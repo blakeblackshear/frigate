@@ -42,22 +42,22 @@ export function MinimapBounds({
           className="pointer-events-none absolute inset-0 -bottom-7 z-20 flex w-full select-none scroll-mt-8 items-center justify-center text-center text-[10px] font-medium text-primary"
           ref={firstMinimapSegmentRef}
         >
-          {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
-            hour12: config?.ui.time_format != "24hour",
-            hour: "2-digit",
-            minute: "2-digit",
-            ...(!dense && { month: "short", day: "2-digit" }),
+          {formatUnixTimestampToDateTime(alignedMinimapStartTime, {
+            timezone: config?.ui.timezone,
+            strftime_fmt: !dense
+              ? `%b %d ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
       )}
 
       {isLastSegmentInMinimap && (
         <div className="pointer-events-none absolute inset-0 -top-3 z-20 flex w-full select-none items-center justify-center text-center text-[10px] font-medium text-primary">
-          {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
-            hour12: config?.ui.time_format != "24hour",
-            hour: "2-digit",
-            minute: "2-digit",
-            ...(!dense && { month: "short", day: "2-digit" }),
+          {formatUnixTimestampToDateTime(alignedMinimapEndTime, {
+            timezone: config?.ui.timezone,
+            strftime_fmt: !dense
+              ? `%b %d ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
       )}
@@ -106,8 +106,7 @@ export function Timestamp({
 
     return formatUnixTimestampToDateTime(timestamp.getTime() / 1000, {
       timezone: config?.ui.timezone,
-      strftime_fmt:
-        config?.ui.time_format == "24hour" ? "%d %b %H:%M" : "%I:%M %p",
+      strftime_fmt: config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
     });
   }, [config, timestamp, timestampSpread]);
 
