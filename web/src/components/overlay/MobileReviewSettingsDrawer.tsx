@@ -62,6 +62,7 @@ export default function MobileReviewSettingsDrawer({
   setShowExportPreview,
 }: MobileReviewSettingsDrawerProps) {
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
+  const [isTimelapse, setIsTimelapse] = useState(false);
 
   // exports
 
@@ -83,7 +84,7 @@ export default function MobileReviewSettingsDrawer({
       .post(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
-          playback: "realtime",
+          playback: isTimelapse ? "timelapse_25x" : "realtime",
           name,
         },
       )
@@ -96,6 +97,7 @@ export default function MobileReviewSettingsDrawer({
           setName("");
           setRange(undefined);
           setMode("none");
+          setIsTimelapse(false);
         }
       })
       .catch((error) => {
@@ -110,7 +112,7 @@ export default function MobileReviewSettingsDrawer({
           });
         }
       });
-  }, [camera, name, range, setRange, setName, setMode]);
+  }, [camera, name, range, isTimelapse, setRange, setName, setMode]);
 
   // filters
 
@@ -177,6 +179,7 @@ export default function MobileReviewSettingsDrawer({
         currentTime={currentTime}
         range={range}
         name={name}
+        isTimelapse={isTimelapse}
         onStartExport={onStartExport}
         setName={setName}
         setRange={setRange}
@@ -187,10 +190,12 @@ export default function MobileReviewSettingsDrawer({
             setDrawerMode("none");
           }
         }}
+        setIsTimelapse={setIsTimelapse}
         onCancel={() => {
           setMode("none");
           setRange(undefined);
           setDrawerMode("select");
+          setIsTimelapse(false);
         }}
       />
     );
@@ -289,7 +294,10 @@ export default function MobileReviewSettingsDrawer({
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
         show={mode == "timeline"}
         onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        onCancel={() => {
+          setMode("none");
+          setIsTimelapse(false);
+        }}
         onPreview={() => setShowExportPreview(true)}
       />
       <ExportPreviewDialog

@@ -11,6 +11,7 @@ import {
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { ExportMode } from "@/types/filter";
 import { FaArrowDown, FaArrowRight, FaCalendarAlt } from "react-icons/fa";
 import axios from "axios";
@@ -65,6 +66,7 @@ export default function ExportDialog({
   setShowPreview,
 }: ExportDialogProps) {
   const [name, setName] = useState("");
+  const [isTimelapse, setIsTimelapse] = useState(false);
 
   const onStartExport = useCallback(() => {
     if (!range) {
@@ -83,7 +85,7 @@ export default function ExportDialog({
       .post(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
         {
-          playback: "realtime",
+          playback: isTimelapse ? "timelapse_25x" : "realtime",
           name,
         },
       )
@@ -96,6 +98,7 @@ export default function ExportDialog({
           setName("");
           setRange(undefined);
           setMode("none");
+          setIsTimelapse(false);
         }
       })
       .catch((error) => {
@@ -110,7 +113,7 @@ export default function ExportDialog({
           });
         }
       });
-  }, [camera, name, range, setRange, setName, setMode]);
+  }, [camera, name, range, isTimelapse, setRange, setName, setMode]);
 
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
@@ -129,13 +132,17 @@ export default function ExportDialog({
         show={mode == "timeline"}
         onPreview={() => setShowPreview(true)}
         onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        onCancel={() => {
+          setMode("none");
+          setIsTimelapse(false);
+        }}
       />
       <Overlay
         open={mode == "select"}
         onOpenChange={(open) => {
           if (!open) {
             setMode("none");
+            setIsTimelapse(false);
           }
         }}
       >
@@ -172,11 +179,16 @@ export default function ExportDialog({
             currentTime={currentTime}
             range={range}
             name={name}
+            isTimelapse={isTimelapse}
             onStartExport={onStartExport}
             setName={setName}
             setRange={setRange}
             setMode={setMode}
-            onCancel={() => setMode("none")}
+            setIsTimelapse={setIsTimelapse}
+            onCancel={() => {
+              setMode("none");
+              setIsTimelapse(false);
+            }}
           />
         </Content>
       </Overlay>
@@ -189,10 +201,12 @@ type ExportContentProps = {
   currentTime: number;
   range?: TimeRange;
   name: string;
+  isTimelapse: boolean;
   onStartExport: () => void;
   setName: (name: string) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  setIsTimelapse: (isTimelapse: boolean) => void;
   onCancel: () => void;
 };
 export function ExportContent({
@@ -200,10 +214,12 @@ export function ExportContent({
   currentTime,
   range,
   name,
+  isTimelapse,
   onStartExport,
   setName,
   setRange,
   setMode,
+  setIsTimelapse,
   onCancel,
 }: ExportContentProps) {
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
@@ -289,6 +305,22 @@ export function ExportContent({
           setRange={setRange}
         />
       )}
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+      <div className="mt-4 flex items-center gap-2">
+        <Checkbox
+          className={
+            isTimelapse
+              ? "bg-selected from-selected/50 to-selected/90 text-selected"
+              : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+          }
+          id="timelapse"
+          checked={isTimelapse}
+          onCheckedChange={(checked) => setIsTimelapse(checked as boolean)}
+        />
+        <Label htmlFor="timelapse" className="cursor-pointer capitalize">
+          Timelapse
+        </Label>
+      </div>
       <Input
         className="text-md my-6"
         type="search"
@@ -319,6 +351,7 @@ export function ExportContent({
               onStartExport();
               setSelectedOption("1");
               setMode("none");
+              setIsTimelapse(false);
             }
           }}
         >
