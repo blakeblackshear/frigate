@@ -45,7 +45,7 @@ export function MinimapBounds({
           {formatUnixTimestampToDateTime(alignedMinimapStartTime, {
             timezone: config?.ui.timezone,
             strftime_fmt: !dense
-              ? `%b %d ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              ? `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
               : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
@@ -56,7 +56,7 @@ export function MinimapBounds({
           {formatUnixTimestampToDateTime(alignedMinimapEndTime, {
             timezone: config?.ui.timezone,
             strftime_fmt: !dense
-              ? `%b %d ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              ? `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
               : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
