@@ -9,6 +9,10 @@ from peewee import DoesNotExist
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
+from frigate.comms.recordings_updater import (
+    RecordingsDataSubscriber,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig
 from frigate.embeddings.functions.embeddings_mixin import (
     EmbeddingsMixin,
@@ -40,6 +44,12 @@ class ClassificationMaintainer(threading.Thread, EmbeddingsMixin):
         self.stop_event = stop_event
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
+        self.recordings_subscriber = RecordingsDataSubscriber(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
+
+        # recordings data
+        self.recordings_available_through: dict[str, float] = {}
 
         # Share required attributes and objects
         self.face_detector = face_detector
@@ -58,10 +68,12 @@ class ClassificationMaintainer(threading.Thread, EmbeddingsMixin):
     def run(self) -> None:
         """Run classification for finalized events."""
         while not self.stop_event.is_set():
-            self._process_updates()
+            self._process_recordings_updates()
+            self._process_event_updates()
 
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
+        self.recordings_subscriber.stop()
         logger.info("Exiting classification maintainer...")
 
     def _fetch_cropped_recording_snapshot(
@@ -127,7 +139,25 @@ class ClassificationMaintainer(threading.Thread, EmbeddingsMixin):
 
         return yuv_image.tobytes()
 
-    def _process_updates(self) -> None:
+    def _process_recordings_updates(self) -> None:
+        """Process recordings updates."""
+        while True:
+            recordings_data = self.recordings_subscriber.check_for_update(timeout=0.01)
+
+            if recordings_data == None:
+                break
+
+            camera, recordings_available_through_timestamp = recordings_data
+
+            self.recordings_available_through[camera] = (
+                recordings_available_through_timestamp
+            )
+
+            logger.debug(
+                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+            )
+
+    def _process_event_updates(self) -> None:
         """Process events."""
         # TODO: check new topic for last recording time
         update = self.event_subscriber.check_for_update(timeout=0.01)
