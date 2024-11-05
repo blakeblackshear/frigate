@@ -184,9 +184,8 @@ COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-# we still have to use pip to build wheel
-RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
-
+RUN uv add --requirements /requirements-wheels.txt \
+    && uv build --wheel --out-dir /wheels
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
