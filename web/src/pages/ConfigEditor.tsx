@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -32,6 +33,8 @@ function ConfigEditor() {
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
   const configRef = useRef<HTMLDivElement | null>(null);
   const schemaConfiguredRef = useRef(false);
+
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -202,7 +205,7 @@ function ConfigEditor() {
               size="sm"
               className="flex items-center gap-2"
               aria-label="Save and restart"
-              onClick={() => onHandleSaveConfig("restart")}
+              onClick={() => setRestartDialogOpen(true)}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
@@ -231,6 +234,11 @@ function ConfigEditor() {
         <div ref={configRef} className="mt-2 h-[calc(100%-2.75rem)]" />
       </div>
       <Toaster closeButton={true} />
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => onHandleSaveConfig("restart")}
+      />
     </div>
   );
 }
