@@ -205,10 +205,7 @@ function ConfigEditor() {
               size="sm"
               className="flex items-center gap-2"
               aria-label="Save and restart"
-              onClick={() => {
-                onHandleSaveConfig("saveonly");
-                setRestartDialogOpen(true);
-              }}
+              onClick={() => setRestartDialogOpen(true)}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
