@@ -41,7 +41,7 @@ The vision model is able to embed both images and text into the same vector spac
 
 The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
 
-Differently weighted CLIP models are available and can be selected by setting the `model_size` config option:
+Differently weighted CLIP models are available and can be selected by setting the `model_size` config option as `small` or `large`:
 
 ```yaml
 semantic_search:
@@ -50,7 +50,7 @@ semantic_search:
 ```
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
-- Configuring the `small` model employs a quantized version of the model that uses much less RAM and runs faster on CPU with a very negligible difference in embedding quality.
+- Configuring the `small` model employs a quantized version of the model that uses less RAM and runs on CPU with a very negligible difference in embedding quality.
 
 ### GPU Acceleration
 
@@ -63,9 +63,11 @@ If the correct build is used for your GPU and the `large` model is configured, t
 **NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
 
 - **AMD**
+
   - ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
 
 - **Intel**
+
   - OpenVINO will automatically be detected and used for semantic search in the default Frigate image.
 
 - **Nvidia**
@@ -73,12 +75,6 @@ If the correct build is used for your GPU and the `large` model is configured, t
   - Jetson devices will automatically be detected and used for semantic search in the `-tensorrt-jp(4/5)` Frigate image.
 
 :::
-
-```yaml
-semantic_search:
-  enabled: True
-  model_size: small
-```
 
 ## Usage and Best Practices
 
