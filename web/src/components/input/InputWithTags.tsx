@@ -463,9 +463,13 @@ export default function InputWithTags({
   }, [setFilters, resetSuggestions, setSearch, setInputFocused]);
 
   const handleClearSimilarity = useCallback(() => {
-    removeFilter("event_id", filters.event_id!);
-    removeFilter("search_type", "similarity");
-  }, [removeFilter, filters]);
+    const newFilters = { ...filters };
+    if (newFilters.event_id === filters.event_id) {
+      delete newFilters.event_id;
+    }
+    delete newFilters.search_type;
+    setFilters(newFilters);
+  }, [setFilters, filters]);
 
   const handleInputBlur = useCallback(
     (e: React.FocusEvent) => {
@@ -763,13 +767,15 @@ export default function InputWithTags({
                             </button>
                           </span>
                         ))
-                    : filterType !== "event_id" && (
+                    : !(filterType == "event_id" && isSimilaritySearch) && (
                         <span
                           key={filterType}
                           className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                         >
-                          {filterType.replaceAll("_", " ")}:{" "}
-                          {formatFilterValues(filterType, filterValues)}
+                          {filterType === "event_id"
+                            ? "Tracked Object ID"
+                            : filterType.replaceAll("_", " ")}
+                          : {formatFilterValues(filterType, filterValues)}
                           <button
                             onClick={() =>
                               removeFilter(

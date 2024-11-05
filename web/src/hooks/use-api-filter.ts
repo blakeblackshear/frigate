@@ -65,10 +65,14 @@ export function useApiFilterArgs<
     const filter: { [key: string]: unknown } = {};
 
     rawParams.forEach((value, key) => {
+      const isValidNumber = /^-?\d+(\.\d+)?(?!.)/.test(value);
+      const isValidEventID = /^\d+\.\d+-[a-zA-Z0-9]+$/.test(value);
+
       if (
         value != "true" &&
         value != "false" &&
-        (/[^0-9,]/.test(value) || isNaN(parseFloat(value)))
+        !isValidNumber &&
+        !isValidEventID
       ) {
         filter[key] = value.includes(",") ? value.split(",") : [value];
       } else {
