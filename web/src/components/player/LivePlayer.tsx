@@ -276,7 +276,9 @@ export default function LivePlayer({
                     ]),
                   ]
                     .filter((label) => label?.includes("-verified") == false)
-                    .map((label) => capitalizeFirstLetter(label))
+                    .map((label) =>
+                      capitalizeFirstLetter(label.replaceAll("_", " ")),
+                    )
                     .sort()
                     .join(", ")
                     .replaceAll("-verified", "")}
