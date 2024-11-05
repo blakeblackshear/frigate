@@ -26,7 +26,6 @@ import {
   GiDeer,
   GiFox,
   GiGoat,
-  GiHummingbird,
   GiPolarBear,
   GiPostStamp,
   GiRabbit,
@@ -36,6 +35,7 @@ import {
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
+import { PiBirdFill } from "react-icons/pi";
 
 export function getAttributeLabels(config?: FrigateConfig) {
   if (!config) {
@@ -66,7 +66,7 @@ export function getIconForLabel(label: string, className?: string) {
     case "bicycle":
       return <FaBicycle key={label} className={className} />;
     case "bird":
-      return <GiHummingbird key={label} className={className} />;
+      return <PiBirdFill key={label} className={className} />;
     case "boat":
       return <GiSailboat key={label} className={className} />;
     case "bus":
