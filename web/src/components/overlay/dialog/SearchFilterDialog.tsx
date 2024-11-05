@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { isDesktop, isMobileOnly } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Switch } from "@/components/ui/switch";
@@ -181,7 +181,7 @@ export default function SearchFilterDialog({
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
-        isMobileOnly && "pb-20",
+        isMobile && "pb-20",
       )}
       open={open}
       onOpenChange={(open) => {
