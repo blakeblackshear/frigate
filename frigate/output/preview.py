@@ -154,6 +154,7 @@ class PreviewRecorder:
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
+
         if config.detect.width > config.detect.height:
             self.out_height = PREVIEW_HEIGHT
             self.out_width = (
@@ -274,7 +275,7 @@ class PreviewRecorder:
 
         return False
 
-    def write_frame_to_cache(self, frame_time: float, frame) -> None:
+    def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> None:
         # resize yuv frame
         small_frame = np.zeros((self.out_height * 3 // 2, self.out_width), np.uint8)
         copy_yuv_to_position(
@@ -303,7 +304,7 @@ class PreviewRecorder:
         current_tracked_objects: list[dict[str, any]],
         motion_boxes: list[list[int]],
         frame_time: float,
-        frame,
+        frame: np.ndarray,
     ) -> bool:
         # check for updated record config
         _, updated_record_config = self.config_subscriber.check_for_update()
@@ -332,6 +333,10 @@ class PreviewRecorder:
                     self.output_frames,
                     self.requestor,
                 ).start()
+            else:
+                logger.debug(
+                    f"Not saving preview for {self.config.name} because there are no saved frames."
+                )
 
             # reset frame cache
             self.segment_end = (
