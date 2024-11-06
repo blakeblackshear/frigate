@@ -9,7 +9,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
 from frigate.config import FrigateConfig
-from frigate.const import CHUNK_SIZE, CLIPS_DIR
+from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
 
