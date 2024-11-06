@@ -13,9 +13,7 @@ markupsafe == 2.1.*
 python-multipart == 0.0.12
 # General
 mypy == 1.6.1
-numpy == 1.26.*
 onvif_zeep == 0.2.12
-opencv-python-headless == 4.9.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
@@ -29,11 +27,15 @@ ruamel.yaml == 0.18.*
 tzlocal == 5.2
 requests == 2.32.*
 types-requests == 2.32.*
-scipy == 1.13.*
 norfair == 2.2.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
+# Image Manipulation
+numpy == 1.26.*
+opencv-python-headless == 4.9.0.*
+scipy == 1.13.*
+scikit-learn == 1.5.*
 # OpenVino & ONNX
 openvino == 2024.3.*
 onnxruntime-openvino == 1.19.* ; platform_machine == 'x86_64'

@@ -2,9 +2,15 @@
 
 import logging
 import os
-from typing import Any
+from typing import Any, Optional
 
+import numpy as np
 import onnxruntime as ort
+from playhouse.sqliteq import SqliteQueueDatabase
+from sklearn.preprocessing import LabelEncoder, Normalizer
+from sklearn.svm import SVC
+
+from frigate.util.builtin import deserialize
 
 try:
     import openvino as ov
@@ -148,3 +154,41 @@ class ONNXModelRunner:
             return [infer_request.get_output_tensor().data]
         elif self.type == "ort":
             return self.ort.run(None, input)
+
+
+class FaceClassificationModel:
+    def __init__(self, db: SqliteQueueDatabase):
+        self.db = db
+        self.labeler: Optional[LabelEncoder] = None
+        self.classifier: Optional[SVC] = None
+
+    def __build_classifier(self) -> None:
+        faces: list[tuple[str, bytes]] = self.db.execute_sql(
+            "SELECT id, face_embedding FROM vec_faces"
+        ).fetchall()
+        embeddings = np.array([deserialize(f[1]) for f in faces])
+        self.labeler = LabelEncoder()
+        norms = Normalizer(norm="l2").transform(embeddings)
+        labels = self.labeler.fit_transform([f[0].split("-")[0] for f in faces])
+        self.classifier = SVC(kernel="linear", probability=True)
+        self.classifier.fit(norms, labels)
+
+    def clear_classifier(self) -> None:
+        self.classifier = None
+        self.labeler = None
+
+    def classify_face(self, embedding: np.ndarray) -> Optional[tuple[str, float]]:
+        if not self.classifier:
+            self.__build_classifier()
+
+        res = self.classifier.predict([embedding])
+
+        if not res:
+            return None
+
+        label = res[0]
+        probabilities = self.classifier.predict_proba([embedding])[0]
+        return (
+            self.labeler.inverse_transform([label])[0],
+            round(probabilities[label], 2),
+        )
