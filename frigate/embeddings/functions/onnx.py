@@ -221,6 +221,9 @@ class GenericONNXEmbedding:
             # copy img image into center of result image
             frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
 
+            # standardize pixel values across channels
+            mean, std = frame.mean(), frame.std()
+            frame = (frame - mean) / std
             frame = np.expand_dims(frame, axis=0)
             return [{"input_2": frame}]
         elif self.model_type == ModelTypeEnum.lpr_detect:
