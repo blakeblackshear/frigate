@@ -63,6 +63,7 @@ def output_frames(
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
     preview_write_times: dict[str, float] = {}
+    failed_frame_requests: dict[str, int] = {}
 
     move_preview_frames("cache")
 
@@ -99,7 +100,16 @@ def output_frames(
 
         if frame is None:
             logger.debug(f"Failed to get frame {frame_id} from SHM")
+            failed_frame_requests[camera] = failed_frame_requests.get(camera, 0) + 1
+
+            if failed_frame_requests[camera] > config.cameras[camera].detect.fps:
+                logger.warning(
+                    f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+                )
+
             continue
+        else:
+            failed_frame_requests[camera] = 0
 
         # send camera frame to ffmpeg process if websockets are connected
         if any(
