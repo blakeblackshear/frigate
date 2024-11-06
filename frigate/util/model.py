@@ -174,9 +174,7 @@ class FaceClassificationModel:
         self.classifier = None
         self.labeler = None
 
-    def classify_face(
-        self, embedding: np.ndarray
-    ) -> Optional[tuple[str, float]]:
+    def classify_face(self, embedding: np.ndarray) -> Optional[tuple[str, float]]:
         if not self.classifier:
             self.__build_classifier()
 
