@@ -110,6 +110,7 @@ class EventCleanup(threading.Thread):
                 .namedtuples()
                 .iterator()
             )
+            logger.debug(f"{len(expired_events)} events can be expired")
             # delete the media from disk
             for expired in expired_events:
                 media_name = f"{expired.camera}-{expired.id}"
@@ -140,6 +141,9 @@ class EventCleanup(threading.Thread):
             for batch in query.iterator():
                 events_to_update.extend([event.id for event in batch])
                 if len(events_to_update) >= CHUNK_SIZE:
+                    logger.debug(
+                        f"Updating {update_params} for {len(events_to_update)} events"
+                    )
                     Event.update(update_params).where(
                         Event.id << events_to_update
                     ).execute()
@@ -147,6 +151,9 @@ class EventCleanup(threading.Thread):
 
             # Update any remaining events
             if events_to_update:
+                logger.debug(
+                    f"Updating clips/snapshots attribute for {len(events_to_update)} events"
+                )
                 Event.update(update_params).where(
                     Event.id << events_to_update
                 ).execute()
@@ -216,6 +223,7 @@ class EventCleanup(threading.Thread):
         # update the clips attribute for the db entry
         for i in range(0, len(events_to_update), CHUNK_SIZE):
             batch = events_to_update[i : i + CHUNK_SIZE]
+            logger.debug(f"Updating {update_params} for {len(batch)} events")
             Event.update(update_params).where(Event.id << batch).execute()
 
         return events_to_update
@@ -243,9 +251,11 @@ class EventCleanup(threading.Thread):
                 .iterator()
             )
             events_to_delete = [e.id for e in events]
+            logger.debug(f"Found {len(events_to_delete)} events that can be expired")
             if len(events_to_delete) > 0:
                 for i in range(0, len(events_to_delete), CHUNK_SIZE):
                     chunk = events_to_delete[i : i + CHUNK_SIZE]
+                    logger.debug(f"Deleting {len(chunk)} events from the database")
                     Event.delete().where(Event.id << chunk).execute()
 
                     if self.config.semantic_search.enabled:
