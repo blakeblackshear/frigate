@@ -455,7 +455,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug("Not processing face due to error creating cropped image.")
             return
 
-        embedding = self.embeddings.embed_face("nick", webp.tobytes(), upsert=True)
+        embedding = self.embeddings.embed_face("unknown", webp.tobytes(), upsert=False)
         res = self.face_classifier.classify_face(embedding)
 
         if not res:
