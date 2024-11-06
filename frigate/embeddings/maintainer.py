@@ -400,13 +400,21 @@ class EmbeddingMaintainer(threading.Thread):
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
             person = rgb[top:bottom, left:right]
-            face = self._detect_face(person)
+            face_box = self._detect_face(person)
 
-            if not face:
+            if not face_box:
                 logger.debug("Detected no faces for person object.")
                 return
 
-            face_frame = person[face[1] : face[3], face[0] : face[2]]
+            margin = int((face_box[2] - face_box[0]) * 0.4)
+            face_frame = person[
+                max(0, face_box[1] - margin) : min(
+                    frame.shape[0], face_box[3] + margin
+                ),
+                max(0, face_box[0] - margin) : min(
+                    frame.shape[1], face_box[2] + margin
+                ),
+            ]
             face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
         else:
             # don't run for object without attributes
@@ -434,8 +442,15 @@ class EmbeddingMaintainer(threading.Thread):
                 return
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            margin = int((face_box[2] - face_box[0]) * 0.4)
+
             face_frame = face_frame[
-                face_box[1] : face_box[3], face_box[0] : face_box[2]
+                max(0, face_box[1] - margin) : min(
+                    frame.shape[0], face_box[3] + margin
+                ),
+                max(0, face_box[0] - margin) : min(
+                    frame.shape[1], face_box[2] + margin
+                ),
             ]
 
         ret, webp = cv2.imencode(
@@ -446,7 +461,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug("Not processing face due to error creating cropped image.")
             return
 
-        embedding = self.embeddings.embed_face("unknown", webp.tobytes(), upsert=False)
+        embedding = self.embeddings.embed_face("nick", webp.tobytes(), upsert=True)
         query_embedding = serialize(embedding)
         best_faces = self._search_face(query_embedding)
         logger.debug(f"Detected best faces for person as: {best_faces}")
