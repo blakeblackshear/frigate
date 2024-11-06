@@ -170,10 +170,14 @@ class FaceClassificationModel:
         self.classifier = SVC(kernel="linear", probability=True)
         self.classifier.fit(norms, labels)
 
+    def clear_classifier(self) -> None:
+        self.classifier = None
+        self.labeler = None
+
     def classify_face(
-        self, embedding: np.ndarray, rebuild_classifier: bool = False
+        self, embedding: np.ndarray
     ) -> Optional[tuple[str, float]]:
-        if not self.classifier or rebuild_classifier:
+        if not self.classifier:
             self.__build_classifier()
 
         res = self.classifier.predict([embedding])

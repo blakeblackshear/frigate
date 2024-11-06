@@ -140,13 +140,15 @@ class EmbeddingMaintainer(threading.Thread):
                         self.embeddings.text_embedding([data])[0], pack=False
                     )
                 elif topic == EmbeddingsRequestEnum.register_face.value:
+                    if not self.face_recognition_enabled:
+                        return False
+
                     if data.get("cropped"):
                         self.embeddings.embed_face(
                             data["face_name"],
                             base64.b64decode(data["image"]),
                             upsert=True,
                         )
-                        return True
                     else:
                         img = cv2.imdecode(
                             np.frombuffer(
@@ -167,7 +169,8 @@ class EmbeddingMaintainer(threading.Thread):
                             data["face_name"], webp.tobytes(), upsert=True
                         )
 
-                    return False
+                self.face_classifier.clear_classifier()
+                return True
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 
