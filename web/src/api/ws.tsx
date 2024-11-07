@@ -69,7 +69,10 @@ function useValue(): useValueReturn {
       ...prevState,
       ...cameraStates,
     }));
-    setHasCameraState(true);
+
+    if (Object.keys(cameraStates).length > 0) {
+      setHasCameraState(true);
+    }
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsState]);
@@ -92,6 +95,9 @@ function useValue(): useValueReturn {
         message: "",
         retain: false,
       });
+    },
+    onClose: () => {
+      setHasCameraState(false);
     },
     shouldReconnect: () => true,
     retryOnError: true,
