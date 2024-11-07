@@ -77,6 +77,13 @@ export interface CameraConfig {
     cmd: string;
     roles: string[];
   }[];
+  genai: {
+    enabled: string;
+    prompt: string;
+    object_prompts: { [key: string]: string };
+    required_zones: string[];
+    objects: string[];
+  };
   live: {
     height: number;
     quality: number;

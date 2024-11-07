@@ -3,9 +3,13 @@ id: genai
 title: Generative AI
 ---
 
-Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects.
+Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
-Semantic Search must be enabled to use Generative AI. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
+:::info
+
+Semantic Search must be enabled to use Generative AI.
+
+:::
 
 ## Configuration
 

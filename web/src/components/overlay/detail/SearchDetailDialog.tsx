@@ -477,7 +477,7 @@ function ObjectDetailsTab({
           onChange={(e) => setDesc(e.target.value)}
         />
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.genai.enabled && (
+          {config?.cameras[search.camera].genai.enabled && (
             <div className="flex items-center">
               <Button
                 className="rounded-r-none border-r-0"
