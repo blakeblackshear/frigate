@@ -54,11 +54,10 @@ class GenAIClient:
 
 def get_genai_client(genai_config: GenAIConfig) -> Optional[GenAIClient]:
     """Get the GenAI client."""
-    if genai_config.enabled:
-        load_providers()
-        provider = PROVIDERS.get(genai_config.provider)
-        if provider:
-            return provider(genai_config)
+    load_providers()
+    provider = PROVIDERS.get(genai_config.provider)
+    if provider:
+        return provider(genai_config)
     return None
 
 
