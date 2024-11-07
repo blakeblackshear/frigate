@@ -183,7 +183,7 @@ class FaceClassificationModel:
 
         res = self.classifier.predict([embedding])
 
-        if not res:
+        if res is None:
             return None
 
         label = res[0]
