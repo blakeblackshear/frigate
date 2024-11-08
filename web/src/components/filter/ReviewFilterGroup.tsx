@@ -214,7 +214,9 @@ export default function ReviewFilterGroup({
           showAll={filter?.showAll == true}
           allZones={filterValues.zones}
           selectedZones={filter?.zones}
-          onUpdateFilter={onUpdateFilter}
+          onUpdateFilter={(general) => {
+            onUpdateFilter({ ...filter, ...general });
+          }}
         />
       )}
       {isMobile && mobileSettingsFeatures.length > 0 && (
@@ -293,7 +295,7 @@ type GeneralFilterButtonProps = {
   allZones: string[];
   selectedZones?: string[];
   filter?: GeneralFilter;
-  onUpdateFilter: (filter: ReviewFilter) => void;
+  onUpdateFilter: (filter: GeneralFilter) => void;
 };
 
 function GeneralFilterButton({
@@ -370,7 +372,11 @@ function GeneralFilterButton({
         setOpen(false);
       }}
       onReset={() => {
-        const resetFilter: GeneralFilter = {};
+        const resetFilter: GeneralFilter = {
+          labels: undefined,
+          zones: undefined,
+          showAll: false,
+        };
         setCurrentFilter(resetFilter);
         onUpdateFilter(resetFilter);
       }}
