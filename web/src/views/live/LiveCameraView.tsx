@@ -437,12 +437,7 @@ export default function LiveCameraView({
                   onClick={() => {
                     setMic(!mic);
                     // Turn on audio when enabling the mic if audio is currently off
-                    if (
-                      !mic &&
-                      !audio &&
-                      supportsAudioOutput &&
-                      preferredLiveMode !== "jsmpeg"
-                    ) {
+                    if (!mic && !audio) {
                       setAudio(true);
                     }
                   }}
