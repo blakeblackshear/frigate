@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
 import { TimeRange } from "@/types/timeline";
 import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
-import { ExportMode } from "@/types/filter";
+import { ExportMode, GeneralFilter } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
 import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
@@ -114,12 +114,12 @@ export default function MobileReviewSettingsDrawer({
 
   // filters
 
-  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
-    filter?.labels,
-  );
-  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
-    filter?.zones,
-  );
+  const [currentFilter, setCurrentFilter] = useState<GeneralFilter>({
+    labels: filter?.labels,
+    zones: filter?.zones,
+    showAll: filter?.showAll,
+    ...filter,
+  });
 
   if (!isMobile) {
     return;
@@ -260,23 +260,21 @@ export default function MobileReviewSettingsDrawer({
         <GeneralFilterContent
           allLabels={allLabels}
           selectedLabels={filter?.labels}
-          currentLabels={currentLabels}
           currentSeverity={currentSeverity}
-          showAll={filter?.showAll == true}
           allZones={allZones}
+          filter={currentFilter}
           selectedZones={filter?.zones}
-          currentZones={currentZones}
-          setCurrentZones={setCurrentZones}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
-          setShowAll={(showAll) => {
-            onUpdateFilter({ ...filter, showAll });
+          onUpdateFilter={setCurrentFilter}
+          onApply={() => {
+            if (currentFilter !== filter) {
+              onUpdateFilter(currentFilter);
+            }
           }}
-          setCurrentLabels={setCurrentLabels}
-          updateLabelFilter={(newLabels) =>
-            onUpdateFilter({ ...filter, labels: newLabels })
-          }
+          onReset={() => {
+            const resetFilter: GeneralFilter = {};
+            setCurrentFilter(resetFilter);
+            onUpdateFilter(resetFilter);
+          }}
           onClose={() => setDrawerMode("select")}
         />
       </div>
