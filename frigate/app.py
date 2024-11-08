@@ -63,7 +63,6 @@ from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
 from frigate.record.record import manage_recordings
 from frigate.review.review import manage_review_segments
-from frigate.service_manager import ServiceManager
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
@@ -79,6 +78,7 @@ logger = logging.getLogger(__name__)
 
 class FrigateApp:
     def __init__(self, config: FrigateConfig) -> None:
+        self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
@@ -449,8 +449,9 @@ class FrigateApp:
         ]
 
         if audio_cameras:
-            proc = AudioProcessor(audio_cameras, self.camera_metrics).start(wait=True)
-            self.processes["audio_detector"] = proc.pid or 0
+            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
+            self.audio_process.start()
+            self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -641,6 +642,11 @@ class FrigateApp:
             ReviewSegment.end_time == None
         ).execute()
 
+        # stop the audio process
+        if self.audio_process:
+            self.audio_process.terminate()
+            self.audio_process.join()
+
         # ensure the capture processes are done
         for camera, metrics in self.camera_metrics.items():
             capture_process = metrics.capture_process
@@ -708,7 +714,5 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
-
-        ServiceManager.current().shutdown(wait=True)
 
         os._exit(os.EX_OK)
