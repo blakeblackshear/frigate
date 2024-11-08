@@ -19,6 +19,11 @@ FIRST_MODEL=true
 MODEL_DOWNLOAD=""
 MODEL_CONVERT=""
 
+if [ -z "$YOLO_MODELS"]; then
+    echo "tensorrt model preparation disabled"
+    exit 0
+fi
+
 for model in ${YOLO_MODELS//,/ }
 do
     # Remove old link in case path/version changed
