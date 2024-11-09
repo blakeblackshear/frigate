@@ -62,7 +62,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.stop_event = stop_event
         self.tracked_events = {}
-        self.genai_client = get_genai_client(config.genai)
+        self.genai_client = get_genai_client(config)
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""

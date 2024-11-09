@@ -6,7 +6,7 @@ from typing import Optional
 
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
+from frigate.config import CameraConfig, FrigateConfig, GenAIProviderEnum
 from frigate.models import Event
 
 PROVIDERS = {}
@@ -25,8 +25,8 @@ def register_genai_provider(key: GenAIProviderEnum):
 class GenAIClient:
     """Generative AI client for Frigate."""
 
-    def __init__(self, genai_config: GenAIConfig, timeout: int = 60) -> None:
-        self.genai_config: GenAIConfig = genai_config
+    def __init__(self, config: FrigateConfig, timeout: int = 60) -> None:
+        self.config: FrigateConfig = config
         self.timeout = timeout
         self.provider = self._init_provider()
 
@@ -52,12 +52,19 @@ class GenAIClient:
         return None
 
 
-def get_genai_client(genai_config: GenAIConfig) -> Optional[GenAIClient]:
+def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
     """Get the GenAI client."""
-    load_providers()
-    provider = PROVIDERS.get(genai_config.provider)
-    if provider:
-        return provider(genai_config)
+    genai_config = config.genai
+    genai_cameras = [
+        c for c in config.cameras.values() if c.enabled and c.genai.enabled
+    ]
+
+    if genai_cameras:
+        load_providers()
+        provider = PROVIDERS.get(genai_config.provider)
+        if provider:
+            return provider(genai_config)
+
     return None
 
 
