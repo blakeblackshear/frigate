@@ -37,7 +37,7 @@ def export_recording(
     camera_name: str,
     start_time: float,
     end_time: float,
-    body: dict = ExportRecordingsBody,
+    body: ExportRecordingsBody,
 ):
     if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
         return JSONResponse(

@@ -10,5 +10,5 @@ class ExportRecordingsBody(BaseModel):
         default=PlaybackFactorEnum.realtime, title="Playback factor"
     )
     source: str = "recordings"
-    name: str = Field(title="Friendly name", default=None, min_length=1, max_length=256)
+    name: str = Field(title="Friendly name", min_length=1, max_length=256)
     image_path: Optional[str] = None
