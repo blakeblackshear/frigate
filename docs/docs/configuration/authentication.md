@@ -81,7 +81,7 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 Frigate looks for a JWT token secret in the following order:
 
 1. An environment variable named `FRIGATE_JWT_SECRET`
-2. A docker secret named `FRIGATE_JWT_SECRET` in `/run/secrets/`
+2. A file named `FRIGATE_JWT_SECRET` in the directory specified by the `CREDENTIALS_DIRECTORY` environment variable (defaults to the Docker Secrets directory: `/run/secrets/`)
 3. A `jwt_secret` option from the Home Assistant Add-on options
 4. A `.jwt_secret` file in the config directory
 
