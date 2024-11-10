@@ -2380,14 +2380,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1731271332.181958
+            default: 1731275308.238304
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1731274932.181968
+            default: 1731278908.238313
             title: Before
       responses:
         '200':
@@ -3294,20 +3294,18 @@ components:
           title: Playback factor
           default: realtime
         source:
-          type: string
-          title: Source
+          allOf:
+            - $ref: '#/components/schemas/PlaybackSourceEnum'
+          title: Playback source
           default: recordings
         name:
           type: string
           maxLength: 256
-          minLength: 1
           title: Friendly name
         image_path:
           type: string
           title: Image Path
       type: object
-      required:
-        - name
       title: ExportRecordingsBody
     Extension:
       type: string
@@ -3366,6 +3364,12 @@ components:
         - realtime
         - timelapse_25x
       title: PlaybackFactorEnum
+    PlaybackSourceEnum:
+      type: string
+      enum:
+        - recordings
+        - preview
+      title: PlaybackSourceEnum
     RegenerateDescriptionEnum:
       type: string
       enum:
