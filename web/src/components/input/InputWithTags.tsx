@@ -194,6 +194,11 @@ export default function InputWithTags({
         if (newFilters[filterType] === filterValue) {
           delete newFilters[filterType];
         }
+      } else if (filterType === "has_snapshot") {
+        if (newFilters[filterType] === filterValue) {
+          delete newFilters[filterType];
+          delete newFilters["is_submitted"];
+        }
       } else {
         delete newFilters[filterType];
       }
@@ -307,6 +312,10 @@ export default function InputWithTags({
             if (!newFilters.has_snapshot) newFilters.has_snapshot = undefined;
             newFilters.has_snapshot = value == "yes" ? 1 : 0;
             break;
+          case "is_submitted":
+            if (!newFilters.is_submitted) newFilters.is_submitted = undefined;
+            newFilters.is_submitted = value == "yes" ? 1 : 0;
+            break;
           case "has_clip":
             if (!newFilters.has_clip) newFilters.has_clip = undefined;
             newFilters.has_clip = value == "yes" ? 1 : 0;
@@ -356,7 +365,11 @@ export default function InputWithTags({
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
       return Math.round(Number(filterValues) * 100).toString() + "%";
-    } else if (filterType === "has_clip" || filterType === "has_snapshot") {
+    } else if (
+      filterType === "has_clip" ||
+      filterType === "has_snapshot" ||
+      filterType === "is_submitted"
+    ) {
       return filterValues ? "Yes" : "No";
     } else {
       return filterValues as string;
@@ -774,7 +787,9 @@ export default function InputWithTags({
                         >
                           {filterType === "event_id"
                             ? "Tracked Object ID"
-                            : filterType.replaceAll("_", " ")}
+                            : filterType === "is_submitted"
+                              ? "Submitted to Frigate+"
+                              : filterType.replaceAll("_", " ")}
                           : {formatFilterValues(filterType, filterValues)}
                           <button
                             onClick={() =>
