@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Union
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from frigate.record.export import PlaybackFactorEnum
 
@@ -11,4 +12,4 @@ class ExportRecordingsBody(BaseModel):
     )
     source: str = "recordings"
     name: str = Field(title="Friendly name", min_length=1, max_length=256)
-    image_path: Optional[str] = None
+    image_path: Union[str, SkipJsonSchema[None]] = None
