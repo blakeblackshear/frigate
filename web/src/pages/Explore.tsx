@@ -113,6 +113,7 @@ export default function Explore() {
           min_score: searchSearchParams["min_score"],
           max_score: searchSearchParams["max_score"],
           has_snapshot: searchSearchParams["has_snapshot"],
+          is_submitted: searchSearchParams["is_submitted"],
           has_clip: searchSearchParams["has_clip"],
           event_id: searchSearchParams["event_id"],
           limit:
@@ -144,6 +145,7 @@ export default function Explore() {
         min_score: searchSearchParams["min_score"],
         max_score: searchSearchParams["max_score"],
         has_snapshot: searchSearchParams["has_snapshot"],
+        is_submitted: searchSearchParams["is_submitted"],
         has_clip: searchSearchParams["has_clip"],
         event_id: searchSearchParams["event_id"],
         timezone,

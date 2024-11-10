@@ -119,6 +119,7 @@ export default function SearchFilterDialog({
         }
       />
       <SnapshotClipFilterContent
+        config={config}
         hasSnapshot={
           currentFilter.has_snapshot !== undefined
             ? currentFilter.has_snapshot === 1
@@ -129,12 +130,19 @@ export default function SearchFilterDialog({
             ? currentFilter.has_clip === 1
             : undefined
         }
-        setSnapshotClip={(snapshot, clip) =>
+        submittedToFrigatePlus={
+          currentFilter.is_submitted !== undefined
+            ? currentFilter.is_submitted === 1
+            : undefined
+        }
+        setSnapshotClip={(snapshot, clip, submitted) =>
           setCurrentFilter({
             ...currentFilter,
             has_snapshot:
               snapshot !== undefined ? (snapshot ? 1 : 0) : undefined,
             has_clip: clip !== undefined ? (clip ? 1 : 0) : undefined,
+            is_submitted:
+              submitted !== undefined ? (submitted ? 1 : 0) : undefined,
           })
         }
       />
@@ -508,17 +516,22 @@ export function ScoreFilterContent({
 }
 
 type SnapshotClipContentProps = {
+  config?: FrigateConfig;
   hasSnapshot: boolean | undefined;
   hasClip: boolean | undefined;
+  submittedToFrigatePlus: boolean | undefined;
   setSnapshotClip: (
     snapshot: boolean | undefined,
     clip: boolean | undefined,
+    submittedToFrigate: boolean | undefined,
   ) => void;
 };
 
-function SnapshotClipFilterContent({
+export function SnapshotClipFilterContent({
+  config,
   hasSnapshot,
   hasClip,
+  submittedToFrigatePlus,
   setSnapshotClip,
 }: SnapshotClipContentProps) {
   const [isSnapshotFilterActive, setIsSnapshotFilterActive] = useState(
@@ -526,6 +539,11 @@ function SnapshotClipFilterContent({
   );
   const [isClipFilterActive, setIsClipFilterActive] = useState(
     hasClip !== undefined,
+  );
+  const [isFrigatePlusFilterActive, setIsFrigatePlusFilterActive] = useState(
+    submittedToFrigatePlus !== undefined &&
+      isSnapshotFilterActive &&
+      hasSnapshot === true,
   );
 
   useEffect(() => {
@@ -535,6 +553,14 @@ function SnapshotClipFilterContent({
   useEffect(() => {
     setIsClipFilterActive(hasClip !== undefined);
   }, [hasClip]);
+
+  useEffect(() => {
+    setIsFrigatePlusFilterActive(
+      submittedToFrigatePlus !== undefined &&
+        isSnapshotFilterActive &&
+        hasSnapshot === true,
+    );
+  }, [submittedToFrigatePlus, isSnapshotFilterActive, hasSnapshot]);
 
   return (
     <div className="overflow-x-hidden">
@@ -551,9 +577,9 @@ function SnapshotClipFilterContent({
               onCheckedChange={(checked) => {
                 setIsSnapshotFilterActive(checked as boolean);
                 if (checked) {
-                  setSnapshotClip(true, hasClip);
+                  setSnapshotClip(true, hasClip, submittedToFrigatePlus);
                 } else {
-                  setSnapshotClip(undefined, hasClip);
+                  setSnapshotClip(undefined, hasClip, undefined);
                 }
               }}
             />
@@ -570,8 +596,10 @@ function SnapshotClipFilterContent({
               hasSnapshot === undefined ? undefined : hasSnapshot ? "yes" : "no"
             }
             onValueChange={(value) => {
-              if (value === "yes") setSnapshotClip(true, hasClip);
-              else if (value === "no") setSnapshotClip(false, hasClip);
+              if (value === "yes")
+                setSnapshotClip(true, hasClip, submittedToFrigatePlus);
+              else if (value === "no")
+                setSnapshotClip(false, hasClip, undefined);
             }}
             disabled={!isSnapshotFilterActive}
           >
@@ -592,6 +620,66 @@ function SnapshotClipFilterContent({
           </ToggleGroup>
         </div>
 
+        {config?.plus?.enabled && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="plus-filter"
+                className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+                checked={isFrigatePlusFilterActive}
+                disabled={!isSnapshotFilterActive || hasSnapshot !== true}
+                onCheckedChange={(checked) => {
+                  setIsFrigatePlusFilterActive(checked as boolean);
+                  if (checked) {
+                    setSnapshotClip(hasSnapshot, hasClip, true);
+                  } else {
+                    setSnapshotClip(hasSnapshot, hasClip, undefined);
+                  }
+                }}
+              />
+              <Label
+                htmlFor="plus-filter"
+                className="cursor-pointer text-sm font-medium leading-none"
+              >
+                Submitted to Frigate+
+              </Label>
+            </div>
+            <ToggleGroup
+              type="single"
+              value={
+                submittedToFrigatePlus === undefined
+                  ? undefined
+                  : submittedToFrigatePlus
+                    ? "yes"
+                    : "no"
+              }
+              onValueChange={(value) => {
+                if (value === "yes")
+                  setSnapshotClip(hasSnapshot, hasClip, true);
+                else if (value === "no")
+                  setSnapshotClip(hasSnapshot, hasClip, false);
+                else setSnapshotClip(hasSnapshot, hasClip, undefined);
+              }}
+              disabled={!isFrigatePlusFilterActive}
+            >
+              <ToggleGroupItem
+                value="yes"
+                aria-label="Yes"
+                className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
+              >
+                Yes
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="no"
+                aria-label="No"
+                className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
+              >
+                No
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -601,9 +689,13 @@ function SnapshotClipFilterContent({
               onCheckedChange={(checked) => {
                 setIsClipFilterActive(checked as boolean);
                 if (checked) {
-                  setSnapshotClip(hasSnapshot, true);
+                  setSnapshotClip(hasSnapshot, true, submittedToFrigatePlus);
                 } else {
-                  setSnapshotClip(hasSnapshot, undefined);
+                  setSnapshotClip(
+                    hasSnapshot,
+                    undefined,
+                    submittedToFrigatePlus,
+                  );
                 }
               }}
             />
@@ -618,8 +710,10 @@ function SnapshotClipFilterContent({
             type="single"
             value={hasClip === undefined ? undefined : hasClip ? "yes" : "no"}
             onValueChange={(value) => {
-              if (value === "yes") setSnapshotClip(hasSnapshot, true);
-              else if (value === "no") setSnapshotClip(hasSnapshot, false);
+              if (value === "yes")
+                setSnapshotClip(hasSnapshot, true, submittedToFrigatePlus);
+              else if (value === "no")
+                setSnapshotClip(hasSnapshot, false, submittedToFrigatePlus);
             }}
             disabled={!isClipFilterActive}
           >

@@ -159,8 +159,10 @@ export default function SearchView({
       max_score: ["100"],
       has_clip: ["yes", "no"],
       has_snapshot: ["yes", "no"],
+      ...(config?.plus?.enabled &&
+        searchFilter?.has_snapshot && { is_submitted: ["yes", "no"] }),
     }),
-    [config, allLabels, allZones, allSubLabels],
+    [config, allLabels, allZones, allSubLabels, searchFilter],
   );
 
   // remove duplicate event ids
