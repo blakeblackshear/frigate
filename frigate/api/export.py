@@ -19,6 +19,7 @@ from frigate.record.export import (
     PlaybackSourceEnum,
     RecordingExporter,
 )
+from frigate.util.builtin import is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ def export_recording(
             .count()
         )
 
-        if previews_count <= 0:
+        if not is_current_hour(start_time) and previews_count <= 0:
             return JSONResponse(
                 content=(
                     {"success": False, "message": "No previews found for time range"}
