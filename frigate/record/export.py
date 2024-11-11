@@ -27,6 +27,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Export, Previews, Recordings
+from frigate.util.builtin import is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +236,32 @@ class RecordingExporter(threading.Thread):
 
     def get_preview_export_command(self, video_path: str) -> list[str]:
         playlist_lines = []
+        codec = "-c copy"
+
+        if is_current_hour(self.start_time):
+            # get list of current preview frames
+            preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+            file_start = f"preview_{self.camera}"
+            start_file = f"{file_start}-{self.start_time}.{PREVIEW_FRAME_TYPE}"
+            end_file = f"{file_start}-{self.end_time}.{PREVIEW_FRAME_TYPE}"
+
+            for file in sorted(os.listdir(preview_dir)):
+                if not file.startswith(file_start):
+                    continue
+
+                if file < start_file:
+                    continue
+
+                if file > end_file:
+                    break
+
+                playlist_lines.append(f"file '{os.path.join(preview_dir, file)}'")
+                playlist_lines.append("duration 0.12")
+
+            if playlist_lines:
+                last_file = playlist_lines[-2]
+                playlist_lines.append(last_file)
+                codec = "-c:v libx264"
 
         # get full set of previews
         export_previews = (
@@ -277,7 +304,7 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (

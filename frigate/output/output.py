@@ -144,6 +144,9 @@ def output_frames(
         # check for any cameras that are currently offline
         # and need to generate a preview
         if generated_preview:
+            logger.debug(
+                "Checking for offline cameras because another camera generated a preview."
+            )
             for camera, time in preview_write_times.copy().items():
                 if time != 0 and frame_time - time > 10:
                     preview_recorders[camera].flag_offline(frame_time)

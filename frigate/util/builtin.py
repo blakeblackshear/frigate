@@ -282,6 +282,17 @@ def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     )
 
 
+def is_current_hour(timestamp: int) -> bool:
+    """Returns if timestamp is in the current UTC hour."""
+    start_of_next_hour = (
+        datetime.datetime.now(datetime.timezone.utc).replace(
+            minute=0, second=0, microsecond=0
+        )
+        + datetime.timedelta(hours=1)
+    ).timestamp()
+    return timestamp < start_of_next_hour
+
+
 def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
     """clear file then unlink to avoid space retained by file descriptors."""
     if not missing_ok and not file.exists():
