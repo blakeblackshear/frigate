@@ -27,6 +27,12 @@ import { DualThumbSlider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -541,9 +547,7 @@ export function SnapshotClipFilterContent({
     hasClip !== undefined,
   );
   const [isFrigatePlusFilterActive, setIsFrigatePlusFilterActive] = useState(
-    submittedToFrigatePlus !== undefined &&
-      isSnapshotFilterActive &&
-      hasSnapshot === true,
+    submittedToFrigatePlus !== undefined,
   );
 
   useEffect(() => {
@@ -555,12 +559,11 @@ export function SnapshotClipFilterContent({
   }, [hasClip]);
 
   useEffect(() => {
-    setIsFrigatePlusFilterActive(
-      submittedToFrigatePlus !== undefined &&
-        isSnapshotFilterActive &&
-        hasSnapshot === true,
-    );
-  }, [submittedToFrigatePlus, isSnapshotFilterActive, hasSnapshot]);
+    setIsFrigatePlusFilterActive(submittedToFrigatePlus !== undefined);
+  }, [submittedToFrigatePlus]);
+
+  const isFrigatePlusFilterDisabled =
+    !isSnapshotFilterActive || hasSnapshot !== true;
 
   return (
     <div className="overflow-x-hidden">
@@ -623,20 +626,42 @@ export function SnapshotClipFilterContent({
         {config?.plus?.enabled && (
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="plus-filter"
-                className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
-                checked={isFrigatePlusFilterActive}
-                disabled={!isSnapshotFilterActive || hasSnapshot !== true}
-                onCheckedChange={(checked) => {
-                  setIsFrigatePlusFilterActive(checked as boolean);
-                  if (checked) {
-                    setSnapshotClip(hasSnapshot, hasClip, true);
-                  } else {
-                    setSnapshotClip(hasSnapshot, hasClip, undefined);
-                  }
-                }}
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="inline-flex">
+                      <Checkbox
+                        id="plus-filter"
+                        className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+                        checked={isFrigatePlusFilterActive}
+                        disabled={isFrigatePlusFilterDisabled}
+                        onCheckedChange={(checked) => {
+                          setIsFrigatePlusFilterActive(checked as boolean);
+                          if (checked) {
+                            setSnapshotClip(hasSnapshot, hasClip, false);
+                          } else {
+                            setSnapshotClip(hasSnapshot, hasClip, undefined);
+                          }
+                        }}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  {isFrigatePlusFilterDisabled && (
+                    <TooltipContent
+                      className="max-w-60"
+                      side="left"
+                      sideOffset={5}
+                    >
+                      You must first filter on tracked objects that have a
+                      snapshot.
+                      <br />
+                      <br />
+                      Tracked objects without a snapshot cannot be submitted to
+                      Frigate+.
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <Label
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
