@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 
-from frigate.api.defs.request.export_recordinds_body import ExportRecordingsBody
+from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
