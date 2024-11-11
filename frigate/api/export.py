@@ -4,13 +4,13 @@ import logging
 import random
 import string
 from pathlib import Path
-from typing import Optional
 
 import psutil
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 
+from frigate.api.defs.request.export_recordinds_body import ExportRecordingsBody
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
@@ -37,7 +37,7 @@ def export_recording(
     camera_name: str,
     start_time: float,
     end_time: float,
-    body: dict = None,
+    body: ExportRecordingsBody,
 ):
     if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
         return JSONResponse(
@@ -47,18 +47,10 @@ def export_recording(
             status_code=404,
         )
 
-    json: dict[str, any] = body or {}
-    playback_factor = json.get("playback", "realtime")
-    playback_source = json.get("source", "recordings")
-    friendly_name: Optional[str] = json.get("name")
-
-    if len(friendly_name or "") > 256:
-        return JSONResponse(
-            content=({"success": False, "message": "File name is too long."}),
-            status_code=401,
-        )
-
-    existing_image = json.get("image_path")
+    playback_factor = body.playback
+    playback_source = body.source
+    friendly_name = body.name
+    existing_image = body.image_path
 
     if playback_source == "recordings":
         recordings_count = (

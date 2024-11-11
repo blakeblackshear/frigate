@@ -7,7 +7,7 @@ info:
 
 servers:
   - url: https://demo.frigate.video/api
-  - url: http://localhost:5001/
+  - url: http://localhost:5001/api
 
 paths:
   /auth:
@@ -296,7 +296,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReviewSetMultipleReviewedBody'
+              $ref: '#/components/schemas/ReviewModifyMultipleBody'
       responses:
         '200':
           description: Successful Response
@@ -321,7 +321,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReviewDeleteMultipleReviewsBody'
+              $ref: '#/components/schemas/ReviewModifyMultipleBody'
       responses:
         '200':
           description: Successful Response
@@ -1141,11 +1141,11 @@ paths:
             type: number
             title: End Time
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              title: Body
+              $ref: '#/components/schemas/ExportRecordingsBody'
       responses:
         '200':
           description: Successful Response
@@ -1408,6 +1408,14 @@ paths:
               - type: number
               - type: 'null'
             title: Max Length
+        - name: event_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Event Id
         - name: sort
           in: query
           required: false
@@ -1518,7 +1526,7 @@ paths:
             anyOf:
               - type: string
               - type: 'null'
-            default: thumbnail,description
+            default: thumbnail
             title: Search Type
         - name: include_thumbnails
           in: query
@@ -1590,6 +1598,22 @@ paths:
               - type: 'null'
             default: 00:00,24:00
             title: Time Range
+        - name: has_clip
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: 'null'
+            title: Has Clip
+        - name: has_snapshot
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: 'null'
+            title: Has Snapshot
         - name: timezone
           in: query
           required: false
@@ -2356,14 +2380,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1729274204.653048
+            default: 1731275308.238304
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1729277804.653095
+            default: 1731278908.238313
             title: Before
       responses:
         '200':
@@ -3262,6 +3286,27 @@ components:
       required:
         - subLabel
       title: EventsSubLabelBody
+    ExportRecordingsBody:
+      properties:
+        playback:
+          allOf:
+            - $ref: '#/components/schemas/PlaybackFactorEnum'
+          title: Playback factor
+          default: realtime
+        source:
+          allOf:
+            - $ref: '#/components/schemas/PlaybackSourceEnum'
+          title: Playback source
+          default: recordings
+        name:
+          type: string
+          maxLength: 256
+          title: Friendly name
+        image_path:
+          type: string
+          title: Image Path
+      type: object
+      title: ExportRecordingsBody
     Extension:
       type: string
       enum:
@@ -3313,6 +3358,18 @@ components:
         - total_alert
         - total_detection
       title: Last24HoursReview
+    PlaybackFactorEnum:
+      type: string
+      enum:
+        - realtime
+        - timelapse_25x
+      title: PlaybackFactorEnum
+    PlaybackSourceEnum:
+      type: string
+      enum:
+        - recordings
+        - preview
+      title: PlaybackSourceEnum
     RegenerateDescriptionEnum:
       type: string
       enum:
@@ -3336,7 +3393,7 @@ components:
         - motion
         - camera
       title: ReviewActivityMotionResponse
-    ReviewDeleteMultipleReviewsBody:
+    ReviewModifyMultipleBody:
       properties:
         ids:
           items:
@@ -3348,7 +3405,7 @@ components:
       type: object
       required:
         - ids
-      title: ReviewDeleteMultipleReviewsBody
+      title: ReviewModifyMultipleBody
     ReviewSegmentResponse:
       properties:
         id:
@@ -3386,19 +3443,6 @@ components:
         - thumb_path
         - data
       title: ReviewSegmentResponse
-    ReviewSetMultipleReviewedBody:
-      properties:
-        ids:
-          items:
-            type: string
-            minLength: 1
-          type: array
-          minItems: 1
-          title: Ids
-      type: object
-      required:
-        - ids
-      title: ReviewSetMultipleReviewedBody
     ReviewSummaryResponse:
       properties:
         last24Hours:
