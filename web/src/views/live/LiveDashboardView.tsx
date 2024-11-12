@@ -356,6 +356,7 @@ export default function LiveDashboardView({
                   cameraConfig={camera}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   autoLive={autoLiveView}
+                  streamName={Object.values(camera.live.streams)[0]}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}
                   onResetLiveMode={() => resetPreferredLiveMode(camera.name)}

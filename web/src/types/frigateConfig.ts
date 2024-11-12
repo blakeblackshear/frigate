@@ -229,6 +229,16 @@ export type CameraGroupConfig = {
   order: number;
 };
 
+export type CameraStreamingSettings = {
+  streamName: string;
+  streamType: string;
+  compatibilityMode: boolean;
+};
+
+export type GroupStreamingSettingsType = {
+  [cameraName: string]: CameraStreamingSettings;
+};
+
 export interface FrigateConfig {
   audio: {
     enabled: boolean;

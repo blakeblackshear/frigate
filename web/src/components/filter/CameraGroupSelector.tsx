@@ -1,10 +1,14 @@
-import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
+import {
+  CameraGroupConfig,
+  FrigateConfig,
+  GroupStreamingSettingsType,
+} from "@/types/frigateConfig";
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import {
@@ -43,7 +47,6 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import axios from "axios";
-import FilterSwitch from "./FilterSwitch";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import IconWrapper from "../ui/icon-wrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,6 +69,9 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "../mobile/MobilePage";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
+import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -607,6 +613,14 @@ export function CameraGroupEdit({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
+  const [groupStreamingSettings, setGroupStreamingSettings] =
+    useState<GroupStreamingSettingsType>({});
+
+  const [persistedGroupStreamingSettings, setPersistedGroupStreamingSettings] =
+    usePersistence<{ [groupName: string]: GroupStreamingSettingsType }>(
+      "streaming-settings",
+    );
+
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   const formSchema = z.object({
@@ -656,6 +670,18 @@ export function CameraGroupEdit({
 
       setIsLoading(true);
 
+      // update streaming settings
+      const updatedSettings: {
+        [groupName: string]: GroupStreamingSettingsType;
+      } = {
+        ...Object.fromEntries(
+          Object.entries(persistedGroupStreamingSettings || {}).filter(
+            ([key]) => key !== editingGroup?.[0],
+          ),
+        ),
+        [values.name]: groupStreamingSettings,
+      };
+
       let renamingQuery = "";
       if (editingGroup && editingGroup[0] !== values.name) {
         renamingQuery = `camera_groups.${editingGroup[0]}&`;
@@ -679,7 +705,7 @@ export function CameraGroupEdit({
             requires_restart: 0,
           },
         )
-        .then((res) => {
+        .then(async (res) => {
           if (res.status === 200) {
             toast.success(`Camera group (${values.name}) has been saved.`, {
               position: "top-center",
@@ -688,6 +714,7 @@ export function CameraGroupEdit({
             if (onSave) {
               onSave();
             }
+            await setPersistedGroupStreamingSettings(updatedSettings);
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
               position: "top-center",
@@ -704,7 +731,16 @@ export function CameraGroupEdit({
           setIsLoading(false);
         });
     },
-    [currentGroups, setIsLoading, onSave, updateConfig, editingGroup],
+    [
+      currentGroups,
+      setIsLoading,
+      onSave,
+      updateConfig,
+      editingGroup,
+      groupStreamingSettings,
+      setPersistedGroupStreamingSettings,
+      persistedGroupStreamingSettings,
+    ],
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -716,6 +752,20 @@ export function CameraGroupEdit({
       cameras: editingGroup && editingGroup[1].cameras,
     },
   });
+
+  // streaming settings
+
+  useEffect(() => {
+    if (editingGroup && editingGroup[0] && persistedGroupStreamingSettings) {
+      setGroupStreamingSettings(
+        persistedGroupStreamingSettings[editingGroup[0]] || {},
+      );
+    }
+  }, [
+    editingGroup,
+    persistedGroupStreamingSettings,
+    setGroupStreamingSettings,
+  ]);
 
   return (
     <Form {...form}>
@@ -758,16 +808,38 @@ export function CameraGroupEdit({
                   ...Object.keys(config?.cameras ?? {}),
                 ].map((camera) => (
                   <FormControl key={camera}>
-                    <FilterSwitch
-                      isChecked={field.value && field.value.includes(camera)}
-                      label={camera.replaceAll("_", " ")}
-                      onCheckedChange={(checked) => {
-                        const updatedCameras = checked
-                          ? [...(field.value || []), camera]
-                          : (field.value || []).filter((c) => c !== camera);
-                        form.setValue("cameras", updatedCameras);
-                      }}
-                    />
+                    <div className="flex items-center justify-between gap-1">
+                      <Label
+                        className="mx-2 w-full cursor-pointer capitalize text-primary"
+                        htmlFor={camera.replaceAll("_", " ")}
+                      >
+                        {camera.replaceAll("_", " ")}
+                      </Label>
+
+                      <div className="flex items-center gap-x-2">
+                        {camera !== "birdseye" && (
+                          <CameraStreamingDialog
+                            camera={camera}
+                            selectedCameras={field.value}
+                            config={config}
+                            groupStreamingSettings={groupStreamingSettings}
+                            setGroupStreamingSettings={
+                              setGroupStreamingSettings
+                            }
+                          />
+                        )}
+                        <Switch
+                          id={camera.replaceAll("_", " ")}
+                          checked={field.value && field.value.includes(camera)}
+                          onCheckedChange={(checked) => {
+                            const updatedCameras = checked
+                              ? [...(field.value || []), camera]
+                              : (field.value || []).filter((c) => c !== camera);
+                            form.setValue("cameras", updatedCameras);
+                          }}
+                        />
+                      </div>
+                    </div>
                   </FormControl>
                 ))}
               </FormItem>

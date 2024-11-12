@@ -650,6 +650,7 @@ const LivePlayerGridItem = React.forwardRef<
           windowVisible={windowVisible}
           cameraConfig={cameraConfig}
           preferredLiveMode={preferredLiveMode}
+          streamName={Object.values(cameraConfig.live.streams)[0]}
           onClick={onClick}
           onError={onError}
           onResetLiveMode={onResetLiveMode}

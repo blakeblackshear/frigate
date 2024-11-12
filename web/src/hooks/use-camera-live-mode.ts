@@ -23,7 +23,7 @@ export default function useCameraLiveMode(
         const isRestreamed =
           config &&
           Object.keys(config.go2rtc.streams || {}).includes(
-            camera.live.stream_name,
+            Object.values(camera.live.streams)[0],
           );
 
         if (!mseSupported) {
