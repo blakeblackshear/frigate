@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.15-0"
+CURRENT_CONFIG_VERSION = "0.16-0"
 
 
 def migrate_frigate_config(config_file: str):
@@ -66,6 +66,13 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.15-0"
+
+    if previous_version < "0.16-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
+        new_config = migrate_016_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.16-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -254,6 +261,29 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         new_config["cameras"][name] = camera_config
 
     new_config["version"] = "0.15-0"
+    return new_config
+
+
+def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.16-0"""
+    new_config = config.copy()
+
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, any]] = camera.copy()
+
+        live_config = camera_config.get("live", {})
+        if "stream_name" in live_config:
+            # Migrate from live -> stream_name to live -> streams -> dict
+            stream_name = live_config["stream_name"]
+            live_config["streams"] = {stream_name: stream_name}
+
+            del live_config["stream_name"]
+
+            camera_config["live"] = live_config
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.16-0"
     return new_config
 
 
