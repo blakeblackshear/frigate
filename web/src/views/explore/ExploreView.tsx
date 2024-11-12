@@ -228,12 +228,17 @@ function ExploreThumbnailImage({
     onSelectSearch(event, 0, "object lifecycle");
   };
 
+  const handleShowSnapshot = () => {
+    onSelectSearch(event, 0, "snapshot");
+  };
+
   return (
     <SearchResultActions
       searchResult={event}
       findSimilar={handleFindSimilar}
       refreshResults={mutate}
       showObjectLifecycle={handleShowObjectLifecycle}
+      showSnapshot={handleShowSnapshot}
       isContextMenu={true}
     >
       <div className="relative size-full">
