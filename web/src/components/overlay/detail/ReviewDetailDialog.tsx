@@ -161,7 +161,7 @@ export default function ReviewDetailDialog({
                 )}
               >
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       aria-label="Share this review item"
                       size="sm"

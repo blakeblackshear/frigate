@@ -37,15 +37,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import useSWR from "swr";
-import { Event } from "@/types/event";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
   refreshResults: () => void;
   showObjectLifecycle: () => void;
+  showSnapshot: () => void;
   isContextMenu?: boolean;
   children?: ReactNode;
 };
@@ -55,12 +54,12 @@ export default function SearchResultActions({
   findSimilar,
   refreshResults,
   showObjectLifecycle,
+  showSnapshot,
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const [showFrigatePlus, setShowFrigatePlus] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = () => {
@@ -130,10 +129,7 @@ export default function SearchResultActions({
         searchResult.has_snapshot &&
         searchResult.end_time &&
         !searchResult.plus_id && (
-          <MenuItem
-            aria-label="Submit to Frigate Plus"
-            onClick={() => setShowFrigatePlus(true)}
-          >
+          <MenuItem aria-label="Submit to Frigate Plus" onClick={showSnapshot}>
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
             <span>Submit to Frigate+</span>
           </MenuItem>
@@ -178,16 +174,6 @@ export default function SearchResultActions({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <FrigatePlusDialog
-        upload={
-          showFrigatePlus ? (searchResult as unknown as Event) : undefined
-        }
-        onClose={() => setShowFrigatePlus(false)}
-        onEventUploaded={() => {
-          searchResult.plus_id = "submitted";
-        }}
-      />
-
       {isContextMenu ? (
         <ContextMenu>
           <ContextMenuTrigger>{children}</ContextMenuTrigger>
@@ -216,7 +202,7 @@ export default function SearchResultActions({
                 <TooltipTrigger>
                   <FrigatePlusIcon
                     className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                    onClick={() => setShowFrigatePlus(true)}
+                    onClick={showSnapshot}
                   />
                 </TooltipTrigger>
                 <TooltipContent>Submit to Frigate+</TooltipContent>

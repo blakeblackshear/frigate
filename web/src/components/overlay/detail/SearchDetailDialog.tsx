@@ -533,7 +533,7 @@ type ObjectSnapshotTabProps = {
   search: Event;
   onEventUploaded: () => void;
 };
-function ObjectSnapshotTab({
+export function ObjectSnapshotTab({
   search,
   onEventUploaded,
 }: ObjectSnapshotTabProps) {

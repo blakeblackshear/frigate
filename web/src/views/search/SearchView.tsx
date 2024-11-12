@@ -471,6 +471,9 @@ export default function SearchView({
                         showObjectLifecycle={() =>
                           onSelectSearch(value, index, "object lifecycle")
                         }
+                        showSnapshot={() =>
+                          onSelectSearch(value, index, "snapshot")
+                        }
                       />
                     </div>
                   </div>
