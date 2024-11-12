@@ -57,7 +57,7 @@ import {
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
-import { IoMdArrowRoundBack } from "react-icons/io";
+import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuEar,
   LuEarOff,
@@ -79,6 +79,20 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { useSessionPersistence } from "@/hooks/use-session-persistence";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { usePersistence } from "@/hooks/use-persistence";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -103,17 +117,20 @@ export default function LiveCameraView({
 
   // supported features
 
+  const [streamName, setStreamName] = usePersistence<string>(
+    `${camera.name}-stream`,
+    Object.values(camera.live.streams)[0],
+  );
+
   const isRestreamed = useMemo(
     () =>
       config &&
-      Object.keys(config.go2rtc.streams || {}).includes(
-        camera.live.stream_name,
-      ),
-    [camera, config],
+      Object.keys(config.go2rtc.streams || {}).includes(streamName ?? ""),
+    [config, streamName],
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    isRestreamed ? `go2rtc/streams/${camera.live.stream_name}` : null,
+    isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
@@ -454,13 +471,16 @@ export default function LiveCameraView({
                 />
               )}
               <FrigateCameraFeatures
-                camera={camera.name}
+                camera={camera}
                 recordingEnabled={camera.record.enabled_in_config}
                 audioDetectEnabled={camera.audio.enabled_in_config}
                 autotrackingEnabled={
                   camera.onvif.autotracking.enabled_in_config
                 }
                 fullscreen={fullscreen}
+                streamName={streamName ?? ""}
+                setStreamName={setStreamName}
+                preferredLiveMode={preferredLiveMode}
               />
             </div>
           </TooltipProvider>
@@ -496,6 +516,7 @@ export default function LiveCameraView({
                 micEnabled={mic}
                 iOSCompatFullScreen={isIOS}
                 preferredLiveMode={preferredLiveMode}
+                streamName={streamName ?? ""}
                 pip={pip}
                 containerRef={containerRef}
                 setFullResolution={setFullResolution}
@@ -749,11 +770,14 @@ function PtzControlPanel({
 }
 
 type FrigateCameraFeaturesProps = {
-  camera: string;
+  camera: CameraConfig;
   recordingEnabled: boolean;
   audioDetectEnabled: boolean;
   autotrackingEnabled: boolean;
   fullscreen: boolean;
+  streamName: string;
+  setStreamName?: (value: string | undefined) => void;
+  preferredLiveMode: string;
 };
 function FrigateCameraFeatures({
   camera,
@@ -761,14 +785,22 @@ function FrigateCameraFeatures({
   audioDetectEnabled,
   autotrackingEnabled,
   fullscreen,
+  streamName,
+  setStreamName,
+  preferredLiveMode,
 }: FrigateCameraFeaturesProps) {
-  const { payload: detectState, send: sendDetect } = useDetectState(camera);
-  const { payload: recordState, send: sendRecord } = useRecordingsState(camera);
-  const { payload: snapshotState, send: sendSnapshot } =
-    useSnapshotsState(camera);
-  const { payload: audioState, send: sendAudio } = useAudioState(camera);
+  const { payload: detectState, send: sendDetect } = useDetectState(
+    camera.name,
+  );
+  const { payload: recordState, send: sendRecord } = useRecordingsState(
+    camera.name,
+  );
+  const { payload: snapshotState, send: sendSnapshot } = useSnapshotsState(
+    camera.name,
+  );
+  const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
   const { payload: autotrackingState, send: sendAutotracking } =
-    useAutotrackingState(camera);
+    useAutotrackingState(camera.name);
 
   // desktop shows icons part of row
   if (isDesktop || isTablet) {
@@ -819,6 +851,47 @@ function FrigateCameraFeatures({
               sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
             }
           />
+        )}
+        {Object.values(camera.live.streams).length > 1 && (
+          <Select
+            value={streamName}
+            onValueChange={(value) => {
+              setStreamName?.(value);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              {preferredLiveMode == "jsmpeg" && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <IoIosWarning className="mr-1 size-5 text-danger" />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent className="max-w-52">
+                      Live view is in low-bandwidth mode due to buffering or
+                      stream errors
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              )}
+              {Object.keys(camera.live.streams).find(
+                (key) => camera.live.streams[key] === streamName,
+              )}
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                {Object.entries(camera.live.streams).map(([stream, name]) => (
+                  <SelectItem
+                    key={stream}
+                    className="cursor-pointer"
+                    value={name}
+                  >
+                    {stream}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         )}
       </>
     );
@@ -877,6 +950,40 @@ function FrigateCameraFeatures({
               sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
             }
           />
+        )}
+        {Object.values(camera.live.streams).length > 1 && (
+          <div className="mt-1 p-2">
+            <div className="mb-1 text-sm">Live stream selection</div>
+            <Select
+              value={streamName}
+              onValueChange={(value) => {
+                setStreamName?.(value);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                {preferredLiveMode == "jsmpeg" && (
+                  <IoIosWarning className="mr-1 size-5 text-danger" />
+                )}
+                {Object.keys(camera.live.streams).find(
+                  (key) => camera.live.streams[key] === streamName,
+                )}
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  {Object.entries(camera.live.streams).map(([stream, name]) => (
+                    <SelectItem
+                      key={stream}
+                      className="cursor-pointer"
+                      value={name}
+                    >
+                      {stream}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </DrawerContent>
     </Drawer>

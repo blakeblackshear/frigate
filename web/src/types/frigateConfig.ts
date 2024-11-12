@@ -87,7 +87,7 @@ export interface CameraConfig {
   live: {
     height: number;
     quality: number;
-    stream_name: string;
+    streams: { [key: string]: string };
   };
   motion: {
     contour_area: number;
@@ -319,12 +319,6 @@ export interface FrigateConfig {
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
-
-  live: {
-    height: number;
-    quality: number;
-    stream_name: string;
-  };
 
   logger: {
     default: string;

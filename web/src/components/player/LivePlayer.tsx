@@ -26,6 +26,7 @@ type LivePlayerProps = {
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   className?: string;
   cameraConfig: CameraConfig;
+  streamName: string;
   preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
   windowVisible?: boolean;
@@ -45,6 +46,7 @@ export default function LivePlayer({
   containerRef,
   className,
   cameraConfig,
+  streamName,
   preferredLiveMode,
   showStillWithoutActivity = true,
   windowVisible = true,
@@ -144,6 +146,19 @@ export default function LivePlayer({
     setLiveReady(false);
   }, [preferredLiveMode]);
 
+  const [key, setKey] = useState(0);
+
+  const resetPlayer = () => {
+    setLiveReady(false);
+    setKey((prevKey) => prevKey + 1);
+  };
+
+  useEffect(() => {
+    if (streamName) {
+      resetPlayer();
+    }
+  }, [streamName]);
+
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
   }, []);
@@ -153,13 +168,14 @@ export default function LivePlayer({
   }
 
   let player;
-  if (!autoLive) {
+  if (!autoLive || !streamName) {
     player = null;
   } else if (preferredLiveMode == "webrtc") {
     player = (
       <WebRtcPlayer
+        key={"webrtc_" + key}
         className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
-        camera={cameraConfig.live.stream_name}
+        camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         audioEnabled={playAudio}
         microphoneEnabled={micEnabled}
@@ -173,8 +189,9 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
+          key={"mse_" + key}
           className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
-          camera={cameraConfig.live.stream_name}
+          camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
           onPlaying={playerIsPlaying}
@@ -194,6 +211,7 @@ export default function LivePlayer({
     if (cameraActive || !showStillWithoutActivity || liveReady) {
       player = (
         <JSMpegPlayer
+          key={"jsmpeg_" + key}
           className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
