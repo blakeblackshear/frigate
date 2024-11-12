@@ -13,6 +13,7 @@ type SearchThumbnailProps = {
   findSimilar: () => void;
   refreshResults: () => void;
   showObjectLifecycle: () => void;
+  showSnapshot: () => void;
 };
 
 export default function SearchThumbnailFooter({
@@ -21,6 +22,7 @@ export default function SearchThumbnailFooter({
   findSimilar,
   refreshResults,
   showObjectLifecycle,
+  showSnapshot,
 }: SearchThumbnailProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -54,6 +56,7 @@ export default function SearchThumbnailFooter({
           findSimilar={findSimilar}
           refreshResults={refreshResults}
           showObjectLifecycle={showObjectLifecycle}
+          showSnapshot={showSnapshot}
         />
       </div>
     </div>
