@@ -21,7 +21,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   FrigateConfig,
-  GroupStreamingSettingsType,
+  GroupStreamingSettings,
+  StreamType,
 } from "@/types/frigateConfig";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { LuSettings } from "react-icons/lu";
@@ -30,9 +31,9 @@ type CameraStreamingDialogProps = {
   camera: string;
   selectedCameras: string[];
   config?: FrigateConfig;
-  groupStreamingSettings: GroupStreamingSettingsType;
+  groupStreamingSettings: GroupStreamingSettings;
   setGroupStreamingSettings: React.Dispatch<
-    React.SetStateAction<GroupStreamingSettingsType>
+    React.SetStateAction<GroupStreamingSettings>
   >;
 };
 
@@ -47,7 +48,7 @@ export function CameraStreamingDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   const [streamName, setStreamName] = useState("");
-  const [streamType, setStreamType] = useState("smart");
+  const [streamType, setStreamType] = useState<StreamType>("smart");
   const [compatibilityMode, setCompatibilityMode] = useState(false);
 
   useEffect(() => {
@@ -154,7 +155,10 @@ export function CameraStreamingDialog({
             <Label htmlFor="streaming-method" className="text-right">
               Streaming Method
             </Label>
-            <Select value={streamType} onValueChange={setStreamType}>
+            <Select
+              value={streamType}
+              onValueChange={(value) => setStreamType(value as StreamType)}
+            >
               <SelectTrigger className="">
                 <SelectValue placeholder="Choose a streaming option" />
               </SelectTrigger>

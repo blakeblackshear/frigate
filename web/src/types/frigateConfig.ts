@@ -229,9 +229,11 @@ export type CameraGroupConfig = {
   order: number;
 };
 
+export type StreamType = "no-streaming" | "smart" | "continuous";
+
 export type CameraStreamingSettings = {
   streamName: string;
-  streamType: string;
+  streamType: StreamType;
   compatibilityMode: boolean;
 };
 

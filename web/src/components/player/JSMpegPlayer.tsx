@@ -12,6 +12,7 @@ type JSMpegPlayerProps = {
   height: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   playbackEnabled: boolean;
+  useWebGL: boolean;
   onPlaying?: () => void;
 };
 
@@ -22,6 +23,7 @@ export default function JSMpegPlayer({
   className,
   containerRef,
   playbackEnabled,
+  useWebGL = false,
   onPlaying,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
@@ -123,8 +125,8 @@ export default function JSMpegPlayer({
           {
             protocols: [],
             audio: false,
-            disableGl: camera != "birdseye",
-            disableWebAssembly: camera != "birdseye",
+            disableGl: !useWebGL,
+            disableWebAssembly: !useWebGL,
             videoBufferSize: 1024 * 1024 * 4,
             onVideoDecode: () => {
               if (!hasDataRef.current) {

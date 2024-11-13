@@ -197,21 +197,11 @@ export default function LiveDashboardView({
   const [persistedStreamingSettings, _, isStreamingSettingsLoaded] =
     usePersistence<AllGroupsStreamingSettings>("streaming-settings");
 
-  const currentGroupStreamingSettings = useMemo(() => {
-    if (cameraGroup && cameraGroup != "default" && allGroupsStreamingSettings) {
-      return allGroupsStreamingSettings[cameraGroup];
-    }
-  }, [allGroupsStreamingSettings, cameraGroup]);
-
   useEffect(() => {
     if (isStreamingSettingsLoaded) {
       setAllGroupsStreamingSettings(persistedStreamingSettings ?? {});
     }
   }, [isStreamingSettingsLoaded, persistedStreamingSettings]);
-
-  useEffect(() => {
-    // console.log("group settings", cameraGroup, currentGroupStreamingSettings);
-  }, [currentGroupStreamingSettings, cameraGroup]);
 
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {
@@ -384,6 +374,7 @@ export default function LiveDashboardView({
                   cameraConfig={camera}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   autoLive={autoLiveView}
+                  useWebGL={false}
                   streamName={Object.values(camera.live.streams)[0]}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}
@@ -436,6 +427,7 @@ export default function LiveDashboardView({
           setIsEditMode={setIsEditMode}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          allGroupsStreamingSettings={allGroupsStreamingSettings}
           setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
         />
       )}

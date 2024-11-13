@@ -29,6 +29,7 @@ type LivePlayerProps = {
   streamName: string;
   preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
+  useWebGL: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
   micEnabled?: boolean; // only webrtc supports mic
@@ -49,6 +50,7 @@ export default function LivePlayer({
   streamName,
   preferredLiveMode,
   showStillWithoutActivity = true,
+  useWebGL = false,
   windowVisible = true,
   playAudio = false,
   micEnabled = false,
@@ -219,6 +221,7 @@ export default function LivePlayer({
           playbackEnabled={
             cameraActive || !showStillWithoutActivity || liveReady
           }
+          useWebGL={useWebGL}
           containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
         />
