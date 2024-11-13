@@ -1,5 +1,6 @@
 import { usePersistence } from "@/hooks/use-persistence";
 import {
+  AllGroupsStreamingSettings,
   BirdseyeConfig,
   CameraConfig,
   FrigateConfig,
@@ -56,6 +57,9 @@ type DraggableGridLayoutProps = {
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  setAllGroupsStreamingSettings: React.Dispatch<
+    React.SetStateAction<AllGroupsStreamingSettings>
+  >;
 };
 export default function DraggableGridLayout({
   cameras,
@@ -70,6 +74,7 @@ export default function DraggableGridLayout({
   setIsEditMode,
   fullscreen,
   toggleFullscreen,
+  setAllGroupsStreamingSettings,
 }: DraggableGridLayoutProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -372,6 +377,7 @@ export default function DraggableGridLayout({
             setOpen={setEditGroup}
             currentGroups={groups}
             activeGroup={group}
+            setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
           />
           <ResponsiveGridLayout
             className="grid-layout"

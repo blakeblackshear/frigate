@@ -235,8 +235,12 @@ export type CameraStreamingSettings = {
   compatibilityMode: boolean;
 };
 
-export type GroupStreamingSettingsType = {
+export type GroupStreamingSettings = {
   [cameraName: string]: CameraStreamingSettings;
+};
+
+export type AllGroupsStreamingSettings = {
+  [groupName: string]: GroupStreamingSettings;
 };
 
 export interface FrigateConfig {

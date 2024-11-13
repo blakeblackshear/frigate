@@ -6,7 +6,9 @@ import GeneralSettings from "../menu/GeneralSettings";
 import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
 import { baseUrl } from "@/api/baseUrl";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePersistence } from "@/hooks/use-persistence";
+import { AllGroupsStreamingSettings } from "@/types/frigateConfig";
 
 function Sidebar() {
   const basePath = useMemo(() => new URL(baseUrl).pathname, []);
@@ -15,6 +17,18 @@ function Sidebar() {
   const isBasePathMatch = useMatch(basePath);
 
   const navbarLinks = useNavigation();
+
+  const [, setAllGroupsStreamingSettings] =
+    useState<AllGroupsStreamingSettings>({});
+
+  const [persistedStreamingSettings, _, isStreamingSettingsLoaded] =
+    usePersistence<AllGroupsStreamingSettings>("streaming-settings");
+
+  useEffect(() => {
+    if (isStreamingSettingsLoaded) {
+      setAllGroupsStreamingSettings(persistedStreamingSettings ?? {});
+    }
+  }, [isStreamingSettingsLoaded, persistedStreamingSettings]);
 
   return (
     <aside className="scrollbar-container scrollbar-hidden absolute inset-y-0 left-0 z-10 flex w-[52px] flex-col justify-between overflow-y-auto border-r border-secondary-highlight bg-background_alt py-4">
@@ -34,7 +48,12 @@ function Sidebar() {
                 item={item}
                 Icon={item.icon}
               />
-              {showCameraGroups && <CameraGroupSelector className="mb-4" />}
+              {showCameraGroups && (
+                <CameraGroupSelector
+                  setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
+                  className="mb-4"
+                />
+              )}
             </div>
           );
         })}

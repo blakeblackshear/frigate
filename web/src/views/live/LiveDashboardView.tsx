@@ -14,7 +14,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import {
+  AllGroupsStreamingSettings,
+  CameraConfig,
+  FrigateConfig,
+} from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -187,6 +191,28 @@ export default function LiveDashboardView({
   const { preferredLiveModes, setPreferredLiveModes, resetPreferredLiveMode } =
     useCameraLiveMode(cameras, windowVisible);
 
+  const [allGroupsStreamingSettings, setAllGroupsStreamingSettings] =
+    useState<AllGroupsStreamingSettings>({});
+
+  const [persistedStreamingSettings, _, isStreamingSettingsLoaded] =
+    usePersistence<AllGroupsStreamingSettings>("streaming-settings");
+
+  const currentGroupStreamingSettings = useMemo(() => {
+    if (cameraGroup && cameraGroup != "default" && allGroupsStreamingSettings) {
+      return allGroupsStreamingSettings[cameraGroup];
+    }
+  }, [allGroupsStreamingSettings, cameraGroup]);
+
+  useEffect(() => {
+    if (isStreamingSettingsLoaded) {
+      setAllGroupsStreamingSettings(persistedStreamingSettings ?? {});
+    }
+  }, [isStreamingSettingsLoaded, persistedStreamingSettings]);
+
+  useEffect(() => {
+    // console.log("group settings", cameraGroup, currentGroupStreamingSettings);
+  }, [currentGroupStreamingSettings, cameraGroup]);
+
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {
       if (!visibleCameraObserver.current) {
@@ -230,7 +256,9 @@ export default function LiveDashboardView({
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
           <div className="max-w-[45%]">
-            <CameraGroupSelector />
+            <CameraGroupSelector
+              setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
+            />
           </div>
           {(!cameraGroup || cameraGroup == "default" || isMobileOnly) && (
             <div className="flex items-center gap-1">
@@ -408,6 +436,7 @@ export default function LiveDashboardView({
           setIsEditMode={setIsEditMode}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
         />
       )}
     </div>

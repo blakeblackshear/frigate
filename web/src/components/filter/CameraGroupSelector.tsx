@@ -1,7 +1,8 @@
 import {
+  AllGroupsStreamingSettings,
   CameraGroupConfig,
   FrigateConfig,
-  GroupStreamingSettingsType,
+  GroupStreamingSettings,
 } from "@/types/frigateConfig";
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
@@ -75,8 +76,14 @@ import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 
 type CameraGroupSelectorProps = {
   className?: string;
+  setAllGroupsStreamingSettings: React.Dispatch<
+    React.SetStateAction<AllGroupsStreamingSettings>
+  >;
 };
-export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
+export function CameraGroupSelector({
+  className,
+  setAllGroupsStreamingSettings,
+}: CameraGroupSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // tooltip
@@ -130,6 +137,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
         activeGroup={group}
         setGroup={setGroup}
         deleteGroup={deleteGroup}
+        setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
@@ -219,6 +227,9 @@ type NewGroupDialogProps = {
   activeGroup?: string;
   setGroup: (value: string | undefined, replace?: boolean | undefined) => void;
   deleteGroup: () => void;
+  setAllGroupsStreamingSettings: React.Dispatch<
+    React.SetStateAction<AllGroupsStreamingSettings>
+  >;
 };
 function NewGroupDialog({
   open,
@@ -227,6 +238,7 @@ function NewGroupDialog({
   activeGroup,
   setGroup,
   deleteGroup,
+  setAllGroupsStreamingSettings,
 }: NewGroupDialogProps) {
   const { mutate: updateConfig } = useSWR<FrigateConfig>("config");
 
@@ -409,6 +421,7 @@ function NewGroupDialog({
                 setIsLoading={setIsLoading}
                 onSave={onSave}
                 onCancel={onCancel}
+                setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
               />
             </>
           )}
@@ -423,12 +436,16 @@ type EditGroupDialogProps = {
   setOpen: (open: boolean) => void;
   currentGroups: [string, CameraGroupConfig][];
   activeGroup?: string;
+  setAllGroupsStreamingSettings: React.Dispatch<
+    React.SetStateAction<AllGroupsStreamingSettings>
+  >;
 };
 export function EditGroupDialog({
   open,
   setOpen,
   currentGroups,
   activeGroup,
+  setAllGroupsStreamingSettings,
 }: EditGroupDialogProps) {
   const Overlay = isDesktop ? Dialog : MobilePage;
   const Content = isDesktop ? DialogContent : MobilePageContent;
@@ -480,6 +497,7 @@ export function EditGroupDialog({
               setIsLoading={setIsLoading}
               onSave={() => setOpen(false)}
               onCancel={() => setOpen(false)}
+              setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
             />
           </div>
         </Content>
@@ -600,6 +618,9 @@ type CameraGroupEditProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  setAllGroupsStreamingSettings: React.Dispatch<
+    React.SetStateAction<AllGroupsStreamingSettings>
+  >;
 };
 
 export function CameraGroupEdit({
@@ -609,17 +630,16 @@ export function CameraGroupEdit({
   setIsLoading,
   onSave,
   onCancel,
+  setAllGroupsStreamingSettings,
 }: CameraGroupEditProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
   const [groupStreamingSettings, setGroupStreamingSettings] =
-    useState<GroupStreamingSettingsType>({});
+    useState<GroupStreamingSettings>({});
 
   const [persistedGroupStreamingSettings, setPersistedGroupStreamingSettings] =
-    usePersistence<{ [groupName: string]: GroupStreamingSettingsType }>(
-      "streaming-settings",
-    );
+    usePersistence<AllGroupsStreamingSettings>("streaming-settings");
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -671,9 +691,7 @@ export function CameraGroupEdit({
       setIsLoading(true);
 
       // update streaming settings
-      const updatedSettings: {
-        [groupName: string]: GroupStreamingSettingsType;
-      } = {
+      const updatedSettings: AllGroupsStreamingSettings = {
         ...Object.fromEntries(
           Object.entries(persistedGroupStreamingSettings || {}).filter(
             ([key]) => key !== editingGroup?.[0],
@@ -715,6 +733,7 @@ export function CameraGroupEdit({
               onSave();
             }
             await setPersistedGroupStreamingSettings(updatedSettings);
+            setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
               position: "top-center",
@@ -740,6 +759,7 @@ export function CameraGroupEdit({
       groupStreamingSettings,
       setPersistedGroupStreamingSettings,
       persistedGroupStreamingSettings,
+      setAllGroupsStreamingSettings,
     ],
   );
 
