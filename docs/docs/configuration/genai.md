@@ -112,6 +112,7 @@ genai:
   provider: openai
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
+  base_url: https://api.openai.com/v1
 ```
 
 ## Azure OpenAI
