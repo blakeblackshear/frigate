@@ -47,22 +47,30 @@ export function CameraStreamingDialog({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [streamName, setStreamName] = useState("");
+  const [streamName, setStreamName] = useState(
+    Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] || "",
+  );
   const [streamType, setStreamType] = useState<StreamType>("smart");
   const [compatibilityMode, setCompatibilityMode] = useState(false);
 
   useEffect(() => {
+    if (!config) {
+      return;
+    }
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
       setStreamName(cameraSettings.streamName || "");
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName("");
+      setStreamName(
+        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
+          "",
+      );
       setStreamType("smart");
       setCompatibilityMode(false);
     }
-  }, [groupStreamingSettings, camera]);
+  }, [groupStreamingSettings, camera, config]);
 
   const handleSave = useCallback(() => {
     setIsLoading(true);
@@ -81,18 +89,24 @@ export function CameraStreamingDialog({
   ]);
 
   const handleCancel = useCallback(() => {
+    if (!config) {
+      return;
+    }
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
       setStreamName(cameraSettings.streamName || "");
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName("");
+      setStreamName(
+        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
+          "",
+      );
       setStreamType("smart");
       setCompatibilityMode(false);
     }
     setIsDialogOpen(false);
-  }, [groupStreamingSettings, camera]);
+  }, [groupStreamingSettings, camera, config]);
 
   if (!config) {
     return null;
@@ -141,9 +155,9 @@ export function CameraStreamingDialog({
                 <SelectContent>
                   {camera !== "birdseye" &&
                     Object.entries(config?.cameras[camera].live.streams).map(
-                      ([stream, name]) => (
-                        <SelectItem key={stream} value={name}>
-                          {stream}
+                      ([name, stream]) => (
+                        <SelectItem key={stream} value={stream}>
+                          {name}
                         </SelectItem>
                       ),
                     )}
