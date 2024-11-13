@@ -51,9 +51,15 @@ go2rtc:
       - ffmpeg:rtsp://192.168.1.5:554/live0#video=copy
 ```
 
-### Setting Stream For Live UI
+### Setting Streams For Live UI
 
-There may be some cameras that you would prefer to use the sub stream for live view, but the main stream for recording. This can be done via `live -> stream_name`.
+In Frigate 0.16 and later, you can configure Live view to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but your full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to select a stream for live viewing.
+
+Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
+
+Configure the `streams` option with a "friendly name" for your stream followed by the go2rtc stream name.
+
+Go2rtc is required to use this feature. You cannot specify paths in the `streams` list, only go2rtc stream names.
 
 ```yaml
 go2rtc:
@@ -80,7 +86,9 @@ cameras:
           roles:
             - detect
     live:
-      stream_name: test_cam_sub
+      streams:
+        - Main Stream: test_cam
+        - Sub Stream: test_cam_sub
 ```
 
 ### WebRTC extra configuration:
