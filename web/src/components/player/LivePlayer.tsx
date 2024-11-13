@@ -161,6 +161,12 @@ export default function LivePlayer({
     }
   }, [streamName]);
 
+  useEffect(() => {
+    if (showStillWithoutActivity && !autoLive) {
+      setLiveReady(false);
+    }
+  }, [showStillWithoutActivity, autoLive]);
+
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
   }, []);
