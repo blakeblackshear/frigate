@@ -22,8 +22,8 @@ class OpenAIClient(GenAIClient):
     def _init_provider(self):
         """Initialize the client."""
 
-        if self.genai_config.base_url is None or self.genai_config.base_url == "":
-            self.genai_config.base_url = "https://api.openai.com/v1"
+        if self.genai_config.base_url == "":
+            self.genai_config.base_url = None
 
         return OpenAI(
             api_key=self.genai_config.api_key, base_url=self.genai_config.base_url
