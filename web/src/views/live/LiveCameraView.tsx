@@ -516,6 +516,7 @@ export default function LiveCameraView({
                 micEnabled={mic}
                 iOSCompatFullScreen={isIOS}
                 preferredLiveMode={preferredLiveMode}
+                useWebGL={true}
                 streamName={streamName ?? ""}
                 pip={pip}
                 containerRef={containerRef}
