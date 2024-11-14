@@ -24,6 +24,11 @@ On startup, an admin user and password are generated and printed in the logs. It
 
 In the event that you are locked out of your instance, you can tell Frigate to reset the admin password and print it in the logs on next startup using the `reset_admin_password` setting in your config file.
 
+```yaml
+auth:
+  reset_admin_password: true
+```
+
 ## Login failure rate limiting
 
 In order to limit the risk of brute force attacks, rate limiting is available for login failures. This is implemented with Flask-Limiter, and the string notation for valid values is available in [the documentation](https://flask-limiter.readthedocs.io/en/stable/configuration.html#rate-limit-string-notation).
