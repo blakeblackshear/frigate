@@ -4,6 +4,7 @@ import base64
 import logging
 from collections import defaultdict
 from statistics import median
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -423,10 +424,11 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, any]]) -> str:
+    def find_best_object(self, objects: list[dict[str, any]]) -> Optional[str]:
         """Find the best attribute for each object and return its ID."""
         best_object_area = None
         best_object_id = None
+        best_object_label = None
 
         for obj in objects:
             if not box_inside(obj["box"], self.box):
@@ -440,8 +442,15 @@ class TrackedObjectAttribute:
             if best_object_area is None:
                 best_object_area = object_area
                 best_object_id = obj["id"]
-            elif object_area < best_object_area:
-                best_object_area = object_area
-                best_object_id = obj["id"]
+                best_object_label = obj["label"]
+            else:
+                if best_object_label == "car" and obj["label"] == "car":
+                    # if multiple cars are overlapping with the same label then the label will not be assigned
+                    return None
+                elif object_area < best_object_area:
+                    # if a car and person are overlapping then assign the label to the smaller object (which should be the person)
+                    best_object_area = object_area
+                    best_object_id = obj["id"]
+                    best_object_label = obj["label"]
 
         return best_object_id
