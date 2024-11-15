@@ -1,6 +1,7 @@
 """Generative AI module for Frigate."""
 
 import importlib
+import logging
 import os
 from typing import Optional
 
@@ -8,6 +9,8 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
 from frigate.models import Event
+
+logger = logging.getLogger(__name__)
 
 PROVIDERS = {}
 
@@ -41,6 +44,7 @@ class GenAIClient:
             event.label,
             camera_config.genai.prompt,
         ).format(**model_to_dict(event))
+        logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
 
     def _init_provider(self):
