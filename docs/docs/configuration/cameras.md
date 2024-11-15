@@ -109,7 +109,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink E1 Zoom              |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink RLC-823A 16x         |      ✅      |      ❌      |                                                                                                                                                 |
 | Speco O8P32X                 |      ✅      |      ❌      |                                                                                                                                                 |
-| Sunba 405-D20X               |      ✅      |      ❌      |                                                                                                                                                 |
+| Sunba 405-D20X               |      ✅      |      ❌      | Incomplete ONVIF support reported on original, and 4k models. All models are suspected incompatable.                                            |
 | Tapo                         |      ✅      |      ❌      | Many models supported, ONVIF Service Port: 2020                                                                                                 |
 | Uniview IPC672LR-AX4DUPK     |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Uniview IPC6612SR-X33-VG     |      ✅      |      ✅      | Leave `calibrate_on_startup` as `False`. A user has reported that zooming with `absolute` is working.                                           |
