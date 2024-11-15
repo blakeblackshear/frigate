@@ -442,7 +442,7 @@ class TrackedObjectAttribute:
             if best_object_area is None:
                 best_object_area = object_area
                 best_object_id = obj["id"]
-                best_object_area = obj["label"]
+                best_object_label = obj["label"]
             else:
                 if best_object_label == "car" and obj["label"] == "car":
                     # if multiple cars are overlapping with the same label then the label will not be assigned
