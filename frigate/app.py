@@ -516,7 +516,7 @@ class FrigateApp:
         if cam_total_frame_size == 0.0:
             return 0
 
-        shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
+        shm_frame_count = min(200, int(available_shm / (cam_total_frame_size)))
 
         logger.debug(
             f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
