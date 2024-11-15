@@ -791,7 +791,7 @@ class SharedMemoryFrameManager(FrameManager):
             if name in self.shm_store:
                 shm = self.shm_store[name]
             else:
-                shm = SharedMemory(name=name)
+                shm = SharedMemory(name=name, track=False)
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
@@ -814,7 +814,7 @@ class SharedMemoryFrameManager(FrameManager):
             del self.shm_store[name]
         else:
             try:
-                shm = SharedMemory(name=name)
+                shm = SharedMemory(name=name, track=False)
                 shm.close()
                 shm.unlink()
             except FileNotFoundError:
