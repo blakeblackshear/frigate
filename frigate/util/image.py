@@ -733,7 +733,7 @@ class FrameManager(ABC):
         pass
 
 
-class SharedMemory(_mpshm.SharedMemory):
+class UntrackedSharedMemory(_mpshm.SharedMemory):
     # https://github.com/python/cpython/issues/82300#issuecomment-2169035092
 
     __lock = threading.Lock()
@@ -744,7 +744,7 @@ class SharedMemory(_mpshm.SharedMemory):
         create: bool = False,
         size: int = 0,
         *,
-        track: bool = True,
+        track: bool = False,
     ) -> None:
         self._track = track
 
@@ -779,10 +779,14 @@ class SharedMemory(_mpshm.SharedMemory):
 
 class SharedMemoryFrameManager(FrameManager):
     def __init__(self):
-        self.shm_store: dict[str, SharedMemory] = {}
+        self.shm_store: dict[str, UntrackedSharedMemory] = {}
 
     def create(self, name: str, size) -> AnyStr:
-        shm = SharedMemory(name=name, create=True, size=size, track=False)
+        shm = UntrackedSharedMemory(
+            name=name,
+            create=True,
+            size=size,
+        )
         self.shm_store[name] = shm
         return shm.buf
 
@@ -791,7 +795,7 @@ class SharedMemoryFrameManager(FrameManager):
             if name in self.shm_store:
                 shm = self.shm_store[name]
             else:
-                shm = SharedMemory(name=name, track=False)
+                shm = UntrackedSharedMemory(name=name)
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
@@ -814,7 +818,7 @@ class SharedMemoryFrameManager(FrameManager):
             del self.shm_store[name]
         else:
             try:
-                shm = SharedMemory(name=name, track=False)
+                shm = UntrackedSharedMemory(name=name)
                 shm.close()
                 shm.unlink()
             except FileNotFoundError:
