@@ -68,6 +68,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.util.builtin import empty_and_close_queue
+from frigate.util.image import UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -325,20 +326,20 @@ class FrigateApp:
                         for det in self.config.detectors.values()
                     ]
                 )
-                shm_in = mp.shared_memory.SharedMemory(
+                shm_in = UntrackedSharedMemory(
                     name=name,
                     create=True,
                     size=largest_frame,
                 )
             except FileExistsError:
-                shm_in = mp.shared_memory.SharedMemory(name=name)
+                shm_in = UntrackedSharedMemory(name=name)
 
             try:
-                shm_out = mp.shared_memory.SharedMemory(
+                shm_out = UntrackedSharedMemory(
                     name=f"out-{name}", create=True, size=20 * 6 * 4
                 )
             except FileExistsError:
-                shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}")
+                shm_out = UntrackedSharedMemory(name=f"out-{name}")
 
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
