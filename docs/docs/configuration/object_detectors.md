@@ -415,6 +415,24 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
 
+:::info
+
+If the correct build is used for your GPU then the GPU will be detected and used automatically.
+
+- **AMD**
+
+  - ROCm will automatically be detected and used with the ONNX detector in the `-rocm` Frigate image.
+
+- **Intel**
+
+  - OpenVINO will automatically be detected and used with the ONNX detector in the default Frigate image.
+
+- **Nvidia**
+  - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp(4/5)` Frigate image.
+
+:::
+
 :::tip
 
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
