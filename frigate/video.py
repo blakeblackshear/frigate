@@ -94,7 +94,6 @@ def capture_frames(
     ffmpeg_process,
     config: CameraConfig,
     shm_frame_count: int,
-    shm_frames: list[str],
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -109,21 +108,20 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
+    # pre-create shms
+    for i in range(shm_frame_count):
+        frame_manager.create(f"{config.name}{i}")
+
+    frame_index = 0
+
     while True:
         fps.value = frame_rate.eps()
         skipped_fps.value = skipped_eps.eps()
         current_frame.value = datetime.datetime.now().timestamp()
-        frame_name = f"{config.name}{current_frame.value}"
+        frame_name = f"{config.name}{frame_index}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
-
-            # update frame cache and cleanup existing frames
-            shm_frames.append(frame_name)
-
-            if len(shm_frames) > shm_frame_count:
-                expired_frame_name = shm_frames.pop(0)
-                frame_manager.delete(expired_frame_name)
         except Exception:
             # always delete the frame
             frame_manager.delete(frame_name)
@@ -147,11 +145,13 @@ def capture_frames(
         # don't lock the queue to check, just try since it should rarely be full
         try:
             # add to the queue
-            frame_queue.put(current_frame.value, False)
+            frame_queue.put((frame_name, current_frame.value), False)
             frame_manager.close(frame_name)
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
+
+        frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
 
 
 class CameraWatchdog(threading.Thread):
@@ -171,7 +171,6 @@ class CameraWatchdog(threading.Thread):
         self.camera_name = camera_name
         self.config = config
         self.shm_frame_count = shm_frame_count
-        self.shm_frames: list[str] = []
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
@@ -304,7 +303,6 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = CameraCapture(
             self.config,
             self.shm_frame_count,
-            self.shm_frames,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -345,7 +343,6 @@ class CameraCapture(threading.Thread):
         self,
         config: CameraConfig,
         shm_frame_count: int,
-        shm_frames: list[str],
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -373,7 +370,6 @@ class CameraCapture(threading.Thread):
             self.ffmpeg_process,
             self.config,
             self.shm_frame_count,
-            self.shm_frames,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
