@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import mmap
 import subprocess as sp
 from abc import ABC, abstractmethod
 from string import printable
@@ -736,21 +737,20 @@ class UntrackedSharedMemory:
         self,
         name: Optional[str] = None,
         create: bool = False,
-        unlink: bool = False,
         size: int = 0,
     ) -> None:
-        if unlink:
-            return
-
         flag = posix_ipc.O_CREAT if create else 0
         self.shm_store = posix_ipc.SharedMemory(name, flags=flag, size=size)
+        self.mm = mmap.mmap(self.shm_store.fd, 0)
+        self.buf = memoryview(self.mm)
 
     def close(self) -> None:
-        self.shm_store.fd_close()
+        del self.buf
+        del self.mm
+        self.shm_store.close_fd()
 
-    def unlink(self, name: str) -> None:
-        shm = posix_ipc.SharedMemory(name, flags=posix_ipc.O_TRUNC, size=0)
-        shm.unlink()
+    def unlink(self) -> None:
+        self.shm_store.unlink()
 
 
 class SharedMemoryFrameManager(FrameManager):
@@ -787,14 +787,14 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
 
             try:
-                self.shm_store[name].unlink(name)
+                self.shm_store[name].unlink()
             except FileNotFoundError:
                 pass
 
             del self.shm_store[name]
         else:
             try:
-                shm = UntrackedSharedMemory(name=name, unlink=True)
+                shm = UntrackedSharedMemory(name=name)
                 shm.close()
                 shm.unlink()
             except FileNotFoundError:
