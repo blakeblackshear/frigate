@@ -514,6 +514,7 @@ class RecordingMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     (
                         camera,
+                        _,
                         frame_time,
                         current_tracked_objects,
                         motion_boxes,

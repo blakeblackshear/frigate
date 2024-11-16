@@ -233,16 +233,17 @@ class CameraState:
     def on(self, event_type: str, callback: Callable[[dict], None]):
         self.callbacks[event_type].append(callback)
 
-    def update(self, frame_time, current_detections, motion_boxes, regions):
-        # get the new frame
-        frame_id = f"{self.name}{frame_time}"
-
+    def update(
+        self,
+        frame_name: str,
+        frame_time: float,
+        current_detections: dict[str, dict[str, any]],
+        motion_boxes: list[tuple[int, int, int, int]],
+        regions: list[tuple[int, int, int, int]],
+    ):
         current_frame = self.frame_manager.get(
-            frame_id, self.camera_config.frame_shape_yuv
+            frame_name, self.camera_config.frame_shape_yuv
         )
-
-        if current_frame is None:
-            logger.debug(f"Failed to get frame {frame_id} from SHM")
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
@@ -477,7 +478,7 @@ class CameraState:
                 if self.previous_frame_id is not None:
                     self.frame_manager.close(self.previous_frame_id)
 
-            self.previous_frame_id = frame_id
+            self.previous_frame_id = frame_name
 
 
 class TrackedObjectProcessor(threading.Thread):
@@ -798,6 +799,7 @@ class TrackedObjectProcessor(threading.Thread):
             try:
                 (
                     camera,
+                    frame_name,
                     frame_time,
                     current_tracked_objects,
                     motion_boxes,
@@ -809,7 +811,7 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state = self.camera_states[camera]
 
             camera_state.update(
-                frame_time, current_tracked_objects, motion_boxes, regions
+                frame_name, frame_time, current_tracked_objects, motion_boxes, regions
             )
 
             self.update_mqtt_motion(camera, frame_time, motion_boxes)
@@ -822,6 +824,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.detection_publisher.publish(
                 (
                     camera,
+                    frame_name,
                     frame_time,
                     tracked_objects,
                     motion_boxes,

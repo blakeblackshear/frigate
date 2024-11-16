@@ -717,19 +717,27 @@ def clipped(obj, frame_shape):
 
 class FrameManager(ABC):
     @abstractmethod
-    def create(self, name, size) -> AnyStr:
+    def create(self, name: str, size: int) -> AnyStr:
         pass
 
     @abstractmethod
-    def get(self, name, timeout_ms=0):
+    def write(self, name: str) -> memoryview:
         pass
 
     @abstractmethod
-    def close(self, name):
+    def get(self, name: str, timeout_ms: int = 0):
         pass
 
     @abstractmethod
-    def delete(self, name):
+    def close(self, name: str):
+        pass
+
+    @abstractmethod
+    def delete(self, name: str):
+        pass
+
+    @abstractmethod
+    def cleanup(self):
         pass
 
 
@@ -790,6 +798,18 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
+    def write(self, name: str) -> memoryview:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+            return shm.buf
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return None
+
     def get(self, name: str, shape) -> Optional[np.ndarray]:
         try:
             if name in self.shm_store:
@@ -820,6 +840,15 @@ class SharedMemoryFrameManager(FrameManager):
             try:
                 shm = UntrackedSharedMemory(name=name)
                 shm.close()
+                shm.unlink()
+            except FileNotFoundError:
+                pass
+
+    def cleanup(self) -> None:
+        for shm in self.shm_store.values():
+            shm.close()
+
+            try:
                 shm.unlink()
             except FileNotFoundError:
                 pass

@@ -59,7 +59,13 @@ class PtzMotionEstimator:
         self.ptz_metrics.reset.set()
         logger.debug(f"{config.name}: Motion estimator init")
 
-    def motion_estimator(self, detections, frame_time, camera):
+    def motion_estimator(
+        self,
+        detections: list[dict[str, any]],
+        frame_name: str,
+        frame_time: float,
+        camera: str,
+    ):
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics.reset.is_set():
             self.ptz_metrics.reset.clear()
@@ -92,9 +98,8 @@ class PtzMotionEstimator:
                 f"{camera}: Motion estimator running - frame time: {frame_time}"
             )
 
-            frame_id = f"{camera}{frame_time}"
             yuv_frame = self.frame_manager.get(
-                frame_id, self.camera_config.frame_shape_yuv
+                frame_name, self.camera_config.frame_shape_yuv
             )
 
             if yuv_frame is None:
@@ -136,7 +141,7 @@ class PtzMotionEstimator:
             except Exception:
                 pass
 
-            self.frame_manager.close(frame_id)
+            self.frame_manager.close(frame_name)
 
         return self.coord_transformations
 
