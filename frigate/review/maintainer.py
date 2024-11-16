@@ -234,6 +234,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def update_existing_segment(
         self,
         segment: PendingReviewSegment,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -292,36 +293,34 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if should_update:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     self._publish_segment_update(
                         segment, camera_config, yuv_frame, active_objects, prev_data
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                 except FileNotFoundError:
                     return
 
         if not has_activity:
             if not segment.has_frame:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     segment.save_full_frame(camera_config, yuv_frame)
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self._publish_segment_update(
                         segment, camera_config, None, [], prev_data
                     )
@@ -338,6 +337,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def check_if_new_segment(
         self,
         camera: str,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -414,19 +414,18 @@ class ReviewSegmentMaintainer(threading.Thread):
                 )
 
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     self.active_review_segments[camera].update_frame(
                         camera_config, yuv_frame, active_objects
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self._publish_segment_start(self.active_review_segments[camera])
                 except FileNotFoundError:
                     return
@@ -454,16 +453,17 @@ class ReviewSegmentMaintainer(threading.Thread):
             if topic == DetectionTypeEnum.video:
                 (
                     camera,
+                    frame_name,
                     frame_time,
                     current_tracked_objects,
-                    motion_boxes,
-                    regions,
+                    _,
+                    _,
                 ) = data
             elif topic == DetectionTypeEnum.audio:
                 (
                     camera,
                     frame_time,
-                    dBFS,
+                    _,
                     audio_detections,
                 ) = data
             elif topic == DetectionTypeEnum.api:
@@ -488,6 +488,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.update_existing_segment(
                         current_segment,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )
@@ -538,6 +539,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
                         camera,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )

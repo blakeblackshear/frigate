@@ -9,5 +9,7 @@ class ObjectTracker(ABC):
         pass
 
     @abstractmethod
-    def match_and_update(self, frame_time: float, detections) -> None:
+    def match_and_update(
+        self, frame_name: str, frame_time: float, detections: list[dict[str, any]]
+    ) -> None:
         pass
