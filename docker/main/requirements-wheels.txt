@@ -30,6 +30,7 @@ norfair == 2.2.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
+posix_ipc == 1.1.*
 # OpenVino & ONNX
 openvino == 2024.3.*
 onnxruntime-openvino == 1.19.* ; platform_machine == 'x86_64'
