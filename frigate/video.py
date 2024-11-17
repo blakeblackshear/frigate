@@ -94,6 +94,7 @@ def capture_frames(
     ffmpeg_process,
     config: CameraConfig,
     shm_frame_count: int,
+    frame_index: int,
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -107,8 +108,6 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
-
-    frame_index = 0
 
     while True:
         fps.value = frame_rate.eps()
@@ -177,6 +176,7 @@ class CameraWatchdog(threading.Thread):
         self.frame_shape = self.config.frame_shape_yuv
         self.frame_size = self.frame_shape[0] * self.frame_shape[1]
         self.fps_overflow_count = 0
+        self.frame_index = 0
         self.stop_event = stop_event
         self.sleeptime = self.config.ffmpeg.retry_interval
 
@@ -298,6 +298,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = CameraCapture(
             self.config,
             self.shm_frame_count,
+            self.frame_index,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -338,6 +339,7 @@ class CameraCapture(threading.Thread):
         self,
         config: CameraConfig,
         shm_frame_count: int,
+        frame_index: int,
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -349,6 +351,7 @@ class CameraCapture(threading.Thread):
         self.name = f"capture:{config.name}"
         self.config = config
         self.shm_frame_count = shm_frame_count
+        self.frame_index = frame_index
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
@@ -364,6 +367,7 @@ class CameraCapture(threading.Thread):
             self.ffmpeg_process,
             self.config,
             self.shm_frame_count,
+            self.frame_index,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
