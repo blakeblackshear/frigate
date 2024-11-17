@@ -145,8 +145,6 @@ def capture_frames(
 
         frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
 
-    frame_manager.cleanup()
-
 
 class CameraWatchdog(threading.Thread):
     def __init__(
