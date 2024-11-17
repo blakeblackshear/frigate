@@ -91,6 +91,7 @@ class FrigateApp:
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
+        self.frame_manager = SharedMemoryFrameManager()
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -426,7 +427,6 @@ class FrigateApp:
 
     def start_camera_capture_processes(self) -> None:
         shm_frame_count = self.shm_frame_count()
-        frame_manager = SharedMemoryFrameManager()
 
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
@@ -436,7 +436,7 @@ class FrigateApp:
             # pre-create shms
             for i in range(shm_frame_count):
                 frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
-                frame_manager.create(f"{config.name}{i}", frame_size)
+                self.frame_manager.create(f"{config.name}{i}", frame_size)
 
             capture_process = util.Process(
                 target=capture_camera,
@@ -717,6 +717,7 @@ class FrigateApp:
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
 
+        self.frame_manager.cleanup()
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
