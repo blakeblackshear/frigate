@@ -68,7 +68,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import UntrackedSharedMemory
+from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -426,11 +426,17 @@ class FrigateApp:
 
     def start_camera_capture_processes(self) -> None:
         shm_frame_count = self.shm_frame_count()
+        frame_manager = SharedMemoryFrameManager()
 
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
+
+            # pre-create shms
+            for i in range(shm_frame_count):
+                frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
+                frame_manager.create(f"{config.name}{i}", frame_size)
 
             capture_process = util.Process(
                 target=capture_camera,

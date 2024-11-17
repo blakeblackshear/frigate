@@ -108,10 +108,6 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    # pre-create shms
-    for i in range(shm_frame_count):
-        frame_manager.create(f"{config.name}{i}", frame_size)
-
     frame_index = 0
 
     while True:
