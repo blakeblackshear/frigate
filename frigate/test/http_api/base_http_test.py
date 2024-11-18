@@ -9,7 +9,8 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
-from frigate.models import Event
+from frigate.models import Event, ReviewSegment
+from frigate.review.maintainer import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
@@ -106,7 +107,7 @@ class BaseTestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def create_app(self, stats= None):
+    def create_app(self, stats=None):
         return create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -140,4 +141,22 @@ class BaseTestHttp(unittest.TestCase):
             area=0,
             has_clip=True,
             has_snapshot=True,
+        ).execute()
+
+    def insert_mock_review_segment(
+        self,
+        id: str,
+        start_time: datetime.datetime = datetime.datetime.now().timestamp(),
+        end_time: datetime.datetime = datetime.datetime.now().timestamp() + 20,
+    ) -> Event:
+        """Inserts a basic event model with a given id."""
+        return ReviewSegment.insert(
+            id=id,
+            camera="front_door",
+            start_time=start_time,
+            end_time=end_time,
+            has_been_reviewed=False,
+            severity=SeverityEnum.alert,
+            thumb_path=False,
+            data={},
         ).execute()

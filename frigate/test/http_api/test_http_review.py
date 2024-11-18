@@ -8,13 +8,12 @@ class TestHttpReview(BaseTestHttp):
     def setUp(self):
         super().setUp([Event, ReviewSegment])
 
-    def test_get_bad_event(self):
+    # Does not return any data point since the end time (before parameter) is not passed
+    def test_get_reviews_no_filters(self):
         app = super().create_app()
-        id = "123456.random"
-        bad_id = "654321.other"
 
         with TestClient(app) as client:
-            super().insert_mock_event(id)
-            event_response = client.get(f"/events/{bad_id}")
-            assert event_response.status_code == 404
-            assert event_response.json() == "Event not found"
+            super().insert_mock_review_segment("123456.random")
+            reviews_response = client.get("/review")
+            assert reviews_response.status_code == 200
+            assert len(reviews_response.json()) == 0
