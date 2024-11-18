@@ -24,6 +24,7 @@ from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
 
@@ -287,7 +288,11 @@ class EmbeddingMaintainer(threading.Thread):
         # fire and forget description update
         self.requestor.send_data(
             UPDATE_EVENT_DESCRIPTION,
-            {"id": event.id, "description": description},
+            {
+                "type": TrackedObjectUpdateTypesEnum.description,
+                "id": event.id,
+                "description": description,
+            },
         )
 
         # Embed the description
