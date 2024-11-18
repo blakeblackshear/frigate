@@ -309,7 +309,7 @@ function ObjectDetailsTab({
       return undefined;
     }
 
-    if (search.sub_label) {
+    if (search.sub_label && search.data?.sub_label_score) {
       return Math.round((search.data?.sub_label_score ?? 0) * 100);
     } else {
       return undefined;
