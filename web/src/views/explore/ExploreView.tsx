@@ -15,7 +15,7 @@ import { SearchResult } from "@/types/search";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { useEventUpdate } from "@/api/ws";
+import { useTrackedObjectUpdate } from "@/api/ws";
 import { isEqual } from "lodash";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import SearchResultActions from "@/components/menu/SearchResultActions";
@@ -72,13 +72,13 @@ export default function ExploreView({
     }, {});
   }, [events]);
 
-  const eventUpdate = useEventUpdate();
+  const trackedObjectUpdate = useTrackedObjectUpdate();
 
   useEffect(() => {
     mutate();
     // mutate / revalidate when event description updates come in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventUpdate]);
+  }, [trackedObjectUpdate]);
 
   // update search detail when results change
 
