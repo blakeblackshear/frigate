@@ -22,7 +22,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
-from frigate.types import ModelStatusTypesEnum
+from frigate.types import ModelStatusTypesEnum, TrackedObjectUpdateTypesEnum
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -136,9 +136,24 @@ class Dispatcher:
             event: Event = Event.get(Event.id == payload["id"])
             event.data["description"] = payload["description"]
             event.save()
+            print(
+                json.dumps(
+                    {
+                        "type": TrackedObjectUpdateTypesEnum.description,
+                        "id": event.id,
+                        "description": event.data["description"],
+                    }
+                )
+            )
             self.publish(
-                "event_update",
-                json.dumps({"id": event.id, "description": event.data["description"]}),
+                "tracked_object_update",
+                json.dumps(
+                    {
+                        "type": TrackedObjectUpdateTypesEnum.description,
+                        "id": event.id,
+                        "description": event.data["description"],
+                    }
+                ),
             )
 
         def handle_update_model_state():
