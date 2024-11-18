@@ -407,9 +407,9 @@ export function useImproveContrast(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
-export function useEventUpdate(): { payload: string } {
+export function useTrackedObjectUpdate(): { payload: string } {
   const {
     value: { payload },
-  } = useWs("event_update", "");
+  } = useWs("tracked_object_update", "");
   return useDeepMemo(JSON.parse(payload as string));
 }

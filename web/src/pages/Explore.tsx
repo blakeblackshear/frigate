@@ -1,6 +1,6 @@
 import {
   useEmbeddingsReindexProgress,
-  useEventUpdate,
+  useTrackedObjectUpdate,
   useModelState,
 } from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -227,15 +227,15 @@ export default function Explore() {
 
   // mutation and revalidation
 
-  const eventUpdate = useEventUpdate();
+  const trackedObjectUpdate = useTrackedObjectUpdate();
 
   useEffect(() => {
-    if (eventUpdate) {
+    if (trackedObjectUpdate) {
       mutate();
     }
     // mutate / revalidate when event description updates come in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventUpdate]);
+  }, [trackedObjectUpdate]);
 
   // embeddings reindex progress
 
