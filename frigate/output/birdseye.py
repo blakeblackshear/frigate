@@ -740,9 +740,10 @@ class Birdseye:
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
         self.config_subscriber = ConfigSubscriber("config/birdseye/")
+        self.frame_manager = SharedMemoryFrameManager()
 
         if config.birdseye.restream:
-            self.birdseye_buffer = SharedMemoryFrameManager().create(
+            self.birdseye_buffer = self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
             )
