@@ -136,15 +136,6 @@ class Dispatcher:
             event: Event = Event.get(Event.id == payload["id"])
             event.data["description"] = payload["description"]
             event.save()
-            print(
-                json.dumps(
-                    {
-                        "type": TrackedObjectUpdateTypesEnum.description,
-                        "id": event.id,
-                        "description": event.data["description"],
-                    }
-                )
-            )
             self.publish(
                 "tracked_object_update",
                 json.dumps(
