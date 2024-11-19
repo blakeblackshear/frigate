@@ -142,6 +142,10 @@ Frigate's thumbnail search excels at identifying specific details about tracked 
 
 While generating simple descriptions of detected objects is useful, understanding intent provides a deeper layer of insight. Instead of just recognizing "what" is in a scene, Frigate’s default prompts aim to infer "why" it might be there or "what" it could do next. Descriptions tell you what’s happening, but intent gives context. For instance, a person walking toward a door might seem like a visitor, but if they’re moving quickly after hours, you can infer a potential break-in attempt. Detecting a person loitering near a door at night can trigger an alert sooner than simply noting "a person standing by the door," helping you respond based on the situation’s context.
 
+### Using GenAI for notifications
+
+Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_update`, that is updated with a JSON payload containing `event_id` and `description` when your AI provider returns a description for a tracked object. This description could be used directly in notifications, such as sending alerts to your phone or making audio announcements. If additional details from the tracked object are needed, you can query the [HTTP API](/integrations/api) using the `event_id`, eg: `http://frigate_ip:5000/api/events/<event_id>`.
+
 ## Custom Prompts
 
 Frigate sends multiple frames from the tracked object along with a prompt to your Generative AI provider asking it to generate a description. The default prompt is as follows:
@@ -172,7 +176,7 @@ genai:
 
 Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. By default, descriptions will be generated for all tracked objects and all zones. But you can also optionally specify `objects` and `required_zones` to only generate descriptions for certain tracked objects or zones.
 
-Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the thumbnails collected over the object's lifetime to the model. Using a snapshot provides the AI with a higher-resolution image (typically downscaled by the AI itself), but the trade-off is that only a single image is used, which might limit the model's ability to determine object movement or direction.
+Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the uncompressed images from the `detect` stream collected over the object's lifetime to the model. Once the object lifecycle ends, only a single compressed and cropped thumbnail is saved with the tracked object. Using a snapshot might be useful when you want to _regenerate_ a tracked object's description as it will provide the AI with a higher-quality image (typically downscaled by the AI itself) than the cropped/compressed thumbnail. Using a snapshot otherwise has a trade-off in that only a single image is sent to your provider, which will limit the model's ability to determine object movement or direction.
 
 ```yaml
 cameras:
