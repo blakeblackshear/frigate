@@ -10,7 +10,7 @@ class TestHttpReview(BaseTestHttp):
     def setUp(self):
         super().setUp([Event, ReviewSegment])
 
-    # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 20 seconds from now
+    # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 2 seconds from now
     def test_get_reviews_no_filters_no_matches(self):
         app = super().create_app()
         now = datetime.datetime.now().timestamp()
