@@ -229,11 +229,13 @@ class FaceClassificationModel:
             self.__build_classifier()
 
         cosine_index = self.labeler.transform([sub_label])[0]
-        probabilities: list[float] = self.classifier.predict_proba([embedding])[0]
+        probabilities: np.ndarray = self.classifier.predict_proba([embedding])[0]
         svc_probability = max(probabilities)
-        logger.debug(f"SVC face classification probability: {svc_probability} and index match: {cosine_index} / {probabilities.index(svc_probability)}")
+        logger.debug(
+            f"SVC face classification probability: {svc_probability} and index match: {cosine_index} / {np.where(probabilities == svc_probability)[0]}"
+        )
 
-        if cosine_index == probabilities.index(svc_probability):
+        if cosine_index == np.where(probabilities == svc_probability)[0]:
             return (
                 sub_label,
                 min(avg_score, svc_probability),
