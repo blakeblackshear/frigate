@@ -25,7 +25,8 @@ class TestHttpReview(BaseTestHttp):
         now = datetime.datetime.now().timestamp()
 
         with TestClient(app) as client:
-            super().insert_mock_review_segment("4566.random", now, now + 20)
+            id = "4566.random"
+            super().insert_mock_review_segment(id, now, now + 20)
             params = {
                 "after": now - 1,
                 "before": now + 21,
@@ -34,3 +35,4 @@ class TestHttpReview(BaseTestHttp):
             assert reviews_response.status_code == 200
             reviews_in_response = reviews_response.json()
             assert len(reviews_in_response) == 1
+            assert reviews_in_response[0]["id"] == id
