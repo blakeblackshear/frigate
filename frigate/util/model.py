@@ -10,7 +10,8 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from sklearn.preprocessing import LabelEncoder, Normalizer
 from sklearn.svm import SVC
 
-from frigate.util.builtin import deserialize
+from frigate.config.semantic_search import FaceRecognitionConfig
+from frigate.util.builtin import deserialize, serialize
 
 try:
     import openvino as ov
@@ -19,6 +20,9 @@ except ImportError:
     pass
 
 logger = logging.getLogger(__name__)
+
+
+MIN_MATCHING_FACES = 2
 
 
 def get_ort_providers(
@@ -157,10 +161,19 @@ class ONNXModelRunner:
 
 
 class FaceClassificationModel:
-    def __init__(self, db: SqliteQueueDatabase):
+    def __init__(self, config: FaceRecognitionConfig, db: SqliteQueueDatabase):
+        self.config = config
         self.db = db
         self.labeler: Optional[LabelEncoder] = None
         self.classifier: Optional[SVC] = None
+        self.embedding_query = f"""
+            SELECT
+                id,
+                distance
+            FROM vec_faces
+            WHERE face_embedding MATCH ?
+                AND k = {MIN_MATCHING_FACES} ORDER BY distance
+        """
 
     def __build_classifier(self) -> None:
         faces: list[tuple[str, bytes]] = self.db.execute_sql(
@@ -170,7 +183,9 @@ class FaceClassificationModel:
         self.labeler = LabelEncoder()
         norms = Normalizer(norm="l2").transform(embeddings)
         labels = self.labeler.fit_transform([f[0].split("-")[0] for f in faces])
-        self.classifier = SVC(kernel="linear", probability=True)
+        self.classifier = SVC(
+            kernel="linear", probability=True, decision_function_shape="ovo"
+        )
         self.classifier.fit(norms, labels)
 
     def clear_classifier(self) -> None:
@@ -178,17 +193,50 @@ class FaceClassificationModel:
         self.labeler = None
 
     def classify_face(self, embedding: np.ndarray) -> Optional[tuple[str, float]]:
+        best_faces = self.db.execute_sql(
+            self.embedding_query, [serialize(embedding)]
+        ).fetchall()
+        logger.debug(f"Face embedding match: {best_faces}")
+
+        if not best_faces or len(best_faces) < MIN_MATCHING_FACES:
+            logger.debug(
+                f"{len(best_faces)} < {MIN_MATCHING_FACES} min required faces."
+            )
+            return None
+
+        sub_label = str(best_faces[0][0]).split("-")[0]
+        avg_score = 0
+
+        # check that the cosine similarity is close enough to match the face
+        for face in best_faces:
+            score = 1.0 - face[1]
+
+            if face[0].split("-")[0] != sub_label:
+                logger.debug("Detected multiple faces, result is not valid.")
+                return None
+
+            avg_score += score
+
+        avg_score = round(avg_score / MIN_MATCHING_FACES, 2)
+
+        if avg_score < self.config.threshold:
+            logger.debug(
+                f"Recognized face score {avg_score} is less than threshold ({self.config.threshold}))."
+            )
+            return None
+
         if not self.classifier:
             self.__build_classifier()
 
-        res = self.classifier.predict([embedding])
+        cosine_index = self.labeler.transform([sub_label])[0]
+        probabilities: list[float] = self.classifier.predict_proba([embedding])[0]
+        svc_probability = max(probabilities)
+        logger.debug(f"SVC face classification probability: {svc_probability} and index match: {cosine_index} / {probabilities.index(svc_probability)}")
 
-        if res is None:
-            return None
+        if cosine_index == probabilities.index(svc_probability):
+            return (
+                sub_label,
+                min(avg_score, svc_probability),
+            )
 
-        label = res[0]
-        probabilities = self.classifier.predict_proba([embedding])[0]
-        return (
-            self.labeler.inverse_transform([label])[0],
-            round(probabilities[label], 2),
-        )
+        return None

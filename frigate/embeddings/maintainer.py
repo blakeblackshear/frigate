@@ -69,7 +69,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.detected_faces: dict[str, float] = {}
         self.face_classifier = (
-            FaceClassificationModel(db) if self.face_recognition_enabled else None
+            FaceClassificationModel(self.config.face_recognition, db)
+            if self.face_recognition_enabled
+            else None
         )
 
         # create communication for updating event descriptions
@@ -201,7 +203,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # Create our own thumbnail based on the bounding box and the frame time
         try:
-            yuv_frame = self.frame_manager.get(frame_name, camera_config.frame_shape_yuv)
+            yuv_frame = self.frame_manager.get(
+                frame_name, camera_config.frame_shape_yuv
+            )
         except FileNotFoundError:
             pass
 
@@ -467,11 +471,9 @@ class EmbeddingMaintainer(threading.Thread):
             f"Detected best face for person as: {sub_label} with score {score}"
         )
 
-        if score < self.config.face_recognition.threshold or (
-            id in self.detected_faces and score <= self.detected_faces[id]
-        ):
+        if id in self.detected_faces and score <= self.detected_faces[id]:
             logger.debug(
-                f"Recognized face score {score} is less than threshold ({self.config.face_recognition.threshold}) / previous face score ({self.detected_faces.get(id)})."
+                f"Recognized face score {score} is less than previous face score ({self.detected_faces.get(id)})."
             )
             return
 
