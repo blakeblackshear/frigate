@@ -133,7 +133,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # Create our own thumbnail based on the bounding box and the frame time
         try:
-            yuv_frame = self.frame_manager.get(frame_name, camera_config.frame_shape_yuv)
+            yuv_frame = self.frame_manager.get(
+                frame_name, camera_config.frame_shape_yuv
+            )
 
             if yuv_frame is not None:
                 data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
