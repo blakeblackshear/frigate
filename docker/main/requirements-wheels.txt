@@ -1,5 +1,7 @@
 click == 8.1.*
 # FastAPI
+aiohttp == 3.11.2
+starlette == 0.41.2
 starlette-context == 0.3.6
 fastapi == 0.115.*
 uvicorn == 0.30.*

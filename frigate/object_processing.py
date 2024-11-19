@@ -262,7 +262,7 @@ class CameraState:
 
             # call event handlers
             for c in self.callbacks["start"]:
-                c(self.name, new_obj, frame_time)
+                c(self.name, new_obj, frame_name)
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
@@ -272,7 +272,7 @@ class CameraState:
 
             if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
-                    c(self.name, updated_obj, frame_time)
+                    c(self.name, updated_obj, frame_name)
 
             if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
@@ -293,7 +293,7 @@ class CameraState:
             ) or significant_update:
                 # call event handlers
                 for c in self.callbacks["update"]:
-                    c(self.name, updated_obj, frame_time)
+                    c(self.name, updated_obj, frame_name)
                 updated_obj.last_published = frame_time
 
         for id in removed_ids:
@@ -302,7 +302,7 @@ class CameraState:
             if "end_time" not in removed_obj.obj_data:
                 removed_obj.obj_data["end_time"] = frame_time
                 for c in self.callbacks["end"]:
-                    c(self.name, removed_obj, frame_time)
+                    c(self.name, removed_obj, frame_name)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
@@ -368,11 +368,11 @@ class CameraState:
                 ):
                     self.best_objects[object_type] = obj
                     for c in self.callbacks["snapshot"]:
-                        c(self.name, self.best_objects[object_type], frame_time)
+                        c(self.name, self.best_objects[object_type], frame_name)
             else:
                 self.best_objects[object_type] = obj
                 for c in self.callbacks["snapshot"]:
-                    c(self.name, self.best_objects[object_type], frame_time)
+                    c(self.name, self.best_objects[object_type], frame_name)
 
         for c in self.callbacks["camera_activity"]:
             c(self.name, camera_activity)
@@ -447,7 +447,7 @@ class CameraState:
                     c(self.name, obj_name, 0)
                 self.active_object_counts[obj_name] = 0
             for c in self.callbacks["snapshot"]:
-                c(self.name, self.best_objects[obj_name], frame_time)
+                c(self.name, self.best_objects[obj_name], frame_name)
 
         # cleanup thumbnail frame cache
         current_thumb_frames = {
@@ -518,17 +518,18 @@ class TrackedObjectProcessor(threading.Thread):
         self.zone_data = defaultdict(lambda: defaultdict(dict))
         self.active_zone_data = defaultdict(lambda: defaultdict(dict))
 
-        def start(camera, obj: TrackedObject, current_frame_time):
+        def start(camera: str, obj: TrackedObject, frame_name: str):
             self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
                     EventStateEnum.start,
                     camera,
+                    frame_name,
                     obj.to_dict(),
                 )
             )
 
-        def update(camera, obj: TrackedObject, current_frame_time):
+        def update(camera: str, obj: TrackedObject, frame_name: str):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
             after = obj.to_dict()
@@ -544,14 +545,15 @@ class TrackedObjectProcessor(threading.Thread):
                     EventTypeEnum.tracked_object,
                     EventStateEnum.update,
                     camera,
+                    frame_name,
                     obj.to_dict(include_thumbnail=True),
                 )
             )
 
-        def autotrack(camera, obj: TrackedObject, current_frame_time):
+        def autotrack(camera: str, obj: TrackedObject, frame_name: str):
             self.ptz_autotracker_thread.ptz_autotracker.autotrack_object(camera, obj)
 
-        def end(camera, obj: TrackedObject, current_frame_time):
+        def end(camera: str, obj: TrackedObject, frame_name: str):
             # populate has_snapshot
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
@@ -606,11 +608,12 @@ class TrackedObjectProcessor(threading.Thread):
                     EventTypeEnum.tracked_object,
                     EventStateEnum.end,
                     camera,
+                    frame_name,
                     obj.to_dict(include_thumbnail=True),
                 )
             )
 
-        def snapshot(camera, obj: TrackedObject, current_frame_time):
+        def snapshot(camera, obj: TrackedObject, frame_name: str):
             mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_jpg_bytes(
