@@ -144,7 +144,7 @@ While generating simple descriptions of detected objects is useful, understandin
 
 ### Using GenAI for notifications
 
-Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_update`, that is updated with a JSON payload containing `event_id` and `description` when your AI provider returns a description for a tracked object. This description could be used directly in notifications, such as sending alerts to your phone or making audio announcements. If additional details from the tracked object are needed, you can query the [HTTP API](/integrations/api) using the `event_id`, eg: `http://frigate_ip:5000/api/events/<event_id>`.
+Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_update`, that is updated with a JSON payload containing `event_id` and `description` when your AI provider returns a description for a tracked object. This description could be used directly in notifications, such as sending alerts to your phone or making audio announcements. If additional details from the tracked object are needed, you can query the [HTTP API](/integrations/api/event-events-event-id-get) using the `event_id`, eg: `http://frigate_ip:5000/api/events/<event_id>`.
 
 ## Custom Prompts
 
