@@ -65,3 +65,26 @@ class TestHttpReview(BaseTestHttp):
             reviews_in_response = reviews_response.json()
             assert len(reviews_in_response) == 1
             assert reviews_in_response[0]["id"] == id
+
+    def test_get_with_all_filters(self):
+        app = super().create_app()
+        now = datetime.datetime.now().timestamp()
+
+        with TestClient(app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now, now + 20)
+            params = {
+                "cameras": "front_door",
+                "labels": "all",
+                "zones": "all",
+                "reviewed": 0,
+                "limit": 1,
+                "severity": "alert",
+                "before": now + 21,
+                "after": now - 1,
+            }
+            reviews_response = client.get("/review", params=params)
+            assert reviews_response.status_code == 200
+            reviews_in_response = reviews_response.json()
+            assert len(reviews_in_response) == 1
+            assert reviews_in_response[0]["id"] == id
