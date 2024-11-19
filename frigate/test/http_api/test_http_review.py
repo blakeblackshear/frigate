@@ -16,7 +16,7 @@ class TestHttpReview(BaseTestHttp):
         now = datetime.datetime.now().timestamp()
 
         with TestClient(app) as client:
-            super().insert_mock_review_segment("123456.random", now, now + 20)
+            super().insert_mock_review_segment("123456.random", now, now + 2)
             reviews_response = client.get("/review")
             assert reviews_response.status_code == 200
             reviews_in_response = reviews_response.json()
@@ -39,10 +39,10 @@ class TestHttpReview(BaseTestHttp):
 
         with TestClient(app) as client:
             id = "123456.random"
-            super().insert_mock_review_segment(id, now, now + 20)
+            super().insert_mock_review_segment(id, now, now + 2)
             params = {
                 "after": now,
-                "before": now + 21,
+                "before": now + 3,
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
@@ -55,10 +55,10 @@ class TestHttpReview(BaseTestHttp):
 
         with TestClient(app) as client:
             id = "123456.random"
-            super().insert_mock_review_segment(id, now, now + 20)
+            super().insert_mock_review_segment(id, now, now + 2)
             params = {
                 "after": now - 1,
-                "before": now + 21,
+                "before": now + 3,
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
@@ -66,13 +66,33 @@ class TestHttpReview(BaseTestHttp):
             assert len(reviews_in_response) == 1
             assert reviews_in_response[0]["id"] == id
 
+    def test_get_review_with_limit(self):
+        app = super().create_app()
+        now = datetime.datetime.now().timestamp()
+
+        with TestClient(app) as client:
+            id = "123456.random"
+            id2 = "654321.random"
+            super().insert_mock_review_segment(id, now, now + 2)
+            super().insert_mock_review_segment(id2, now + 1, now + 2)
+            params = {
+                "limit": 1,
+                "after": now,
+                "before": now + 3,
+            }
+            reviews_response = client.get("/review", params=params)
+            assert reviews_response.status_code == 200
+            reviews_in_response = reviews_response.json()
+            assert len(reviews_in_response) == 1
+            assert reviews_in_response[0]["id"] == id2
+
     def test_get_with_all_filters(self):
         app = super().create_app()
         now = datetime.datetime.now().timestamp()
 
         with TestClient(app) as client:
             id = "123456.random"
-            super().insert_mock_review_segment(id, now, now + 20)
+            super().insert_mock_review_segment(id, now, now + 2)
             params = {
                 "cameras": "front_door",
                 "labels": "all",
@@ -80,8 +100,8 @@ class TestHttpReview(BaseTestHttp):
                 "reviewed": 0,
                 "limit": 1,
                 "severity": "alert",
-                "before": now + 21,
                 "after": now - 1,
+                "before": now + 3,
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
