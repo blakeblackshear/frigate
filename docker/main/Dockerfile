@@ -3,12 +3,12 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG BASE_IMAGE=debian:11
-ARG SLIM_BASE=debian:11-slim
+ARG BASE_IMAGE=debian:12
+ARG SLIM_BASE=debian:12-slim
 
 FROM ${BASE_IMAGE} AS base
 
-FROM --platform=${BUILDPLATFORM} debian:11 AS base_host
+FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
 
 FROM ${SLIM_BASE} AS slim-base
 
