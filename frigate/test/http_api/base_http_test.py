@@ -148,6 +148,7 @@ class BaseTestHttp(unittest.TestCase):
         id: str,
         start_time: datetime.datetime = datetime.datetime.now().timestamp(),
         end_time: datetime.datetime = datetime.datetime.now().timestamp() + 20,
+        severity:SeverityEnum = SeverityEnum.alert,
     ) -> Event:
         """Inserts a basic event model with a given id."""
         return ReviewSegment.insert(
@@ -156,7 +157,7 @@ class BaseTestHttp(unittest.TestCase):
             start_time=start_time,
             end_time=end_time,
             has_been_reviewed=False,
-            severity=SeverityEnum.alert,
+            severity=severity,
             thumb_path=False,
             data={},
         ).execute()
