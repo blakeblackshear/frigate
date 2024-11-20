@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@docusaurus/core": "^3.5.2",
-    "@docusaurus/preset-classic": "^3.5.2",
+    "@docusaurus/preset-classic": "^3.6.2",
     "@docusaurus/theme-mermaid": "^3.5.2",
     "@docusaurus/plugin-content-docs": "^3.5.2",
     "@mdx-js/react": "^3.0.1",
