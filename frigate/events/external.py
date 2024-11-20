@@ -64,6 +64,7 @@ class ExternalEventProcessor:
                 EventTypeEnum.api,
                 EventStateEnum.start,
                 camera,
+                "",
                 {
                     "id": event_id,
                     "label": label,
