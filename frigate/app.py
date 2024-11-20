@@ -68,7 +68,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import UntrackedSharedMemory
+from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -91,6 +91,7 @@ class FrigateApp:
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
+        self.frame_manager = SharedMemoryFrameManager()
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -432,6 +433,11 @@ class FrigateApp:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
+            # pre-create shms
+            for i in range(shm_frame_count):
+                frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
+                self.frame_manager.create(f"{config.name}{i}", frame_size)
+
             capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
@@ -711,6 +717,7 @@ class FrigateApp:
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
 
+        self.frame_manager.cleanup()
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()

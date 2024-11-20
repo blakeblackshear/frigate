@@ -24,6 +24,7 @@ from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
 
@@ -113,7 +114,7 @@ class EmbeddingMaintainer(threading.Thread):
         if update is None:
             return
 
-        source_type, _, camera, data = update
+        source_type, _, camera, frame_name, data = update
 
         if not camera or source_type != EventTypeEnum.tracked_object:
             return
@@ -133,8 +134,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # Create our own thumbnail based on the bounding box and the frame time
         try:
-            frame_id = f"{camera}{data['frame_time']}"
-            yuv_frame = self.frame_manager.get(frame_id, camera_config.frame_shape_yuv)
+            yuv_frame = self.frame_manager.get(
+                frame_name, camera_config.frame_shape_yuv
+            )
 
             if yuv_frame is not None:
                 data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
@@ -146,7 +148,7 @@ class EmbeddingMaintainer(threading.Thread):
 
                 self.tracked_events[data["id"]].append(data)
 
-                self.frame_manager.close(frame_id)
+                self.frame_manager.close(frame_name)
         except FileNotFoundError:
             pass
 
@@ -287,7 +289,11 @@ class EmbeddingMaintainer(threading.Thread):
         # fire and forget description update
         self.requestor.send_data(
             UPDATE_EVENT_DESCRIPTION,
-            {"id": event.id, "description": description},
+            {
+                "type": TrackedObjectUpdateTypesEnum.description,
+                "id": event.id,
+                "description": description,
+            },
         )
 
         # Embed the description

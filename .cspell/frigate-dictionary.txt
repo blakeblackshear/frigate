@@ -12,6 +12,7 @@ argmax
 argmin
 argpartition
 ascontiguousarray
+astype
 authelia
 authentik
 autodetected
@@ -195,6 +196,7 @@ poweroff
 preexec
 probesize
 protobuf
+pstate
 psutil
 pubkey
 putenv
@@ -278,6 +280,7 @@ uvicorn
 vaapi
 vainfo
 variations
+vbios
 vconcat
 vitb
 vstream

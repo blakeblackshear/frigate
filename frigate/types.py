@@ -19,3 +19,7 @@ class ModelStatusTypesEnum(str, Enum):
     downloading = "downloading"
     downloaded = "downloaded"
     error = "error"
+
+
+class TrackedObjectUpdateTypesEnum(str, Enum):
+    description = "description"

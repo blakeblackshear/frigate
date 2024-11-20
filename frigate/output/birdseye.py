@@ -388,7 +388,7 @@ class BirdsEyeFrameManager:
                 for cam, cam_data in self.cameras.items()
                 if self.config.cameras[cam].birdseye.enabled
                 and cam_data["last_active_frame"] > 0
-                and cam_data["current_frame"] - cam_data["last_active_frame"]
+                and cam_data["current_frame_time"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
             ]
         )
@@ -405,7 +405,7 @@ class BirdsEyeFrameManager:
                 limited_active_cameras = sorted(
                     active_cameras,
                     key=lambda active_camera: (
-                        self.cameras[active_camera]["current_frame"]
+                        self.cameras[active_camera]["current_frame_time"]
                         - self.cameras[active_camera]["last_active_frame"]
                     ),
                 )
@@ -517,7 +517,7 @@ class BirdsEyeFrameManager:
                 self.copy_to_position(
                     position[1],
                     position[0],
-                    frame,
+                    self.cameras[position[0]]["current_frame"],
                 )
 
         return True
@@ -689,7 +689,8 @@ class BirdsEyeFrameManager:
             return False
 
         # update the last active frame for the camera
-        self.cameras[camera]["current_frame"] = frame_time
+        self.cameras[camera]["current_frame"] = frame.copy()
+        self.cameras[camera]["current_frame_time"] = frame_time
         if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
@@ -739,9 +740,10 @@ class Birdseye:
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
         self.config_subscriber = ConfigSubscriber("config/birdseye/")
+        self.frame_manager = SharedMemoryFrameManager()
 
         if config.birdseye.restream:
-            self.birdseye_buffer = SharedMemoryFrameManager().create(
+            self.birdseye_buffer = self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
             )
@@ -755,7 +757,7 @@ class Birdseye:
         current_tracked_objects: list[dict[str, any]],
         motion_boxes: list[list[int]],
         frame_time: float,
-        frame,
+        frame: np.ndarray,
     ) -> None:
         # check if there is an updated config
         while True:

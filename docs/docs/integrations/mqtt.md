@@ -94,6 +94,18 @@ Message published for each changed tracked object. The first message is publishe
 }
 ```
 
+### `frigate/tracked_object_update`
+
+Message published for updates to tracked object metadata, for example when GenAI runs and returns a tracked object description.
+
+```json
+{
+  "type": "description",
+  "id": "1607123955.475377-mxklsc",
+  "description": "The car is a red sedan moving away from the camera."
+}
+```
+
 ### `frigate/reviews`
 
 Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. When additional objects are detected or when a zone change occurs, it will publish a, `update` message with the same id. When the review activity has ended a final `end` message is published.

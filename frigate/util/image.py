@@ -790,11 +790,15 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store: dict[str, UntrackedSharedMemory] = {}
 
     def create(self, name: str, size) -> AnyStr:
-        shm = UntrackedSharedMemory(
-            name=name,
-            create=True,
-            size=size,
-        )
+        try:
+            shm = UntrackedSharedMemory(
+                name=name,
+                create=True,
+                size=size,
+            )
+        except FileExistsError:
+            shm = UntrackedSharedMemory(name=name)
+
         self.shm_store[name] = shm
         return shm.buf
 
