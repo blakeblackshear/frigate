@@ -22,20 +22,6 @@ apt-get -qq install --no-install-recommends -y \
 
 mkdir -p -m 600 /root/.gnupg
 
-# add coral repo
-curl -fsSLo - https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-    gpg --dearmor -o /etc/apt/trusted.gpg.d/google-cloud-packages-archive-keyring.gpg
-echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
-echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
-
-# enable non-free repo in Debian
-if grep -q "Debian" /etc/issue; then
-    sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
-fi
-
-# coral drivers
-mkdir /tmp/
-
 # install coral runtime
 wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.0-1/libedgetpu1-max_16.0tf2.17.0-1.bookworm_${TARGETARCH}.deb"
 dpkg -i /tmp/libedgetpu1-max.deb

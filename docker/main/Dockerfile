@@ -140,12 +140,6 @@ ARG TARGETARCH
 RUN apt-get -qq update \
     && apt-get -qq install -y \
     apt-transport-https \
-    gnupg \
-    wget \
-    # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
-    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4D64FEC119C2029067D6E791F8D2585B8783D481" | \
-    gpg --dearmor > /usr/share/keyrings/debian-archive-bookworm-stable.gpg \
-    && sed -i 's|/usr/share/keyrings/debian-archive-keyring.gpg|/usr/share/keyrings/debian-archive-bookworm-stable.gpg|g' /etc/apt/sources.list.d/debian.sources \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3 \
