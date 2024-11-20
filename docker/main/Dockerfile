@@ -143,29 +143,25 @@ RUN apt-get -qq update \
     gnupg \
     wget \
     # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
-    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA4285295FC7B1A81600062A9605C66F00D6C9793" | \
-    gpg --dearmor > /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-bullseye-stable.gpg] http://deb.debian.org/debian bullseye main contrib non-free" | \
-    tee /etc/apt/sources.list.d/debian-bullseye-nonfree.list \
+    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4D64FEC119C2029067D6E791F8D2585B8783D481" | \
+    gpg --dearmor > /usr/share/keyrings/debian-archive-bookworm-stable.gpg \
+    && sed -i 's|/usr/share/keyrings/debian-archive-keyring.gpg|/usr/share/keyrings/debian-archive-bookworm-stable.gpg|g' /etc/apt/sources.list.d/debian.sources \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.10 \
-    python3.10-dev \
+    python3 \
+    python3-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev libssl-dev\
-    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libtbbmalloc2 libtbb-dev libdc1394-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # sqlite3 dependencies
     tclsh \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
-
-# Ensure python3 defaults to python3.10
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"

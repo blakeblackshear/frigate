@@ -11,7 +11,7 @@ apt-get -qq install --no-install-recommends -y \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3.10 \
+    python3 \
     python3-pip \
     curl \
     lsof \
@@ -19,9 +19,6 @@ apt-get -qq install --no-install-recommends -y \
     nethogs \
     libgl1 \
     libglib2.0-0
-
-# ensure python3 defaults to python3.10
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 mkdir -p -m 600 /root/.gnupg
 
@@ -46,13 +43,13 @@ rm /tmp/libedgetpu1-max.deb
 
 # install python3 & tflite runtime
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp310-cp310-linux_x86_64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp310-cp310-linux_x86_64.whl
-    wget -qO /deps/wheels/pycoral-2.0.2-cp310-cp310-linux_x86_64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp310-cp310-linux_x86_64.whl
+    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp311-cp311-linux_x86_64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_x86_64.whl
+    wget -qO /deps/wheels/pycoral-2.0.2-cp311-cp311-linux_x86_64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_x86_64.whl
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
-    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp310-cp310-linux_aarch64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp310-cp310-linux_aarch64.whl
-    wget -qO /deps/wheels/pycoral-2.0.2-cp310-cp310-linux_aarch64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp310-cp310-linux_aarch64.whl
+    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp311-cp311-linux_aarch64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_aarch64.whl
+    wget -qO /deps/wheels/pycoral-2.0.2-cp311-cp311-linux_aarch64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_aarch64.whl
 fi
 
 # btbn-ffmpeg -> amd64
