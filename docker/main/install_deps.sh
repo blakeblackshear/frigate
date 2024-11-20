@@ -37,9 +37,23 @@ if grep -q "Debian" /etc/issue; then
 fi
 
 # coral drivers
-apt-get -qq update
-apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libedgetpu1-max python3-tflite-runtime python3-pycoral
+mkdir /tmp/
+
+# install coral runtime
+wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.0-1/libedgetpu1-max_16.0tf2.17.0-1.bookworm_${TARGETARCH}.deb"
+dpkg -i /tmp/libedgetpu1-max.deb
+rm /tmp/libedgetpu1-max.deb
+
+# install python3 & tflite runtime
+if [[ "${TARGETARCH}" == "amd64" ]]; then
+    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp310-cp310-linux_x86_64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp310-cp310-linux_x86_64.whl
+    wget -qO /deps/wheels/pycoral-2.0.2-cp310-cp310-linux_x86_64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp310-cp310-linux_x86_64.whl
+fi
+
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    wget -qO /deps/wheels/tflite_runtime-2.17.0-cp310-cp310-linux_aarch64.whl https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp310-cp310-linux_aarch64.whl
+    wget -qO /deps/wheels/pycoral-2.0.2-cp310-cp310-linux_aarch64.whl https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp310-cp310-linux_aarch64.whl
+fi
 
 # btbn-ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
