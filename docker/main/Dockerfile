@@ -66,8 +66,8 @@ COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip" \
-    && pip install -r /requirements-ov.txt
+    && python3 get-pip.py "pip" --break-system-packages \
+    && pip install --break-system-packages -r /requirements-ov.txt
 
 # Get OpenVino Model
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
@@ -139,7 +139,7 @@ ARG TARGETARCH
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    apt-transport-https \
+    apt-transport-https wget \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3 \
@@ -158,10 +158,10 @@ RUN apt-get -qq update \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip"
+    && python3 get-pip.py "pip" --break-system-packages
 
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+RUN pip3 install -r /requirements.txt --break-system-packages
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
@@ -212,8 +212,8 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    python3 -m pip install --upgrade pip && \
-    pip3 install -U /deps/wheels/*.whl
+    python3 -m pip install --upgrade pip --break-system-packages && \
+    pip3 install -U /deps/wheels/*.whl --break-system-packages
 
 COPY --from=deps-rootfs / /
 
