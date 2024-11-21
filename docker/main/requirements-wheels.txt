@@ -19,7 +19,7 @@ pandas == 2.2.*
 peewee == 3.17.*
 peewee_migrate == 1.13.*
 psutil == 6.1.*
-pydantic == 2.8.*
+pydantic == 2.10.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 pytz == 2024.*
 pyzmq == 26.2.*
