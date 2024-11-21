@@ -451,29 +451,20 @@ class EmbeddingMaintainer(threading.Thread):
                 ),
             ]
 
-        ret, webp = cv2.imencode(
-            ".webp", face_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
-        )
-
-        if not ret:
-            logger.debug("Not processing face due to error creating cropped image.")
-            return
-
-        embedding = self.embeddings.embed_face("unknown", webp.tobytes(), upsert=False)
-        res = self.face_classifier.classify_face(embedding)
+        res = self.face_classifier.classify_face(face_frame)
 
         if not res:
             return
 
-        sub_label, score = res
+        sub_label, distance = res
 
         logger.debug(
-            f"Detected best face for person as: {sub_label} with score {score}"
+            f"Detected best face for person as: {sub_label} with distance {distance}"
         )
 
-        if id in self.detected_faces and score <= self.detected_faces[id]:
+        if id in self.detected_faces and distance >= self.detected_faces[id]:
             logger.debug(
-                f"Recognized face score {score} is less than previous face score ({self.detected_faces.get(id)})."
+                f"Recognized face distance {distance} is greater than previous face distance ({self.detected_faces.get(id)})."
             )
             return
 
@@ -482,12 +473,11 @@ class EmbeddingMaintainer(threading.Thread):
             json={
                 "camera": obj_data.get("camera"),
                 "subLabel": sub_label,
-                "subLabelScore": score,
             },
         )
 
         if resp.status_code == 200:
-            self.detected_faces[id] = score
+            self.detected_faces[id] = distance
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
