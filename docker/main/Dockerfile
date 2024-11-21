@@ -260,7 +260,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
-    pip3 install -r requirements-dev.txt
+    pip3 install -r requirements-dev.txt --break-system-packages
 
 HEALTHCHECK NONE
 
