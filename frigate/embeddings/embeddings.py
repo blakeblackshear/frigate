@@ -3,8 +3,6 @@
 import base64
 import logging
 import os
-import random
-import string
 import time
 
 from numpy import ndarray
@@ -14,7 +12,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
-    FACE_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )

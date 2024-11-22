@@ -3,7 +3,9 @@
 import base64
 import logging
 import os
+import random
 import re
+import string
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
@@ -22,7 +24,12 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, FRIGATE_LOCALHOST, UPDATE_EVENT_DESCRIPTION
+from frigate.const import (
+    CLIPS_DIR,
+    FACE_DIR,
+    FRIGATE_LOCALHOST,
+    UPDATE_EVENT_DESCRIPTION,
+)
 from frigate.embeddings.lpr.lpr import LicensePlateRecognition
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
@@ -146,12 +153,14 @@ class EmbeddingMaintainer(threading.Thread):
                     if not self.face_recognition_enabled:
                         return False
 
+                    rand_id = "".join(
+                        random.choices(string.ascii_lowercase + string.digits, k=6)
+                    )
+                    label = data["face_name"]
+                    id = f"{label}-{rand_id}"
+
                     if data.get("cropped"):
-                        self.embeddings.embed_face(
-                            data["face_name"],
-                            base64.b64decode(data["image"]),
-                            upsert=True,
-                        )
+                        pass
                     else:
                         img = cv2.imdecode(
                             np.frombuffer(
@@ -165,12 +174,18 @@ class EmbeddingMaintainer(threading.Thread):
                             return False
 
                         face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
-                        ret, webp = cv2.imencode(
+                        ret, thumbnail = cv2.imencode(
                             ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
                         )
-                        self.embeddings.embed_face(
-                            data["face_name"], webp.tobytes(), upsert=True
-                        )
+
+                    # write face to library
+                    folder = os.path.join(FACE_DIR, label)
+                    file = os.path.join(folder, f"{id}.webp")
+                    os.makedirs(folder, exist_ok=True)
+
+                    # save face image
+                    with open(file, "wb") as output:
+                        output.write(thumbnail.tobytes())
 
                 self.face_classifier.clear_classifier()
                 return True
@@ -473,7 +488,7 @@ class EmbeddingMaintainer(threading.Thread):
             json={
                 "camera": obj_data.get("camera"),
                 "subLabel": sub_label,
-                "subLabelScore": score
+                "subLabelScore": score,
             },
         )
 
