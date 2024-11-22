@@ -1,12 +1,19 @@
 import { baseUrl } from "@/api/baseUrl";
 import Chip from "@/components/indicators/Chip";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
+import { useForm } from "react-hook-form";
+import { FaPlus } from "react-icons/fa";
 import { LuTrash } from "react-icons/lu";
 import useSWR from "swr";
+import { z } from "zod";
 
 export default function FaceLibrary() {
   const [page, setPage] = useState<string>();
@@ -33,6 +40,24 @@ export default function FaceLibrary() {
     // we need to listen on the value of the faces list
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faces]);
+
+  /**
+     * <Button className="flex gap-2" variant="select" size="sm">
+            <FaPlus />
+            Upload Image
+          </Button>
+     */
+
+  const formSchema = z.object({
+    image: z
+      .instanceof(File, { message: "Please select an image file." })
+      .refine((file) => file.size < 1000000, "Image size is too large."),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+  });
 
   return (
     <div className="flex size-full flex-col p-2">
@@ -65,6 +90,21 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
+        <Form {...form}>
+          <form>
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="file" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </div>
       {pageToggle && (
         <div className="flex gap-2">
