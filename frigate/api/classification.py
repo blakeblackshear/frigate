@@ -1,11 +1,13 @@
 """Object classification APIs."""
 
 import logging
+import os
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from frigate.api.defs.tags import Tags
+from frigate.const import FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 
 logger = logging.getLogger(__name__)
@@ -15,7 +17,14 @@ router = APIRouter(tags=[Tags.events])
 
 @router.get("/faces")
 def get_faces():
-    return JSONResponse(content={"message": "there are faces"})
+    face_dict: dict[str, list[str]] = {}
+
+    for name in os.listdir(FACE_DIR):
+        face_dict[name] = []
+        for file in os.listdir(os.path.join(FACE_DIR, name)):
+            face_dict[name].append(file)
+
+    return JSONResponse(status_code=200, content=face_dict)
 
 
 @router.post("/faces/{name}")
