@@ -165,7 +165,7 @@ class FaceClassificationModel:
     def __init__(self, config: FaceRecognitionConfig, db: SqliteQueueDatabase):
         self.config = config
         self.db = db
-        self.recognizer = cv2.face.LBPHFaceRecognizer_create(radius=4, threshold=config.threshold)
+        self.recognizer = cv2.face.LBPHFaceRecognizer_create(radius=4, threshold=(1 - config.threshold) * 1000)
         self.label_map: dict[int, str] = {}
 
     def __build_classifier(self) -> None:
@@ -198,5 +198,6 @@ class FaceClassificationModel:
         if index == -1:
             return None
 
-        return self.label_map[index], distance
+        score = 1.0 - (distance / 1000)
+        return self.label_map[index], round(score, 2)
 

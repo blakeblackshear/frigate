@@ -456,15 +456,15 @@ class EmbeddingMaintainer(threading.Thread):
         if not res:
             return
 
-        sub_label, distance = res
+        sub_label, score = res
 
         logger.debug(
-            f"Detected best face for person as: {sub_label} with distance {distance}"
+            f"Detected best face for person as: {sub_label} with score {score}"
         )
 
-        if id in self.detected_faces and distance >= self.detected_faces[id]:
+        if id in self.detected_faces and score <= self.detected_faces[id]:
             logger.debug(
-                f"Recognized face distance {distance} is greater than previous face distance ({self.detected_faces.get(id)})."
+                f"Recognized face distance {score} is less than previous face distance ({self.detected_faces.get(id)})."
             )
             return
 
@@ -473,11 +473,12 @@ class EmbeddingMaintainer(threading.Thread):
             json={
                 "camera": obj_data.get("camera"),
                 "subLabel": sub_label,
+                "subLabelScore": score
             },
         )
 
         if resp.status_code == 200:
-            self.detected_faces[id] = distance
+            self.detected_faces[id] = score
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
