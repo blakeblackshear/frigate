@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 
 from fastapi.testclient import TestClient
 
@@ -14,7 +13,7 @@ class TestHttpReview(BaseTestHttp):
         self.app = super().create_app()
 
     ####################################################################################################################
-    ###################################  Review Endpoint   #############################################################
+    ###################################  GET /review Endpoint   ########################################################
     ####################################################################################################################
 
     # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 2 seconds from now
@@ -144,7 +143,7 @@ class TestHttpReview(BaseTestHttp):
             assert reviews_in_response[0]["id"] == id
 
     ####################################################################################################################
-    ###################################  Review Summary Endpoint   #####################################################
+    ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################
     def test_get_review_summary_all_filters(self):
         with TestClient(self.app) as client:
@@ -260,14 +259,14 @@ class TestHttpReview(BaseTestHttp):
             )
             super().insert_mock_review_segment(
                 "123458.random",
-                one_month_ago_ts,
+                twenty_days_ago.timestamp(),
                 None,
                 SeverityEnum.detection,
             )
             # One month ago plus 5 seconds fits within the condition (review.start_time > month_ago). Assuming that the endpoint does not take more than 5 seconds to be invoked
             super().insert_mock_review_segment(
                 "123459.random",
-                one_month_ago.timestamp() + 5,
+                one_month_ago_ts + 5,
                 None,
                 SeverityEnum.detection,
             )
@@ -432,3 +431,65 @@ class TestHttpReview(BaseTestHttp):
                 },
             }
             self.assertEqual(review_summary_response, expected_response)
+
+    ####################################################################################################################
+    ###################################  POST reviews/viewed Endpoint   ################################################
+    ####################################################################################################################
+    def test_post_reviews_viewed_no_body(self):
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random")
+            reviews_mark_viewed_many_response = client.post("/reviews/viewed")
+            # Missing ids
+            assert reviews_mark_viewed_many_response.status_code == 422
+
+    def test_post_reviews_viewed_no_body_ids(self):
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random")
+            body = {"ids": [""]}
+            reviews_mark_viewed_many_response = client.post(
+                "/reviews/viewed", json=body
+            )
+            # Missing ids
+            assert reviews_mark_viewed_many_response.status_code == 422
+
+    def test_post_reviews_viewed_non_existent_id(self):
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id)
+            body = {"ids": ["1"]}
+            reviews_mark_viewed_many_request = client.post("/reviews/viewed", json=body)
+            assert reviews_mark_viewed_many_request.status_code == 200
+            reviews_mark_viewed_many_response = reviews_mark_viewed_many_request.json()
+            assert reviews_mark_viewed_many_response["success"] == True
+            assert (
+                reviews_mark_viewed_many_response["message"]
+                == "Reviewed multiple items"
+            )
+            # Verify that in DB the review segment was not changed
+            review_segment_in_db = (
+                ReviewSegment.select(ReviewSegment.has_been_reviewed)
+                .where(ReviewSegment.id == id)
+                .get()
+            )
+            assert review_segment_in_db.has_been_reviewed == False
+
+    def test_post_reviews_viewed(self):
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id)
+            body = {"ids": [id]}
+            reviews_mark_viewed_many_request = client.post("/reviews/viewed", json=body)
+            assert reviews_mark_viewed_many_request.status_code == 200
+            reviews_mark_viewed_many_response = reviews_mark_viewed_many_request.json()
+            assert reviews_mark_viewed_many_response["success"] == True
+            assert (
+                reviews_mark_viewed_many_response["message"]
+                == "Reviewed multiple items"
+            )
+            # Verify that in DB the review segment was changed
+            review_segment_in_db = (
+                ReviewSegment.select(ReviewSegment.has_been_reviewed)
+                .where(ReviewSegment.id == id)
+                .get()
+            )
+            assert review_segment_in_db.has_been_reviewed == True
