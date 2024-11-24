@@ -36,5 +36,8 @@ RUN pip3 install -U /deps/hailo-wheels/*.whl
 # Copy base files from the rootfs stage
 COPY --from=rootfs / /
 
+# Set Library path for hailo driver
+ENV LD_LIBRARY_PATH=/rootfs/usr/local/lib/
+
 # Set workdir
 WORKDIR /opt/frigate/
