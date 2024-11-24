@@ -158,7 +158,7 @@ RUN apt-get -qq update \
     gfortran openexr libatlas-base-dev libssl-dev\
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
-    libgl1-mesa-glx libglib2.0-0 \
+    libgl1 libglib2.0-0 \
     # sqlite3 dependencies
     tclsh \
     # scipy dependencies
