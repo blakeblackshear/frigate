@@ -207,8 +207,14 @@ class TestHttpReview(BaseTestHttp):
         five_days_ago = datetime.today() - timedelta(days=5)
 
         with TestClient(self.app) as client:
-            super().insert_mock_review_segment("123456.random", now.timestamp() - 2, now.timestamp() - 1)
-            super().insert_mock_review_segment("654321.random", five_days_ago.timestamp(), five_days_ago.timestamp() + 1)
+            super().insert_mock_review_segment(
+                "123456.random", now.timestamp() - 2, now.timestamp() - 1
+            )
+            super().insert_mock_review_segment(
+                "654321.random",
+                five_days_ago.timestamp(),
+                five_days_ago.timestamp() + 1,
+            )
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
@@ -248,12 +254,26 @@ class TestHttpReview(BaseTestHttp):
 
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random", now.timestamp())
-            super().insert_mock_review_segment("123457.random", five_days_ago.timestamp())
-            super().insert_mock_review_segment("123458.random", twenty_days_ago.timestamp(), None, SeverityEnum.detection)
+            super().insert_mock_review_segment(
+                "123457.random", five_days_ago.timestamp()
+            )
+            super().insert_mock_review_segment(
+                "123458.random",
+                twenty_days_ago.timestamp(),
+                None,
+                SeverityEnum.detection,
+            )
             # One month ago plus 5 seconds fits within the condition (review.start_time > month_ago). Assuming that the endpoint does not take more than 5 seconds to be invoked
-            super().insert_mock_review_segment("123459.random", one_month_ago.timestamp() + 5, None, SeverityEnum.detection)
+            super().insert_mock_review_segment(
+                "123459.random",
+                one_month_ago.timestamp() + 5,
+                None,
+                SeverityEnum.detection,
+            )
             # This won't appear in the output since it's within last month start_time clause (review.start_time > month_ago)
-            super().insert_mock_review_segment("123450.random", one_month_ago.timestamp() + 0)
+            super().insert_mock_review_segment(
+                "123450.random", one_month_ago.timestamp() + 0
+            )
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
@@ -311,9 +331,19 @@ class TestHttpReview(BaseTestHttp):
             super().insert_mock_review_segment("123456.random", now.timestamp())
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(20):
-                super().insert_mock_review_segment(f"123456_{i}.random_alert", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_alert",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.alert,
+                )
             for i in range(15):
-                super().insert_mock_review_segment(f"123456_{i}.random_detection", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_detection",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.detection,
+                )
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
@@ -351,13 +381,37 @@ class TestHttpReview(BaseTestHttp):
         with TestClient(self.app) as client:
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(10):
-                super().insert_mock_review_segment(f"123456_{i}.random_alert_not_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert, False)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_alert_not_reviewed",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.alert,
+                    False,
+                )
             for i in range(10):
-                super().insert_mock_review_segment(f"123456_{i}.random_alert_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert, True)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_alert_reviewed",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.alert,
+                    True,
+                )
             for i in range(10):
-                super().insert_mock_review_segment(f"123456_{i}.random_detection_not_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection, False)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_detection_not_reviewed",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.detection,
+                    False,
+                )
             for i in range(5):
-                super().insert_mock_review_segment(f"123456_{i}.random_detection_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection, True)
+                super().insert_mock_review_segment(
+                    f"123456_{i}.random_detection_reviewed",
+                    five_days_ago_ts,
+                    five_days_ago_ts,
+                    SeverityEnum.detection,
+                    True,
+                )
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
