@@ -1,6 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
 import Chip from "@/components/indicators/Chip";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -10,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { useForm } from "react-hook-form";
-import { FaPlus } from "react-icons/fa";
 import { LuTrash } from "react-icons/lu";
 import useSWR from "swr";
 import { z } from "zod";
@@ -98,7 +96,10 @@ export default function FaceLibrary() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input type="file" {...field} />
+                    {
+                      // @ts-expect-error ignore
+                      <Input type="file" {...field} />
+                    }
                   </FormControl>
                 </FormItem>
               )}
