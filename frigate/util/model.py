@@ -8,11 +8,8 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 from playhouse.sqliteq import SqliteQueueDatabase
-from sklearn.preprocessing import LabelEncoder, Normalizer
-from sklearn.svm import SVC
 
 from frigate.config.semantic_search import FaceRecognitionConfig
-from frigate.util.builtin import deserialize, serialize
 
 try:
     import openvino as ov
