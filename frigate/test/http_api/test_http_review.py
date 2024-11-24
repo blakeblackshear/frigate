@@ -148,8 +148,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
     def test_get_review_summary_all_filters(self):
         with TestClient(self.app) as client:
-            id = "123456.random"
-            super().insert_mock_review_segment(id)
+            super().insert_mock_review_segment("123456.random")
             params = {
                 "cameras": "front_door",
                 "labels": "all",
@@ -160,7 +159,7 @@ class TestHttpReview(BaseTestHttp):
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.date.today().strftime("%Y-%m-%d")
+            today_formatted = datetime.today().strftime("%Y-%m-%d")
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -185,7 +184,7 @@ class TestHttpReview(BaseTestHttp):
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.date.today().strftime("%Y-%m-%d")
+            today_formatted = datetime.today().strftime("%Y-%m-%d")
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -263,9 +262,9 @@ class TestHttpReview(BaseTestHttp):
             # e.g. '2024-11-19'
             five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
             # e.g. '2024-11-04'
-            twenty_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            twenty_days_ago_formatted = twenty_days_ago.strftime("%Y-%m-%d")
             # e.g. '2024-10-24'
-            one_month_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            one_month_ago_formatted = one_month_ago.strftime("%Y-%m-%d")
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
