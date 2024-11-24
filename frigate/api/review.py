@@ -230,6 +230,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
+    day_in_seconds = 60 * 60 * 24
     last_month = (
         ReviewSegment.select(
             fn.strftime(
@@ -292,7 +293,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         )
         .where(reduce(operator.and_, clauses))
         .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / (3600 * 24),
+            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds,
         )
         .order_by(ReviewSegment.start_time.desc())
     )
