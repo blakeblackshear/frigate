@@ -2,15 +2,27 @@ from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
 
-from frigate.models import Event, ReviewSegment
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.maintainer import SeverityEnum
 from frigate.test.http_api.base_http_test import BaseTestHttp
 
 
 class TestHttpReview(BaseTestHttp):
     def setUp(self):
-        super().setUp([Event, ReviewSegment])
+        super().setUp([Event, Recordings, ReviewSegment])
         self.app = super().create_app()
+
+    def _get_reviews(self, ids: list[str]):
+        return list(
+            ReviewSegment.select(ReviewSegment.id)
+            .where(ReviewSegment.id.in_(ids))
+            .execute()
+        )
+
+    def _get_recordings(self, ids: list[str]):
+        return list(
+            Recordings.select(Recordings.id).where(Recordings.id.in_(ids)).execute()
+        )
 
     ####################################################################################################################
     ###################################  GET /review Endpoint   ########################################################
@@ -24,8 +36,8 @@ class TestHttpReview(BaseTestHttp):
             super().insert_mock_review_segment("123456.random", now, now + 2)
             reviews_response = client.get("/review")
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 0
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 0
 
     def test_get_review_no_filters(self):
         now = datetime.now().timestamp()
@@ -34,8 +46,8 @@ class TestHttpReview(BaseTestHttp):
             super().insert_mock_review_segment("123456.random", now - 2, now - 1)
             reviews_response = client.get("/review")
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 1
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 1
 
     def test_get_review_with_time_filter_no_matches(self):
         now = datetime.now().timestamp()
@@ -49,8 +61,8 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 0
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 0
 
     def test_get_review_with_time_filter(self):
         now = datetime.now().timestamp()
@@ -64,9 +76,9 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 1
-            assert reviews_in_response[0]["id"] == id
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 1
+            assert reviews_response_json[0]["id"] == id
 
     def test_get_review_with_limit_filter(self):
         now = datetime.now().timestamp()
@@ -83,9 +95,9 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 1
-            assert reviews_in_response[0]["id"] == id2
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 1
+            assert reviews_response_json[0]["id"] == id2
 
     def test_get_review_with_severity_filters_no_matches(self):
         now = datetime.now().timestamp()
@@ -100,9 +112,9 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 1
-            assert reviews_in_response[0]["id"] == id
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 1
+            assert reviews_response_json[0]["id"] == id
 
     def test_get_review_with_severity_filters(self):
         now = datetime.now().timestamp()
@@ -117,8 +129,8 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 0
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 0
 
     def test_get_review_with_all_filters(self):
         now = datetime.now().timestamp()
@@ -138,9 +150,9 @@ class TestHttpReview(BaseTestHttp):
             }
             reviews_response = client.get("/review", params=params)
             assert reviews_response.status_code == 200
-            reviews_in_response = reviews_response.json()
-            assert len(reviews_in_response) == 1
-            assert reviews_in_response[0]["id"] == id
+            reviews_response_json = reviews_response.json()
+            assert len(reviews_response_json) == 1
+            assert reviews_response_json[0]["id"] == id
 
     ####################################################################################################################
     ###################################  GET /review/summary Endpoint   #################################################
@@ -154,9 +166,9 @@ class TestHttpReview(BaseTestHttp):
                 "zones": "all",
                 "timezone": "utc",
             }
-            review_summary_request = client.get("/review/summary", params=params)
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary", params=params)
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-24'
             today_formatted = datetime.today().strftime("%Y-%m-%d")
             expected_response = {
@@ -174,14 +186,14 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 0,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     def test_get_review_summary_no_filters(self):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
-            review_summary_request = client.get("/review/summary")
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary")
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-24'
             today_formatted = datetime.today().strftime("%Y-%m-%d")
             expected_response = {
@@ -199,7 +211,7 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 0,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     def test_get_review_summary_multiple_days(self):
         now = datetime.now()
@@ -214,9 +226,9 @@ class TestHttpReview(BaseTestHttp):
                 five_days_ago.timestamp(),
                 five_days_ago.timestamp() + 1,
             )
-            review_summary_request = client.get("/review/summary")
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary")
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-24'
             today_formatted = now.strftime("%Y-%m-%d")
             # e.g. '2024-11-19'
@@ -243,7 +255,7 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 0,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     def test_get_review_summary_multiple_days_edge_cases(self):
         now = datetime.now()
@@ -272,9 +284,9 @@ class TestHttpReview(BaseTestHttp):
             )
             # This won't appear in the output since it's not within last month start_time clause (review.start_time > month_ago)
             super().insert_mock_review_segment("123450.random", one_month_ago_ts)
-            review_summary_request = client.get("/review/summary")
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary")
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-24'
             today_formatted = now.strftime("%Y-%m-%d")
             # e.g. '2024-11-19'
@@ -319,7 +331,7 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 1,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     def test_get_review_summary_multiple_in_same_day(self):
         now = datetime.now()
@@ -342,9 +354,9 @@ class TestHttpReview(BaseTestHttp):
                     five_days_ago_ts,
                     SeverityEnum.detection,
                 )
-            review_summary_request = client.get("/review/summary")
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary")
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-24'
             today_formatted = now.strftime("%Y-%m-%d")
             # e.g. '2024-11-19'
@@ -371,7 +383,7 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 15,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     def test_get_review_summary_multiple_in_same_day_with_reviewed(self):
         five_days_ago = datetime.today() - timedelta(days=5)
@@ -410,9 +422,9 @@ class TestHttpReview(BaseTestHttp):
                     SeverityEnum.detection,
                     True,
                 )
-            review_summary_request = client.get("/review/summary")
-            assert review_summary_request.status_code == 200
-            review_summary_response = review_summary_request.json()
+            review_summary_response = client.get("/review/summary")
+            assert review_summary_response.status_code == 200
+            review_summary_response_json = review_summary_response.json()
             # e.g. '2024-11-19'
             five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
             expected_response = {
@@ -430,7 +442,7 @@ class TestHttpReview(BaseTestHttp):
                     "total_detection": 15,
                 },
             }
-            self.assertEqual(review_summary_response, expected_response)
+            self.assertEqual(review_summary_response_json, expected_response)
 
     ####################################################################################################################
     ###################################  POST reviews/viewed Endpoint   ################################################
@@ -457,12 +469,16 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": ["1"]}
-            reviews_mark_viewed_many_request = client.post("/reviews/viewed", json=body)
-            assert reviews_mark_viewed_many_request.status_code == 200
-            reviews_mark_viewed_many_response = reviews_mark_viewed_many_request.json()
-            assert reviews_mark_viewed_many_response["success"] == True
+            reviews_mark_viewed_many_response = client.post(
+                "/reviews/viewed", json=body
+            )
+            assert reviews_mark_viewed_many_response.status_code == 200
+            reviews_mark_viewed_many_response_json = (
+                reviews_mark_viewed_many_response.json()
+            )
+            assert reviews_mark_viewed_many_response_json["success"] == True
             assert (
-                reviews_mark_viewed_many_response["message"]
+                reviews_mark_viewed_many_response_json["message"]
                 == "Reviewed multiple items"
             )
             # Verify that in DB the review segment was not changed
@@ -478,12 +494,16 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": [id]}
-            reviews_mark_viewed_many_request = client.post("/reviews/viewed", json=body)
-            assert reviews_mark_viewed_many_request.status_code == 200
-            reviews_mark_viewed_many_response = reviews_mark_viewed_many_request.json()
-            assert reviews_mark_viewed_many_response["success"] == True
+            reviews_mark_viewed_many_response = client.post(
+                "/reviews/viewed", json=body
+            )
+            assert reviews_mark_viewed_many_response.status_code == 200
+            reviews_mark_viewed_many_response_json = (
+                reviews_mark_viewed_many_response.json()
+            )
+            assert reviews_mark_viewed_many_response_json["success"] == True
             assert (
-                reviews_mark_viewed_many_response["message"]
+                reviews_mark_viewed_many_response_json["message"]
                 == "Reviewed multiple items"
             )
             # Verify that in DB the review segment was changed
@@ -493,3 +513,82 @@ class TestHttpReview(BaseTestHttp):
                 .get()
             )
             assert review_segment_in_db.has_been_reviewed == True
+
+    ####################################################################################################################
+    ###################################  POST reviews/delete Endpoint   ################################################
+    ####################################################################################################################
+    def test_post_reviews_delete_no_body(self):
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random")
+            reviews_delete_many_response = client.post("/reviews/delete")
+            # Missing ids
+            assert reviews_delete_many_response.status_code == 422
+
+    def test_post_reviews_delete_no_body_ids(self):
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random")
+            body = {"ids": [""]}
+            reviews_delete_many_response = client.post("/reviews/delete", json=body)
+            # Missing ids
+            assert reviews_delete_many_response.status_code == 422
+
+    def test_post_reviews_delete_non_existent_id(self):
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id)
+            body = {"ids": ["1"]}
+            reviews_delete_many_response = client.post("/reviews/delete", json=body)
+            assert reviews_delete_many_response.status_code == 200
+            reviews_delete_many_response_json = reviews_delete_many_response.json()
+            assert reviews_delete_many_response_json["success"] == True
+            assert reviews_delete_many_response_json["message"] == "Delete reviews"
+            # Verify that in DB the review segment was not deleted
+            review_segment_in_db = (
+                ReviewSegment.select(ReviewSegment.id)
+                .where(ReviewSegment.id == id)
+                .get()
+            )
+            assert review_segment_in_db.id == id
+
+    def test_post_reviews_delete(self):
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id)
+            body = {"ids": [id]}
+            reviews_delete_many_response = client.post("/reviews/delete", json=body)
+            assert reviews_delete_many_response.status_code == 200
+            reviews_delete_many_response_json = reviews_delete_many_response.json()
+            assert reviews_delete_many_response_json["success"] == True
+            assert reviews_delete_many_response_json["message"] == "Delete reviews"
+            # Verify that in DB the review segment was deleted
+            review_segment_in_db = (
+                ReviewSegment.select(ReviewSegment.id)
+                .where(ReviewSegment.id == id)
+                .get_or_none()
+            )
+            assert review_segment_in_db == None
+
+    def test_post_reviews_delete_many(self):
+        with TestClient(self.app) as client:
+            ids = ["123456.random", "654321.random"]
+            for id in ids:
+                super().insert_mock_review_segment(id)
+                super().insert_mock_recording(id)
+
+            review_ids_in_db_before = self._get_reviews(ids)
+            recordings_ids_in_db_before = self._get_recordings(ids)
+            assert len(review_ids_in_db_before) == 2
+            assert len(recordings_ids_in_db_before) == 2
+
+            body = {"ids": ids}
+            reviews_delete_many_response = client.post("/reviews/delete", json=body)
+            assert reviews_delete_many_response.status_code == 200
+            reviews_delete_many_response_json = reviews_delete_many_response.json()
+            assert reviews_delete_many_response_json["success"] == True
+            assert reviews_delete_many_response_json["message"] == "Delete reviews"
+
+            # Verify that in DB all review segments and recordings that were passed were deleted
+            review_ids_in_db_after = self._get_reviews(ids)
+            recording_ids_in_db_after = self._get_recordings(ids)
+            assert len(review_ids_in_db_after) == 0
+            assert len(recording_ids_in_db_after) == 0
