@@ -12,6 +12,10 @@ class TestHttpReview(BaseTestHttp):
         super().setUp([Event, ReviewSegment])
         self.app = super().create_app()
 
+    ####################################################################################################################
+    ###################################  Review Endpoint   #############################################################
+    ####################################################################################################################
+
     # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 2 seconds from now
     def test_get_review_no_filters_no_matches(self):
         now = datetime.datetime.now().timestamp()
@@ -137,3 +141,61 @@ class TestHttpReview(BaseTestHttp):
             reviews_in_response = reviews_response.json()
             assert len(reviews_in_response) == 1
             assert reviews_in_response[0]["id"] == id
+
+    ####################################################################################################################
+    ###################################  Review Summary Endpoint   #####################################################
+    ####################################################################################################################
+    def test_get_review_summary_all_filters(self):
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id)
+            params = {
+                "cameras": "front_door",
+                "labels": "all",
+                "zones": "all",
+                "timezone": "utc",
+            }
+            review_summary_request = client.get("/review/summary", params=params)
+            assert review_summary_request.status_code == 200
+            review_summary_response = review_summary_request.json()
+            today = datetime.date.today().strftime('%Y-%m-%d') # e.g. '2024-11-24'
+            expected_response = {
+                'last24Hours': {
+                    'reviewed_alert': 0,
+                    'reviewed_detection': 0,
+                    'total_alert': 1,
+                    'total_detection': 0
+                },
+                today: {
+                    'day': today,
+                    'reviewed_alert': 0,
+                    'reviewed_detection': 0,
+                    'total_alert': 1,
+                    'total_detection': 0
+                }
+            }
+            self.assertEqual(review_summary_response, expected_response)
+
+    def test_get_review_summary_no_filters(self):
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random")
+            review_summary_request = client.get("/review/summary")
+            assert review_summary_request.status_code == 200
+            review_summary_response = review_summary_request.json()
+            today = datetime.date.today().strftime('%Y-%m-%d') # e.g. '2024-11-24'
+            expected_response = {
+                'last24Hours': {
+                    'reviewed_alert': 0,
+                    'reviewed_detection': 0,
+                    'total_alert': 1,
+                    'total_detection': 0
+                },
+                today: {
+                    'day': today,
+                    'reviewed_alert': 0,
+                    'reviewed_detection': 0,
+                    'total_alert': 1,
+                    'total_detection': 0
+                }
+            }
+            self.assertEqual(review_summary_response, expected_response)
