@@ -146,8 +146,8 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_review_segment(
         self,
         id: str,
-        start_time: datetime.datetime = datetime.datetime.now().timestamp(),
-        end_time: datetime.datetime = datetime.datetime.now().timestamp() + 20,
+        start_time: float = datetime.datetime.now().timestamp(),
+        end_time: float = datetime.datetime.now().timestamp() + 20,
         severity: SeverityEnum = SeverityEnum.alert,
         has_been_reviewed: bool = False,
     ) -> Event:

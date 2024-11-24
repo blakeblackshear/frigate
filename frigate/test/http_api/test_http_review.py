@@ -251,6 +251,7 @@ class TestHttpReview(BaseTestHttp):
         five_days_ago = datetime.today() - timedelta(days=5)
         twenty_days_ago = datetime.today() - timedelta(days=20)
         one_month_ago = datetime.today() - timedelta(days=30)
+        one_month_ago_ts = one_month_ago.timestamp()
 
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random", now.timestamp())
@@ -259,7 +260,7 @@ class TestHttpReview(BaseTestHttp):
             )
             super().insert_mock_review_segment(
                 "123458.random",
-                twenty_days_ago.timestamp(),
+                one_month_ago_ts,
                 None,
                 SeverityEnum.detection,
             )
@@ -270,9 +271,9 @@ class TestHttpReview(BaseTestHttp):
                 None,
                 SeverityEnum.detection,
             )
-            # This won't appear in the output since it's within last month start_time clause (review.start_time > month_ago)
+            # This won't appear in the output since it's not within last month start_time clause (review.start_time > month_ago)
             super().insert_mock_review_segment(
-                "123450.random", one_month_ago.timestamp() + 0
+                "123450.random", one_month_ago_ts
             )
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
