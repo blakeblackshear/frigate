@@ -26,6 +26,7 @@ from frigate.api.defs.review_responses import (
 )
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
+from frigate.review.maintainer import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -161,7 +162,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -173,7 +174,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -185,7 +186,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -197,7 +198,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],
@@ -247,7 +248,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -259,7 +260,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -271,7 +272,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -283,7 +284,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],

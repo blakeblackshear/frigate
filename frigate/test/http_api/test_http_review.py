@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 
 from fastapi.testclient import TestClient
 
@@ -299,6 +300,83 @@ class TestHttpReview(BaseTestHttp):
                     "reviewed_detection": 0,
                     "total_alert": 0,
                     "total_detection": 1,
+                },
+            }
+            self.assertEqual(review_summary_response, expected_response)
+
+    def test_get_review_summary_multiple_in_same_day(self):
+        now = datetime.now()
+        five_days_ago = datetime.today() - timedelta(days=5)
+
+        with TestClient(self.app) as client:
+            super().insert_mock_review_segment("123456.random", now.timestamp())
+            five_days_ago_ts = five_days_ago.timestamp()
+            for i in range(20):
+                super().insert_mock_review_segment(f"123456_{i}.random_alert", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert)
+            for i in range(15):
+                super().insert_mock_review_segment(f"123456_{i}.random_detection", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection)
+            review_summary_request = client.get("/review/summary")
+            assert review_summary_request.status_code == 200
+            review_summary_response = review_summary_request.json()
+            # e.g. '2024-11-24'
+            today_formatted = now.strftime("%Y-%m-%d")
+            # e.g. '2024-11-19'
+            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            expected_response = {
+                "last24Hours": {
+                    "reviewed_alert": 0,
+                    "reviewed_detection": 0,
+                    "total_alert": 1,
+                    "total_detection": 0,
+                },
+                today_formatted: {
+                    "day": today_formatted,
+                    "reviewed_alert": 0,
+                    "reviewed_detection": 0,
+                    "total_alert": 1,
+                    "total_detection": 0,
+                },
+                five_days_ago_formatted: {
+                    "day": five_days_ago_formatted,
+                    "reviewed_alert": 0,
+                    "reviewed_detection": 0,
+                    "total_alert": 20,
+                    "total_detection": 15,
+                },
+            }
+            self.assertEqual(review_summary_response, expected_response)
+
+    def test_get_review_summary_multiple_in_same_day_with_reviewed(self):
+        five_days_ago = datetime.today() - timedelta(days=5)
+
+        with TestClient(self.app) as client:
+            five_days_ago_ts = five_days_ago.timestamp()
+            for i in range(10):
+                super().insert_mock_review_segment(f"123456_{i}.random_alert_not_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert, False)
+            for i in range(10):
+                super().insert_mock_review_segment(f"123456_{i}.random_alert_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert, True)
+            for i in range(10):
+                super().insert_mock_review_segment(f"123456_{i}.random_detection_not_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection, False)
+            for i in range(5):
+                super().insert_mock_review_segment(f"123456_{i}.random_detection_reviewed", five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection, True)
+            review_summary_request = client.get("/review/summary")
+            assert review_summary_request.status_code == 200
+            review_summary_response = review_summary_request.json()
+            # e.g. '2024-11-19'
+            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            expected_response = {
+                "last24Hours": {
+                    "reviewed_alert": None,
+                    "reviewed_detection": None,
+                    "total_alert": None,
+                    "total_detection": None,
+                },
+                five_days_ago_formatted: {
+                    "day": five_days_ago_formatted,
+                    "reviewed_alert": 10,
+                    "reviewed_detection": 5,
+                    "total_alert": 20,
+                    "total_detection": 15,
                 },
             }
             self.assertEqual(review_summary_response, expected_response)
