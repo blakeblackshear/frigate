@@ -272,9 +272,7 @@ class TestHttpReview(BaseTestHttp):
                 SeverityEnum.detection,
             )
             # This won't appear in the output since it's not within last month start_time clause (review.start_time > month_ago)
-            super().insert_mock_review_segment(
-                "123450.random", one_month_ago_ts
-            )
+            super().insert_mock_review_segment("123450.random", one_month_ago_ts)
             review_summary_request = client.get("/review/summary")
             assert review_summary_request.status_code == 200
             review_summary_response = review_summary_request.json()
