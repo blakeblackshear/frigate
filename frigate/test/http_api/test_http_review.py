@@ -527,12 +527,9 @@ class TestHttpReview(BaseTestHttp):
             assert response_json["success"] == True
             assert response_json["message"] == "Delete reviews"
             # Verify that in DB the review segment was not deleted
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.id)
-                .where(ReviewSegment.id == id)
-                .get()
-            )
-            assert review_segment_in_db.id == id
+            review_ids_in_db_after = self._get_reviews([id])
+            assert len(review_ids_in_db_after) == 1
+            assert review_ids_in_db_after[0].id == id
 
     def test_post_reviews_delete(self):
         with TestClient(self.app) as client:
@@ -545,12 +542,8 @@ class TestHttpReview(BaseTestHttp):
             assert response_json["success"] == True
             assert response_json["message"] == "Delete reviews"
             # Verify that in DB the review segment was deleted
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.id)
-                .where(ReviewSegment.id == id)
-                .get_or_none()
-            )
-            assert review_segment_in_db == None
+            review_ids_in_db_after = self._get_reviews([id])
+            assert len(review_ids_in_db_after) == 0
 
     def test_post_reviews_delete_many(self):
         with TestClient(self.app) as client:
