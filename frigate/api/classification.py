@@ -2,6 +2,7 @@
 
 import logging
 import os
+from pathvalidate import sanitize_filename
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
@@ -46,8 +47,8 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.delete("/faces")
-def deregister_faces(request: Request, body: dict = None):
+@router.post("/faces/{name}/delete")
+def deregister_faces(request: Request, name: str, body: dict = None):
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
@@ -58,7 +59,9 @@ def deregister_faces(request: Request, body: dict = None):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    context.delete_face_ids(list_of_ids)
+    context.delete_face_ids(
+        name, map(lambda file: sanitize_filename(file), list_of_ids)
+    )
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
