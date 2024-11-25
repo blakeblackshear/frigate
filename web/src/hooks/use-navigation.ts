@@ -2,6 +2,7 @@ import { ENV } from "@/env";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { NavData } from "@/types/navigation";
 import { useMemo } from "react";
+import { isDesktop } from "react-device-detect";
 import { FaCompactDisc, FaVideo } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { LuConstruction } from "react-icons/lu";
@@ -68,7 +69,7 @@ export default function useNavigation(
           icon: TbFaceId,
           title: "Face Library",
           url: "/faces",
-          enabled: config?.face_recognition.enabled,
+          enabled: isDesktop && config?.face_recognition.enabled,
         },
       ] as NavData[],
     [config?.face_recognition.enabled, variant],
