@@ -1,25 +1,26 @@
 import { baseUrl } from "@/api/baseUrl";
 import Chip from "@/components/indicators/Chip";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
+import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { useForm } from "react-hook-form";
-import { LuTrash } from "react-icons/lu";
+import { LuImagePlus, LuTrash } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
-import { z } from "zod";
 
 export default function FaceLibrary() {
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
+
+  // upload
+
+  const [upload, setUpload] = useState(false);
 
   // face data
 
@@ -42,29 +43,18 @@ export default function FaceLibrary() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faces]);
 
-  /**
-     * <Button className="flex gap-2" variant="select" size="sm">
-            <FaPlus />
-            Upload Image
-          </Button>
-     */
-
-  const formSchema = z.object({
-    image: z
-      .instanceof(File, { message: "Please select an image file." })
-      .refine((file) => file.size < 1000000, "Image size is too large."),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: "onChange",
-  });
-
   return (
     <div className="flex size-full flex-col p-2">
-      <div className="relative flex h-11 w-full items-center justify-between">
-        <Toaster />
+      <Toaster />
 
+      <UploadImageDialog
+        open={upload}
+        title="Upload Face Image"
+        description={`Upload an image to scan for faces and include for ${pageToggle}`}
+        setOpen={setUpload}
+      />
+
+      <div className="relative flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -93,30 +83,19 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        <Form {...form}>
-          <form>
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    {
-                      // @ts-expect-error ignore
-                      <Input type="file" {...field} />
-                    }
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
       </div>
       {pageToggle && (
         <div className="flex flex-wrap gap-2">
           {faceImages.map((image: string) => (
-            <FaceImage name={pageToggle} image={image} />
+            <FaceImage key={image} name={pageToggle} image={image} />
           ))}
+          <Button
+            key="upload"
+            className="size-40"
+            onClick={() => setUpload(true)}
+          >
+            <LuImagePlus className="size-10" />
+          </Button>
         </div>
       )}
     </div>
