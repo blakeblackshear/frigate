@@ -43,7 +43,7 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.4.0",
+    "@docusaurus/module-type-aliases": "^3.6.3",
     "@docusaurus/types": "^3.4.0",
     "@types/react": "^18.3.7"
   },
