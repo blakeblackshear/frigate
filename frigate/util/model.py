@@ -4,13 +4,12 @@ import logging
 import os
 from typing import Any, Optional
 
+import cv2
 import numpy as np
 import onnxruntime as ort
 from playhouse.sqliteq import SqliteQueueDatabase
-from sklearn.preprocessing import LabelEncoder, Normalizer
-from sklearn.svm import SVC
 
-from frigate.util.builtin import deserialize
+from frigate.config.semantic_search import FaceRecognitionConfig
 
 try:
     import openvino as ov
@@ -19,6 +18,9 @@ except ImportError:
     pass
 
 logger = logging.getLogger(__name__)
+
+
+MIN_MATCHING_FACES = 2
 
 
 def get_ort_providers(
@@ -157,38 +159,42 @@ class ONNXModelRunner:
 
 
 class FaceClassificationModel:
-    def __init__(self, db: SqliteQueueDatabase):
+    def __init__(self, config: FaceRecognitionConfig, db: SqliteQueueDatabase):
+        self.config = config
         self.db = db
-        self.labeler: Optional[LabelEncoder] = None
-        self.classifier: Optional[SVC] = None
+        self.recognizer = cv2.face.LBPHFaceRecognizer_create(radius=4, threshold=(1 - config.threshold) * 1000)
+        self.label_map: dict[int, str] = {}
 
     def __build_classifier(self) -> None:
-        faces: list[tuple[str, bytes]] = self.db.execute_sql(
-            "SELECT id, face_embedding FROM vec_faces"
-        ).fetchall()
-        embeddings = np.array([deserialize(f[1]) for f in faces])
-        self.labeler = LabelEncoder()
-        norms = Normalizer(norm="l2").transform(embeddings)
-        labels = self.labeler.fit_transform([f[0].split("-")[0] for f in faces])
-        self.classifier = SVC(kernel="linear", probability=True)
-        self.classifier.fit(norms, labels)
+        labels = []
+        faces = []
+
+        dir = "/media/frigate/clips/faces"
+        for idx, name in enumerate(os.listdir(dir)):
+            self.label_map[idx] = name
+            face_folder = os.path.join(dir, name)
+            for image in os.listdir(face_folder):
+                img = cv2.imread(os.path.join(face_folder, image))
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                equ = cv2.equalizeHist(gray)
+                faces.append(equ)
+                labels.append(idx)
+
+        self.recognizer.train(faces, np.array(labels))
 
     def clear_classifier(self) -> None:
         self.classifier = None
         self.labeler = None
 
-    def classify_face(self, embedding: np.ndarray) -> Optional[tuple[str, float]]:
-        if not self.classifier:
+    def classify_face(self, face_image: np.ndarray) -> Optional[tuple[str, float]]:
+        if not self.label_map:
             self.__build_classifier()
 
-        res = self.classifier.predict([embedding])
+        index, distance = self.recognizer.predict(cv2.equalizeHist(cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)))
 
-        if res is None:
+        if index == -1:
             return None
 
-        label = res[0]
-        probabilities = self.classifier.predict_proba([embedding])[0]
-        return (
-            self.labeler.inverse_transform([label])[0],
-            round(probabilities[label], 2),
-        )
+        score = 1.0 - (distance / 1000)
+        return self.label_map[index], round(score, 2)
+
