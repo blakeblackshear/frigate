@@ -4,7 +4,9 @@ title: Advanced Options
 sidebar_label: Advanced Options
 ---
 
-### `logger`
+### Logging
+
+#### Frigate `logger`
 
 Change the default log level for troubleshooting purposes.
 
@@ -27,6 +29,18 @@ Examples of available modules are:
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
+
+#### Go2RTC Logging
+
+See [the go2rtc docs](for logging configuration)
+
+```yaml
+go2rtc:
+  streams:
+    ...
+  log:
+    exec: trace
+```
 
 ### `environment_vars`
 
