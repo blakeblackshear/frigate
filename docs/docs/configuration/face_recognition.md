@@ -19,3 +19,17 @@ Face recognition is disabled by default and requires semantic search to be enabl
 face_recognition:
   enabled: true
 ```
+
+## Dataset
+
+The number of images needed for a sufficient training set for face recognition varies depending on several factors:
+
+- Complexity of the task: A simple task like recognizing faces of known individuals may require fewer images than a complex task like identifying unknown individuals in a large crowd.
+- Diversity of the dataset: A dataset with diverse images, including variations in lighting, pose, and facial expressions, will require fewer images per person than a less diverse dataset.
+- Desired accuracy: The higher the desired accuracy, the more images are typically needed.
+
+However, here are some general guidelines:
+
+- Minimum: For basic face recognition tasks, a minimum of 10-20 images per person is often recommended.
+- Recommended: For more robust and accurate systems, 30-50 images per person is a good starting point.
+- Ideal: For optimal performance, especially in challenging conditions, 100 or more images per person can be beneficial.

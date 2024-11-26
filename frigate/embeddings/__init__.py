@@ -14,7 +14,7 @@ from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR
+from frigate.const import CONFIG_DIR, FACE_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
@@ -209,8 +209,13 @@ class EmbeddingsContext:
 
         return self.db.execute_sql(sql_query).fetchall()
 
-    def delete_face_ids(self, ids: list[str]) -> None:
-        self.db.delete_embeddings_face(ids)
+    def delete_face_ids(self, face: str, ids: list[str]) -> None:
+        folder = os.path.join(FACE_DIR, face)
+        for id in ids:
+            file_path = os.path.join(folder, id)
+
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
 
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
