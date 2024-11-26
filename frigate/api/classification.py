@@ -1,11 +1,14 @@
 """Object classification APIs."""
 
 import logging
+import os
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filename
 
 from frigate.api.defs.tags import Tags
+from frigate.const import FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 
 logger = logging.getLogger(__name__)
@@ -15,20 +18,18 @@ router = APIRouter(tags=[Tags.events])
 
 @router.get("/faces")
 def get_faces():
-    return JSONResponse(content={"message": "there are faces"})
+    face_dict: dict[str, list[str]] = {}
+
+    for name in os.listdir(FACE_DIR):
+        face_dict[name] = []
+        for file in os.listdir(os.path.join(FACE_DIR, name)):
+            face_dict[name].append(file)
+
+    return JSONResponse(status_code=200, content=face_dict)
 
 
 @router.post("/faces/{name}")
 async def register_face(request: Request, name: str, file: UploadFile):
-    # if not file.content_type.startswith("image"):
-    #    return JSONResponse(
-    #        status_code=400,
-    #        content={
-    #            "success": False,
-    #            "message": "Only an image can be used to register a face.",
-    #        },
-    #    )
-
     context: EmbeddingsContext = request.app.embeddings
     context.register_face(name, await file.read())
     return JSONResponse(
@@ -37,8 +38,8 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.delete("/faces")
-def deregister_faces(request: Request, body: dict = None):
+@router.post("/faces/{name}/delete")
+def deregister_faces(request: Request, name: str, body: dict = None):
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
@@ -49,7 +50,9 @@ def deregister_faces(request: Request, body: dict = None):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    context.delete_face_ids(list_of_ids)
+    context.delete_face_ids(
+        name, map(lambda file: sanitize_filename(file), list_of_ids)
+    )
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
