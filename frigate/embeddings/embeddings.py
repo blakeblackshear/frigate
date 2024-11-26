@@ -3,8 +3,6 @@
 import base64
 import logging
 import os
-import random
-import string
 import time
 
 from numpy import ndarray
@@ -14,7 +12,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
-    FACE_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -68,7 +65,7 @@ class Embeddings:
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
+        self.db.create_embeddings_tables()
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
@@ -125,22 +122,6 @@ class Embeddings:
             requestor=self.requestor,
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
-
-        self.face_embedding = None
-
-        if self.config.face_recognition.enabled:
-            self.face_embedding = GenericONNXEmbedding(
-                model_name="facenet",
-                model_file="facenet.onnx",
-                download_urls={
-                    "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.onnx",
-                    "facedet.onnx": "https://github.com/opencv/opencv_zoo/raw/refs/heads/main/models/face_detection_yunet/face_detection_yunet_2023mar_int8.onnx",
-                },
-                model_size="large",
-                model_type=ModelTypeEnum.face,
-                requestor=self.requestor,
-                device="GPU",
-            )
 
         self.lpr_detection_model = None
         self.lpr_classification_model = None
@@ -277,40 +258,12 @@ class Embeddings:
 
         return embeddings
 
-    def embed_face(self, label: str, thumbnail: bytes, upsert: bool = False) -> ndarray:
-        embedding = self.face_embedding(thumbnail)[0]
-
-        if upsert:
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
-            id = f"{label}-{rand_id}"
-
-            # write face to library
-            folder = os.path.join(FACE_DIR, label)
-            file = os.path.join(folder, f"{id}.webp")
-            os.makedirs(folder, exist_ok=True)
-
-            # save face image
-            with open(file, "wb") as output:
-                output.write(thumbnail)
-
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_faces(id, face_embedding)
-                VALUES(?, ?)
-                """,
-                (id, serialize(embedding)),
-            )
-
-        return embedding
-
     def reindex(self) -> None:
         logger.info("Indexing tracked object embeddings...")
 
         self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
-        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
+        self.db.create_embeddings_tables()
         logger.debug("Created embeddings tables.")
 
         # Delete the saved stats file

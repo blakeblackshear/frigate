@@ -16,7 +16,9 @@ apt-get -qq install --no-install-recommends -y \
     curl \
     lsof \
     jq \
-    nethogs
+    nethogs \
+    libgl1 \
+    libglib2.0-0
 
 # ensure python3 defaults to python3.9
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
