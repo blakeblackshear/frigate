@@ -2,10 +2,10 @@
 
 import logging
 import os
-from pathvalidate import sanitize_filename
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filename
 
 from frigate.api.defs.tags import Tags
 from frigate.const import FACE_DIR
@@ -30,15 +30,6 @@ def get_faces():
 
 @router.post("/faces/{name}")
 async def register_face(request: Request, name: str, file: UploadFile):
-    # if not file.content_type.startswith("image"):
-    #    return JSONResponse(
-    #        status_code=400,
-    #        content={
-    #            "success": False,
-    #            "message": "Only an image can be used to register a face.",
-    #        },
-    #    )
-
     context: EmbeddingsContext = request.app.embeddings
     context.register_face(name, await file.read())
     return JSONResponse(

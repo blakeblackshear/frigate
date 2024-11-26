@@ -10,6 +10,7 @@ import {
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -18,23 +19,36 @@ type UploadImageDialogProps = {
   title: string;
   description?: string;
   setOpen: (open: boolean) => void;
+  onSave: (file: File) => void;
 };
 export default function UploadImageDialog({
   open,
   title,
   description,
   setOpen,
+  onSave,
 }: UploadImageDialogProps) {
   const formSchema = z.object({
-    image: z
-      .instanceof(File, { message: "Please select an image file." })
-      .refine((file) => file.size < 1000000, "Image size is too large."),
+    file: z.instanceof(FileList, { message: "Please select an image file." }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
   });
+  const fileRef = form.register("file");
+
+  // upload handler
+
+  const onSubmit = useCallback(
+    (data: z.infer<typeof formSchema>) => {
+      if (!data["file"]) {
+        return;
+      }
+
+      onSave(data["file"]["0"]);
+    },
+    [onSave],
+  );
 
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
@@ -44,31 +58,30 @@ export default function UploadImageDialog({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
-              name="image"
-              render={({ field }) => (
+              name="file"
+              render={() => (
                 <FormItem>
                   <FormControl>
-                    {
-                      // @ts-expect-error ignore
-                      <Input
-                        className="aspect-video h-40 w-full"
-                        type="file"
-                        {...field}
-                      />
-                    }
+                    <Input
+                      className="aspect-video h-40 w-full"
+                      type="file"
+                      {...fileRef}
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
+            <DialogFooter className="pt-4">
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button variant="select" type="submit">
+                Save
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
-        <DialogFooter>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="select">Save</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

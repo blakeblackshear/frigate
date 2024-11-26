@@ -18,10 +18,6 @@ export default function FaceLibrary() {
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
-  // upload
-
-  const [upload, setUpload] = useState(false);
-
   // face data
 
   const { data: faceData } = useSWR("faces");
@@ -43,6 +39,23 @@ export default function FaceLibrary() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faces]);
 
+  // upload
+
+  const [upload, setUpload] = useState(false);
+
+  const onUploadImage = useCallback(
+    (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      axios.post(`faces/${pageToggle}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
+    [pageToggle],
+  );
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
@@ -52,6 +65,7 @@ export default function FaceLibrary() {
         title="Upload Face Image"
         description={`Upload an image to scan for faces and include for ${pageToggle}`}
         setOpen={setUpload}
+        onSave={onUploadImage}
       />
 
       <div className="relative flex h-11 w-full items-center justify-between">
