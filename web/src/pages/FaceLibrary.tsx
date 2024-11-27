@@ -20,7 +20,7 @@ export default function FaceLibrary() {
 
   // face data
 
-  const { data: faceData } = useSWR("faces");
+  const { data: faceData, mutate: refreshFaces } = useSWR("faces");
 
   const faces = useMemo<string[]>(
     () => (faceData ? Object.keys(faceData) : []),
@@ -47,13 +47,36 @@ export default function FaceLibrary() {
     (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
-      axios.post(`faces/${pageToggle}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      axios
+        .post(`faces/${pageToggle}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            setUpload(false);
+            refreshFaces();
+            toast.success(
+              "Successfully uploaded iamge. View the file in the /exports folder.",
+              { position: "top-center" },
+            );
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(
+              `Failed to upload image: ${error.response.data.message}`,
+              { position: "top-center" },
+            );
+          } else {
+            toast.error(`Failed to upload image: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
     },
-    [pageToggle],
+    [pageToggle, refreshFaces],
   );
 
   return (
