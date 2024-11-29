@@ -25,7 +25,7 @@ My current favorite is the Beelink EQ13 because of the efficient N100 CPU and du
 
 | Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
 | ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
-| Beelink EQ13 (<a href="https://amzn.to/4ejU0ew" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB/M.2(A+E)        | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
+| Beelink EQ13 (<a href="https://amzn.to/4ejU0ew" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
 
 ## Detectors
 
