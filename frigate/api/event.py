@@ -35,8 +35,9 @@ from frigate.const import (
     CLIPS_DIR,
 )
 from frigate.embeddings import EmbeddingsContext
+from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.object_processing import TrackedObject
+from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -1087,9 +1088,11 @@ def create_event(
         )
 
     try:
-        frame = request.app.detected_frames_processor.get_current_frame(camera_name)
+        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
+        external_processor: ExternalEventProcessor = request.app.external_processor
 
-        event_id = request.app.external_processor.create_manual_event(
+        frame = frame_processor.get_current_frame(camera_name)
+        event_id = external_processor.create_manual_event(
             camera_name,
             label,
             body.source_type,

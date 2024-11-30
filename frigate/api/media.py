@@ -36,6 +36,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
+from frigate.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 from frigate.util.image import get_image_from_recording
 
@@ -79,7 +80,11 @@ def mjpeg_feed(
 
 
 def imagestream(
-    detected_frames_processor, camera_name: str, fps: int, height: int, draw_options
+    detected_frames_processor: TrackedObjectProcessor,
+    camera_name: str,
+    fps: int,
+    height: int,
+    draw_options: dict[str, any],
 ):
     while True:
         # max out at specified FPS
@@ -118,6 +123,7 @@ def latest_frame(
     extension: Extension,
     params: MediaLatestFrameQueryParams = Depends(),
 ):
+    frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
     draw_options = {
         "bounding_boxes": params.bbox,
         "timestamp": params.timestamp,
@@ -129,17 +135,14 @@ def latest_frame(
     quality = params.quality
 
     if camera_name in request.app.frigate_config.cameras:
-        frame = request.app.detected_frames_processor.get_current_frame(
-            camera_name, draw_options
-        )
+        frame = frame_processor.get_current_frame(camera_name, draw_options)
         retry_interval = float(
             request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            request.app.detected_frames_processor.get_current_frame_time(camera_name)
-            + retry_interval
+            frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             if request.app.camera_error_image is None:
                 error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
@@ -180,7 +183,7 @@ def latest_frame(
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
-            request.app.detected_frames_processor.get_current_frame(camera_name),
+            frame_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
         )
 
@@ -813,15 +816,15 @@ def grid_snapshot(
 ):
     if camera_name in request.app.frigate_config.cameras:
         detect = request.app.frigate_config.cameras[camera_name].detect
-        frame = request.app.detected_frames_processor.get_current_frame(camera_name, {})
+        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
+        frame = frame_processor.get_current_frame(camera_name, {})
         retry_interval = float(
             request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            request.app.detected_frames_processor.get_current_frame_time(camera_name)
-            + retry_interval
+            frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             return JSONResponse(
                 content={"success": False, "message": "Unable to get valid frame"},
