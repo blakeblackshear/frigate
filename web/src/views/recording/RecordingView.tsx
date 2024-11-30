@@ -46,8 +46,7 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-
-const SEGMENT_DURATION = 30;
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -657,12 +656,43 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
+  // timeline interaction
+
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 30,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 30, timestampSpread: 15 },
+      { segmentDuration: 15, timestampSpread: 5 },
+      { segmentDuration: 5, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+  });
+
+  // motion data
+
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,
-      scale: SEGMENT_DURATION / 2,
+      scale: Math.round(zoomSettings.segmentDuration / 2),
       cameras: mainCamera,
     },
   ]);
@@ -697,8 +727,8 @@ function Timeline({
       {timelineType == "timeline" ? (
         motionData ? (
           <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
+            segmentDuration={zoomSettings.segmentDuration}
+            timestampSpread={zoomSettings.timestampSpread}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
             showHandlebar={exportRange == undefined}
@@ -711,7 +741,6 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
           />
