@@ -1,9 +1,12 @@
-import { useCallback, useMemo, useRef, RefObject } from "react";
-import MotionSegment from "./MotionSegment";
+import React, { useCallback, useMemo, useRef, RefObject } from "react";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
+import { MotionData, ReviewSegment } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
+import {
+  VirtualizedMotionSegments,
+  VirtualizedMotionSegmentsRef,
+} from "./VirtualizedMotionSegments";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -25,7 +28,6 @@ export type MotionReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
   motion_events: MotionData[];
-  severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
   timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
@@ -59,6 +61,7 @@ export function MotionReviewTimeline({
 }: MotionReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
+  const virtualizedSegmentsRef = useRef<VirtualizedMotionSegmentsRef>(null);
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd + 4 * segmentDuration,
@@ -80,8 +83,8 @@ export function MotionReviewTimeline({
     motion_events,
   );
 
-  // Generate segments for the timeline
-  const generateSegments = useCallback(() => {
+  // Generate segment times for the timeline
+  const segmentTimes = useMemo(() => {
     const segments = [];
     let segmentTime = timelineStartAligned;
 
@@ -111,23 +114,7 @@ export function MotionReviewTimeline({
         continue;
       }
 
-      segments.push(
-        <MotionSegment
-          key={segmentTime}
-          events={events}
-          firstHalfMotionValue={firstHalfMotionValue}
-          secondHalfMotionValue={secondHalfMotionValue}
-          segmentDuration={segmentDuration}
-          segmentTime={segmentTime}
-          timestampSpread={timestampSpread}
-          motionOnly={motionOnly}
-          showMinimap={showMinimap}
-          minimapStartTime={minimapStartTime}
-          minimapEndTime={minimapEndTime}
-          setHandlebarTime={setHandlebarTime}
-          dense={dense}
-        />,
-      );
+      segments.push(segmentTime);
       segmentTime -= segmentDuration;
     }
     return segments;
@@ -135,33 +122,21 @@ export function MotionReviewTimeline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     segmentDuration,
-    timestampSpread,
     timelineStartAligned,
     timelineDuration,
-    showMinimap,
-    minimapStartTime,
-    minimapEndTime,
     events,
+    getMotionSegmentValue,
     motion_events,
     motionOnly,
   ]);
 
-  const segments = useMemo(
-    () => generateSegments(),
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      segmentDuration,
-      timestampSpread,
-      timelineStartAligned,
-      timelineDuration,
-      showMinimap,
-      minimapStartTime,
-      minimapEndTime,
-      events,
-      motion_events,
-      motionOnly,
-    ],
+  const scrollToSegment = useCallback(
+    (segmentTime: number, ifNeeded?: boolean) => {
+      if (virtualizedSegmentsRef.current) {
+        virtualizedSegmentsRef.current.scrollToSegment(segmentTime, ifNeeded);
+      }
+    },
+    [],
   );
 
   return (
@@ -183,8 +158,26 @@ export function MotionReviewTimeline({
       setExportEndTime={setExportEndTime}
       timelineCollapsed={motionOnly}
       dense={dense}
+      segments={segmentTimes}
+      scrollToSegment={scrollToSegment}
     >
-      {segments}
+      <VirtualizedMotionSegments
+        ref={virtualizedSegmentsRef}
+        timelineRef={selectedTimelineRef}
+        segments={segmentTimes}
+        events={events}
+        motion_events={motion_events}
+        segmentDuration={segmentDuration}
+        timestampSpread={timestampSpread}
+        showMinimap={showMinimap}
+        minimapStartTime={minimapStartTime}
+        minimapEndTime={minimapEndTime}
+        contentRef={contentRef}
+        setHandlebarTime={setHandlebarTime}
+        dense={dense}
+        motionOnly={motionOnly}
+        getMotionSegmentValue={getMotionSegmentValue}
+      />
     </ReviewTimeline>
   );
 }
