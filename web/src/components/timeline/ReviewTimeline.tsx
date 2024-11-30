@@ -30,7 +30,9 @@ export type ReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   timelineCollapsed?: boolean;
   dense: boolean;
-  children: ReactNode[];
+  segments: number[];
+  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
+  children: ReactNode;
 };
 
 export function ReviewTimeline({
@@ -51,6 +53,8 @@ export function ReviewTimeline({
   setExportEndTime,
   timelineCollapsed = false,
   dense,
+  segments,
+  scrollToSegment,
   children,
 }: ReviewTimelineProps) {
   const [isDraggingHandlebar, setIsDraggingHandlebar] = useState(false);
@@ -116,7 +120,8 @@ export function ReviewTimeline({
     setIsDragging: setIsDraggingHandlebar,
     draggableElementTimeRef: handlebarTimeRef,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const {
@@ -140,7 +145,8 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportStartTimeRef,
     setDraggableElementPosition: setExportStartPosition,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const {
@@ -164,7 +170,8 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportEndTimeRef,
     setDraggableElementPosition: setExportEndPosition,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const handleHandlebar = useCallback(
@@ -327,7 +334,7 @@ export function ReviewTimeline({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
         {children}
       </div>
-      {children.length > 0 && (
+      {children && (
         <>
           {showHandlebar && (
             <div
