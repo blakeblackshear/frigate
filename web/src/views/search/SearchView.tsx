@@ -181,21 +181,45 @@ export default function SearchView({
 
   // search interaction
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedObjects, setSelectedObjects] = useState<string[]>([]);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const onSelectSearch = useCallback(
-    (item: SearchResult, index: number, page: SearchTab = "details") => {
+    (item: SearchResult, page: SearchTab = "details") => {
+      if (selectedObjects.length > 1) {
+        const index = selectedObjects.indexOf(item.id);
+
+        if (index != -1) {
+          if (selectedObjects.length == 1) {
+            setSelectedObjects([]);
+          } else {
+            const copy = [
+              ...selectedObjects.slice(0, index),
+              ...selectedObjects.slice(index + 1),
+            ];
+            setSelectedObjects(copy);
+          }
+        } else {
+          const copy = [...selectedObjects];
+          copy.push(item.id);
+          setSelectedObjects(copy);
+        }
+      } else {
+        setSelectedObjects([item.id]);
+      }
       setPage(page);
       setSearchDetail(item);
-      setSelectedIndex(index);
     },
-    [],
+    [selectedObjects],
   );
 
   useEffect(() => {
-    setSelectedIndex(0);
-  }, [searchTerm, searchFilter]);
+    if (uniqueResults && uniqueResults.length > 0) {
+      setSelectedObjects([uniqueResults[0].id]);
+    } else {
+      setSelectedObjects([]);
+    }
+  }, [searchTerm, searchFilter, uniqueResults]);
 
   // confidence score
 
@@ -244,21 +268,46 @@ export default function SearchView({
 
       switch (key) {
         case "ArrowLeft":
-          setSelectedIndex((prevIndex) => {
+          setSelectedObjects((prevSelected) => {
+            if (uniqueResults.length === 0) return prevSelected;
+
+            const currentIndex =
+              prevSelected.length > 0
+                ? uniqueResults.findIndex(
+                    (result) => result.id === prevSelected[0],
+                  )
+                : -1;
+
             const newIndex =
-              prevIndex === null
+              currentIndex === -1
                 ? uniqueResults.length - 1
-                : (prevIndex - 1 + uniqueResults.length) % uniqueResults.length;
-            setSearchDetail(uniqueResults[newIndex]);
-            return newIndex;
+                : (currentIndex - 1 + uniqueResults.length) %
+                  uniqueResults.length;
+
+            const newSelectedResult = uniqueResults[newIndex];
+            setSearchDetail(newSelectedResult);
+            return [newSelectedResult.id];
           });
           break;
         case "ArrowRight":
-          setSelectedIndex((prevIndex) => {
+          setSelectedObjects((prevSelected) => {
+            if (uniqueResults.length === 0) return prevSelected;
+
+            const currentIndex =
+              prevSelected.length > 0
+                ? uniqueResults.findIndex(
+                    (result) => result.id === prevSelected[0],
+                  )
+                : -1;
+
             const newIndex =
-              prevIndex === null ? 0 : (prevIndex + 1) % uniqueResults.length;
-            setSearchDetail(uniqueResults[newIndex]);
-            return newIndex;
+              currentIndex === -1
+                ? 0
+                : (currentIndex + 1) % uniqueResults.length;
+
+            const newSelectedResult = uniqueResults[newIndex];
+            setSearchDetail(newSelectedResult);
+            return [newSelectedResult.id];
           });
           break;
         case "PageDown":
@@ -287,20 +336,22 @@ export default function SearchView({
   // scroll into view
 
   useEffect(() => {
-    if (
-      selectedIndex !== null &&
-      uniqueResults &&
-      itemRefs.current?.[selectedIndex]
-    ) {
-      scrollIntoView(itemRefs.current[selectedIndex], {
-        block: "center",
-        behavior: "smooth",
-        scrollMode: "if-needed",
-      });
+    if (selectedObjects.length > 0 && uniqueResults && itemRefs.current) {
+      const selectedIndex = uniqueResults.findIndex(
+        (result) => result.id === selectedObjects[0],
+      );
+
+      if (selectedIndex !== -1 && itemRefs.current[selectedIndex]) {
+        scrollIntoView(itemRefs.current[selectedIndex], {
+          block: "center",
+          behavior: "smooth",
+          scrollMode: "if-needed",
+        });
+      }
     }
-    // we only want to scroll when the index changes
+    // we only want to scroll when the selected objects change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIndex]);
+  }, [selectedObjects]);
 
   // observer for loading more
 
@@ -412,7 +463,7 @@ export default function SearchView({
           <div className={gridClassName}>
             {uniqueResults &&
               uniqueResults.map((value, index) => {
-                const selected = selectedIndex === index;
+                const selected = selectedObjects.includes(value.id);
 
                 return (
                   <div
@@ -428,7 +479,7 @@ export default function SearchView({
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        onClick={() => onSelectSearch(value, index)}
+                        onClick={() => onSelectSearch(value)}
                       />
                       {(searchTerm ||
                         searchFilter?.search_type?.includes("similarity")) && (
@@ -469,11 +520,9 @@ export default function SearchView({
                         }}
                         refreshResults={refresh}
                         showObjectLifecycle={() =>
-                          onSelectSearch(value, index, "object lifecycle")
+                          onSelectSearch(value, "object lifecycle")
                         }
-                        showSnapshot={() =>
-                          onSelectSearch(value, index, "snapshot")
-                        }
+                        showSnapshot={() => onSelectSearch(value, "snapshot")}
                       />
                     </div>
                   </div>
