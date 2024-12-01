@@ -525,7 +525,7 @@ class FrigateApp:
             return 0
 
         shm_frame_count = min(
-            os.environ.get(SHM_FRAMES_VAR, 50),
+            int(os.environ.get(SHM_FRAMES_VAR, "50")),
             int(available_shm / (cam_total_frame_size)),
         )
 
