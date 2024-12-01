@@ -480,7 +480,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if not self.config.cameras[camera].record.enabled:
                 if current_segment:
-                    self.update_existing_segment(current_segment, frame_time, [])
+                    self.update_existing_segment(
+                        current_segment, frame_name, frame_time, []
+                    )
 
                 continue
 
