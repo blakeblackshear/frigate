@@ -3225,7 +3225,7 @@ components:
           title: Sub Label
         score:
           anyOf:
-            - type: integer
+            - type: number
             - type: 'null'
           title: Score
           default: 0
@@ -3264,7 +3264,7 @@ components:
       properties:
         end_time:
           anyOf:
-            - type: integer
+            - type: number
             - type: 'null'
           title: End Time
       type: object
