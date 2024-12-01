@@ -216,6 +216,9 @@ class AudioEventMaintainer(threading.Thread):
                     "label": label,
                     "last_detection": datetime.datetime.now().timestamp(),
                 }
+                self.logger.warning(
+                    f"Failed to create audio event with status code {resp.status_code}"
+                )
 
     def expire_detections(self) -> None:
         now = datetime.datetime.now().timestamp()

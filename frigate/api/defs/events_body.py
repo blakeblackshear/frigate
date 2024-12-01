@@ -17,14 +17,14 @@ class EventsDescriptionBody(BaseModel):
 class EventsCreateBody(BaseModel):
     source_type: Optional[str] = "api"
     sub_label: Optional[str] = None
-    score: Optional[int] = 0
+    score: Optional[float] = 0
     duration: Optional[int] = 30
     include_recording: Optional[bool] = True
     draw: Optional[dict] = {}
 
 
 class EventsEndBody(BaseModel):
-    end_time: Optional[int] = None
+    end_time: Optional[float] = None
 
 
 class SubmitPlusBody(BaseModel):

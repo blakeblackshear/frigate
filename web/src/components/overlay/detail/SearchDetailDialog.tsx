@@ -626,7 +626,7 @@ export function ObjectSnapshotTab({
                 </div>
               )}
             </TransformComponent>
-            {search.plus_id !== "not_enabled" && search.end_time && (
+            {search.data.type == "object" && search.plus_id !== "not_enabled" && search.end_time && (
               <Card className="p-1 text-sm md:p-2">
                 <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
                   <div className={cn("flex flex-col space-y-3")}>

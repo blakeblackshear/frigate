@@ -108,6 +108,7 @@ class ExternalEventProcessor:
                 EventTypeEnum.api,
                 EventStateEnum.end,
                 None,
+                "",
                 {"id": event_id, "end_time": end_time},
             )
         )
