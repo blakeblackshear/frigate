@@ -128,6 +128,7 @@ export default function SearchResultActions({
         config?.plus?.enabled &&
         searchResult.has_snapshot &&
         searchResult.end_time &&
+        searchResult.data.type == "object" &&
         !searchResult.plus_id && (
           <MenuItem aria-label="Submit to Frigate Plus" onClick={showSnapshot}>
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
@@ -197,6 +198,7 @@ export default function SearchResultActions({
             config?.plus?.enabled &&
             searchResult.has_snapshot &&
             searchResult.end_time &&
+            searchResult.data.type == "object" &&
             !searchResult.plus_id && (
               <Tooltip>
                 <TooltipTrigger>
