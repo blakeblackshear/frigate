@@ -115,6 +115,7 @@ services:
   frigate:
     container_name: frigate
     restart: unless-stopped
+    stop_grace_period: 30s
     image: ghcr.io/blakeblackshear/frigate:stable
     volumes:
       - ./config:/config

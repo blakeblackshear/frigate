@@ -193,6 +193,7 @@ services:
     container_name: frigate
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
+    stop_grace_period: 30s # allow enough time to shut down the various services
     image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "512mb" # update for your cameras based on calculation above
     devices:
@@ -224,6 +225,7 @@ If you can't use docker compose, you can run the container with something simila
 docker run -d \
   --name frigate \
   --restart=unless-stopped \
+  --stop-timeout 30 \
   --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
   --device /dev/bus/usb:/dev/bus/usb \
   --device /dev/dri/renderD128 \
