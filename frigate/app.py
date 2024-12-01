@@ -437,7 +437,7 @@ class FrigateApp:
             # pre-create shms
             for i in range(shm_frame_count):
                 frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
-                self.frame_manager.create(f"{config.name}{i}", frame_size)
+                self.frame_manager.create(f"{config.name}_{i}", frame_size)
 
             capture_process = util.Process(
                 target=capture_camera,
