@@ -10,6 +10,7 @@ from enum import Enum
 from typing import Optional
 
 import cv2
+from numpy import ndarray
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.events_updater import EventUpdatePublisher
@@ -45,7 +46,7 @@ class ExternalEventProcessor:
         duration: Optional[int],
         include_recording: bool,
         draw: dict[str, any],
-        snapshot_frame: any,
+        snapshot_frame: Optional[ndarray],
     ) -> str:
         now = datetime.datetime.now().timestamp()
         camera_config = self.config.cameras.get(camera)
@@ -131,8 +132,11 @@ class ExternalEventProcessor:
         label: str,
         event_id: str,
         draw: dict[str, any],
-        img_frame: any,
-    ) -> str:
+        img_frame: Optional[ndarray],
+    ) -> Optional[str]:
+        if not img_frame:
+            return None
+
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_frame)
