@@ -108,13 +108,15 @@ export default function SearchResultActions({
           </a>
         </MenuItem>
       )}
-      <MenuItem
-        aria-label="Show the object lifecycle"
-        onClick={showObjectLifecycle}
-      >
-        <FaArrowsRotate className="mr-2 size-4" />
-        <span>View object lifecycle</span>
-      </MenuItem>
+      {searchResult.data.type == "object" && (
+        <MenuItem
+          aria-label="Show the object lifecycle"
+          onClick={showObjectLifecycle}
+        >
+          <FaArrowsRotate className="mr-2 size-4" />
+          <span>View object lifecycle</span>
+        </MenuItem>
+      )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
           aria-label="Find similar tracked objects"
@@ -182,17 +184,18 @@ export default function SearchResultActions({
         </ContextMenu>
       ) : (
         <>
-          {config?.semantic_search?.enabled && (
-            <Tooltip>
-              <TooltipTrigger>
-                <MdImageSearch
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={findSimilar}
-                />
-              </TooltipTrigger>
-              <TooltipContent>Find similar</TooltipContent>
-            </Tooltip>
-          )}
+          {config?.semantic_search?.enabled &&
+            searchResult.data.type == "object" && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <MdImageSearch
+                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                    onClick={findSimilar}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Find similar</TooltipContent>
+              </Tooltip>
+            )}
 
           {!isMobileOnly &&
             config?.plus?.enabled &&
