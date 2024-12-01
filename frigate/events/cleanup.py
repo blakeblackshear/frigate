@@ -110,7 +110,7 @@ class EventCleanup(threading.Thread):
                 .namedtuples()
                 .iterator()
             )
-            logger.debug(f"{len(expired_events)} events can be expired")
+            logger.debug(f"{len(list(expired_events))} events can be expired")
             # delete the media from disk
             for expired in expired_events:
                 media_name = f"{expired.camera}-{expired.id}"
