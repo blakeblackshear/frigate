@@ -187,7 +187,7 @@ export default function SearchView({
 
   const onSelectSearch = useCallback(
     (item: SearchResult, ctrl: boolean, page: SearchTab = "details") => {
-      if (selectedObjects.length > 0 || ctrl) {
+      if (selectedObjects.length > 1 || ctrl) {
         const index = selectedObjects.indexOf(item.id);
 
         if (index != -1) {
@@ -205,12 +205,9 @@ export default function SearchView({
           copy.push(item.id);
           setSelectedObjects(copy);
         }
-      }
-      if (!ctrl) {
+      } else {
         setPage(page);
         setSearchDetail(item);
-      } else {
-        setSearchDetail(undefined);
       }
     },
     [selectedObjects],
@@ -556,10 +553,13 @@ export default function SearchView({
                           ctrl: boolean,
                           detail: boolean,
                         ) => {
-                          if (detail) {
+                          if (detail && selectedObjects.length == 0) {
                             setSearchDetail(value);
                           } else {
-                            onSelectSearch(value, ctrl);
+                            onSelectSearch(
+                              value,
+                              ctrl || selectedObjects.length > 0,
+                            );
                           }
                         }}
                       />
