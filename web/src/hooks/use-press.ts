@@ -10,7 +10,7 @@ import {
 export default function usePress(
   options: Omit<Parameters<typeof useLongPress>[1], "onCancel" | "onStart"> & {
     onLongPress: NonNullable<Parameters<typeof useLongPress>[0]>;
-    onPress: () => void;
+    onPress: (event: LongPressReactEvents<Element>) => void;
   },
 ) {
   const { onLongPress, onPress, ...actualOptions } = options;
@@ -43,9 +43,9 @@ export default function usePress(
   return useCallback(
     () => ({
       ...bind(),
-      onClick: () => {
+      onClick: (event: LongPressReactEvents<HTMLDivElement>) => {
         if (!hasLongPress) {
-          onPress();
+          onPress(event);
         }
       },
     }),
