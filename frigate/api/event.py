@@ -16,6 +16,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.events_body import (
     EventsCreateBody,
+    EventsDeleteBody,
     EventsDescriptionBody,
     EventsEndBody,
     EventsSubLabelBody,
@@ -1036,34 +1037,64 @@ def regenerate_description(
     )
 
 
-@router.delete("/events/{event_id}")
-def delete_event(request: Request, event_id: str):
+def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
+        return {"success": False, "message": f"Event {event_id} not found"}
 
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-        media.unlink(missing_ok=True)
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-        media.unlink(missing_ok=True)
+        snapshot_paths = [
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg"),
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"),
+        ]
+        for media in snapshot_paths:
+            media.unlink(missing_ok=True)
 
     event.delete_instance()
     Timeline.delete().where(Timeline.source_id == event_id).execute()
+
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
         context.db.delete_embeddings_thumbnail(event_ids=[event_id])
         context.db.delete_embeddings_description(event_ids=[event_id])
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " deleted"}),
-        status_code=200,
-    )
+
+    return {"success": True, "message": f"Event {event_id} deleted"}
+
+
+@router.delete("/events/{event_id}")
+def delete_event(request: Request, event_id: str):
+    result = delete_single_event(event_id, request)
+    status_code = 200 if result["success"] else 404
+    return JSONResponse(content=result, status_code=status_code)
+
+
+@router.delete("/events/")
+def delete_events(request: Request, body: EventsDeleteBody):
+    if not body.event_ids:
+        return JSONResponse(
+            content=({"success": False, "message": "No event IDs provided."}),
+            status_code=404,
+        )
+
+    deleted_events = []
+    not_found_events = []
+
+    for event_id in body.event_ids:
+        result = delete_single_event(event_id, request)
+        if result["success"]:
+            deleted_events.append(event_id)
+        else:
+            not_found_events.append(event_id)
+
+    response = {
+        "success": True,
+        "deleted_events": deleted_events,
+        "not_found_events": not_found_events,
+    }
+    return JSONResponse(content=response, status_code=200)
 
 
 @router.post("/events/{camera_name}/{label}/create")

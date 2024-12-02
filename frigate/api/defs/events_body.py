@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -25,6 +25,10 @@ class EventsCreateBody(BaseModel):
 
 class EventsEndBody(BaseModel):
     end_time: Optional[float] = None
+
+
+class EventsDeleteBody(BaseModel):
+    event_ids: List[str] = Field(title="The event IDs to delete")
 
 
 class SubmitPlusBody(BaseModel):

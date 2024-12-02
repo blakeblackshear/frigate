@@ -32,8 +32,9 @@ export default function SearchActionGroup({
 
   const onDelete = useCallback(async () => {
     await axios
-      // TODO: fix for multiple event deletion
-      .delete(`events/${selectedObjects.id}`)
+      .delete(`events/`, {
+        data: { event_ids: selectedObjects },
+      })
       .then((resp) => {
         if (resp.status == 200) {
           toast.success("Tracked objects deleted successfully.", {
