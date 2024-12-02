@@ -187,7 +187,7 @@ export default function SearchView({
 
   const onSelectSearch = useCallback(
     (item: SearchResult, ctrl: boolean, page: SearchTab = "details") => {
-      if (selectedObjects.length > 1 || ctrl) {
+      if (selectedObjects.length > 0 || ctrl) {
         const index = selectedObjects.indexOf(item.id);
 
         if (index != -1) {
@@ -205,8 +205,6 @@ export default function SearchView({
           copy.push(item.id);
           setSelectedObjects(copy);
         }
-      } else {
-        setSelectedObjects([item.id]);
       }
       if (!ctrl) {
         setPage(page);
@@ -231,12 +229,8 @@ export default function SearchView({
   }, [uniqueResults, selectedObjects]);
 
   useEffect(() => {
-    if (uniqueResults && uniqueResults.length > 0) {
-      setSelectedObjects([uniqueResults[0].id]);
-    } else {
-      setSelectedObjects([]);
-    }
-    // only select first item when search term or filter changes
+    setSelectedObjects([]);
+    // unselect items when search term or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, searchFilter]);
 
@@ -292,15 +286,12 @@ export default function SearchView({
           }
           break;
         case "ArrowLeft":
-          setSelectedObjects((prevSelected) => {
-            if (uniqueResults.length === 0) return prevSelected;
-
-            const currentIndex =
-              prevSelected.length > 0
-                ? uniqueResults.findIndex(
-                    (result) => result.id === prevSelected[0],
-                  )
-                : -1;
+          if (uniqueResults.length > 0) {
+            const currentIndex = searchDetail
+              ? uniqueResults.findIndex(
+                  (result) => result.id === searchDetail.id,
+                )
+              : -1;
 
             const newIndex =
               currentIndex === -1
@@ -308,31 +299,25 @@ export default function SearchView({
                 : (currentIndex - 1 + uniqueResults.length) %
                   uniqueResults.length;
 
-            const newSelectedResult = uniqueResults[newIndex];
-            setSearchDetail(newSelectedResult);
-            return [newSelectedResult.id];
-          });
+            setSearchDetail(uniqueResults[newIndex]);
+          }
           break;
-        case "ArrowRight":
-          setSelectedObjects((prevSelected) => {
-            if (uniqueResults.length === 0) return prevSelected;
 
-            const currentIndex =
-              prevSelected.length > 0
-                ? uniqueResults.findIndex(
-                    (result) => result.id === prevSelected[0],
-                  )
-                : -1;
+        case "ArrowRight":
+          if (uniqueResults.length > 0) {
+            const currentIndex = searchDetail
+              ? uniqueResults.findIndex(
+                  (result) => result.id === searchDetail.id,
+                )
+              : -1;
 
             const newIndex =
               currentIndex === -1
                 ? 0
                 : (currentIndex + 1) % uniqueResults.length;
 
-            const newSelectedResult = uniqueResults[newIndex];
-            setSearchDetail(newSelectedResult);
-            return [newSelectedResult.id];
-          });
+            setSearchDetail(uniqueResults[newIndex]);
+          }
           break;
         case "PageDown":
           contentRef.current?.scrollBy({
@@ -348,7 +333,7 @@ export default function SearchView({
           break;
       }
     },
-    [uniqueResults, inputFocused, onSelectAllObjects],
+    [uniqueResults, inputFocused, onSelectAllObjects, searchDetail],
   );
 
   useKeyboardListener(
@@ -359,23 +344,69 @@ export default function SearchView({
 
   // scroll into view
 
+  const [prevSearchDetail, setPrevSearchDetail] = useState<
+    SearchResult | undefined
+  >();
+
+  // keep track of previous ref to outline thumbnail when dialog closes
+  const prevSearchDetailRef = useRef<SearchResult | undefined>();
+
   useEffect(() => {
-    if (selectedObjects.length == 1 && uniqueResults && itemRefs.current) {
+    if (searchDetail === undefined && prevSearchDetailRef.current) {
+      setPrevSearchDetail(prevSearchDetailRef.current);
+    }
+    prevSearchDetailRef.current = searchDetail;
+  }, [searchDetail]);
+
+  useEffect(() => {
+    if (uniqueResults && itemRefs.current && prevSearchDetail) {
       const selectedIndex = uniqueResults.findIndex(
-        (result) => result.id === selectedObjects[0],
+        (result) => result.id === prevSearchDetail.id,
       );
 
-      if (selectedIndex !== -1 && itemRefs.current[selectedIndex]) {
-        scrollIntoView(itemRefs.current[selectedIndex], {
+      const parent = itemRefs.current[selectedIndex];
+
+      if (selectedIndex !== -1 && parent) {
+        const target = parent.querySelector(".review-item-ring");
+        if (target) {
+          scrollIntoView(target, {
+            block: "center",
+            behavior: "smooth",
+            scrollMode: "if-needed",
+          });
+          target.classList.add(`outline-selected`);
+          target.classList.remove("outline-transparent");
+
+          setTimeout(() => {
+            target.classList.remove(`outline-selected`);
+            target.classList.add("outline-transparent");
+          }, 3000);
+        }
+      }
+    }
+    // we only want to scroll when the dialog closes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prevSearchDetail]);
+
+  useEffect(() => {
+    if (uniqueResults && itemRefs.current && searchDetail) {
+      const selectedIndex = uniqueResults.findIndex(
+        (result) => result.id === searchDetail.id,
+      );
+
+      const parent = itemRefs.current[selectedIndex];
+
+      if (selectedIndex !== -1 && parent) {
+        scrollIntoView(parent, {
           block: "center",
           behavior: "smooth",
           scrollMode: "if-needed",
         });
       }
     }
-    // we only want to scroll when the selected objects change
+    // we only want to scroll when changing the detail pane
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObjects]);
+  }, [searchDetail]);
 
   // observer for loading more
 
@@ -444,7 +475,7 @@ export default function SearchView({
         {hasExistingSearch && (
           <ScrollArea className="w-full whitespace-nowrap lg:ml-[35%]">
             <div className="flex flex-row gap-2">
-              {selectedObjects.length <= 1 ? (
+              {selectedObjects.length == 0 ? (
                 <>
                   <SearchFilterGroup
                     className={cn(
@@ -511,7 +542,7 @@ export default function SearchView({
                     key={value.id}
                     ref={(item) => (itemRefs.current[index] = item)}
                     data-start={value.start_time}
-                    className="review-item relative flex flex-col rounded-lg"
+                    className="relative flex flex-col rounded-lg"
                   >
                     <div
                       className={cn(
@@ -520,8 +551,16 @@ export default function SearchView({
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        onClick={(value: SearchResult, ctrl: boolean) => {
-                          onSelectSearch(value, ctrl);
+                        onClick={(
+                          value: SearchResult,
+                          ctrl: boolean,
+                          detail: boolean,
+                        ) => {
+                          if (detail) {
+                            setSearchDetail(value);
+                          } else {
+                            onSelectSearch(value, ctrl);
+                          }
                         }}
                       />
                       {(searchTerm ||

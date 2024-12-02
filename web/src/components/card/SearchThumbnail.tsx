@@ -17,7 +17,7 @@ import useContextMenu from "@/hooks/use-contextmenu";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
-  onClick: (searchResult: SearchResult, ctrl: boolean) => void;
+  onClick: (searchResult: SearchResult, ctrl: boolean, detail: boolean) => void;
 };
 
 export default function SearchThumbnail({
@@ -31,12 +31,12 @@ export default function SearchThumbnail({
   // interactions
 
   useContextMenu(imgRef, () => {
-    onClick(searchResult, true);
+    onClick(searchResult, true, false);
   });
 
   const bindClickAndLongPress = usePress({
-    onLongPress: () => onClick(searchResult, true),
-    onPress: () => onClick(searchResult, false),
+    onLongPress: () => onClick(searchResult, true, false),
+    onPress: () => onClick(searchResult, false, true),
   })();
 
   const objectLabel = useMemo(() => {
@@ -89,7 +89,7 @@ export default function SearchThumbnail({
                 <div className="mx-3 pb-1 text-sm text-white">
                   <Chip
                     className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs`}
-                    onClick={() => onClick(searchResult, false)}
+                    onClick={() => onClick(searchResult, false, true)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
                     {Math.round(
