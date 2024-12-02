@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
@@ -27,10 +27,11 @@ export default function SearchThumbnail({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // interactions
 
-  useContextMenu(imgRef, () => {
+  useContextMenu(containerRef, () => {
     onClick(searchResult, true, false);
   });
 
@@ -53,6 +54,7 @@ export default function SearchThumbnail({
 
   return (
     <div
+      ref={containerRef}
       className="relative size-full cursor-pointer"
       {...bindClickAndLongPress}
     >
