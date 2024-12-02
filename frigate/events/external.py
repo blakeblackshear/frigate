@@ -135,7 +135,7 @@ class ExternalEventProcessor:
         draw: dict[str, any],
         img_frame: Optional[ndarray],
     ) -> Optional[str]:
-        if not img_frame:
+        if img_frame is None:
             return None
 
         # write clean snapshot if enabled
