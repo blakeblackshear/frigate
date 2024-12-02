@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
@@ -12,7 +12,6 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import usePress from "@/hooks/use-press";
 import useContextMenu from "@/hooks/use-contextmenu";
 
 type SearchThumbnailProps = {
@@ -27,18 +26,12 @@ export default function SearchThumbnail({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // interactions
 
-  useContextMenu(containerRef, () => {
+  useContextMenu(imgRef, () => {
     onClick(searchResult, true, false);
   });
-
-  const bindClickAndLongPress = usePress({
-    onLongPress: () => onClick(searchResult, true, false),
-    onPress: () => onClick(searchResult, false, true),
-  })();
 
   const objectLabel = useMemo(() => {
     if (
@@ -54,9 +47,8 @@ export default function SearchThumbnail({
 
   return (
     <div
-      ref={containerRef}
       className="relative size-full cursor-pointer"
-      {...bindClickAndLongPress}
+      onClick={() => onClick(searchResult, false, true)}
     >
       <ImageLoadingIndicator
         className="absolute inset-0"

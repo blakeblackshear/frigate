@@ -21,8 +21,6 @@ import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { baseUrl } from "@/api/baseUrl";
-import usePress from "@/hooks/use-press";
-import { LongPressReactEvents } from "use-long-press";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -51,7 +49,7 @@ export default function PreviewThumbnailPlayer({
 
   const [ignoreClick, setIgnoreClick] = useState(false);
   const handleOnClick = useCallback(
-    (e: LongPressReactEvents<Element>) => {
+    (e: React.MouseEvent<HTMLDivElement>) => {
       if (!ignoreClick) {
         onClick(review, e.metaKey, false);
       }
@@ -78,11 +76,6 @@ export default function PreviewThumbnailPlayer({
   useContextMenu(imgRef, () => {
     onClick(review, true, false);
   });
-
-  const bindClickAndLongPress = usePress({
-    onLongPress: () => onClick(review, true, false),
-    onPress: (e) => handleOnClick(e),
-  })();
 
   // playback
 
@@ -183,7 +176,7 @@ export default function PreviewThumbnailPlayer({
       className="relative size-full cursor-pointer"
       onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
-      {...bindClickAndLongPress}
+      onClick={handleOnClick}
       onAuxClick={(e) => {
         if (e.button === 1) {
           window.open(`${baseUrl}review?id=${review.id}`, "_blank")?.focus();
