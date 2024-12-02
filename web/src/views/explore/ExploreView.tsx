@@ -26,7 +26,7 @@ type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
   setSearchDetail: (search: SearchResult | undefined) => void;
   setSimilaritySearch: (search: SearchResult) => void;
-  onSelectSearch: (item: SearchResult, index: number, page?: SearchTab) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 export default function ExploreView({
@@ -125,7 +125,7 @@ type ThumbnailRowType = {
   setSearchDetail: (search: SearchResult | undefined) => void;
   mutate: () => void;
   setSimilaritySearch: (search: SearchResult) => void;
-  onSelectSearch: (item: SearchResult, index: number, page?: SearchTab) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 function ThumbnailRow({
@@ -205,7 +205,7 @@ type ExploreThumbnailImageProps = {
   setSearchDetail: (search: SearchResult | undefined) => void;
   mutate: () => void;
   setSimilaritySearch: (search: SearchResult) => void;
-  onSelectSearch: (item: SearchResult, index: number, page?: SearchTab) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 function ExploreThumbnailImage({
   event,
@@ -225,11 +225,11 @@ function ExploreThumbnailImage({
   };
 
   const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, 0, "object lifecycle");
+    onSelectSearch(event, false, "object lifecycle");
   };
 
   const handleShowSnapshot = () => {
-    onSelectSearch(event, 0, "snapshot");
+    onSelectSearch(event, false, "snapshot");
   };
 
   return (
