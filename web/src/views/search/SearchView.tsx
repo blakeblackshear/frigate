@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import SearchActionGroup from "@/components/filter/SearchActionGroup";
 
 type SearchViewProps = {
   search: string;
@@ -185,8 +186,8 @@ export default function SearchView({
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const onSelectSearch = useCallback(
-    (item: SearchResult, page: SearchTab = "details") => {
-      if (selectedObjects.length > 1) {
+    (item: SearchResult, ctrl: boolean, page: SearchTab = "details") => {
+      if (selectedObjects.length > 1 || ctrl) {
         const index = selectedObjects.indexOf(item.id);
 
         if (index != -1) {
@@ -207,11 +208,27 @@ export default function SearchView({
       } else {
         setSelectedObjects([item.id]);
       }
-      setPage(page);
-      setSearchDetail(item);
+      if (!ctrl) {
+        setPage(page);
+        setSearchDetail(item);
+      } else {
+        setSearchDetail(undefined);
+      }
     },
     [selectedObjects],
   );
+
+  const onSelectAllObjects = useCallback(() => {
+    if (!uniqueResults || uniqueResults.length == 0) {
+      return;
+    }
+
+    if (selectedObjects.length < uniqueResults.length) {
+      setSelectedObjects(uniqueResults.map((value) => value.id));
+    } else {
+      setSelectedObjects([]);
+    }
+  }, [uniqueResults, selectedObjects]);
 
   useEffect(() => {
     if (uniqueResults && uniqueResults.length > 0) {
@@ -219,7 +236,9 @@ export default function SearchView({
     } else {
       setSelectedObjects([]);
     }
-  }, [searchTerm, searchFilter, uniqueResults]);
+    // only select first item when search term or filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, searchFilter]);
 
   // confidence score
 
@@ -267,6 +286,11 @@ export default function SearchView({
       }
 
       switch (key) {
+        case "a":
+          if (modifiers.ctrl) {
+            onSelectAllObjects();
+          }
+          break;
         case "ArrowLeft":
           setSelectedObjects((prevSelected) => {
             if (uniqueResults.length === 0) return prevSelected;
@@ -324,11 +348,11 @@ export default function SearchView({
           break;
       }
     },
-    [uniqueResults, inputFocused],
+    [uniqueResults, inputFocused, onSelectAllObjects],
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
+    ["a", "ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
     onKeyboardShortcut,
     !inputFocused,
   );
@@ -336,7 +360,7 @@ export default function SearchView({
   // scroll into view
 
   useEffect(() => {
-    if (selectedObjects.length > 0 && uniqueResults && itemRefs.current) {
+    if (selectedObjects.length == 1 && uniqueResults && itemRefs.current) {
       const selectedIndex = uniqueResults.findIndex(
         (result) => result.id === selectedObjects[0],
       );
@@ -420,22 +444,39 @@ export default function SearchView({
         {hasExistingSearch && (
           <ScrollArea className="w-full whitespace-nowrap lg:ml-[35%]">
             <div className="flex flex-row gap-2">
-              <SearchFilterGroup
-                className={cn(
-                  "w-full justify-between md:justify-start lg:justify-end",
-                )}
-                filter={searchFilter}
-                onUpdateFilter={onUpdateFilter}
-              />
-              <SearchSettings
-                columns={columns}
-                setColumns={setColumns}
-                defaultView={defaultView}
-                setDefaultView={setDefaultView}
-                filter={searchFilter}
-                onUpdateFilter={onUpdateFilter}
-              />
-              <ScrollBar orientation="horizontal" className="h-0" />
+              {selectedObjects.length <= 1 ? (
+                <>
+                  <SearchFilterGroup
+                    className={cn(
+                      "w-full justify-between md:justify-start lg:justify-end",
+                    )}
+                    filter={searchFilter}
+                    onUpdateFilter={onUpdateFilter}
+                  />
+                  <SearchSettings
+                    columns={columns}
+                    setColumns={setColumns}
+                    defaultView={defaultView}
+                    setDefaultView={setDefaultView}
+                    filter={searchFilter}
+                    onUpdateFilter={onUpdateFilter}
+                  />
+                  <ScrollBar orientation="horizontal" className="h-0" />
+                </>
+              ) : (
+                <div
+                  className={cn(
+                    "scrollbar-container flex justify-center gap-2 overflow-x-auto",
+                    "h-10 w-full justify-between md:justify-start lg:justify-end",
+                  )}
+                >
+                  <SearchActionGroup
+                    selectedObjects={selectedObjects}
+                    setSelectedObjects={setSelectedObjects}
+                    pullLatestData={refresh}
+                  />
+                </div>
+              )}
             </div>
           </ScrollArea>
         )}
@@ -479,7 +520,9 @@ export default function SearchView({
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        onClick={() => onSelectSearch(value)}
+                        onClick={(value: SearchResult, ctrl: boolean) => {
+                          onSelectSearch(value, ctrl);
+                        }}
                       />
                       {(searchTerm ||
                         searchFilter?.search_type?.includes("similarity")) && (
@@ -520,9 +563,11 @@ export default function SearchView({
                         }}
                         refreshResults={refresh}
                         showObjectLifecycle={() =>
-                          onSelectSearch(value, "object lifecycle")
+                          onSelectSearch(value, false, "object lifecycle")
                         }
-                        showSnapshot={() => onSelectSearch(value, "snapshot")}
+                        showSnapshot={() =>
+                          onSelectSearch(value, false, "snapshot")
+                        }
                       />
                     </div>
                   </div>
