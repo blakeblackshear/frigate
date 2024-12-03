@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.events_body import (
+from frigate.api.defs.request.events_body import (
     EventsCreateBody,
     EventsDeleteBody,
     EventsDescriptionBody,

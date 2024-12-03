@@ -18,7 +18,7 @@ from joserfc import jwt
 from peewee import DoesNotExist
 from slowapi import Limiter
 
-from frigate.api.defs.app_body import (
+from frigate.api.defs.request.app_body import (
     AppPostLoginBody,
     AppPostUsersBody,
     AppPutPasswordBody,
