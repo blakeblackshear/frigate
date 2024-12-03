@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel, Json
+from pydantic import BaseModel
 
 
 class EventResponse(BaseModel):
@@ -20,7 +20,7 @@ class EventResponse(BaseModel):
     model_hash: Optional[str]
     detector_type: Optional[str]
     model_type: Optional[str]
-    data: Json
+    data: dict[str, Any]
 
 
 class EventCreateResponse(BaseModel):
