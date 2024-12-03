@@ -116,13 +116,30 @@ export function EventReviewTimeline({
   ]);
 
   const scrollToSegment = useCallback(
-    (segmentTime: number, ifNeeded?: boolean) => {
+    (segmentTime: number, ifNeeded?: boolean, behavior?: ScrollBehavior) => {
       if (virtualizedSegmentsRef.current) {
-        virtualizedSegmentsRef.current.scrollToSegment(segmentTime, ifNeeded);
+        virtualizedSegmentsRef.current.scrollToSegment(
+          segmentTime,
+          ifNeeded,
+          behavior,
+        );
       }
     },
     [],
   );
+
+  // keep handlebar centered when zooming
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToSegment(
+        alignStartDateToTimeline(handlebarTime ?? timelineStart),
+        true,
+        "auto",
+      );
+    }, 0);
+    // we only want to scroll when zooming level changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segmentDuration]);
 
   return (
     <ReviewTimeline

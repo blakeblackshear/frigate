@@ -27,7 +27,11 @@ type VirtualizedMotionSegmentsProps = {
 };
 
 export interface VirtualizedMotionSegmentsRef {
-  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
+  scrollToSegment: (
+    segmentTime: number,
+    ifNeeded?: boolean,
+    behavior?: ScrollBehavior,
+  ) => void;
 }
 
 const SEGMENT_HEIGHT = 8;
@@ -93,7 +97,11 @@ export const VirtualizedMotionSegments = forwardRef<
     }, [updateVisibleRange, timelineRef]);
 
     const scrollToSegment = useCallback(
-      (segmentTime: number, ifNeeded: boolean = true) => {
+      (
+        segmentTime: number,
+        ifNeeded: boolean = true,
+        behavior: ScrollBehavior = "smooth",
+      ) => {
         const segmentIndex = segments.findIndex((time) => time === segmentTime);
         if (
           segmentIndex !== -1 &&
@@ -112,7 +120,7 @@ export const VirtualizedMotionSegments = forwardRef<
           if (!ifNeeded || !isVisible) {
             timelineRef.current.scrollTo({
               top: Math.max(0, centeredScrollTop),
-              behavior: "smooth",
+              behavior: behavior,
             });
           }
           updateVisibleRange();
