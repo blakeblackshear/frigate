@@ -12,13 +12,13 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.response.generic_response import GenericResponse
-from frigate.api.defs.request.review_body import ReviewModifyMultipleBody
-from frigate.api.defs.review_query_parameters import (
+from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
     ReviewSummaryQueryParams,
 )
+from frigate.api.defs.request.review_body import ReviewModifyMultipleBody
+from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.response.review_response import (
     ReviewActivityMotionResponse,
     ReviewSegmentResponse,
