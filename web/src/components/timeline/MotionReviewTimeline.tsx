@@ -83,52 +83,17 @@ export function MotionReviewTimeline({
     motion_events,
   );
 
-  // Generate segment times for the timeline
   const segmentTimes = useMemo(() => {
     const segments = [];
     let segmentTime = timelineStartAligned;
 
-    while (segmentTime >= timelineStartAligned - timelineDuration) {
-      const motionStart = segmentTime;
-      const motionEnd = motionStart + segmentDuration;
-
-      const firstHalfMotionValue = getMotionSegmentValue(motionStart);
-      const secondHalfMotionValue = getMotionSegmentValue(
-        motionStart + segmentDuration / 2,
-      );
-
-      const segmentMotion =
-        firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
-      const overlappingReviewItems = events.some(
-        (item) =>
-          (item.start_time >= motionStart && item.start_time < motionEnd) ||
-          ((item.end_time ?? timelineStart) > motionStart &&
-            (item.end_time ?? timelineStart) <= motionEnd) ||
-          (item.start_time <= motionStart &&
-            (item.end_time ?? timelineStart) >= motionEnd),
-      );
-
-      if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
-        // exclude segment if necessary when in motion only mode
-        segmentTime -= segmentDuration;
-        continue;
-      }
-
+    for (let i = 0; i < Math.ceil(timelineDuration / segmentDuration); i++) {
       segments.push(segmentTime);
       segmentTime -= segmentDuration;
     }
+
     return segments;
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    segmentDuration,
-    timelineStartAligned,
-    timelineDuration,
-    events,
-    getMotionSegmentValue,
-    motion_events,
-    motionOnly,
-  ]);
+  }, [timelineStartAligned, segmentDuration, timelineDuration]);
 
   const scrollToSegment = useCallback(
     (segmentTime: number, ifNeeded?: boolean) => {

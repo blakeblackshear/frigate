@@ -9,7 +9,7 @@ import React, {
 import MotionSegment from "./MotionSegment";
 import { ReviewSegment, MotionData } from "@/types/review";
 
-interface VirtualizedMotionSegmentsProps {
+type VirtualizedMotionSegmentsProps = {
   timelineRef: React.RefObject<HTMLDivElement>;
   segments: number[];
   events: ReviewSegment[];
@@ -24,7 +24,7 @@ interface VirtualizedMotionSegmentsProps {
   dense: boolean;
   motionOnly: boolean;
   getMotionSegmentValue: (timestamp: number) => number;
-}
+};
 
 export interface VirtualizedMotionSegmentsRef {
   scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
@@ -125,6 +125,75 @@ export const VirtualizedMotionSegments = forwardRef<
       scrollToSegment,
     }));
 
+    const renderSegment = useCallback(
+      (segmentTime: number, index: number) => {
+        const motionStart = segmentTime;
+        const motionEnd = motionStart + segmentDuration;
+
+        const firstHalfMotionValue = getMotionSegmentValue(motionStart);
+        const secondHalfMotionValue = getMotionSegmentValue(
+          motionStart + segmentDuration / 2,
+        );
+
+        const segmentMotion =
+          firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
+        const overlappingReviewItems = events.some(
+          (item) =>
+            (item.start_time >= motionStart && item.start_time < motionEnd) ||
+            ((item.end_time ?? segmentTime) > motionStart &&
+              (item.end_time ?? segmentTime) <= motionEnd) ||
+            (item.start_time <= motionStart &&
+              (item.end_time ?? segmentTime) >= motionEnd),
+        );
+
+        if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
+          return null; // Skip rendering this segment in motion only mode
+        }
+
+        return (
+          <div
+            key={`${segmentTime}_${segmentDuration}`}
+            style={{
+              position: "absolute",
+              top: `${(visibleRange.start + index) * SEGMENT_HEIGHT}px`,
+              height: `${SEGMENT_HEIGHT}px`,
+              width: "100%",
+            }}
+          >
+            <MotionSegment
+              events={events}
+              firstHalfMotionValue={firstHalfMotionValue}
+              secondHalfMotionValue={secondHalfMotionValue}
+              segmentDuration={segmentDuration}
+              segmentTime={segmentTime}
+              timestampSpread={timestampSpread}
+              motionOnly={motionOnly}
+              showMinimap={showMinimap}
+              minimapStartTime={minimapStartTime}
+              minimapEndTime={minimapEndTime}
+              setHandlebarTime={setHandlebarTime}
+              scrollToSegment={scrollToSegment}
+              dense={dense}
+            />
+          </div>
+        );
+      },
+      [
+        events,
+        getMotionSegmentValue,
+        motionOnly,
+        segmentDuration,
+        showMinimap,
+        minimapStartTime,
+        minimapEndTime,
+        setHandlebarTime,
+        scrollToSegment,
+        dense,
+        timestampSpread,
+        visibleRange.start,
+      ],
+    );
+
     const totalHeight = segments.length * SEGMENT_HEIGHT;
     const visibleSegments = segments.slice(
       visibleRange.start,
@@ -149,46 +218,17 @@ export const VirtualizedMotionSegments = forwardRef<
               aria-hidden="true"
             />
           )}
-          {visibleSegments.map((segmentTime, index) => {
-            const firstHalfMotionValue = getMotionSegmentValue(segmentTime);
-            const secondHalfMotionValue = getMotionSegmentValue(
-              segmentTime + segmentDuration / 2,
-            );
-
-            return (
-              <div
-                key={`${segmentTime}_${segmentDuration}`}
-                style={{
-                  position: "absolute",
-                  top: `${(visibleRange.start + index) * SEGMENT_HEIGHT}px`,
-                  height: `${SEGMENT_HEIGHT}px`,
-                  width: "100%",
-                }}
-              >
-                <MotionSegment
-                  events={events}
-                  firstHalfMotionValue={firstHalfMotionValue}
-                  secondHalfMotionValue={secondHalfMotionValue}
-                  segmentDuration={segmentDuration}
-                  segmentTime={segmentTime}
-                  timestampSpread={timestampSpread}
-                  motionOnly={motionOnly}
-                  showMinimap={showMinimap}
-                  minimapStartTime={minimapStartTime}
-                  minimapEndTime={minimapEndTime}
-                  setHandlebarTime={setHandlebarTime}
-                  scrollToSegment={scrollToSegment}
-                  dense={dense}
-                />
-              </div>
-            );
-          })}
+          {visibleSegments.map((segmentTime, index) =>
+            renderSegment(segmentTime, index),
+          )}
           {visibleRange.end < segments.length && (
             <div
               style={{
                 position: "absolute",
                 top: `${visibleRange.end * SEGMENT_HEIGHT}px`,
-                height: `${(segments.length - visibleRange.end) * SEGMENT_HEIGHT}px`,
+                height: `${
+                  (segments.length - visibleRange.end) * SEGMENT_HEIGHT
+                }px`,
                 width: "100%",
               }}
               aria-hidden="true"
@@ -199,3 +239,5 @@ export const VirtualizedMotionSegments = forwardRef<
     );
   },
 );
+
+export default VirtualizedMotionSegments;
