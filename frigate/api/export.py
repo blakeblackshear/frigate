@@ -210,7 +210,7 @@ def export_delete(event_id: str):
     )
 
 
-@router.get("/exports/{export_id}", response_model=Export)
+@router.get("/exports/{export_id}")
 def get_export(export_id: str):
     try:
         return JSONResponse(content=model_to_dict(Export.get(Export.id == export_id)))

@@ -1,4 +1,26 @@
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import BaseModel, Json
+
+
+class EventResponse(BaseModel):
+    id: str
+    label: str
+    sub_label: Optional[str]
+    camera: str
+    start_time: float
+    end_time: Optional[float]
+    false_positive: bool
+    zones: list[str]
+    thumbnail: str
+    has_clip: bool
+    has_snapshot: bool
+    retain_indefinitely: bool
+    plus_id: Optional[str]
+    model_hash: Optional[str]
+    detector_type: Optional[str]
+    model_type: Optional[str]
+    data: Json
 
 
 class EventCreateResponse(BaseModel):

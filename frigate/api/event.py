@@ -34,6 +34,7 @@ from frigate.api.defs.request.events_body import (
 from frigate.api.defs.response.event_response import (
     EventCreateResponse,
     EventMultiDeleteResponse,
+    EventResponse,
     EventUploadPlusResponse,
 )
 from frigate.api.defs.response.generic_response import GenericResponse
@@ -50,7 +51,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.events])
 
 
-@router.get("/events", response_model=list[Event])
+@router.get("/events", response_model=list[EventResponse])
 def events(params: EventsQueryParams = Depends()):
     camera = params.camera
     cameras = params.cameras
@@ -267,7 +268,7 @@ def events(params: EventsQueryParams = Depends()):
     return JSONResponse(content=list(events))
 
 
-@router.get("/events/explore", response_model=list[Event])
+@router.get("/events/explore", response_model=list[EventResponse])
 def events_explore(limit: int = 10):
     # get distinct labels for all events
     distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
@@ -329,7 +330,7 @@ def events_explore(limit: int = 10):
     return JSONResponse(content=processed_events)
 
 
-@router.get("/event_ids", response_model=list[Event])
+@router.get("/event_ids", response_model=list[EventResponse])
 def event_ids(ids: str):
     ids = ids.split(",")
 
@@ -652,7 +653,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
     return JSONResponse(content=[e for e in groups.dicts()])
 
 
-@router.get("/events/{event_id}", response_model=Event)
+@router.get("/events/{event_id}", response_model=EventResponse)
 def event(event_id: str):
     try:
         return model_to_dict(Event.get(Event.id == event_id))
