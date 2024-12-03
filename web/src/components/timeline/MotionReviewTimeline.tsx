@@ -88,12 +88,36 @@ export function MotionReviewTimeline({
     let segmentTime = timelineStartAligned;
 
     for (let i = 0; i < Math.ceil(timelineDuration / segmentDuration); i++) {
-      segments.push(segmentTime);
+      if (!motionOnly) {
+        segments.push(segmentTime);
+      } else {
+        const motionStart = segmentTime;
+        const motionEnd = motionStart + segmentDuration;
+        const overlappingReviewItems = events.some(
+          (item) =>
+            (item.start_time >= motionStart && item.start_time < motionEnd) ||
+            ((item.end_time ?? timelineStart) > motionStart &&
+              (item.end_time ?? timelineStart) <= motionEnd) ||
+            (item.start_time <= motionStart &&
+              (item.end_time ?? timelineStart) >= motionEnd),
+        );
+        if (getMotionSegmentValue(segmentTime) && !overlappingReviewItems) {
+          segments.push(segmentTime);
+        }
+      }
       segmentTime -= segmentDuration;
     }
 
     return segments;
-  }, [timelineStartAligned, segmentDuration, timelineDuration]);
+  }, [
+    timelineStartAligned,
+    segmentDuration,
+    timelineDuration,
+    motionOnly,
+    getMotionSegmentValue,
+    events,
+    timelineStart,
+  ]);
 
   const scrollToSegment = useCallback(
     (segmentTime: number, ifNeeded?: boolean) => {
