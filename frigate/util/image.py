@@ -222,16 +222,25 @@ def draw_box_with_label(
     # set the text start position
     if position == "ul":
         text_offset_x = x_min
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "ur":
-        text_offset_x = x_max - (text_width + 8)
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_x = max(0, x_max - (text_width + 8))
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "bl":
         text_offset_x = x_min
         text_offset_y = y_max
     elif position == "br":
-        text_offset_x = x_max - (text_width + 8)
+        text_offset_x = max(0, x_max - (text_width + 8))
         text_offset_y = y_max
+
+    # Adjust position if it overlaps with the box
+    if position in {"ul", "ur"} and text_offset_y < y_min + thickness:
+        # Move the text below the box
+        text_offset_y = y_max
+    elif position in {"bl", "br"} and text_offset_y + line_height > y_max:
+        # Move the text above the box
+        text_offset_y = max(0, y_min - (line_height + 8))
+
     # make the coords of the box with a small padding of two pixels
     textbox_coords = (
         (text_offset_x, text_offset_y),
