@@ -15,7 +15,10 @@ export function useOverlayState<S>(
     (value: S, replace: boolean = false) => {
       const newLocationState = { ...currentLocationState };
       newLocationState[key] = value;
-      navigate(location.pathname, { state: newLocationState, replace });
+      navigate(location.pathname + location.search, {
+        state: newLocationState,
+        replace,
+      });
     },
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
