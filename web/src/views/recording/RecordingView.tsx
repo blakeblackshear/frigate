@@ -632,6 +632,7 @@ export function RecordingView({
 
 type TimelineProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
+  timelineRef?: MutableRefObject<HTMLDivElement | null>;
   mainCamera: string;
   timelineType: TimelineType;
   timeRange: TimeRange;
@@ -645,6 +646,7 @@ type TimelineProps = {
 };
 function Timeline({
   contentRef,
+  timelineRef,
   mainCamera,
   timelineType,
   timeRange,
@@ -656,6 +658,9 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+
   // timeline interaction
 
   const [zoomSettings, setZoomSettings] = useState({
@@ -679,10 +684,12 @@ function Timeline({
     [possibleZoomLevels],
   );
 
-  useTimelineZoom({
+  const { isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
     onZoomChange: handleZoomChange,
+    timelineRef: selectedTimelineRef,
+    timelineDuration: timeRange.after - timeRange.before,
   });
 
   // motion data
@@ -727,6 +734,7 @@ function Timeline({
       {timelineType == "timeline" ? (
         !isLoading ? (
           <MotionReviewTimeline
+            timelineRef={selectedTimelineRef}
             segmentDuration={zoomSettings.segmentDuration}
             timestampSpread={zoomSettings.timestampSpread}
             timelineStart={timeRange.before}
@@ -743,6 +751,8 @@ function Timeline({
             motion_events={motionData ?? []}
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            isZooming={isZooming}
+            zoomDirection={zoomDirection}
           />
         ) : (
           <Skeleton className="size-full" />

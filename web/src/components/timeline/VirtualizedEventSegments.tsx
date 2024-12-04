@@ -9,7 +9,7 @@ import React, {
 import { EventSegment } from "./EventSegment";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 
-interface VirtualizedEventSegmentsProps {
+type VirtualizedEventSegmentsProps = {
   timelineRef: React.RefObject<HTMLDivElement>;
   segments: number[];
   events: ReviewSegment[];
@@ -23,7 +23,7 @@ interface VirtualizedEventSegmentsProps {
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
   alignStartDateToTimeline: (timestamp: number) => number;
-}
+};
 
 export interface VirtualizedEventSegmentsRef {
   scrollToSegment: (

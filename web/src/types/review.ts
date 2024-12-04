@@ -67,3 +67,5 @@ export type ConsolidatedSegmentData = {
   severity: ReviewSeverity | "empty";
   reviewed: boolean;
 };
+
+export type TimelineZoomDirection = "in" | "out" | null;

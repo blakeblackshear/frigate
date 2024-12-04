@@ -195,10 +195,12 @@ function UIPlayground() {
     [possibleZoomLevels],
   );
 
-  const { zoomLevel, handleZoom } = useTimelineZoom({
+  const { zoomLevel, handleZoom, isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
     onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration: 4 * 60 * 60,
   });
 
   const handleZoomIn = () => handleZoom(-1);
@@ -407,6 +409,8 @@ function UIPlayground() {
                 motion_events={mockMotionData}
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
                 dense={isMobile} // dense will produce a smaller handlebar and only minute resolution on timestamps
+                isZooming={isZooming} // is the timeline actively zooming?
+                zoomDirection={zoomDirection} // is the timeline zooming in or out
               />
             )}
             {isEventsReviewTimeline && (
@@ -432,6 +436,8 @@ function UIPlayground() {
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
                 timelineRef={reviewTimelineRef} // save a ref to this timeline to connect with the summary timeline
                 dense // dense will produce a smaller handlebar and only minute resolution on timestamps
+                isZooming={isZooming} // is the timeline actively zooming?
+                zoomDirection={zoomDirection} // is the timeline zooming in or out
               />
             )}
           </div>

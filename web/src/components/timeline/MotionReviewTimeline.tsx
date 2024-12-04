@@ -6,7 +6,11 @@ import React, {
   useEffect,
 } from "react";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { MotionData, ReviewSegment } from "@/types/review";
+import {
+  MotionData,
+  ReviewSegment,
+  TimelineZoomDirection,
+} from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 import {
@@ -38,6 +42,8 @@ export type MotionReviewTimelineProps = {
   timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
   dense?: boolean;
+  isZooming: boolean;
+  zoomDirection: TimelineZoomDirection;
 };
 
 export function MotionReviewTimeline({
@@ -64,6 +70,8 @@ export function MotionReviewTimeline({
   timelineRef,
   onHandlebarDraggingChange,
   dense = false,
+  isZooming,
+  zoomDirection,
 }: MotionReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
@@ -172,6 +180,8 @@ export function MotionReviewTimeline({
       dense={dense}
       segments={segmentTimes}
       scrollToSegment={scrollToSegment}
+      isZooming={isZooming}
+      zoomDirection={zoomDirection}
     >
       <VirtualizedMotionSegments
         ref={virtualizedSegmentsRef}

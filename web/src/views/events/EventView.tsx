@@ -486,6 +486,11 @@ function DetectionReview({
 
   // timeline interaction
 
+  const timelineDuration = useMemo(
+    () => timeRange.before - timeRange.after,
+    [timeRange],
+  );
+
   const [zoomSettings, setZoomSettings] = useState({
     segmentDuration: 60,
     timestampSpread: 15,
@@ -507,16 +512,13 @@ function DetectionReview({
     [possibleZoomLevels],
   );
 
-  useTimelineZoom({
+  const { isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
     onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration,
   });
-
-  const timelineDuration = useMemo(
-    () => timeRange.before - timeRange.after,
-    [timeRange],
-  );
 
   const { alignStartDateToTimeline, getVisibleTimelineDuration } =
     useTimelineUtils({
@@ -795,6 +797,8 @@ function DetectionReview({
               contentRef={contentRef}
               timelineRef={reviewTimelineRef}
               dense={isMobile}
+              isZooming={isZooming}
+              zoomDirection={zoomDirection}
             />
           )}
         </div>
@@ -1130,6 +1134,8 @@ function MotionReview({
               setScrubbing(scrubbing);
             }}
             dense={isMobileOnly}
+            isZooming={false}
+            zoomDirection={null}
           />
         ) : (
           <Skeleton className="size-full" />

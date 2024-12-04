@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { TimelineZoomDirection } from "@/types/review";
 
 type ZoomSettings = {
   segmentDuration: number;
@@ -10,6 +11,8 @@ type UseTimelineZoomProps = {
   zoomLevels: ZoomSettings[];
   onZoomChange: (newZoomLevel: number) => void;
   pinchThresholdPercent?: number;
+  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineDuration: number;
 };
 
 export function useTimelineZoom({
@@ -17,6 +20,8 @@ export function useTimelineZoom({
   zoomLevels,
   onZoomChange,
   pinchThresholdPercent = 20,
+  timelineRef,
+  timelineDuration,
 }: UseTimelineZoomProps) {
   const [zoomLevel, setZoomLevel] = useState(
     zoomLevels.findIndex(
@@ -25,6 +30,9 @@ export function useTimelineZoom({
         level.timestampSpread === zoomSettings.timestampSpread,
     ),
   );
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomDirection, setZoomDirection] =
+    useState<TimelineZoomDirection>(null);
   const touchStartDistanceRef = useRef(0);
 
   const getPinchThreshold = useCallback(() => {
@@ -37,18 +45,46 @@ export function useTimelineZoom({
 
   const handleZoom = useCallback(
     (delta: number) => {
+      setIsZooming(true);
+      setZoomDirection(delta > 0 ? "out" : "in");
       setZoomLevel((prevLevel) => {
         const newLevel = Math.max(
           0,
           Math.min(zoomLevels.length - 1, prevLevel - delta),
         );
-        if (newLevel !== prevLevel) {
+        if (newLevel !== prevLevel && timelineRef.current) {
+          const { scrollTop, clientHeight, scrollHeight } = timelineRef.current;
+
+          // get time at the center of the viewable timeline
+          const centerRatio = (scrollTop + clientHeight / 2) / scrollHeight;
+          const centerTime = centerRatio * timelineDuration;
+
+          // calc the new total height based on the new zoom level
+          const newTotalHeight =
+            (timelineDuration / zoomLevels[newLevel].segmentDuration) * 8;
+
+          // calc the new scroll position to keep the center time in view
+          const newScrollTop =
+            (centerTime / timelineDuration) * newTotalHeight - clientHeight / 2;
+
           onZoomChange(newLevel);
+
+          // Apply new scroll position after a short delay to allow for DOM update
+          setTimeout(() => {
+            if (timelineRef.current) {
+              timelineRef.current.scrollTop = newScrollTop;
+            }
+          }, 0);
         }
         return newLevel;
       });
+
+      setTimeout(() => {
+        setIsZooming(false);
+        setZoomDirection(null);
+      }, 500);
     },
-    [zoomLevels, onZoomChange],
+    [zoomLevels, onZoomChange, timelineRef, timelineDuration],
   );
 
   const debouncedZoom = useCallback(() => {
@@ -134,5 +170,5 @@ export function useTimelineZoom({
     };
   }, [handleWheel, handleTouchStart, handleTouchMove]);
 
-  return { zoomLevel, handleZoom };
+  return { zoomLevel, handleZoom, isZooming, zoomDirection };
 }

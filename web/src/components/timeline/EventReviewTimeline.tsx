@@ -6,7 +6,11 @@ import React, {
   useCallback,
 } from "react";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  ReviewSegment,
+  ReviewSeverity,
+  TimelineZoomDirection,
+} from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import {
   VirtualizedEventSegments,
@@ -35,6 +39,8 @@ export type EventReviewTimelineProps = {
   timelineRef?: RefObject<HTMLDivElement>;
   contentRef: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
+  isZooming: boolean;
+  zoomDirection: TimelineZoomDirection;
   dense?: boolean;
 };
 
@@ -60,6 +66,8 @@ export function EventReviewTimeline({
   timelineRef,
   contentRef,
   onHandlebarDraggingChange,
+  isZooming,
+  zoomDirection,
   dense = false,
 }: EventReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
@@ -128,19 +136,6 @@ export function EventReviewTimeline({
     [],
   );
 
-  // keep handlebar centered when zooming
-  useEffect(() => {
-    setTimeout(() => {
-      scrollToSegment(
-        alignStartDateToTimeline(handlebarTime ?? timelineStart),
-        true,
-        "auto",
-      );
-    }, 0);
-    // we only want to scroll when zooming level changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [segmentDuration]);
-
   return (
     <ReviewTimeline
       timelineRef={selectedTimelineRef}
@@ -160,6 +155,8 @@ export function EventReviewTimeline({
       dense={dense}
       segments={segmentTimes}
       scrollToSegment={scrollToSegment}
+      isZooming={isZooming}
+      zoomDirection={zoomDirection}
     >
       <VirtualizedEventSegments
         ref={virtualizedSegmentsRef}
