@@ -175,7 +175,7 @@ export default function SearchFilterDialog({
               time_range: undefined,
               zones: undefined,
               sub_labels: undefined,
-              search_type: ["thumbnail", "description"],
+              search_type: undefined,
               min_score: undefined,
               max_score: undefined,
               has_snapshot: undefined,

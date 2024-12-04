@@ -248,6 +248,8 @@ def events(params: EventsQueryParams = Depends()):
             order_by = Event.start_time.asc()
         elif sort == "date_desc":
             order_by = Event.start_time.desc()
+        else:
+            order_by = Event.start_time.desc()
     else:
         order_by = Event.start_time.desc()
 
@@ -582,19 +584,17 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         processed_events.append(processed_event)
 
-    # Sort by search distance if search_results are available, otherwise by start_time as default
-    if search_results:
+    if (sort is None or sort == "relevance") and search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
+    elif min_score is not None and max_score is not None and sort == "score_asc":
+        processed_events.sort(key=lambda x: x["score"])
+    elif min_score is not None and max_score is not None and sort == "score_desc":
+        processed_events.sort(key=lambda x: x["score"], reverse=True)
+    elif sort == "date_asc":
+        processed_events.sort(key=lambda x: x["start_time"])
     else:
-        if sort == "score_asc":
-            processed_events.sort(key=lambda x: x["score"])
-        elif sort == "score_desc":
-            processed_events.sort(key=lambda x: x["score"], reverse=True)
-        elif sort == "date_asc":
-            processed_events.sort(key=lambda x: x["start_time"])
-        else:
-            # "date_desc" default
-            processed_events.sort(key=lambda x: x["start_time"], reverse=True)
+        # "date_desc" default
+        processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
     processed_events = processed_events[:limit]
