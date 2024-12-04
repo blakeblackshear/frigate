@@ -134,7 +134,7 @@ cameras:
 
 ## Handling Complex Passwords
 
-go2rtc expects URL-encoded values in the config, [urlencoder.org](https://urlencoder.org) can be used for this purpose. 
+go2rtc expects URL-encoded passwords in the config, [urlencoder.org](https://urlencoder.org) can be used for this purpose. 
 
 For example:
 
