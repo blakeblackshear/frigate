@@ -379,6 +379,7 @@ function EventItem({
 
               {event.has_snapshot &&
                 event.plus_id == undefined &&
+                event.data.type == "object" &&
                 config?.plus.enabled && (
                   <Tooltip>
                     <TooltipTrigger>

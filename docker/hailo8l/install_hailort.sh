@@ -10,10 +10,8 @@ elif [[ "${TARGETARCH}" == "arm64" ]]; then
     arch="aarch64"
 fi
 
-mkdir -p /rootfs
-
 wget -qO- "https://github.com/frigate-nvr/hailort/releases/download/v${hailo_version}/hailort-${TARGETARCH}.tar.gz" |
-    tar -C /rootfs/ -xzf -
+    tar -C / -xzf -
 
 mkdir -p /hailo-wheels
 

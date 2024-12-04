@@ -36,6 +36,7 @@ from frigate.const import (
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
+    SHM_FRAMES_VAR,
 )
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
@@ -436,7 +437,7 @@ class FrigateApp:
             # pre-create shms
             for i in range(shm_frame_count):
                 frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
-                self.frame_manager.create(f"{config.name}{i}", frame_size)
+                self.frame_manager.create(f"{config.name}_{i}", frame_size)
 
             capture_process = util.Process(
                 target=capture_camera,
@@ -523,7 +524,10 @@ class FrigateApp:
         if cam_total_frame_size == 0.0:
             return 0
 
-        shm_frame_count = min(200, int(available_shm / (cam_total_frame_size)))
+        shm_frame_count = min(
+            int(os.environ.get(SHM_FRAMES_VAR, "50")),
+            int(available_shm / (cam_total_frame_size)),
+        )
 
         logger.debug(
             f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"

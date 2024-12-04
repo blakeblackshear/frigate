@@ -6,7 +6,7 @@ import queue
 import threading
 from collections import Counter, defaultdict
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable
+from typing import Callable, Optional
 
 import cv2
 import numpy as np
@@ -784,12 +784,17 @@ class TrackedObjectProcessor(threading.Thread):
         else:
             return {}
 
-    def get_current_frame(self, camera, draw_options={}):
+    def get_current_frame(
+        self, camera: str, draw_options: dict[str, any] = {}
+    ) -> Optional[np.ndarray]:
         if camera == "birdseye":
             return self.frame_manager.get(
                 "birdseye",
                 (self.config.birdseye.height * 3 // 2, self.config.birdseye.width),
             )
+
+        if camera not in self.camera_states:
+            return None
 
         return self.camera_states[camera].get_current_frame(draw_options)
 

@@ -13,6 +13,8 @@ FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 
+SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
+
 # Attribute & Object constants
 
 DEFAULT_ATTRIBUTE_LABEL_MAP = {

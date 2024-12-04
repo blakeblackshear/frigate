@@ -113,7 +113,7 @@ def capture_frames(
         fps.value = frame_rate.eps()
         skipped_fps.value = skipped_eps.eps()
         current_frame.value = datetime.datetime.now().timestamp()
-        frame_name = f"{config.name}{frame_index}"
+        frame_name = f"{config.name}_{frame_index}"
         frame_buffer = frame_manager.write(frame_name)
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
