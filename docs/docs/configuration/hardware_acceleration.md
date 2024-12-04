@@ -231,28 +231,11 @@ docker run -d \
 
 ### Setup Decoder
 
-The decoder you need to pass in the `hwaccel_args` will depend on the input video.
-
-A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the container to get the ones your card supports)
-
-```
- V..... h263_cuvid           Nvidia CUVID H263 decoder (codec h263)
- V..... h264_cuvid           Nvidia CUVID H264 decoder (codec h264)
- V..... hevc_cuvid           Nvidia CUVID HEVC decoder (codec hevc)
- V..... mjpeg_cuvid          Nvidia CUVID MJPEG decoder (codec mjpeg)
- V..... mpeg1_cuvid          Nvidia CUVID MPEG1VIDEO decoder (codec mpeg1video)
- V..... mpeg2_cuvid          Nvidia CUVID MPEG2VIDEO decoder (codec mpeg2video)
- V..... mpeg4_cuvid          Nvidia CUVID MPEG4 decoder (codec mpeg4)
- V..... vc1_cuvid            Nvidia CUVID VC1 decoder (codec vc1)
- V..... vp8_cuvid            Nvidia CUVID VP8 decoder (codec vp8)
- V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
-```
-
-For example, for H264 video, you'll select `preset-nvidia-h264`.
+Using `preset-nvidia` ffmpeg will automatically select the necessary profile for the incoming video, and will log an error if the profile is not supported by your GPU.
 
 ```yaml
 ffmpeg:
-  hwaccel_args: preset-nvidia-h264
+  hwaccel_args: preset-nvidia
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
