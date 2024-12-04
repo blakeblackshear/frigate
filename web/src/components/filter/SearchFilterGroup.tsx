@@ -15,13 +15,15 @@ import {
   SearchFilter,
   SearchFilters,
   SearchSource,
+  SearchSortType,
 } from "@/types/search";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
-import { MdLabel } from "react-icons/md";
+import { MdLabel, MdSort } from "react-icons/md";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -107,6 +109,25 @@ export default function SearchFilterGroup({
     [config, allLabels, allZones],
   );
 
+  const availableSortTypes = useMemo(() => {
+    const sortTypes = ["date_asc", "date_desc"];
+    if (filter?.min_score || filter?.max_score) {
+      sortTypes.push("score_desc", "score_asc");
+    }
+    if (filter?.event_id || filter?.query) {
+      sortTypes.push("relevance");
+    }
+    return sortTypes as SearchSortType[];
+  }, [filter]);
+
+  const defaultSortType = useMemo<SearchSortType>(() => {
+    if (filter?.query || filter?.event_id) {
+      return "relevance";
+    } else {
+      return "date_desc";
+    }
+  }, [filter]);
+
   const groups = useMemo(() => {
     if (!config) {
       return [];
@@ -179,6 +200,16 @@ export default function SearchFilterGroup({
         filterValues={filterValues}
         onUpdateFilter={onUpdateFilter}
       />
+      {filters.includes("sort") && Object.keys(filter ?? {}).length > 0 && (
+        <SortTypeButton
+          availableSortTypes={availableSortTypes ?? []}
+          defaultSortType={defaultSortType}
+          selectedSortType={filter?.sort}
+          updateSortType={(newSort) => {
+            onUpdateFilter({ ...filter, sort: newSort });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -354,6 +385,179 @@ export function GeneralFilterContent({
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+    </>
+  );
+}
+
+type SortTypeButtonProps = {
+  availableSortTypes: SearchSortType[];
+  defaultSortType: SearchSortType;
+  selectedSortType: SearchSortType | undefined;
+  updateSortType: (sortType: SearchSortType | undefined) => void;
+};
+function SortTypeButton({
+  availableSortTypes,
+  defaultSortType,
+  selectedSortType,
+  updateSortType,
+}: SortTypeButtonProps) {
+  const [open, setOpen] = useState(false);
+  const [currentSortType, setCurrentSortType] = useState<
+    SearchSortType | undefined
+  >(selectedSortType as SearchSortType);
+
+  // ui
+
+  useEffect(() => {
+    setCurrentSortType(selectedSortType);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSortType]);
+
+  const trigger = (
+    <Button
+      size="sm"
+      variant={
+        selectedSortType != defaultSortType && selectedSortType != undefined
+          ? "select"
+          : "default"
+      }
+      className="flex items-center gap-2 capitalize"
+      aria-label="Labels"
+    >
+      <MdSort
+        className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Sort
+      </div>
+    </Button>
+  );
+  const content = (
+    <SortTypeContent
+      availableSortTypes={availableSortTypes ?? []}
+      defaultSortType={defaultSortType}
+      selectedSortType={selectedSortType}
+      currentSortType={currentSortType}
+      setCurrentSortType={setCurrentSortType}
+      updateSortType={updateSortType}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  return (
+    <PlatformAwareDialog
+      trigger={trigger}
+      content={content}
+      contentClassName={
+        isDesktop
+          ? "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto"
+          : "max-h-[75dvh] overflow-hidden p-4"
+      }
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentSortType(selectedSortType);
+        }
+
+        setOpen(open);
+      }}
+    />
+  );
+}
+
+type SortTypeContentProps = {
+  availableSortTypes: SearchSortType[];
+  defaultSortType: SearchSortType;
+  selectedSortType: SearchSortType | undefined;
+  currentSortType: SearchSortType | undefined;
+  updateSortType: (sort_type: SearchSortType | undefined) => void;
+  setCurrentSortType: (sort_type: SearchSortType | undefined) => void;
+  onClose: () => void;
+};
+export function SortTypeContent({
+  availableSortTypes,
+  defaultSortType,
+  selectedSortType,
+  currentSortType,
+  updateSortType,
+  setCurrentSortType,
+  onClose,
+}: SortTypeContentProps) {
+  const sortLabels = {
+    date_asc: "Date (Ascending)",
+    date_desc: "Date (Descending)",
+    score_asc: "Object Score (Ascending)",
+    score_desc: "Object Score (Descending)",
+    relevance: "Relevance",
+  };
+
+  return (
+    <>
+      <div className="overflow-x-hidden">
+        <div className="my-2.5 flex flex-col gap-2.5">
+          <RadioGroup
+            value={
+              Array.isArray(currentSortType)
+                ? currentSortType?.[0]
+                : (currentSortType ?? defaultSortType)
+            }
+            defaultValue={defaultSortType}
+            onValueChange={(value) =>
+              setCurrentSortType(value as SearchSortType)
+            }
+            className="w-full space-y-1"
+          >
+            {availableSortTypes.map((value) => (
+              <div className="flex flex-row gap-2">
+                <RadioGroupItem
+                  key={value}
+                  value={value}
+                  id={`sort-${value}`}
+                  className={
+                    value == (currentSortType ?? defaultSortType)
+                      ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                      : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                  }
+                />
+                <Label
+                  htmlFor={`sort-${value}`}
+                  className="flex cursor-pointer items-center space-x-2"
+                >
+                  <span>{sortLabels[value]}</span>
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+      </div>
+      <DropdownMenuSeparator />
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          aria-label="Apply"
+          variant="select"
+          onClick={() => {
+            if (selectedSortType != currentSortType) {
+              updateSortType(currentSortType);
+            }
+
+            onClose();
+          }}
+        >
+          Apply
+        </Button>
+        <Button
+          aria-label="Reset"
+          onClick={() => {
+            setCurrentSortType(undefined);
+            updateSortType(undefined);
           }}
         >
           Reset

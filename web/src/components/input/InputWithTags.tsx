@@ -18,6 +18,7 @@ import {
   FilterType,
   SavedSearchQuery,
   SearchFilter,
+  SearchSortType,
   SearchSource,
 } from "@/types/search";
 import useSuggestions from "@/hooks/use-suggestions";
@@ -322,6 +323,9 @@ export default function InputWithTags({
             break;
           case "event_id":
             newFilters.event_id = value;
+            break;
+          case "sort":
+            newFilters.sort = value as SearchSortType;
             break;
           default:
             // Handle array types (cameras, labels, subLabels, zones)
