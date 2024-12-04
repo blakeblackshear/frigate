@@ -26,6 +26,7 @@ from frigate.api.defs.review_responses import (
 )
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
+from frigate.review.maintainer import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -161,7 +162,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -173,7 +174,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -185,7 +186,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -197,7 +198,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],
@@ -230,6 +231,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
+    day_in_seconds = 60 * 60 * 24
     last_month = (
         ReviewSegment.select(
             fn.strftime(
@@ -246,7 +248,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -258,7 +260,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -270,7 +272,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -282,7 +284,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],
@@ -292,7 +294,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         )
         .where(reduce(operator.and_, clauses))
         .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / (3600 * 24),
+            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds,
         )
         .order_by(ReviewSegment.start_time.desc())
     )
