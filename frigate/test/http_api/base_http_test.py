@@ -9,7 +9,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
-from frigate.models import Event, ReviewSegment
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.maintainer import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -146,17 +146,35 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_review_segment(
         self,
         id: str,
-        start_time: datetime.datetime = datetime.datetime.now().timestamp(),
-        end_time: datetime.datetime = datetime.datetime.now().timestamp() + 20,
+        start_time: float = datetime.datetime.now().timestamp(),
+        end_time: float = datetime.datetime.now().timestamp() + 20,
+        severity: SeverityEnum = SeverityEnum.alert,
+        has_been_reviewed: bool = False,
     ) -> Event:
-        """Inserts a basic event model with a given id."""
+        """Inserts a review segment model with a given id."""
         return ReviewSegment.insert(
             id=id,
             camera="front_door",
             start_time=start_time,
             end_time=end_time,
-            has_been_reviewed=False,
-            severity=SeverityEnum.alert,
+            has_been_reviewed=has_been_reviewed,
+            severity=severity,
             thumb_path=False,
             data={},
+        ).execute()
+
+    def insert_mock_recording(
+        self,
+        id: str,
+        start_time: float = datetime.datetime.now().timestamp(),
+        end_time: float = datetime.datetime.now().timestamp() + 20,
+    ) -> Event:
+        """Inserts a recording model with a given id."""
+        return Recordings.insert(
+            id=id,
+            path=id,
+            camera="front_door",
+            start_time=start_time,
+            end_time=end_time,
+            duration=end_time - start_time,
         ).execute()
