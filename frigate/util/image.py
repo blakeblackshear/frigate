@@ -219,6 +219,8 @@ def draw_box_with_label(
     text_width = size[0][0]
     text_height = size[0][1]
     line_height = text_height + size[1]
+    # get frame height
+    frame_height = frame.shape[0]
     # set the text start position
     if position == "ul":
         text_offset_x = x_min
@@ -228,18 +230,23 @@ def draw_box_with_label(
         text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "bl":
         text_offset_x = x_min
-        text_offset_y = y_max
+        text_offset_y = min(frame_height - line_height, y_max)
     elif position == "br":
         text_offset_x = max(0, x_max - (text_width + 8))
-        text_offset_y = y_max
-
-    # Adjust position if it overlaps with the box
-    if position in {"ul", "ur"} and text_offset_y < y_min + thickness:
-        # Move the text below the box
-        text_offset_y = y_max
-    elif position in {"bl", "br"} and text_offset_y + line_height > y_max:
-        # Move the text above the box
-        text_offset_y = max(0, y_min - (line_height + 8))
+        text_offset_y = min(frame_height - line_height, y_max)
+    # Adjust position if it overlaps with the box or goes out of frame
+    if position in {"ul", "ur"}:
+        if text_offset_y < y_min + thickness:  # Label overlaps with the box
+            if y_min - (line_height + 8) < 0 and y_max + line_height <= frame_height:
+                # Not enough space above, and there is space below
+                text_offset_y = y_max
+            elif y_min - (line_height + 8) >= 0:
+                # Enough space above, keep the label at the top
+                text_offset_y = max(0, y_min - (line_height + 8))
+    elif position in {"bl", "br"}:
+        if text_offset_y + line_height > frame_height:
+            # If there's not enough space below, try above the box
+            text_offset_y = max(0, y_min - (line_height + 8))
 
     # make the coords of the box with a small padding of two pixels
     textbox_coords = (
