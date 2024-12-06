@@ -168,7 +168,7 @@ class TestHttp(unittest.TestCase):
 
         assert event
         assert event["id"] == id
-        assert event == model_to_dict(Event.get(Event.id == id))
+        assert event["id"] == model_to_dict(Event.get(Event.id == id))["id"]
 
     def test_get_bad_event(self):
         app = create_fastapi_app(

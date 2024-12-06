@@ -17,8 +17,8 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from markupsafe import escape
 from peewee import operator
 
-from frigate.api.defs.app_body import AppConfigSetBody
-from frigate.api.defs.app_query_parameters import AppTimelineHourlyQueryParameters
+from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
+from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR

@@ -525,7 +525,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
-            assert response_json["message"] == "Delete reviews"
+            assert response_json["message"] == "Deleted review items."
             # Verify that in DB the review segment was not deleted
             review_ids_in_db_after = self._get_reviews([id])
             assert len(review_ids_in_db_after) == 1
@@ -540,7 +540,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
-            assert response_json["message"] == "Delete reviews"
+            assert response_json["message"] == "Deleted review items."
             # Verify that in DB the review segment was deleted
             review_ids_in_db_after = self._get_reviews([id])
             assert len(review_ids_in_db_after) == 0
@@ -562,7 +562,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
-            assert response_json["message"] == "Delete reviews"
+            assert response_json["message"] == "Deleted review items."
 
             # Verify that in DB all review segments and recordings that were passed were deleted
             review_ids_in_db_after = self._get_reviews(ids)
