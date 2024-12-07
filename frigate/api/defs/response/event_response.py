@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class EventResponse(BaseModel):
@@ -10,7 +10,7 @@ class EventResponse(BaseModel):
     camera: str
     start_time: float
     end_time: Optional[float]
-    false_positive: bool
+    false_positive: Optional[bool]
     zones: list[str]
     thumbnail: str
     has_clip: bool
@@ -21,6 +21,8 @@ class EventResponse(BaseModel):
     detector_type: Optional[str]
     model_type: Optional[str]
     data: dict[str, Any]
+
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class EventCreateResponse(BaseModel):
