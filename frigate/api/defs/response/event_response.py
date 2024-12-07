@@ -22,7 +22,7 @@ class EventResponse(BaseModel):
     model_type: Optional[str]
     data: dict[str, Any]
 
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class EventCreateResponse(BaseModel):
