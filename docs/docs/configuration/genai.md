@@ -112,7 +112,11 @@ genai:
   provider: openai
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
+  base_url: http://example.endpoint/v1 # optional
 ```
+
+### Optional base_url Parameter
+The base_url parameter is an optional configuration setting that allows you to specify a custom endpoint for the OpenAI API. By default, the OpenAI client uses the standard API endpoint provided by OpenAI. However, if you need to route your requests through a different server or use a proxy, you can set this parameter to the desired URL.
 
 ## Azure OpenAI
 
