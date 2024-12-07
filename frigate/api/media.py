@@ -20,7 +20,7 @@ from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
-from frigate.api.defs.media_query_parameters import (
+from frigate.api.defs.query.media_query_parameters import (
     Extension,
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,

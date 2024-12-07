@@ -14,7 +14,16 @@ from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.events_body import (
+from frigate.api.defs.query.events_query_parameters import (
+    DEFAULT_TIME_RANGE,
+    EventsQueryParams,
+    EventsSearchQueryParams,
+    EventsSummaryQueryParams,
+)
+from frigate.api.defs.query.regenerate_query_parameters import (
+    RegenerateQueryParameters,
+)
+from frigate.api.defs.request.events_body import (
     EventsCreateBody,
     EventsDeleteBody,
     EventsDescriptionBody,
@@ -22,19 +31,15 @@ from frigate.api.defs.events_body import (
     EventsSubLabelBody,
     SubmitPlusBody,
 )
-from frigate.api.defs.events_query_parameters import (
-    DEFAULT_TIME_RANGE,
-    EventsQueryParams,
-    EventsSearchQueryParams,
-    EventsSummaryQueryParams,
+from frigate.api.defs.response.event_response import (
+    EventCreateResponse,
+    EventMultiDeleteResponse,
+    EventResponse,
+    EventUploadPlusResponse,
 )
-from frigate.api.defs.regenerate_query_parameters import (
-    RegenerateQueryParameters,
-)
+from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.const import (
-    CLIPS_DIR,
-)
+from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, ReviewSegment, Timeline
@@ -46,7 +51,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.events])
 
 
-@router.get("/events")
+@router.get("/events", response_model=list[EventResponse])
 def events(params: EventsQueryParams = Depends()):
     camera = params.camera
     cameras = params.cameras
@@ -265,7 +270,7 @@ def events(params: EventsQueryParams = Depends()):
     return JSONResponse(content=list(events))
 
 
-@router.get("/events/explore")
+@router.get("/events/explore", response_model=list[EventResponse])
 def events_explore(limit: int = 10):
     # get distinct labels for all events
     distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
@@ -310,7 +315,8 @@ def events_explore(limit: int = 10):
                 "data": {
                     k: v
                     for k, v in event.data.items()
-                    if k in ["type", "score", "top_score", "description"]
+                    if k
+                    in ["type", "score", "top_score", "description", "sub_label_score"]
                 },
                 "event_count": label_counts[event.label],
             }
@@ -326,7 +332,7 @@ def events_explore(limit: int = 10):
     return JSONResponse(content=processed_events)
 
 
-@router.get("/event_ids")
+@router.get("/event_ids", response_model=list[EventResponse])
 def event_ids(ids: str):
     ids = ids.split(",")
 
@@ -647,7 +653,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
     return JSONResponse(content=[e for e in groups.dicts()])
 
 
-@router.get("/events/{event_id}")
+@router.get("/events/{event_id}", response_model=EventResponse)
 def event(event_id: str):
     try:
         return model_to_dict(Event.get(Event.id == event_id))
@@ -655,7 +661,7 @@ def event(event_id: str):
         return JSONResponse(content="Event not found", status_code=404)
 
 
-@router.post("/events/{event_id}/retain")
+@router.post("/events/{event_id}/retain", response_model=GenericResponse)
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -674,7 +680,7 @@ def set_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/plus")
+@router.post("/events/{event_id}/plus", response_model=EventUploadPlusResponse)
 def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
@@ -786,7 +792,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     )
 
 
-@router.put("/events/{event_id}/false_positive")
+@router.put("/events/{event_id}/false_positive", response_model=EventUploadPlusResponse)
 def false_positive(request: Request, event_id: str):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
@@ -875,7 +881,7 @@ def false_positive(request: Request, event_id: str):
     )
 
 
-@router.delete("/events/{event_id}/retain")
+@router.delete("/events/{event_id}/retain", response_model=GenericResponse)
 def delete_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -894,7 +900,7 @@ def delete_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/sub_label")
+@router.post("/events/{event_id}/sub_label", response_model=GenericResponse)
 def set_sub_label(
     request: Request,
     event_id: str,
@@ -946,7 +952,7 @@ def set_sub_label(
     )
 
 
-@router.post("/events/{event_id}/description")
+@router.post("/events/{event_id}/description", response_model=GenericResponse)
 def set_description(
     request: Request,
     event_id: str,
@@ -993,7 +999,7 @@ def set_description(
     )
 
 
-@router.put("/events/{event_id}/description/regenerate")
+@router.put("/events/{event_id}/description/regenerate", response_model=GenericResponse)
 def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
@@ -1064,14 +1070,14 @@ def delete_single_event(event_id: str, request: Request) -> dict:
     return {"success": True, "message": f"Event {event_id} deleted"}
 
 
-@router.delete("/events/{event_id}")
+@router.delete("/events/{event_id}", response_model=GenericResponse)
 def delete_event(request: Request, event_id: str):
     result = delete_single_event(event_id, request)
     status_code = 200 if result["success"] else 404
     return JSONResponse(content=result, status_code=status_code)
 
 
-@router.delete("/events/")
+@router.delete("/events/", response_model=EventMultiDeleteResponse)
 def delete_events(request: Request, body: EventsDeleteBody):
     if not body.event_ids:
         return JSONResponse(
@@ -1097,7 +1103,7 @@ def delete_events(request: Request, body: EventsDeleteBody):
     return JSONResponse(content=response, status_code=200)
 
 
-@router.post("/events/{camera_name}/{label}/create")
+@router.post("/events/{camera_name}/{label}/create", response_model=EventCreateResponse)
 def create_event(
     request: Request,
     camera_name: str,
@@ -1153,7 +1159,7 @@ def create_event(
     )
 
 
-@router.put("/events/{event_id}/end")
+@router.put("/events/{event_id}/end", response_model=GenericResponse)
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()
