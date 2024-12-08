@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Line, Circle, Group } from "react-konva";
+import { Line, Circle, Group, Text, Rect } from "react-konva";
 import {
   minMax,
   toRGBColorString,
@@ -20,23 +20,27 @@ import { Vector2d } from "konva/lib/types";
 type PolygonDrawerProps = {
   stageRef: RefObject<Konva.Stage>;
   points: number[][];
+  distances: number[];
   isActive: boolean;
   isHovered: boolean;
   isFinished: boolean;
   color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
+  activeLine?: number;
 };
 
 export default function PolygonDrawer({
   stageRef,
   points,
+  distances,
   isActive,
   isHovered,
   isFinished,
   color,
   handlePointDragMove,
   handleGroupDragEnd,
+  activeLine,
 }: PolygonDrawerProps) {
   const vertexRadius = 6;
   const flattenedPoints = useMemo(() => flattenPoints(points), [points]);
@@ -113,6 +117,33 @@ export default function PolygonDrawer({
     stageRef.current.container().style.cursor = cursor;
   }, [stageRef, cursor]);
 
+  // Calculate midpoints for distance labels based on sorted points
+  const midpoints = useMemo(() => {
+    const midpointsArray = [];
+    for (let i = 0; i < points.length; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % points.length];
+      const midpointX = (p1[0] + p2[0]) / 2;
+      const midpointY = (p1[1] + p2[1]) / 2;
+      midpointsArray.push([midpointX, midpointY]);
+    }
+    return midpointsArray;
+  }, [points]);
+
+  // Determine the points for the active line
+  const activeLinePoints = useMemo(() => {
+    if (
+      activeLine === undefined ||
+      activeLine < 1 ||
+      activeLine > points.length
+    ) {
+      return [];
+    }
+    const p1 = points[activeLine - 1];
+    const p2 = points[activeLine % points.length];
+    return [p1[0], p1[1], p2[0], p2[1]];
+  }, [activeLine, points]);
+
   return (
     <Group
       name="polygon"
@@ -158,6 +189,14 @@ export default function PolygonDrawer({
           }
         />
       )}
+      {isActive && activeLinePoints.length > 0 && (
+        <Line
+          points={activeLinePoints}
+          stroke="white"
+          strokeWidth={6}
+          hitStrokeWidth={12}
+        />
+      )}
       {points.map((point, index) => {
         if (!isActive) {
           return;
@@ -195,6 +234,43 @@ export default function PolygonDrawer({
           />
         );
       })}
+      {isFinished && (
+        <Group>
+          {midpoints.map((midpoint, index) => {
+            const [x, y] = midpoint;
+            const distance = distances[index];
+            if (distance === undefined) return null;
+
+            const squareSize = 22;
+
+            return (
+              <Group
+                key={`distance-group-${index}`}
+                x={x - squareSize / 2}
+                y={y - squareSize / 2}
+              >
+                <Rect
+                  width={squareSize}
+                  height={squareSize}
+                  fill={colorString(true)}
+                  stroke="white"
+                  strokeWidth={1}
+                />
+                <Text
+                  text={`${distance}`}
+                  width={squareSize}
+                  y={4}
+                  fontSize={16}
+                  fontFamily="Arial"
+                  fill="white"
+                  align="center"
+                  verticalAlign="middle"
+                />
+              </Group>
+            );
+          })}
+        </Group>
+      )}
     </Group>
   );
 }
