@@ -8,6 +8,7 @@ export type Polygon = {
   objects: string[];
   points: number[][];
   pointsOrder?: number[];
+  distances: number[];
   isFinished: boolean;
   color: number[];
 };
