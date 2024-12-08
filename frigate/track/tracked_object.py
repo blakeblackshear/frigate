@@ -22,6 +22,7 @@ from frigate.util.image import (
     is_better_thumbnail,
 )
 from frigate.util.object import box_inside
+from frigate.util.velocity import calculate_real_world_speed
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,9 @@ class TrackedObject:
         self.frame = None
         self.active = True
         self.pending_loitering = False
+        self.estimated_speed = 0
+        self.max_estimated_speed = 0
+        self.velocity_angle = 0
         self.previous = self.to_dict()
 
     @property
@@ -129,6 +133,7 @@ class TrackedObject:
                     "region": obj_data["region"],
                     "score": obj_data["score"],
                     "attributes": obj_data["attributes"],
+                    "estimated_speed": self.estimated_speed,
                 }
                 thumb_update = True
 
@@ -173,6 +178,26 @@ class TrackedObject:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
+
+            # update speed
+            if zone.distances and name in self.entered_zones:
+                self.estimated_speed, self.velocity_angle = (
+                    calculate_real_world_speed(
+                        zone.contour,
+                        zone.distances,
+                        self.obj_data["estimate_velocity"],
+                        bottom_center,
+                        self.camera_config.detect.fps,
+                    )
+                    if self.active
+                    else 0
+                )
+                logger.debug(
+                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, estimated speed: {self.estimated_speed:.1f}"
+                )
+
+                if self.estimated_speed > self.max_estimated_speed:
+                    self.max_estimated_speed = self.estimated_speed
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
@@ -255,6 +280,14 @@ class TrackedObject:
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
             "max_severity": self.max_severity,
+            "pixel_velocity": str(
+                tuple(
+                    np.round(self.obj_data["estimate_velocity"]).flatten().astype(int)
+                )
+            ),
+            "estimated_speed": self.estimated_speed,
+            "max_estimated_speed": self.max_estimated_speed,
+            "velocity_angle": self.velocity_angle,
         }
 
         if include_thumbnail:
@@ -339,7 +372,8 @@ class TrackedObject:
                 box[2],
                 box[3],
                 self.obj_data["label"],
-                f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}",
+                f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}"
+                + (f" {self.estimated_speed:.1f}" if self.estimated_speed != 0 else ""),
                 thickness=thickness,
                 color=color,
             )
