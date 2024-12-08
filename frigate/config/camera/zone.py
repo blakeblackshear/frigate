@@ -16,6 +16,10 @@ class ZoneConfig(BaseModel):
     coordinates: Union[str, list[str]] = Field(
         title="Coordinates polygon for the defined zone."
     )
+    distances: Optional[Union[str, list[str]]] = Field(
+        default_factory=list,
+        title="Real-world distances for the sides of quadrilateral for the defined zone.",
+    )
     inertia: int = Field(
         default=3,
         title="Number of consecutive frames required for object to be considered present in the zone.",
@@ -48,6 +52,24 @@ class ZoneConfig(BaseModel):
             return [v]
 
         return v
+
+    @field_validator("distances", mode="before")
+    @classmethod
+    def validate_distances(cls, v):
+        if v is None:
+            return None
+
+        if isinstance(v, str):
+            distances = list(map(str, map(float, v.split(","))))
+        elif isinstance(v, list):
+            distances = [str(float(val)) for val in v]
+        else:
+            raise ValueError("Invalid type for distances")
+
+        if len(distances) != 4:
+            raise ValueError("distances must have exactly 4 values")
+
+        return distances
 
     def __init__(self, **config):
         super().__init__(**config)
