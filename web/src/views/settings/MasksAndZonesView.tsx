@@ -61,6 +61,7 @@ export default function MasksAndZonesView({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
+  const [activeLine, setActiveLine] = useState<number | undefined>();
 
   const { addMessage } = useContext(StatusBarMessagesContext)!;
 
@@ -161,6 +162,7 @@ export default function MasksAndZonesView({
       ...(allPolygons || []),
       {
         points: [],
+        distances: [],
         isFinished: false,
         type,
         typeIndex: 9999,
@@ -238,6 +240,7 @@ export default function MasksAndZonesView({
             scaledWidth,
             scaledHeight,
           ),
+          distances: zoneData.distances.map((distance) => parseFloat(distance)),
           isFinished: true,
           color: zoneData.color,
         }),
@@ -267,6 +270,7 @@ export default function MasksAndZonesView({
           scaledWidth,
           scaledHeight,
         ),
+        distances: [],
         isFinished: true,
         color: [0, 0, 255],
       }));
@@ -290,6 +294,7 @@ export default function MasksAndZonesView({
           scaledWidth,
           scaledHeight,
         ),
+        distances: [],
         isFinished: true,
         color: [128, 128, 128],
       }));
@@ -316,6 +321,7 @@ export default function MasksAndZonesView({
                 scaledWidth,
                 scaledHeight,
               ),
+              distances: [],
               isFinished: true,
               color: [128, 128, 128],
             };
@@ -391,6 +397,7 @@ export default function MasksAndZonesView({
                 setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
+                setActiveLine={setActiveLine}
               />
             )}
             {editPane == "motion_mask" && (
@@ -653,6 +660,7 @@ export default function MasksAndZonesView({
                   activePolygonIndex={activePolygonIndex}
                   hoveredPolygonIndex={hoveredPolygonIndex}
                   selectedZoneMask={selectedZoneMask}
+                  activeLine={activeLine}
                 />
               ) : (
                 <Skeleton className="size-full" />

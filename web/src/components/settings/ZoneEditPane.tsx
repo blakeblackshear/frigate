@@ -40,6 +40,7 @@ type ZoneEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  setActiveLine: React.Dispatch<React.SetStateAction<number | undefined>>;
 };
 
 export default function ZoneEditPane({
@@ -52,6 +53,7 @@ export default function ZoneEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  setActiveLine,
 }: ZoneEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -569,9 +571,13 @@ export default function ZoneEditPane({
                   name="topWidth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Top Width</FormLabel>
+                      <FormLabel>Line A distance</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter top width..." />
+                        <Input
+                          {...field}
+                          onFocus={() => setActiveLine(1)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -581,9 +587,13 @@ export default function ZoneEditPane({
                   name="bottomWidth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bottom Width</FormLabel>
+                      <FormLabel>Line B distance</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter bottom width..." />
+                        <Input
+                          {...field}
+                          onFocus={() => setActiveLine(2)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -593,9 +603,13 @@ export default function ZoneEditPane({
                   name="leftDepth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Left Depth</FormLabel>
+                      <FormLabel>Line C distance</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter left depth..." />
+                        <Input
+                          {...field}
+                          onFocus={() => setActiveLine(3)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -605,9 +619,13 @@ export default function ZoneEditPane({
                   name="rightDepth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Right Depth</FormLabel>
+                      <FormLabel>Line D distance</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter right depth..." />
+                        <Input
+                          {...field}
+                          onFocus={() => setActiveLine(4)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
