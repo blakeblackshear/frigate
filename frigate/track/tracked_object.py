@@ -171,7 +171,9 @@ class TrackedObject:
                     else 0
                 )
                 logger.debug(
-                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, estimated speed: {self.estimated_speed:.1f}"
+                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, \
+                        pixel velocity: {str(tuple(np.round(self.obj_data["estimate_velocity"]).flatten().astype(int)))} \
+                        estimated speed: {self.estimated_speed:.1f}"
                 )
 
                 if self.estimated_speed > self.max_estimated_speed:
@@ -257,11 +259,6 @@ class TrackedObject:
             "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
-            "pixel_velocity": str(
-                tuple(
-                    np.round(self.obj_data["estimate_velocity"]).flatten().astype(int)
-                )
-            ),
             "estimated_speed": self.estimated_speed,
             "max_estimated_speed": self.max_estimated_speed,
             "velocity_angle": self.velocity_angle,
