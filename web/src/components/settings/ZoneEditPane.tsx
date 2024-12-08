@@ -90,7 +90,7 @@ export default function ZoneEditPane({
 
     return Array.isArray(distances)
       ? distances.map((value) => parseFloat(value) || 0)
-      : [0, 0, 0, 0];
+      : [undefined, undefined, undefined, undefined];
   }, [polygon, config]);
 
   const formSchema = z
@@ -197,7 +197,7 @@ export default function ZoneEditPane({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       name: polygon?.name ?? "",
       inertia:
@@ -217,6 +217,19 @@ export default function ZoneEditPane({
       lineD,
     },
   });
+
+  useEffect(() => {
+    if (
+      form.watch("speedEstimation") &&
+      polygon &&
+      polygon.points.length !== 4
+    ) {
+      toast.error(
+        "Speed estimation has been disabled for this zone. Zones with speed estimation must have exactly 4 points.",
+      );
+      form.setValue("speedEstimation", false);
+    }
+  }, [polygon, form]);
 
   const saveToConfig = useCallback(
     async (
@@ -746,7 +759,9 @@ export function ZoneObjectSelector({
 
   useEffect(() => {
     updateLabelFilter(currentLabels);
-  }, [currentLabels, updateLabelFilter]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLabels]);
 
   return (
     <>
