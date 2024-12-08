@@ -20,10 +20,10 @@ export type ZoneFormValuesType = {
   isFinished: boolean;
   objects: string[];
   speedEstimation: boolean;
-  topWidth: number;
-  bottomWidth: number;
-  leftDepth: number;
-  rightDepth: number;
+  lineA: number;
+  lineB: number;
+  lineC: number;
+  lineD: number;
 };
 
 export type ObjectMaskFormValuesType = {

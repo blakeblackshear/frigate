@@ -82,7 +82,7 @@ export default function ZoneEditPane({
     }
   }, [polygon, config]);
 
-  const [topWidth, bottomWidth, leftDepth, rightDepth] = useMemo(() => {
+  const [lineA, lineB, lineC, lineD] = useMemo(() => {
     const distances =
       polygon?.camera &&
       polygon?.name &&
@@ -93,94 +93,107 @@ export default function ZoneEditPane({
       : [0, 0, 0, 0];
   }, [polygon, config]);
 
-  const formSchema = z.object({
-    name: z
-      .string()
-      .min(2, {
-        message: "Zone name must be at least 2 characters.",
-      })
-      .transform((val: string) => val.trim().replace(/\s+/g, "_"))
-      .refine(
-        (value: string) => {
-          return !cameras.map((cam) => cam.name).includes(value);
-        },
-        {
-          message: "Zone name must not be the name of a camera.",
-        },
-      )
-      .refine(
-        (value: string) => {
-          const otherPolygonNames =
-            polygons
-              ?.filter((_, index) => index !== activePolygonIndex)
-              .map((polygon) => polygon.name) || [];
+  const formSchema = z
+    .object({
+      name: z
+        .string()
+        .min(2, {
+          message: "Zone name must be at least 2 characters.",
+        })
+        .transform((val: string) => val.trim().replace(/\s+/g, "_"))
+        .refine(
+          (value: string) => {
+            return !cameras.map((cam) => cam.name).includes(value);
+          },
+          {
+            message: "Zone name must not be the name of a camera.",
+          },
+        )
+        .refine(
+          (value: string) => {
+            const otherPolygonNames =
+              polygons
+                ?.filter((_, index) => index !== activePolygonIndex)
+                .map((polygon) => polygon.name) || [];
 
-          return !otherPolygonNames.includes(value);
-        },
-        {
-          message: "Zone name already exists on this camera.",
-        },
-      )
-      .refine(
-        (value: string) => {
-          return !value.includes(".");
-        },
-        {
-          message: "Zone name must not contain a period.",
-        },
-      )
-      .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-        message: "Zone name has an illegal character.",
+            return !otherPolygonNames.includes(value);
+          },
+          {
+            message: "Zone name already exists on this camera.",
+          },
+        )
+        .refine(
+          (value: string) => {
+            return !value.includes(".");
+          },
+          {
+            message: "Zone name must not contain a period.",
+          },
+        )
+        .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
+          message: "Zone name has an illegal character.",
+        }),
+      inertia: z.coerce
+        .number()
+        .min(1, {
+          message: "Inertia must be above 0.",
+        })
+        .or(z.literal("")),
+      loitering_time: z.coerce
+        .number()
+        .min(0, {
+          message: "Loitering time must be greater than or equal to 0.",
+        })
+        .optional()
+        .or(z.literal("")),
+      isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+        message: "The polygon drawing must be finished before saving.",
       }),
-    inertia: z.coerce
-      .number()
-      .min(1, {
-        message: "Inertia must be above 0.",
-      })
-      .or(z.literal("")),
-    loitering_time: z.coerce
-      .number()
-      .min(0, {
-        message: "Loitering time must be greater than or equal to 0.",
-      })
-      .optional()
-      .or(z.literal("")),
-    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
-    }),
-    objects: z.array(z.string()).optional(),
-    review_alerts: z.boolean().default(false).optional(),
-    review_detections: z.boolean().default(false).optional(),
-    speedEstimation: z.boolean().default(false),
-    topWidth: z.coerce
-      .number()
-      .min(0.1, {
-        message: "Distance must be greater than or equal to 0.1",
-      })
-      .optional()
-      .or(z.literal("")),
-    bottomWidth: z.coerce
-      .number()
-      .min(0.1, {
-        message: "Distance must be greater than or equal to 0.1",
-      })
-      .optional()
-      .or(z.literal("")),
-    leftDepth: z.coerce
-      .number()
-      .min(0.1, {
-        message: "Distance must be greater than or equal to 0.1",
-      })
-      .optional()
-      .or(z.literal("")),
-    rightDepth: z.coerce
-      .number()
-      .min(0.1, {
-        message: "Distance must be greater than or equal to 0.1",
-      })
-      .optional()
-      .or(z.literal("")),
-  });
+      objects: z.array(z.string()).optional(),
+      review_alerts: z.boolean().default(false).optional(),
+      review_detections: z.boolean().default(false).optional(),
+      speedEstimation: z.boolean().default(false),
+      lineA: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineB: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineC: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineD: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+    })
+    .refine(
+      (data) => {
+        if (data.speedEstimation) {
+          return !!data.lineA && !!data.lineB && !!data.lineC && !!data.lineD;
+        }
+        return true;
+      },
+      {
+        message: "All distance fields must be filled to use speed estimation.",
+        path: ["speedEstimation"],
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -197,11 +210,11 @@ export default function ZoneEditPane({
         config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
-      speedEstimation: !!(topWidth || bottomWidth || leftDepth || rightDepth),
-      topWidth,
-      bottomWidth,
-      leftDepth,
-      rightDepth,
+      speedEstimation: !!(lineA || lineB || lineC || lineD),
+      lineA,
+      lineB,
+      lineC,
+      lineD,
     },
   });
 
@@ -213,10 +226,10 @@ export default function ZoneEditPane({
         loitering_time,
         objects: form_objects,
         speedEstimation,
-        topWidth,
-        bottomWidth,
-        leftDepth,
-        rightDepth,
+        lineA,
+        lineB,
+        lineC,
+        lineD,
       }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
@@ -314,9 +327,7 @@ export default function ZoneEditPane({
       }
 
       let distancesQuery = "";
-      const distances = [topWidth, bottomWidth, leftDepth, rightDepth].join(
-        ",",
-      );
+      const distances = [lineA, lineB, lineC, lineD].join(",");
       if (speedEstimation) {
         distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
       } else {
@@ -543,7 +554,7 @@ export default function ZoneEditPane({
                             polygons[activePolygonIndex].points.length !== 4
                           ) {
                             toast.error(
-                              "Zones with speed estimation must have exactly 4 points",
+                              "Zones with speed estimation must have exactly 4 points.",
                             );
                             return;
                           }
@@ -557,6 +568,7 @@ export default function ZoneEditPane({
                   Enable speed estimation for objects in this zone. The zone
                   must have exactly 4 points.
                 </FormDescription>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -568,7 +580,7 @@ export default function ZoneEditPane({
               <>
                 <FormField
                   control={form.control}
-                  name="topWidth"
+                  name="lineA"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Line A distance</FormLabel>
@@ -584,7 +596,7 @@ export default function ZoneEditPane({
                 />
                 <FormField
                   control={form.control}
-                  name="bottomWidth"
+                  name="lineB"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Line B distance</FormLabel>
@@ -600,7 +612,7 @@ export default function ZoneEditPane({
                 />
                 <FormField
                   control={form.control}
-                  name="leftDepth"
+                  name="lineC"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Line C distance</FormLabel>
@@ -616,7 +628,7 @@ export default function ZoneEditPane({
                 />
                 <FormField
                   control={form.control}
-                  name="rightDepth"
+                  name="lineD"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Line D distance</FormLabel>
