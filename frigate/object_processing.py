@@ -162,7 +162,12 @@ class CameraState:
                     box[2],
                     box[3],
                     text,
-                    f"{obj['score']:.0%} {int(obj['area'])}",
+                    f"{obj['score']:.0%} {int(obj['area'])}"
+                    + (
+                        f" {float(obj['estimated_speed']):.1f}"
+                        if obj["estimated_speed"] != 0
+                        else ""
+                    ),
                     thickness=thickness,
                     color=color,
                 )
