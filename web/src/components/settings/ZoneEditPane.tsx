@@ -80,6 +80,17 @@ export default function ZoneEditPane({
     }
   }, [polygon, config]);
 
+  const [topWidth, bottomWidth, leftDepth, rightDepth] = useMemo(() => {
+    const distances =
+      polygon?.camera &&
+      polygon?.name &&
+      config?.cameras[polygon.camera]?.zones[polygon.name]?.distances;
+
+    return Array.isArray(distances)
+      ? distances.map((value) => parseFloat(value) || 0)
+      : [0, 0, 0, 0];
+  }, [polygon, config]);
+
   const formSchema = z.object({
     name: z
       .string()
@@ -138,6 +149,35 @@ export default function ZoneEditPane({
     objects: z.array(z.string()).optional(),
     review_alerts: z.boolean().default(false).optional(),
     review_detections: z.boolean().default(false).optional(),
+    speedEstimation: z.boolean().default(false),
+    topWidth: z.coerce
+      .number()
+      .min(0.1, {
+        message: "Distance must be greater than or equal to 0.1",
+      })
+      .optional()
+      .or(z.literal("")),
+    bottomWidth: z.coerce
+      .number()
+      .min(0.1, {
+        message: "Distance must be greater than or equal to 0.1",
+      })
+      .optional()
+      .or(z.literal("")),
+    leftDepth: z.coerce
+      .number()
+      .min(0.1, {
+        message: "Distance must be greater than or equal to 0.1",
+      })
+      .optional()
+      .or(z.literal("")),
+    rightDepth: z.coerce
+      .number()
+      .min(0.1, {
+        message: "Distance must be greater than or equal to 0.1",
+      })
+      .optional()
+      .or(z.literal("")),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -155,6 +195,11 @@ export default function ZoneEditPane({
         config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
+      speedEstimation: !!(topWidth || bottomWidth || leftDepth || rightDepth),
+      topWidth,
+      bottomWidth,
+      leftDepth,
+      rightDepth,
     },
   });
 
@@ -165,6 +210,11 @@ export default function ZoneEditPane({
         inertia,
         loitering_time,
         objects: form_objects,
+        speedEstimation,
+        topWidth,
+        bottomWidth,
+        leftDepth,
+        rightDepth,
       }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
@@ -261,9 +311,19 @@ export default function ZoneEditPane({
         loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
       }
 
+      let distancesQuery = "";
+      const distances = [topWidth, bottomWidth, leftDepth, rightDepth].join(
+        ",",
+      );
+      if (speedEstimation) {
+        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
+      } else {
+        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+      }
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
           { requires_restart: 0 },
         )
         .then((res) => {
@@ -455,6 +515,105 @@ export default function ZoneEditPane({
               }}
             />
           </FormItem>
+
+          <Separator className="my-2 flex bg-secondary" />
+          <FormField
+            control={form.control}
+            name="speedEstimation"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center space-x-2">
+                  <FormControl>
+                    <div className="my-2.5 flex w-full items-center justify-between">
+                      <FormLabel
+                        className="cursor-pointer text-primary"
+                        htmlFor="allLabels"
+                      >
+                        Speed Estimation
+                      </FormLabel>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          if (
+                            checked &&
+                            polygons &&
+                            activePolygonIndex &&
+                            polygons[activePolygonIndex].points.length !== 4
+                          ) {
+                            toast.error(
+                              "Zones with speed estimation must have exactly 4 points",
+                            );
+                            return;
+                          }
+                          field.onChange(checked);
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Enable speed estimation for objects in this zone. The zone
+                  must have exactly 4 points.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+
+          {form.watch("speedEstimation") &&
+            polygons &&
+            activePolygonIndex &&
+            polygons[activePolygonIndex].points.length === 4 && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="topWidth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Top Width</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter top width..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="bottomWidth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bottom Width</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter bottom width..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="leftDepth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Left Depth</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter left depth..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="rightDepth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Right Depth</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter right depth..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
           <FormField
             control={form.control}
