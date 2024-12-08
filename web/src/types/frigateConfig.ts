@@ -8,6 +8,7 @@ export interface UiConfig {
   strftime_fmt?: string;
   dashboard: boolean;
   order: number;
+  unit_system?: "metric" | "imperial";
 }
 
 export interface BirdseyeConfig {
