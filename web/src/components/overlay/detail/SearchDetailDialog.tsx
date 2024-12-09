@@ -316,6 +316,18 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
+  const maxEstimatedSpeed = useMemo(() => {
+    if (!search || !search.data?.max_estimated_speed) {
+      return undefined;
+    }
+
+    if (search.data?.max_estimated_speed != 0) {
+      return search.data?.max_estimated_speed.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
   const updateDescription = useCallback(() => {
     if (!search) {
       return;
@@ -427,6 +439,15 @@ function ObjectDetailsTab({
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
+          {maxEstimatedSpeed && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">Max Estimated Speed</div>
+              <div className="text-sm">
+                {maxEstimatedSpeed}{" "}
+                {config?.ui.unit_system == "imperial" ? "mph" : "kph"}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">Camera</div>
             <div className="text-sm capitalize">
