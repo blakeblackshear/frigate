@@ -12,6 +12,7 @@ import numpy as np
 from frigate.config import (
     CameraConfig,
     ModelConfig,
+    UIConfig,
 )
 from frigate.util.image import (
     area,
@@ -31,6 +32,7 @@ class TrackedObject:
         self,
         model_config: ModelConfig,
         camera_config: CameraConfig,
+        ui_config: UIConfig,
         frame_cache,
         obj_data: dict[str, any],
     ):
@@ -42,6 +44,7 @@ class TrackedObject:
         self.colormap = model_config.colormap
         self.logos = model_config.all_attribute_logos
         self.camera_config = camera_config
+        self.ui_config = ui_config
         self.frame_cache = frame_cache
         self.zone_presence: dict[str, int] = {}
         self.zone_loitering: dict[str, int] = {}
@@ -159,7 +162,7 @@ class TrackedObject:
 
             # update speed
             if zone.distances and name in self.entered_zones:
-                self.estimated_speed, self.velocity_angle = (
+                speed_magnitude, self.velocity_angle = (
                     calculate_real_world_speed(
                         zone.contour,
                         zone.distances,
@@ -170,10 +173,14 @@ class TrackedObject:
                     if self.active
                     else 0
                 )
+                if self.ui_config.unit_system == "metric":
+                    # Convert m/s to km/h
+                    self.estimated_speed = speed_magnitude * 3.6
+                elif self.ui_config.unit_system == "imperial":
+                    # Convert ft/s to mph
+                    self.estimated_speed = speed_magnitude * 0.681818
                 logger.debug(
-                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, \
-                        pixel velocity: {str(tuple(np.round(self.obj_data["estimate_velocity"]).flatten().astype(int)))} \
-                        estimated speed: {self.estimated_speed:.1f}"
+                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.estimated_speed:.1f}"
                 )
 
                 if self.estimated_speed > self.max_estimated_speed:

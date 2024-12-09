@@ -261,6 +261,7 @@ class CameraState:
             new_obj = tracked_objects[id] = TrackedObject(
                 self.config.model,
                 self.camera_config,
+                self.config.ui,
                 self.frame_cache,
                 current_detections[id],
             )
