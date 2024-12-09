@@ -292,6 +292,9 @@ class TrackedObject:
             "estimated_speed": self.estimated_speed,
             "max_estimated_speed": self.max_estimated_speed,
             "velocity_angle": self.velocity_angle,
+            "estimated_speed": self.estimated_speed,
+            "max_estimated_speed": self.max_estimated_speed,
+            "velocity_angle": self.velocity_angle,
         }
 
         if include_thumbnail:
