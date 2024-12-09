@@ -2,9 +2,6 @@ import math
 
 import numpy as np
 
-unit_system = "imperial"
-magnitude = "mph"
-
 
 def create_ground_plane(zone_points, distances):
     """
@@ -68,7 +65,7 @@ def calculate_real_world_speed(
     :param velocity_pixels: List of tuples representing velocity in pixels/frame
     :param position: Current position of the object (x, y) in pixels
     :param camera_fps: Frames per second of the camera
-    :return: speed in the specified unit system (m/s for metric, ft/s for imperial) and velocity direction
+    :return: speed and velocity angle direction
     """
     ground_plane = create_ground_plane(zone_contour, distances)
 
@@ -89,14 +86,5 @@ def calculate_real_world_speed(
     angle = math.degrees(math.atan2(dy, dx))
     if angle < 0:
         angle += 360
-
-    if unit_system == "metric":
-        if magnitude == "kmh":
-            # Convert m/s to km/h
-            speed_magnitude *= 3.6
-    elif unit_system == "imperial":
-        if magnitude == "mph":
-            # Convert ft/s to mph
-            speed_magnitude *= 0.681818
 
     return speed_magnitude, angle
