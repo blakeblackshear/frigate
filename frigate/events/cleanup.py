@@ -298,7 +298,13 @@ class EventCleanup(threading.Thread):
                 .where(
                     Event.camera == name,
                     Event.retain_indefinitely == False,
-                    (Event.end_time < alert_expire_date)
+                    (
+                        (
+                            (Event.data["max_severity"] != "detection")
+                            | (Event.data["max_severity"].is_null())
+                        )
+                        & (Event.end_time < alert_expire_date)
+                    )
                     | (
                         (Event.data["max_severity"] == "detection")
                         & (Event.end_time < detection_expire_date)
