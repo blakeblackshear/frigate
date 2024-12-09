@@ -240,7 +240,8 @@ export default function MasksAndZonesView({
             scaledWidth,
             scaledHeight,
           ),
-          distances: zoneData.distances.map((distance) => parseFloat(distance)),
+          distances:
+            zoneData.distances?.map((distance) => parseFloat(distance)) ?? [],
           isFinished: true,
           color: zoneData.color,
         }),
