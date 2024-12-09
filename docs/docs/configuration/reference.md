@@ -639,7 +639,7 @@ cameras:
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
-        coordinates: 0.284,0.997,0.389,0.869,0.410,0.745
+        coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
         # Optional: The real-world distances of a 4-sided zone used for zones with speed estimation enabled (default: none)
         # List distances in order of the zone points coordinates and use the unit system defined in the ui config
         distances: 10,15,12,11

@@ -153,7 +153,7 @@ ui:
   unit_system: metric
 ```
 
-The maximum speed during the object's lifetime is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label. Current estimated speed, max estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic in the `data` field. See the [MQTT docs](../integrations/mqtt.md#frigateevents).
+The maximum speed during the object's lifetime is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label. Current estimated speed, max estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents).
 
 #### Best practices and caveats
 
