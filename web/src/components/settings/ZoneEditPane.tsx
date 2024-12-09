@@ -596,7 +596,13 @@ export default function ZoneEditPane({
                   name="lineA"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Line A distance</FormLabel>
+                      <FormLabel>
+                        Line A distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -612,7 +618,13 @@ export default function ZoneEditPane({
                   name="lineB"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Line B distance</FormLabel>
+                      <FormLabel>
+                        Line B distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -628,7 +640,13 @@ export default function ZoneEditPane({
                   name="lineC"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Line C distance</FormLabel>
+                      <FormLabel>
+                        Line C distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -644,7 +662,13 @@ export default function ZoneEditPane({
                   name="lineD"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Line D distance</FormLabel>
+                      <FormLabel>
+                        Line D distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
