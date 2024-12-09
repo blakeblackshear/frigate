@@ -13,7 +13,7 @@ from frigate.config import (
     CameraConfig,
     ModelConfig,
 )
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
     calculate_region,

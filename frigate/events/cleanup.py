@@ -324,8 +324,9 @@ class EventCleanup(threading.Thread):
 
     def run(self) -> None:
         # only expire events every 5 minutes
-        while not self.stop_event.wait(300):
+        while not self.stop_event.wait(1):
             events_with_expired_clips = self.expire_clips()
+            return
 
             # delete timeline entries for events that have expired recordings
             # delete up to 100,000 at a time

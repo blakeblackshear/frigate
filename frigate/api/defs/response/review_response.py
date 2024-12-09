@@ -3,7 +3,7 @@ from typing import Dict
 
 from pydantic import BaseModel, Json
 
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 
 
 class ReviewSegmentResponse(BaseModel):
