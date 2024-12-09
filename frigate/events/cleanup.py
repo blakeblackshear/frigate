@@ -275,6 +275,7 @@ class EventCleanup(threading.Thread):
             Event.update(update_params).where(Event.id << events_to_update).execute()
 
         events_to_update = []
+        now = datetime.datetime.now()
 
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
@@ -282,9 +283,11 @@ class EventCleanup(threading.Thread):
                 camera.record.alerts.retain.days,
                 camera.record.detections.retain.days,
             )
-
-            expire_after = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days)
+            alert_expire_date = (
+                now - datetime.timedelta(days=camera.record.alerts.retain.days)
+            ).timestamp()
+            detection_expire_date = (
+                now - datetime.timedelta(days=camera.record.detections.retain.days)
             ).timestamp()
             # grab all events after specific time
             expired_events = (
@@ -294,8 +297,12 @@ class EventCleanup(threading.Thread):
                 )
                 .where(
                     Event.camera == name,
-                    Event.start_time < expire_after,
                     Event.retain_indefinitely == False,
+                    (Event.end_time < alert_expire_date)
+                    | (
+                        (Event.data["max_severity"] == "detection")
+                        & (Event.end_time < detection_expire_date)
+                    ),
                 )
                 .namedtuples()
                 .iterator()
