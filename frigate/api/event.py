@@ -316,7 +316,14 @@ def events_explore(limit: int = 10):
                     k: v
                     for k, v in event.data.items()
                     if k
-                    in ["type", "score", "top_score", "description", "sub_label_score"]
+                    in [
+                        "type",
+                        "score",
+                        "top_score",
+                        "description",
+                        "sub_label_score",
+                        "max_estimated_speed",
+                    ]
                 },
                 "event_count": label_counts[event.label],
             }
@@ -581,7 +588,15 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         processed_event["data"] = {
             k: v
             for k, v in event["data"].items()
-            if k in ["type", "score", "top_score", "description"]
+            if k
+            in [
+                "type",
+                "score",
+                "top_score",
+                "description",
+                "sub_label_score",
+                "max_estimated_speed",
+            ]
         }
 
         if event["id"] in search_results:
