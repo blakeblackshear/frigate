@@ -210,6 +210,7 @@ class EventProcessor(threading.Thread):
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
                     "type": "object",
+                    "max_severity": event_data.get("max_severity"),
                 },
             }
 
