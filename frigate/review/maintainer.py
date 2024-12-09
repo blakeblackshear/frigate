@@ -7,7 +7,6 @@ import random
 import string
 import sys
 import threading
-from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Optional
@@ -27,6 +26,7 @@ from frigate.const import (
 from frigate.events.external import ManualEventState
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
+from frigate.review.types import SeverityEnum
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
 
 logger = logging.getLogger(__name__)
@@ -37,11 +37,6 @@ THUMB_WIDTH = 320
 
 THRESHOLD_ALERT_ACTIVITY = 120
 THRESHOLD_DETECTION_ACTIVITY = 30
-
-
-class SeverityEnum(str, Enum):
-    alert = "alert"
-    detection = "detection"
 
 
 class PendingReviewSegment:

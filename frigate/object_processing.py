@@ -702,30 +702,7 @@ class TrackedObjectProcessor(threading.Thread):
             return False
 
         # If the object is not considered an alert or detection
-        review_config = self.config.cameras[camera].review
-        if not (
-            (
-                obj.obj_data["label"] in review_config.alerts.labels
-                and (
-                    not review_config.alerts.required_zones
-                    or set(obj.entered_zones) & set(review_config.alerts.required_zones)
-                )
-            )
-            or (
-                (
-                    not review_config.detections.labels
-                    or obj.obj_data["label"] in review_config.detections.labels
-                )
-                and (
-                    not review_config.detections.required_zones
-                    or set(obj.entered_zones)
-                    & set(review_config.detections.required_zones)
-                )
-            )
-        ):
-            logger.debug(
-                f"Not creating clip for {obj.obj_data['id']} because it did not qualify as an alert or detection"
-            )
+        if obj.max_severity is None:
             return False
 
         return True

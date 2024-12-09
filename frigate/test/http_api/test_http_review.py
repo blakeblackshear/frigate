@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 
 from frigate.models import Event, Recordings, ReviewSegment
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import BaseTestHttp
 
 

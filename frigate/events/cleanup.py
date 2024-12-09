@@ -4,7 +4,6 @@ import datetime
 import logging
 import os
 import threading
-from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
@@ -14,11 +13,6 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
-
-
-class EventCleanupType(str, Enum):
-    clips = "clips"
-    snapshots = "snapshots"
 
 
 CHUNK_SIZE = 50
@@ -67,19 +61,11 @@ class EventCleanup(threading.Thread):
 
         return self.camera_labels[camera]["labels"]
 
-    def expire(self, media_type: EventCleanupType) -> list[str]:
+    def expire_snapshots(self) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
-        if media_type == EventCleanupType.clips:
-            expire_days = max(
-                self.config.record.alerts.retain.days,
-                self.config.record.detections.retain.days,
-            )
-            file_extension = None  # mp4 clips are no longer stored in /clips
-            update_params = {"has_clip": False}
-        else:
-            retain_config = self.config.snapshots.retain
-            file_extension = "jpg"
-            update_params = {"has_snapshot": False}
+        retain_config = self.config.snapshots.retain
+        file_extension = "jpg"
+        update_params = {"has_snapshot": False}
 
         distinct_labels = self.get_removed_camera_labels()
 
@@ -87,10 +73,7 @@ class EventCleanup(threading.Thread):
         # loop over object types in db
         for event in distinct_labels:
             # get expiration time for this label
-            if media_type == EventCleanupType.snapshots:
-                expire_days = retain_config.objects.get(
-                    event.label, retain_config.default
-                )
+            expire_days = retain_config.objects.get(event.label, retain_config.default)
 
             expire_after = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
@@ -162,13 +145,7 @@ class EventCleanup(threading.Thread):
 
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
-            if media_type == EventCleanupType.clips:
-                expire_days = max(
-                    camera.record.alerts.retain.days,
-                    camera.record.detections.retain.days,
-                )
-            else:
-                retain_config = camera.snapshots.retain
+            retain_config = camera.snapshots.retain
 
             # get distinct objects in database for this camera
             distinct_labels = self.get_camera_labels(name)
@@ -176,10 +153,9 @@ class EventCleanup(threading.Thread):
             # loop over object types in db
             for event in distinct_labels:
                 # get expiration time for this label
-                if media_type == EventCleanupType.snapshots:
-                    expire_days = retain_config.objects.get(
-                        event.label, retain_config.default
-                    )
+                expire_days = retain_config.objects.get(
+                    event.label, retain_config.default
+                )
 
                 expire_after = (
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
@@ -206,19 +182,143 @@ class EventCleanup(threading.Thread):
                 for event in expired_events:
                     events_to_update.append(event.id)
 
-                    if media_type == EventCleanupType.snapshots:
-                        try:
-                            media_name = f"{event.camera}-{event.id}"
-                            media_path = Path(
-                                f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
-                            )
-                            media_path.unlink(missing_ok=True)
-                            media_path = Path(
-                                f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                            )
-                            media_path.unlink(missing_ok=True)
-                        except OSError as e:
-                            logger.warning(f"Unable to delete event images: {e}")
+                    try:
+                        media_name = f"{event.camera}-{event.id}"
+                        media_path = Path(
+                            f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                        )
+                        media_path.unlink(missing_ok=True)
+                        media_path = Path(
+                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                        )
+                        media_path.unlink(missing_ok=True)
+                    except OSError as e:
+                        logger.warning(f"Unable to delete event images: {e}")
+
+        # update the clips attribute for the db entry
+        for i in range(0, len(events_to_update), CHUNK_SIZE):
+            batch = events_to_update[i : i + CHUNK_SIZE]
+            logger.debug(f"Updating {update_params} for {len(batch)} events")
+            Event.update(update_params).where(Event.id << batch).execute()
+
+        return events_to_update
+
+    def expire_clips(self) -> list[str]:
+        ## Expire events from unlisted cameras based on the global config
+        expire_days = max(
+            self.config.record.alerts.retain.days,
+            self.config.record.detections.retain.days,
+        )
+        file_extension = None  # mp4 clips are no longer stored in /clips
+        update_params = {"has_clip": False}
+
+        # get expiration time for this label
+
+        expire_after = (
+            datetime.datetime.now() - datetime.timedelta(days=expire_days)
+        ).timestamp()
+        # grab all events after specific time
+        expired_events: list[Event] = (
+            Event.select(
+                Event.id,
+                Event.camera,
+            )
+            .where(
+                Event.camera.not_in(self.camera_keys),
+                Event.start_time < expire_after,
+                Event.retain_indefinitely == False,
+            )
+            .namedtuples()
+            .iterator()
+        )
+        logger.debug(f"{len(list(expired_events))} events can be expired")
+        # delete the media from disk
+        for expired in expired_events:
+            media_name = f"{expired.camera}-{expired.id}"
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+
+            try:
+                media_path.unlink(missing_ok=True)
+                if file_extension == "jpg":
+                    media_path = Path(
+                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                    )
+                    media_path.unlink(missing_ok=True)
+            except OSError as e:
+                logger.warning(f"Unable to delete event images: {e}")
+
+        # update the clips attribute for the db entry
+        query = Event.select(Event.id).where(
+            Event.camera.not_in(self.camera_keys),
+            Event.start_time < expire_after,
+            Event.retain_indefinitely == False,
+        )
+
+        events_to_update = []
+
+        for batch in query.iterator():
+            events_to_update.extend([event.id for event in batch])
+            if len(events_to_update) >= CHUNK_SIZE:
+                logger.debug(
+                    f"Updating {update_params} for {len(events_to_update)} events"
+                )
+                Event.update(update_params).where(
+                    Event.id << events_to_update
+                ).execute()
+                events_to_update = []
+
+        # Update any remaining events
+        if events_to_update:
+            logger.debug(
+                f"Updating clips/snapshots attribute for {len(events_to_update)} events"
+            )
+            Event.update(update_params).where(Event.id << events_to_update).execute()
+
+        events_to_update = []
+        now = datetime.datetime.now()
+
+        ## Expire events from cameras based on the camera config
+        for name, camera in self.config.cameras.items():
+            expire_days = max(
+                camera.record.alerts.retain.days,
+                camera.record.detections.retain.days,
+            )
+            alert_expire_date = (
+                now - datetime.timedelta(days=camera.record.alerts.retain.days)
+            ).timestamp()
+            detection_expire_date = (
+                now - datetime.timedelta(days=camera.record.detections.retain.days)
+            ).timestamp()
+            # grab all events after specific time
+            expired_events = (
+                Event.select(
+                    Event.id,
+                    Event.camera,
+                )
+                .where(
+                    Event.camera == name,
+                    Event.retain_indefinitely == False,
+                    (
+                        (
+                            (Event.data["max_severity"] != "detection")
+                            | (Event.data["max_severity"].is_null())
+                        )
+                        & (Event.end_time < alert_expire_date)
+                    )
+                    | (
+                        (Event.data["max_severity"] == "detection")
+                        & (Event.end_time < detection_expire_date)
+                    ),
+                )
+                .namedtuples()
+                .iterator()
+            )
+
+            # delete the grabbed clips from disk
+            # only snapshots are stored in /clips
+            # so no need to delete mp4 files
+            for event in expired_events:
+                events_to_update.append(event.id)
 
         # update the clips attribute for the db entry
         for i in range(0, len(events_to_update), CHUNK_SIZE):
@@ -230,8 +330,9 @@ class EventCleanup(threading.Thread):
 
     def run(self) -> None:
         # only expire events every 5 minutes
-        while not self.stop_event.wait(300):
-            events_with_expired_clips = self.expire(EventCleanupType.clips)
+        while not self.stop_event.wait(1):
+            events_with_expired_clips = self.expire_clips()
+            return
 
             # delete timeline entries for events that have expired recordings
             # delete up to 100,000 at a time
@@ -242,7 +343,7 @@ class EventCleanup(threading.Thread):
                     Timeline.source_id << deleted_events_list[i : i + max_deletes]
                 ).execute()
 
-            self.expire(EventCleanupType.snapshots)
+            self.expire_snapshots()
 
             # drop events from db where has_clip and has_snapshot are false
             events = (

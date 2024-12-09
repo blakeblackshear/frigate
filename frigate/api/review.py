@@ -26,7 +26,7 @@ from frigate.api.defs.response.review_response import (
 )
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)

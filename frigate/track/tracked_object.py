@@ -13,6 +13,7 @@ from frigate.config import (
     CameraConfig,
     ModelConfig,
 )
+from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
     calculate_region,
@@ -58,6 +59,27 @@ class TrackedObject:
         self.active = True
         self.pending_loitering = False
         self.previous = self.to_dict()
+
+    @property
+    def max_severity(self) -> Optional[str]:
+        review_config = self.camera_config.review
+
+        if self.obj_data["label"] in review_config.alerts.labels and (
+            not review_config.alerts.required_zones
+            or set(self.entered_zones) & set(review_config.alerts.required_zones)
+        ):
+            return SeverityEnum.alert
+
+        if (
+            not review_config.detections.labels
+            or self.obj_data["label"] in review_config.detections.labels
+        ) and (
+            not review_config.detections.required_zones
+            or set(self.entered_zones) & set(review_config.detections.required_zones)
+        ):
+            return SeverityEnum.detection
+
+        return None
 
     def _is_false_positive(self):
         # once a true positive, always a true positive
@@ -232,6 +254,7 @@ class TrackedObject:
             "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
+            "max_severity": self.max_severity,
         }
 
         if include_thumbnail:
