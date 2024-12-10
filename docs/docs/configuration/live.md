@@ -3,7 +3,7 @@ id: live
 title: Live View
 ---
 
-Frigate intelligently displays your camera streams on the Live view dashboard. Your camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
+Frigate intelligently displays your camera streams on the Live view dashboard. By default, Frigate employs "smart streaming" where camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion or objects are detected, cameras seamlessly switch to a live stream.
 
 ## Live View technologies
 
@@ -53,7 +53,7 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-In Frigate 0.16 and later, you can configure Live view to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but your full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to select a stream for live viewing.
+In Frigate 0.16 and later, you can edit your configuration to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This settings is _per device_ and is saved in your device's local storage.
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard. The default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` for streaming.
 
@@ -86,7 +86,7 @@ cameras:
           roles:
             - detect
     live:
-      streams:
+      streams: # <--- Multiple streams for Frigate 0.16 and later
         - Main Stream: test_cam
         - Sub Stream: test_cam_sub
 ```
@@ -146,3 +146,20 @@ services:
 :::
 
 See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.3#module-webrtc) for more information about this.
+
+### Streaming options on camera group dashboards
+
+Frigate 0.16 and later provides a dialog in the Camera Group Edit pane with several options for streaming on a camera group's dashboard. These settings are _per device_ and are saved in your device's local storage.
+
+- Stream selection using the `live -> streams` configuration option (see _Setting Streams For Live UI_ above)
+- Streaming type:
+  - _No streaming_: Camera images will only update once per minute and no live streaming will occur.
+  - _Smart Streaming_ (default, recommended setting): Smart streaming will update your camera image once per minute when no detectable activity is occurring to conserve bandwidth and resources. When motion or objects are detected, the image seamlessly switches to a live stream.
+  - _Continuous Streaming_: Camera image will always be a live stream when visible on the dashboard, even if no activity is being detected. Continuous streaming may cause high bandwidth usage and performance issues. **Use with caution.**
+- Compatibility mode: Enable this option only if your camera's live stream is displaying color artifacts and has a diagonal line on the right side of the image. Before enabling this, try setting your camera's `detect` width and height to a standard aspect ratio (for example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). Browsers may not be able to support more than a few cameras in compatibility mode, so only use this option if changing your config fails to resolve the color artifacting and diagonal line.
+
+:::note
+
+The default dashboard ("All Cameras") will always use Smart Streaming and the first entry set in your `streams` configuration, if defined. Use a camera group if you need to change any of these settings from these defaults.
+
+:::
