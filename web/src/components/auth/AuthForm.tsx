@@ -63,7 +63,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           toast.error("Exceeded rate limit. Try again later.", {
             position: "top-center",
           });
-        } else if (err.response?.status === 400) {
+        } else if (err.response?.status === 401) {
           toast.error("Login failed", {
             position: "top-center",
           });

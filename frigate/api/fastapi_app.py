@@ -87,7 +87,11 @@ def create_fastapi_app(
         logger.info("FastAPI started")
 
     # Rate limiter (used for login endpoint)
-    auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit or "")
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
+    else:
+        auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit)
+
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
