@@ -180,28 +180,32 @@ def auth():
 
     fail_response = make_response({}, 401)
 
-    # ensure the proxy secret matches if configured
+    # if the request is coming from a proxy with a auth header attempt header auth
     if (
-        proxy_config.auth_secret is not None
-        and request.headers.get("x-proxy-secret", "", type=str)
-        != proxy_config.auth_secret
+        auth_config.trusted_proxies is not None
+        and proxy_config.header_map.user is not None
+        and proxy_config.header_map.user in request.headers
     ):
-        logger.debug("X-Proxy-Secret header does not match configured secret value")
-        return fail_response
+        # ensure the proxy secret matches if configured
+        if (
+            proxy_config.auth_secret is not None
+            and request.headers.get("x-proxy-secret", "", type=str)
+            != proxy_config.auth_secret
+        ):
+            logger.debug("X-Proxy-Secret header does not match configured secret value")
+            return fail_response
 
-    # if auth is disabled, just apply the proxy header map and return success
+        upstream_user_header_value = request.headers.get(
+            proxy_config.header_map.user,
+            type=str,
+            default="anonymous",
+        )
+        success_response.headers["remote-user"] = upstream_user_header_value
+        return success_response
+
+    # if auth is disabled, return success
     if not auth_config.enabled:
-        # pass the user header value from the upstream proxy if a mapping is specified
-        # or use anonymous if none are specified
-        if proxy_config.header_map.user is not None:
-            upstream_user_header_value = request.headers.get(
-                proxy_config.header_map.user,
-                type=str,
-                default="anonymous",
-            )
-            success_response.headers["remote-user"] = upstream_user_header_value
-        else:
-            success_response.headers["remote-user"] = "anonymous"
+        success_response.headers["remote-user"] = "anonymous"
         return success_response
 
     # now apply authentication
