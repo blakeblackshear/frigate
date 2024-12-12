@@ -257,7 +257,11 @@ class EventCleanup(threading.Thread):
         events_to_update = []
 
         for batch in query.iterator():
-            events_to_update.extend([event.id for event in batch])
+            try:
+                events_to_update.extend([event.id for event in batch])
+            except TypeError:
+                events_to_update.append(batch)
+
             if len(events_to_update) >= CHUNK_SIZE:
                 logger.debug(
                     f"Updating {update_params} for {len(events_to_update)} events"
