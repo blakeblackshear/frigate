@@ -136,17 +136,17 @@ class Rknn(DetectionApi):
     def check_config(self, config):
         if (config.model.width != 320) or (config.model.height != 320):
             raise Exception(
-                "Make sure to set the model width and height to 320 in your config.yml."
+                "Make sure to set the model width and height to 320 in your config."
             )
 
         if config.model.input_pixel_format != "bgr":
             raise Exception(
-                'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+                'Make sure to set the model input_pixel_format to "bgr" in your config.'
             )
 
         if config.model.input_tensor != "nhwc":
             raise Exception(
-                'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+                'Make sure to set the model input_tensor to "nhwc" in your config.'
             )
 
     def detect_raw(self, tensor_input):
