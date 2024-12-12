@@ -256,8 +256,8 @@ class EventCleanup(threading.Thread):
 
         events_to_update = []
 
-        for batch in query.iterator():
-            events_to_update.append(batch)
+        for event in query.iterator():
+            events_to_update.append(event)
 
             if len(events_to_update) >= CHUNK_SIZE:
                 logger.debug(
