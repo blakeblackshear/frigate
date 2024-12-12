@@ -28,6 +28,7 @@ from frigate.util.builtin import (
     get_tz_modifiers,
     update_yaml_from_url,
 )
+from frigate.util.config import find_config_file
 from frigate.util.services import (
     ffprobe_stream,
     get_nvidia_driver_info,
@@ -147,13 +148,7 @@ def config(request: Request):
 
 @router.get("/config/raw")
 def config_raw():
-    config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-    # Check if we can use .yaml instead of .yml
-    config_file_yaml = config_file.replace(".yml", ".yaml")
-
-    if os.path.isfile(config_file_yaml):
-        config_file = config_file_yaml
+    config_file = find_config_file()
 
     if not os.path.isfile(config_file):
         return JSONResponse(
@@ -198,13 +193,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
 
     # Save the config to file
     try:
-        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-        # Check if we can use .yaml instead of .yml
-        config_file_yaml = config_file.replace(".yml", ".yaml")
-
-        if os.path.isfile(config_file_yaml):
-            config_file = config_file_yaml
+        config_file = find_config_file()
 
         with open(config_file, "w") as f:
             f.write(new_config)
@@ -253,13 +242,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
 
 @router.put("/config/set")
 def config_set(request: Request, body: AppConfigSetBody):
-    config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
-
-    # Check if we can use .yaml instead of .yml
-    config_file_yaml = config_file.replace(".yml", ".yaml")
-
-    if os.path.isfile(config_file_yaml):
-        config_file = config_file_yaml
+    config_file = find_config_file()
 
     with open(config_file, "r") as f:
         old_raw_config = f.read()

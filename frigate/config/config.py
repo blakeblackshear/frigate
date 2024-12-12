@@ -29,6 +29,7 @@ from frigate.util.builtin import (
 )
 from frigate.util.config import (
     StreamInfoRetriever,
+    find_config_file,
     get_relative_coordinates,
     migrate_frigate_config,
 )
@@ -67,7 +68,6 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-DEFAULT_CONFIG_FILE = "/config/config.yml"
 DEFAULT_CONFIG = """
 mqtt:
   enabled: False
@@ -638,16 +638,13 @@ class FrigateConfig(FrigateBaseModel):
 
     @classmethod
     def load(cls, **kwargs):
-        config_path = os.environ.get("CONFIG_FILE", DEFAULT_CONFIG_FILE)
-
-        if not os.path.isfile(config_path):
-            config_path = config_path.replace("yml", "yaml")
+        config_path = find_config_file()
 
         # No configuration file found, create one.
         new_config = False
         if not os.path.isfile(config_path):
             logger.info("No config file found, saving default config")
-            config_path = DEFAULT_CONFIG_FILE
+            config_path = config_path
             new_config = True
         else:
             # Check if the config file needs to be migrated.
