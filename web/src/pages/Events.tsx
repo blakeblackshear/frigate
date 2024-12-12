@@ -53,20 +53,18 @@ export default function Events() {
           const startTime = resp.data.start_time - REVIEW_PADDING;
           const date = new Date(startTime * 1000);
 
-          setTimeout(() => {
-            setReviewFilter({
-              after: getBeginningOfDayTimestamp(date),
-              before: getEndOfDayTimestamp(date),
-            });
-            setRecording(
-              {
-                camera: resp.data.camera,
-                startTime,
-                severity: resp.data.severity,
-              },
-              true,
-            );
-          }, 100);
+          setReviewFilter({
+            after: getBeginningOfDayTimestamp(date),
+            before: getEndOfDayTimestamp(date),
+          });
+          setRecording(
+            {
+              camera: resp.data.camera,
+              startTime,
+              severity: resp.data.severity,
+            },
+            true,
+          );
         }
       })
       .catch(() => {});
