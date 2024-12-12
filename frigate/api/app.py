@@ -21,7 +21,6 @@ from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryPa
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR
 from frigate.models import Event, Timeline
 from frigate.util.builtin import (
     clean_camera_user_pass,
