@@ -39,8 +39,11 @@ export default function Events() {
 
   const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
 
-  const [recording, setRecording] =
-    useOverlayState<RecordingStartingPoint>("recording");
+  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
+    "recording",
+    undefined,
+    false,
+  );
 
   useSearchEffect("id", (reviewId: string) => {
     axios
@@ -50,18 +53,20 @@ export default function Events() {
           const startTime = resp.data.start_time - REVIEW_PADDING;
           const date = new Date(startTime * 1000);
 
-          setReviewFilter({
-            after: getBeginningOfDayTimestamp(date),
-            before: getEndOfDayTimestamp(date),
-          });
-          setRecording(
-            {
-              camera: resp.data.camera,
-              startTime,
-              severity: resp.data.severity,
-            },
-            true,
-          );
+          setTimeout(() => {
+            setReviewFilter({
+              after: getBeginningOfDayTimestamp(date),
+              before: getEndOfDayTimestamp(date),
+            });
+            setRecording(
+              {
+                camera: resp.data.camera,
+                startTime,
+                severity: resp.data.severity,
+              },
+              true,
+            );
+          }, 100);
         }
       })
       .catch(() => {});
