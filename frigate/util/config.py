@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 CURRENT_CONFIG_VERSION = "0.15-0"
 DEFAULT_CONFIG_FILE = "/config/config.yml"
 
+
 def find_config_file() -> str:
     config_path = os.environ.get("CONFIG_FILE", DEFAULT_CONFIG_FILE)
 
