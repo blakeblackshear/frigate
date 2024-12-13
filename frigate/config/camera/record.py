@@ -99,7 +99,6 @@ class RecordConfig(FrigateBaseModel):
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",
-        ge=0,
     )
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
