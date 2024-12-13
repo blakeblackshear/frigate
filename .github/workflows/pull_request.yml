@@ -3,7 +3,7 @@ name: On pull request
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
 
 env:
   DEFAULT_PYTHON: 3.9
@@ -19,6 +19,8 @@ jobs:
       DOCKER_BUILDKIT: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -38,6 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -52,6 +56,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@master
         with:
           node-version: 20.x
@@ -67,6 +73,8 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v5.1.0
         with:
@@ -88,6 +96,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
