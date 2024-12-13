@@ -39,8 +39,11 @@ export default function Events() {
 
   const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
 
-  const [recording, setRecording] =
-    useOverlayState<RecordingStartingPoint>("recording");
+  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
+    "recording",
+    undefined,
+    false,
+  );
 
   useSearchEffect("id", (reviewId: string) => {
     axios

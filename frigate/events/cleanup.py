@@ -256,8 +256,9 @@ class EventCleanup(threading.Thread):
 
         events_to_update = []
 
-        for batch in query.iterator():
-            events_to_update.extend([event.id for event in batch])
+        for event in query.iterator():
+            events_to_update.append(event)
+
             if len(events_to_update) >= CHUNK_SIZE:
                 logger.debug(
                     f"Updating {update_params} for {len(events_to_update)} events"
@@ -330,9 +331,8 @@ class EventCleanup(threading.Thread):
 
     def run(self) -> None:
         # only expire events every 5 minutes
-        while not self.stop_event.wait(1):
+        while not self.stop_event.wait(300):
             events_with_expired_clips = self.expire_clips()
-            return
 
             # delete timeline entries for events that have expired recordings
             # delete up to 100,000 at a time
