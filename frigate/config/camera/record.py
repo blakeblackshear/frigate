@@ -32,6 +32,7 @@ class RecordRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, title="Default retention period.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
+
 class RecordCleanupConfig(FrigateBaseModel):
     trigger_minutes: int = Field(
         default=60,
