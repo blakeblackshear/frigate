@@ -15,6 +15,7 @@ __all__ = [
     "EventsConfig",
     "ReviewRetainConfig",
     "RecordRetainConfig",
+    "RecordCleanupConfig",
     "RetainModeEnum",
 ]
 
@@ -30,6 +31,28 @@ class RetainModeEnum(str, Enum):
 class RecordRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, title="Default retention period.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
+
+class RecordCleanupConfig(FrigateBaseModel):
+    trigger_minutes: int = Field(
+        default=60,
+        title="Minutes of remaining recording time remaining on disk to perform recording cleanup",
+        ge=0,
+    )
+    trigger_space: int = Field(
+        default=0,
+        title="Space remaining on disk to perform recording cleanup.",
+        ge=0,
+    )
+    target_minutes: int = Field(
+        default=120,
+        title="Minutes of remaining recording time to remove once below threshold.",
+        ge=0,
+    )
+    target_space: int = Field(
+        default=0,
+        title="Amount of space to free once below threshold.",
+        ge=0,
+    )
 
 
 class ReviewRetainConfig(FrigateBaseModel):
@@ -75,6 +98,7 @@ class RecordConfig(FrigateBaseModel):
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",
+        ge=0,
     )
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
@@ -87,6 +111,9 @@ class RecordConfig(FrigateBaseModel):
     )
     export: RecordExportConfig = Field(
         default_factory=RecordExportConfig, title="Recording Export Config"
+    )
+    cleanup: RecordCleanupConfig = Field(
+        default_factory=RecordCleanupConfig, title="Recording Cleanup Config"
     )
     preview: RecordPreviewConfig = Field(
         default_factory=RecordPreviewConfig, title="Recording Preview Config"

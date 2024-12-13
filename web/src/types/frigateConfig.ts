@@ -158,6 +158,12 @@ export interface CameraConfig {
       };
     };
     expire_interval: number;
+    cleanup: {
+      trigger_minutes: number;
+      target_minutes: number;
+      trigger_space: number;
+      target_space: number;
+    }
     export: {
       timelapse_args: string;
     };
@@ -400,6 +406,12 @@ export interface FrigateConfig {
       };
     };
     expire_interval: number;
+    cleanup: {
+      trigger_minutes: number;
+      target_minutes: number;
+      trigger_space: number;
+      target_space: number;
+    }
     export: {
       timelapse_args: string;
     };

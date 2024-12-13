@@ -415,7 +415,16 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
-  # Optional: Sync recordings with disk on startup and once a day (default: shown below).
+  cleanup:
+    # Optional: Minutes of remaining recording time on disk to start recording cleanup (default: shown below)
+    trigger_minutes: 60
+    # Optional: Minutes of remaining recording time on disk to free (default: shown below)
+    target_minutes: 120
+    # Optional: The free disk space in MiB to start recording cleanup (default: shown below)
+    trigger_space: 0
+    # Optional: The amount of free disk space in MiB to free (default: shown below)
+    target_space: 0
+    # Optional: Sync recordings with disk on startup and once a day (default: shown below).
   sync_recordings: False
   # Optional: Retention settings for recording
   retain:

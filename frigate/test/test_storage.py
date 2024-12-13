@@ -3,7 +3,9 @@ import logging
 import os
 import tempfile
 import unittest
+import shutil
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from peewee import DoesNotExist
 from peewee_migrate import Router
@@ -138,11 +140,13 @@ class TestHttp(unittest.TestCase):
         assert storage.camera_storage_stats == {
             "front_door": {"bandwidth": 0, "needs_refresh": True},
         }
-
-    def test_storage_cleanup(self):
+    
+    @patch('frigate.storage.shutil.disk_usage')
+    def test_storage_cleanup(self, mock_disk_usage):
         """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)
         storage = StorageMaintainer(config, MagicMock())
+        mock_disk_usage.return_value = shutil._ntuple_diskusage(total=10000, used=5000, free=5000)
 
         id = "123456.keep"
         time_keep = datetime.datetime.now().timestamp()
@@ -209,10 +213,12 @@ class TestHttp(unittest.TestCase):
             Recordings.get(Recordings.id == rec_d2_id)
             Recordings.get(Recordings.id == rec_d3_id)
 
-    def test_storage_cleanup_keeps_retained(self):
+    @patch('frigate.storage.shutil.disk_usage')
+    def test_storage_cleanup_keeps_retained(self, mock_disk_usage):
         """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)
         storage = StorageMaintainer(config, MagicMock())
+        mock_disk_usage.return_value = shutil._ntuple_diskusage(total=10000, used=5000, free=5000)
 
         id = "123456.keep"
         time_keep = datetime.datetime.now().timestamp()
