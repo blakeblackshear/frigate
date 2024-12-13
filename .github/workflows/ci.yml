@@ -7,7 +7,7 @@ on:
       - dev
       - master
     paths-ignore:
-      - 'docs/**'      
+      - "docs/**"
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -45,6 +47,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -86,6 +90,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -112,6 +118,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -140,6 +148,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -165,6 +175,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -188,6 +200,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
