@@ -28,7 +28,7 @@ For the Dahua/Loryta 5442 camera, I use the following settings:
 - Encode Mode: H.264
 - Resolution: 2688\*1520
 - Frame Rate(FPS): 15
-- I Frame Interval: 30
+- I Frame Interval: 30 (15 can also be used to prioritize streaming performance - see the [camera settings recommendations](../configuration/live) for more info)
 
 **Sub Stream (Detection)**
 
