@@ -82,18 +82,23 @@ class EventProcessor(threading.Thread):
             )
 
             if source_type == EventTypeEnum.tracked_object:
+                id = event_data["id"]
                 self.timeline_queue.put(
                     (
                         camera,
                         source_type,
                         event_type,
-                        self.events_in_process.get(event_data["id"]),
+                        self.events_in_process.get(id),
                         event_data,
                     )
                 )
 
-                if event_type == EventStateEnum.start:
-                    self.events_in_process[event_data["id"]] = event_data
+                # if this is the first message, just store it and continue, its not time to insert it in the db
+                if (
+                    event_type == EventStateEnum.start
+                    or id not in self.events_in_process
+                ):
+                    self.events_in_process[id] = event_data
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
@@ -122,10 +127,6 @@ class EventProcessor(threading.Thread):
     ) -> None:
         """handle tracked object event updates."""
         updated_db = False
-
-        # if this is the first message, just store it and continue, its not time to insert it in the db
-        if event_type == EventStateEnum.start:
-            self.events_in_process[event_data["id"]] = event_data
 
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
             updated_db = True
