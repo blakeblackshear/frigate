@@ -312,19 +312,19 @@ Topic with current state of the PTZ autotracker for a camera. Published values a
 
 Topic to determine if PTZ autotracker is actively tracking an object. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/review/alerts/set`
+### `frigate/<camera_name>/review_alerts/set`
 
 Topic to turn review alerts for a camera on or off. Expected values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/review/alerts/state`
+### `frigate/<camera_name>/review_alerts/state`
 
 Topic with current state of review alerts for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/review/detections/set`
+### `frigate/<camera_name>/review_detections/set`
 
 Topic to turn review detections for a camera on or off. Expected values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/review/detections/state`
+### `frigate/<camera_name>/review_detections/state`
 
 Topic with current state of review detections for a camera. Published values are `ON` and `OFF`.
 
