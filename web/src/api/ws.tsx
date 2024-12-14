@@ -200,6 +200,31 @@ export function useAutotrackingState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
+export function useAlertsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/review/alerts/state`, `${camera}/review/alerts/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useDetectionsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review/detections/state`,
+    `${camera}/review/detections/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function usePtzCommand(camera: string): {
   payload: string;
   send: (payload: string, retain?: boolean) => void;

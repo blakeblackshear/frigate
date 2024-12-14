@@ -172,10 +172,12 @@ export interface CameraConfig {
   };
   review: {
     alerts: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
     };
     detections: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
     };
