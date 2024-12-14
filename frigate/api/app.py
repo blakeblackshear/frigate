@@ -16,6 +16,7 @@ from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from markupsafe import escape
 from peewee import operator
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
@@ -35,9 +36,6 @@ from frigate.util.services import (
     vainfo_hwaccel,
 )
 from frigate.version import VERSION
-
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from fastapi.responses import Response
 
 logger = logging.getLogger(__name__)
 
