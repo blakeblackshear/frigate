@@ -52,3 +52,4 @@ pywebpush == 2.0.*
 # alpr
 pyclipper == 1.3.*
 shapely == 2.0.*
+prometheus-client == 0.21.*
