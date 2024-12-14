@@ -36,6 +36,9 @@ from frigate.util.services import (
 )
 from frigate.version import VERSION
 
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from fastapi.responses import Response
+
 logger = logging.getLogger(__name__)
 
 
@@ -105,6 +108,12 @@ def stats_history(request: Request, keys: str = None):
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
+@router.get("/metrics")
+def metrics():
+    """Expose Prometheus metrics endpoint"""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 @router.get("/config")
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
@@ -138,9 +147,9 @@ def config(request: Request):
     config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
-        detector_config["model"]["labelmap"] = (
-            request.app.frigate_config.model.merged_labelmap
-        )
+        detector_config["model"][
+            "labelmap"
+        ] = request.app.frigate_config.model.merged_labelmap
 
     return JSONResponse(content=config)
 
