@@ -53,7 +53,15 @@ function useValue(): useValueReturn {
     const cameraStates: WsState = {};
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
-      const { record, detect, snapshots, audio, autotracking } =
+      const {
+        record,
+        detect,
+        snapshots,
+        audio,
+        autotracking,
+        alerts,
+        detections,
+      } =
         // @ts-expect-error we know this is correct
         state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
@@ -61,6 +69,10 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_alerts/state`] = alerts ? "ON" : "OFF";
+      cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
     });
@@ -207,7 +219,7 @@ export function useAlertsState(camera: string): {
   const {
     value: { payload },
     send,
-  } = useWs(`${camera}/review/alerts/state`, `${camera}/review/alerts/set`);
+  } = useWs(`${camera}/review_alerts/state`, `${camera}/review_alerts/set`);
   return { payload: payload as ToggleableSetting, send };
 }
 
@@ -219,8 +231,8 @@ export function useDetectionsState(camera: string): {
     value: { payload },
     send,
   } = useWs(
-    `${camera}/review/detections/state`,
-    `${camera}/review/detections/set`,
+    `${camera}/review_detections/state`,
+    `${camera}/review_detections/set`,
   );
   return { payload: payload as ToggleableSetting, send };
 }

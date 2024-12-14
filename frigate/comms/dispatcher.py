@@ -80,8 +80,8 @@ class Dispatcher:
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
             "birdseye_mode": self._on_birdseye_mode_command,
-            "alerts": self._on_alerts_command,
-            "detections": self._on_detections_command,
+            "review_alerts": self._on_alerts_command,
+            "review_detections": self._on_detections_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_notification_command,
@@ -515,7 +515,7 @@ class Dispatcher:
                 review_settings.alerts.enabled = False
 
         self.config_updater.publish(f"config/review/{camera_name}", review_settings)
-        self.publish(f"{camera_name}/review/alerts/state", payload, retain=True)
+        self.publish(f"{camera_name}/review_alerts/state", payload, retain=True)
 
     def _on_detections_command(self, camera_name: str, payload: str) -> None:
         """Callback for detections topic."""
@@ -537,4 +537,4 @@ class Dispatcher:
                 review_settings.detections.enabled = False
 
         self.config_updater.publish(f"config/review/{camera_name}", review_settings)
-        self.publish(f"{camera_name}/review/detections/state", payload, retain=True)
+        self.publish(f"{camera_name}/review_detections/state", payload, retain=True)

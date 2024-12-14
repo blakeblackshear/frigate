@@ -261,10 +261,9 @@ export default function CameraSettingsView({
               <Switch
                 id="alerts-enabled"
                 className="mr-3"
-                disabled={alertsState == "OFF"}
                 checked={alertsState == "ON"}
                 onCheckedChange={(isChecked) => {
-                  sendAlerts(isChecked ? "OFF" : "ON");
+                  sendAlerts(isChecked ? "ON" : "OFF");
                 }}
               />
               <div className="space-y-0.5">
@@ -276,10 +275,9 @@ export default function CameraSettingsView({
                 <Switch
                   id="detections-enabled"
                   className="mr-3"
-                  disabled={detectionsState == "OFF"}
                   checked={detectionsState == "ON"}
                   onCheckedChange={(isChecked) => {
-                    sendDetections(isChecked ? "OFF" : "ON");
+                    sendDetections(isChecked ? "ON" : "OFF");
                   }}
                 />
                 <div className="space-y-0.5">
