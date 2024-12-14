@@ -80,6 +80,8 @@ class Dispatcher:
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
             "birdseye_mode": self._on_birdseye_mode_command,
+            "alerts": self._on_alerts_command,
+            "detections": self._on_detections_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_notification_command,
@@ -182,6 +184,8 @@ class Dispatcher:
                     "autotracking": self.config.cameras[
                         camera
                     ].onvif.autotracking.enabled,
+                    "alerts": self.config.cameras[camera].review.alerts.enabled,
+                    "detections": self.config.cameras[camera].review.detections.enabled,
                 }
 
             self.publish("camera_activity", json.dumps(camera_status))
@@ -490,3 +494,47 @@ class Dispatcher:
 
         self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
+
+    def _on_alerts_command(self, camera_name: str, payload: str) -> None:
+        """Callback for alerts topic."""
+        review_settings = self.config.cameras[camera_name].review
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].review.alerts.enabled_in_config:
+                logger.error(
+                    "Alerts must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not review_settings.alerts.enabled:
+                logger.info(f"Turning on alerts for {camera_name}")
+                review_settings.alerts.enabled = True
+        elif payload == "OFF":
+            if review_settings.alerts.enabled:
+                logger.info(f"Turning off alerts for {camera_name}")
+                review_settings.alerts.enabled = False
+
+        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.publish(f"{camera_name}/review/alerts/state", payload, retain=True)
+
+    def _on_detections_command(self, camera_name: str, payload: str) -> None:
+        """Callback for detections topic."""
+        review_settings = self.config.cameras[camera_name].review
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].review.detections.enabled_in_config:
+                logger.error(
+                    "Detections must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not review_settings.detections.enabled:
+                logger.info(f"Turning on detections for {camera_name}")
+                review_settings.detections.enabled = True
+        elif payload == "OFF":
+            if review_settings.detections.enabled:
+                logger.info(f"Turning off detections for {camera_name}")
+                review_settings.detections.enabled = False
+
+        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.publish(f"{camera_name}/review/detections/state", payload, retain=True)
