@@ -147,9 +147,9 @@ def config(request: Request):
     config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
-        detector_config["model"][
-            "labelmap"
-        ] = request.app.frigate_config.model.merged_labelmap
+        detector_config["model"]["labelmap"] = (
+            request.app.frigate_config.model.merged_labelmap
+        )
 
     return JSONResponse(content=config)
 
