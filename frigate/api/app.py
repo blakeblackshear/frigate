@@ -37,9 +37,6 @@ from frigate.util.services import (
 )
 from frigate.version import VERSION
 
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from fastapi.responses import Response
-
 logger = logging.getLogger(__name__)
 
 
