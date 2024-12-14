@@ -1,12 +1,12 @@
-from typing import Dict
-
 from prometheus_client import (
-    CONTENT_TYPE_LATEST,
     Counter,
     Gauge,
+    Histogram,
     Info,
     generate_latest,
+    CONTENT_TYPE_LATEST,
 )
+from typing import Dict
 
 # System metrics
 SYSTEM_INFO = Info("frigate_system", "System information")

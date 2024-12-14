@@ -14,6 +14,8 @@ from frigate.const import FREQUENCY_STATS_POINTS
 from frigate.stats.prometheus import update_metrics
 from frigate.stats.util import stats_snapshot
 from frigate.types import StatsTrackingTypes
+from frigate.stats.prometheus import update_metrics
+
 
 logger = logging.getLogger(__name__)
 
