@@ -335,8 +335,10 @@ class EmbeddingMaintainer(threading.Thread):
                 )
 
                 # crop snapshot based on region before sending off to genai
+                # provide full image if region doesn't exist (manual events)
+                region = event.data.get("region", [0, 0, 1, 1])
                 height, width = img.shape[:2]
-                x1_rel, y1_rel, width_rel, height_rel = event.data["region"]
+                x1_rel, y1_rel, width_rel, height_rel = region
 
                 x1, y1 = int(x1_rel * width), int(y1_rel * height)
                 cropped_image = img[
