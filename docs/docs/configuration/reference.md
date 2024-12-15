@@ -46,6 +46,11 @@ mqtt:
   tls_insecure: false
   # Optional: interval in seconds for publishing stats (default: shown below)
   stats_interval: 60
+  # Optional: QoS level for subscriptions and publishing (default: shown below)
+  # 0 = at most once
+  # 1 = at least once
+  # 2 = exactly once
+  qos: 0
 
 # Optional: Detectors configuration. Defaults to a single CPU detector
 detectors:
