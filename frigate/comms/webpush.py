@@ -116,16 +116,70 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         if topic == "reviews":
             self.send_alert(json.loads(payload))
+        elif topic == "notification_test":
+            self.send_notification_test()
 
-    def send_alert(self, payload: dict[str, any]) -> None:
+    def send_push_notification(
+        self,
+        user: str,
+        payload: dict[str, Any],
+        title: str,
+        message: str,
+        direct_url: str = "",
+        image: str = "",
+        notification_type: str = "alert",
+        ttl: int = 0,
+    ) -> None:
+        for pusher in self.web_pushers[user]:
+            endpoint = pusher.subscription_info["endpoint"]
+            headers = self.claim_headers[endpoint[: endpoint.index("/", 10)]].copy()
+            headers["urgency"] = "high"
+
+            resp = pusher.send(
+                headers=headers,
+                ttl=ttl,
+                data=json.dumps(
+                    {
+                        "title": title,
+                        "message": message,
+                        "direct_url": direct_url,
+                        "image": image,
+                        "id": payload.get("after", {}).get("id", ""),
+                        "type": notification_type,
+                    }
+                ),
+            )
+
+            if resp.status_code in (404, 410):
+                self.expired_subs.setdefault(user, []).append(endpoint)
+            elif resp.status_code != 201:
+                logger.warning(
+                    f"Failed to send notification to {user} :: {resp.headers}"
+                )
+
+    def send_notification_test(self) -> None:
         if not self.config.notifications.email:
             return
 
         self.check_registrations()
 
-        # Only notify for alerts
-        if payload["after"]["severity"] != "alert":
+        for user in self.web_pushers:
+            self.send_push_notification(
+                user=user,
+                payload={},
+                title="Test Notification",
+                message="This is a test notification from Frigate.",
+                notification_type="test",
+            )
+
+    def send_alert(self, payload: dict[str, Any]) -> None:
+        if (
+            not self.config.notifications.email
+            or payload["after"]["severity"] != "alert"
+        ):
             return
+
+        self.check_registrations()
 
         state = payload["type"]
 
@@ -155,47 +209,18 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
+        ttl = 3600 if state == "end" else 0
 
-        for user, pushers in self.web_pushers.items():
-            for pusher in pushers:
-                endpoint = pusher.subscription_info["endpoint"]
-
-                # set headers for notification behavior
-                headers = self.claim_headers[
-                    endpoint[0 : endpoint.index("/", 10)]
-                ].copy()
-                headers["urgency"] = "high"
-                ttl = 3600 if state == "end" else 0
-
-                # send message
-                resp = pusher.send(
-                    headers=headers,
-                    ttl=ttl,
-                    data=json.dumps(
-                        {
-                            "title": title,
-                            "message": message,
-                            "direct_url": direct_url,
-                            "image": image,
-                            "id": reviewId,
-                            "type": "alert",
-                        }
-                    ),
-                )
-
-                if resp.status_code == 201:
-                    pass
-                elif resp.status_code == 404 or resp.status_code == 410:
-                    # subscription is not found or has been unsubscribed
-                    if not self.expired_subs.get(user):
-                        self.expired_subs[user] = []
-
-                    self.expired_subs[user].append(pusher.subscription_info["endpoint"])
-                    # the subscription no longer exists and should be removed
-                else:
-                    logger.warning(
-                        f"Failed to send notification to {user} :: {resp.headers}"
-                    )
+        for user in self.web_pushers:
+            self.send_push_notification(
+                user=user,
+                payload=payload,
+                title=title,
+                message=message,
+                direct_url=direct_url,
+                image=image,
+                ttl=ttl,
+            )
 
         self.cleanup_registrations()
 

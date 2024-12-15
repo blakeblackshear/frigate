@@ -13,6 +13,7 @@ from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     INSERT_MANY_RECORDINGS,
     INSERT_PREVIEW,
+    NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -191,6 +192,9 @@ class Dispatcher:
                 json.dumps(self.embeddings_reindex.copy()),
             )
 
+        def handle_notification_test():
+            self.publish("notification_test", "Test notification")
+
         # Dictionary mapping topic to handlers
         topic_handlers = {
             INSERT_MANY_RECORDINGS: handle_insert_many_recordings,
@@ -202,6 +206,7 @@ class Dispatcher:
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
+            NOTIFICATION_TEST: handle_notification_test,
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
