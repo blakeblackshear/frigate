@@ -134,9 +134,22 @@ def config(request: Request):
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
+    # remove go2rtc stream passwords
+    for stream_name, stream in request.app.frigate_config.go2rtc.get("streams", {}).items():
+        if isinstance(stream, str):
+            cleaned = clean_camera_user_pass(stream)
+        else:
+            cleaned = []
+
+            for item in stream:
+                cleaned.append(clean_camera_user_pass(item))
+
+        config["go2rtc"]["streams"][stream_name] = cleaned
+
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
 
+    # use merged labelamp
     for detector_config in config["detectors"].values():
         detector_config["model"]["labelmap"] = (
             request.app.frigate_config.model.merged_labelmap
