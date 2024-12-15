@@ -1,3 +1,4 @@
+import { useNotificationTest } from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,8 @@ export default function NotificationView({
       revalidateOnFocus: false,
     },
   );
+
+  const { send: sendTestNotification } = useNotificationTest();
 
   // status bar
 
@@ -296,7 +299,7 @@ export default function NotificationView({
             </form>
           </Form>
 
-          <div className="mt-4 space-y-6">
+          <div className="mt-4 gap-2 space-y-6">
             <div className="space-y-3">
               <Separator className="my-2 flex bg-secondary" />
               <Button
@@ -338,6 +341,14 @@ export default function NotificationView({
               >
                 {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
               </Button>
+              {registration != null && (
+                <Button
+                  aria-label="Send a test notification"
+                  onClick={() => sendTestNotification("notification_test")}
+                >
+                  Send a test notification
+                </Button>
+              )}
             </div>
           </div>
         </div>

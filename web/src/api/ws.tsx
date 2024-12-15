@@ -413,3 +413,14 @@ export function useTrackedObjectUpdate(): { payload: string } {
   } = useWs("tracked_object_update", "");
   return useDeepMemo(JSON.parse(payload as string));
 }
+
+export function useNotificationTest(): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs("notification_test", "notification_test");
+  return { payload: payload as string, send };
+}
