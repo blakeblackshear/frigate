@@ -135,7 +135,9 @@ def config(request: Request):
             camera_dict["zones"][zone_name]["color"] = zone.color
 
     # remove go2rtc stream passwords
-    for stream_name, stream in request.app.frigate_config.go2rtc.get("streams", {}).items():
+    for stream_name, stream in request.app.frigate_config.go2rtc.get(
+        "streams", {}
+    ).items():
         if isinstance(stream, str):
             cleaned = clean_camera_user_pass(stream)
         else:
