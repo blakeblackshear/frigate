@@ -22,7 +22,6 @@ const sidebars: SidebarsConfig = {
     Configuration: {
       'Configuration Files': [
         'configuration/index',
-        'configuration/metrics',
         'configuration/reference',
         {
           type: 'link',
@@ -85,6 +84,7 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       'integrations/mqtt',
+      'configuration/metrics',
       'integrations/third_party_extensions',
     ],
     'Frigate+': [
