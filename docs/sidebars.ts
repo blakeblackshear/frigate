@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
     Configuration: {
       'Configuration Files': [
         'configuration/index',
+        'configuration/metrics',
         'configuration/reference',
         {
           type: 'link',
