@@ -77,13 +77,14 @@ class Dispatcher:
             "motion": self._on_motion_command,
             "motion_contour_area": self._on_motion_contour_area_command,
             "motion_threshold": self._on_motion_threshold_command,
+            "notifications": self._on_camera_notification_command,
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
             "birdseye_mode": self._on_birdseye_mode_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
-            "notifications": self._on_notification_command,
+            "notifications": self._on_global_notification_command,
         }
 
         for comm in self.comms:
@@ -369,16 +370,18 @@ class Dispatcher:
         self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
 
-    def _on_notification_command(self, payload: str) -> None:
-        """Callback for notification topic."""
+    def _on_global_notification_command(self, payload: str) -> None:
+        """Callback for global notification topic."""
         if payload != "ON" and payload != "OFF":
-            f"Received unsupported value for notification: {payload}"
+            f"Received unsupported value for all notification: {payload}"
             return
 
         notification_settings = self.config.notifications
-        logger.info(f"Setting notifications: {payload}")
+        logger.info(f"Setting all notifications: {payload}")
         notification_settings.enabled = payload == "ON"  # type: ignore[union-attr]
-        self.config_updater.publish("config/notifications", notification_settings)
+        self.config_updater.publish(
+            "config/notifications", {"_global_notifications": notification_settings}
+        )
         self.publish("notifications/state", payload, retain=True)
 
     def _on_audio_command(self, camera_name: str, payload: str) -> None:
@@ -495,3 +498,27 @@ class Dispatcher:
 
         self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
+
+    def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:
+        """Callback for camera level notifications topic."""
+        notification_settings = self.config.cameras[camera_name].notifications
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].notifications.enabled_in_config:
+                logger.error(
+                    "Notifications must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not notification_settings.enabled:
+                logger.info(f"Turning on notifications for {camera_name}")
+                notification_settings.enabled = True
+        elif payload == "OFF":
+            if notification_settings.enabled:
+                logger.info(f"Turning off notifications for {camera_name}")
+                notification_settings.enabled = False
+
+        self.config_updater.publish(
+            "config/notifications", {camera_name: notification_settings}
+        )
+        self.publish(f"{camera_name}/notifications/state", payload, retain=True)

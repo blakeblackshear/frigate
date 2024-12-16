@@ -109,14 +109,22 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         _, updated_notification_config = self.config_subscriber.check_for_update()
 
         if updated_notification_config:
-            self.config.notifications = updated_notification_config
+            for key, value in updated_notification_config.items():
+                if key == "_global_notifications":
+                    self.config.notifications = value
 
-        if not self.config.notifications.enabled:
-            return
+                elif key in self.config.cameras:
+                    self.config.cameras[key].notifications = value
 
         if topic == "reviews":
-            self.send_alert(json.loads(payload))
+            decoded = json.loads(payload)
+            camera = payload["after"]["camera"]
+            if not self.config.cameras[camera].notifications.enabled:
+                return
+            self.send_alert(decoded)
         elif topic == "notification_test":
+            if not self.config.notifications.enabled:
+                return
             self.send_notification_test()
 
     def send_push_notification(
