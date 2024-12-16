@@ -45,6 +45,7 @@ from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig
 from .camera.motion import MotionConfig
+from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
 from .camera.record import RecordConfig, RetainModeEnum
 from .camera.review import ReviewConfig
@@ -55,7 +56,6 @@ from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
-from .notification import NotificationConfig
 from .proxy import ProxyConfig
 from .semantic_search import SemanticSearchConfig
 from .telemetry import TelemetryConfig
@@ -308,7 +308,7 @@ class FrigateConfig(FrigateBaseModel):
     )
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     notifications: NotificationConfig = Field(
-        default_factory=NotificationConfig, title="Notification configuration."
+        default_factory=NotificationConfig, title="Global notification configuration."
     )
     proxy: ProxyConfig = Field(
         default_factory=ProxyConfig, title="Proxy configuration."
@@ -418,6 +418,7 @@ class FrigateConfig(FrigateBaseModel):
                 "review": ...,
                 "genai": ...,
                 "motion": ...,
+                "notifications": ...,
                 "detect": ...,
                 "ffmpeg": ...,
                 "timestamp_style": ...,
@@ -502,6 +503,9 @@ class FrigateConfig(FrigateBaseModel):
             # set config pre-value
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
             camera_config.record.enabled_in_config = camera_config.record.enabled
+            camera_config.notifications.enabled_in_config = (
+                camera_config.notifications.enabled
+            )
             camera_config.onvif.autotracking.enabled_in_config = (
                 camera_config.onvif.autotracking.enabled
             )

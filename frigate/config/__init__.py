@@ -7,7 +7,6 @@ from .config import *  # noqa: F403
 from .database import *  # noqa: F403
 from .logger import *  # noqa: F403
 from .mqtt import *  # noqa: F403
-from .notification import *  # noqa: F403
 from .proxy import *  # noqa: F403
 from .semantic_search import *  # noqa: F403
 from .telemetry import *  # noqa: F403

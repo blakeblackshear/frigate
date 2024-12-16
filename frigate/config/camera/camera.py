@@ -25,6 +25,7 @@ from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
+from .notification import NotificationConfig
 from .objects import ObjectConfig
 from .onvif import OnvifConfig
 from .record import RecordConfig
@@ -84,6 +85,9 @@ class CameraConfig(FrigateBaseModel):
     )
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig, title="MQTT configuration."
+    )
+    notifications: NotificationConfig = Field(
+        default_factory=NotificationConfig, title="Notifications configuration."
     )
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
