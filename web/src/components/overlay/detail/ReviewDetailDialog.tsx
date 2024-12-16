@@ -280,12 +280,24 @@ export default function ReviewDetailDialog({
               </div>
               {hasMismatch && (
                 <div className="p-4 text-center text-sm">
-                  Some objects may have been detected in this review item that
-                  did not qualify as an alert or detection. Adjust your
-                  configuration if you want Frigate to save tracked objects for
-                  any missing labels.
+                  {(() => {
+                    const detectedCount = Math.abs(
+                      (events?.length ?? 0) -
+                        (review?.data.detections.length ?? 0),
+                    );
+                    const objectLabel =
+                      detectedCount === 1 ? "object was" : "objects were";
+
+                    return `${detectedCount} unavailable ${objectLabel} detected and included in this review item.`;
+                  })()}{" "}
+                  Those objects either did not qualify as an alert or detection
+                  or have already been cleaned up/deleted.
                   {missingObjects.length > 0 && (
-                    <div className="mt-2">{missingObjects.join(", ")}</div>
+                    <div className="mt-2">
+                      Adjust your configuration if you want Frigate to save
+                      tracked objects for the following labels:{" "}
+                      {missingObjects.join(", ")}
+                    </div>
                   )}
                 </div>
               )}
