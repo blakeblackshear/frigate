@@ -74,6 +74,23 @@ export default function ReviewDetailDialog({
     return events.length != review?.data.detections.length;
   }, [review, events]);
 
+  const missingObjects = useMemo(() => {
+    if (!review || !events) {
+      return [];
+    }
+
+    const detectedIds = review.data.detections;
+    const missing = Array.from(
+      new Set(
+        events
+          .filter((event) => !detectedIds.includes(event.id))
+          .map((event) => event.label),
+      ),
+    );
+
+    return missing;
+  }, [review, events]);
+
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
@@ -263,8 +280,13 @@ export default function ReviewDetailDialog({
               </div>
               {hasMismatch && (
                 <div className="p-4 text-center text-sm">
-                  Some objects that were detected are not included in this list
-                  because the object does not have a snapshot
+                  Some objects may have been detected in this review item that
+                  did not qualify as an alert or detection. Adjust your
+                  configuration if you want Frigate to save tracked objects for
+                  any missing labels.
+                  {missingObjects.length > 0 && (
+                    <div className="mt-2">{missingObjects.join(", ")}</div>
+                  )}
                 </div>
               )}
               <div className="relative flex size-full flex-col gap-2">

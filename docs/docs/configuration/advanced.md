@@ -174,7 +174,7 @@ NOTE: The folder that is set for the config needs to be the folder that contains
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.4, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.2, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 
