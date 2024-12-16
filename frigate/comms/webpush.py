@@ -118,7 +118,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         if topic == "reviews":
             decoded = json.loads(payload)
-            camera = payload["after"]["camera"]
+            camera = decoded["before"]["camera"]
             if not self.config.cameras[camera].notifications.enabled:
                 return
             self.send_alert(decoded)

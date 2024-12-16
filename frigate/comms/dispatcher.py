@@ -181,6 +181,7 @@ class Dispatcher:
                     "snapshots": self.config.cameras[camera].snapshots.enabled,
                     "record": self.config.cameras[camera].record.enabled,
                     "audio": self.config.cameras[camera].audio.enabled,
+                    "notifications": self.config.cameras[camera].notifications.enabled,
                     "autotracking": self.config.cameras[
                         camera
                     ].onvif.autotracking.enabled,
