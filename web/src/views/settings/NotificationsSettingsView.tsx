@@ -1,4 +1,3 @@
-import { useNotificationTest } from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +19,15 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { LuExternalLink } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { z } from "zod";
+import { useNotifications, useNotificationTest } from "@/api/ws";
+import FilterSwitch from "@/components/filter/FilterSwitch";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -47,6 +48,16 @@ export default function NotificationView({
       revalidateOnFocus: false,
     },
   );
+
+  const cameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
 
   const { send: sendTestNotification } = useNotificationTest();
 
@@ -351,8 +362,49 @@ export default function NotificationView({
               )}
             </div>
           </div>
+          {registration != null && (
+            <div className="mt-4 gap-2 space-y-6">
+              <div className="space-y-3">
+                <Separator className="my-2 flex bg-secondary" />
+                <Heading as="h4" className="my-2">
+                  Cameras
+                </Heading>
+                <div className="max-w-6xl">
+                  <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+                    <p>Enable / disable notifications for specific cameras.</p>
+                  </div>
+                </div>
+
+                <div className="flex max-w-72 flex-col gap-2.5">
+                  {cameras.map((item) => (
+                    <CameraNotificationSwitch camera={item.name} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
+  );
+}
+
+type CameraNotificationSwitchProps = {
+  camera: string;
+};
+
+function CameraNotificationSwitch({ camera }: CameraNotificationSwitchProps) {
+  const { payload: notificationState, send: sendNotification } =
+    useNotifications(camera);
+
+  return (
+    <FilterSwitch
+      key={camera}
+      isChecked={notificationState == "ON"}
+      label={camera.replaceAll("_", " ")}
+      onCheckedChange={(isChecked) => {
+        sendNotification(isChecked ? "ON" : "OFF");
+      }}
+    />
   );
 }
