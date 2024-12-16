@@ -184,7 +184,7 @@ class EventProcessor(threading.Thread):
             )
 
             # keep these from being set back to false because the event
-            # may have started while recordings and snapshots were enabled
+            # may have started while recordings/snapshots/alerts/detections were enabled
             # this would be an issue for long running events
             if self.events_in_process[event_data["id"]]["has_clip"]:
                 event_data["has_clip"] = True
@@ -199,7 +199,9 @@ class EventProcessor(threading.Thread):
                 Event.end_time: end_time,
                 Event.zones: list(event_data["entered_zones"]),
                 Event.thumbnail: event_data["thumbnail"],
-                Event.has_clip: event_data["has_clip"],
+                Event.has_clip: event_data["has_clip"]
+                if event_data.get("max_severity")
+                else False,
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.model_hash: first_detector.model.model_hash,
                 Event.model_type: first_detector.model.model_type,
