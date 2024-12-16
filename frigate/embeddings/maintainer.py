@@ -325,10 +325,15 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         if event.has_snapshot and source == "snapshot":
-            with open(
-                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
-                "rb",
-            ) as image_file:
+            snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
+
+            if not os.path.isfile(snapshot_file):
+                logger.error(
+                    f"Cannot regenerate description for {event.id}, snapshot file not found: {snapshot_file}"
+                )
+                return
+
+            with open(snapshot_file, "rb") as image_file:
                 snapshot_image = image_file.read()
                 img = cv2.imdecode(
                     np.frombuffer(snapshot_image, dtype=np.int8), cv2.IMREAD_COLOR
