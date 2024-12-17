@@ -26,8 +26,19 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { z } from "zod";
-import { useNotifications, useNotificationTest } from "@/api/ws";
+import {
+  useNotifications,
+  useNotificationSuspend,
+  useNotificationTest,
+} from "@/api/ws";
 import FilterSwitch from "@/components/filter/FilterSwitch";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -362,7 +373,7 @@ export default function NotificationView({
               )}
             </div>
           </div>
-          {registration != null && (
+          {cameras && (
             <div className="mt-4 gap-2 space-y-6">
               <div className="space-y-3">
                 <Separator className="my-2 flex bg-secondary" />
@@ -393,18 +404,83 @@ type CameraNotificationSwitchProps = {
   camera: string;
 };
 
-function CameraNotificationSwitch({ camera }: CameraNotificationSwitchProps) {
+export function CameraNotificationSwitch({
+  camera,
+}: CameraNotificationSwitchProps) {
   const { payload: notificationState, send: sendNotification } =
     useNotifications(camera);
+  const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
+    useNotificationSuspend(camera);
+  const [isSuspended, setIsSuspended] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (notificationSuspendUntil) {
+      setIsSuspended(notificationSuspendUntil != "0");
+    }
+  }, [notificationSuspendUntil]);
+
+  const handleSuspend = (duration: string) => {
+    sendNotificationSuspend(duration);
+  };
+
+  const handleCancelSuspension = () => {
+    sendNotificationSuspend("0"); // Assuming sending "0" cancels the suspension
+  };
+
+  const formatSuspendedUntil = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp) * 1000);
+    return date.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const isOn = notificationState === "ON" || isSuspended;
 
   return (
-    <FilterSwitch
-      key={camera}
-      isChecked={notificationState == "ON"}
-      label={camera.replaceAll("_", " ")}
-      onCheckedChange={(isChecked) => {
-        sendNotification(isChecked ? "ON" : "OFF");
-      }}
-    />
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between">
+        <FilterSwitch
+          key={camera}
+          isChecked={isOn}
+          label={camera.replaceAll("_", " ")}
+          onCheckedChange={(isChecked) => {
+            sendNotification(isChecked ? "ON" : "OFF");
+          }}
+        />
+        {!isSuspended && isOn && (
+          <Select onValueChange={handleSuspend}>
+            <SelectTrigger className="w-auto">
+              <SelectValue placeholder="Suspend" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30">Suspend for 30 minutes</SelectItem>
+              <SelectItem value="60">Suspend for 1 hour</SelectItem>
+              <SelectItem value="180">Suspend for 3 hours</SelectItem>
+              <SelectItem value="360">Suspend for 6 hours</SelectItem>
+              <SelectItem value="840">Suspend for 12 hours</SelectItem>
+              <SelectItem value="1440">Suspend for 24 hours</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        {isSuspended && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleCancelSuspension}
+          >
+            Cancel Suspension
+          </Button>
+        )}
+      </div>
+      {isSuspended && notificationSuspendUntil && (
+        <div className="mt-1 text-sm text-muted-foreground">
+          Suspended until {formatSuspendedUntil(notificationSuspendUntil)}
+        </div>
+      )}
+    </div>
   );
 }

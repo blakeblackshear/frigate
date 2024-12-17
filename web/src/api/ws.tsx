@@ -53,7 +53,15 @@ function useValue(): useValueReturn {
     const cameraStates: WsState = {};
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
-      const { record, detect, snapshots, audio, notifications, autotracking } =
+      const {
+        record,
+        detect,
+        snapshots,
+        audio,
+        notifications,
+        notifications_suspended,
+        autotracking,
+      } =
         // @ts-expect-error we know this is correct
         state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
@@ -63,6 +71,8 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/notifications/state`] = notifications
         ? "ON"
         : "OFF";
+      cameraStates[`${name}/notifications/suspended`] =
+        notifications_suspended || 0;
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
         ? "ON"
         : "OFF";
@@ -426,6 +436,20 @@ export function useNotifications(camera: string): {
     send,
   } = useWs(`${camera}/notifications/state`, `${camera}/notifications/set`);
   return { payload: payload as ToggleableSetting, send };
+}
+
+export function useNotificationSuspend(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/notifications/suspended`,
+    `${camera}/notifications/suspend`,
+  );
+  return { payload: payload as string, send };
 }
 
 export function useNotificationTest(): {
