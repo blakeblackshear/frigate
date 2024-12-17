@@ -27,7 +27,10 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
-        self.suspended_cameras: dict[str, datetime.datetime] = {}
+        self.suspended_cameras: dict[str, datetime.datetime] = {
+            c.name: datetime.datetime.fromtimestamp(0)
+            for c in self.config.cameras.values()
+        }
 
         if not self.config.notifications.email:
             logger.warning("Email must be provided for push notifications to be sent.")
@@ -112,16 +115,11 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def unsuspend_notifications(self, camera: str) -> None:
         """Unsuspend notifications for a specific camera."""
-        del self.suspended_cameras[camera]
+        self.suspended_cameras[camera] = datetime.datetime.fromtimestamp(0)
         logger.info(f"Notifications for {camera} unsuspended")
 
     def is_camera_suspended(self, camera: str) -> bool:
-        if camera in self.suspended_cameras:
-            if datetime.datetime.now() >= self.suspended_cameras[camera]:
-                del self.suspended_cameras[camera]
-                return False
-            return True
-        return False
+        return datetime.datetime.now() <= self.suspended_cameras[camera]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""

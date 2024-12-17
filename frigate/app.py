@@ -308,7 +308,7 @@ class FrigateApp:
             if c.enabled and c.notifications.enabled_in_config
         ]
 
-        if self.config.notifications.enabled_in_config or notification_cameras:
+        if notification_cameras:
             comms.append(WebPushClient(self.config))
 
         comms.append(WebSocketClient(self.config))
