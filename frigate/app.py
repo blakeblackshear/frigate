@@ -17,8 +17,9 @@ import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
-from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
