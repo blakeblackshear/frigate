@@ -469,60 +469,90 @@ function ObjectDetailsTab({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="text-sm text-primary/40">Description</div>
-        <Textarea
-          className="h-64"
-          placeholder="Description of the tracked object"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-        />
-        <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search.camera].genai.enabled && (
-            <div className="flex items-center">
-              <Button
-                className="rounded-r-none border-r-0"
-                aria-label="Regenerate tracked object description"
-                onClick={() => regenerateDescription("thumbnails")}
-              >
-                Regenerate
-              </Button>
-              {search.has_snapshot && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="rounded-l-none border-l-0 px-2"
-                      aria-label="Expand regeneration menu"
-                    >
-                      <FaChevronDown className="size-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label="Regenerate from snapshot"
-                      onClick={() => regenerateDescription("snapshot")}
-                    >
-                      Regenerate from Snapshot
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label="Regenerate from thumbnails"
-                      onClick={() => regenerateDescription("thumbnails")}
-                    >
-                      Regenerate from Thumbnails
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+        {config?.cameras[search.camera].genai.enabled &&
+        !search.end_time &&
+        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+          search.zones.some((zone) =>
+            config.cameras[search.camera].genai.required_zones.includes(zone),
+          )) &&
+        (config.cameras[search.camera].genai.objects.length === 0 ||
+          config.cameras[search.camera].genai.objects.includes(
+            search.label,
+          )) ? (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <div className="flex h-64 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
+              <div className="flex">
+                <ActivityIndicator />
+              </div>
+              <div className="flex">
+                Frigate will not request a description from your Generative AI
+                provider until the tracked object's lifecycle has ended.
+              </div>
             </div>
+          </>
+        ) : (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <Textarea
+              className="h-64"
+              placeholder="Description of the tracked object"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+            />
+          </>
+        )}
+
+        <div className="flex w-full flex-row justify-end gap-2">
+          {config?.cameras[search.camera].genai.enabled && search.end_time && (
+            <>
+              <div className="flex items-start">
+                <Button
+                  className="rounded-r-none border-r-0"
+                  aria-label="Regenerate tracked object description"
+                  onClick={() => regenerateDescription("thumbnails")}
+                >
+                  Regenerate
+                </Button>
+                {search.has_snapshot && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="rounded-l-none border-l-0 px-2"
+                        aria-label="Expand regeneration menu"
+                      >
+                        <FaChevronDown className="size-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label="Regenerate from snapshot"
+                        onClick={() => regenerateDescription("snapshot")}
+                      >
+                        Regenerate from Snapshot
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label="Regenerate from thumbnails"
+                        onClick={() => regenerateDescription("thumbnails")}
+                      >
+                        Regenerate from Thumbnails
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+
+              <Button
+                variant="select"
+                aria-label="Save"
+                onClick={updateDescription}
+              >
+                Save
+              </Button>
+            </>
           )}
-          <Button
-            variant="select"
-            aria-label="Save"
-            onClick={updateDescription}
-          >
-            Save
-          </Button>
         </div>
       </div>
     </div>
