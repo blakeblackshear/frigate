@@ -301,7 +301,13 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        if self.config.notifications.enabled_in_config:
+        notification_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.notifications.enabled_in_config
+        ]
+
+        if self.config.notifications.enabled_in_config or notification_cameras:
             comms.append(WebPushClient(self.config))
 
         comms.append(WebSocketClient(self.config))

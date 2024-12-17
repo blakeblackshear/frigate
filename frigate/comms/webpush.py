@@ -9,8 +9,8 @@ from typing import Any, Callable
 from py_vapid import Vapid01
 from pywebpush import WebPusher
 
+from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
-from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.models import User
@@ -27,6 +27,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
+        self.suspended_cameras: dict[str, datetime.datetime] = {}
 
         if not self.config.notifications.email:
             logger.warning("Email must be provided for push notifications to be sent.")
@@ -103,6 +104,25 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         self.expired_subs = {}
 
+    def suspend_notifications(self, camera: str, minutes: int) -> None:
+        """Suspend notifications for a specific camera."""
+        suspend_until = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
+        self.suspended_cameras[camera] = suspend_until
+        logger.info(f"Notifications for {camera} suspended until {suspend_until}")
+
+    def unsuspend_notifications(self, camera: str) -> None:
+        """Unsuspend notifications for a specific camera."""
+        del self.suspended_cameras[camera]
+        logger.info(f"Notifications for {camera} unsuspended")
+
+    def is_camera_suspended(self, camera: str) -> bool:
+        if camera in self.suspended_cameras:
+            if datetime.datetime.now() >= self.suspended_cameras[camera]:
+                del self.suspended_cameras[camera]
+                return False
+            return True
+        return False
+
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         # check for updated notification config
@@ -120,6 +140,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             decoded = json.loads(payload)
             camera = decoded["before"]["camera"]
             if not self.config.cameras[camera].notifications.enabled:
+                return
+            if self.is_camera_suspended(camera):
+                logger.debug(f"Notifications for {camera} are currently suspended.")
                 return
             self.send_alert(decoded)
         elif topic == "notification_test":
