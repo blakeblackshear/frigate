@@ -328,7 +328,10 @@ class EmbeddingMaintainer(threading.Thread):
                         [snapshot_image]
                         if event.has_snapshot and camera_config.genai.use_snapshot
                         else (
-                            [thumbnail for data in self.tracked_events[event_id]]
+                            [
+                                data["thumbnail"]
+                                for data in self.tracked_events[event_id]
+                            ]
                             if len(self.tracked_events.get(event_id, [])) > 0
                             else [thumbnail]
                         )
@@ -789,7 +792,7 @@ class EmbeddingMaintainer(threading.Thread):
             [snapshot_image]
             if event.has_snapshot and source == "snapshot"
             else (
-                [thumbnail for data in self.tracked_events[event_id]]
+                [data["thumbnail"] for data in self.tracked_events[event_id]]
                 if len(self.tracked_events.get(event_id, [])) > 0
                 else [thumbnail]
             )
