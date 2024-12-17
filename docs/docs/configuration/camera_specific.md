@@ -95,6 +95,29 @@ ffmpeg:
   input_args: preset-rtsp-blue-iris
 ```
 
+### Hikvision Cameras
+
+Hikvision cameras should be connected to via RTSP using the following format:
+
+```
+rtsp://username:password@192.168.50.155/streaming/channels/101 # this is the main stream
+rtsp://username:password@192.168.50.155/streaming/channels/102 # this is the sub stream
+rtsp://username:password@192.168.50.155/streaming/channels/103 # some cameras support a third or fourth stream
+```
+
+:::note
+
+[Some users have reported](https://www.reddit.com/r/frigate_nvr/comments/1hg4ze7/hikvision_security_settings) that newer Hikvision cameras require adjustments to the security settings:
+
+```
+RTSP Authentication - digest/basic
+RTSP Digest Algorithm - MD5
+WEB Authentication - digest/basic
+WEB Digest Algorithm  - MD5
+```
+
+:::
+
 ### Reolink Cameras
 
 Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the http stream is recommended.
