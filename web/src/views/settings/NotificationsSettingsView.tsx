@@ -31,7 +31,6 @@ import {
   useNotificationSuspend,
   useNotificationTest,
 } from "@/api/ws";
-import FilterSwitch from "@/components/filter/FilterSwitch";
 import {
   Select,
   SelectTrigger,
@@ -39,6 +38,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -66,7 +66,7 @@ export default function NotificationView({
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.enabled && conf.notifications.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
@@ -388,7 +388,10 @@ export default function NotificationView({
 
                 <div className="flex max-w-72 flex-col gap-2.5">
                   {cameras.map((item) => (
-                    <CameraNotificationSwitch camera={item.name} />
+                    <CameraNotificationSwitch
+                      config={config}
+                      camera={item.name}
+                    />
                   ))}
                 </div>
               </div>
@@ -401,10 +404,12 @@ export default function NotificationView({
 }
 
 type CameraNotificationSwitchProps = {
+  config?: FrigateConfig;
   camera: string;
 };
 
 export function CameraNotificationSwitch({
+  config,
   camera,
 }: CameraNotificationSwitchProps) {
   const { payload: notificationState, send: sendNotification } =
@@ -420,21 +425,26 @@ export function CameraNotificationSwitch({
   }, [notificationSuspendUntil]);
 
   const handleSuspend = (duration: string) => {
-    sendNotificationSuspend(duration);
+    if (duration == "off") {
+      sendNotification("OFF");
+      setIsSuspended(true);
+    } else {
+      sendNotificationSuspend(duration);
+    }
   };
 
   const handleCancelSuspension = () => {
-    sendNotificationSuspend("0"); // Assuming sending "0" cancels the suspension
+    sendNotificationSuspend("0");
   };
 
   const formatSuspendedUntil = (timestamp: string) => {
-    const date = new Date(parseInt(timestamp) * 1000);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    if (timestamp === "0") return "Frigate restarts.";
+
+    return formatUnixTimestampToDateTime(parseInt(timestamp), {
+      time_style: "medium",
+      date_style: "medium",
+      timezone: config?.ui.timezone,
+      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
     });
   };
 
@@ -443,14 +453,13 @@ export function CameraNotificationSwitch({
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between">
-        <FilterSwitch
-          key={camera}
-          isChecked={isOn}
-          label={camera.replaceAll("_", " ")}
-          onCheckedChange={(isChecked) => {
-            sendNotification(isChecked ? "ON" : "OFF");
-          }}
-        />
+        <Label
+          className="mx-2 w-full cursor-pointer capitalize text-primary"
+          htmlFor="camera"
+        >
+          {camera.replaceAll("_", " ")}
+        </Label>
+
         {!isSuspended && isOn && (
           <Select onValueChange={handleSuspend}>
             <SelectTrigger className="w-auto">
@@ -463,6 +472,7 @@ export function CameraNotificationSwitch({
               <SelectItem value="360">Suspend for 6 hours</SelectItem>
               <SelectItem value="840">Suspend for 12 hours</SelectItem>
               <SelectItem value="1440">Suspend for 24 hours</SelectItem>
+              <SelectItem value="off">Suspend until restart</SelectItem>
             </SelectContent>
           </Select>
         )}
