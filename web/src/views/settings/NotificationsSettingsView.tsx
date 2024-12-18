@@ -14,14 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
-import { Switch } from "@/components/ui/switch";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { LuExternalLink } from "react-icons/lu";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -39,12 +38,14 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import FilterSwitch from "@/components/filter/FilterSwitch";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
 type NotificationSettingsValueType = {
-  enabled: boolean;
+  allEnabled: boolean;
   email?: string;
+  cameras: string[];
 };
 
 type NotificationsSettingsViewProps = {
@@ -60,13 +61,28 @@ export default function NotificationView({
     },
   );
 
-  const cameras = useMemo(() => {
+  const allCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras).sort(
+      (aConf, bConf) => aConf.ui.order - bConf.ui.order,
+    );
+  }, [config]);
+
+  const notificationCameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.enabled && conf.notifications.enabled_in_config)
+      .filter(
+        (conf) =>
+          conf.enabled &&
+          conf.notifications &&
+          conf.notifications.enabled_in_config,
+      )
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
@@ -75,6 +91,22 @@ export default function NotificationView({
   // status bar
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
+  const [changedValue, setChangedValue] = useState(false);
+
+  useEffect(() => {
+    if (changedValue) {
+      addMessage(
+        "notification_settings",
+        `Unsaved notification settings`,
+        undefined,
+        `notification_settings`,
+      );
+    } else {
+      removeMessage("notification_settings", `notification_settings`);
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changedValue]);
 
   // notification key handling
 
@@ -147,18 +179,30 @@ export default function NotificationView({
 
   const [isLoading, setIsLoading] = useState(false);
   const formSchema = z.object({
-    enabled: z.boolean(),
+    allEnabled: z.boolean(),
     email: z.string(),
+    cameras: z.array(z.string()),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      enabled: config?.notifications.enabled,
+      allEnabled: config?.notifications.enabled,
       email: config?.notifications.email,
+      cameras: config?.notifications.enabled
+        ? []
+        : notificationCameras.map((c) => c.name),
     },
   });
+
+  const watchCameras = form.watch("cameras");
+
+  useEffect(() => {
+    if (watchCameras.length > 0) {
+      form.setValue("allEnabled", false);
+    }
+  }, [watchCameras, allCameras, form]);
 
   const onCancel = useCallback(() => {
     if (!config) {
@@ -166,9 +210,13 @@ export default function NotificationView({
     }
 
     setUnsavedChanges(false);
+    setChangedValue(false);
     form.reset({
-      enabled: config.notifications.enabled,
+      allEnabled: config.notifications.enabled,
       email: config.notifications.email || "",
+      cameras: config?.notifications.enabled
+        ? []
+        : notificationCameras.map((c) => c.name),
     });
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,11 +224,27 @@ export default function NotificationView({
 
   const saveToConfig = useCallback(
     async (
-      { enabled, email }: NotificationSettingsValueType, // values submitted via the form
+      { allEnabled, email, cameras }: NotificationSettingsValueType, // values submitted via the form
     ) => {
+      const allCameraNames = allCameras.map((cam) => cam.name);
+
+      const enabledCameraQueries = cameras
+        .map((cam) => `&cameras.${cam}.notifications.enabled=True`)
+        .join("");
+
+      const disabledCameraQueries = allCameraNames
+        .filter((cam) => !cameras.includes(cam))
+        .map(
+          (cam) =>
+            `&cameras.${cam}.notifications.enabled=${allEnabled ? "True" : "False"}`,
+        )
+        .join("");
+
+      const allCameraQueries = enabledCameraQueries + disabledCameraQueries;
+
       axios
         .put(
-          `config/set?notifications.enabled=${enabled}&notifications.email=${email}`,
+          `config/set?notifications.enabled=${allEnabled ? "True" : "False"}&notifications.email=${email}${allCameraQueries}`,
           {
             requires_restart: 0,
           },
@@ -207,7 +271,7 @@ export default function NotificationView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading],
+    [updateConfig, setIsLoading, allCameras],
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -247,30 +311,8 @@ export default function NotificationView({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="mt-2 space-y-6"
+              className="mt-2 max-w-2xl space-y-6"
             >
-              <FormField
-                control={form.control}
-                name="enabled"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="flex flex-row items-center justify-start gap-2">
-                        <Label className="cursor-pointer" htmlFor="auto-live">
-                          Notifications
-                        </Label>
-                        <Switch
-                          id="auto-live"
-                          checked={field.value}
-                          onCheckedChange={(checked) => {
-                            return field.onChange(checked);
-                          }}
-                        />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="email"
@@ -292,7 +334,74 @@ export default function NotificationView({
                   </FormItem>
                 )}
               />
-              <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
+
+              <FormField
+                control={form.control}
+                name="cameras"
+                render={({ field }) => (
+                  <FormItem>
+                    {allCameras && allCameras?.length > 0 ? (
+                      <>
+                        <div className="mb-2">
+                          <FormLabel className="flex flex-row items-center text-base">
+                            Cameras
+                          </FormLabel>
+                        </div>
+                        <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+                          <FormField
+                            control={form.control}
+                            name="allEnabled"
+                            render={({ field }) => (
+                              <FilterSwitch
+                                label="All Cameras"
+                                isChecked={field.value}
+                                onCheckedChange={(checked) => {
+                                  setChangedValue(true);
+                                  if (checked) {
+                                    form.setValue("cameras", []);
+                                  }
+                                  field.onChange(checked);
+                                }}
+                              />
+                            )}
+                          />
+                          {allCameras?.map((camera) => (
+                            <FilterSwitch
+                              key={camera.name}
+                              label={camera.name.replaceAll("_", " ")}
+                              isChecked={field.value?.includes(camera.name)}
+                              onCheckedChange={(checked) => {
+                                setChangedValue(true);
+                                let newCameras;
+                                if (checked) {
+                                  newCameras = [...field.value, camera.name];
+                                } else {
+                                  newCameras = field.value?.filter(
+                                    (value) => value !== camera.name,
+                                  );
+                                }
+                                field.onChange(newCameras);
+                                form.setValue("allEnabled", false);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="font-normal text-destructive">
+                        No cameras available.
+                      </div>
+                    )}
+
+                    <FormMessage />
+                    <FormDescription>
+                      Select the cameras to enable notifications for.
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex w-full flex-row items-center gap-2 pt-2">
                 <Button
                   className="flex flex-1"
                   aria-label="Cancel"
@@ -324,6 +433,9 @@ export default function NotificationView({
           <div className="mt-4 gap-2 space-y-6">
             <div className="space-y-3">
               <Separator className="my-2 flex bg-secondary" />
+              <Heading as="h4" className="my-2">
+                Register and Test
+              </Heading>
               <Button
                 aria-label="Register or unregister notifications for this device"
                 disabled={
@@ -373,26 +485,33 @@ export default function NotificationView({
               )}
             </div>
           </div>
-          {cameras && (
+          {notificationCameras.length > 0 && (
             <div className="mt-4 gap-2 space-y-6">
               <div className="space-y-3">
                 <Separator className="my-2 flex bg-secondary" />
                 <Heading as="h4" className="my-2">
-                  Cameras
+                  Suspend Notifications
                 </Heading>
-                <div className="max-w-6xl">
-                  <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                    <p>Enable / disable notifications for specific cameras.</p>
+                <div className="max-w-xl">
+                  <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
+                    <p>
+                      Temporarily suspend notifications for specific cameras on
+                      all registered devices.
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex max-w-72 flex-col gap-2.5">
-                  {cameras.map((item) => (
-                    <CameraNotificationSwitch
-                      config={config}
-                      camera={item.name}
-                    />
-                  ))}
+                <div className="flex max-w-2xl flex-col gap-2.5">
+                  <div className="rounded-lg bg-secondary p-5">
+                    <div className="grid gap-6">
+                      {notificationCameras.map((item) => (
+                        <CameraNotificationSwitch
+                          config={config}
+                          camera={item.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -420,21 +539,24 @@ export function CameraNotificationSwitch({
 
   useEffect(() => {
     if (notificationSuspendUntil) {
-      setIsSuspended(notificationSuspendUntil != "0");
+      setIsSuspended(
+        notificationSuspendUntil !== "0" || notificationState === "OFF",
+      );
     }
-  }, [notificationSuspendUntil]);
+  }, [notificationSuspendUntil, notificationState]);
 
   const handleSuspend = (duration: string) => {
+    setIsSuspended(true);
     if (duration == "off") {
       sendNotification("OFF");
-      setIsSuspended(true);
     } else {
-      sendNotificationSuspend(duration);
+      sendNotificationSuspend(parseInt(duration));
     }
   };
 
   const handleCancelSuspension = () => {
-    sendNotificationSuspend("0");
+    sendNotification("ON");
+    sendNotificationSuspend(0);
   };
 
   const formatSuspendedUntil = (timestamp: string) => {
@@ -448,48 +570,60 @@ export function CameraNotificationSwitch({
     });
   };
 
-  const isOn = notificationState === "ON" || isSuspended;
-
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between">
-        <Label
-          className="mx-2 w-full cursor-pointer capitalize text-primary"
-          htmlFor="camera"
-        >
-          {camera.replaceAll("_", " ")}
-        </Label>
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col items-start justify-start">
+        <div className="flex flex-row items-center justify-start gap-3">
+          {!isSuspended ? (
+            <LuCheck className="size-6 text-success" />
+          ) : (
+            <LuX className="size-6 text-danger" />
+          )}
+          <div className="flex flex-col">
+            <Label
+              className="text-md cursor-pointer capitalize text-primary"
+              htmlFor="camera"
+            >
+              {camera.replaceAll("_", " ")}
+            </Label>
 
-        {!isSuspended && isOn && (
-          <Select onValueChange={handleSuspend}>
-            <SelectTrigger className="w-auto">
-              <SelectValue placeholder="Suspend" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="30">Suspend for 30 minutes</SelectItem>
-              <SelectItem value="60">Suspend for 1 hour</SelectItem>
-              <SelectItem value="180">Suspend for 3 hours</SelectItem>
-              <SelectItem value="360">Suspend for 6 hours</SelectItem>
-              <SelectItem value="840">Suspend for 12 hours</SelectItem>
-              <SelectItem value="1440">Suspend for 24 hours</SelectItem>
-              <SelectItem value="off">Suspend until restart</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        {isSuspended && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleCancelSuspension}
-          >
-            Cancel Suspension
-          </Button>
-        )}
-      </div>
-      {isSuspended && notificationSuspendUntil && (
-        <div className="mt-1 text-sm text-muted-foreground">
-          Suspended until {formatSuspendedUntil(notificationSuspendUntil)}
+            {!isSuspended ? (
+              <div className="flex flex-row items-center gap-2 text-sm text-success">
+                Notifications Active
+              </div>
+            ) : (
+              <div className="flex flex-row items-center gap-2 text-sm text-danger">
+                Notifications suspended until{" "}
+                {formatSuspendedUntil(notificationSuspendUntil)}
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+
+      {!isSuspended ? (
+        <Select onValueChange={handleSuspend}>
+          <SelectTrigger className="w-auto">
+            <SelectValue placeholder="Suspend" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="5">Suspend for 5 minutes</SelectItem>
+            <SelectItem value="10">Suspend for 10 minutes</SelectItem>
+            <SelectItem value="30">Suspend for 30 minutes</SelectItem>
+            <SelectItem value="60">Suspend for 1 hour</SelectItem>
+            <SelectItem value="840">Suspend for 12 hours</SelectItem>
+            <SelectItem value="1440">Suspend for 24 hours</SelectItem>
+            <SelectItem value="off">Suspend until restart</SelectItem>
+          </SelectContent>
+        </Select>
+      ) : (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleCancelSuspension}
+        >
+          Cancel Suspension
+        </Button>
       )}
     </div>
   );
