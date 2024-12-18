@@ -2,7 +2,6 @@
 
 import copy
 import logging
-import os
 import queue
 import threading
 import time
@@ -29,11 +28,11 @@ from frigate.const import (
     AUTOTRACKING_ZOOM_EDGE_THRESHOLD,
     AUTOTRACKING_ZOOM_IN_HYSTERESIS,
     AUTOTRACKING_ZOOM_OUT_HYSTERESIS,
-    CONFIG_DIR,
 )
 from frigate.ptz.onvif import OnvifController
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.builtin import update_yaml_file
+from frigate.util.config import find_config_file
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
 logger = logging.getLogger(__name__)
@@ -328,13 +327,7 @@ class PtzAutoTracker:
         self.autotracker_init[camera] = True
 
     def _write_config(self, camera):
-        config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
-
-        # Check if we can use .yaml instead of .yml
-        config_file_yaml = config_file.replace(".yml", ".yaml")
-
-        if os.path.isfile(config_file_yaml):
-            config_file = config_file_yaml
+        config_file = find_config_file()
 
         logger.debug(
             f"{camera}: Writing new config with autotracker motion coefficients: {self.config.cameras[camera].onvif.autotracking.movement_weights}"

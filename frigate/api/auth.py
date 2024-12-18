@@ -329,7 +329,7 @@ def login(request: Request, body: AppPostLoginBody):
     try:
         db_user: User = User.get_by_id(user)
     except DoesNotExist:
-        return JSONResponse(content={"message": "Login failed"}, status_code=400)
+        return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
@@ -340,7 +340,7 @@ def login(request: Request, body: AppPostLoginBody):
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
         return response
-    return JSONResponse(content={"message": "Login failed"}, status_code=400)
+    return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
 @router.get("/users")

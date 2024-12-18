@@ -5,6 +5,7 @@ import { usePersistence } from "./use-persistence";
 export function useOverlayState<S>(
   key: string,
   defaultValue: S | undefined = undefined,
+  preserveSearch: boolean = true,
 ): [S | undefined, (value: S, replace?: boolean) => void] {
   const location = useLocation();
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export function useOverlayState<S>(
     (value: S, replace: boolean = false) => {
       const newLocationState = { ...currentLocationState };
       newLocationState[key] = value;
-      navigate(location.pathname + location.search, {
+      navigate(location.pathname + (preserveSearch ? location.search : ""), {
         state: newLocationState,
         replace,
       });

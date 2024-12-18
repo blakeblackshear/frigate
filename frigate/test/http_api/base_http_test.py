@@ -10,7 +10,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings, ReviewSegment
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 

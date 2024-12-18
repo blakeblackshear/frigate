@@ -221,7 +221,10 @@ class EmbeddingMaintainer(threading.Thread):
                         [snapshot_image]
                         if event.has_snapshot and camera_config.genai.use_snapshot
                         else (
-                            [thumbnail for data in self.tracked_events[event_id]]
+                            [
+                                data["thumbnail"]
+                                for data in self.tracked_events[event_id]
+                            ]
                             if len(self.tracked_events.get(event_id, [])) > 0
                             else [thumbnail]
                         )
@@ -325,18 +328,25 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         if event.has_snapshot and source == "snapshot":
-            with open(
-                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
-                "rb",
-            ) as image_file:
+            snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
+
+            if not os.path.isfile(snapshot_file):
+                logger.error(
+                    f"Cannot regenerate description for {event.id}, snapshot file not found: {snapshot_file}"
+                )
+                return
+
+            with open(snapshot_file, "rb") as image_file:
                 snapshot_image = image_file.read()
                 img = cv2.imdecode(
                     np.frombuffer(snapshot_image, dtype=np.int8), cv2.IMREAD_COLOR
                 )
 
                 # crop snapshot based on region before sending off to genai
+                # provide full image if region doesn't exist (manual events)
+                region = event.data.get("region", [0, 0, 1, 1])
                 height, width = img.shape[:2]
-                x1_rel, y1_rel, width_rel, height_rel = event.data["region"]
+                x1_rel, y1_rel, width_rel, height_rel = region
 
                 x1, y1 = int(x1_rel * width), int(y1_rel * height)
                 cropped_image = img[
@@ -350,7 +360,7 @@ class EmbeddingMaintainer(threading.Thread):
             [snapshot_image]
             if event.has_snapshot and source == "snapshot"
             else (
-                [thumbnail for data in self.tracked_events[event_id]]
+                [data["thumbnail"] for data in self.tracked_events[event_id]]
                 if len(self.tracked_events.get(event_id, [])) > 0
                 else [thumbnail]
             )

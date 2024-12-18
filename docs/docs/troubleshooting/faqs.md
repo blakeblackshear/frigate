@@ -98,3 +98,11 @@ docker run -d \
   -p 8555:8555/udp \
   ghcr.io/blakeblackshear/frigate:stable
 ```
+
+### My RTSP stream works fine in VLC, but it does not work when I put the same URL in my Frigate config. Is this a bug?
+
+No. Frigate uses the TCP protocol to connect to your camera's RTSP URL. VLC automatically switches between UDP and TCP depending on network conditions and stream availability. So a stream that works in VLC but not in Frigate is likely due to VLC selecting UDP as the transfer protocol.
+
+TCP ensures that all data packets arrive in the correct order. This is crucial for video recording, decoding, and stream processing, which is why Frigate enforces a TCP connection. UDP is faster but less reliable, as it does not guarantee packet delivery or order, and VLC does not have the same requirements as Frigate.
+
+You can still configure Frigate to use UDP by using ffmpeg input args or the preset `preset-rtsp-udp`. See the [ffmpeg presets](/configuration/ffmpeg_presets) documentation.
