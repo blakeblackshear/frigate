@@ -3,6 +3,7 @@ import faulthandler
 import signal
 import sys
 import threading
+from typing import Union
 
 import ruamel.yaml
 from pydantic import ValidationError
@@ -61,12 +62,15 @@ def main() -> None:
 
             try:
                 for i, part in enumerate(error_path):
-                    key = int(part) if part.isdigit() else part
+                    key: Union[int, str] = (
+                        int(part) if isinstance(part, str) and part.isdigit() else part
+                    )
 
                     if isinstance(current, ruamel.yaml.comments.CommentedMap):
                         current = current[key]
                     elif isinstance(current, list):
-                        current = current[key]
+                        if isinstance(key, int):
+                            current = current[key]
 
                     if hasattr(current, "lc"):
                         last_line_number = current.lc.line
