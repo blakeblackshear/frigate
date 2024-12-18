@@ -3,12 +3,15 @@ import faulthandler
 import signal
 import sys
 import threading
+from typing import Union
 
+import ruamel.yaml
 from pydantic import ValidationError
 
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
 from frigate.log import setup_logging
+from frigate.util.config import find_config_file
 
 
 def main() -> None:
@@ -42,10 +45,50 @@ def main() -> None:
         print("*************************************************************")
         print("*************************************************************")
         print("***    Config Validation Errors                           ***")
-        print("*************************************************************")
+        print("*************************************************************\n")
+        # Attempt to get the original config file for line number tracking
+        config_path = find_config_file()
+        with open(config_path, "r") as f:
+            yaml_config = ruamel.yaml.YAML()
+            yaml_config.preserve_quotes = True
+            full_config = yaml_config.load(f)
+
         for error in e.errors():
-            location = ".".join(str(item) for item in error["loc"])
-            print(f"{location}: {error['msg']}")
+            error_path = error["loc"]
+
+            current = full_config
+            line_number = "Unknown"
+            last_line_number = "Unknown"
+
+            try:
+                for i, part in enumerate(error_path):
+                    key: Union[int, str] = (
+                        int(part) if isinstance(part, str) and part.isdigit() else part
+                    )
+
+                    if isinstance(current, ruamel.yaml.comments.CommentedMap):
+                        current = current[key]
+                    elif isinstance(current, list):
+                        if isinstance(key, int):
+                            current = current[key]
+
+                    if hasattr(current, "lc"):
+                        last_line_number = current.lc.line
+
+                    if i == len(error_path) - 1:
+                        if hasattr(current, "lc"):
+                            line_number = current.lc.line
+                        else:
+                            line_number = last_line_number
+
+            except Exception as traverse_error:
+                print(f"Could not determine exact line number: {traverse_error}")
+
+            print(f"Line #  : {line_number}")
+            print(f"Key     : {' -> '.join(map(str, error_path))}")
+            print(f"Value   : {error.get('input','-')}")
+            print(f"Message : {error.get('msg', error.get('type', 'Unknown'))}\n")
+
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
         print("*************************************************************")
