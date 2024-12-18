@@ -70,6 +70,7 @@ RUN apt-get -y install libnuma1
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
+# Temporarily disabled to see if a new wheel can be built to support py3.11
 #COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
 #RUN python3 -m pip install --upgrade pip \
 #    && pip3 uninstall -y onnxruntime-openvino \
@@ -90,8 +91,8 @@ COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-311-x86_64-linux-gnu.so 
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
-
-ENV HSA_ENABLE_SDMA=0
+\
+    ENV HSA_ENABLE_SDMA=0
 
 COPY --from=rocm-dist / /
 
