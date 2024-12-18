@@ -311,7 +311,7 @@ export default function NotificationView({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="mt-2 max-w-2xl space-y-6"
+              className="mt-2 space-y-6"
             >
               <FormField
                 control={form.control}
@@ -401,7 +401,7 @@ export default function NotificationView({
                 )}
               />
 
-              <div className="flex w-full flex-row items-center gap-2 pt-2">
+              <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
                 <Button
                   className="flex flex-1"
                   aria-label="Cancel"
