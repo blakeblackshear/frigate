@@ -7,15 +7,18 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from functools import reduce
+from io import StringIO
 from typing import Any, Optional
 
 import requests
+import ruamel.yaml
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from markupsafe import escape
 from peewee import operator
+from pydantic import ValidationError
 
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
@@ -186,7 +189,6 @@ def config_raw():
 @router.post("/config/save")
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     new_config = body.decode()
-
     if not new_config:
         return JSONResponse(
             content=(
@@ -197,13 +199,64 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
 
     # Validate the config schema
     try:
+        # Use ruamel to parse and preserve line numbers
+        yaml_config = ruamel.yaml.YAML()
+        yaml_config.preserve_quotes = True
+        full_config = yaml_config.load(StringIO(new_config))
+
         FrigateConfig.parse_yaml(new_config)
+
+    except ValidationError as e:
+        error_message = []
+
+        for error in e.errors():
+            error_path = error["loc"]
+            current = full_config
+            line_number = "Unknown"
+            last_line_number = "Unknown"
+
+            try:
+                for i, part in enumerate(error_path):
+                    key = int(part) if part.isdigit() else part
+
+                    if isinstance(current, ruamel.yaml.comments.CommentedMap):
+                        current = current[key]
+                    elif isinstance(current, list):
+                        current = current[key]
+
+                    if hasattr(current, "lc"):
+                        last_line_number = current.lc.line
+
+                    if i == len(error_path) - 1:
+                        if hasattr(current, "lc"):
+                            line_number = current.lc.line
+                        else:
+                            line_number = last_line_number
+
+            except Exception:
+                line_number = "Unable to determine"
+
+            error_message.append(
+                f"Line {line_number}: {' -> '.join(map(str, error_path))} - {error.get('msg', error.get('type', 'Unknown'))}"
+            )
+
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Your configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n"
+                    + "\n".join(error_message),
+                }
+            ),
+            status_code=400,
+        )
+
     except Exception:
         return JSONResponse(
             content=(
                 {
                     "success": False,
-                    "message": f"\nConfig Error:\n\n{escape(str(traceback.format_exc()))}",
+                    "message": f"\nYour configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n{escape(str(traceback.format_exc()))}",
                 }
             ),
             status_code=400,
