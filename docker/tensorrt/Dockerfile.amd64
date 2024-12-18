@@ -7,18 +7,19 @@ ARG DEBIAN_FRONTEND=noninteractive
 FROM wheels as trt-wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+RUN python3 -m pip config set global.break-system-packages true
 
 # Add TensorRT wheels to another folder
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 FROM tensorrt-base AS frigate-tensorrt
-ENV TRT_VER=8.5.3
+ENV TRT_VER=8.6.1
+RUN python3 -m pip config set global.break-system-packages true
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl && \
+    pip3 install -U /deps/trt-wheels/*.whl --break-system-packages && \
     ldconfig
 
-ENV LD_LIBRARY_PATH=/usr/local/lib/python3.9/dist-packages/tensorrt:/usr/local/cuda/lib64:/usr/local/lib/python3.9/dist-packages/nvidia/cufft/lib
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
@@ -31,4 +32,4 @@ COPY --from=trt-deps /usr/local/cuda-12.1 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl
+    pip3 install -U /deps/trt-wheels/*.whl --break-system-packages
