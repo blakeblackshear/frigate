@@ -7,13 +7,14 @@ FROM wheels as rk-wheels
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN sed -i "/https:\/\//d" /requirements-wheels.txt
+RUN python3 -m pip config set global.break-system-packages true
 RUN pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
 
 FROM deps AS rk-frigate
 ARG TARGETARCH
 
 RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
-    pip3 install -U /deps/rk-wheels/*.whl
+    pip3 install -U /deps/rk-wheels/*.whl --break-system-packages
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /

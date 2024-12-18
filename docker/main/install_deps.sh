@@ -11,35 +11,34 @@ apt-get -qq install --no-install-recommends -y \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3.9 \
+    python3 \
     python3-pip \
     curl \
     lsof \
     jq \
     nethogs \
     libgl1 \
-    libglib2.0-0
-
-# ensure python3 defaults to python3.9
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+    libglib2.0-0 \
+    libusb-1.0.0
 
 mkdir -p -m 600 /root/.gnupg
 
-# add coral repo
-curl -fsSLo - https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-    gpg --dearmor -o /etc/apt/trusted.gpg.d/google-cloud-packages-archive-keyring.gpg
-echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
-echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
+# install coral runtime
+wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.0-1/libedgetpu1-max_16.0tf2.17.0-1.bookworm_${TARGETARCH}.deb"
+unset DEBIAN_FRONTEND
+yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
+rm /tmp/libedgetpu1-max.deb
 
-# enable non-free repo in Debian
-if grep -q "Debian" /etc/issue; then
-    sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
+# install python3 & tflite runtime
+if [[ "${TARGETARCH}" == "amd64" ]]; then
+    pip3 install --break-system-packages https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_x86_64.whl
+    pip3 install --break-system-packages https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_x86_64.whl
 fi
 
-# coral drivers
-apt-get -qq update
-apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libedgetpu1-max python3-tflite-runtime python3-pycoral
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    pip3 install --break-system-packages https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_aarch64.whl
+    pip3 install --break-system-packages https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_aarch64.whl
+fi
 
 # btbn-ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
@@ -67,22 +66,14 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    # use debian bookworm for amd / intel-i965 driver packages
-    echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
-    apt-get -qq update
+    # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver intel-gpu-tools onevpl-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 
-    # something about this dependency requires it to be installed in a separate call rather than in the line above
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        i965-va-driver-shaders
-
     # intel packages use zst compression so we need to update dpkg
     apt-get install -y dpkg
-
-    rm -f /etc/apt/sources.list.d/debian-bookworm.list
 
     # use intel apt intel packages
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
