@@ -16,6 +16,7 @@ from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
+from markupsafe import escape
 from peewee import operator
 from pydantic import ValidationError
 
@@ -242,6 +243,17 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
                     "success": False,
                     "message": "Your configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n"
                     + "\n".join(error_message),
+                }
+            ),
+            status_code=400,
+        )
+
+    except Exception:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"\nYour configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n{escape(str(traceback.format_exc()))}",
                 }
             ),
             status_code=400,
