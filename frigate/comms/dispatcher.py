@@ -171,11 +171,10 @@ class Dispatcher:
                     "audio": self.config.cameras[camera].audio.enabled,
                     "notifications": self.config.cameras[camera].notifications.enabled,
                     "notifications_suspended": int(
-                        self.web_push_client.suspended_cameras.get(
-                            camera, None
-                        ).timestamp()
+                        self.web_push_client.suspended_cameras.get(camera, 0)
                     )
-                    if camera in self.web_push_client.suspended_cameras
+                    if self.web_push_client
+                    and camera in self.web_push_client.suspended_cameras
                     else 0,
                     "autotracking": self.config.cameras[
                         camera
@@ -518,7 +517,7 @@ class Dispatcher:
                 self.web_push_client
                 and camera_name in self.web_push_client.suspended_cameras
             ):
-                del self.web_push_client.suspended_cameras[camera_name]
+                self.web_push_client.suspended_cameras[camera_name] = 0
         elif payload == "OFF":
             if notification_settings.enabled:
                 logger.info(f"Turning off notifications for {camera_name}")
@@ -527,7 +526,7 @@ class Dispatcher:
                 self.web_push_client
                 and camera_name in self.web_push_client.suspended_cameras
             ):
-                del self.web_push_client.suspended_cameras[camera_name]
+                self.web_push_client.suspended_cameras[camera_name] = 0
 
         self.config_updater.publish(
             "config/notifications", {camera_name: notification_settings}
@@ -561,11 +560,7 @@ class Dispatcher:
         self.publish(
             f"{camera_name}/notifications/suspended",
             str(
-                int(
-                    self.web_push_client.suspended_cameras.get(
-                        camera_name, None
-                    ).timestamp()
-                )
+                int(self.web_push_client.suspended_cameras.get(camera_name, 0))
                 if camera_name in self.web_push_client.suspended_cameras
                 else 0
             ),

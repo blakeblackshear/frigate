@@ -27,9 +27,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
-        self.suspended_cameras: dict[str, datetime.datetime] = {
-            c.name: datetime.datetime.fromtimestamp(0)
-            for c in self.config.cameras.values()
+        self.suspended_cameras: dict[str, int] = {
+            c.name: 0 for c in self.config.cameras.values()
         }
 
         if not self.config.notifications.email:
@@ -109,17 +108,21 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def suspend_notifications(self, camera: str, minutes: int) -> None:
         """Suspend notifications for a specific camera."""
-        suspend_until = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
+        suspend_until = int(
+            (datetime.datetime.now() + datetime.timedelta(minutes=minutes)).timestamp()
+        )
         self.suspended_cameras[camera] = suspend_until
-        logger.info(f"Notifications for {camera} suspended until {suspend_until}")
+        logger.info(
+            f"Notifications for {camera} suspended until {datetime.datetime.fromtimestamp(suspend_until).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
 
     def unsuspend_notifications(self, camera: str) -> None:
         """Unsuspend notifications for a specific camera."""
-        self.suspended_cameras[camera] = datetime.datetime.fromtimestamp(0)
+        self.suspended_cameras[camera] = 0
         logger.info(f"Notifications for {camera} unsuspended")
 
     def is_camera_suspended(self, camera: str) -> bool:
-        return datetime.datetime.now() <= self.suspended_cameras[camera]
+        return datetime.datetime.now().timestamp() <= self.suspended_cameras[camera]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
