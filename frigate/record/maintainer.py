@@ -195,6 +195,7 @@ class RecordingMaintainer(threading.Thread):
                 ReviewSegment.select(
                     ReviewSegment.start_time,
                     ReviewSegment.end_time,
+                    ReviewSegment.severity,
                     ReviewSegment.data,
                 )
                 .where(
