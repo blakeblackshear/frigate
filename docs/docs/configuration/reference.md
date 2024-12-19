@@ -686,6 +686,7 @@ cameras:
     # to enable PTZ controls.
     onvif:
       # Required: host of the camera being connected to.
+      # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
@@ -694,6 +695,8 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
+      # Optional: Skip TLS verification from the ONVIF server (default: shown below)
+      tls_insecure: False
       # Optional: Ignores time synchronization mismatches between the camera and the server during authentication.
       # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents.
       ignore_time_mismatch: False

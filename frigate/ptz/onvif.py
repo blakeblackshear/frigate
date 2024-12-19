@@ -6,6 +6,7 @@ from importlib.util import find_spec
 from pathlib import Path
 
 import numpy
+import requests
 from onvif import ONVIFCamera, ONVIFError
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import Transport
@@ -48,7 +49,11 @@ class OnvifController:
 
             if cam.onvif.host:
                 try:
-                    transport = Transport(timeout=10, operation_timeout=10)
+                    session = requests.Session()
+                    session.verify = not cam.onvif.tls_insecure
+                    transport = Transport(
+                        timeout=10, operation_timeout=10, session=session
+                    )
                     self.cams[cam_name] = {
                         "onvif": ONVIFCamera(
                             cam.onvif.host,
