@@ -65,6 +65,18 @@ ffmpeg:
 
 ## Model/vendor specific setup
 
+### Amcrest & Dahua
+
+Amcrest & Dahua cameras should be connected to via RTSP using the following format:
+
+```
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=0 # this is the main stream
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=1 # this is the sub stream, typically supporting low resolutions only
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=2 # higher end cameras support a third stream with a mid resolution (1280x720, 1920x1080)
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=2 # new higher end cameras support a fourth stream with another mid resolution (1280x720, 1920x1080)
+
+```
+
 ### Annke C800
 
 This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
@@ -77,7 +89,7 @@ cameras:
         record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
 
       inputs:
-        - path: rtsp://user:password@camera-ip:554/H264/ch1/main/av_stream # <----- Update for your camera
+        - path: rtsp://USERNAME:PASSWORD@CAMERA-IP/H264/ch1/main/av_stream # <----- Update for your camera
           roles:
             - detect
             - record
@@ -100,9 +112,9 @@ ffmpeg:
 Hikvision cameras should be connected to via RTSP using the following format:
 
 ```
-rtsp://username:password@192.168.50.155/streaming/channels/101 # this is the main stream
-rtsp://username:password@192.168.50.155/streaming/channels/102 # this is the sub stream
-rtsp://username:password@192.168.50.155/streaming/channels/103 # some cameras support a third or fourth stream
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/101 # this is the main stream
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/102 # this is the sub stream, typically supporting low resolutions only
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/103 # higher end cameras support a third stream with a mid resolution (1280x720, 1920x1080)
 ```
 
 :::note
