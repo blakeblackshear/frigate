@@ -558,22 +558,26 @@ class OnvifController:
             if not self._init_onvif(camera_name):
                 return
 
-        if command == OnvifCommandEnum.init:
-            # already init
-            return
-        elif command == OnvifCommandEnum.stop:
-            self._stop(camera_name)
-        elif command == OnvifCommandEnum.preset:
-            self._move_to_preset(camera_name, param)
-        elif command == OnvifCommandEnum.move_relative:
-            _, pan, tilt = param.split("_")
-            self._move_relative(camera_name, float(pan), float(tilt), 0, 1)
-        elif (
-            command == OnvifCommandEnum.zoom_in or command == OnvifCommandEnum.zoom_out
-        ):
-            self._zoom(camera_name, command)
-        else:
-            self._move(camera_name, command)
+        try:
+            if command == OnvifCommandEnum.init:
+                # already init
+                return
+            elif command == OnvifCommandEnum.stop:
+                self._stop(camera_name)
+            elif command == OnvifCommandEnum.preset:
+                self._move_to_preset(camera_name, param)
+            elif command == OnvifCommandEnum.move_relative:
+                _, pan, tilt = param.split("_")
+                self._move_relative(camera_name, float(pan), float(tilt), 0, 1)
+            elif (
+                command == OnvifCommandEnum.zoom_in
+                or command == OnvifCommandEnum.zoom_out
+            ):
+                self._zoom(camera_name, command)
+            else:
+                self._move(camera_name, command)
+        except ONVIFError as e:
+            logger.error(f"Unable to handle onvif command: {e}")
 
     def get_camera_info(self, camera_name: str) -> dict[str, any]:
         if camera_name not in self.cams.keys():
