@@ -19,6 +19,9 @@ mqtt:
   host: mqtt.server.com
   # Optional: port (default: shown below)
   port: 1883
+  # Optional: MQTT transport mechanism (default: shown below)
+  # NOTE: must be tcp (raw MQTT) or websockets.
+  transport: tcp
   # Optional: topic prefix (default: shown below)
   # NOTE: must be unique if you are running multiple instances
   topic_prefix: frigate

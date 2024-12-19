@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import Field, ValidationInfo, model_validator
+from pydantic import Field, ValidationInfo, model_validator, field_validator
 from typing_extensions import Self
 
 from frigate.const import FREQUENCY_STATS_POINTS
@@ -15,6 +15,7 @@ class MqttConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable MQTT Communication.")
     host: str = Field(default="", title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
+    transport: str = Field(default="tcp", title="MQTT Transport Mechanism")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
     client_id: str = Field(default="frigate", title="MQTT Client ID")
     stats_interval: int = Field(
@@ -36,3 +37,10 @@ class MqttConfig(FrigateBaseModel):
         if (self.user is None) != (self.password is None):
             raise ValueError("Password must be provided with username.")
         return self
+
+    @field_validator("transport")
+    @classmethod
+    def check_transport_mechanism(cls, v: str) -> str:
+        if v != "tcp" and v != "websockets":
+            raise ValueError("MQTT transport could only be tcp or websockets.")
+        return v
