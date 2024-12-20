@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CameraImage from "./CameraImage";
 
 type AutoUpdatingCameraImageProps = {
@@ -8,6 +8,7 @@ type AutoUpdatingCameraImageProps = {
   className?: string;
   cameraClasses?: string;
   reloadInterval?: number;
+  periodicCache?: boolean;
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
@@ -19,6 +20,7 @@ export default function AutoUpdatingCameraImage({
   className,
   cameraClasses,
   reloadInterval = MIN_LOAD_TIMEOUT_MS,
+  periodicCache = false,
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
@@ -42,6 +44,8 @@ export default function AutoUpdatingCameraImage({
   }, [reloadInterval]);
 
   const handleLoad = useCallback(() => {
+    setIsCached(true);
+
     if (reloadInterval == -1) {
       return;
     }
@@ -66,12 +70,28 @@ export default function AutoUpdatingCameraImage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, setFps]);
 
+  // periodic cache to reduce loading indicator
+
+  const [isCached, setIsCached] = useState(false);
+
+  const cacheKey = useMemo(() => {
+    let baseParam = "";
+
+    if (periodicCache && !isCached) {
+      baseParam = "store=1";
+    } else {
+      baseParam = `cache=${key}`;
+    }
+
+    return `${baseParam}${searchParams ? `&${searchParams}` : ""}`;
+  }, [isCached, periodicCache, key, searchParams]);
+
   return (
     <div className={className}>
       <CameraImage
         camera={camera}
         onload={handleLoad}
-        searchParams={`cache=${key}${searchParams ? `&${searchParams}` : ""}`}
+        searchParams={cacheKey}
         className={cameraClasses}
       />
       {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
