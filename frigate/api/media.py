@@ -179,7 +179,12 @@ def latest_frame(
         return Response(
             content=img.tobytes(),
             media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            headers={
+                "Content-Type": f"image/{extension}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
@@ -198,7 +203,12 @@ def latest_frame(
         return Response(
             content=img.tobytes(),
             media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            headers={
+                "Content-Type": f"image/{extension}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     else:
         return JSONResponse(
