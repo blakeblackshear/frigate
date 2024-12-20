@@ -15,6 +15,7 @@ type MSEPlayerProps = {
   className?: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  playInBackground?: boolean;
   pip?: boolean;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
@@ -26,6 +27,7 @@ function MSEPlayer({
   className,
   playbackEnabled = true,
   audioEnabled = false,
+  playInBackground = false,
   pip = false,
   onPlaying,
   setFullResolution,
@@ -508,12 +510,22 @@ function MSEPlayer({
       }
     };
 
-    document.addEventListener("visibilitychange", listener);
+    if (!playInBackground) {
+      document.addEventListener("visibilitychange", listener);
+    }
 
     return () => {
-      document.removeEventListener("visibilitychange", listener);
+      if (!playInBackground) {
+        document.removeEventListener("visibilitychange", listener);
+      }
     };
-  }, [playbackEnabled, visibilityCheck, onConnect, onDisconnect]);
+  }, [
+    playbackEnabled,
+    visibilityCheck,
+    playInBackground,
+    onConnect,
+    onDisconnect,
+  ]);
 
   // control pip
 

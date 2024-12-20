@@ -55,6 +55,7 @@ import {
   FaMicrophone,
   FaMicrophoneSlash,
 } from "react-icons/fa";
+import { CiStreamOff, CiStreamOn } from "react-icons/ci";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
 import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
@@ -219,6 +220,11 @@ export default function LiveCameraView({
   const [webRTC, setWebRTC] = useState(false);
   const [pip, setPip] = useState(false);
   const [lowBandwidth, setLowBandwidth] = useState(false);
+
+  const [playInBackground, setPlayInBackground] = usePersistence<boolean>(
+    `${camera.name}-background-play`,
+    false,
+  );
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
@@ -481,6 +487,8 @@ export default function LiveCameraView({
                 streamName={streamName ?? ""}
                 setStreamName={setStreamName}
                 preferredLiveMode={preferredLiveMode}
+                playInBackground={playInBackground ?? false}
+                setPlayInBackground={setPlayInBackground}
               />
             </div>
           </TooltipProvider>
@@ -513,6 +521,7 @@ export default function LiveCameraView({
                 showStillWithoutActivity={false}
                 cameraConfig={camera}
                 playAudio={audio}
+                playInBackground={playInBackground ?? false}
                 micEnabled={mic}
                 iOSCompatFullScreen={isIOS}
                 preferredLiveMode={preferredLiveMode}
@@ -779,6 +788,8 @@ type FrigateCameraFeaturesProps = {
   streamName: string;
   setStreamName?: (value: string | undefined) => void;
   preferredLiveMode: string;
+  playInBackground: boolean;
+  setPlayInBackground: (value: boolean | undefined) => void;
 };
 function FrigateCameraFeatures({
   camera,
@@ -789,6 +800,8 @@ function FrigateCameraFeatures({
   streamName,
   setStreamName,
   preferredLiveMode,
+  playInBackground,
+  setPlayInBackground,
 }: FrigateCameraFeaturesProps) {
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
@@ -853,6 +866,14 @@ function FrigateCameraFeatures({
             }
           />
         )}
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={playInBackground ? CiStreamOn : CiStreamOff}
+          isActive={playInBackground ?? false}
+          title={`${playInBackground ? "Disable" : "Enable"} Background Playback`}
+          onClick={() => setPlayInBackground(!playInBackground)}
+        />
         {Object.values(camera.live.streams).length > 1 && (
           <Select
             value={streamName}
@@ -952,6 +973,13 @@ function FrigateCameraFeatures({
             }
           />
         )}
+        <FilterSwitch
+          label="Play in Background"
+          isChecked={playInBackground}
+          onCheckedChange={(checked) => {
+            setPlayInBackground(checked);
+          }}
+        />
         {Object.values(camera.live.streams).length > 1 && (
           <div className="mt-1 p-2">
             <div className="mb-1 text-sm">Live stream selection</div>
