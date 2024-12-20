@@ -29,6 +29,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.models import Recordings, ReviewSegment
+from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -194,6 +195,7 @@ class RecordingMaintainer(threading.Thread):
                 ReviewSegment.select(
                     ReviewSegment.start_time,
                     ReviewSegment.end_time,
+                    ReviewSegment.severity,
                     ReviewSegment.data,
                 )
                 .where(
@@ -219,11 +221,15 @@ class RecordingMaintainer(threading.Thread):
             [r for r in recordings_to_insert if r is not None],
         )
 
+    def drop_segment(self, cache_path: str) -> None:
+        Path(cache_path).unlink(missing_ok=True)
+        self.end_time_cache.pop(cache_path, None)
+
     async def validate_and_move_segment(
         self, camera: str, reviews: list[ReviewSegment], recording: dict[str, any]
     ) -> None:
-        cache_path = recording["cache_path"]
-        start_time = recording["start_time"]
+        cache_path: str = recording["cache_path"]
+        start_time: datetime.datetime = recording["start_time"]
         record_config = self.config.cameras[camera].record
 
         # Just delete files if recordings are turned off
@@ -231,8 +237,7 @@ class RecordingMaintainer(threading.Thread):
             camera not in self.config.cameras
             or not self.config.cameras[camera].record.enabled
         ):
-            Path(cache_path).unlink(missing_ok=True)
-            self.end_time_cache.pop(cache_path, None)
+            self.drop_segment(cache_path)
             return
 
         if cache_path in self.end_time_cache:
@@ -260,24 +265,34 @@ class RecordingMaintainer(threading.Thread):
                 return
 
         # if cached file's start_time is earlier than the retain days for the camera
+        # meaning continuous recording is not enabled
         if start_time <= (
             datetime.datetime.now().astimezone(datetime.timezone.utc)
             - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
         ):
-            # if the cached segment overlaps with the events:
+            # if the cached segment overlaps with the review items:
             overlaps = False
             for review in reviews:
-                # if the event starts in the future, stop checking events
+                severity = SeverityEnum[review.severity]
+
+                # if the review item starts in the future, stop checking review items
                 # and remove this segment
-                if review.start_time > end_time.timestamp():
+                if (
+                    review.start_time - record_config.get_review_pre_capture(severity)
+                ) > end_time.timestamp():
                     overlaps = False
-                    Path(cache_path).unlink(missing_ok=True)
-                    self.end_time_cache.pop(cache_path, None)
                     break
 
-                # if the event is in progress or ends after the recording starts, keep it
-                # and stop looking at events
-                if review.end_time is None or review.end_time >= start_time.timestamp():
+                # if the review item is in progress or ends after the recording starts, keep it
+                # and stop looking at review items
+                if (
+                    review.end_time is None
+                    or (
+                        review.end_time
+                        + record_config.get_review_post_capture(severity)
+                    )
+                    >= start_time.timestamp()
+                ):
                     overlaps = True
                     break
 
@@ -296,7 +311,7 @@ class RecordingMaintainer(threading.Thread):
                     cache_path,
                     record_mode,
                 )
-            # if it doesn't overlap with an event, go ahead and drop the segment
+            # if it doesn't overlap with an review item, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
             else:
                 camera_info = self.object_recordings_info[camera]
@@ -307,9 +322,9 @@ class RecordingMaintainer(threading.Thread):
                     most_recently_processed_frame_time - record_config.event_pre_capture
                 ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
-                    Path(cache_path).unlink(missing_ok=True)
-                    self.end_time_cache.pop(cache_path, None)
+                    self.drop_segment(cache_path)
         # else retain days includes this segment
+        # meaning continuous recording is enabled
         else:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
@@ -390,8 +405,7 @@ class RecordingMaintainer(threading.Thread):
 
         # check if the segment shouldn't be stored
         if segment_info.should_discard_segment(store_mode):
-            Path(cache_path).unlink(missing_ok=True)
-            self.end_time_cache.pop(cache_path, None)
+            self.drop_segment(cache_path)
             return
 
         # directory will be in utc due to start_time being in utc
