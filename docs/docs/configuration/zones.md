@@ -153,7 +153,7 @@ ui:
   unit_system: metric
 ```
 
-The average and maximum speed during the object's lifetime is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label. Current estimated speed, average estimated speed, max estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents).
+The average and maximum speed during the object's lifetime is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label. Current estimated speed, average estimated speed, max estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents). These speed values are output as a number in miles per hour (mph) or kilometers per hour (kph), depending on how `unit_system` is configured in your `ui` config.
 
 #### Best practices and caveats
 
