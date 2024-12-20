@@ -6,12 +6,14 @@ on:
     branches:
       - dev
       - master
+      - "0.16"
     paths-ignore:
       - "docs/**"
   pull_request:
     branches:
       - dev
       - master
+      - "0.16"
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
