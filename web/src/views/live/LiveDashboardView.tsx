@@ -375,6 +375,7 @@ export default function LiveDashboardView({
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   autoLive={autoLiveView}
                   useWebGL={false}
+                  playInBackground={false}
                   streamName={Object.values(camera.live.streams)[0]}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}

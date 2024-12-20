@@ -698,6 +698,7 @@ const LivePlayerGridItem = React.forwardRef<
           onResetLiveMode={onResetLiveMode}
           containerRef={ref as React.RefObject<HTMLDivElement>}
           autoLive={autoLive}
+          playInBackground={false}
           showStillWithoutActivity={showStillWithoutActivity}
           useWebGL={useWebGL}
         />
