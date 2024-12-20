@@ -182,11 +182,16 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
             media_type=f"image/{mime_type}",
-            headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
@@ -199,11 +204,16 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
             media_type=f"image/{mime_type}",
-            headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     else:
         return JSONResponse(
