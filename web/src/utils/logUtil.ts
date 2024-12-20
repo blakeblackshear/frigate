@@ -1,13 +1,14 @@
 import { LogLine, LogSeverity, LogType } from "@/types/log";
 
+const pythonSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
+
 const frigateDateStamp = /\[[\d\s-:]*]/;
-const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
 const frigateSection = /[\w.]*/;
 
 const goSeverity = /(DEB )|(INF )|(WRN )|(ERR )/;
 const goSection = /\[[\w]*]/;
 
-const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
+const httpMethods = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
 
 export function parseLogLines(logService: LogType, logs: string[]) {
   if (logService == "frigate") {
@@ -45,7 +46,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
 
         return {
           dateStamp: match.toString().slice(1, -1),
-          severity: frigateSeverity
+          severity: pythonSeverity
             .exec(line)
             ?.at(0)
             ?.toString()
@@ -69,7 +70,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
         let section =
           goSection.exec(line)?.toString()?.slice(1, -1) ?? "startup";
 
-        if (frigateSeverity.exec(section)) {
+        if (pythonSeverity.exec(section)) {
           section = "startup";
         }
 
@@ -122,7 +123,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
         return {
           dateStamp: line.substring(0, 19),
           severity: "info",
-          section: ngSeverity.exec(line)?.at(0)?.toString() ?? "META",
+          section: httpMethods.exec(line)?.at(0)?.toString() ?? "META",
           content: line.substring(line.indexOf(" ", 20)).trim(),
         };
       })

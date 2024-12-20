@@ -11,6 +11,7 @@ set -o errexit -o nounset -o pipefail
 MODEL_CACHE_DIR=${MODEL_CACHE_DIR:-"/config/model_cache/tensorrt"}
 TRT_VER=${TRT_VER:-$(cat /etc/TENSORRT_VER)}
 OUTPUT_FOLDER="${MODEL_CACHE_DIR}/${TRT_VER}"
+YOLO_MODELS=${YOLO_MODELS:-""}
 
 # Create output folder
 mkdir -p ${OUTPUT_FOLDER}
@@ -18,6 +19,11 @@ mkdir -p ${OUTPUT_FOLDER}
 FIRST_MODEL=true
 MODEL_DOWNLOAD=""
 MODEL_CONVERT=""
+
+if [ -z "$YOLO_MODELS"]; then
+    echo "tensorrt model preparation disabled"
+    exit 0
+fi
 
 for model in ${YOLO_MODELS//,/ }
 do

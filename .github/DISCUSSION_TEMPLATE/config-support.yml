@@ -76,6 +76,17 @@ body:
         - HassOS Addon
         - Docker Compose
         - Docker CLI
+        - Proxmox via Docker
+        - Proxmox via TTeck Script
+        - Windows WSL2
+    validations:
+      required: true
+  - type: textarea
+    id: docker
+    attributes:
+      label: docker-compose file or Docker CLI command
+      description: This will be automatically formatted into code, so no need for backticks.
+      render: yaml
     validations:
       required: true
   - type: dropdown

@@ -74,7 +74,7 @@ export default function CreateUserDialog({
                   <FormLabel>User</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                      className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                       {...field}
                     />
                   </FormControl>
@@ -89,7 +89,7 @@ export default function CreateUserDialog({
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                      className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                       type="password"
                       {...field}
                     />
@@ -98,7 +98,11 @@ export default function CreateUserDialog({
               )}
             />
             <DialogFooter className="mt-4">
-              <Button variant="select" disabled={isLoading}>
+              <Button
+                variant="select"
+                aria-label="Create user"
+                disabled={isLoading}
+              >
                 {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
                 Create User
               </Button>

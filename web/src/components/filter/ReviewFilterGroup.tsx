@@ -1,36 +1,23 @@
 import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
-import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useMemo, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import {
-  FaCalendarAlt,
-  FaCheckCircle,
-  FaFilter,
-  FaRunning,
-  FaVideo,
-} from "react-icons/fa";
+import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import FilterSwitch from "./FilterSwitch";
-import { FilterList } from "@/types/filter";
+import { FilterList, GeneralFilter } from "@/types/filter";
+import CalendarFilterButton from "./CalendarFilterButton";
+import { CamerasFilterButton } from "./CamerasFilterButton";
+import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -227,15 +214,9 @@ export default function ReviewFilterGroup({
           showAll={filter?.showAll == true}
           allZones={filterValues.zones}
           selectedZones={filter?.zones}
-          setShowAll={(showAll) => {
-            onUpdateFilter({ ...filter, showAll });
+          onUpdateFilter={(general) => {
+            onUpdateFilter({ ...filter, ...general });
           }}
-          updateLabelFilter={(newLabels) => {
-            onUpdateFilter({ ...filter, labels: newLabels });
-          }}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
         />
       )}
       {isMobile && mobileSettingsFeatures.length > 0 && (
@@ -254,172 +235,11 @@ export default function ReviewFilterGroup({
           mode="none"
           setMode={() => {}}
           setRange={() => {}}
+          showExportPreview={false}
+          setShowExportPreview={() => {}}
         />
       )}
     </div>
-  );
-}
-
-type CameraFilterButtonProps = {
-  allCameras: string[];
-  groups: [string, CameraGroupConfig][];
-  selectedCameras: string[] | undefined;
-  updateCameraFilter: (cameras: string[] | undefined) => void;
-};
-export function CamerasFilterButton({
-  allCameras,
-  groups,
-  selectedCameras,
-  updateCameraFilter,
-}: CameraFilterButtonProps) {
-  const [open, setOpen] = useState(false);
-  const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
-    selectedCameras,
-  );
-
-  const trigger = (
-    <Button
-      className="flex items-center gap-2 capitalize"
-      variant={selectedCameras?.length == undefined ? "default" : "select"}
-      size="sm"
-    >
-      <FaVideo
-        className={`${(selectedCameras?.length ?? 0) >= 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
-      />
-      <div
-        className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
-      >
-        {selectedCameras == undefined
-          ? "All Cameras"
-          : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
-      </div>
-    </Button>
-  );
-  const content = (
-    <>
-      {isMobile && (
-        <>
-          <DropdownMenuLabel className="flex justify-center">
-            Cameras
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-        </>
-      )}
-      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
-        <FilterSwitch
-          isChecked={currentCameras == undefined}
-          label="All Cameras"
-          onCheckedChange={(isChecked) => {
-            if (isChecked) {
-              setCurrentCameras(undefined);
-            }
-          }}
-        />
-        {groups.length > 0 && (
-          <>
-            <DropdownMenuSeparator className="mt-2" />
-            {groups.map(([name, conf]) => {
-              return (
-                <div
-                  key={name}
-                  className="w-full cursor-pointer rounded-lg px-2 py-1.5 text-sm capitalize text-primary hover:bg-muted"
-                  onClick={() => setCurrentCameras([...conf.cameras])}
-                >
-                  {name}
-                </div>
-              );
-            })}
-          </>
-        )}
-        <DropdownMenuSeparator className="my-2" />
-        <div className="flex flex-col gap-2.5">
-          {allCameras.map((item) => (
-            <FilterSwitch
-              key={item}
-              isChecked={currentCameras?.includes(item) ?? false}
-              label={item.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  const updatedCameras = currentCameras
-                    ? [...currentCameras]
-                    : [];
-
-                  updatedCameras.push(item);
-                  setCurrentCameras(updatedCameras);
-                } else {
-                  const updatedCameras = currentCameras
-                    ? [...currentCameras]
-                    : [];
-
-                  // can not deselect the last item
-                  if (updatedCameras.length > 1) {
-                    updatedCameras.splice(updatedCameras.indexOf(item), 1);
-                    setCurrentCameras(updatedCameras);
-                  }
-                }
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      <DropdownMenuSeparator className="my-2" />
-      <div className="flex items-center justify-evenly p-2">
-        <Button
-          variant="select"
-          onClick={() => {
-            updateCameraFilter(currentCameras);
-            setOpen(false);
-          }}
-        >
-          Apply
-        </Button>
-        <Button
-          onClick={() => {
-            setCurrentCameras(undefined);
-            updateCameraFilter(undefined);
-          }}
-        >
-          Reset
-        </Button>
-      </div>
-    </>
-  );
-
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentCameras(selectedCameras);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <DropdownMenu
-      modal={false}
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          setCurrentCameras(selectedCameras);
-        }
-
-        setOpen(open);
-      }}
-    >
-      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent>{content}</DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
@@ -452,6 +272,7 @@ function ShowReviewFilter({
 
       <Button
         className="block duration-0 md:hidden"
+        aria-label="Show reviewed"
         variant={showReviewedSwitch ? "select" : "default"}
         size="sm"
         onClick={() =>
@@ -466,74 +287,6 @@ function ShowReviewFilter({
   );
 }
 
-type CalendarFilterButtonProps = {
-  reviewSummary?: ReviewSummary;
-  day?: Date;
-  updateSelectedDay: (day?: Date) => void;
-};
-function CalendarFilterButton({
-  reviewSummary,
-  day,
-  updateSelectedDay,
-}: CalendarFilterButtonProps) {
-  const selectedDate = useFormattedTimestamp(
-    day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    "%b %-d",
-  );
-
-  const trigger = (
-    <Button
-      className="flex items-center gap-2"
-      variant={day == undefined ? "default" : "select"}
-      size="sm"
-    >
-      <FaCalendarAlt
-        className={`${day == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
-      />
-      <div
-        className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
-      >
-        {day == undefined ? "Last 24 Hours" : selectedDate}
-      </div>
-    </Button>
-  );
-  const content = (
-    <>
-      <ReviewActivityCalendar
-        reviewSummary={reviewSummary}
-        selectedDay={day}
-        onSelect={updateSelectedDay}
-      />
-      <DropdownMenuSeparator />
-      <div className="flex items-center justify-center p-2">
-        <Button
-          onClick={() => {
-            updateSelectedDay(undefined);
-          }}
-        >
-          Reset
-        </Button>
-      </div>
-    </>
-  );
-
-  if (isMobile) {
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>{content}</DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-auto">{content}</PopoverContent>
-    </Popover>
-  );
-}
-
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
@@ -541,28 +294,40 @@ type GeneralFilterButtonProps = {
   showAll: boolean;
   allZones: string[];
   selectedZones?: string[];
-  setShowAll: (showAll: boolean) => void;
-  updateLabelFilter: (labels: string[] | undefined) => void;
-  updateZoneFilter: (zones: string[] | undefined) => void;
+  filter?: GeneralFilter;
+  onUpdateFilter: (filter: GeneralFilter) => void;
 };
+
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
+  filter,
   currentSeverity,
   showAll,
   allZones,
   selectedZones,
-  setShowAll,
-  updateLabelFilter,
-  updateZoneFilter,
+  onUpdateFilter,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
-  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
-    selectedLabels,
-  );
-  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
-    selectedZones,
-  );
+  const [currentFilter, setCurrentFilter] = useState<GeneralFilter>({
+    labels: selectedLabels,
+    zones: selectedZones,
+    showAll: showAll,
+    ...filter,
+  });
+
+  // Update local state when props change
+
+  useEffect(() => {
+    setCurrentFilter({
+      labels: selectedLabels,
+      zones: selectedZones,
+      showAll: showAll,
+      ...filter,
+    });
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLabels, selectedZones, showAll, filter]);
 
   const trigger = (
     <Button
@@ -571,12 +336,21 @@ function GeneralFilterButton({
         selectedLabels?.length || selectedZones?.length ? "select" : "default"
       }
       className="flex items-center gap-2 capitalize"
+      aria-label="Filter"
     >
       <FaFilter
-        className={`${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+        className={`${
+          selectedLabels?.length || selectedZones?.length
+            ? "text-selected-foreground"
+            : "text-secondary-foreground"
+        }`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`hidden md:block ${
+          selectedLabels?.length || selectedZones?.length
+            ? "text-selected-foreground"
+            : "text-primary"
+        }`}
       >
         Filter
       </div>
@@ -586,108 +360,97 @@ function GeneralFilterButton({
     <GeneralFilterContent
       allLabels={allLabels}
       selectedLabels={selectedLabels}
-      currentLabels={currentLabels}
       currentSeverity={currentSeverity}
-      showAll={showAll}
       allZones={allZones}
+      filter={currentFilter}
       selectedZones={selectedZones}
-      currentZones={currentZones}
-      setCurrentZones={setCurrentZones}
-      updateZoneFilter={updateZoneFilter}
-      setShowAll={setShowAll}
-      updateLabelFilter={updateLabelFilter}
-      setCurrentLabels={setCurrentLabels}
+      onUpdateFilter={setCurrentFilter}
+      onApply={() => {
+        if (currentFilter !== filter) {
+          onUpdateFilter(currentFilter);
+        }
+        setOpen(false);
+      }}
+      onReset={() => {
+        const resetFilter: GeneralFilter = {
+          labels: undefined,
+          zones: undefined,
+          showAll: false,
+        };
+        setCurrentFilter(resetFilter);
+        onUpdateFilter(resetFilter);
+      }}
       onClose={() => setOpen(false)}
     />
   );
 
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentLabels(selectedLabels);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover
+    <PlatformAwareDialog
+      trigger={trigger}
+      content={content}
       open={open}
       onOpenChange={(open) => {
         if (!open) {
-          setCurrentLabels(selectedLabels);
+          setCurrentFilter({
+            labels: selectedLabels,
+            zones: selectedZones,
+            showAll: showAll,
+            ...filter,
+          });
         }
 
         setOpen(open);
       }}
-    >
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent>{content}</PopoverContent>
-    </Popover>
+    />
   );
 }
 
 type GeneralFilterContentProps = {
   allLabels: string[];
-  selectedLabels: string[] | undefined;
-  currentLabels: string[] | undefined;
+  allZones: string[];
   currentSeverity?: ReviewSeverity;
-  showAll?: boolean;
-  allZones?: string[];
+  filter: GeneralFilter;
+  selectedLabels?: string[];
   selectedZones?: string[];
-  currentZones?: string[];
-  setShowAll?: (showAll: boolean) => void;
-  updateLabelFilter: (labels: string[] | undefined) => void;
-  setCurrentLabels: (labels: string[] | undefined) => void;
-  updateZoneFilter?: (zones: string[] | undefined) => void;
-  setCurrentZones?: (zones: string[] | undefined) => void;
+  onUpdateFilter: (filter: GeneralFilter) => void;
+  onApply: () => void;
+  onReset: () => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
   allLabels,
-  selectedLabels,
-  currentLabels,
-  currentSeverity,
-  showAll,
   allZones,
-  selectedZones,
-  currentZones,
-  setShowAll,
-  updateLabelFilter,
-  setCurrentLabels,
-  updateZoneFilter,
-  setCurrentZones,
+  currentSeverity,
+  filter,
+  onUpdateFilter,
+  onApply,
+  onReset,
   onClose,
 }: GeneralFilterContentProps) {
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        {currentSeverity && setShowAll && (
+        {currentSeverity && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
               label="Alerts"
               disabled={currentSeverity == "alert"}
-              isChecked={currentSeverity == "alert" ? true : showAll == true}
-              onCheckedChange={setShowAll}
+              isChecked={
+                currentSeverity == "alert" ? true : filter.showAll === true
+              }
+              onCheckedChange={(checked) =>
+                onUpdateFilter({ ...filter, showAll: checked })
+              }
             />
             <FilterSwitch
               label="Detections"
               disabled={currentSeverity == "detection"}
               isChecked={
-                currentSeverity == "detection" ? true : showAll == true
+                currentSeverity == "detection" ? true : filter.showAll === true
               }
-              onCheckedChange={setShowAll}
+              onCheckedChange={(checked) =>
+                onUpdateFilter({ ...filter, showAll: checked })
+              }
             />
             <DropdownMenuSeparator />
           </div>
@@ -702,10 +465,11 @@ export function GeneralFilterContent({
           <Switch
             className="ml-1"
             id="allLabels"
-            checked={currentLabels == undefined}
+            checked={filter.labels === undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                setCurrentLabels(undefined);
+                const { labels: _labels, ...rest } = filter;
+                onUpdateFilter(rest);
               }
             }}
           />
@@ -713,21 +477,21 @@ export function GeneralFilterContent({
         <div className="my-2.5 flex flex-col gap-2.5">
           {allLabels.map((item) => (
             <FilterSwitch
+              key={item}
               label={item.replaceAll("_", " ")}
-              isChecked={currentLabels?.includes(item) ?? false}
+              isChecked={filter.labels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
-
+                  const updatedLabels = filter.labels ? [...filter.labels] : [];
                   updatedLabels.push(item);
-                  setCurrentLabels(updatedLabels);
+                  onUpdateFilter({ ...filter, labels: updatedLabels });
                 } else {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
+                  const updatedLabels = filter.labels ? [...filter.labels] : [];
 
                   // can not deselect the last item
                   if (updatedLabels.length > 1) {
                     updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                    setCurrentLabels(updatedLabels);
+                    onUpdateFilter({ ...filter, labels: updatedLabels });
                   }
                 }
               }}
@@ -735,7 +499,7 @@ export function GeneralFilterContent({
           ))}
         </div>
 
-        {allZones && setCurrentZones && (
+        {allZones && (
           <>
             <DropdownMenuSeparator />
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -748,10 +512,11 @@ export function GeneralFilterContent({
               <Switch
                 className="ml-1"
                 id="allZones"
-                checked={currentZones == undefined}
+                checked={filter.zones === undefined}
                 onCheckedChange={(isChecked) => {
                   if (isChecked) {
-                    setCurrentZones(undefined);
+                    const { zones: _zones, ...rest } = filter;
+                    onUpdateFilter(rest);
                   }
                 }}
               />
@@ -759,25 +524,26 @@ export function GeneralFilterContent({
             <div className="my-2.5 flex flex-col gap-2.5">
               {allZones.map((item) => (
                 <FilterSwitch
+                  key={item}
                   label={item.replaceAll("_", " ")}
-                  isChecked={currentZones?.includes(item) ?? false}
+                  isChecked={filter.zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {
-                      const updatedZones = currentZones
-                        ? [...currentZones]
+                      const updatedZones = filter.zones
+                        ? [...filter.zones]
                         : [];
 
                       updatedZones.push(item);
-                      setCurrentZones(updatedZones);
+                      onUpdateFilter({ ...filter, zones: updatedZones });
                     } else {
-                      const updatedZones = currentZones
-                        ? [...currentZones]
+                      const updatedZones = filter.zones
+                        ? [...filter.zones]
                         : [];
 
                       // can not deselect the last item
                       if (updatedZones.length > 1) {
                         updatedZones.splice(updatedZones.indexOf(item), 1);
-                        setCurrentZones(updatedZones);
+                        onUpdateFilter({ ...filter, zones: updatedZones });
                       }
                     }
                   }}
@@ -790,28 +556,16 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
+          aria-label="Apply"
           variant="select"
           onClick={() => {
-            if (selectedLabels != currentLabels) {
-              updateLabelFilter(currentLabels);
-            }
-
-            if (updateZoneFilter && selectedZones != currentZones) {
-              updateZoneFilter(currentZones);
-            }
-
+            onApply();
             onClose();
           }}
         >
           Apply
         </Button>
-        <Button
-          onClick={() => {
-            setCurrentLabels(undefined);
-            setCurrentZones?.(undefined);
-            updateLabelFilter(undefined);
-          }}
-        >
+        <Button aria-label="Reset" onClick={onReset}>
           Reset
         </Button>
       </div>
@@ -853,6 +607,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
+          aria-label="Show Motion Only"
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >

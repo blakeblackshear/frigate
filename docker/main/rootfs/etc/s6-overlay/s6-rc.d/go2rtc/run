@@ -43,8 +43,6 @@ function get_ip_and_port_from_supervisor() {
     export FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL="${ip_address}:${webrtc_port}"
 }
 
-export LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po 'libavformat\W+\K\d+')
-
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
     echo "[INFO] Removing stale config from last run..."
     rm /dev/shm/go2rtc.yaml

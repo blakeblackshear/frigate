@@ -23,11 +23,11 @@ COPY docker/rocm/rocm-pin-600 /etc/apt/preferences.d/
 
 RUN apt-get update
 
-RUN apt-get -y install --no-install-recommends migraphx
+RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer
 RUN apt-get -y install --no-install-recommends migraphx-dev
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
-RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
@@ -69,7 +69,11 @@ RUN apt-get -y install libnuma1
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
-COPY docker/rocm/rootfs/ /
+
+COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
+RUN python3 -m pip install --upgrade pip \
+    && pip3 uninstall -y onnxruntime-openvino \
+    && pip3 install -r /requirements.txt
 
 #######################################################################
 FROM scratch AS rocm-dist
@@ -79,6 +83,7 @@ ARG AMDGPU
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
+COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
 COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
@@ -100,7 +105,4 @@ ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
 #######################################################################
 FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
-
-# Request yolov8 download at startup
-ENV DOWNLOAD_YOLOV8=1
 

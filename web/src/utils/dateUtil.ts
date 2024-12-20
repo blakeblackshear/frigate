@@ -230,6 +230,23 @@ export const getDurationFromTimestamps = (
 };
 
 /**
+ *
+ * @param seconds - number of seconds to convert into hours, minutes and seconds
+ * @returns string - formatted duration in hours, minutes and seconds
+ */
+export const formatSecondsToDuration = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) {
+    return "Invalid duration";
+  }
+
+  const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
+  return formatDuration(duration, {
+    format: ["hours", "minutes", "seconds"],
+    delimiter: ", ",
+  });
+};
+
+/**
  * Adapted from https://stackoverflow.com/a/29268535 this takes a timezone string and
  * returns the offset of that timezone from UTC in minutes.
  * @param timezone string representation of the timezone the user is requesting
@@ -285,6 +302,11 @@ export function endOfHourOrCurrentTime(timestamp: number) {
   return Math.min(timestamp, now.getTime() / 1000);
 }
 
+export function getBeginningOfDayTimestamp(date: Date) {
+  date.setHours(0, 0, 0, 0);
+  return date.getTime() / 1000;
+}
+
 export function getEndOfDayTimestamp(date: Date) {
   date.setHours(23, 59, 59, 999);
   return date.getTime() / 1000;
@@ -295,4 +317,153 @@ export function isCurrentHour(timestamp: number) {
   now.setUTCMinutes(0, 0, 0);
 
   return timestamp > now.getTime() / 1000;
+}
+
+export const convertLocalDateToTimestamp = (dateString: string): number => {
+  // Ensure the date string is in the correct format (8 digits)
+  if (!/^\d{8}$/.test(dateString)) {
+    return 0;
+  }
+
+  // Determine the local date format
+  const format = new Intl.DateTimeFormat()
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type === "day") acc.push("D");
+      if (part.type === "month") acc.push("M");
+      if (part.type === "year") acc.push("Y");
+      return acc;
+    }, [] as string[])
+    .join("");
+
+  let day: string, month: string, year: string;
+
+  // Parse the date string according to the detected format
+  switch (format) {
+    case "DMY":
+      [day, month, year] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    case "MDY":
+      [month, day, year] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    case "YMD":
+      [year, month, day] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    default:
+      return 0;
+  }
+
+  // Create a Date object based on the local timezone
+  const localDate = new Date(`${year}-${month}-${day}T00:00:00`);
+
+  // Check if the date is valid
+  if (isNaN(localDate.getTime())) {
+    return 0;
+  }
+
+  // Convert local date to UTC timestamp
+  const timestamp = localDate.getTime();
+
+  return timestamp;
+};
+
+export function getIntlDateFormat() {
+  return new Intl.DateTimeFormat()
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type === "day") acc.push("DD");
+      if (part.type === "month") acc.push("MM");
+      if (part.type === "year") acc.push("YYYY");
+      return acc;
+    }, [] as string[])
+    .join("");
+}
+
+export function formatDateToLocaleString(daysOffset: number = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+
+  return new Intl.DateTimeFormat(window.navigator.language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+    .format(date)
+    .replace(/[^\d]/g, "");
+}
+
+export function to24Hour(
+  time: string,
+  time_format: "12hour" | "24hour" | "browser" = "24hour",
+): string {
+  const is24HourFormat = time_format === "24hour";
+
+  if (is24HourFormat) return time;
+
+  const [timePart, ampm] = time.split(/([AP]M)/i);
+
+  if (!timePart || !ampm) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
+
+  let hours = Number(timePart.split(":")[0]);
+  const minutes = Number(timePart.split(":")[1]);
+
+  if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+export function isValidTimeRange(
+  rangeString: string,
+  time_format?: "12hour" | "24hour" | "browser",
+): boolean {
+  const range = rangeString.split(",");
+  if (range.length !== 2) {
+    return false;
+  }
+
+  const is24HourFormat = time_format === "24hour";
+
+  const toMinutes = (time: string): number => {
+    const [h, m] = to24Hour(time, time_format).split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const isValidTime = (time: string): boolean => {
+    if (is24HourFormat) {
+      return /^(?:([01]\d|2[0-3]):([0-5]\d)|24:00)$/.test(time);
+    } else {
+      return /^(0?[1-9]|1[0-2]):[0-5][0-9](A|P)M$/i.test(time);
+    }
+  };
+
+  const [startTime, endTime] = range.map((t) => t.trim());
+
+  return (
+    isValidTime(startTime) &&
+    isValidTime(endTime) &&
+    toMinutes(startTime) < toMinutes(endTime)
+  );
+}
+
+export function convertTo12Hour(time: string) {
+  const [hours, minutes] = time.split(":");
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
 }

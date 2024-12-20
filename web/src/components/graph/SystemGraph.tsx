@@ -1,6 +1,7 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
@@ -32,6 +33,16 @@ export function ThresholdBarGraph({
     [data],
   );
 
+  const yMax = useMemo(() => {
+    if (unit != "%") {
+      return undefined;
+    }
+
+    // @ts-expect-error y is valid
+    const yValues: number[] = data[0].data.map((point) => point?.y);
+    return Math.max(threshold.warning, ...yValues);
+  }, [data, threshold, unit]);
+
   const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
@@ -40,17 +51,17 @@ export function ThresholdBarGraph({
 
       let timeOffset = 0;
       if (dateIndex < 0) {
-        timeOffset = 5000 * Math.abs(dateIndex);
+        timeOffset = 5 * Math.abs(dateIndex);
       }
 
-      const date = new Date(
-        updateTimes[Math.max(1, dateIndex) - 1] * 1000 - timeOffset,
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.max(1, dateIndex) - 1] - timeOffset,
+        {
+          timezone: config?.ui.timezone,
+          strftime_fmt:
+            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+        },
       );
-      return date.toLocaleTimeString([], {
-        hour12: config?.ui.time_format != "24hour",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
     },
     [config, updateTimes],
   );
@@ -111,7 +122,7 @@ export function ThresholdBarGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: isMobileOnly ? 2 : 3,
         tickPlacement: "on",
         labels: {
           rotate: 0,
@@ -130,9 +141,10 @@ export function ThresholdBarGraph({
           formatter: (val: number) => Math.ceil(val).toString(),
         },
         min: 0,
+        max: yMax,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
+  }, [graphId, threshold, unit, yMax, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);

@@ -28,8 +28,7 @@ from frigate.video import (  # noqa: E402
     start_or_restart_ffmpeg,
 )
 
-logging.basicConfig()
-logging.root.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -281,10 +280,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config()
-        runtime_config.cameras["camera"].create_ffmpeg_cmds()
-
-        process_clip = ProcessClip(c, frame_shape, runtime_config)
+        process_clip = ProcessClip(c, frame_shape, frigate_config)
         process_clip.load_frames()
         process_clip.process_frames(object_detector, objects_to_track=[label])
 

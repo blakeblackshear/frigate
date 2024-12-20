@@ -3,10 +3,9 @@
   "configurations": [
     {
       "name": "Python: Launch Frigate",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
-      "module": "frigate",
-      "justMyCode": true
+      "module": "frigate"
     }
   ]
 }

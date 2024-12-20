@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import shutil
 import subprocess as sp
 import threading
 import time
@@ -11,6 +12,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
@@ -64,8 +66,7 @@ class FFMpegConverter(threading.Thread):
         frame_times: list[float],
         requestor: InterProcessRequestor,
     ):
-        threading.Thread.__init__(self)
-        self.name = f"{config.name}_preview_converter"
+        super().__init__(name=f"{config.name}_preview_converter")
         self.config = config
         self.frame_times = frame_times
         self.requestor = requestor
@@ -76,7 +77,8 @@ class FFMpegConverter(threading.Thread):
 
         # write a PREVIEW at fps and 1 key frame per clip
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
-            config.ffmpeg.hwaccel_args,
+            config.ffmpeg.ffmpeg_path,
+            "default",
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -threads 1 -i /dev/stdin",
             output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
@@ -152,6 +154,7 @@ class PreviewRecorder:
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
+
         if config.detect.width > config.detect.height:
             self.out_height = PREVIEW_HEIGHT
             self.out_width = (
@@ -169,6 +172,7 @@ class PreviewRecorder:
 
         # create communication for finished previews
         self.requestor = InterProcessRequestor()
+        self.config_subscriber = ConfigSubscriber(f"config/record/{self.config.name}")
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,
@@ -242,6 +246,9 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
+        if not self.config.record.enabled:
+            return False
+
         active_objs = get_active_objects(
             frame_time, self.config, current_tracked_objects
         )
@@ -268,7 +275,7 @@ class PreviewRecorder:
 
         return False
 
-    def write_frame_to_cache(self, frame_time: float, frame) -> None:
+    def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> None:
         # resize yuv frame
         small_frame = np.zeros((self.out_height * 3 // 2, self.out_width), np.uint8)
         copy_yuv_to_position(
@@ -297,20 +304,76 @@ class PreviewRecorder:
         current_tracked_objects: list[dict[str, any]],
         motion_boxes: list[list[int]],
         frame_time: float,
-        frame,
-    ) -> None:
+        frame: np.ndarray,
+    ) -> bool:
+        # check for updated record config
+        _, updated_record_config = self.config_subscriber.check_for_update()
+
+        if updated_record_config:
+            self.config.record = updated_record_config
+
         # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
-            return
+            return False
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
-            # save last frame to ensure consistent duration
+            if len(self.output_frames) > 0:
+                # save last frame to ensure consistent duration
+                if self.config.record:
+                    self.output_frames.append(frame_time)
+                    self.write_frame_to_cache(frame_time, frame)
+
+                # write the preview if any frames exist for this hour
+                FFMpegConverter(
+                    self.config,
+                    self.output_frames,
+                    self.requestor,
+                ).start()
+            else:
+                logger.debug(
+                    f"Not saving preview for {self.config.name} because there are no saved frames."
+                )
+
+            # reset frame cache
+            self.segment_end = (
+                (datetime.datetime.now() + datetime.timedelta(hours=1))
+                .astimezone(datetime.timezone.utc)
+                .replace(minute=0, second=0, microsecond=0)
+                .timestamp()
+            )
+            self.start_time = frame_time
+            self.last_output_time = frame_time
+            self.output_frames: list[float] = []
+
+            # include first frame to ensure consistent duration
+            if self.config.record.enabled:
+                self.output_frames.append(frame_time)
+                self.write_frame_to_cache(frame_time, frame)
+
+            return True
+        elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
+            return False
+
+    def flag_offline(self, frame_time: float) -> None:
+        # check if PREVIEW clip should be generated and cached frames reset
+        if frame_time >= self.segment_end:
+            if len(self.output_frames) == 0:
+                return
+
+            old_frame_path = get_cache_image_name(
+                self.config.name, self.output_frames[-1]
+            )
+            new_frame_path = get_cache_image_name(self.config.name, frame_time)
+            shutil.copy(old_frame_path, new_frame_path)
+
+            # save last frame to ensure consistent duration
+            self.output_frames.append(frame_time)
             FFMpegConverter(
                 self.config,
                 self.output_frames,
@@ -327,13 +390,6 @@ class PreviewRecorder:
             self.start_time = frame_time
             self.last_output_time = frame_time
             self.output_frames = []
-
-            # include first frame to ensure consistent duration
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
-        elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
 
     def stop(self) -> None:
         self.requestor.stop()

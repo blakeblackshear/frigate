@@ -112,7 +112,7 @@ export default function MotionTunerView({
 
     axios
       .put(
-        `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast}`,
+        `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast ? "True" : "False"}`,
         { requires_restart: 0 },
       )
       .then((res) => {
@@ -284,13 +284,18 @@ export default function MotionTunerView({
         </div>
         <div className="flex flex-1 flex-col justify-end">
           <div className="flex flex-row gap-2 pt-5">
-            <Button className="flex flex-1" onClick={onCancel}>
+            <Button
+              className="flex flex-1"
+              aria-label="Reset"
+              onClick={onCancel}
+            >
               Reset
             </Button>
             <Button
               variant="select"
               disabled={!changedValue || isLoading}
               className="flex flex-1"
+              aria-label="Save"
               onClick={saveToConfig}
             >
               {isLoading ? (

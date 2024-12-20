@@ -29,29 +29,46 @@ import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
-import GeneralSettingsView from "@/views/settings/GeneralSettingsView";
 import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
+import NotificationView from "@/views/settings/NotificationsSettingsView";
+import SearchSettingsView from "@/views/settings/SearchSettingsView";
+import UiSettingsView from "@/views/settings/UiSettingsView";
+
+const allSettingsViews = [
+  "UI settings",
+  "search settings",
+  "camera settings",
+  "masks / zones",
+  "motion tuner",
+  "debug",
+  "users",
+  "notifications",
+] as const;
+type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
-  const settingsViews = [
-    "general",
-    "camera settings",
-    "masks / zones",
-    "motion tuner",
-    "debug",
-    "users",
-  ] as const;
-
-  type SettingsType = (typeof settingsViews)[number];
-  const [page, setPage] = useState<SettingsType>("general");
+  const [page, setPage] = useState<SettingsType>("UI settings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // available settings views
+
+  const settingsViews = useMemo(() => {
+    const views = [...allSettingsViews];
+
+    if (!("Notification" in window) || !window.isSecureContext) {
+      const index = views.indexOf("notifications");
+      views.splice(index, 1);
+    }
+
+    return views;
+  }, []);
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -125,7 +142,7 @@ export default function Settings() {
               {Object.values(settingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "general" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
@@ -157,7 +174,10 @@ export default function Settings() {
         )}
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "general" && <GeneralSettingsView />}
+        {page == "UI settings" && <UiSettingsView />}
+        {page == "search settings" && (
+          <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
+        )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
         )}
@@ -181,6 +201,9 @@ export default function Settings() {
           />
         )}
         {page == "users" && <AuthenticationView />}
+        {page == "notifications" && (
+          <NotificationView setUnsavedChanges={setUnsavedChanges} />
+        )}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
@@ -229,6 +252,7 @@ function CameraSelectButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 bg-selected capitalize hover:bg-selected"
+      aria-label="Select a camera"
       size="sm"
     >
       <FaVideo className="text-background dark:text-primary" />

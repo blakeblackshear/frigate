@@ -1,79 +1,76 @@
-# adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
+import atexit
 import logging
 import multiprocessing as mp
 import os
-import queue
-import signal
+import sys
 import threading
 from collections import deque
-from logging import handlers
-from multiprocessing import Queue
-from types import FrameType
+from logging.handlers import QueueHandler, QueueListener
 from typing import Deque, Optional
-
-from setproctitle import setproctitle
 
 from frigate.util.builtin import clean_camera_user_pass
 
-
-def listener_configurer() -> None:
-    root = logging.getLogger()
-
-    if root.hasHandlers():
-        root.handlers.clear()
-
-    console_handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
+LOG_HANDLER = logging.StreamHandler()
+LOG_HANDLER.setFormatter(
+    logging.Formatter(
+        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s",
+        "%Y-%m-%d %H:%M:%S",
     )
-    console_handler.setFormatter(formatter)
-    root.addHandler(console_handler)
-    root.setLevel(logging.INFO)
+)
+
+LOG_HANDLER.addFilter(
+    lambda record: not record.getMessage().startswith(
+        "You are using a scalar distance function"
+    )
+)
+
+log_listener: Optional[QueueListener] = None
 
 
-def root_configurer(queue: Queue) -> None:
-    h = handlers.QueueHandler(queue)
-    root = logging.getLogger()
+def setup_logging() -> None:
+    global log_listener
 
-    if root.hasHandlers():
-        root.handlers.clear()
+    log_queue: mp.Queue = mp.Queue()
+    log_listener = QueueListener(log_queue, LOG_HANDLER, respect_handler_level=True)
 
-    root.addHandler(h)
-    root.setLevel(logging.INFO)
+    atexit.register(_stop_logging)
+    log_listener.start()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[],
+        force=True,
+    )
+
+    logging.getLogger().addHandler(QueueHandler(log_listener.queue))
 
 
-def log_process(log_queue: Queue) -> None:
-    threading.current_thread().name = "logger"
-    setproctitle("frigate.logger")
-    listener_configurer()
+def _stop_logging() -> None:
+    global log_listener
 
-    stop_event = mp.Event()
+    if log_listener is not None:
+        log_listener.stop()
+        log_listener = None
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        stop_event.set()
 
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
+# When a multiprocessing.Process exits, python tries to flush stdout and stderr. However, if the
+# process is created after a thread (for example a logging thread) is created and the process fork
+# happens while an internal lock is held, the stdout/err flush can cause a deadlock.
+#
+# https://github.com/python/cpython/issues/91776
+def reopen_std_streams() -> None:
+    sys.stdout = os.fdopen(1, "w")
+    sys.stderr = os.fdopen(2, "w")
 
-    while True:
-        try:
-            record = log_queue.get(block=True, timeout=1.0)
-        except queue.Empty:
-            if stop_event.is_set():
-                break
-            continue
-        if record.msg.startswith("You are using a scalar distance function"):
-            continue
-        logger = logging.getLogger(record.name)
-        logger.handle(record)
+
+os.register_at_fork(after_in_child=reopen_std_streams)
 
 
 # based on https://codereview.stackexchange.com/a/17959
 class LogPipe(threading.Thread):
     def __init__(self, log_name: str):
         """Setup the object with a logger and start the thread"""
-        threading.Thread.__init__(self)
-        self.daemon = False
+        super().__init__(daemon=False)
         self.logger = logging.getLogger(log_name)
         self.level = logging.ERROR
         self.deque: Deque[str] = deque(maxlen=100)

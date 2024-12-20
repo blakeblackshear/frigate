@@ -63,7 +63,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           toast.error("Exceeded rate limit. Try again later.", {
             position: "top-center",
           });
-        } else if (err.response?.status === 400) {
+        } else if (err.response?.status === 401) {
           toast.error("Login failed", {
             position: "top-center",
           });
@@ -121,6 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               variant="select"
               disabled={isLoading}
               className="flex flex-1"
+              aria-label="Login"
             >
               {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
               Login

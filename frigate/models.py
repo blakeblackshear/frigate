@@ -93,7 +93,7 @@ class ReviewSegment(Model):  # type: ignore[misc]
     start_time = DateTimeField()
     end_time = DateTimeField()
     has_been_reviewed = BooleanField(default=False)
-    severity = CharField(max_length=30)  # alert, detection, significant_motion
+    severity = CharField(max_length=30)  # alert, detection
     thumb_path = CharField(unique=True)
     data = JSONField()  # additional data about detection like list of labels, zone, areas of significant motion
 
@@ -118,3 +118,4 @@ class RecordingsToDelete(Model):  # type: ignore[misc]
 class User(Model):  # type: ignore[misc]
     username = CharField(null=False, primary_key=True, max_length=30)
     password_hash = CharField(null=False, max_length=120)
+    notification_tokens = JSONField()

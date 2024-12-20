@@ -4,6 +4,7 @@ from statistics import mean
 
 import numpy as np
 
+import frigate.util as util
 from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
     ObjectDetectProcess,
@@ -90,7 +91,7 @@ edgetpu_process_2 = ObjectDetectProcess(
 )
 
 for x in range(0, 10):
-    camera_process = mp.Process(
+    camera_process = util.Process(
         target=start, args=(x, 300, detection_queue, events[str(x)])
     )
     camera_process.daemon = True

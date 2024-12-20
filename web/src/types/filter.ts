@@ -10,3 +10,9 @@ export type FilterList = {
 };
 
 export const LAST_24_HOURS_KEY = "last24Hours";
+
+export type GeneralFilter = {
+  showAll?: boolean;
+  labels?: string[];
+  zones?: string[];
+};

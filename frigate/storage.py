@@ -17,13 +17,14 @@ bandwidth_equation = Recordings.segment_size / (
     Recordings.end_time - Recordings.start_time
 )
 
+MAX_CALCULATED_BANDWIDTH = 10000  # 10Gb/hr
+
 
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
     def __init__(self, config: FrigateConfig, stop_event) -> None:
-        threading.Thread.__init__(self)
-        self.name = "storage_maintainer"
+        super().__init__(name="storage_maintainer")
         self.config = config
         self.stop_event = stop_event
         self.camera_storage_stats: dict[str, dict] = {}
@@ -53,6 +54,12 @@ class StorageMaintainer(threading.Thread):
                         * 3600,
                         2,
                     )
+
+                    if bandwidth > MAX_CALCULATED_BANDWIDTH:
+                        logger.warning(
+                            f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
+                        )
+                        bandwidth = MAX_CALCULATED_BANDWIDTH
                 except TypeError:
                     bandwidth = 0
 

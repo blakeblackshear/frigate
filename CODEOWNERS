@@ -4,3 +4,4 @@
 /docker/tensorrt/*jetson* @madsciencetist
 /docker/rockchip/ @MarcA711
 /docker/rocm/ @harakas
+/docker/hailo8l/ @spanner3003

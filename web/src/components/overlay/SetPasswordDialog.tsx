@@ -23,12 +23,12 @@ export default function SetPasswordDialog({
 
   return (
     <Dialog open={show} onOpenChange={onCancel}>
-      <DialogContent>
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Set Password</DialogTitle>
         </DialogHeader>
         <Input
-          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
@@ -36,6 +36,7 @@ export default function SetPasswordDialog({
         <DialogFooter>
           <Button
             className="flex items-center gap-1"
+            aria-label="Save Password"
             variant="select"
             size="sm"
             onClick={() => {

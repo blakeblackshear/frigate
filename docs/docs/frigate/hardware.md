@@ -88,6 +88,10 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | Quadro P400 2GB | 20 - 25 ms      |
 | Quadro P2000    | ~ 12 ms         |
 
+#### AMD GPUs
+
+With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs.
+
 ### Community Supported:
 
 #### Nvidia Jetson
@@ -107,6 +111,12 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 - RK3588
 
 The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
+
+#### Hailo-8l PCIe
+
+Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
+
+The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

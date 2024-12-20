@@ -3,8 +3,8 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
 import { TimeRange } from "@/types/timeline";
-import { ExportContent } from "./ExportDialog";
-import { ExportMode } from "@/types/filter";
+import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
+import { ExportMode, GeneralFilter } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
 import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
@@ -13,7 +13,7 @@ import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
-import { isMobile } from "react-device-detect";
+import { isIOS, isMobile } from "react-device-detect";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
@@ -34,12 +34,14 @@ type MobileReviewSettingsDrawerProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
+  showExportPreview: boolean;
   reviewSummary?: ReviewSummary;
   allLabels: string[];
   allZones: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  setShowExportPreview: (showPreview: boolean) => void;
 };
 export default function MobileReviewSettingsDrawer({
   features = DEFAULT_DRAWER_FEATURES,
@@ -50,12 +52,14 @@ export default function MobileReviewSettingsDrawer({
   currentTime,
   range,
   mode,
+  showExportPreview,
   reviewSummary,
   allLabels,
   allZones,
   onUpdateFilter,
   setRange,
   setMode,
+  setShowExportPreview,
 }: MobileReviewSettingsDrawerProps) {
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
 
@@ -110,12 +114,12 @@ export default function MobileReviewSettingsDrawer({
 
   // filters
 
-  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
-    filter?.labels,
-  );
-  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
-    filter?.zones,
-  );
+  const [currentFilter, setCurrentFilter] = useState<GeneralFilter>({
+    labels: filter?.labels,
+    zones: filter?.zones,
+    showAll: filter?.showAll,
+    ...filter,
+  });
 
   if (!isMobile) {
     return;
@@ -128,6 +132,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Export"
             onClick={() => {
               setDrawerMode("export");
               setMode("select");
@@ -140,6 +145,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Calendar"
             variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
@@ -152,6 +158,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("filter") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Filter"
             variant={filter?.labels || filter?.zones ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
@@ -201,24 +208,28 @@ export default function MobileReviewSettingsDrawer({
             Calendar
           </div>
         </div>
-        <ReviewActivityCalendar
-          reviewSummary={reviewSummary}
-          selectedDay={
-            filter?.after == undefined
-              ? undefined
-              : new Date(filter.after * 1000)
-          }
-          onSelect={(day) => {
-            onUpdateFilter({
-              ...filter,
-              after: day == undefined ? undefined : day.getTime() / 1000,
-              before: day == undefined ? undefined : getEndOfDayTimestamp(day),
-            });
-          }}
-        />
+        <div className="flex w-full flex-row justify-center">
+          <ReviewActivityCalendar
+            reviewSummary={reviewSummary}
+            selectedDay={
+              filter?.after == undefined
+                ? undefined
+                : new Date(filter.after * 1000)
+            }
+            onSelect={(day) => {
+              onUpdateFilter({
+                ...filter,
+                after: day == undefined ? undefined : day.getTime() / 1000,
+                before:
+                  day == undefined ? undefined : getEndOfDayTimestamp(day),
+              });
+            }}
+          />
+        </div>
         <SelectSeparator />
         <div className="flex items-center justify-center p-2">
           <Button
+            aria-label="Reset"
             onClick={() => {
               onUpdateFilter({
                 ...filter,
@@ -249,23 +260,21 @@ export default function MobileReviewSettingsDrawer({
         <GeneralFilterContent
           allLabels={allLabels}
           selectedLabels={filter?.labels}
-          currentLabels={currentLabels}
           currentSeverity={currentSeverity}
-          showAll={filter?.showAll == true}
           allZones={allZones}
+          filter={currentFilter}
           selectedZones={filter?.zones}
-          currentZones={currentZones}
-          setCurrentZones={setCurrentZones}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
-          setShowAll={(showAll) => {
-            onUpdateFilter({ ...filter, showAll });
+          onUpdateFilter={setCurrentFilter}
+          onApply={() => {
+            if (currentFilter !== filter) {
+              onUpdateFilter(currentFilter);
+            }
           }}
-          setCurrentLabels={setCurrentLabels}
-          updateLabelFilter={(newLabels) =>
-            onUpdateFilter({ ...filter, labels: newLabels })
-          }
+          onReset={() => {
+            const resetFilter: GeneralFilter = {};
+            setCurrentFilter(resetFilter);
+            onUpdateFilter(resetFilter);
+          }}
           onClose={() => setDrawerMode("select")}
         />
       </div>
@@ -279,8 +288,16 @@ export default function MobileReviewSettingsDrawer({
         show={mode == "timeline"}
         onSave={() => onStartExport()}
         onCancel={() => setMode("none")}
+        onPreview={() => setShowExportPreview(true)}
+      />
+      <ExportPreviewDialog
+        camera={camera}
+        range={range}
+        showPreview={showExportPreview}
+        setShowPreview={setShowExportPreview}
       />
       <Drawer
+        modal={!(isIOS && drawerMode == "export")}
         open={drawerMode != "none"}
         onOpenChange={(open) => {
           if (!open) {
@@ -291,6 +308,7 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
+            aria-label="Filters"
             variant={
               filter?.labels || filter?.after || filter?.zones
                 ? "select"

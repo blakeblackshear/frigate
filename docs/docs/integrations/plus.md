@@ -19,7 +19,7 @@ Once logged in, you can generate an API key for Frigate in Settings.
 
 ### Set your API key
 
-In Frigate, you can use an environment variable or a docker secret named `PLUS_API_KEY` to enable the Frigate+ page. Home Assistant Addon users can set it under Settings > Addons > Frigate NVR > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
+In Frigate, you can use an environment variable or a docker secret named `PLUS_API_KEY` to enable the `Frigate+` buttons on the Explore page. Home Assistant Addon users can set it under Settings > Addons > Frigate NVR > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
 
 :::warning
 
@@ -29,7 +29,7 @@ You cannot use the `environment_vars` section of your Frigate configuration file
 
 ## Submit examples
 
-Once your API key is configured, you can submit examples directly from the Frigate+ page.
+Once your API key is configured, you can submit examples directly from the Explore page in Frigate using the `Frigate+` button.
 
 :::note
 

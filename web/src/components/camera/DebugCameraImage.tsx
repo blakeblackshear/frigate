@@ -55,7 +55,12 @@ export default function DebugCameraImage({
         searchParams={searchParams}
         cameraClasses="relative w-full h-full flex justify-center"
       />
-      <Button onClick={handleToggleSettings} variant="link" size="sm">
+      <Button
+        onClick={handleToggleSettings}
+        variant="link"
+        size="sm"
+        aria-label="Settings"
+      >
         <span className="h-5 w-5">
           <LuSettings />
         </span>{" "}

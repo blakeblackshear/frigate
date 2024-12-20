@@ -2,8 +2,8 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { useCallback, useState } from "react";
-import { isDesktop } from "react-device-detect";
-import { FaDownload, FaPlay } from "react-icons/fa";
+import { isDesktop, isMobile } from "react-device-detect";
+import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import {
@@ -19,6 +19,7 @@ import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
+import { shareOrCopy } from "@/utils/browserUtil";
 
 type ExportProps = {
   className: string;
@@ -81,7 +82,13 @@ export default function ExportCard({
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          onOpenAutoFocus={(e) => {
+            if (isMobile) {
+              e.preventDefault();
+            }
+          }}
+        >
           <DialogTitle>Rename Export</DialogTitle>
           <DialogDescription>
             Enter a new name for this export.
@@ -89,7 +96,7 @@ export default function ExportCard({
           {editName && (
             <>
               <Input
-                className="mt-3"
+                className="text-md mt-3"
                 type="search"
                 placeholder={editName?.original}
                 value={
@@ -106,6 +113,7 @@ export default function ExportCard({
               />
               <DialogFooter>
                 <Button
+                  aria-label="Save Export"
                   size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
@@ -148,6 +156,19 @@ export default function ExportCard({
             <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
             <div className="absolute right-1 top-1 flex items-center gap-2">
               {!exportedRecording.in_progress && (
+                <Chip
+                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  onClick={() =>
+                    shareOrCopy(
+                      `${baseUrl}export?id=${exportedRecording.id}`,
+                      exportedRecording.name.replaceAll("_", " "),
+                    )
+                  }
+                >
+                  <FaShareAlt className="size-4 text-white" />
+                </Chip>
+              )}
+              {!exportedRecording.in_progress && (
                 <a
                   download
                   href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
@@ -186,6 +207,7 @@ export default function ExportCard({
             {!exportedRecording.in_progress && (
               <Button
                 className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                aria-label="Play"
                 variant="ghost"
                 onClick={() => {
                   onSelect(exportedRecording);

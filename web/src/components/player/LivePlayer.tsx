@@ -19,6 +19,7 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { baseUrl } from "@/api/baseUrl";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -58,6 +59,7 @@ export default function LivePlayer({
   onResetLiveMode,
 }: LivePlayerProps) {
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+
   // camera activity
 
   const { activeMotion, activeTracking, objects, offline } =
@@ -224,6 +226,11 @@ export default function LivePlayer({
         className,
       )}
       onClick={onClick}
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          window.open(`${baseUrl}#${cameraConfig.name}`, "_blank")?.focus();
+        }
+      }}
     >
       {((showStillWithoutActivity && !liveReady) || liveReady) && (
         <>
@@ -295,12 +302,16 @@ export default function LivePlayer({
       </div>
 
       {offline && !showStillWithoutActivity && (
-        <div className="flex size-full flex-col items-center">
-          <p className="mb-5">
-            {capitalizeFirstLetter(cameraConfig.name)} is offline
-          </p>
-          <TbExclamationCircle className="mb-3 size-10" />
-          <p>No frames have been received, check error logs</p>
+        <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
+            <p className="my-5 text-lg">Stream offline</p>
+            <TbExclamationCircle className="mb-3 size-10" />
+            <p className="max-w-96 text-center">
+              No frames have been received on the{" "}
+              {capitalizeFirstLetter(cameraConfig.name)} <code>detect</code>{" "}
+              stream, check error logs
+            </p>
+          </div>
         </div>
       )}
 

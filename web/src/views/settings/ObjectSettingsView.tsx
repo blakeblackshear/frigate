@@ -11,11 +11,18 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "@/hooks/use-deep-memo";
 import { Card } from "@/components/ui/card";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { LuExternalLink, LuInfo } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -34,7 +41,31 @@ export default function ObjectSettingsView({
     {
       param: "bbox",
       title: "Bounding boxes",
-      description: "Show bounding boxes around detected objects",
+      description: "Show bounding boxes around tracked objects",
+      info: (
+        <>
+          <p className="mb-2">
+            <strong>Object Bounding Box Colors</strong>
+          </p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>
+              At startup, different colors will be assigned to each object label
+            </li>
+            <li>
+              A dark blue thin line indicates that object is not detected at
+              this current point in time
+            </li>
+            <li>
+              A gray thin line indicates that object is detected as being
+              stationary
+            </li>
+            <li>
+              A thick line indicates that object is the subject of autotracking
+              (when enabled)
+            </li>
+          </ul>
+        </>
+      ),
     },
     {
       param: "timestamp",
@@ -55,12 +86,34 @@ export default function ObjectSettingsView({
       param: "motion",
       title: "Motion boxes",
       description: "Show boxes around areas where motion is detected",
+      info: (
+        <>
+          <p className="mb-2">
+            <strong>Motion Boxes</strong>
+          </p>
+          <p>
+            Red boxes will be overlaid on areas of the frame where motion is
+            currently being detected
+          </p>
+        </>
+      ),
     },
     {
       param: "regions",
       title: "Regions",
       description:
         "Show a box of the region of interest sent to the object detector",
+      info: (
+        <>
+          <p className="mb-2">
+            <strong>Region Boxes</strong>
+          </p>
+          <p>
+            Bright green boxes will be overlaid on areas of interest in the
+            frame that are being sent to the object detector.
+          </p>
+        </>
+      ),
     },
   ];
 
@@ -130,11 +183,26 @@ export default function ObjectSettingsView({
             to detect objects in your camera's video stream.
           </p>
           <p>
-            Debugging view shows a real-time view of detected objects and their
+            Debugging view shows a real-time view of tracked objects and their
             statistics. The object list shows a time-delayed summary of detected
             objects.
           </p>
         </div>
+        {config?.cameras[cameraConfig.name]?.webui_url && (
+          <div className="mb-5 text-sm text-muted-foreground">
+            <div className="mt-2 flex flex-row items-center text-primary">
+              <Link
+                to={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Open {capitalizeFirstLetter(cameraConfig.name)}'s Web UI
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -145,19 +213,34 @@ export default function ObjectSettingsView({
             <div className="flex w-full flex-col space-y-6">
               <div className="mt-2 space-y-6">
                 <div className="my-2.5 flex flex-col gap-2.5">
-                  {DEBUG_OPTIONS.map(({ param, title, description }) => (
+                  {DEBUG_OPTIONS.map(({ param, title, description, info }) => (
                     <div
                       key={param}
                       className="flex w-full flex-row items-center justify-between"
                     >
                       <div className="mb-2 flex flex-col">
-                        <Label
-                          className="mb-2 w-full cursor-pointer capitalize text-primary"
-                          htmlFor={param}
-                        >
-                          {title}
-                        </Label>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            className="mb-0 cursor-pointer capitalize text-primary"
+                            htmlFor={param}
+                          >
+                            {title}
+                          </Label>
+                          {info && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <div className="cursor-pointer p-0">
+                                  <LuInfo className="size-4" />
+                                  <span className="sr-only">Info</span>
+                                </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                {info}
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
                           {description}
                         </div>
                       </div>
@@ -240,7 +323,7 @@ function ObjectList(objects?: ObjectType[]) {
                     {getIconForLabel(obj.label, "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
-                    {capitalizeFirstLetter(obj.label)}
+                    {capitalizeFirstLetter(obj.label.replaceAll("_", " "))}
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-end justify-end">

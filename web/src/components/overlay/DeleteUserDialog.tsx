@@ -27,6 +27,7 @@ export default function DeleteUserDialog({
         <DialogFooter>
           <Button
             className="flex items-center gap-1"
+            aria-label="Confirm delete"
             variant="destructive"
             size="sm"
             onClick={onDelete}

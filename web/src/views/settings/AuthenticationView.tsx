@@ -95,6 +95,7 @@ export default function AuthenticationView() {
           </Heading>
           <Button
             className="flex items-center gap-1"
+            aria-label="Add a new user"
             variant="default"
             onClick={() => {
               setShowCreate(true);
@@ -114,6 +115,7 @@ export default function AuthenticationView() {
                 <div className="flex flex-1 justify-end space-x-2">
                   <Button
                     className="flex items-center gap-1"
+                    aria-label="Update the user's password"
                     variant="secondary"
                     onClick={() => {
                       setShowSetPassword(true);
@@ -125,6 +127,7 @@ export default function AuthenticationView() {
                   </Button>
                   <Button
                     className="flex items-center gap-1"
+                    aria-label="Delete the user"
                     variant="destructive"
                     onClick={() => {
                       setShowDelete(true);

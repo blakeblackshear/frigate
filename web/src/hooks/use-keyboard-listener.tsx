@@ -10,10 +10,12 @@ export type KeyModifiers = {
 export default function useKeyboardListener(
   keys: string[],
   listener: (key: string | null, modifiers: KeyModifiers) => void,
+  preventDefault: boolean = true,
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
-      if (!e) {
+      // @ts-expect-error we know this field exists
+      if (!e || e.target.tagName == "INPUT") {
         return;
       }
 
@@ -25,13 +27,13 @@ export default function useKeyboardListener(
       };
 
       if (keys.includes(e.key)) {
-        e.preventDefault();
+        if (preventDefault) e.preventDefault();
         listener(e.key, modifiers);
       } else if (e.key === "Shift" || e.key === "Control" || e.key === "Meta") {
         listener(null, modifiers);
       }
     },
-    [keys, listener],
+    [keys, listener, preventDefault],
   );
 
   const keyUpListener = useCallback(

@@ -26,9 +26,6 @@ DETECTOR_KEY = "tensorrt"
 if TRT_SUPPORT:
 
     class TrtLogger(trt.ILogger):
-        def __init__(self):
-            trt.ILogger.__init__(self)
-
         def log(self, severity, msg):
             logger.log(self.getSeverity(severity), msg)
 
@@ -199,7 +196,7 @@ class TensorRtDetector(DetectionApi):
 
         # Run inference.
         if not self._execute():
-            logger.warn("Execute returned false")
+            logger.warning("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [
@@ -258,7 +255,7 @@ class TensorRtDetector(DetectionApi):
             raise RuntimeError("fail to allocate CUDA resources") from e
 
         logger.debug("TensorRT loaded. Input shape is %s", self.input_shape)
-        logger.debug("TensorRT version is %s", trt.__version__[0])
+        logger.debug("TensorRT version is %s", TRT_VERSION)
 
     def __del__(self):
         """Free CUDA memories."""
@@ -285,14 +282,14 @@ class TensorRtDetector(DetectionApi):
             boxes, scores, classes
         """
         # filter low-conf detections and concatenate results of all yolo layers
-        detections = []
+        detection_list = []
         for o in trt_outputs:
-            dets = o.reshape((-1, 7))
-            dets = dets[dets[:, 4] * dets[:, 6] >= conf_th]
-            detections.append(dets)
-        detections = np.concatenate(detections, axis=0)
+            detections = o.reshape((-1, 7))
+            detections = detections[detections[:, 4] * detections[:, 6] >= conf_th]
+            detection_list.append(detections)
+        detection_list = np.concatenate(detection_list, axis=0)
 
-        return detections
+        return detection_list
 
     def detect_raw(self, tensor_input):
         # Input tensor has the shape of the [height, width, 3]

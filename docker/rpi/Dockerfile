@@ -12,5 +12,7 @@ RUN rm -rf /usr/lib/btbn-ffmpeg/
 RUN --mount=type=bind,source=docker/rpi/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
+ENV LIBAVFORMAT_VERSION_MAJOR=58
+
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /

@@ -475,6 +475,7 @@ export default function CameraSettingsView({
               <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
                 <Button
                   className="flex flex-1"
+                  aria-label="Cancel"
                   onClick={onCancel}
                   type="button"
                 >
@@ -484,6 +485,7 @@ export default function CameraSettingsView({
                   variant="select"
                   disabled={isLoading}
                   className="flex flex-1"
+                  aria-label="Save"
                   type="submit"
                 >
                   {isLoading ? (

@@ -1,0 +1,12 @@
+appdirs==1.4.4
+argcomplete==2.0.0
+contextlib2==0.6.0.post1
+distlib==0.3.6
+filelock==3.8.0
+future==0.18.2
+importlib-metadata==5.1.0
+importlib-resources==5.1.2
+netaddr==0.8.0
+netifaces==0.10.9
+verboselogs==1.7
+virtualenv==20.17.0

@@ -1,83 +1,108 @@
 """Export apis."""
 
 import logging
+import random
+import string
 from pathlib import Path
-from typing import Optional
 
 import psutil
-from flask import (
-    Blueprint,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 
+from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
+from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
-from frigate.models import Export, Recordings
-from frigate.record.export import PlaybackFactorEnum, RecordingExporter
+from frigate.models import Export, Previews, Recordings
+from frigate.record.export import (
+    PlaybackFactorEnum,
+    PlaybackSourceEnum,
+    RecordingExporter,
+)
+from frigate.util.builtin import is_current_hour
 
 logger = logging.getLogger(__name__)
 
-ExportBp = Blueprint("exports", __name__)
+router = APIRouter(tags=[Tags.export])
 
 
-@ExportBp.route("/exports")
+@router.get("/exports")
 def get_exports():
     exports = Export.select().order_by(Export.date.desc()).dicts().iterator()
-    return jsonify([e for e in exports])
+    return JSONResponse(content=[e for e in exports])
 
 
-@ExportBp.route(
-    "/export/<camera_name>/start/<int:start_time>/end/<int:end_time>", methods=["POST"]
-)
-@ExportBp.route(
-    "/export/<camera_name>/start/<float:start_time>/end/<float:end_time>",
-    methods=["POST"],
-)
-def export_recording(camera_name: str, start_time, end_time):
-    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
-        return make_response(
-            jsonify(
+@router.post("/export/{camera_name}/start/{start_time}/end/{end_time}")
+def export_recording(
+    request: Request,
+    camera_name: str,
+    start_time: float,
+    end_time: float,
+    body: ExportRecordingsBody,
+):
+    if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
+        return JSONResponse(
+            content=(
                 {"success": False, "message": f"{camera_name} is not a valid camera."}
             ),
-            404,
+            status_code=404,
         )
 
-    json: dict[str, any] = request.get_json(silent=True) or {}
-    playback_factor = json.get("playback", "realtime")
-    friendly_name: Optional[str] = json.get("name")
+    playback_factor = body.playback
+    playback_source = body.source
+    friendly_name = body.name
+    existing_image = body.image_path
 
-    if len(friendly_name or "") > 256:
-        return make_response(
-            jsonify({"success": False, "message": "File name is too long."}),
-            401,
+    if playback_source == "recordings":
+        recordings_count = (
+            Recordings.select()
+            .where(
+                Recordings.start_time.between(start_time, end_time)
+                | Recordings.end_time.between(start_time, end_time)
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .count()
         )
 
-    recordings_count = (
-        Recordings.select()
-        .where(
-            Recordings.start_time.between(start_time, end_time)
-            | Recordings.end_time.between(start_time, end_time)
-            | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
+        if recordings_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No recordings found for time range"}
+                ),
+                status_code=400,
+            )
+    else:
+        previews_count = (
+            Previews.select()
+            .where(
+                Previews.start_time.between(start_time, end_time)
+                | Previews.end_time.between(start_time, end_time)
+                | ((start_time > Previews.start_time) & (end_time < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .count()
         )
-        .where(Recordings.camera == camera_name)
-        .count()
-    )
 
-    if recordings_count <= 0:
-        return make_response(
-            jsonify(
-                {"success": False, "message": "No recordings found for time range"}
-            ),
-            400,
-        )
+        if not is_current_hour(start_time) and previews_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No previews found for time range"}
+                ),
+                status_code=400,
+            )
 
+    export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
     exporter = RecordingExporter(
-        current_app.frigate_config,
+        request.app.frigate_config,
+        export_id,
         camera_name,
         friendly_name,
+        existing_image,
         int(start_time),
         int(end_time),
         (
@@ -85,60 +110,66 @@ def export_recording(camera_name: str, start_time, end_time):
             if playback_factor in PlaybackFactorEnum.__members__.values()
             else PlaybackFactorEnum.realtime
         ),
+        (
+            PlaybackSourceEnum[playback_source]
+            if playback_source in PlaybackSourceEnum.__members__.values()
+            else PlaybackSourceEnum.recordings
+        ),
     )
     exporter.start()
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Starting export of recording.",
+                "export_id": export_id,
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@ExportBp.route("/export/<id>/<new_name>", methods=["PATCH"])
-def export_rename(id, new_name: str):
+@router.patch("/export/{event_id}/{new_name}")
+def export_rename(event_id: str, new_name: str):
     try:
-        export: Export = Export.get(Export.id == id)
+        export: Export = Export.get(Export.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": "Export not found.",
                 }
             ),
-            404,
+            status_code=404,
         )
 
     export.name = new_name
     export.save()
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Successfully renamed export.",
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@ExportBp.route("/export/<id>", methods=["DELETE"])
-def export_delete(id: str):
+@router.delete("/export/{event_id}")
+def export_delete(event_id: str):
     try:
-        export: Export = Export.get(Export.id == id)
+        export: Export = Export.get(Export.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": "Export not found.",
                 }
             ),
-            404,
+            status_code=404,
         )
 
     files_in_use = []
@@ -146,20 +177,20 @@ def export_delete(id: str):
         try:
             if process.name() != "ffmpeg":
                 continue
-            flist = process.open_files()
-            if flist:
-                for nt in flist:
+            file_list = process.open_files()
+            if file_list:
+                for nt in file_list:
                     if nt.path.startswith(EXPORT_DIR):
                         files_in_use.append(nt.path.split("/")[-1])
         except psutil.Error:
             continue
 
     if export.video_path.split("/")[-1] in files_in_use:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {"success": False, "message": "Can not delete in progress export."}
             ),
-            400,
+            status_code=400,
         )
 
     Path(export.video_path).unlink(missing_ok=True)
@@ -168,12 +199,23 @@ def export_delete(id: str):
         Path(export.thumb_path).unlink(missing_ok=True)
 
     export.delete_instance()
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Successfully deleted export.",
             }
         ),
-        200,
+        status_code=200,
     )
+
+
+@router.get("/exports/{export_id}")
+def get_export(export_id: str):
+    try:
+        return JSONResponse(content=model_to_dict(Export.get(Export.id == export_id)))
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export not found"},
+            status_code=404,
+        )

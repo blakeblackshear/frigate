@@ -22,7 +22,11 @@ export default function MobileTimelineDrawer({
   return (
     <Drawer open={drawer} onOpenChange={setDrawer}>
       <DrawerTrigger asChild>
-        <Button className="rounded-lg capitalize" size="sm">
+        <Button
+          className="rounded-lg capitalize"
+          aria-label="Select timeline or events list"
+          size="sm"
+        >
           <FaFlag className="text-secondary-foreground" />
         </Button>
       </DrawerTrigger>

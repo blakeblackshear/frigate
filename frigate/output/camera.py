@@ -6,7 +6,7 @@ import queue
 import subprocess as sp
 import threading
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, FfmpegConfig
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class FFMpegConverter(threading.Thread):
     def __init__(
         self,
         camera: str,
+        ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
         stop_event: mp.Event,
         in_width: int,
@@ -23,14 +24,13 @@ class FFMpegConverter(threading.Thread):
         out_height: int,
         quality: int,
     ):
-        threading.Thread.__init__(self)
-        self.name = f"{camera}_output_converter"
+        super().__init__(name=f"{camera}_output_converter")
         self.camera = camera
         self.input_queue = input_queue
         self.stop_event = stop_event
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            ffmpeg.ffmpeg_path,
             "-threads",
             "1",
             "-f",
@@ -101,7 +101,7 @@ class BroadcastThread(threading.Thread):
         websocket_server,
         stop_event: mp.Event,
     ):
-        super(BroadcastThread, self).__init__()
+        super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
@@ -142,6 +142,7 @@ class JsmpegCamera:
         )
         self.converter = FFMpegConverter(
             config.name,
+            config.ffmpeg,
             self.input,
             stop_event,
             config.frame_shape[1],

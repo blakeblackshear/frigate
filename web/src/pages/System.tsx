@@ -13,6 +13,7 @@ import useOptimisticState from "@/hooks/use-optimistic-state";
 import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { Toaster } from "@/components/ui/sonner";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -42,6 +43,7 @@ function System() {
 
   return (
     <div className="flex size-full flex-col p-2">
+      <Toaster position="top-center" />
       <div className="relative flex h-11 w-full items-center justify-between">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
