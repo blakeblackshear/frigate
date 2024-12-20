@@ -55,6 +55,7 @@ export type SearchResult = {
     ratio: number;
     type: "object" | "audio" | "manual";
     description?: string;
+    average_estimated_speed: number;
     max_estimated_speed: number;
   };
 };

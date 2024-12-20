@@ -316,6 +316,18 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
+  const averageEstimatedSpeed = useMemo(() => {
+    if (!search || !search.data?.average_estimated_speed) {
+      return undefined;
+    }
+
+    if (search.data?.average_estimated_speed != 0) {
+      return search.data?.average_estimated_speed.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
   const maxEstimatedSpeed = useMemo(() => {
     if (!search || !search.data?.max_estimated_speed) {
       return undefined;
@@ -439,12 +451,24 @@ function ObjectDetailsTab({
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
-          {maxEstimatedSpeed && (
+          {(averageEstimatedSpeed || maxEstimatedSpeed) && (
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Max Estimated Speed</div>
-              <div className="text-sm">
-                {maxEstimatedSpeed}{" "}
-                {config?.ui.unit_system == "imperial" ? "mph" : "kph"}
+              <div className="text-sm text-primary/40">Estimated Speeds</div>
+              <div className="flex flex-col space-y-0.5 text-sm">
+                {averageEstimatedSpeed && (
+                  <div>
+                    {averageEstimatedSpeed}{" "}
+                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    <span className="text-primary/40">(average)</span>
+                  </div>
+                )}
+                {maxEstimatedSpeed && (
+                  <div>
+                    {maxEstimatedSpeed}{" "}
+                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    <span className="text-primary/40">(maximum)</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

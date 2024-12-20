@@ -62,7 +62,9 @@ class TrackedObject:
         self.frame = None
         self.active = True
         self.pending_loitering = False
-        self.estimated_speed = 0
+        self.speed_history = []
+        self.current_estimated_speed = 0
+        self.average_estimated_speed = 0
         self.max_estimated_speed = 0
         self.velocity_angle = 0
         self.previous = self.to_dict()
@@ -197,16 +199,22 @@ class TrackedObject:
                 )
                 if self.ui_config.unit_system == "metric":
                     # Convert m/s to km/h
-                    self.estimated_speed = speed_magnitude * 3.6
+                    self.current_estimated_speed = speed_magnitude * 3.6
                 elif self.ui_config.unit_system == "imperial":
                     # Convert ft/s to mph
-                    self.estimated_speed = speed_magnitude * 0.681818
+                    self.current_estimated_speed = speed_magnitude * 0.681818
+
                 logger.debug(
-                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.estimated_speed:.1f}"
+                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.current_estimated_speed:.1f}"
                 )
 
-                if self.estimated_speed > self.max_estimated_speed:
-                    self.max_estimated_speed = self.estimated_speed
+                self.speed_history.append(self.current_estimated_speed)
+                self.average_estimated_speed = sum(self.speed_history) / len(
+                    self.speed_history
+                )
+
+                if self.current_estimated_speed > self.max_estimated_speed:
+                    self.max_estimated_speed = self.current_estimated_speed
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
@@ -289,7 +297,8 @@ class TrackedObject:
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
             "max_severity": self.max_severity,
-            "estimated_speed": self.estimated_speed,
+            "current_estimated_speed": self.current_estimated_speed,
+            "average_estimated_speed": self.average_estimated_speed,
             "max_estimated_speed": self.max_estimated_speed,
             "velocity_angle": self.velocity_angle,
         }

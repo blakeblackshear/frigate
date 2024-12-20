@@ -322,6 +322,7 @@ def events_explore(limit: int = 10):
                         "top_score",
                         "description",
                         "sub_label_score",
+                        "average_estimated_speed",
                         "max_estimated_speed",
                     ]
                 },
@@ -595,6 +596,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 "top_score",
                 "description",
                 "sub_label_score",
+                "average_estimated_speed",
                 "max_estimated_speed",
             ]
         }
