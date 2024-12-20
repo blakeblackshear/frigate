@@ -3,7 +3,7 @@
 numpy < 1.24; platform_machine == 'x86_64'
 tensorrt == 8.6.1.*; platform_machine == 'x86_64'
 cuda-python == 11.8.*; platform_machine == 'x86_64'
-cython == 0.29.*; platform_machine == 'x86_64'
+cython == 3.0.*; platform_machine == 'x86_64'
 nvidia-cuda-runtime-cu12 == 12.1.*; platform_machine == 'x86_64'
 nvidia-cuda-runtime-cu11 == 11.8.*; platform_machine == 'x86_64'
 nvidia-cublas-cu11 == 11.11.3.6; platform_machine == 'x86_64'
