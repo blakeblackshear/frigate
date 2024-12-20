@@ -73,7 +73,7 @@ Amcrest & Dahua cameras should be connected to via RTSP using the following form
 rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=0 # this is the main stream
 rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=1 # this is the sub stream, typically supporting low resolutions only
 rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=2 # higher end cameras support a third stream with a mid resolution (1280x720, 1920x1080)
-rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=2 # new higher end cameras support a fourth stream with another mid resolution (1280x720, 1920x1080)
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=3 # new higher end cameras support a fourth stream with another mid resolution (1280x720, 1920x1080)
 
 ```
 
