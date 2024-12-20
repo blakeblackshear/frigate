@@ -195,7 +195,7 @@ class TrackedObject:
                         self.camera_config.detect.fps,
                     )
                     if self.active
-                    else 0
+                    else (0, 0)
                 )
                 if self.ui_config.unit_system == "metric":
                     # Convert m/s to km/h
@@ -208,10 +208,11 @@ class TrackedObject:
                     f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.current_estimated_speed:.1f}"
                 )
 
-                self.speed_history.append(self.current_estimated_speed)
-                self.average_estimated_speed = sum(self.speed_history) / len(
-                    self.speed_history
-                )
+                if self.active:
+                    self.speed_history.append(self.current_estimated_speed)
+                    self.average_estimated_speed = sum(self.speed_history) / len(
+                        self.speed_history
+                    )
 
                 if self.current_estimated_speed > self.max_estimated_speed:
                     self.max_estimated_speed = self.current_estimated_speed
