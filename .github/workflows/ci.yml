@@ -8,6 +8,10 @@ on:
       - master
     paths-ignore:
       - "docs/**"
+  pull_request:
+    branches:
+      - dev
+      - master
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
@@ -41,6 +45,7 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+
   arm64_build:
     runs-on: ubuntu-latest
     name: ARM Build
@@ -84,6 +89,7 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
+
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
@@ -112,6 +118,7 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
+
   jetson_jp5_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 5
@@ -140,6 +147,7 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
+
   amd64_extra_builds:
     runs-on: ubuntu-latest
     name: AMD64 Extra Build
@@ -167,6 +175,7 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+
   arm64_extra_builds:
     runs-on: ubuntu-latest
     name: ARM Extra Build
@@ -191,6 +200,7 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
+            
   combined_extra_builds:
     runs-on: ubuntu-latest
     name: Combined Extra Builds
@@ -229,8 +239,7 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-from=type=gha
-  # The majority of users running arm64 are rpi users, so the rpi
-  # build should be the primary arm64 image
+            
   assemble_default_build:
     runs-on: ubuntu-latest
     name: Assemble and push default build
