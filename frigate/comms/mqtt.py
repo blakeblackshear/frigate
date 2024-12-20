@@ -168,9 +168,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
     def _start(self) -> None:
         """Start mqtt client."""
+        logger.info("MQTT transport mechanism: %s" % str(self.mqtt_config.transport))
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=self.mqtt_config.client_id,
+            transport=self.mqtt_config.transport,
         )
         self.client.on_connect = self._on_connect
         self.client.on_disconnect = self._on_disconnect
@@ -180,6 +182,8 @@ class MqttClient(Communicator):  # type: ignore[misc]
             qos=1,
             retain=True,
         )
+        if self.mqtt_config.transport == "websockets":
+            self.client.ws_set_options(path="/mqtt")
 
         # register callbacks
         callback_types = [
