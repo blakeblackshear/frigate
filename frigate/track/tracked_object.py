@@ -138,7 +138,7 @@ class TrackedObject:
                     "region": obj_data["region"],
                     "score": obj_data["score"],
                     "attributes": obj_data["attributes"],
-                    "estimated_speed": self.estimated_speed,
+                    "current_estimated_speed": self.current_estimated_speed,
                 }
                 thumb_update = True
 
@@ -387,7 +387,11 @@ class TrackedObject:
                 box[3],
                 self.obj_data["label"],
                 f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}"
-                + (f" {self.estimated_speed:.1f}" if self.estimated_speed != 0 else ""),
+                + (
+                    f" {self.thumbnail_data['current_estimated_speed']:.1f}"
+                    if self.thumbnail_data["current_estimated_speed"] != 0
+                    else ""
+                ),
                 thickness=thickness,
                 color=color,
             )

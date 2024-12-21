@@ -164,8 +164,8 @@ class CameraState:
                     text,
                     f"{obj['score']:.0%} {int(obj['area'])}"
                     + (
-                        f" {float(obj['estimated_speed']):.1f}"
-                        if obj["estimated_speed"] != 0
+                        f" {float(obj['current_estimated_speed']):.1f}"
+                        if obj["current_estimated_speed"] != 0
                         else ""
                     ),
                     thickness=thickness,
