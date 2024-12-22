@@ -3,6 +3,25 @@ import math
 import numpy as np
 
 
+def order_points_clockwise(points):
+    points = np.array(points)
+    centroid = np.mean(points, axis=0)
+
+    angles = np.arctan2(points[:, 1] - centroid[1], points[:, 0] - centroid[0])
+
+    # Sort points by angle
+    sorted_indices = np.argsort(angles)
+    sorted_points = points[sorted_indices]
+
+    # Find the top-left point (minimum sum of x and y coordinates)
+    top_left_idx = np.argmin(np.sum(sorted_points, axis=1))
+
+    # Rotate the points so that the top-left point is first
+    sorted_points = np.roll(sorted_points, -top_left_idx, axis=0)
+
+    return sorted_points.tolist()
+
+
 def create_ground_plane(zone_points, distances):
     """
     Create a ground plane that accounts for perspective distortion using real-world dimensions for each side of the zone.
@@ -61,13 +80,25 @@ def calculate_real_world_speed(
     directly from the zone string.
 
     :param zone_contour: Array of absolute zone points
-    :param distances: Comma separated distances of each side, ordered by A, B, C, D
+    :param distances: List of distances of each side, ordered by A, B, C, D
     :param velocity_pixels: List of tuples representing velocity in pixels/frame
     :param position: Current position of the object (x, y) in pixels
     :param camera_fps: Frames per second of the camera
     :return: speed and velocity angle direction
     """
-    ground_plane = create_ground_plane(zone_contour, distances)
+    if not isinstance(zone_contour, np.ndarray):
+        zone_contour = np.array(zone_contour)
+
+    # Find the top-left point (minimum sum of x and y coordinates)
+    top_left_idx = np.argmin(np.sum(zone_contour, axis=1))
+
+    # Rotate the points so that the top-left point is first
+    ordered_zone_contour = np.roll(zone_contour, -top_left_idx, axis=0)
+
+    # Reorder distances to match the new order of zone_contour
+    ordered_distances = np.roll(distances, -top_left_idx)
+
+    ground_plane = create_ground_plane(ordered_zone_contour, ordered_distances)
 
     if not isinstance(velocity_pixels, np.ndarray):
         velocity_pixels = np.array(velocity_pixels)
