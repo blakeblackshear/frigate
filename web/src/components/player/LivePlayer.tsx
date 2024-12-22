@@ -32,6 +32,7 @@ type LivePlayerProps = {
   useWebGL: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
+  volume?: number;
   playInBackground: boolean;
   micEnabled?: boolean; // only webrtc supports mic
   iOSCompatFullScreen?: boolean;
@@ -54,6 +55,7 @@ export default function LivePlayer({
   useWebGL = false,
   windowVisible = true,
   playAudio = false,
+  volume,
   playInBackground = false,
   micEnabled = false,
   iOSCompatFullScreen = false,
@@ -188,6 +190,7 @@ export default function LivePlayer({
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         audioEnabled={playAudio}
+        volume={volume}
         microphoneEnabled={micEnabled}
         iOSCompatFullScreen={iOSCompatFullScreen}
         onPlaying={playerIsPlaying}
@@ -204,6 +207,7 @@ export default function LivePlayer({
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
+          volume={volume}
           playInBackground={playInBackground}
           onPlaying={playerIsPlaying}
           pip={pip}

@@ -7,6 +7,7 @@ type WebRtcPlayerProps = {
   camera: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  volume?: number;
   microphoneEnabled?: boolean;
   iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
   pip?: boolean;
@@ -19,6 +20,7 @@ export default function WebRtcPlayer({
   camera,
   playbackEnabled = true,
   audioEnabled = false,
+  volume,
   microphoneEnabled = false,
   iOSCompatFullScreen = false,
   pip = false,
@@ -193,6 +195,16 @@ export default function WebRtcPlayer({
 
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
+
+  // control volume
+
+  useEffect(() => {
+    if (!videoRef.current || volume == undefined) {
+      return;
+    }
+
+    videoRef.current.volume = volume;
+  }, [volume, videoRef]);
 
   useEffect(() => {
     videoLoadTimeoutRef.current = setTimeout(() => {

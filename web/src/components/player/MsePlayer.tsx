@@ -15,6 +15,7 @@ type MSEPlayerProps = {
   className?: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  volume?: number;
   playInBackground?: boolean;
   pip?: boolean;
   onPlaying?: () => void;
@@ -27,6 +28,7 @@ function MSEPlayer({
   className,
   playbackEnabled = true,
   audioEnabled = false,
+  volume,
   playInBackground = false,
   pip = false,
   onPlaying,
@@ -536,6 +538,16 @@ function MSEPlayer({
 
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
+
+  // control volume
+
+  useEffect(() => {
+    if (!videoRef.current || volume == undefined) {
+      return;
+    }
+
+    videoRef.current.volume = volume;
+  }, [volume, videoRef]);
 
   // ensure we disconnect for slower connections
 
