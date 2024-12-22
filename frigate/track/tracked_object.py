@@ -65,7 +65,6 @@ class TrackedObject:
         self.speed_history = []
         self.current_estimated_speed = 0
         self.average_estimated_speed = 0
-        self.max_estimated_speed = 0
         self.velocity_angle = 0
         self.previous = self.to_dict()
 
@@ -208,7 +207,7 @@ class TrackedObject:
                     f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.current_estimated_speed:.1f}"
                 )
 
-                if self.active:
+                if self.active and name in self.current_zones:
                     # only keep the last 10 speeds
                     if len(self.speed_history) > 10:
                         self.speed_history = self.speed_history[-10:]
@@ -216,9 +215,6 @@ class TrackedObject:
                     self.average_estimated_speed = sum(self.speed_history) / len(
                         self.speed_history
                     )
-
-                if self.current_estimated_speed > self.max_estimated_speed:
-                    self.max_estimated_speed = self.current_estimated_speed
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
@@ -303,7 +299,6 @@ class TrackedObject:
             "max_severity": self.max_severity,
             "current_estimated_speed": self.current_estimated_speed,
             "average_estimated_speed": self.average_estimated_speed,
-            "max_estimated_speed": self.max_estimated_speed,
             "velocity_angle": self.velocity_angle,
         }
 

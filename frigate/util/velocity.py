@@ -4,7 +4,15 @@ import numpy as np
 
 
 def order_points_clockwise(points):
-    points = np.array(points)
+    """
+    Ensure points are sorted in clockwise order starting from the top left
+
+    :param points: Array of zone corner points in pixel coordinates
+    :return: Ordered list of points
+    """
+    if not isinstance(points, np.ndarray):
+        points = np.array(points)
+
     centroid = np.mean(points, axis=0)
 
     angles = np.arctan2(points[:, 1] - centroid[1], points[:, 0] - centroid[0])
@@ -26,7 +34,7 @@ def create_ground_plane(zone_points, distances):
     """
     Create a ground plane that accounts for perspective distortion using real-world dimensions for each side of the zone.
 
-    :param zone_points: Array of zone corner points in pixel coordinates in circular order
+    :param zone_points: Array of zone corner points in pixel coordinates
                         [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
     :param distances: Real-world dimensions ordered by A, B, C, D
     :return: Function that calculates real-world distance per pixel at any coordinate
