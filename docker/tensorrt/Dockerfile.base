@@ -24,6 +24,7 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY --from=trt-deps /usr/local/cuda-12.1 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS=""
 
