@@ -217,6 +217,8 @@ class EmbeddingMaintainer(threading.Thread):
                             _, buffer = cv2.imencode(".jpg", cropped_image)
                             snapshot_image = buffer.tobytes()
 
+                    num_thumbnails = len(self.tracked_events.get(event_id, []))
+
                     embed_image = (
                         [snapshot_image]
                         if event.has_snapshot and camera_config.genai.use_snapshot
@@ -225,10 +227,32 @@ class EmbeddingMaintainer(threading.Thread):
                                 data["thumbnail"]
                                 for data in self.tracked_events[event_id]
                             ]
-                            if len(self.tracked_events.get(event_id, [])) > 0
+                            if num_thumbnails > 0
                             else [thumbnail]
                         )
                     )
+
+                    if camera_config.genai.save_thumbnails and num_thumbnails > 0:
+                        logger.debug(
+                            f"Saving {num_thumbnails} thumbnails for event {event.id}"
+                        )
+
+                        for idx, data in enumerate(self.tracked_events[event_id]):
+                            jpg_bytes: bytes = data["thumbnail"]
+
+                            if jpg_bytes is None:
+                                logger.warning(
+                                    f"Unable to save thumbnail {idx} for {event.id}."
+                                )
+                            else:
+                                with open(
+                                    os.path.join(
+                                        CLIPS_DIR,
+                                        f"thumb-{camera}-{event.id}-{idx}.jpg",
+                                    ),
+                                    "wb",
+                                ) as j:
+                                    j.write(jpg_bytes)
 
                     # Generate the description. Call happens in a thread since it is network bound.
                     threading.Thread(

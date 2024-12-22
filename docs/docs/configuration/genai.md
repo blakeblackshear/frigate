@@ -180,6 +180,8 @@ Prompts can also be overriden at the camera level to provide a more detailed pro
 
 Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the uncompressed images from the `detect` stream collected over the object's lifetime to the model. Once the object lifecycle ends, only a single compressed and cropped thumbnail is saved with the tracked object. Using a snapshot might be useful when you want to _regenerate_ a tracked object's description as it will provide the AI with a higher-quality image (typically downscaled by the AI itself) than the cropped/compressed thumbnail. Using a snapshot otherwise has a trade-off in that only a single image is sent to your provider, which will limit the model's ability to determine object movement or direction.
 
+If not using `use_snapshot` and you want to review the exact images being provided, you can set `save_thumbnails` to `True`. Images will be saved as JPGs in the clips directory for each event.
+
 ```yaml
 cameras:
   front_door:
@@ -194,6 +196,7 @@ cameras:
         - cat
       required_zones:
         - steps
+      save_thumbnails: False
 ```
 
 ### Experiment with prompts
