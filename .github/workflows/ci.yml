@@ -75,15 +75,6 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-      - name: Build and push Rockchip build
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rk
-          files: docker/rockchip/rk.hcl
-          set: |
-            rk.tags=${{ steps.setup.outputs.image-name }}-rk
-            *.cache-from=type=gha
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
