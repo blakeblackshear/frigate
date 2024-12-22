@@ -55,11 +55,11 @@ import {
   FaMicrophone,
   FaMicrophoneSlash,
 } from "react-icons/fa";
-import { CiStreamOff, CiStreamOn } from "react-icons/ci";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
 import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
 import {
+  LuCog,
   LuEar,
   LuEarOff,
   LuHistory,
@@ -69,6 +69,7 @@ import {
 } from "react-icons/lu";
 import {
   MdNoPhotography,
+  MdOutlineRestartAlt,
   MdPersonOff,
   MdPersonSearch,
   MdPhotoCamera,
@@ -87,13 +88,9 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -489,6 +486,8 @@ export default function LiveCameraView({
                 preferredLiveMode={preferredLiveMode}
                 playInBackground={playInBackground ?? false}
                 setPlayInBackground={setPlayInBackground}
+                isRestreamed={isRestreamed ?? false}
+                setLowBandwidth={setLowBandwidth}
               />
             </div>
           </TooltipProvider>
@@ -790,6 +789,8 @@ type FrigateCameraFeaturesProps = {
   preferredLiveMode: string;
   playInBackground: boolean;
   setPlayInBackground: (value: boolean | undefined) => void;
+  isRestreamed: boolean;
+  setLowBandwidth: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function FrigateCameraFeatures({
   camera,
@@ -802,6 +803,8 @@ function FrigateCameraFeatures({
   preferredLiveMode,
   playInBackground,
   setPlayInBackground,
+  isRestreamed,
+  setLowBandwidth,
 }: FrigateCameraFeaturesProps) {
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
@@ -866,54 +869,106 @@ function FrigateCameraFeatures({
             }
           />
         )}
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={playInBackground ? CiStreamOn : CiStreamOff}
-          isActive={playInBackground ?? false}
-          title={`${playInBackground ? "Disable" : "Enable"} Background Playback`}
-          onClick={() => setPlayInBackground(!playInBackground)}
-        />
-        {Object.values(camera.live.streams).length > 1 && (
-          <Select
-            value={streamName}
-            onValueChange={(value) => {
-              setStreamName?.(value);
-            }}
-          >
-            <SelectTrigger className="w-full">
-              {preferredLiveMode == "jsmpeg" && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <IoIosWarning className="mr-1 size-5 text-danger" />
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent className="max-w-52">
-                      Live view is in low-bandwidth mode due to buffering or
-                      stream errors
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-              )}
-              {Object.keys(camera.live.streams).find(
-                (key) => camera.live.streams[key] === streamName,
-              )}
-            </SelectTrigger>
+        {isRestreamed && (
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger>
+              <div
+                className={cn(
+                  "flex flex-col items-center justify-center rounded-lg bg-secondary p-2 text-secondary-foreground md:p-0",
+                )}
+              >
+                <LuCog
+                  className={`text-secondary-foreground" size-5 md:m-[6px]`}
+                />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-w-96">
+              <div className="flex flex-col gap-5 p-4">
+                {Object.values(camera.live.streams).length > 1 && (
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="streaming-method" className="">
+                      Stream
+                    </Label>
+                    <Select
+                      value={streamName}
+                      onValueChange={(value) => {
+                        setStreamName?.(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        {Object.keys(camera.live.streams).find(
+                          (key) => camera.live.streams[key] === streamName,
+                        )}
+                      </SelectTrigger>
 
-            <SelectContent>
-              <SelectGroup>
-                {Object.entries(camera.live.streams).map(([stream, name]) => (
-                  <SelectItem
-                    key={stream}
-                    className="cursor-pointer"
-                    value={name}
-                  >
-                    {stream}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+                      <SelectContent>
+                        <SelectGroup>
+                          {Object.entries(camera.live.streams).map(
+                            ([stream, name]) => (
+                              <SelectItem
+                                key={stream}
+                                className="cursor-pointer"
+                                value={name}
+                              >
+                                {stream}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    {preferredLiveMode == "jsmpeg" && isRestreamed && (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="flex flex-row items-center gap-2">
+                          <IoIosWarning className="mr-1 size-8 text-danger" />
+
+                          <p className="text-sm">
+                            Live view is in low-bandwidth mode due to buffering
+                            or stream errors.
+                          </p>
+                        </div>
+                        <Button
+                          className={`flex items-center gap-2.5 rounded-lg`}
+                          aria-label="Reset the stream"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLowBandwidth(false)}
+                        >
+                          <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                          <div className="text-primary-variant">
+                            Reset stream
+                          </div>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="mx-0 cursor-pointer text-primary"
+                      htmlFor="backgroundplay"
+                    >
+                      Play in background
+                    </Label>
+                    <Switch
+                      className="ml-1"
+                      id="backgroundplay"
+                      checked={playInBackground}
+                      onCheckedChange={(checked) =>
+                        setPlayInBackground(checked)
+                      }
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Enable this option to continue streaming when the player is
+                    hidden.
+                  </p>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </>
     );
@@ -973,16 +1028,9 @@ function FrigateCameraFeatures({
             }
           />
         )}
-        <FilterSwitch
-          label="Play in Background"
-          isChecked={playInBackground}
-          onCheckedChange={(checked) => {
-            setPlayInBackground(checked);
-          }}
-        />
         {Object.values(camera.live.streams).length > 1 && (
           <div className="mt-1 p-2">
-            <div className="mb-1 text-sm">Live stream selection</div>
+            <div className="mb-1 text-sm">Stream</div>
             <Select
               value={streamName}
               onValueChange={(value) => {
@@ -990,9 +1038,6 @@ function FrigateCameraFeatures({
               }}
             >
               <SelectTrigger className="w-full">
-                {preferredLiveMode == "jsmpeg" && (
-                  <IoIosWarning className="mr-1 size-5 text-danger" />
-                )}
                 {Object.keys(camera.live.streams).find(
                   (key) => camera.live.streams[key] === streamName,
                 )}
@@ -1012,7 +1057,44 @@ function FrigateCameraFeatures({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {preferredLiveMode == "jsmpeg" && isRestreamed && (
+              <div className="mt-2 flex flex-col items-center gap-3">
+                <div className="flex flex-row items-center gap-2">
+                  <IoIosWarning className="mr-1 size-8 text-danger" />
+
+                  <p className="text-sm">
+                    Live view is in low-bandwidth mode due to buffering or
+                    stream errors.
+                  </p>
+                </div>
+                <Button
+                  className={`flex items-center gap-2.5 rounded-lg`}
+                  aria-label="Reset the stream"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLowBandwidth(false)}
+                >
+                  <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                  <div className="text-primary-variant">Reset stream</div>
+                </Button>
+              </div>
+            )}
           </div>
+        )}
+        {isRestreamed && (
+          <>
+            <FilterSwitch
+              label="Play in Background"
+              isChecked={playInBackground}
+              onCheckedChange={(checked) => {
+                setPlayInBackground(checked);
+              }}
+            />
+            <p className="mx-2 -mt-2 text-sm text-muted-foreground">
+              Enable this option to continue streaming when the player is
+              hidden.
+            </p>
+          </>
         )}
       </DrawerContent>
     </Drawer>
