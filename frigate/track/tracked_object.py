@@ -209,6 +209,9 @@ class TrackedObject:
                 )
 
                 if self.active:
+                    # only keep the last 10 speeds
+                    if len(self.speed_history) > 10:
+                        self.speed_history = self.speed_history[-10:]
                     self.speed_history.append(self.current_estimated_speed)
                     self.average_estimated_speed = sum(self.speed_history) / len(
                         self.speed_history
