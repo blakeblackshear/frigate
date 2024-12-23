@@ -10,21 +10,21 @@ def order_points_clockwise(points):
     :param points: Array of zone corner points in pixel coordinates
     :return: Ordered list of points
     """
-    center = np.mean(points, axis=0)
+    top_left = min(
+        points, key=lambda p: (p[1], p[0])
+    )  # Find the top-left point (min y, then x)
 
-    top_left = top_right = bottom_right = bottom_left = None
+    # Remove the top-left point from the list of points
+    remaining_points = [p for p in points if not np.array_equal(p, top_left)]
 
-    for point in points:
-        if point[0] < center[0] and point[1] < center[1] and top_left is None:
-            top_left = point
-        elif point[0] > center[0] and point[1] < center[1] and top_right is None:
-            top_right = point
-        elif point[0] > center[0] and point[1] > center[1] and bottom_right is None:
-            bottom_right = point
-        elif point[0] < center[0] and point[1] > center[1] and bottom_left is None:
-            bottom_left = point
+    # Sort the remaining points based on the angle relative to the top-left point
+    def angle_from_top_left(point):
+        x, y = point[0] - top_left[0], point[1] - top_left[1]
+        return math.atan2(y, x)
 
-    return np.array([top_left, top_right, bottom_right, bottom_left])
+    sorted_points = sorted(remaining_points, key=angle_from_top_left)
+
+    return [top_left] + sorted_points
 
 
 def create_ground_plane(zone_points, distances):
