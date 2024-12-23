@@ -184,7 +184,12 @@ class TrackedObject:
                     self.zone_presence[name] = zone_score - 1
 
             # update speed
-            if zone.distances and name in self.entered_zones:
+            if (
+                zone.distances
+                and name in self.current_zones
+                and obj_data["frame_time"] == current_frame_time
+                and self.active
+            ):
                 speed_magnitude, self.velocity_angle = (
                     calculate_real_world_speed(
                         zone.contour,
@@ -203,18 +208,17 @@ class TrackedObject:
                     # Convert ft/s to mph
                     self.current_estimated_speed = speed_magnitude * 0.681818
 
-                logger.debug(
-                    f"Camera: {self.camera_config.name}, zone: {name}, tracked object ID: {self.obj_data['id']}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))} estimated speed: {self.current_estimated_speed:.1f}"
-                )
+                # only keep the last 10 speeds
+                if len(self.speed_history) > 10:
+                    self.speed_history = self.speed_history[-10:]
 
-                if self.active and name in self.current_zones:
-                    # only keep the last 10 speeds
-                    if len(self.speed_history) > 10:
-                        self.speed_history = self.speed_history[-10:]
-                    self.speed_history.append(self.current_estimated_speed)
-                    self.average_estimated_speed = sum(self.speed_history) / len(
-                        self.speed_history
-                    )
+                self.speed_history.append(self.current_estimated_speed)
+                self.average_estimated_speed = sum(self.speed_history) / len(
+                    self.speed_history
+                )
+                logger.debug(
+                    f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, speed magnitude: {speed_magnitude}, estimated speed: {self.current_estimated_speed:.1f}, average speed: {self.average_estimated_speed:.1f}, length: {len(self.speed_history)}"
+                )
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
