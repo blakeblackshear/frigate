@@ -159,6 +159,7 @@ The average speed of your object as it moved through your zone is saved in Friga
 
 - Speed estimation works best with a straight road or path when your object travels in a straight line across that path. If your object makes turns, speed estimation may not be accurate.
 - Create a zone where the bottom center of your object's bounding box travels directly through it and does not become obscured at any time.
+- Depending on the size and location of your zone, you may want to decrease the zone's `inertia` value from the default of 3.
 - The more accurate your real-world dimensions can be measured, the more accurate speed estimation will be. However, due to the way Frigate's tracking algorithm works, you may need to tweak the real-world distance values so that estimated speeds better match real-world speeds.
 - Once an object leaves the zone, speed accuracy will likely decrease due to perspective distortion and misalignment with the calibrated area.
 - The speeds are only an _estimation_ and are highly dependent on camera position, zone points, and real-world measurements. This feature should not be used for law enforcement.
