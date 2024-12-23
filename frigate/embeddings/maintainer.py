@@ -232,7 +232,7 @@ class EmbeddingMaintainer(threading.Thread):
                         )
                     )
 
-                    if camera_config.genai.save_thumbnails and num_thumbnails > 0:
+                    if camera_config.genai.debug_save_thumbnails and num_thumbnails > 0:
                         logger.debug(
                             f"Saving {num_thumbnails} thumbnails for event {event.id}"
                         )
