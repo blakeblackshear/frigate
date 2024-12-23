@@ -10,24 +10,22 @@ def order_points_clockwise(points):
     :param points: Array of zone corner points in pixel coordinates
     :return: Ordered list of points
     """
-    if not isinstance(points, np.ndarray):
-        points = np.array(points)
+    center = np.mean(points, axis=0)
 
-    centroid = np.mean(points, axis=0)
+    top_left = points[
+        np.logical_and(points[:, 0] < center[0], points[:, 1] < center[1])
+    ][0]
+    top_right = points[
+        np.logical_and(points[:, 0] > center[0], points[:, 1] < center[1])
+    ][0]
+    bottom_right = points[
+        np.logical_and(points[:, 0] > center[0], points[:, 1] > center[1])
+    ][0]
+    bottom_left = points[
+        np.logical_and(points[:, 0] < center[0], points[:, 1] > center[1])
+    ][0]
 
-    angles = np.arctan2(points[:, 1] - centroid[1], points[:, 0] - centroid[0])
-
-    # Sort points by angle
-    sorted_indices = np.argsort(angles)
-    sorted_points = points[sorted_indices]
-
-    # Find the top-left point (minimum sum of x and y coordinates)
-    top_left_idx = np.argmin(np.sum(sorted_points, axis=1))
-
-    # Rotate the points so that the top-left point is first
-    sorted_points = np.roll(sorted_points, -top_left_idx, axis=0)
-
-    return sorted_points.tolist()
+    return np.array([top_left, top_right, bottom_right, bottom_left])
 
 
 def create_ground_plane(zone_points, distances):
@@ -94,17 +92,18 @@ def calculate_real_world_speed(
     :param camera_fps: Frames per second of the camera
     :return: speed and velocity angle direction
     """
-    if not isinstance(zone_contour, np.ndarray):
-        zone_contour = np.array(zone_contour)
+    # order the zone_contour points clockwise starting at top left
+    ordered_zone_contour = order_points_clockwise(zone_contour)
 
-    # Find the top-left point (minimum sum of x and y coordinates)
-    top_left_idx = np.argmin(np.sum(zone_contour, axis=1))
-
-    # Rotate the points so that the top-left point is first
-    ordered_zone_contour = np.roll(zone_contour, -top_left_idx, axis=0)
+    # find the indices that would sort the original zone_contour to match ordered_zone_contour
+    sort_indices = [
+        np.where((zone_contour == point).all(axis=1))[0][0]
+        for point in ordered_zone_contour
+    ]
 
     # Reorder distances to match the new order of zone_contour
-    ordered_distances = np.roll(distances, -top_left_idx)
+    distances = np.array(distances)
+    ordered_distances = distances[sort_indices]
 
     ground_plane = create_ground_plane(ordered_zone_contour, ordered_distances)
 
