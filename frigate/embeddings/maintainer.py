@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
+from pathlib import Path
 from typing import Optional
 
 import cv2
@@ -237,7 +238,11 @@ class EmbeddingMaintainer(threading.Thread):
                             f"Saving {num_thumbnails} thumbnails for event {event.id}"
                         )
 
-                        for idx, data in enumerate(self.tracked_events[event_id]):
+                        Path(
+                            os.path.join(CLIPS_DIR, f"genai-requests/{event.id}")
+                        ).mkdir(parents=True, exist_ok=True)
+
+                        for idx, data in enumerate(self.tracked_events[event_id], 1):
                             jpg_bytes: bytes = data["thumbnail"]
 
                             if jpg_bytes is None:
@@ -248,7 +253,7 @@ class EmbeddingMaintainer(threading.Thread):
                                 with open(
                                     os.path.join(
                                         CLIPS_DIR,
-                                        f"thumb-{camera}-{event.id}-{idx}.jpg",
+                                        f"genai-requests/{event.id}/{idx}.jpg",
                                     ),
                                     "wb",
                                 ) as j:
