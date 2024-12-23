@@ -130,7 +130,7 @@ Your zone must be defined with exactly 4 points and should be aligned to the gro
 
 ![Ground plane 4-point zone](/img/ground-plane.jpg)
 
-Speed estimation requires a minimum number of frames for your object to be tracked before a valid estimate can be calculated, so create your zone away from places where objects enter and exit for the best results. _Your zone should not take up the full frame._ Once an object enters a speed estimation zone, its speed will continue to be tracked, even after it leaves the zone. However, once an object leaves the zone, speed accuracy will likely decrease due to perspective distortion and misalignment with the calibrated area.
+Speed estimation requires a minimum number of frames for your object to be tracked before a valid estimate can be calculated, so create your zone away from places where objects enter and exit for the best results. _Your zone should not take up the full frame._ An object's speed is tracked while it is in the zone and then saved to Frigate's database.
 
 Accurate real-world distance measurements are required to estimate speeds. These distances can be specified in your zone config through the `distances` field.
 
