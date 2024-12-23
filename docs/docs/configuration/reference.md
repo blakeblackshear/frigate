@@ -760,6 +760,8 @@ cameras:
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
       required_zones: []
+      # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
+      debug_save_thumbnails: False
 
 # Optional
 ui:
