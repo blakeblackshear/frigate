@@ -56,6 +56,7 @@ export type SearchResult = {
     type: "object" | "audio" | "manual";
     description?: string;
     average_estimated_speed: number;
+    velocity_angle: number;
   };
 };
 

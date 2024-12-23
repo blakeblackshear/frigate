@@ -138,6 +138,7 @@ class TrackedObject:
                     "score": obj_data["score"],
                     "attributes": obj_data["attributes"],
                     "current_estimated_speed": self.current_estimated_speed,
+                    "velocity_angle": self.velocity_angle,
                 }
                 thumb_update = True
 
@@ -217,7 +218,7 @@ class TrackedObject:
                     self.speed_history
                 )
                 logger.debug(
-                    f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, speed magnitude: {speed_magnitude}, estimated speed: {self.current_estimated_speed:.1f}, average speed: {self.average_estimated_speed:.1f}, length: {len(self.speed_history)}"
+                    f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, speed magnitude: {speed_magnitude}, velocity angle: {self.velocity_angle}, estimated speed: {self.current_estimated_speed:.1f}, average speed: {self.average_estimated_speed:.1f}, length: {len(self.speed_history)}"
                 )
 
         # update loitering status

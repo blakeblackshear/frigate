@@ -27,6 +27,7 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
             or prev_event["end_time"] != current_event["end_time"]
             or prev_event["average_estimated_speed"]
             != current_event["average_estimated_speed"]
+            or prev_event["velocity_angle"] != current_event["velocity_angle"]
         ):
             return True
     return False
@@ -212,6 +213,7 @@ class EventProcessor(threading.Thread):
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
                     "average_estimated_speed": event_data["average_estimated_speed"],
+                    "velocity_angle": event_data["velocity_angle"],
                     "type": "object",
                     "max_severity": event_data.get("max_severity"),
                 },
