@@ -12,18 +12,17 @@ def order_points_clockwise(points):
     """
     center = np.mean(points, axis=0)
 
-    top_left = points[
-        np.logical_and(points[:, 0] < center[0], points[:, 1] < center[1])
-    ][0]
-    top_right = points[
-        np.logical_and(points[:, 0] > center[0], points[:, 1] < center[1])
-    ][0]
-    bottom_right = points[
-        np.logical_and(points[:, 0] > center[0], points[:, 1] > center[1])
-    ][0]
-    bottom_left = points[
-        np.logical_and(points[:, 0] < center[0], points[:, 1] > center[1])
-    ][0]
+    top_left = top_right = bottom_right = bottom_left = None
+
+    for point in points:
+        if point[0] < center[0] and point[1] < center[1] and top_left is None:
+            top_left = point
+        elif point[0] > center[0] and point[1] < center[1] and top_right is None:
+            top_right = point
+        elif point[0] > center[0] and point[1] > center[1] and bottom_right is None:
+            bottom_right = point
+        elif point[0] < center[0] and point[1] > center[1] and bottom_left is None:
+            bottom_left = point
 
     return np.array([top_left, top_right, bottom_right, bottom_left])
 
