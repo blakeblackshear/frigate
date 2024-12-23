@@ -543,6 +543,8 @@ genai:
   # Format: {label}: {prompt}
   object_prompts:
     person: "My special person prompt."
+  # Optional: Attempt to detect faces in the image and blur for privacy before sending to provider (default: shown below)
+  blur_faces: False
 
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.2)

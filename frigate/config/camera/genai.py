@@ -68,3 +68,6 @@ class GenAIConfig(FrigateBaseModel):
     provider: GenAIProviderEnum = Field(
         default=GenAIProviderEnum.openai, title="GenAI provider."
     )
+    blur_faces: bool = Field(
+        default=False, title="Blur faces if detected in the image."
+    )

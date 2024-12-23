@@ -5,6 +5,8 @@ import logging
 import os
 from typing import Optional
 
+import cv2
+import numpy as np
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
@@ -33,6 +35,14 @@ class GenAIClient:
         self.timeout = timeout
         self.provider = self._init_provider()
 
+        if self.genai_config.blur_faces:
+            self.face_cascade_classifier = cv2.CascadeClassifier(
+                cv2.data.haarcascades + "/haarcascade_frontalface_alt.xml"
+            )
+            self.face_profile_cascade_classifier = cv2.CascadeClassifier(
+                cv2.data.haarcascades + "/haarcascade_profileface.xml"
+            )
+
     def generate_description(
         self,
         camera_config: CameraConfig,
@@ -44,6 +54,8 @@ class GenAIClient:
             event.label,
             camera_config.genai.prompt,
         ).format(**model_to_dict(event))
+        if self.genai_config.blur_faces:
+            self.blur_faces(thumbnails)
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
 
@@ -54,6 +66,30 @@ class GenAIClient:
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to the provider."""
         return None
+
+    def blur_faces(self, thumbnails: list[bytes]):
+        for thumb in thumbnails:
+            image = cv2.imdecode(np.frombuffer(thumb, dtype=np.int8), cv2.IMREAD_COLOR)
+
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+            face_data = self.face_cascade_classifier.detectMultiScale(
+                image=gray, scaleFactor=1.1, minNeighbors=2, minSize=(25, 25)
+            )
+
+            face_profile_data = self.face_profile_cascade_classifier.detectMultiScale(
+                image=gray, scaleFactor=1.1, minNeighbors=2, minSize=(25, 25)
+            )
+
+            for x, y, w, h in face_data:
+                roi = image[y : y + h, x : x + w]
+                roi = cv2.GaussianBlur(roi, (23, 23), 30)
+                image[y : y + h, x : x + w] = roi
+
+            for x, y, w, h in face_profile_data:
+                roi = image[y : y + h, x : x + w]
+                roi = cv2.GaussianBlur(roi, (23, 23), 30)
+                image[y : y + h, x : x + w] = roi
 
 
 def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
