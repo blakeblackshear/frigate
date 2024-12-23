@@ -122,7 +122,7 @@ export default function FaceLibrary() {
         </ScrollArea>
       </div>
       {pageToggle && (
-        <div className="flex flex-wrap gap-2">
+        <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
           {faceImages.map((image: string) => (
             <FaceImage key={image} name={pageToggle} image={image} />
           ))}
