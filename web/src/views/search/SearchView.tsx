@@ -158,6 +158,8 @@ export default function SearchView({
       after: [formatDateToLocaleString(-5)],
       min_score: ["50"],
       max_score: ["100"],
+      min_speed: ["1"],
+      max_speed: ["150"],
       has_clip: ["yes", "no"],
       has_snapshot: ["yes", "no"],
       ...(config?.plus?.enabled &&
