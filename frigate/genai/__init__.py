@@ -83,12 +83,12 @@ class GenAIClient:
 
             for x, y, w, h in face_data:
                 roi = image[y : y + h, x : x + w]
-                roi = cv2.GaussianBlur(roi, (23, 23), 30)
+                roi = cv2.blur(roi, (30, 30), 0)
                 image[y : y + h, x : x + w] = roi
 
             for x, y, w, h in face_profile_data:
                 roi = image[y : y + h, x : x + w]
-                roi = cv2.GaussianBlur(roi, (23, 23), 30)
+                roi = cv2.blur(roi, (30, 30), 0)
                 image[y : y + h, x : x + w] = roi
 
 
