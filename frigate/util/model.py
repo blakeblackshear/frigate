@@ -163,12 +163,30 @@ class FaceClassificationModel:
         self.config = config
         self.db = db
         self.landmark_detector = cv2.face.createFacemarkLBF()
+        self.landmark_detector.loadModel("/config/model_cache/facenet/lbfmodel.yaml")
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
-                radius=2, neighbors=4, threshold=(1 - config.threshold) * 1000
+                radius=2, threshold=(1 - config.threshold) * 1000
             )
         )
         self.label_map: dict[int, str] = {}
+
+    def __build_classifier(self) -> None:
+        labels = []
+        faces = []
+
+        dir = "/media/frigate/clips/faces"
+        for idx, name in enumerate(os.listdir(dir)):
+            self.label_map[idx] = name
+            face_folder = os.path.join(dir, name)
+            for image in os.listdir(face_folder):
+                img = cv2.imread(os.path.join(face_folder, image))
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                img = self.__align_face(img, img.shape[1], img.shape[0])
+                faces.append(img)
+                labels.append(idx)
+
+        self.recognizer.train(faces, np.array(labels))
 
     def __align_face(
         self,
@@ -226,24 +244,6 @@ class FaceClassificationModel:
         return cv2.warpAffine(
             image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
         )
-
-    def __build_classifier(self) -> None:
-        labels = []
-        faces = []
-
-        dir = "/media/frigate/clips/faces"
-        for idx, name in enumerate(os.listdir(dir)):
-            self.label_map[idx] = name
-            face_folder = os.path.join(dir, name)
-            for image in os.listdir(face_folder):
-                img = cv2.imread(os.path.join(face_folder, image))
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                img = self.__align_face(img, img.shape[1], img.shape[0])
-                faces.append(img)
-                labels.append(idx)
-
-        self.recognizer.train(faces, np.array(labels))
-        self.landmark_detector.loadModel("/config/model_cache/facenet/lbfmodel.yaml")
 
     def clear_classifier(self) -> None:
         self.classifier = None
