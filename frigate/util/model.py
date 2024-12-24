@@ -162,8 +162,12 @@ class FaceClassificationModel:
     def __init__(self, config: FaceRecognitionConfig, db: SqliteQueueDatabase):
         self.config = config
         self.db = db
-        self.recognizer = cv2.face.LBPHFaceRecognizer_create(
-            radius=4, threshold=(1 - config.threshold) * 1000
+        self.landmark_detector = cv2.face.createFacemarkLBF()
+        self.landmark_detector.loadModel("/config/model_cache/facenet/landmarkdet.yaml")
+        self.recognizer: cv2.face.LBPHFaceRecognizer = (
+            cv2.face.LBPHFaceRecognizer_create(
+                radius=2, threshold=(1 - config.threshold) * 1000
+            )
         )
         self.label_map: dict[int, str] = {}
 
@@ -177,12 +181,69 @@ class FaceClassificationModel:
             face_folder = os.path.join(dir, name)
             for image in os.listdir(face_folder):
                 img = cv2.imread(os.path.join(face_folder, image))
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                equ = cv2.equalizeHist(gray)
-                faces.append(equ)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                img = self.__align_face(img, img.shape[1], img.shape[0])
+                faces.append(img)
                 labels.append(idx)
 
         self.recognizer.train(faces, np.array(labels))
+
+    def __align_face(
+        self,
+        image: np.ndarray,
+        output_width: int,
+        output_height: int,
+    ) -> np.ndarray:
+        _, lands = self.landmark_detector.fit(
+            image, np.array([(0, 0, image.shape[1], image.shape[0])])
+        )
+        landmarks = lands[0][0]
+
+        # get landmarks for eyes
+        leftEyePts = landmarks[42:48]
+        rightEyePts = landmarks[36:42]
+
+        # compute the center of mass for each eye
+        leftEyeCenter = leftEyePts.mean(axis=0).astype("int")
+        rightEyeCenter = rightEyePts.mean(axis=0).astype("int")
+
+        # compute the angle between the eye centroids
+        dY = rightEyeCenter[1] - leftEyeCenter[1]
+        dX = rightEyeCenter[0] - leftEyeCenter[0]
+        angle = np.degrees(np.arctan2(dY, dX)) - 180
+
+        # compute the desired right eye x-coordinate based on the
+        # desired x-coordinate of the left eye
+        desiredRightEyeX = 1.0 - 0.35
+
+        # determine the scale of the new resulting image by taking
+        # the ratio of the distance between eyes in the *current*
+        # image to the ratio of distance between eyes in the
+        # *desired* image
+        dist = np.sqrt((dX**2) + (dY**2))
+        desiredDist = desiredRightEyeX - 0.35
+        desiredDist *= output_width
+        scale = desiredDist / dist
+
+        # compute center (x, y)-coordinates (i.e., the median point)
+        # between the two eyes in the input image
+        # grab the rotation matrix for rotating and scaling the face
+        eyesCenter = (
+            int((leftEyeCenter[0] + rightEyeCenter[0]) // 2),
+            int((leftEyeCenter[1] + rightEyeCenter[1]) // 2),
+        )
+        M = cv2.getRotationMatrix2D(eyesCenter, angle, scale)
+
+        # update the translation component of the matrix
+        tX = output_width * 0.5
+        tY = output_height * 0.35
+        M[0, 2] += tX - eyesCenter[0]
+        M[1, 2] += tY - eyesCenter[1]
+
+        # apply the affine transformation
+        return cv2.warpAffine(
+            image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
+        )
 
     def clear_classifier(self) -> None:
         self.classifier = None
@@ -192,9 +253,9 @@ class FaceClassificationModel:
         if not self.label_map:
             self.__build_classifier()
 
-        index, distance = self.recognizer.predict(
-            cv2.equalizeHist(cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY))
-        )
+        img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+        img = self.__align_face(img, img.shape[1], img.shape[0])
+        index, distance = self.recognizer.predict(img)
 
         if index == -1:
             return None
