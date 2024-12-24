@@ -131,6 +131,7 @@ class Embeddings:
                     "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
                     "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
                 },
+                model_size="small",
                 model_type=ModelTypeEnum.face,
                 requestor=self.requestor,
             )
