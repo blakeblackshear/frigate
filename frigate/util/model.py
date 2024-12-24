@@ -163,7 +163,7 @@ class FaceClassificationModel:
         self.config = config
         self.db = db
         self.landmark_detector = cv2.face.createFacemarkLBF()
-        self.landmark_detector.loadModel("/config/model_cache/facenet/landmarkdet.yaml")
+        self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
                 radius=2, threshold=(1 - config.threshold) * 1000

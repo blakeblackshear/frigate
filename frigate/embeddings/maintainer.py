@@ -105,7 +105,7 @@ class EmbeddingMaintainer(threading.Thread):
         # Lazily create the classifier.
         if "face_detector" not in self.__dict__:
             self.__dict__["face_detector"] = cv2.FaceDetectorYN.create(
-                "/config/model_cache/facenet/facedet.onnx",
+                "/config/model_cache/facedet/facedet.onnx",
                 config="",
                 input_size=(320, 320),
                 score_threshold=0.8,
