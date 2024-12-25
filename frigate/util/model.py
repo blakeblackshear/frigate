@@ -178,6 +178,9 @@ class FaceClassificationModel:
 
         dir = "/media/frigate/clips/faces"
         for idx, name in enumerate(os.listdir(dir)):
+            if name == "debug":
+                continue
+
             self.label_map[idx] = name
             face_folder = os.path.join(dir, name)
             for image in os.listdir(face_folder):
