@@ -66,6 +66,7 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "../mobile/MobilePage";
+import { Trans } from "react-i18next";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -151,8 +152,8 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
               </Button>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent className="capitalize" side="right">
-                All Cameras
+              <TooltipContent className="" side="right">
+                <Trans>ui.menu.live.allCameras</Trans>
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>

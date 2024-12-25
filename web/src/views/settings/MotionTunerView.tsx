@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { Trans } from "react-i18next";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -179,13 +180,11 @@ export default function MotionTunerView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          Motion Detection Tuner
+          <Trans>ui.settingView.motionDetectionTuner</Trans>
         </Heading>
         <div className="my-3 space-y-3 text-sm text-muted-foreground">
           <p>
-            Frigate uses motion detection as a first line check to see if there
-            is anything happening in the frame worth checking with object
-            detection.
+            <Trans>ui.settingView.motionDetectionTuner.desc</Trans>
           </p>
 
           <div className="flex items-center text-primary">
@@ -195,7 +194,7 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              Read the Motion Tuning Guide{" "}
+              <Trans>ui.settingView.motionDetectionTuner.desc.documentation</Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -205,13 +204,11 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                Threshold
+                <Trans>ui.settingView.motionDetectionTuner.Threshold</Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  The threshold value dictates how much of a change in a pixel's
-                  luminance is required to be considered motion.{" "}
-                  <em>Default: 30</em>
+                  <Trans>ui.settingView.motionDetectionTuner.Threshold.desc</Trans>
                 </p>
               </div>
             </div>
@@ -236,12 +233,11 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                Contour Area
+                <Trans>ui.settingView.motionDetectionTuner.contourArea</Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  The contour area value is used to decide which groups of
-                  changed pixels qualify as motion. <em>Default: 10</em>
+                  <Trans>ui.settingView.motionDetectionTuner.contourArea.desc</Trans>
                 </p>
               </div>
             </div>
@@ -266,9 +262,9 @@ export default function MotionTunerView({
           <Separator className="my-2 flex bg-secondary" />
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="improve-contrast">Improve Contrast</Label>
+              <Label htmlFor="improve-contrast"><Trans>ui.settingView.motionDetectionTuner.improveContrast</Trans></Label>
               <div className="text-sm text-muted-foreground">
-                Improve contrast for darker scenes. <em>Default: ON</em>
+                <Trans>ui.settingView.motionDetectionTuner.improveContrast.desc</Trans>
               </div>
             </div>
             <Switch
@@ -289,7 +285,7 @@ export default function MotionTunerView({
               aria-label="Reset"
               onClick={onCancel}
             >
-              Reset
+              <Trans>ui.reset</Trans>
             </Button>
             <Button
               variant="select"
@@ -301,10 +297,10 @@ export default function MotionTunerView({
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span>Saving...</span>
+                  <span><Trans>ui.saving</Trans></span>
                 </div>
               ) : (
-                "Save"
+                <Trans>ui.save</Trans>
               )}
             </Button>
           </div>

@@ -12,6 +12,7 @@ import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
+import { t } from "i18next";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -38,7 +39,7 @@ export function CamerasFilterButton({
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
-      return "All Cameras";
+      return t("ui.menu.live.allCameras");
     }
 
     return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;

@@ -18,6 +18,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from "../../components/ui/select";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
@@ -63,13 +65,13 @@ export default function UiSettingsView() {
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
-            General Settings
+            <Trans>ui.settingView.generalSettings</Trans>
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            Live Dashboard
+            <Trans>ui.settingView.generalSettings.liveDashboard</Trans>
           </Heading>
 
           <div className="mt-2 space-y-6">
@@ -81,14 +83,12 @@ export default function UiSettingsView() {
                   onCheckedChange={setAutoLive}
                 />
                 <Label className="cursor-pointer" htmlFor="auto-live">
-                  Automatic Live View
+                  <Trans>ui.settingView.generalSettings.automaticLiveView</Trans>
                 </Label>
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  Automatically switch to a camera's live view when activity is
-                  detected. Disabling this option causes static camera images on
-                  the Live dashboard to only update once per minute.
+                  <Trans>ui.settingView.generalSettings.automaticLiveView.desc</Trans>
                 </p>
               </div>
             </div>
@@ -100,14 +100,12 @@ export default function UiSettingsView() {
                   onCheckedChange={setAlertVideos}
                 />
                 <Label className="cursor-pointer" htmlFor="images-only">
-                  Play Alert Videos
+                  <Trans>ui.settingView.generalSettings.playAlertVideos</Trans>
                 </Label>
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  By default, recent alerts on the Live dashboard play as small
-                  looping videos. Disable this option to only show a static
-                  image of recent alerts on this device/browser.
+                  <Trans>ui.settingView.generalSettings.playAlertVideos.desc</Trans>
                 </p>
               </div>
             </div>
@@ -116,12 +114,10 @@ export default function UiSettingsView() {
           <div className="my-3 flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md">Stored Layouts</div>
+                <div className="text-md"><Trans>ui.settingView.generalSettings.storedLayouts</Trans></div>
                 <div className="my-2 text-sm text-muted-foreground">
                   <p>
-                    The layout of cameras in a camera group can be
-                    dragged/resized. The positions are stored in your browser's
-                    local storage.
+                    <Trans>ui.settingView.generalSettings.storedLayouts.desc</Trans>
                   </p>
                 </div>
               </div>
@@ -129,21 +125,21 @@ export default function UiSettingsView() {
                 aria-label="Clear all saved layouts"
                 onClick={clearStoredLayouts}
               >
-                Clear All Layouts
+                <Trans>ui.settingView.generalSettings.storedLayouts.clearAll</Trans>
               </Button>
             </div>
 
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              Recordings Viewer
+              <Trans>ui.settingView.generalSettings.recordingsViewer</Trans>
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md">Default Playback Rate</div>
+                <div className="text-md"><Trans>ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate</Trans></div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p>Default playback rate for recordings playback.</p>
+                  <p><Trans>ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate.desc</Trans></p>
                 </div>
               </div>
             </div>
@@ -171,14 +167,14 @@ export default function UiSettingsView() {
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              Calendar
+              <Trans>ui.settingView.generalSettings.calendar</Trans>
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md">First Weekday</div>
+                <div className="text-md"><Trans>ui.settingView.generalSettings.calendar.firstWeekday</Trans></div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p>The day that the weeks of the review calendar begin on.</p>
+                  <p><Trans>ui.settingView.generalSettings.calendar.firstWeekday.desc</Trans></p>
                 </div>
               </div>
             </div>
@@ -187,7 +183,7 @@ export default function UiSettingsView() {
               onValueChange={(value) => setWeekStartsOn(parseInt(value))}
             >
               <SelectTrigger className="w-32">
-                {WEEK_STARTS_ON[weekStartsOn ?? 0]}
+                {t("ui.settingView.generalSettings.calendar.firstWeekday." + WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase())}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -197,7 +193,7 @@ export default function UiSettingsView() {
                       className="cursor-pointer"
                       value={index.toString()}
                     >
-                      {day}
+                      {t("ui.settingView.generalSettings.calendar.firstWeekday."+day.toLowerCase())}
                     </SelectItem>
                   ))}
                 </SelectGroup>

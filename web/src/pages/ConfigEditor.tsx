@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import { Trans } from "react-i18next";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -189,7 +190,7 @@ function ConfigEditor() {
       <div className="relative h-full overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            Config Editor
+            <Trans>ui.configEditorView.configEditor</Trans>
           </Heading>
           <div className="flex flex-row gap-1">
             <Button
@@ -199,7 +200,7 @@ function ConfigEditor() {
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
-              <span className="hidden md:block">Copy Config</span>
+              <span className="hidden md:block"><Trans>ui.configEditorView.copyConfig</Trans></span>
             </Button>
             <Button
               size="sm"
@@ -211,7 +212,7 @@ function ConfigEditor() {
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
-              <span className="hidden md:block">Save & Restart</span>
+              <span className="hidden md:block"><Trans>ui.configEditorView.saveAndRestart</Trans></span>
             </Button>
             <Button
               size="sm"
@@ -220,7 +221,7 @@ function ConfigEditor() {
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block">Save Only</span>
+              <span className="hidden md:block"><Trans>ui.configEditorView.saveOnly</Trans></span>
             </Button>
           </div>
         </div>

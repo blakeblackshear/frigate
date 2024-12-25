@@ -23,9 +23,7 @@ export const colorSchemes: ColorScheme[] = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const friendlyColorSchemeName = (className: string): string => {
   const words = className.split("-").slice(1); // Exclude the first word (e.g., 'theme')
-  return words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  return "ui.theme."+words.join(".");
 };
 
 type ThemeProviderProps = {
@@ -127,7 +125,7 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
-      {children}
+      
     </ThemeProviderContext.Provider>
   );
 }

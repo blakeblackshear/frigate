@@ -37,6 +37,7 @@ import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { Trans } from "react-i18next";
 
 type MasksAndZoneViewProps = {
   selectedCamera: string;
@@ -422,7 +423,7 @@ export default function MasksAndZonesView({
             {editPane === undefined && (
               <>
                 <Heading as="h3" className="my-2">
-                  Masks / Zones
+                  <Trans>ui.settingView.masksAndZonesSettings</Trans>
                 </Heading>
                 <div className="flex w-full flex-col">
                   {(selectedZoneMask === undefined ||
@@ -431,14 +432,12 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">Zones</div>
+                            <div className="text-md cursor-default"><Trans>ui.settingView.masksAndZonesSettings.zone</Trans></div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                Zones allow you to define a specific area of the
-                                frame so you can determine whether or not an
-                                object is within a particular area.
+                                <Trans>ui.settingView.masksAndZonesSettings.zone.desc</Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -447,7 +446,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  Documentation{" "}
+                                  <Trans>ui.settingView.masksAndZonesSettings.zone.desc.documentation</Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -468,7 +467,7 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Add Zone</TooltipContent>
+                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.zone.add</Trans></TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons
@@ -498,16 +497,13 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              Motion Masks
+                              <Trans>ui.settingView.masksAndZonesSettings.motionMasks</Trans>
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                Motion masks are used to prevent unwanted types
-                                of motion from triggering detection. Over
-                                masking will make it more difficult for objects
-                                to be tracked.
+                                <Trans>ui.settingView.masksAndZonesSettings.motionMasks.desc</Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -516,7 +512,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  Documentation{" "}
+                                  <Trans>ui.settingView.masksAndZonesSettings.motionMasks.desc.documentation</Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -537,7 +533,7 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Add Motion Mask</TooltipContent>
+                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.motionMasks.add</Trans></TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons
@@ -569,15 +565,13 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              Object Masks
+                              <Trans>ui.settingView.masksAndZonesSettings.objectMasks</Trans>
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                Object filter masks are used to filter out false
-                                positives for a given object type based on
-                                location.
+                                <Trans>ui.settingView.masksAndZonesSettings.objectMasks.desc</Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -586,7 +580,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  Documentation{" "}
+                                  <Trans>ui.settingView.masksAndZonesSettings.objectMasks.documentation</Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -607,7 +601,7 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Add Object Mask</TooltipContent>
+                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.objectMasks.add</Trans></TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons

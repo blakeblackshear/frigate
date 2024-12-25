@@ -29,6 +29,8 @@ import { toast } from "sonner";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -330,23 +332,19 @@ export default function ZoneEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? "Edit" : "New"} Zone
+        {polygon.name.length ? t("ui.settingView.masksAndZonesSettings.zone.edit") : t("ui.settingView.masksAndZonesSettings.zone.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
-          Zones allow you to define a specific area of the frame so you can
-          determine whether or not an object is within a particular area.
+          <Trans>ui.settingView.masksAndZonesSettings.zone.desc</Trans>
         </p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {polygons[activePolygonIndex].points.length}{" "}
-            {polygons[activePolygonIndex].points.length > 1 ||
-            polygons[activePolygonIndex].points.length == 0
-              ? "points"
-              : "point"}
+            {t("ui.settingView.masksAndZonesSettings.zone.point", { count: polygons[activePolygonIndex].points.length })}
+            
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
             )}
@@ -359,7 +357,7 @@ export default function ZoneEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        Click to draw a polygon on the image.
+        <Trans>ui.settingView.masksAndZonesSettings.zone.clickDrawPolygon</Trans>
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -371,17 +369,16 @@ export default function ZoneEditPane({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.name</Trans></FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                    placeholder="Enter a name..."
+                    placeholder={t("ui.settingView.masksAndZonesSettings.zone.name.inputPlaceHolder")}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  Name must be at least 2 characters and must not be the name of
-                  a camera or another zone.
+                  <Trans>ui.settingView.masksAndZonesSettings.zone.name.tips</Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -393,7 +390,7 @@ export default function ZoneEditPane({
             name="inertia"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Inertia</FormLabel>
+                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.inertia</Trans></FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -402,8 +399,7 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  Specifies how many frames that an object must be in a zone
-                  before they are considered in the zone. <em>Default: 3</em>
+                  <Trans>ui.settingView.masksAndZonesSettings.zone.inertia.desc</Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -415,7 +411,7 @@ export default function ZoneEditPane({
             name="loitering_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Loitering Time</FormLabel>
+                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.loiteringTime</Trans></FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -424,8 +420,7 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  Sets a minimum amount of time in seconds that the object must
-                  be in the zone for it to activate. <em>Default: 0</em>
+                  <Trans>ui.settingView.masksAndZonesSettings.zone.loiteringTime.desc</Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -433,9 +428,9 @@ export default function ZoneEditPane({
           />
           <Separator className="my-2 flex bg-secondary" />
           <FormItem>
-            <FormLabel>Objects</FormLabel>
+            <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.objects</Trans></FormLabel>
             <FormDescription>
-              List of objects that apply to this zone.
+              <Trans>ui.settingView.masksAndZonesSettings.zone.objects.desc</Trans>
             </FormDescription>
             <ZoneObjectSelector
               camera={polygon.camera}
@@ -564,7 +559,7 @@ export function ZoneObjectSelector({
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex items-center justify-between">
           <Label className="cursor-pointer text-primary" htmlFor="allLabels">
-            All Objects
+            <Trans>ui.settingView.masksAndZonesSettings.zone.allObjects</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -585,7 +580,7 @@ export function ZoneObjectSelector({
                 className="w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                {item.replaceAll("_", " ")}
+                {t("object." + item)}
               </Label>
               <Switch
                 key={item}

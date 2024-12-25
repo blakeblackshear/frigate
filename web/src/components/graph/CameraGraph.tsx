@@ -1,6 +1,7 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { t } from "i18next";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
@@ -126,7 +127,7 @@ export function CameraLineGraph({
                 className="size-2"
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
-              <div className="text-xs text-muted-foreground">{label}</div>
+              <div className="text-xs text-muted-foreground">{t("ui.system.cameras.label." + label)}</div>
               <div className="text-xs text-primary">
                 {lastValues[labelIdx]}
                 {unit}

@@ -20,6 +20,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type SearchSettingsViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -152,18 +154,16 @@ export default function SearchSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <Heading as="h3" className="my-2">
-          Search Settings
+          <Trans>ui.settingView.searchSettings</Trans>
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
         <Heading as="h4" className="my-2">
-          Semantic Search
+          <Trans>ui.settingView.searchSettings.semanticSearch</Trans>
         </Heading>
         <div className="max-w-6xl">
           <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
             <p>
-              Semantic Search in Frigate allows you to find tracked objects
-              within your review items using either the image itself, a
-              user-defined text description, or an automatically generated one.
+              <Trans>ui.settingView.searchSettings.semanticSearch.desc</Trans>
             </p>
 
             <div className="flex items-center text-primary">
@@ -173,7 +173,7 @@ export default function SearchSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                Read the Documentation
+                <Trans>ui.settingView.searchSettings.semanticSearch.readTheDocumentation</Trans>
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
@@ -192,7 +192,7 @@ export default function SearchSettingsView({
               }}
             />
             <div className="space-y-0.5">
-              <Label htmlFor="enabled">Enabled</Label>
+              <Label htmlFor="enabled"><Trans>ui.enabled</Trans></Label>
             </div>
           </div>
           <div className="flex flex-col">
@@ -207,31 +207,26 @@ export default function SearchSettingsView({
                 }}
               />
               <div className="space-y-0.5">
-                <Label htmlFor="reindex">Re-Index On Startup</Label>
+                <Label htmlFor="reindex"><Trans>ui.settingView.searchSettings.semanticSearch.reindexOnStartup</Trans></Label>
               </div>
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
-              Re-indexing will reprocess all thumbnails and descriptions (if
-              enabled) and apply the embeddings on each startup.{" "}
-              <em>Don't forget to disable the option after restarting!</em>
+              <Trans>ui.settingView.searchSettings.semanticSearch.reindexOnStartup.desc</Trans>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
-              <div className="text-md">Model Size</div>
+              <div className="text-md"><Trans>ui.settingView.searchSettings.semanticSearch.modelSize</Trans></div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
-                  The size of the model used for semantic search embeddings.
+                  <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.desc</Trans>
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
-                    Using <em>small</em> employs a quantized version of the
-                    model that uses less RAM and runs faster on CPU with a very
-                    negligible difference in embedding quality.
+                    <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.small.desc</Trans>
                   </li>
                   <li>
-                    Using <em>large</em> employs the full Jina model and will
-                    automatically run on the GPU if applicable.
+                  <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.large.desc</Trans>
                   </li>
                 </ul>
               </div>
@@ -245,7 +240,7 @@ export default function SearchSettingsView({
               }
             >
               <SelectTrigger className="w-20">
-                {searchSettings.model_size}
+                {t("ui.settingView.searchSettings.semanticSearch.modelSize." + searchSettings.model_size)}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -255,7 +250,7 @@ export default function SearchSettingsView({
                       className="cursor-pointer"
                       value={size}
                     >
-                      {size}
+                      {t("ui.settingView.searchSettings.semanticSearch.modelSize." + size)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -267,7 +262,7 @@ export default function SearchSettingsView({
 
         <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
           <Button className="flex flex-1" aria-label="Reset" onClick={onCancel}>
-            Reset
+            <Trans>ui.reset</Trans>
           </Button>
           <Button
             variant="select"
@@ -279,10 +274,10 @@ export default function SearchSettingsView({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>Saving...</span>
+                <span><Trans>ui.saving</Trans></span>
               </div>
             ) : (
-              "Save"
+              t("ui.save")
             )}
           </Button>
         </div>

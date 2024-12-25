@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
 import { LuAlertCircle } from "react-icons/lu";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type CameraStorage = {
   [key: string]: {
@@ -176,10 +178,10 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Camera</TableHead>
-              <TableHead>Storage Used</TableHead>
-              <TableHead>Percentage of Total Used</TableHead>
-              <TableHead>Bandwidth</TableHead>
+              <TableHead><Trans>ui.system.storage.cameraStorage.camera</Trans></TableHead>
+              <TableHead><Trans>ui.system.storage.cameraStorage.storageUsed</Trans></TableHead>
+              <TableHead><Trans>ui.system.storage.cameraStorage.percentageOfTotalUsed</Trans></TableHead>
+              <TableHead><Trans>ui.system.storage.cameraStorage.bandwidth</Trans></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,7 +193,7 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name.replaceAll("_", " ")}
+                  {item.name === "Unused" ? t("ui.system.storage.cameraStorage.unused"): item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -207,10 +209,7 @@ export function CombinedStorageGraph({
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          This value may not accurately represent the free space
-                          available to Frigate if you have other files stored on
-                          your drive beyond Frigate's recordings. Frigate does
-                          not track storage usage outside of its recordings.
+                          <Trans>ui.system.storage.cameraStorage.unused.tips</Trans>
                         </div>
                       </PopoverContent>
                     </Popover>

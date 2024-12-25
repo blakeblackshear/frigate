@@ -5,6 +5,7 @@ import { ApiProvider } from "@/api";
 import { IconContext } from "react-icons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
+import { LanguageProvider } from "./language-provider";
 
 type TProvidersProps = {
   children: ReactNode;
@@ -21,6 +22,13 @@ function providers({ children }: TProvidersProps) {
             </IconContext.Provider>
           </TooltipProvider>
         </ThemeProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <IconContext.Provider value={{ size: "20" }}>
+              <StatusBarMessagesProvider>{children}</StatusBarMessagesProvider>
+            </IconContext.Provider>
+          </TooltipProvider>
+        </LanguageProvider>
       </ApiProvider>
     </RecoilRoot>
   );

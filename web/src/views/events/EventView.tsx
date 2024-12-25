@@ -53,6 +53,7 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
+import { Trans } from "react-i18next";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -284,7 +285,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  Alerts
+                  <Trans>ui.eventView.alerts</Trans>
                   {reviewCounts.alert > -1 ? (
                     ` ∙ ${reviewCounts.alert}`
                   ) : (
@@ -320,7 +321,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  Detections
+                  <Trans>ui.eventView.detections</Trans>
                   {reviewCounts.detection > -1 ? (
                     ` ∙ ${reviewCounts.detection}`
                   ) : (
@@ -673,7 +674,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            There are no {severity.replace(/_/g, " ")}s to review
+            <Trans>ui.eventView.empty.{severity.replace(/_/g, " ")}</Trans>
           </div>
         )}
 

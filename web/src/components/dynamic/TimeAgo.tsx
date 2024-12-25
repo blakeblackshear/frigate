@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 
 interface IProp {
@@ -40,7 +41,7 @@ const timeAgo = ({
 
   const elapsed: number = elapsedTime / 1000;
   if (elapsed < 10) {
-    return "just now";
+    return t("ui.time.justNow");
   }
 
   for (let i = 0; i < timeUnits.length; i++) {
