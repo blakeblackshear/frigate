@@ -480,6 +480,13 @@ class EmbeddingMaintainer(threading.Thread):
             f"Detected best face for person as: {sub_label} with score {score}"
         )
 
+        if self.config.face_recognition.debug_save_images:
+            # write face to library
+            folder = os.path.join(FACE_DIR, "debug")
+            file = os.path.join(folder, f"{id}-{sub_label}-{score}.webp")
+            os.makedirs(folder, exist_ok=True)
+            cv2.imwrite(file, face_frame)
+
         if id in self.detected_faces and score <= self.detected_faces[id]:
             logger.debug(
                 f"Recognized face distance {score} is less than previous face distance ({self.detected_faces.get(id)})."
