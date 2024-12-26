@@ -327,7 +327,7 @@ export default function LivePlayer({
         )}
       >
         <AutoUpdatingCameraImage
-          className="size-full"
+          className="pointer-events-none size-full"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
