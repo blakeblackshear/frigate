@@ -17,6 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
@@ -59,13 +64,17 @@ import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
 import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
 import {
+  LuCheck,
   LuCog,
   LuEar,
   LuEarOff,
+  LuExternalLink,
   LuHistory,
+  LuInfo,
   LuPictureInPicture,
   LuVideo,
   LuVideoOff,
+  LuX,
 } from "react-icons/lu";
 import {
   MdNoPhotography,
@@ -76,7 +85,7 @@ import {
   MdZoomIn,
   MdZoomOut,
 } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
@@ -488,6 +497,8 @@ export default function LiveCameraView({
                 setPlayInBackground={setPlayInBackground}
                 isRestreamed={isRestreamed ?? false}
                 setLowBandwidth={setLowBandwidth}
+                supportsAudioOutput={supportsAudioOutput}
+                supports2WayTalk={supports2WayTalk}
               />
             </div>
           </TooltipProvider>
@@ -791,6 +802,8 @@ type FrigateCameraFeaturesProps = {
   setPlayInBackground: (value: boolean | undefined) => void;
   isRestreamed: boolean;
   setLowBandwidth: React.Dispatch<React.SetStateAction<boolean>>;
+  supportsAudioOutput: boolean;
+  supports2WayTalk: boolean;
 };
 function FrigateCameraFeatures({
   camera,
@@ -805,6 +818,8 @@ function FrigateCameraFeatures({
   setPlayInBackground,
   isRestreamed,
   setLowBandwidth,
+  supportsAudioOutput,
+  supports2WayTalk,
 }: FrigateCameraFeaturesProps) {
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
@@ -917,6 +932,89 @@ function FrigateCameraFeatures({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+
+                    {preferredLiveMode != "jsmpeg" && isRestreamed && (
+                      <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                        {supportsAudioOutput ? (
+                          <>
+                            <LuCheck className="size-4 text-success" />
+                            <div>Audio is available for this stream</div>
+                          </>
+                        ) : (
+                          <>
+                            <LuX className="size-4 text-danger" />
+                            <div>Audio is unavailable for this stream</div>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <div className="cursor-pointer p-0">
+                                  <LuInfo className="size-4" />
+                                  <span className="sr-only">Info</span>
+                                </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                Audio must be output from your camera and
+                                configured in go2rtc for this stream.
+                                <div className="mt-2 flex items-center text-primary">
+                                  <Link
+                                    to="https://docs.frigate.video/configuration/live"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline"
+                                  >
+                                    Read the documentation{" "}
+                                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                                  </Link>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {preferredLiveMode != "jsmpeg" &&
+                      isRestreamed &&
+                      supportsAudioOutput && (
+                        <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                          {supports2WayTalk ? (
+                            <>
+                              <LuCheck className="size-4 text-success" />
+                              <div>
+                                Two-way talk is available for this stream
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <LuX className="size-4 text-danger" />
+                              <div>
+                                Two-way talk is unavailable for this stream
+                              </div>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <div className="cursor-pointer p-0">
+                                    <LuInfo className="size-4" />
+                                    <span className="sr-only">Info</span>
+                                  </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                  Your device must suppport the feature and
+                                  WebRTC must be configured for two-way talk.
+                                  <div className="mt-2 flex items-center text-primary">
+                                    <Link
+                                      to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline"
+                                    >
+                                      Read the documentation{" "}
+                                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                                    </Link>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </>
+                          )}
+                        </div>
+                      )}
 
                     {preferredLiveMode == "jsmpeg" && isRestreamed && (
                       <div className="flex flex-col items-center gap-3">
