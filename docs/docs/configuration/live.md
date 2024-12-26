@@ -160,6 +160,36 @@ Frigate 0.16 and later provides a dialog in the Camera Group Edit pane with seve
 
 :::note
 
-The default dashboard ("All Cameras") will always use Smart Streaming and the first entry set in your `streams` configuration, if defined. Use a camera group if you need to change any of these settings from these defaults.
+The default dashboard ("All Cameras") will always use Smart Streaming and the first entry set in your `streams` configuration, if defined. Use a camera group if you want to change any of these settings from the defaults.
 
 :::
+
+## Live view FAQ
+
+1. Why don't I have audio in my Live view?
+   You must use go2rtc to hear audio in your live streams. If you have go2rtc already configured, you need to ensure your camera is sending AAC audio. If you can't change your camera's audio codec, you need to [transcode the audio to AAC](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) using go2rtc.
+
+   Note that the low bandwidth mode player is a video-only stream. You should not expect to hear audio, even if you've set up go2rtc.
+
+2. Frigate 0.16 shows that my live stream is in "low bandwidth mode". What does this mean?
+   Frigate 0.14 and later intelligently selects the live streaming technology based on a number of factors (user-selected modes like two-way talk, camera settings, browser capabilities, available bandwidth) and prioritizes showing an actual up-to-date live view of your camera's stream as quickly as possible.
+
+   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI calls "low bandwidth mode". You can try using the "reset" button to force a reload of your stream.
+
+   If you are still having issues with Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the recommendations above.
+
+3. It doesn't seem like my cameras are streaming on the Live dashboard. Why?
+   On the default Live dashboard, your camera images will update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a full-resolution live stream.
+
+4. I see a strange diagonal line on my live view, but my recordings look fine. How can I fix it?
+   This is caused by incorrect dimensions set in your detect width or height (or incorrectly auto-detected), causing the jsmpeg player's rendering engine to display a slightly distorted image. You should enlarge the width and height of your `detect` resolution up to a standard aspect ratio (example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). If changing the resolution to match a standard 4:3, 16:9, or 32:9 aspect ratio does not solve the issue, you can enable "compatibility mode" in your camera group dashboard's stream settings. Depending on your browser and device, more than a few cameras in compatibility mode may not be supported, so only use this option if changing your `detect` width and height fails to resolve the color artifacts and diagonal line.
+
+5. How does "smart streaming" work?
+   This feature was introduced in Frigate 0.14 with the Live dashboard. Because a static image of a scene looks exactly the same as a live stream with no motion or activity, smart streaming updates your camera images once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
+
+   This static image is pulled from the stream defined in your config with the `detect` role. When activity is detected, images from the `detect` stream immediately begin updating at ~5 frames per second until the live player is loaded and begins playing. This usually only takes a second or two. If the live player times out, buffers, or has streaming errors, the jsmpeg player is loaded and plays a video-only stream from the `detect` role. When activity ends, the players are destroyed and a static image is displayed until activity is detected again, and the process repeats.
+
+   This is Frigate's default and recommended setting because it results in a significant bandwidth savings, especially for high resolution cameras.
+
+6. I have unmuted some cameras on my dashboard, but I do not hear sound. Why?
+   If your camera is streaming (as indicated by a red dot in the upper right, or if it has been set to continuous streaming mode), your browser may be blocking audio until you interact with the page. This is an intentional browser limitation. See [this article](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide#autoplay_availability). Many browsers have a whitelist feature to change this behavior.
