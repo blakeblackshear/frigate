@@ -27,6 +27,7 @@ import {
   GroupStreamingSettings,
 } from "@/types/frigateConfig";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
+import { IoIosWarning } from "react-icons/io";
 
 type LiveContextMenuProps = {
   camera: string;
@@ -174,8 +175,16 @@ export default function LiveContextMenu({
       <ContextMenu key={camera} onOpenChange={handleOpenChange}>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
-          <div className="text-md py-1 pl-2 capitalize text-primary-variant">
-            {camera.replaceAll("_", " ")}
+          <div className="flex flex-col items-start gap-1 py-1 pl-2">
+            <div className="text-md capitalize text-primary-variant">
+              {camera.replaceAll("_", " ")}
+            </div>
+            {preferredLiveMode == "jsmpeg" && isRestreamed && (
+              <div className="flex flex-row items-center gap-1">
+                <IoIosWarning className="mr-1 size-4 text-danger" />
+                <p className="mr-2 text-xs">Low-bandwidth mode</p>
+              </div>
+            )}
           </div>
           {preferredLiveMode != "jsmpeg" && isRestreamed && supportsAudio && (
             <>
