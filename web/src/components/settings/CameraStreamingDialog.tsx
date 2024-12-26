@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { IoIosWarning } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +28,9 @@ import {
 } from "@/types/frigateConfig";
 import ActivityIndicator from "../indicators/activity-indicator";
 import useSWR from "swr";
-import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
+import { LiveStreamMetadata } from "@/types/live";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -51,11 +51,6 @@ export function CameraStreamingDialog({
 }: CameraStreamingDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { supportsAudioOutputStates } = useCameraLiveMode(
-    config?.cameras[camera] ? [config.cameras[camera]] : [],
-    false,
-  );
-
   const [isLoading, setIsLoading] = useState(false);
 
   const [streamName, setStreamName] = useState(
@@ -63,6 +58,39 @@ export function CameraStreamingDialog({
   );
   const [streamType, setStreamType] = useState<StreamType>("smart");
   const [compatibilityMode, setCompatibilityMode] = useState(false);
+
+  // metadata
+
+  const isRestreamed = useMemo(
+    () =>
+      config &&
+      Object.keys(config.go2rtc.streams || {}).includes(streamName ?? ""),
+    [config, streamName],
+  );
+
+  const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
+    isRestreamed ? `go2rtc/streams/${streamName}` : null,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const supportsAudioOutput = useMemo(() => {
+    if (!cameraMetadata) {
+      return false;
+    }
+
+    return (
+      cameraMetadata.producers.find(
+        (prod) =>
+          prod.medias &&
+          prod.medias.find((media) => media.includes("audio, recvonly")) !=
+            undefined,
+      ) != undefined
+    );
+  }, [cameraMetadata]);
+
+  // handlers
 
   useEffect(() => {
     if (!config) {
@@ -167,8 +195,7 @@ export function CameraStreamingDialog({
                   )}
               </SelectContent>
               <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                {supportsAudioOutputStates[streamName] &&
-                supportsAudioOutputStates[streamName].supportsAudio ? (
+                {supportsAudioOutput ? (
                   <>
                     <LuCheck className="size-4 text-success" />
                     <div>Audio is available for this stream</div>
