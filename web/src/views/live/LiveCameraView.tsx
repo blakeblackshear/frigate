@@ -85,6 +85,8 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { useSessionPersistence } from "@/hooks/use-session-persistence";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -363,7 +365,7 @@ export default function LiveCameraView({
                 onClick={() => navigate(-1)}
               >
                 <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-                {isDesktop && <div className="text-primary">Back</div>}
+                {isDesktop && <div className="text-primary"><Trans>ui.back</Trans></div>}
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
@@ -383,7 +385,7 @@ export default function LiveCameraView({
                 }}
               >
                 <LuHistory className="size-5 text-secondary-foreground" />
-                {isDesktop && <div className="text-primary">History</div>}
+                {isDesktop && <div className="text-primary"><Trans>ui.history</Trans></div>}
               </Button>
             </div>
           ) : (
@@ -412,7 +414,7 @@ export default function LiveCameraView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={fullscreen ? FaCompress : FaExpand}
                   isActive={fullscreen}
-                  title={fullscreen ? "Close" : "Fullscreen"}
+                  title={fullscreen ? t("ui.close") : t("ui.fullscreen")}
                   onClick={toggleFullscreen}
                 />
               )}
@@ -422,7 +424,7 @@ export default function LiveCameraView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={LuPictureInPicture}
                   isActive={pip}
-                  title={pip ? "Close" : "Picture in Picture"}
+                  title={pip ? t("ui.close") : t("ui.pictureInPicture")}
                   onClick={() => {
                     if (!pip) {
                       setPip(true);
@@ -665,7 +667,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("pt") && (
         <>
           <TooltipButton
-            label="Move camera left"
+            label={t("ui.live.ptz.move.left.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_LEFT");
@@ -680,7 +682,7 @@ function PtzControlPanel({
             <FaAngleLeft />
           </TooltipButton>
           <TooltipButton
-            label="Move camera up"
+            label={t("ui.live.ptz.move.up.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_UP");
@@ -695,7 +697,7 @@ function PtzControlPanel({
             <FaAngleUp />
           </TooltipButton>
           <TooltipButton
-            label="Move camera down"
+            label={t("ui.live.ptz.move.down.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_DOWN");
@@ -710,7 +712,7 @@ function PtzControlPanel({
             <FaAngleDown />
           </TooltipButton>
           <TooltipButton
-            label="Move camera right"
+            label={t("ui.live.ptz.move.right.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_RIGHT");
@@ -729,7 +731,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("zoom") && (
         <>
           <TooltipButton
-            label="Zoom in"
+            label={t("ui.live.ptz.zoom.in.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_IN");
@@ -744,7 +746,7 @@ function PtzControlPanel({
             <MdZoomIn />
           </TooltipButton>
           <TooltipButton
-            label="Zoom out"
+            label={t("ui.live.ptz.zoom.out.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_OUT");
@@ -847,7 +849,7 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
           isActive={detectState == "ON"}
-          title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+          title={detectState == "ON" ? t("ui.live.detect.disable") : t("ui.live.detect.enable")}
           onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
         />
         <CameraFeatureToggle
@@ -855,7 +857,7 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={recordState == "ON" ? LuVideo : LuVideoOff}
           isActive={recordState == "ON"}
-          title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+          title={recordState == "ON" ? t("ui.live.recording.disable") : t("ui.live.recording.enable")}
           onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
         />
         <CameraFeatureToggle
@@ -863,7 +865,7 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
           isActive={snapshotState == "ON"}
-          title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+          title={snapshotState == "ON" ? t("ui.live.snapshots.disable") : t("ui.live.snapshots.enable")}
           onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
         />
         {audioDetectEnabled && (
@@ -872,7 +874,7 @@ function FrigateCameraFeatures({
             variant={fullscreen ? "overlay" : "primary"}
             Icon={audioState == "ON" ? LuEar : LuEarOff}
             isActive={audioState == "ON"}
-            title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+            title={audioState == "ON" ? t("ui.live.audioDetect.disable") : t("ui.live.audioDetect.enable")}
             onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
           />
         )}
@@ -882,7 +884,7 @@ function FrigateCameraFeatures({
             variant={fullscreen ? "overlay" : "primary"}
             Icon={autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff}
             isActive={autotrackingState == "ON"}
-            title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
+            title={autotrackingState == "ON" ? t("ui.live.autotracking.disable") : t("ui.live.autotracking.enable")}
             onClick={() =>
               sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
             }

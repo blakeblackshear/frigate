@@ -18,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { baseUrl } from "@/api/baseUrl";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type RestartDialogProps = {
   isOpen: boolean;
@@ -79,13 +81,13 @@ export default function RestartDialog({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Are you sure you want to restart Frigate?
+              <Trans>ui.dialog.restart.title</Trans>
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><Trans>ui.cancel</Trans></AlertDialogCancel>
             <AlertDialogAction onClick={handleRestart}>
-              Restart
+              <Trans>ui.dialog.restart.button</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -100,10 +102,10 @@ export default function RestartDialog({
             <ActivityIndicator />
             <SheetHeader className="mt-5 text-center">
               <SheetTitle className="text-center">
-                Frigate is Restarting
+                <Trans>ui.dialog.restart.restarting.title</Trans>
               </SheetTitle>
               <SheetDescription className="text-center">
-                <div>This page will reload in {countdown} seconds.</div>
+                <div>{t("ui.dialog.restart.restarting.content", {countdown})}</div>
               </SheetDescription>
             </SheetHeader>
             <Button
@@ -112,7 +114,7 @@ export default function RestartDialog({
               aria-label="Force reload now"
               onClick={handleForceReload}
             >
-              Force Reload Now
+              <Trans>ui.dialog.restart.restarting.button</Trans>
             </Button>
           </div>
         </SheetContent>

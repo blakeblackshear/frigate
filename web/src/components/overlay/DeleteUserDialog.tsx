@@ -1,3 +1,4 @@
+import { Trans } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -21,9 +22,9 @@ export default function DeleteUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle><Trans>ui.settingView.users.dialog.deleteUser</Trans></DialogTitle>
         </DialogHeader>
-        <div>Are you sure?</div>
+        <div><Trans>ui.settingView.users.dialog.deleteUser.warn</Trans></div>
         <DialogFooter>
           <Button
             className="flex items-center gap-1"
@@ -32,7 +33,7 @@ export default function DeleteUserDialog({
             size="sm"
             onClick={onDelete}
           >
-            Delete
+            <Trans>ui.delete</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

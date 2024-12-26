@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { Trans } from "react-i18next";
 
 type CreateUserOverlayProps = {
   show: boolean;
@@ -63,7 +64,7 @@ export default function CreateUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
+          <DialogTitle><Trans>ui.settingView.users.dialog.createUser</Trans></DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -71,7 +72,7 @@ export default function CreateUserDialog({
               name="user"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>User</FormLabel>
+                  <FormLabel><Trans>ui.settingView.users.dialog.createUser.user</Trans></FormLabel>
                   <FormControl>
                     <Input
                       className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -86,7 +87,7 @@ export default function CreateUserDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel><Trans>ui.settingView.users.dialog.createUser.password</Trans></FormLabel>
                   <FormControl>
                     <Input
                       className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -104,7 +105,7 @@ export default function CreateUserDialog({
                 disabled={isLoading}
               >
                 {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
-                Create User
+                <Trans>ui.settingView.users.dialog.createUser</Trans>
               </Button>
             </DialogFooter>
           </form>

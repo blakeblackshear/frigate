@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { Trans } from "react-i18next";
 
 type SetPasswordProps = {
   show: boolean;
@@ -25,7 +26,7 @@ export default function SetPasswordDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Set Password</DialogTitle>
+          <DialogTitle><Trans>ui.settingView.users.dialog.setPassword</Trans></DialogTitle>
         </DialogHeader>
         <Input
           className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -43,7 +44,7 @@ export default function SetPasswordDialog({
               onSave(password!);
             }}
           >
-            Save
+            <Trans>ui.save</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -32,6 +32,7 @@ import { LivePlayerError } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { t } from "i18next";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -387,7 +388,7 @@ export default function LiveDashboardView({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                  {fullscreen ? t("ui.exitFullscreen") : t("ui.fullscreen")}
                 </TooltipContent>
               </Tooltip>
             </div>
