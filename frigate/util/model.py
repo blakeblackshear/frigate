@@ -170,6 +170,7 @@ class FaceClassificationModel:
             )
         )
         self.label_map: dict[int, str] = {}
+        self.__build_classifier()
 
     def __build_classifier(self) -> None:
         labels = []
@@ -177,6 +178,9 @@ class FaceClassificationModel:
 
         dir = "/media/frigate/clips/faces"
         for idx, name in enumerate(os.listdir(dir)):
+            if name == "debug":
+                continue
+
             self.label_map[idx] = name
             face_folder = os.path.join(dir, name)
             for image in os.listdir(face_folder):
@@ -248,6 +252,7 @@ class FaceClassificationModel:
     def clear_classifier(self) -> None:
         self.classifier = None
         self.labeler = None
+        self.label_map = {}
 
     def classify_face(self, face_image: np.ndarray) -> Optional[tuple[str, float]]:
         if not self.label_map:
