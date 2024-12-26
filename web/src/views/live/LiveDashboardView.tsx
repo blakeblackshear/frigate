@@ -28,7 +28,7 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { LivePlayerError } from "@/types/live";
+import { AudioState, LivePlayerError, VolumeState } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -229,8 +229,8 @@ export default function LiveDashboardView({
 
   // audio states
 
-  const [audioStates, setAudioStates] = useState<Record<string, boolean>>({});
-  const [volumeStates, setVolumeStates] = useState<Record<string, number>>({});
+  const [audioStates, setAudioStates] = useState<AudioState>({});
+  const [volumeStates, setVolumeStates] = useState<VolumeState>({});
 
   const toggleAudio = (cameraName: string): void => {
     setAudioStates((prev) => ({
@@ -394,7 +394,7 @@ export default function LiveDashboardView({
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
-                  volumeState={volumeStates[camera.name]}
+                  volumeState={volumeStates[camera.name] ?? 1}
                   setVolumeState={(value) =>
                     setVolumeStates({
                       [camera.name]: value,
