@@ -834,6 +834,8 @@ function FrigateCameraFeatures({
   const { payload: autotrackingState, send: sendAutotracking } =
     useAutotrackingState(camera.name);
 
+  const navigate = useNavigate();
+
   // desktop shows icons part of row
   if (isDesktop || isTablet) {
     return (
@@ -1042,27 +1044,40 @@ function FrigateCameraFeatures({
                     )}
                   </div>
                 )}
+                {isRestreamed && (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        className="mx-0 cursor-pointer text-primary"
+                        htmlFor="backgroundplay"
+                      >
+                        Play in background
+                      </Label>
+                      <Switch
+                        className="ml-1"
+                        id="backgroundplay"
+                        checked={playInBackground}
+                        onCheckedChange={(checked) =>
+                          setPlayInBackground(checked)
+                        }
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Enable this option to continue streaming when the player
+                      is hidden.
+                    </p>
+                  </div>
+                )}
                 <div className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
-                    <Label
-                      className="mx-0 cursor-pointer text-primary"
-                      htmlFor="backgroundplay"
-                    >
-                      Play in background
-                    </Label>
-                    <Switch
-                      className="ml-1"
-                      id="backgroundplay"
-                      checked={playInBackground}
-                      onCheckedChange={(checked) =>
-                        setPlayInBackground(checked)
+                  <div className="flex items-center justify-between text-sm">
+                    Debug View
+                    <LuExternalLink
+                      onClick={() =>
+                        navigate(`/settings?page=debug&camera=${camera.name}`)
                       }
+                      className="ml-2 inline-flex size-5 cursor-pointer"
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Enable this option to continue streaming when the player is
-                    hidden.
-                  </p>
                 </div>
               </div>
             </DropdownMenuContent>
@@ -1155,6 +1170,84 @@ function FrigateCameraFeatures({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {preferredLiveMode != "jsmpeg" && isRestreamed && (
+              <div className="mt-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                {supportsAudioOutput ? (
+                  <>
+                    <LuCheck className="size-4 text-success" />
+                    <div>Audio is available for this stream</div>
+                  </>
+                ) : (
+                  <>
+                    <LuX className="size-4 text-danger" />
+                    <div>Audio is unavailable for this stream</div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="cursor-pointer p-0">
+                          <LuInfo className="size-4" />
+                          <span className="sr-only">Info</span>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        Audio must be output from your camera and configured in
+                        go2rtc for this stream.
+                        <div className="mt-2 flex items-center text-primary">
+                          <Link
+                            to="https://docs.frigate.video/configuration/live"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline"
+                          >
+                            Read the documentation{" "}
+                            <LuExternalLink className="ml-2 inline-flex size-3" />
+                          </Link>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </>
+                )}
+              </div>
+            )}
+            {preferredLiveMode != "jsmpeg" &&
+              isRestreamed &&
+              supportsAudioOutput && (
+                <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                  {supports2WayTalk ? (
+                    <>
+                      <LuCheck className="size-4 text-success" />
+                      <div>Two-way talk is available for this stream</div>
+                    </>
+                  ) : (
+                    <>
+                      <LuX className="size-4 text-danger" />
+                      <div>Two-way talk is unavailable for this stream</div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="cursor-pointer p-0">
+                            <LuInfo className="size-4" />
+                            <span className="sr-only">Info</span>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          Your device must suppport the feature and WebRTC must
+                          be configured for two-way talk.
+                          <div className="mt-2 flex items-center text-primary">
+                            <Link
+                              to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline"
+                            >
+                              Read the documentation{" "}
+                              <LuExternalLink className="ml-2 inline-flex size-3" />
+                            </Link>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </>
+                  )}
+                </div>
+              )}
             {preferredLiveMode == "jsmpeg" && isRestreamed && (
               <div className="mt-2 flex flex-col items-center gap-3">
                 <div className="flex flex-row items-center gap-2">
@@ -1194,6 +1287,17 @@ function FrigateCameraFeatures({
             </p>
           </>
         )}
+        <div className="flex flex-col gap-1 px-2">
+          <div className="flex items-center justify-between text-sm">
+            Debug View
+            <LuExternalLink
+              onClick={() =>
+                navigate(`/settings?page=debug&camera=${camera.name}`)
+              }
+              className="ml-2 inline-flex size-5 cursor-pointer"
+            />
+          </div>
+        </div>
       </DrawerContent>
     </Drawer>
   );
