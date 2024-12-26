@@ -505,13 +505,26 @@ class EmbeddingMaintainer(threading.Thread):
 
         sub_label, score = res
 
+        # calculate the overall face score as the probability * area of face
+        # this will help to reduce false positives from small side-angle faces
+        # if a large front-on face image may have scored slightly lower but
+        # is more likely to be accurate due to the larger face area
+        face_score = round(score * face_frame.shape[0] * face_frame.shape[1], 2)
+
         logger.debug(
-            f"Detected best face for person as: {sub_label} with score {score}"
+            f"Detected best face for person as: {sub_label} with probability {score} and overall face score {face_score}"
         )
 
-        if id in self.detected_faces and score <= self.detected_faces[id]:
+        if self.config.face_recognition.debug_save_images:
+            # write face to library
+            folder = os.path.join(FACE_DIR, "debug")
+            file = os.path.join(folder, f"{id}-{sub_label}-{score}-{face_score}.webp")
+            os.makedirs(folder, exist_ok=True)
+            cv2.imwrite(file, face_frame)
+
+        if id in self.detected_faces and face_score <= self.detected_faces[id]:
             logger.debug(
-                f"Recognized face distance {score} is less than previous face distance ({self.detected_faces.get(id)})."
+                f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
             )
             return
 
@@ -525,7 +538,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         if resp.status_code == 200:
-            self.detected_faces[id] = score
+            self.detected_faces[id] = face_score
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
