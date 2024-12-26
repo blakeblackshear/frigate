@@ -252,11 +252,15 @@ export default function NotificationView({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><Trans>ui.settingView.notification.email</Trans></FormLabel>
+                    <FormLabel>
+                      <Trans>ui.settingView.notification.email</Trans>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                        placeholder={t("ui.settingView.notification.email.placeholder")}
+                        placeholder={t(
+                          "ui.settingView.notification.email.placeholder",
+                        )}
                         {...field}
                       />
                     </FormControl>
@@ -286,7 +290,9 @@ export default function NotificationView({
                   {isLoading ? (
                     <div className="flex flex-row items-center gap-2">
                       <ActivityIndicator />
-                      <span><Trans>ui.saving</Trans></span>
+                      <span>
+                        <Trans>ui.saving</Trans>
+                      </span>
                     </div>
                   ) : (
                     <Trans>ui.save</Trans>
@@ -336,7 +342,9 @@ export default function NotificationView({
                   }
                 }}
               >
-                {registration != null ? t("ui.settingView.notification.unregisterDevice") : t("ui.settingView.notification.registerDevice")}
+                {registration != null
+                  ? t("ui.settingView.notification.unregisterDevice")
+                  : t("ui.settingView.notification.registerDevice")}
               </Button>
             </div>
           </div>

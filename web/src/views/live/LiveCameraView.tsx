@@ -365,7 +365,11 @@ export default function LiveCameraView({
                 onClick={() => navigate(-1)}
               >
                 <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-                {isDesktop && <div className="text-primary"><Trans>ui.back</Trans></div>}
+                {isDesktop && (
+                  <div className="text-primary">
+                    <Trans>ui.back</Trans>
+                  </div>
+                )}
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
@@ -385,7 +389,11 @@ export default function LiveCameraView({
                 }}
               >
                 <LuHistory className="size-5 text-secondary-foreground" />
-                {isDesktop && <div className="text-primary"><Trans>ui.history</Trans></div>}
+                {isDesktop && (
+                  <div className="text-primary">
+                    <Trans>ui.history</Trans>
+                  </div>
+                )}
               </Button>
             </div>
           ) : (
@@ -849,7 +857,11 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
           isActive={detectState == "ON"}
-          title={detectState == "ON" ? t("ui.live.detect.disable") : t("ui.live.detect.enable")}
+          title={
+            detectState == "ON"
+              ? t("ui.live.detect.disable")
+              : t("ui.live.detect.enable")
+          }
           onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
         />
         <CameraFeatureToggle
@@ -857,7 +869,11 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={recordState == "ON" ? LuVideo : LuVideoOff}
           isActive={recordState == "ON"}
-          title={recordState == "ON" ? t("ui.live.recording.disable") : t("ui.live.recording.enable")}
+          title={
+            recordState == "ON"
+              ? t("ui.live.recording.disable")
+              : t("ui.live.recording.enable")
+          }
           onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
         />
         <CameraFeatureToggle
@@ -865,7 +881,11 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
           isActive={snapshotState == "ON"}
-          title={snapshotState == "ON" ? t("ui.live.snapshots.disable") : t("ui.live.snapshots.enable")}
+          title={
+            snapshotState == "ON"
+              ? t("ui.live.snapshots.disable")
+              : t("ui.live.snapshots.enable")
+          }
           onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
         />
         {audioDetectEnabled && (
@@ -874,7 +894,11 @@ function FrigateCameraFeatures({
             variant={fullscreen ? "overlay" : "primary"}
             Icon={audioState == "ON" ? LuEar : LuEarOff}
             isActive={audioState == "ON"}
-            title={audioState == "ON" ? t("ui.live.audioDetect.disable") : t("ui.live.audioDetect.enable")}
+            title={
+              audioState == "ON"
+                ? t("ui.live.audioDetect.disable")
+                : t("ui.live.audioDetect.enable")
+            }
             onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
           />
         )}
@@ -884,7 +908,11 @@ function FrigateCameraFeatures({
             variant={fullscreen ? "overlay" : "primary"}
             Icon={autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff}
             isActive={autotrackingState == "ON"}
-            title={autotrackingState == "ON" ? t("ui.live.autotracking.disable") : t("ui.live.autotracking.enable")}
+            title={
+              autotrackingState == "ON"
+                ? t("ui.live.autotracking.disable")
+                : t("ui.live.autotracking.enable")
+            }
             onClick={() =>
               sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
             }

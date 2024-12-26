@@ -332,7 +332,9 @@ export default function ZoneEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? t("ui.settingView.masksAndZonesSettings.zone.edit") : t("ui.settingView.masksAndZonesSettings.zone.add")}
+        {polygon.name.length
+          ? t("ui.settingView.masksAndZonesSettings.zone.edit")
+          : t("ui.settingView.masksAndZonesSettings.zone.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
@@ -343,8 +345,10 @@ export default function ZoneEditPane({
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {t("ui.settingView.masksAndZonesSettings.zone.point", { count: polygons[activePolygonIndex].points.length })}
-            
+            {t("ui.settingView.masksAndZonesSettings.zone.point", {
+              count: polygons[activePolygonIndex].points.length,
+            })}
+
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
             )}
@@ -357,7 +361,9 @@ export default function ZoneEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans>ui.settingView.masksAndZonesSettings.zone.clickDrawPolygon</Trans>
+        <Trans>
+          ui.settingView.masksAndZonesSettings.zone.clickDrawPolygon
+        </Trans>
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -369,16 +375,22 @@ export default function ZoneEditPane({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.name</Trans></FormLabel>
+                <FormLabel>
+                  <Trans>ui.settingView.masksAndZonesSettings.zone.name</Trans>
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                    placeholder={t("ui.settingView.masksAndZonesSettings.zone.name.inputPlaceHolder")}
+                    placeholder={t(
+                      "ui.settingView.masksAndZonesSettings.zone.name.inputPlaceHolder",
+                    )}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>ui.settingView.masksAndZonesSettings.zone.name.tips</Trans>
+                  <Trans>
+                    ui.settingView.masksAndZonesSettings.zone.name.tips
+                  </Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -390,7 +402,11 @@ export default function ZoneEditPane({
             name="inertia"
             render={({ field }) => (
               <FormItem>
-                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.inertia</Trans></FormLabel>
+                <FormLabel>
+                  <Trans>
+                    ui.settingView.masksAndZonesSettings.zone.inertia
+                  </Trans>
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -399,7 +415,9 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>ui.settingView.masksAndZonesSettings.zone.inertia.desc</Trans>
+                  <Trans>
+                    ui.settingView.masksAndZonesSettings.zone.inertia.desc
+                  </Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -411,7 +429,11 @@ export default function ZoneEditPane({
             name="loitering_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.loiteringTime</Trans></FormLabel>
+                <FormLabel>
+                  <Trans>
+                    ui.settingView.masksAndZonesSettings.zone.loiteringTime
+                  </Trans>
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -420,7 +442,9 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>ui.settingView.masksAndZonesSettings.zone.loiteringTime.desc</Trans>
+                  <Trans>
+                    ui.settingView.masksAndZonesSettings.zone.loiteringTime.desc
+                  </Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -428,9 +452,13 @@ export default function ZoneEditPane({
           />
           <Separator className="my-2 flex bg-secondary" />
           <FormItem>
-            <FormLabel><Trans>ui.settingView.masksAndZonesSettings.zone.objects</Trans></FormLabel>
+            <FormLabel>
+              <Trans>ui.settingView.masksAndZonesSettings.zone.objects</Trans>
+            </FormLabel>
             <FormDescription>
-              <Trans>ui.settingView.masksAndZonesSettings.zone.objects.desc</Trans>
+              <Trans>
+                ui.settingView.masksAndZonesSettings.zone.objects.desc
+              </Trans>
             </FormDescription>
             <ZoneObjectSelector
               camera={polygon.camera}

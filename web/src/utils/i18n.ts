@@ -12,16 +12,24 @@ i18n
     // if you're using a language detector, do not define the lng option
 
     backend: {
-      loadPath: "/locales/{{lng}}/{{ns}}.json"
+      loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
 
     react: {
       transSupportBasicHtmlNodes: true,
-      transKeepBasicHtmlNodesFor: ["br", "strong", "i", "em", "li", "p", "code"],
+      transKeepBasicHtmlNodesFor: [
+        "br",
+        "strong",
+        "i",
+        "em",
+        "li",
+        "p",
+        "code",
+      ],
     },
     interpolation: {
-      escapeValue: false // react already safes from xss
-    }
+      escapeValue: false, // react already safes from xss
+    },
   });
 
-  export default i18n;
+export default i18n;

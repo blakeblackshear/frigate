@@ -73,7 +73,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
-          text: t("ui.stats.ffmpegHighCpuUsage", {camera: capitalizeFirstLetter(name.replaceAll("_", " ")), ffmpegAvg}),//`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
+          text: t("ui.stats.ffmpegHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            ffmpegAvg,
+          }), //`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
           color: "text-danger",
           relevantLink: "/system#cameras",
         });
@@ -81,7 +84,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
-          text: t("ui.stats.detectHighCpuUsage", {camera: capitalizeFirstLetter(name.replaceAll("_", " ")), detectAvg}),//`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
+          text: t("ui.stats.detectHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            detectAvg,
+          }), //`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
           color: "text-danger",
           relevantLink: "/system#cameras",
         });

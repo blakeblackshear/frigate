@@ -51,7 +51,9 @@ export default function StorageMetrics({
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
-      <div className="text-sm font-medium text-muted-foreground"><Trans>ui.system.storage.overview</Trans></div>
+      <div className="text-sm font-medium text-muted-foreground">
+        <Trans>ui.system.storage.overview</Trans>
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">

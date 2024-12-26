@@ -61,7 +61,9 @@ export default function NavItem({
         <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
-            <p><Trans>{item.title}</Trans></p>
+            <p>
+              <Trans>{item.title}</Trans>
+            </p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>

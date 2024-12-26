@@ -148,7 +148,9 @@ export default function Settings() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">{t("ui.settingView.menu." + item)}</div>
+                  <div className="capitalize">
+                    {t("ui.settingView.menu." + item)}
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>

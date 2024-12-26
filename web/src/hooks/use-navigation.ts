@@ -72,6 +72,6 @@ export default function useNavigation(
           enabled: isDesktop && config?.face_recognition.enabled,
         },
       ] as NavData[],
-    [config?.face_recognition.enabled, variant],
+    [config?.face_recognition?.enabled, variant],
   );
 }

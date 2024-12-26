@@ -200,7 +200,9 @@ function ConfigEditor() {
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
-              <span className="hidden md:block"><Trans>ui.configEditorView.copyConfig</Trans></span>
+              <span className="hidden md:block">
+                <Trans>ui.configEditorView.copyConfig</Trans>
+              </span>
             </Button>
             <Button
               size="sm"
@@ -212,7 +214,9 @@ function ConfigEditor() {
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
-              <span className="hidden md:block"><Trans>ui.configEditorView.saveAndRestart</Trans></span>
+              <span className="hidden md:block">
+                <Trans>ui.configEditorView.saveAndRestart</Trans>
+              </span>
             </Button>
             <Button
               size="sm"
@@ -221,7 +225,9 @@ function ConfigEditor() {
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block"><Trans>ui.configEditorView.saveOnly</Trans></span>
+              <span className="hidden md:block">
+                <Trans>ui.configEditorView.saveOnly</Trans>
+              </span>
             </Button>
           </div>
         </div>

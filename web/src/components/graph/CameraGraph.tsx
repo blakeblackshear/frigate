@@ -127,7 +127,9 @@ export function CameraLineGraph({
                 className="size-2"
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
-              <div className="text-xs text-muted-foreground">{t("ui.system.cameras.label." + label)}</div>
+              <div className="text-xs text-muted-foreground">
+                {t("ui.system.cameras.label." + label)}
+              </div>
               <div className="text-xs text-primary">
                 {lastValues[labelIdx]}
                 {unit}

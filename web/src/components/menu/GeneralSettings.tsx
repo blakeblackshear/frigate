@@ -104,7 +104,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="right">
-                <p><Trans>ui.settings</Trans></p>
+                <p>
+                  <Trans>ui.settings</Trans>
+                </p>
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -148,7 +150,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 </MenuItem>
               </>
             )}
-            <DropdownMenuLabel><Trans>ui.system</Trans></DropdownMenuLabel>
+            <DropdownMenuLabel>
+              <Trans>ui.system</Trans>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
               <Link to="/system#general">
@@ -161,7 +165,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   aria-label="System metrics"
                 >
                   <LuActivity className="mr-2 size-4" />
-                  <span><Trans>ui.systemMetrics</Trans></span>
+                  <span>
+                    <Trans>ui.systemMetrics</Trans>
+                  </span>
                 </MenuItem>
               </Link>
               <Link to="/logs">
@@ -174,7 +180,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   aria-label="System logs"
                 >
                   <LuList className="mr-2 size-4" />
-                  <span><Trans>ui.systemLogs</Trans></span>
+                  <span>
+                    <Trans>ui.systemLogs</Trans>
+                  </span>
                 </MenuItem>
               </Link>
             </DropdownMenuGroup>
@@ -193,7 +201,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   aria-label="Settings"
                 >
                   <LuSettings className="mr-2 size-4" />
-                  <span><Trans>ui.settings</Trans></span>
+                  <span>
+                    <Trans>ui.settings</Trans>
+                  </span>
                 </MenuItem>
               </Link>
               <Link to="/config">
@@ -206,7 +216,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   aria-label="Configuration editor"
                 >
                   <LuPenSquare className="mr-2 size-4" />
-                  <span><Trans>ui.configurationEditor</Trans></span>
+                  <span>
+                    <Trans>ui.configurationEditor</Trans>
+                  </span>
                 </MenuItem>
               </Link>
               <SubItem>
@@ -218,7 +230,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                 >
                   <LuLanguages className="mr-2 size-4" />
-                  <span><Trans>ui.languages</Trans></span>
+                  <span>
+                    <Trans>ui.languages</Trans>
+                  </span>
                 </SubItemTrigger>
                 <Portal>
                   <SubItemContent
@@ -242,7 +256,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.language.en</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.language.en</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.language.en</Trans>
+                        </span>
                       )}
                     </MenuItem>
                     <MenuItem
@@ -260,7 +276,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.language.zhCN</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.language.zhCN</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.language.zhCN</Trans>
+                        </span>
                       )}
                     </MenuItem>
                     <MenuItem
@@ -278,7 +296,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.withSystem</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.withSystem</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.withSystem</Trans>
+                        </span>
                       )}
                     </MenuItem>
                   </SubItemContent>
@@ -297,7 +317,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                 >
                   <LuSunMoon className="mr-2 size-4" />
-                  <span><Trans>ui.darkMode</Trans></span>
+                  <span>
+                    <Trans>ui.darkMode</Trans>
+                  </span>
                 </SubItemTrigger>
                 <Portal>
                   <SubItemContent
@@ -321,7 +343,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.darkMode.light</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.darkMode.light</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.darkMode.light</Trans>
+                        </span>
                       )}
                     </MenuItem>
                     <MenuItem
@@ -339,7 +363,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.darkMode.dark</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.darkMode.dark</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.darkMode.dark</Trans>
+                        </span>
                       )}
                     </MenuItem>
                     <MenuItem
@@ -357,7 +383,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           <Trans>ui.withSystem</Trans>
                         </>
                       ) : (
-                        <span className="ml-6 mr-2"><Trans>ui.withSystem</Trans></span>
+                        <span className="ml-6 mr-2">
+                          <Trans>ui.withSystem</Trans>
+                        </span>
                       )}
                     </MenuItem>
                   </SubItemContent>
@@ -372,7 +400,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                 >
                   <LuSunMoon className="mr-2 size-4" />
-                  <span><Trans>ui.theme</Trans></span>
+                  <span>
+                    <Trans>ui.theme</Trans>
+                  </span>
                 </SubItemTrigger>
                 <Portal>
                   <SubItemContent
@@ -420,7 +450,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 aria-label={t("ui.documentation.label")}
               >
                 <LuLifeBuoy className="mr-2 size-4" />
-                <span><Trans>ui.documentation</Trans></span>
+                <span>
+                  <Trans>ui.documentation</Trans>
+                </span>
               </MenuItem>
             </a>
             <a
@@ -446,7 +478,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               onClick={() => setRestartDialogOpen(true)}
             >
               <LuRotateCw className="mr-2 size-4" />
-              <span><Trans>ui.restart</Trans></span>
+              <span>
+                <Trans>ui.restart</Trans>
+              </span>
             </MenuItem>
           </div>
         </Content>

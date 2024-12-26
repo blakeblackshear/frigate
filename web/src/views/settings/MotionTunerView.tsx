@@ -194,7 +194,9 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              <Trans>ui.settingView.motionDetectionTuner.desc.documentation</Trans>{" "}
+              <Trans>
+                ui.settingView.motionDetectionTuner.desc.documentation
+              </Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -208,7 +210,9 @@ export default function MotionTunerView({
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>ui.settingView.motionDetectionTuner.Threshold.desc</Trans>
+                  <Trans>
+                    ui.settingView.motionDetectionTuner.Threshold.desc
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -237,7 +241,9 @@ export default function MotionTunerView({
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>ui.settingView.motionDetectionTuner.contourArea.desc</Trans>
+                  <Trans>
+                    ui.settingView.motionDetectionTuner.contourArea.desc
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -262,9 +268,15 @@ export default function MotionTunerView({
           <Separator className="my-2 flex bg-secondary" />
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="improve-contrast"><Trans>ui.settingView.motionDetectionTuner.improveContrast</Trans></Label>
+              <Label htmlFor="improve-contrast">
+                <Trans>
+                  ui.settingView.motionDetectionTuner.improveContrast
+                </Trans>
+              </Label>
               <div className="text-sm text-muted-foreground">
-                <Trans>ui.settingView.motionDetectionTuner.improveContrast.desc</Trans>
+                <Trans>
+                  ui.settingView.motionDetectionTuner.improveContrast.desc
+                </Trans>
               </div>
             </div>
             <Switch
@@ -297,7 +309,9 @@ export default function MotionTunerView({
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span><Trans>ui.saving</Trans></span>
+                  <span>
+                    <Trans>ui.saving</Trans>
+                  </span>
                 </div>
               ) : (
                 <Trans>ui.save</Trans>

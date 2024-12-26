@@ -74,7 +74,9 @@ export default function CameraInfoDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="capitalize">
-              {t("ui.system.cameras.info.cameraProbeInfo", {camera: camera.name.replaceAll("_", " ")})} 
+              {t("ui.system.cameras.info.cameraProbeInfo", {
+                camera: camera.name.replaceAll("_", " "),
+              })}
             </DialogTitle>
           </DialogHeader>
           <DialogDescription>
@@ -87,7 +89,7 @@ export default function CameraInfoDialog({
                 {ffprobeInfo.map((stream, idx) => (
                   <div key={idx} className="mb-5">
                     <div className="mb-1 rounded-md bg-secondary p-2 text-lg text-primary">
-                      {t("ui.system.cameras.info.stream", {idx: idx + 1})}
+                      {t("ui.system.cameras.info.stream", { idx: idx + 1 })}
                     </div>
                     {stream.return_code == 0 ? (
                       <div>
@@ -95,7 +97,9 @@ export default function CameraInfoDialog({
                           <div className="" key={idx}>
                             {codec.width ? (
                               <div className="text-muted-foreground">
-                                <div className="ml-2"><Trans>ui.system.cameras.info.video</Trans></div>
+                                <div className="ml-2">
+                                  <Trans>ui.system.cameras.info.video</Trans>
+                                </div>
                                 <div className="ml-5">
                                   <div>
                                     <Trans>ui.system.cameras.info.codec</Trans>
@@ -107,7 +111,9 @@ export default function CameraInfoDialog({
                                   <div>
                                     {codec.width && codec.height ? (
                                       <>
-                                        <Trans>ui.system.cameras.info.resolution</Trans>{" "}
+                                        <Trans>
+                                          ui.system.cameras.info.resolution
+                                        </Trans>{" "}
                                         <span className="text-primary">
                                           {" "}
                                           {codec.width}x{codec.height} (
@@ -121,7 +127,9 @@ export default function CameraInfoDialog({
                                       </>
                                     ) : (
                                       <span>
-                                        <Trans>ui.system.cameras.info.resolution</Trans>{" "}
+                                        <Trans>
+                                          ui.system.cameras.info.resolution
+                                        </Trans>{" "}
                                         <span className="text-primary">
                                           Unknown
                                         </span>
@@ -154,7 +162,11 @@ export default function CameraInfoDialog({
                       </div>
                     ) : (
                       <div className="px-2">
-                        <div>{t("ui.system.cameras.info.error", {error: stream.stderr})}</div>
+                        <div>
+                          {t("ui.system.cameras.info.error", {
+                            error: stream.stderr,
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -163,7 +175,9 @@ export default function CameraInfoDialog({
             ) : (
               <div className="flex flex-col items-center">
                 <ActivityIndicator />
-                <div className="mt-2"><Trans>ui.system.cameras.info.fetching</Trans></div>
+                <div className="mt-2">
+                  <Trans>ui.system.cameras.info.fetching</Trans>
+                </div>
               </div>
             )}
           </div>

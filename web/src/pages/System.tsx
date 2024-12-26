@@ -71,7 +71,9 @@ function System() {
               {item == "general" && <LuActivity className="size-4" />}
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
-              {isDesktop && <div className="capitalize">{t("ui.system." + item)}</div>}
+              {isDesktop && (
+                <div className="capitalize">{t("ui.system." + item)}</div>
+              )}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -79,7 +81,8 @@ function System() {
         <div className="flex h-full items-center">
           {lastUpdated && (
             <div className="h-full content-center text-sm text-muted-foreground">
-              <Trans>ui.system.lastRefreshed</Trans><TimeAgo time={lastUpdated * 1000} dense />
+              <Trans>ui.system.lastRefreshed</Trans>
+              <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>

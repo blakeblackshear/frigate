@@ -47,7 +47,9 @@ export default function ObjectSettingsView({
       info: (
         <>
           <p className="mb-2">
-            <strong><Trans>ui.settingView.debug.boundingBoxes.colors</Trans></strong>
+            <strong>
+              <Trans>ui.settingView.debug.boundingBoxes.colors</Trans>
+            </strong>
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <Trans>ui.settingView.debug.boundingBoxes.colors.info</Trans>
@@ -148,9 +150,11 @@ export default function ObjectSettingsView({
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
             {t("ui.settingView.debug.detectorDesc", {
-              detectors: config ? Object.keys(config?.detectors)
-              .map((detector) => capitalizeFirstLetter(detector))
-              .join(",") : ""
+              detectors: config
+                ? Object.keys(config?.detectors)
+                    .map((detector) => capitalizeFirstLetter(detector))
+                    .join(",")
+                : "",
             })}
           </p>
           <p>
@@ -175,8 +179,12 @@ export default function ObjectSettingsView({
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="debug"><Trans>ui.settingView.debug.debugging</Trans></TabsTrigger>
-            <TabsTrigger value="objectlist"><Trans>ui.settingView.debug.objectList</Trans></TabsTrigger>
+            <TabsTrigger value="debug">
+              <Trans>ui.settingView.debug.debugging</Trans>
+            </TabsTrigger>
+            <TabsTrigger value="objectlist">
+              <Trans>ui.settingView.debug.objectList</Trans>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="debug">
             <div className="flex w-full flex-col space-y-6">
@@ -329,7 +337,9 @@ function ObjectList(objects?: ObjectType[]) {
           );
         })
       ) : (
-        <div className="p-3 text-center"><Trans>ui.settingView.debug.noObjects</Trans></div>
+        <div className="p-3 text-center">
+          <Trans>ui.settingView.debug.noObjects</Trans>
+        </div>
       )}
     </div>
   );

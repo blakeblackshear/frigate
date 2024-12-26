@@ -124,7 +124,9 @@ export default function AuthenticationView() {
                     }}
                   >
                     <FaUserEdit />
-                    <div className="hidden md:block"><Trans>ui.settingView.users.updatePassword</Trans></div>
+                    <div className="hidden md:block">
+                      <Trans>ui.settingView.users.updatePassword</Trans>
+                    </div>
                   </Button>
                   <Button
                     className="flex items-center gap-1"
@@ -136,7 +138,9 @@ export default function AuthenticationView() {
                     }}
                   >
                     <HiTrash />
-                    <div className="hidden md:block"><Trans>ui.delete</Trans></div>
+                    <div className="hidden md:block">
+                      <Trans>ui.delete</Trans>
+                    </div>
                   </Button>
                 </div>
               </div>

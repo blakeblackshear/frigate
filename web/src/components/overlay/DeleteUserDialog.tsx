@@ -22,9 +22,13 @@ export default function DeleteUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle><Trans>ui.settingView.users.dialog.deleteUser</Trans></DialogTitle>
+          <DialogTitle>
+            <Trans>ui.settingView.users.dialog.deleteUser</Trans>
+          </DialogTitle>
         </DialogHeader>
-        <div><Trans>ui.settingView.users.dialog.deleteUser.warn</Trans></div>
+        <div>
+          <Trans>ui.settingView.users.dialog.deleteUser.warn</Trans>
+        </div>
         <DialogFooter>
           <Button
             className="flex items-center gap-1"

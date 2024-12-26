@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import i18next from 'i18next';
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import i18next from "i18next";
 
 type LanguageProviderState = {
   language: string;
@@ -8,17 +8,18 @@ type LanguageProviderState = {
 };
 
 const initialState: LanguageProviderState = {
-  language: i18next.language || 'en',
-  systemLanguage: 'en',
+  language: i18next.language || "en",
+  systemLanguage: "en",
   setLanguage: () => null,
 };
 
-const LanguageProviderContext = createContext<LanguageProviderState>(initialState);
+const LanguageProviderContext =
+  createContext<LanguageProviderState>(initialState);
 
 export function LanguageProvider({
   children,
-  defaultLanguage = 'en',
-  storageKey = 'frigate-ui-language',
+  defaultLanguage = "en",
+  storageKey = "frigate-ui-language",
   ...props
 }: {
   children: React.ReactNode;
@@ -27,27 +28,26 @@ export function LanguageProvider({
 }) {
   const [language, setLanguage] = useState<string>(() => {
     try {
-      
       const storedData = localStorage.getItem(storageKey);
       const newLanguage = storedData || defaultLanguage;
       i18next.changeLanguage(newLanguage);
       return newLanguage;
     } catch (error) {
-        // eslint-disable-next-line no-console
-      console.error('Error retrieving language data from storage:', error);
+      // eslint-disable-next-line no-console
+      console.error("Error retrieving language data from storage:", error);
       return defaultLanguage;
     }
   });
 
   const systemLanguage = useMemo<string | undefined>(() => {
-    if (typeof window === 'undefined') return undefined;
+    if (typeof window === "undefined") return undefined;
     return window.navigator.language;
   }, []);
 
   useEffect(() => {
     if (language === systemLanguage) return;
     i18next.changeLanguage(language);
-  }, [language]);
+  }, [language, systemLanguage]);
 
   const value = {
     language,
@@ -68,10 +68,10 @@ export function LanguageProvider({
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useLanguage = () => {
-    const context = useContext(LanguageProviderContext);
+  const context = useContext(LanguageProviderContext);
 
-    if (context === undefined)
-        throw new Error("useLanguage must be used within a LanguageProvider");
-    
-    return context;
+  if (context === undefined)
+    throw new Error("useLanguage must be used within a LanguageProvider");
+
+  return context;
 };

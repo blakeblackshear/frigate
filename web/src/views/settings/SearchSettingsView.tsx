@@ -173,7 +173,9 @@ export default function SearchSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                <Trans>ui.settingView.searchSettings.semanticSearch.readTheDocumentation</Trans>
+                <Trans>
+                  ui.settingView.searchSettings.semanticSearch.readTheDocumentation
+                </Trans>
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
@@ -192,7 +194,9 @@ export default function SearchSettingsView({
               }}
             />
             <div className="space-y-0.5">
-              <Label htmlFor="enabled"><Trans>ui.enabled</Trans></Label>
+              <Label htmlFor="enabled">
+                <Trans>ui.enabled</Trans>
+              </Label>
             </div>
           </div>
           <div className="flex flex-col">
@@ -207,26 +211,42 @@ export default function SearchSettingsView({
                 }}
               />
               <div className="space-y-0.5">
-                <Label htmlFor="reindex"><Trans>ui.settingView.searchSettings.semanticSearch.reindexOnStartup</Trans></Label>
+                <Label htmlFor="reindex">
+                  <Trans>
+                    ui.settingView.searchSettings.semanticSearch.reindexOnStartup
+                  </Trans>
+                </Label>
               </div>
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
-              <Trans>ui.settingView.searchSettings.semanticSearch.reindexOnStartup.desc</Trans>
+              <Trans>
+                ui.settingView.searchSettings.semanticSearch.reindexOnStartup.desc
+              </Trans>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
-              <div className="text-md"><Trans>ui.settingView.searchSettings.semanticSearch.modelSize</Trans></div>
+              <div className="text-md">
+                <Trans>
+                  ui.settingView.searchSettings.semanticSearch.modelSize
+                </Trans>
+              </div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
-                  <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.desc</Trans>
+                  <Trans>
+                    ui.settingView.searchSettings.semanticSearch.modelSize.desc
+                  </Trans>
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
-                    <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.small.desc</Trans>
+                    <Trans>
+                      ui.settingView.searchSettings.semanticSearch.modelSize.small.desc
+                    </Trans>
                   </li>
                   <li>
-                  <Trans>ui.settingView.searchSettings.semanticSearch.modelSize.large.desc</Trans>
+                    <Trans>
+                      ui.settingView.searchSettings.semanticSearch.modelSize.large.desc
+                    </Trans>
                   </li>
                 </ul>
               </div>
@@ -240,7 +260,10 @@ export default function SearchSettingsView({
               }
             >
               <SelectTrigger className="w-20">
-                {t("ui.settingView.searchSettings.semanticSearch.modelSize." + searchSettings.model_size)}
+                {t(
+                  "ui.settingView.searchSettings.semanticSearch.modelSize." +
+                    searchSettings.model_size,
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -250,7 +273,10 @@ export default function SearchSettingsView({
                       className="cursor-pointer"
                       value={size}
                     >
-                      {t("ui.settingView.searchSettings.semanticSearch.modelSize." + size)}
+                      {t(
+                        "ui.settingView.searchSettings.semanticSearch.modelSize." +
+                          size,
+                      )}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -274,7 +300,9 @@ export default function SearchSettingsView({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span><Trans>ui.saving</Trans></span>
+                <span>
+                  <Trans>ui.saving</Trans>
+                </span>
               </div>
             ) : (
               t("ui.save")

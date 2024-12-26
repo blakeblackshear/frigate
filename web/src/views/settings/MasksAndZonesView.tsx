@@ -432,12 +432,18 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default"><Trans>ui.settingView.masksAndZonesSettings.zone</Trans></div>
+                            <div className="text-md cursor-default">
+                              <Trans>
+                                ui.settingView.masksAndZonesSettings.zone
+                              </Trans>
+                            </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                <Trans>ui.settingView.masksAndZonesSettings.zone.desc</Trans>
+                                <Trans>
+                                  ui.settingView.masksAndZonesSettings.zone.desc
+                                </Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -446,7 +452,9 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans>ui.settingView.masksAndZonesSettings.zone.desc.documentation</Trans>{" "}
+                                  <Trans>
+                                    ui.settingView.masksAndZonesSettings.zone.desc.documentation
+                                  </Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -467,7 +475,11 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.zone.add</Trans></TooltipContent>
+                          <TooltipContent>
+                            <Trans>
+                              ui.settingView.masksAndZonesSettings.zone.add
+                            </Trans>
+                          </TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons
@@ -497,13 +509,17 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              <Trans>ui.settingView.masksAndZonesSettings.motionMasks</Trans>
+                              <Trans>
+                                ui.settingView.masksAndZonesSettings.motionMasks
+                              </Trans>
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                <Trans>ui.settingView.masksAndZonesSettings.motionMasks.desc</Trans>
+                                <Trans>
+                                  ui.settingView.masksAndZonesSettings.motionMasks.desc
+                                </Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -512,7 +528,9 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans>ui.settingView.masksAndZonesSettings.motionMasks.desc.documentation</Trans>{" "}
+                                  <Trans>
+                                    ui.settingView.masksAndZonesSettings.motionMasks.desc.documentation
+                                  </Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -533,7 +551,11 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.motionMasks.add</Trans></TooltipContent>
+                          <TooltipContent>
+                            <Trans>
+                              ui.settingView.masksAndZonesSettings.motionMasks.add
+                            </Trans>
+                          </TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons
@@ -565,13 +587,17 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              <Trans>ui.settingView.masksAndZonesSettings.objectMasks</Trans>
+                              <Trans>
+                                ui.settingView.masksAndZonesSettings.objectMasks
+                              </Trans>
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
-                                <Trans>ui.settingView.masksAndZonesSettings.objectMasks.desc</Trans>
+                                <Trans>
+                                  ui.settingView.masksAndZonesSettings.objectMasks.desc
+                                </Trans>
                               </p>
                               <div className="flex items-center text-primary">
                                 <Link
@@ -580,7 +606,9 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans>ui.settingView.masksAndZonesSettings.objectMasks.documentation</Trans>{" "}
+                                  <Trans>
+                                    ui.settingView.masksAndZonesSettings.objectMasks.documentation
+                                  </Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -601,7 +629,11 @@ export default function MasksAndZonesView({
                               <LuPlus />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent><Trans>ui.settingView.masksAndZonesSettings.objectMasks.add</Trans></TooltipContent>
+                          <TooltipContent>
+                            <Trans>
+                              ui.settingView.masksAndZonesSettings.objectMasks.add
+                            </Trans>
+                          </TooltipContent>
                         </Tooltip>
                       </div>
                       {allPolygons

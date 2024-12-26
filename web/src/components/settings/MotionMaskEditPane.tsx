@@ -215,11 +215,15 @@ export default function MotionMaskEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? t("ui.settingView.masksAndZonesSettings.motionMasks.edit") : t("ui.settingView.masksAndZonesSettings.motionMasks.add")}
+        {polygon.name.length
+          ? t("ui.settingView.masksAndZonesSettings.motionMasks.edit")
+          : t("ui.settingView.masksAndZonesSettings.motionMasks.add")}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
-          <Trans>ui.settingView.masksAndZonesSettings.motionMasks.context</Trans>
+          <Trans>
+            ui.settingView.masksAndZonesSettings.motionMasks.context
+          </Trans>
         </p>
 
         <div className="flex items-center text-primary">
@@ -229,7 +233,9 @@ export default function MotionMaskEditPane({
             rel="noopener noreferrer"
             className="inline"
           >
-            <Trans>ui.settingView.masksAndZonesSettings.motionMasks.context.documentation</Trans>{" "}
+            <Trans>
+              ui.settingView.masksAndZonesSettings.motionMasks.context.documentation
+            </Trans>{" "}
             <LuExternalLink className="ml-2 inline-flex size-3" />
           </Link>
         </div>
@@ -239,7 +245,7 @@ export default function MotionMaskEditPane({
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
             {t("ui.settingView.masksAndZonesSettings.motionMasks.point", {
-              count: polygons[activePolygonIndex].points.length
+              count: polygons[activePolygonIndex].points.length,
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -253,7 +259,10 @@ export default function MotionMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans>ui.settingView.masksAndZonesSettings.motionMasks.clickDrawPolygon</Trans>Click to draw a polygon on the image.
+        <Trans>
+          ui.settingView.masksAndZonesSettings.motionMasks.clickDrawPolygon
+        </Trans>
+        Click to draw a polygon on the image.
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -261,19 +270,26 @@ export default function MotionMaskEditPane({
       {polygonArea && polygonArea >= 0.35 && (
         <>
           <div className="mb-3 text-sm text-danger">
-            {t("ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge", {
-              polygonArea: Math.round(polygonArea * 100)
-            })}
+            {t(
+              "ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge",
+              {
+                polygonArea: Math.round(polygonArea * 100),
+              },
+            )}
           </div>
           <div className="mb-3 text-sm text-primary">
-            <Trans>ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.tips</Trans>
+            <Trans>
+              ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.tips
+            </Trans>
             <Link
               to="https://github.com/blakeblackshear/frigate/discussions/13040"
               target="_blank"
               rel="noopener noreferrer"
               className="my-3 block"
             >
-              <Trans>ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.documentation</Trans>{" "}
+              <Trans>
+                ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.documentation
+              </Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -322,7 +338,9 @@ export default function MotionMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span><Trans>ui.saving</Trans></span>
+                    <span>
+                      <Trans>ui.saving</Trans>
+                    </span>
                   </div>
                 ) : (
                   <Trans>ui.save</Trans>

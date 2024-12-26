@@ -64,7 +64,9 @@ export default function CreateUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle><Trans>ui.settingView.users.dialog.createUser</Trans></DialogTitle>
+          <DialogTitle>
+            <Trans>ui.settingView.users.dialog.createUser</Trans>
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -72,7 +74,9 @@ export default function CreateUserDialog({
               name="user"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel><Trans>ui.settingView.users.dialog.createUser.user</Trans></FormLabel>
+                  <FormLabel>
+                    <Trans>ui.settingView.users.dialog.createUser.user</Trans>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -87,7 +91,11 @@ export default function CreateUserDialog({
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel><Trans>ui.settingView.users.dialog.createUser.password</Trans></FormLabel>
+                  <FormLabel>
+                    <Trans>
+                      ui.settingView.users.dialog.createUser.password
+                    </Trans>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"

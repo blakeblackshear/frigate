@@ -178,10 +178,20 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead><Trans>ui.system.storage.cameraStorage.camera</Trans></TableHead>
-              <TableHead><Trans>ui.system.storage.cameraStorage.storageUsed</Trans></TableHead>
-              <TableHead><Trans>ui.system.storage.cameraStorage.percentageOfTotalUsed</Trans></TableHead>
-              <TableHead><Trans>ui.system.storage.cameraStorage.bandwidth</Trans></TableHead>
+              <TableHead>
+                <Trans>ui.system.storage.cameraStorage.camera</Trans>
+              </TableHead>
+              <TableHead>
+                <Trans>ui.system.storage.cameraStorage.storageUsed</Trans>
+              </TableHead>
+              <TableHead>
+                <Trans>
+                  ui.system.storage.cameraStorage.percentageOfTotalUsed
+                </Trans>
+              </TableHead>
+              <TableHead>
+                <Trans>ui.system.storage.cameraStorage.bandwidth</Trans>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -193,7 +203,9 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name === "Unused" ? t("ui.system.storage.cameraStorage.unused"): item.name.replaceAll("_", " ")}
+                  {item.name === "Unused"
+                    ? t("ui.system.storage.cameraStorage.unused")
+                    : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -209,7 +221,9 @@ export function CombinedStorageGraph({
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          <Trans>ui.system.storage.cameraStorage.unused.tips</Trans>
+                          <Trans>
+                            ui.system.storage.cameraStorage.unused.tips
+                          </Trans>
                         </div>
                       </PopoverContent>
                     </Popover>

@@ -85,7 +85,9 @@ export default function RestartDialog({
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel><Trans>ui.cancel</Trans></AlertDialogCancel>
+            <AlertDialogCancel>
+              <Trans>ui.cancel</Trans>
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleRestart}>
               <Trans>ui.dialog.restart.button</Trans>
             </AlertDialogAction>
@@ -105,7 +107,9 @@ export default function RestartDialog({
                 <Trans>ui.dialog.restart.restarting.title</Trans>
               </SheetTitle>
               <SheetDescription className="text-center">
-                <div>{t("ui.dialog.restart.restarting.content", {countdown})}</div>
+                <div>
+                  {t("ui.dialog.restart.restarting.content", { countdown })}
+                </div>
               </SheetDescription>
             </SheetHeader>
             <Button

@@ -83,12 +83,16 @@ export default function UiSettingsView() {
                   onCheckedChange={setAutoLive}
                 />
                 <Label className="cursor-pointer" htmlFor="auto-live">
-                  <Trans>ui.settingView.generalSettings.automaticLiveView</Trans>
+                  <Trans>
+                    ui.settingView.generalSettings.automaticLiveView
+                  </Trans>
                 </Label>
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>ui.settingView.generalSettings.automaticLiveView.desc</Trans>
+                  <Trans>
+                    ui.settingView.generalSettings.automaticLiveView.desc
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -105,7 +109,9 @@ export default function UiSettingsView() {
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>ui.settingView.generalSettings.playAlertVideos.desc</Trans>
+                  <Trans>
+                    ui.settingView.generalSettings.playAlertVideos.desc
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -114,10 +120,14 @@ export default function UiSettingsView() {
           <div className="my-3 flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md"><Trans>ui.settingView.generalSettings.storedLayouts</Trans></div>
+                <div className="text-md">
+                  <Trans>ui.settingView.generalSettings.storedLayouts</Trans>
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
                   <p>
-                    <Trans>ui.settingView.generalSettings.storedLayouts.desc</Trans>
+                    <Trans>
+                      ui.settingView.generalSettings.storedLayouts.desc
+                    </Trans>
                   </p>
                 </div>
               </div>
@@ -125,7 +135,9 @@ export default function UiSettingsView() {
                 aria-label="Clear all saved layouts"
                 onClick={clearStoredLayouts}
               >
-                <Trans>ui.settingView.generalSettings.storedLayouts.clearAll</Trans>
+                <Trans>
+                  ui.settingView.generalSettings.storedLayouts.clearAll
+                </Trans>
               </Button>
             </div>
 
@@ -137,9 +149,17 @@ export default function UiSettingsView() {
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md"><Trans>ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate</Trans></div>
+                <div className="text-md">
+                  <Trans>
+                    ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate
+                  </Trans>
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p><Trans>ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate.desc</Trans></p>
+                  <p>
+                    <Trans>
+                      ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate.desc
+                    </Trans>
+                  </p>
                 </div>
               </div>
             </div>
@@ -172,9 +192,17 @@ export default function UiSettingsView() {
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md"><Trans>ui.settingView.generalSettings.calendar.firstWeekday</Trans></div>
+                <div className="text-md">
+                  <Trans>
+                    ui.settingView.generalSettings.calendar.firstWeekday
+                  </Trans>
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p><Trans>ui.settingView.generalSettings.calendar.firstWeekday.desc</Trans></p>
+                  <p>
+                    <Trans>
+                      ui.settingView.generalSettings.calendar.firstWeekday.desc
+                    </Trans>
+                  </p>
                 </div>
               </div>
             </div>
@@ -183,7 +211,10 @@ export default function UiSettingsView() {
               onValueChange={(value) => setWeekStartsOn(parseInt(value))}
             >
               <SelectTrigger className="w-32">
-                {t("ui.settingView.generalSettings.calendar.firstWeekday." + WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase())}
+                {t(
+                  "ui.settingView.generalSettings.calendar.firstWeekday." +
+                    WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase(),
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -193,7 +224,10 @@ export default function UiSettingsView() {
                       className="cursor-pointer"
                       value={index.toString()}
                     >
-                      {t("ui.settingView.generalSettings.calendar.firstWeekday."+day.toLowerCase())}
+                      {t(
+                        "ui.settingView.generalSettings.calendar.firstWeekday." +
+                          day.toLowerCase(),
+                      )}
                     </SelectItem>
                   ))}
                 </SelectGroup>

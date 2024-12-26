@@ -253,7 +253,9 @@ export default function CameraSettingsView({
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
               <p>
-                <Trans>ui.settingView.cameraSettings.reviewClassification.desc</Trans>
+                <Trans>
+                  ui.settingView.cameraSettings.reviewClassification.desc
+                </Trans>
               </p>
               <div className="flex items-center text-primary">
                 <Link
@@ -262,7 +264,9 @@ export default function CameraSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  <Trans>ui.settingView.cameraSettings.reviewClassification.readTheDocumentation</Trans>{" "}
+                  <Trans>
+                    ui.settingView.cameraSettings.reviewClassification.readTheDocumentation
+                  </Trans>{" "}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -295,7 +299,9 @@ export default function CameraSettingsView({
                               <MdCircle className="ml-3 size-2 text-severity_alert" />
                             </FormLabel>
                             <FormDescription>
-                              <Trans>ui.settingView.cameraSettings.reviewClassification.selectAlertsZones</Trans>
+                              <Trans>
+                                ui.settingView.cameraSettings.reviewClassification.selectAlertsZones
+                              </Trans>
                             </FormDescription>
                           </div>
                           <div className="max-w-md rounded-lg bg-secondary p-4 md:max-w-full">
@@ -344,17 +350,40 @@ export default function CameraSettingsView({
                         </>
                       ) : (
                         <div className="font-normal text-destructive">
-                          <Trans>ui.settingView.cameraSettings.reviewClassification.noDefinedZones</Trans>
+                          <Trans>
+                            ui.settingView.cameraSettings.reviewClassification.noDefinedZones
+                          </Trans>
                         </div>
                       )}
                       <FormMessage />
                       <div className="text-sm">
-                      {watchedAlertsZones && watchedAlertsZones.length > 0
-                          ?
-                          t("ui.settingView.cameraSettings.reviewClassification.zoneObjectAlertsTips", { alertsLabels, zone: watchedAlertsZones.map((zone) => capitalizeFirstLetter(zone).replaceAll("_", " ")).join(", "), cameraName: capitalizeFirstLetter(cameraConfig?.name ?? "",).replaceAll("_", " ") })
-                          :
-                          t("ui.settingView.cameraSettings.reviewClassification.objectAlertsTips", { alertsLabels, cameraName: capitalizeFirstLetter(cameraConfig?.name ?? "",).replaceAll("_", " ") })
-                      }
+                        {watchedAlertsZones && watchedAlertsZones.length > 0
+                          ? t(
+                              "ui.settingView.cameraSettings.reviewClassification.zoneObjectAlertsTips",
+                              {
+                                alertsLabels,
+                                zone: watchedAlertsZones
+                                  .map((zone) =>
+                                    capitalizeFirstLetter(zone).replaceAll(
+                                      "_",
+                                      " ",
+                                    ),
+                                  )
+                                  .join(", "),
+                                cameraName: capitalizeFirstLetter(
+                                  cameraConfig?.name ?? "",
+                                ).replaceAll("_", " "),
+                              },
+                            )
+                          : t(
+                              "ui.settingView.cameraSettings.reviewClassification.objectAlertsTips",
+                              {
+                                alertsLabels,
+                                cameraName: capitalizeFirstLetter(
+                                  cameraConfig?.name ?? "",
+                                ).replaceAll("_", " "),
+                              },
+                            )}
                       </div>
                     </FormItem>
                   )}
@@ -445,37 +474,52 @@ export default function CameraSettingsView({
                       )}
 
                       <div className="text-sm">
-                      {watchedDetectionsZones &&
+                        {watchedDetectionsZones &&
                         watchedDetectionsZones.length > 0
-                          ?
-                          !selectDetections ?
-                          t("ui.settingView.cameraSettings.reviewClassification.zoneObjectDetectionsTips", {
-                            detectionsLabels,
-                            zone: watchedDetectionsZones.map((zone) =>
-                              capitalizeFirstLetter(zone).replaceAll("_", " "),
-                            ).join(", "),
-                            cameraName: capitalizeFirstLetter(
-                              cameraConfig?.name ?? "",
-                            ).replaceAll("_", " "),
-                          })
-                          :
-                          t("ui.settingView.cameraSettings.reviewClassification.zoneObjectDetectionsTips.notSelectDetections",{
-                            detectionsLabels,
-                            zone: watchedDetectionsZones.map((zone) =>
-                              capitalizeFirstLetter(zone).replaceAll("_", " "),
-                            ).join(", "),
-                            cameraName: capitalizeFirstLetter(
-                              cameraConfig?.name ?? "",
-                            ).replaceAll("_", " "),
-                          })
-                          :
-                          t("ui.settingView.cameraSettings.reviewClassification.objectDetectionsTips", {
-                            detectionsLabels,
-                            cameraName: capitalizeFirstLetter(
-                              cameraConfig?.name ?? "",
-                            ).replaceAll("_", " "),
-                          })
-                      }
+                          ? !selectDetections
+                            ? t(
+                                "ui.settingView.cameraSettings.reviewClassification.zoneObjectDetectionsTips",
+                                {
+                                  detectionsLabels,
+                                  zone: watchedDetectionsZones
+                                    .map((zone) =>
+                                      capitalizeFirstLetter(zone).replaceAll(
+                                        "_",
+                                        " ",
+                                      ),
+                                    )
+                                    .join(", "),
+                                  cameraName: capitalizeFirstLetter(
+                                    cameraConfig?.name ?? "",
+                                  ).replaceAll("_", " "),
+                                },
+                              )
+                            : t(
+                                "ui.settingView.cameraSettings.reviewClassification.zoneObjectDetectionsTips.notSelectDetections",
+                                {
+                                  detectionsLabels,
+                                  zone: watchedDetectionsZones
+                                    .map((zone) =>
+                                      capitalizeFirstLetter(zone).replaceAll(
+                                        "_",
+                                        " ",
+                                      ),
+                                    )
+                                    .join(", "),
+                                  cameraName: capitalizeFirstLetter(
+                                    cameraConfig?.name ?? "",
+                                  ).replaceAll("_", " "),
+                                },
+                              )
+                          : t(
+                              "ui.settingView.cameraSettings.reviewClassification.objectDetectionsTips",
+                              {
+                                detectionsLabels,
+                                cameraName: capitalizeFirstLetter(
+                                  cameraConfig?.name ?? "",
+                                ).replaceAll("_", " "),
+                              },
+                            )}
                       </div>
                     </FormItem>
                   )}
@@ -502,7 +546,9 @@ export default function CameraSettingsView({
                   {isLoading ? (
                     <div className="flex flex-row items-center gap-2">
                       <ActivityIndicator />
-                      <span><Trans>ui.saving</Trans></span>
+                      <span>
+                        <Trans>ui.saving</Trans>
+                      </span>
                     </div>
                   ) : (
                     <Trans>ui.save</Trans>
