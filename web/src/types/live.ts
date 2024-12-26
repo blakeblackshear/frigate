@@ -32,3 +32,6 @@ export type LiveStreamMetadata = {
 };
 
 export type LivePlayerError = "stalled" | "startup" | "mse-decode";
+
+export type AudioState = Record<string, boolean>;
+export type VolumeState = Record<string, number>;

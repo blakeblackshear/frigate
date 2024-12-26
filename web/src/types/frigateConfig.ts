@@ -235,6 +235,8 @@ export type CameraStreamingSettings = {
   streamName: string;
   streamType: StreamType;
   compatibilityMode: boolean;
+  playAudio: boolean;
+  volume: number;
 };
 
 export type GroupStreamingSettings = {

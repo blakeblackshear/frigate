@@ -9,7 +9,7 @@ import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import {
@@ -73,17 +73,13 @@ import {
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { useStreamingSettings } from "@/context/streaming-settings-provider";
 
 type CameraGroupSelectorProps = {
   className?: string;
-  setAllGroupsStreamingSettings: React.Dispatch<
-    React.SetStateAction<AllGroupsStreamingSettings>
-  >;
 };
-export function CameraGroupSelector({
-  className,
-  setAllGroupsStreamingSettings,
-}: CameraGroupSelectorProps) {
+export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // tooltip
@@ -137,7 +133,6 @@ export function CameraGroupSelector({
         activeGroup={group}
         setGroup={setGroup}
         deleteGroup={deleteGroup}
-        setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
@@ -227,9 +222,6 @@ type NewGroupDialogProps = {
   activeGroup?: string;
   setGroup: (value: string | undefined, replace?: boolean | undefined) => void;
   deleteGroup: () => void;
-  setAllGroupsStreamingSettings: React.Dispatch<
-    React.SetStateAction<AllGroupsStreamingSettings>
-  >;
 };
 function NewGroupDialog({
   open,
@@ -238,7 +230,6 @@ function NewGroupDialog({
   activeGroup,
   setGroup,
   deleteGroup,
-  setAllGroupsStreamingSettings,
 }: NewGroupDialogProps) {
   const { mutate: updateConfig } = useSWR<FrigateConfig>("config");
 
@@ -421,7 +412,6 @@ function NewGroupDialog({
                 setIsLoading={setIsLoading}
                 onSave={onSave}
                 onCancel={onCancel}
-                setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
               />
             </>
           )}
@@ -436,16 +426,12 @@ type EditGroupDialogProps = {
   setOpen: (open: boolean) => void;
   currentGroups: [string, CameraGroupConfig][];
   activeGroup?: string;
-  setAllGroupsStreamingSettings: React.Dispatch<
-    React.SetStateAction<AllGroupsStreamingSettings>
-  >;
 };
 export function EditGroupDialog({
   open,
   setOpen,
   currentGroups,
   activeGroup,
-  setAllGroupsStreamingSettings,
 }: EditGroupDialogProps) {
   const Overlay = isDesktop ? Dialog : MobilePage;
   const Content = isDesktop ? DialogContent : MobilePageContent;
@@ -497,7 +483,6 @@ export function EditGroupDialog({
               setIsLoading={setIsLoading}
               onSave={() => setOpen(false)}
               onCancel={() => setOpen(false)}
-              setAllGroupsStreamingSettings={setAllGroupsStreamingSettings}
             />
           </div>
         </Content>
@@ -618,9 +603,6 @@ type CameraGroupEditProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
-  setAllGroupsStreamingSettings: React.Dispatch<
-    React.SetStateAction<AllGroupsStreamingSettings>
-  >;
 };
 
 export function CameraGroupEdit({
@@ -630,16 +612,19 @@ export function CameraGroupEdit({
   setIsLoading,
   onSave,
   onCancel,
-  setAllGroupsStreamingSettings,
 }: CameraGroupEditProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
-  const [groupStreamingSettings, setGroupStreamingSettings] =
-    useState<GroupStreamingSettings>({});
+  const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
+    useStreamingSettings();
 
-  const [persistedGroupStreamingSettings, setPersistedGroupStreamingSettings] =
-    usePersistence<AllGroupsStreamingSettings>("streaming-settings");
+  const [groupStreamingSettings, setGroupStreamingSettings] =
+    useState<GroupStreamingSettings>(
+      allGroupsStreamingSettings[editingGroup?.[0] ?? ""],
+    );
+
+  const [openCamera, setOpenCamera] = useState<string | null>();
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -693,7 +678,7 @@ export function CameraGroupEdit({
       // update streaming settings
       const updatedSettings: AllGroupsStreamingSettings = {
         ...Object.fromEntries(
-          Object.entries(persistedGroupStreamingSettings || {}).filter(
+          Object.entries(allGroupsStreamingSettings || {}).filter(
             ([key]) => key !== editingGroup?.[0],
           ),
         ),
@@ -732,7 +717,6 @@ export function CameraGroupEdit({
             if (onSave) {
               onSave();
             }
-            await setPersistedGroupStreamingSettings(updatedSettings);
             setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
@@ -757,8 +741,7 @@ export function CameraGroupEdit({
       updateConfig,
       editingGroup,
       groupStreamingSettings,
-      setPersistedGroupStreamingSettings,
-      persistedGroupStreamingSettings,
+      allGroupsStreamingSettings,
       setAllGroupsStreamingSettings,
     ],
   );
@@ -772,20 +755,6 @@ export function CameraGroupEdit({
       cameras: editingGroup && editingGroup[1].cameras,
     },
   });
-
-  // streaming settings
-
-  useEffect(() => {
-    if (editingGroup && editingGroup[0] && persistedGroupStreamingSettings) {
-      setGroupStreamingSettings(
-        persistedGroupStreamingSettings[editingGroup[0]] || {},
-      );
-    }
-  }, [
-    editingGroup,
-    persistedGroupStreamingSettings,
-    setGroupStreamingSettings,
-  ]);
 
   return (
     <Form {...form}>
@@ -838,15 +807,43 @@ export function CameraGroupEdit({
 
                       <div className="flex items-center gap-x-2">
                         {camera !== "birdseye" && (
-                          <CameraStreamingDialog
-                            camera={camera}
-                            selectedCameras={field.value}
-                            config={config}
-                            groupStreamingSettings={groupStreamingSettings}
-                            setGroupStreamingSettings={
-                              setGroupStreamingSettings
+                          <Dialog
+                            open={openCamera === camera}
+                            onOpenChange={(isOpen) =>
+                              setOpenCamera(isOpen ? camera : null)
                             }
-                          />
+                          >
+                            <DialogTrigger asChild>
+                              <Button
+                                className="flex h-auto items-center gap-1"
+                                aria-label="Camera streaming settings"
+                                size="icon"
+                                variant="ghost"
+                                disabled={
+                                  !(field.value && field.value.includes(camera))
+                                }
+                              >
+                                <LuIcons.LuSettings
+                                  className={cn(
+                                    field.value && field.value.includes(camera)
+                                      ? "text-primary"
+                                      : "text-muted-foreground",
+                                    "size-5",
+                                  )}
+                                />
+                              </Button>
+                            </DialogTrigger>
+                            <CameraStreamingDialog
+                              camera={camera}
+                              groupStreamingSettings={groupStreamingSettings}
+                              setGroupStreamingSettings={
+                                setGroupStreamingSettings
+                              }
+                              setIsDialogOpen={(isOpen) =>
+                                setOpenCamera(isOpen ? camera : null)
+                              }
+                            />
+                          </Dialog>
                         )}
                         <Switch
                           id={camera.replaceAll("_", " ")}
