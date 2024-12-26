@@ -32,6 +32,9 @@ class FaceRecognitionConfig(FrigateBaseModel):
     min_area: int = Field(
         default=500, title="Min area of face box to consider running face recognition."
     )
+    debug_save_images: bool = Field(
+        default=False, title="Save images of face detections for debugging."
+    )
 
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
