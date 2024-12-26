@@ -47,6 +47,7 @@
     "framer-motion": "^11.5.4",
     "hls.js": "^1.5.17",
     "i18next": "^24.2.0",
+    "i18next-http-backend": "^3.0.1",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
     "konva": "^9.3.16",
