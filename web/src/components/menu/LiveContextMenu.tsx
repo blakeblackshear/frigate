@@ -28,8 +28,10 @@ import {
 } from "@/types/frigateConfig";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { IoIosWarning } from "react-icons/io";
+import { cn } from "@/lib/utils";
 
 type LiveContextMenuProps = {
+  className?: string;
   camera: string;
   streamName: string;
   cameraGroup?: string;
@@ -46,6 +48,7 @@ type LiveContextMenuProps = {
   children?: ReactNode;
 };
 export default function LiveContextMenu({
+  className,
   camera,
   streamName,
   cameraGroup,
@@ -171,7 +174,7 @@ export default function LiveContextMenu({
   };
 
   return (
-    <>
+    <div className={cn("w-full", className)}>
       <ContextMenu key={camera} onOpenChange={handleOpenChange}>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
@@ -266,6 +269,6 @@ export default function LiveContextMenu({
           onSave={onSave}
         />
       </Dialog>
-    </>
+    </div>
   );
 }

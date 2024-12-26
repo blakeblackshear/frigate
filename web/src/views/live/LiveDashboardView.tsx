@@ -381,6 +381,7 @@ export default function LiveDashboardView({
               }
               return (
                 <LiveContextMenu
+                  className={grow}
                   key={camera.name}
                   camera={camera.name}
                   streamName={Object.values(camera.live.streams)?.[0]}
