@@ -626,65 +626,67 @@ export function ObjectSnapshotTab({
                 </div>
               )}
             </TransformComponent>
-            {search.plus_id !== "not_enabled" && search.end_time && (
-              <Card className="p-1 text-sm md:p-2">
-                <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
-                  <div className={cn("flex flex-col space-y-3")}>
-                    <div
-                      className={
-                        "text-lg font-semibold leading-none tracking-tight"
-                      }
-                    >
-                      Submit To Frigate+
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Objects in locations you want to avoid are not false
-                      positives. Submitting them as false positives will confuse
-                      the model.
-                    </div>
-                  </div>
-
-                  <div className="flex flex-row justify-center gap-2 md:justify-end">
-                    {state == "reviewing" && (
-                      <>
-                        <Button
-                          className="bg-success"
-                          aria-label="Confirm this label for Frigate Plus"
-                          onClick={() => {
-                            setState("uploading");
-                            onSubmitToPlus(false);
-                          }}
-                        >
-                          This is{" "}
-                          {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
-                          {search?.label}
-                        </Button>
-                        <Button
-                          className="text-white"
-                          aria-label="Do not confirm this label for Frigate Plus"
-                          variant="destructive"
-                          onClick={() => {
-                            setState("uploading");
-                            onSubmitToPlus(true);
-                          }}
-                        >
-                          This is not{" "}
-                          {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
-                          {search?.label}
-                        </Button>
-                      </>
-                    )}
-                    {state == "uploading" && <ActivityIndicator />}
-                    {state == "submitted" && (
-                      <div className="flex flex-row items-center justify-center gap-2">
-                        <FaCheckCircle className="text-success" />
-                        Submitted
+            {search.plus_id !== "not_enabled" &&
+              search.end_time &&
+              search.label != "on_demand" && (
+                <Card className="p-1 text-sm md:p-2">
+                  <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
+                    <div className={cn("flex flex-col space-y-3")}>
+                      <div
+                        className={
+                          "text-lg font-semibold leading-none tracking-tight"
+                        }
+                      >
+                        Submit To Frigate+
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      <div className="text-sm text-muted-foreground">
+                        Objects in locations you want to avoid are not false
+                        positives. Submitting them as false positives will
+                        confuse the model.
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row justify-center gap-2 md:justify-end">
+                      {state == "reviewing" && (
+                        <>
+                          <Button
+                            className="bg-success"
+                            aria-label="Confirm this label for Frigate Plus"
+                            onClick={() => {
+                              setState("uploading");
+                              onSubmitToPlus(false);
+                            }}
+                          >
+                            This is{" "}
+                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                            {search?.label}
+                          </Button>
+                          <Button
+                            className="text-white"
+                            aria-label="Do not confirm this label for Frigate Plus"
+                            variant="destructive"
+                            onClick={() => {
+                              setState("uploading");
+                              onSubmitToPlus(true);
+                            }}
+                          >
+                            This is not{" "}
+                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                            {search?.label}
+                          </Button>
+                        </>
+                      )}
+                      {state == "uploading" && <ActivityIndicator />}
+                      {state == "submitted" && (
+                        <div className="flex flex-row items-center justify-center gap-2">
+                          <FaCheckCircle className="text-success" />
+                          Submitted
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </TransformWrapper>
       </div>

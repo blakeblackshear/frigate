@@ -61,7 +61,12 @@ import {
   FaMicrophoneSlash,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
-import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
+import {
+  TbRecordMail,
+  TbRecordMailOff,
+  TbViewfinder,
+  TbViewfinderOff,
+} from "react-icons/tb";
 import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuCheck,
@@ -100,6 +105,8 @@ import {
 import { usePersistence } from "@/hooks/use-persistence";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import axios from "axios";
+import { toast } from "sonner";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -789,6 +796,32 @@ function PtzControlPanel({
   );
 }
 
+function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
+  const rankMap = { all: 0, motion: 1, active_objects: 2 };
+  const getValidMode = (retain?: { mode?: string }): keyof typeof rankMap => {
+    const mode = retain?.mode;
+    return mode && mode in rankMap ? (mode as keyof typeof rankMap) : "all";
+  };
+
+  const recordRetainMode = getValidMode(camera.record.retain);
+  const alertsRetainMode = getValidMode(camera.review.alerts.retain);
+
+  const effectiveRetainMode =
+    rankMap[alertsRetainMode] < rankMap[recordRetainMode]
+      ? recordRetainMode
+      : alertsRetainMode;
+
+  const source = effectiveRetainMode === recordRetainMode ? "camera" : "alerts";
+
+  return effectiveRetainMode !== "all" ? (
+    <div>
+      Your {source} recording retention configuration is set to{" "}
+      <code>mode: {effectiveRetainMode}</code>, so this on-demand recording will
+      only keep segments with {effectiveRetainMode.replaceAll("_", " ")}.
+    </div>
+  ) : null;
+}
+
 type FrigateCameraFeaturesProps = {
   camera: CameraConfig;
   recordingEnabled: boolean;
@@ -833,6 +866,98 @@ function FrigateCameraFeatures({
   const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
   const { payload: autotrackingState, send: sendAutotracking } =
     useAutotrackingState(camera.name);
+
+  // manual event
+
+  const recordingEventIdRef = useRef<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [activeToastId, setActiveToastId] = useState<string | number | null>(
+    null,
+  );
+
+  const createEvent = useCallback(async () => {
+    try {
+      const response = await axios.post(
+        `events/${camera.name}/on_demand/create`,
+        {
+          include_recording: true,
+          duration: null,
+        },
+      );
+
+      if (response.data.success) {
+        recordingEventIdRef.current = response.data.event_id;
+        setIsRecording(true);
+        const toastId = toast.success(
+          <div className="flex flex-col space-y-3">
+            <div className="font-semibold">
+              Started manual on-demand recording.
+            </div>
+            {!camera.record.enabled || camera.record.retain.days == 0 ? (
+              <div>
+                Since recording is disabled or restricted in the config for this
+                camera, only a snapshot will be saved.
+              </div>
+            ) : (
+              <OnDemandRetentionMessage camera={camera} />
+            )}
+          </div>,
+          {
+            position: "top-center",
+            duration: 10000,
+          },
+        );
+        setActiveToastId(toastId);
+      }
+    } catch (error) {
+      toast.error("Failed to start manual on-demand recording.", {
+        position: "top-center",
+      });
+    }
+  }, [camera]);
+
+  const endEvent = useCallback(() => {
+    if (activeToastId) {
+      toast.dismiss(activeToastId);
+    }
+    try {
+      if (recordingEventIdRef.current) {
+        axios.put(`events/${recordingEventIdRef.current}/end`, {
+          end_time: Math.ceil(Date.now() / 1000),
+        });
+        recordingEventIdRef.current = null;
+        setIsRecording(false);
+        toast.success("Ended manual on-demand recording.", {
+          position: "top-center",
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to end manual on-demand recording.", {
+        position: "top-center",
+      });
+    }
+  }, [activeToastId]);
+
+  const handleEventButtonClick = useCallback(() => {
+    if (isRecording) {
+      endEvent();
+    } else {
+      createEvent();
+    }
+  }, [createEvent, endEvent, isRecording]);
+
+  useEffect(() => {
+    // ensure manual event is stopped when component unmounts
+    return () => {
+      if (recordingEventIdRef.current) {
+        endEvent();
+      }
+    };
+    // mount/unmount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // navigate for debug view
 
   const navigate = useNavigate();
 
@@ -886,6 +1011,17 @@ function FrigateCameraFeatures({
             }
           />
         )}
+        <CameraFeatureToggle
+          className={cn(
+            "p-2 md:p-0",
+            isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
+          )}
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={isRecording ? TbRecordMail : TbRecordMailOff}
+          isActive={isRecording}
+          title={`${isRecording ? "Stop" : "Start"} on-demand recording`}
+          onClick={handleEventButtonClick}
+        />
         {isRestreamed && (
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
@@ -1272,6 +1408,17 @@ function FrigateCameraFeatures({
             )}
           </div>
         )}
+        <div className="my-4">
+          <Button
+            onClick={handleEventButtonClick}
+            className={cn(
+              "w-full",
+              isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
+            )}
+          >
+            {isRecording ? "End" : "Start"} on-demand recording
+          </Button>
+        </div>
         {isRestreamed && (
           <>
             <FilterSwitch

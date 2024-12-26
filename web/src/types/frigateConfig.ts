@@ -174,10 +174,18 @@ export interface CameraConfig {
     alerts: {
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
     detections: {
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
   };
   rtmp: {
