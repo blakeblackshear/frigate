@@ -3,7 +3,7 @@ import i18next from "i18next";
 
 type LanguageProviderState = {
   language: string;
-  systemLanguage?: string;
+  systemLanguage: string;
   setLanguage: (language: string) => void;
 };
 
@@ -39,8 +39,8 @@ export function LanguageProvider({
     }
   });
 
-  const systemLanguage = useMemo<string | undefined>(() => {
-    if (typeof window === "undefined") return undefined;
+  const systemLanguage = useMemo<string>(() => {
+    if (typeof window === "undefined") return "en";
     return window.navigator.language;
   }, []);
 
