@@ -262,7 +262,6 @@ export default function MotionMaskEditPane({
         <Trans>
           ui.settingView.masksAndZonesSettings.motionMasks.clickDrawPolygon
         </Trans>
-        Click to draw a polygon on the image.
       </div>
 
       <Separator className="my-3 bg-secondary" />
