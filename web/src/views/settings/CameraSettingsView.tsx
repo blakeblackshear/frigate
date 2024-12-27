@@ -513,7 +513,7 @@ export default function CameraSettingsView({
                               }}
                             />
                           )
-                        ) : (
+                         : (
                           <Trans
                             i18nKey="ui.settingView.cameraSettings.reviewClassification.objectDetectionsTips"
                             values={{
