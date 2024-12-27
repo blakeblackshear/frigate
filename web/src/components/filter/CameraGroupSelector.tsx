@@ -755,7 +755,11 @@ export function CameraGroupEdit({
                 <FormMessage />
                 {[
                   ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
-                  ...Object.keys(config?.cameras ?? {}),
+                  ...Object.keys(config?.cameras ?? {}).sort(
+                    (a, b) =>
+                      (config?.cameras[a]?.ui?.order ?? 0) -
+                      (config?.cameras[b]?.ui?.order ?? 0),
+                  ),
                 ].map((camera) => (
                   <FormControl key={camera}>
                     <FilterSwitch
