@@ -115,7 +115,14 @@ export function MotionReviewTimeline({
             (item.start_time <= motionStart &&
               (item.end_time ?? timelineStart) >= motionEnd),
         );
-        if (getMotionSegmentValue(segmentTime) && !overlappingReviewItems) {
+        const firstHalfMotionValue = getMotionSegmentValue(motionStart);
+        const secondHalfMotionValue = getMotionSegmentValue(
+          motionStart + segmentDuration / 2,
+        );
+
+        const segmentMotion =
+          firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
+        if (segmentMotion && !overlappingReviewItems) {
           segments.push(segmentTime);
         }
       }
