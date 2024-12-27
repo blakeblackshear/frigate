@@ -146,7 +146,7 @@
     "ui.system.storage.cameraStorage.storageUsed": "Storage Used",
     "ui.system.storage.cameraStorage.percentageOfTotalUsed": "Percentage of Total Used",
     "ui.system.storage.cameraStorage.bandwidth": "Bandwidth",
-    "ui.system.storage.cameraStorage.unused.tips": "This value may not accurately represent the free space  available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings.",
+    "ui.system.storage.cameraStorage.unused.tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings.",
 
     "ui.system.cameras.overview": "Overview",
     "ui.system.cameras.info.cameraProbeInfo": "{{camera}} Camera Probe Info",
@@ -322,7 +322,7 @@
     "ui.settingView.masksAndZonesSettings.zone.desc": "Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
     "ui.settingView.masksAndZonesSettings.zone.desc.documentation": "Documentation",
     "ui.settingView.masksAndZonesSettings.zone.add": "Add Zone",
-    "ui.settingView.masksAndZonesSettings.zone.edit": "New Zone",
+    "ui.settingView.masksAndZonesSettings.zone.edit": "Edit Zone",
     "ui.settingView.masksAndZonesSettings.zone.point_one": "{{count}} point",
     "ui.settingView.masksAndZonesSettings.zone.point_other": "{{count}} points",
     "ui.settingView.masksAndZonesSettings.zone.clickDrawPolygon": "Click to draw a polygon on the image.",
