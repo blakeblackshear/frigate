@@ -139,6 +139,8 @@ def config(request: Request):
         mode="json", warnings="none", exclude_none=True
     )
     for stream_name, stream in go2rtc.get("streams", {}).items():
+        if stream is None:
+            continue
         if isinstance(stream, str):
             cleaned = clean_camera_user_pass(stream)
         else:
