@@ -70,7 +70,6 @@ import {
 import { IoIosWarning, IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuCheck,
-  LuCog,
   LuEar,
   LuEarOff,
   LuExternalLink,
@@ -1039,7 +1038,7 @@ function FrigateCameraFeatures({
                 "flex flex-col items-center justify-center rounded-lg bg-secondary p-2 text-secondary-foreground md:p-0",
               )}
             >
-              <LuCog
+              <FaCog
                 className={`text-secondary-foreground" size-5 md:m-[6px]`}
               />
             </div>
