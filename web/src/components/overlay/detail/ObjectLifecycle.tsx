@@ -477,7 +477,10 @@ export default function ObjectLifecycle({
                           </p>
                           {Array.isArray(item.data.box) &&
                           item.data.box.length >= 4
-                            ? (item.data.box[2] / item.data.box[3]).toFixed(2)
+                            ? (
+                                aspectRatio *
+                                (item.data.box[2] / item.data.box[3])
+                              ).toFixed(2)
                             : "N/A"}
                         </div>
                       </div>
