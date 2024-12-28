@@ -14,7 +14,7 @@ type JSMpegPlayerProps = {
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   playbackEnabled: boolean;
   useWebGL: boolean;
-  setStats: (stats: PlayerStatsType) => void;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
 };
 
@@ -166,7 +166,7 @@ export default function JSMpegPlayer({
           const timeDiff = (currentTimestamp - lastTimestampRef.current) / 1000; // in seconds
           const bitrate = (bytesReceivedRef.current * 8) / timeDiff / 1000; // in kbps
 
-          setStats({
+          setStats?.({
             streamType: "jsmpeg",
             bandwidth: Math.round(bitrate),
             totalFrames: frameCount,

@@ -22,8 +22,8 @@ type MSEPlayerProps = {
   volume?: number;
   playInBackground?: boolean;
   pip?: boolean;
-  getStats: boolean;
-  setStats: (stats: PlayerStatsType) => void;
+  getStats?: boolean;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -37,7 +37,7 @@ function MSEPlayer({
   volume,
   playInBackground = false,
   pip = false,
-  getStats,
+  getStats = false,
   setStats,
   onPlaying,
   setFullResolution,
@@ -611,7 +611,7 @@ function MSEPlayer({
           ? (droppedVideoFrames / totalVideoFrames) * 100
           : 0;
 
-        setStats({
+        setStats?.({
           streamType: "MSE",
           bandwidth,
           latency,
@@ -627,7 +627,7 @@ function MSEPlayer({
 
     return () => {
       clearInterval(interval);
-      setStats({
+      setStats?.({
         streamType: "-",
         bandwidth: 0,
         latency: undefined,

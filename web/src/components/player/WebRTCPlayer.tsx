@@ -11,8 +11,8 @@ type WebRtcPlayerProps = {
   microphoneEnabled?: boolean;
   iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
   pip?: boolean;
-  getStats: boolean;
-  setStats: (stats: PlayerStatsType) => void;
+  getStats?: boolean;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   onError?: (error: LivePlayerError) => void;
 };
@@ -26,7 +26,7 @@ export default function WebRtcPlayer({
   microphoneEnabled = false,
   iOSCompatFullScreen = false,
   pip = false,
-  getStats,
+  getStats = false,
   setStats,
   onPlaying,
   onError,
@@ -268,7 +268,7 @@ export default function WebRtcPlayer({
             ? (bytesReceived - lastBytesReceived) / timeDiff / 1000
             : 0; // in kbps
 
-        setStats({
+        setStats?.({
           streamType: "WebRTC",
           bandwidth: Math.round(bitrate),
           latency: roundTripTime,
@@ -286,7 +286,7 @@ export default function WebRtcPlayer({
 
     return () => {
       clearInterval(interval);
-      setStats({
+      setStats?.({
         streamType: "-",
         bandwidth: 0,
         latency: undefined,
