@@ -28,7 +28,12 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { AudioState, LivePlayerError, VolumeState } from "@/types/live";
+import {
+  AudioState,
+  LivePlayerError,
+  StatsState,
+  VolumeState,
+} from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -231,6 +236,14 @@ export default function LiveDashboardView({
 
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
+  const [statsStates, setStatsStates] = useState<StatsState>({});
+
+  const toggleStats = (cameraName: string): void => {
+    setStatsStates((prev) => ({
+      ...prev,
+      [cameraName]: !prev[cameraName],
+    }));
+  };
 
   const toggleAudio = (cameraName: string): void => {
     setAudioStates((prev) => ({
@@ -394,6 +407,8 @@ export default function LiveDashboardView({
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
+                  statsState={statsStates[camera.name]}
+                  toggleStats={() => toggleStats(camera.name)}
                   volumeState={volumeStates[camera.name] ?? 1}
                   setVolumeState={(value) =>
                     setVolumeStates({
@@ -418,6 +433,7 @@ export default function LiveDashboardView({
                     autoLive={autoLiveView}
                     useWebGL={false}
                     playInBackground={false}
+                    showStats={statsStates[camera.name]}
                     streamName={Object.values(camera.live.streams)[0]}
                     onClick={() => onSelectCamera(camera.name)}
                     onError={(e) => handleError(camera.name, e)}

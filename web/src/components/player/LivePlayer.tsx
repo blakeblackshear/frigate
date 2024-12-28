@@ -11,6 +11,7 @@ import { useCameraActivity } from "@/hooks/use-camera-activity";
 import {
   LivePlayerError,
   LivePlayerMode,
+  PlayerStatsType,
   VideoResolutionType,
 } from "@/types/live";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
+import { PlayerStats } from "./PlayerStats";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -38,6 +40,7 @@ type LivePlayerProps = {
   iOSCompatFullScreen?: boolean;
   pip?: boolean;
   autoLive?: boolean;
+  showStats?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -61,12 +64,25 @@ export default function LivePlayer({
   iOSCompatFullScreen = false,
   pip,
   autoLive = true,
+  showStats = false,
   onClick,
   setFullResolution,
   onError,
   onResetLiveMode,
 }: LivePlayerProps) {
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // stats
+
+  const [stats, setStats] = useState<PlayerStatsType>({
+    streamType: "-",
+    bandwidth: 0, // in kbps
+    latency: undefined, // in seconds
+    totalFrames: 0,
+    droppedFrames: undefined,
+    decodedFrames: 0,
+    droppedFrameRate: 0, // percentage
+  });
 
   // camera activity
 
@@ -189,6 +205,8 @@ export default function LivePlayer({
         className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
+        getStats={showStats}
+        setStats={setStats}
         audioEnabled={playAudio}
         volume={volume}
         microphoneEnabled={micEnabled}
@@ -209,6 +227,8 @@ export default function LivePlayer({
           audioEnabled={playAudio}
           volume={volume}
           playInBackground={playInBackground}
+          getStats={showStats}
+          setStats={setStats}
           onPlaying={playerIsPlaying}
           pip={pip}
           setFullResolution={setFullResolution}
@@ -235,6 +255,7 @@ export default function LivePlayer({
             cameraActive || !showStillWithoutActivity || liveReady
           }
           useWebGL={useWebGL}
+          setStats={setStats}
           containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
         />
@@ -364,6 +385,9 @@ export default function LivePlayer({
           </Chip>
         )}
       </div>
+      {showStats && (
+        <PlayerStats stats={stats} minimal={cameraRef !== undefined} />
+      )}
     </div>
   );
 }

@@ -239,6 +239,8 @@ export default function LiveCameraView({
     false,
   );
 
+  const [showStats, setShowStats] = useState(false);
+
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
     height: 0,
@@ -502,6 +504,8 @@ export default function LiveCameraView({
                 preferredLiveMode={preferredLiveMode}
                 playInBackground={playInBackground ?? false}
                 setPlayInBackground={setPlayInBackground}
+                showStats={showStats}
+                setShowStats={setShowStats}
                 isRestreamed={isRestreamed ?? false}
                 setLowBandwidth={setLowBandwidth}
                 supportsAudioOutput={supportsAudioOutput}
@@ -539,6 +543,7 @@ export default function LiveCameraView({
                 cameraConfig={camera}
                 playAudio={audio}
                 playInBackground={playInBackground ?? false}
+                showStats={showStats}
                 micEnabled={mic}
                 iOSCompatFullScreen={isIOS}
                 preferredLiveMode={preferredLiveMode}
@@ -833,6 +838,8 @@ type FrigateCameraFeaturesProps = {
   preferredLiveMode: string;
   playInBackground: boolean;
   setPlayInBackground: (value: boolean | undefined) => void;
+  showStats: boolean;
+  setShowStats: (value: boolean) => void;
   isRestreamed: boolean;
   setLowBandwidth: React.Dispatch<React.SetStateAction<boolean>>;
   supportsAudioOutput: boolean;
@@ -849,6 +856,8 @@ function FrigateCameraFeatures({
   preferredLiveMode,
   playInBackground,
   setPlayInBackground,
+  showStats,
+  setShowStats,
   isRestreamed,
   setLowBandwidth,
   supportsAudioOutput,
@@ -1205,6 +1214,26 @@ function FrigateCameraFeatures({
                   </div>
                 )}
                 <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="mx-0 cursor-pointer text-primary"
+                      htmlFor="showstats"
+                    >
+                      Show stream stats
+                    </Label>
+                    <Switch
+                      className="ml-1"
+                      id="showstats"
+                      checked={showStats}
+                      onCheckedChange={(checked) => setShowStats(checked)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Enable this option to show stream statistics as an overlay
+                    on the camera feed.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between text-sm font-medium leading-none">
                     Debug View
                     <LuExternalLink
@@ -1437,17 +1466,32 @@ function FrigateCameraFeatures({
           </div>
           {isRestreamed && (
             <>
-              <FilterSwitch
-                label="Play in Background"
-                isChecked={playInBackground}
-                onCheckedChange={(checked) => {
-                  setPlayInBackground(checked);
-                }}
-              />
-              <p className="mx-2 -mt-2 text-sm text-muted-foreground">
-                Enable this option to continue streaming when the player is
-                hidden.
-              </p>
+              <div className="flex flex-col gap-2">
+                <FilterSwitch
+                  label="Play in Background"
+                  isChecked={playInBackground}
+                  onCheckedChange={(checked) => {
+                    setPlayInBackground(checked);
+                  }}
+                />
+                <p className="mx-2 -mt-2 text-sm text-muted-foreground">
+                  Enable this option to continue streaming when the player is
+                  hidden.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <FilterSwitch
+                  label="Show Stats"
+                  isChecked={showStats}
+                  onCheckedChange={(checked) => {
+                    setShowStats(checked);
+                  }}
+                />
+                <p className="mx-2 -mt-2 text-sm text-muted-foreground">
+                  Enable this option to show stream statistics as an overlay on
+                  the camera feed.
+                </p>
+              </div>
             </>
           )}
           <div className="mb-3 flex flex-col gap-1 px-2">

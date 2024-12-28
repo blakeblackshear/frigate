@@ -21,7 +21,12 @@ import {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { AudioState, LivePlayerMode, VolumeState } from "@/types/live";
+import {
+  AudioState,
+  LivePlayerMode,
+  StatsState,
+  VolumeState,
+} from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -363,10 +368,24 @@ export default function DraggableGridLayout({
     placeholder.h = layoutItem.h;
   };
 
-  // audio states
+  // audio and stats states
 
   const [audioStates, setAudioStates] = useState<AudioState>({});
   const [volumeStates, setVolumeStates] = useState<VolumeState>({});
+  const [statsStates, setStatsStates] = useState<StatsState>(() => {
+    const initialStates: StatsState = {};
+    cameras.forEach((camera) => {
+      initialStates[camera.name] = false;
+    });
+    return initialStates;
+  });
+
+  const toggleStats = (cameraName: string): void => {
+    setStatsStates((prev) => ({
+      ...prev,
+      [cameraName]: !prev[cameraName],
+    }));
+  };
 
   useEffect(() => {
     if (!allGroupsStreamingSettings) {
@@ -552,6 +571,8 @@ export default function DraggableGridLayout({
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
+                  statsState={statsStates[camera.name]}
+                  toggleStats={() => toggleStats(camera.name)}
                   volumeState={volumeStates[camera.name]}
                   setVolumeState={(value) =>
                     setVolumeStates({
@@ -584,6 +605,7 @@ export default function DraggableGridLayout({
                     cameraConfig={camera}
                     preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                     playInBackground={false}
+                    showStats={statsStates[camera.name]}
                     onClick={() => {
                       !isEditMode && onSelectCamera(camera.name);
                     }}
@@ -761,6 +783,8 @@ type GridLiveContextMenuProps = {
   supportsAudio: boolean;
   audioState: boolean;
   toggleAudio: () => void;
+  statsState: boolean;
+  toggleStats: () => void;
   volumeState?: number;
   setVolumeState: (volumeState: number) => void;
   muteAll: () => void;
@@ -788,6 +812,8 @@ const GridLiveContextMenu = React.forwardRef<
       supportsAudio,
       audioState,
       toggleAudio,
+      statsState,
+      toggleStats,
       volumeState,
       setVolumeState,
       muteAll,
@@ -816,6 +842,8 @@ const GridLiveContextMenu = React.forwardRef<
           supportsAudio={supportsAudio}
           audioState={audioState}
           toggleAudio={toggleAudio}
+          statsState={statsState}
+          toggleStats={toggleStats}
           volumeState={volumeState}
           setVolumeState={setVolumeState}
           muteAll={muteAll}

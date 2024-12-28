@@ -44,6 +44,8 @@ type LiveContextMenuProps = {
   setVolumeState: (volumeState: number) => void;
   muteAll: () => void;
   unmuteAll: () => void;
+  statsState: boolean;
+  toggleStats: () => void;
   resetPreferredLiveMode: () => void;
   children?: ReactNode;
 };
@@ -61,6 +63,8 @@ export default function LiveContextMenu({
   setVolumeState,
   muteAll,
   unmuteAll,
+  statsState,
+  toggleStats,
   resetPreferredLiveMode,
   children,
 }: LiveContextMenuProps) {
@@ -229,6 +233,17 @@ export default function LiveContextMenu({
               onClick={unmuteAll}
             >
               <div className="text-primary">Unmute All Cameras</div>
+            </div>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem>
+            <div
+              className="flex w-full cursor-pointer items-center justify-start gap-2"
+              onClick={toggleStats}
+            >
+              <div className="text-primary">
+                {statsState ? "Hide" : "Show"} Stream Stats
+              </div>
             </div>
           </ContextMenuItem>
           {isRestreamed && cameraGroup && (
