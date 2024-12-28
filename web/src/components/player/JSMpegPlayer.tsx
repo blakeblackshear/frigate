@@ -178,12 +178,12 @@ export default function JSMpegPlayer({
 
           bytesReceivedRef.current = 0;
           lastTimestampRef.current = currentTimestamp;
-          frameCount = 0;
         }, 1000);
 
         return () => {
           if (statsIntervalRef.current) {
             clearInterval(statsIntervalRef.current);
+            frameCount = 0;
             statsIntervalRef.current = null;
           }
         };

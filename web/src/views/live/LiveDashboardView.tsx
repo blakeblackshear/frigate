@@ -397,6 +397,7 @@ export default function LiveDashboardView({
                   className={grow}
                   key={camera.name}
                   camera={camera.name}
+                  cameraGroup={cameraGroup}
                   streamName={Object.values(camera.live.streams)?.[0]}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   isRestreamed={isRestreamedStates[camera.name]}
