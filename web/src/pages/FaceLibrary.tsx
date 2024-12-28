@@ -162,22 +162,31 @@ function AttemptsGrid({ attemptImages }: AttemptsGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {attemptImages.map((image: string) => (
-        <FaceImage key={image} name={"something"} image={image} />
+        <FaceAttempt key={image} image={image} />
       ))}
     </div>
   );
 }
 
 type FaceAttemptProps = {
-  name: string;
   image: string;
 };
-function FaceAttempt({ name, image }: FaceAttemptProps) {
+function FaceAttempt({ image }: FaceAttemptProps) {
   const [hovered, setHovered] = useState(false);
+
+  const data = useMemo(() => {
+    const parts = image.split("-");
+
+    return {
+      eventId: `${parts[0]}-${parts[1]}`,
+      name: parts[2],
+      score: parts[3],
+    };
+  }, [image]);
 
   const onDelete = useCallback(() => {
     axios
-      .post(`/faces/${name}/delete`, { ids: [image] })
+      .post(`/faces/debug/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
           toast.error(`Successfully deleted face.`, { position: "top-center" });
@@ -194,11 +203,11 @@ function FaceAttempt({ name, image }: FaceAttemptProps) {
           });
         }
       });
-  }, [name, image]);
+  }, [image]);
 
   return (
     <div
-      className="relative h-40"
+      className="relative h-min"
       onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
       onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
       onClick={isDesktop ? undefined : () => setHovered(!hovered)}
@@ -213,10 +222,13 @@ function FaceAttempt({ name, image }: FaceAttemptProps) {
           </Chip>
         </div>
       )}
-      <img
-        className="h-40 rounded-md"
-        src={`${baseUrl}clips/faces/${name}/${image}`}
-      />
+      <div className="rounded-md bg-secondary">
+        <img
+          className="h-40 rounded-md"
+          src={`${baseUrl}clips/faces/debug/${image}`}
+        />
+        <div className="p-2">{`${data.name}: ${data.score}`}</div>
+      </div>
     </div>
   );
 }
