@@ -106,6 +106,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -368,6 +369,7 @@ export default function LiveCameraView({
 
   return (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+      <Toaster position="top-center" closeButton={true} />
       <div
         ref={mainRef}
         className={
