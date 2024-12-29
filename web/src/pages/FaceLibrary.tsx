@@ -64,7 +64,7 @@ export default function FaceLibrary() {
             setUpload(false);
             refreshFaces();
             toast.success(
-              "Successfully uploaded iamge. View the file in the /exports folder.",
+              "Successfully uploaded image. View the file in the /exports folder.",
               { position: "top-center" },
             );
           }
@@ -143,7 +143,7 @@ export default function FaceLibrary() {
       </div>
       {pageToggle &&
         (pageToggle == "attempts" ? (
-          <AttemptsGrid attemptImages={faceAttempts} />
+          <AttemptsGrid attemptImages={faceAttempts} onRefresh={refreshFaces} />
         ) : (
           <FaceGrid
             faceImages={faceImages}
@@ -157,12 +157,13 @@ export default function FaceLibrary() {
 
 type AttemptsGridProps = {
   attemptImages: string[];
+  onRefresh: () => void;
 };
-function AttemptsGrid({ attemptImages }: AttemptsGridProps) {
+function AttemptsGrid({ attemptImages, onRefresh }: AttemptsGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {attemptImages.map((image: string) => (
-        <FaceAttempt key={image} image={image} />
+        <FaceAttempt key={image} image={image} onRefresh={onRefresh} />
       ))}
     </div>
   );
@@ -170,6 +171,7 @@ function AttemptsGrid({ attemptImages }: AttemptsGridProps) {
 
 type FaceAttemptProps = {
   image: string;
+  onRefresh: () => void;
 };
 function FaceAttempt({ image }: FaceAttemptProps) {
   const [hovered, setHovered] = useState(false);
@@ -189,7 +191,9 @@ function FaceAttempt({ image }: FaceAttemptProps) {
       .post(`/faces/debug/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.error(`Successfully deleted face.`, { position: "top-center" });
+          toast.success(`Successfully deleted face.`, {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
