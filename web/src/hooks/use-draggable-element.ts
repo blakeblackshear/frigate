@@ -389,7 +389,7 @@ function useDraggableElement({
         (time) => time === alignedSegmentTime,
       );
 
-      if (segmentIndex !== 0) {
+      if (segmentIndex >= 0) {
         const segmentStart = segmentIndex * segmentHeight;
 
         const offset =
