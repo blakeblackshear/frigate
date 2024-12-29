@@ -149,6 +149,7 @@ export default function FaceLibrary() {
             faceImages={faceImages}
             pageToggle={pageToggle}
             setUpload={setUpload}
+            onRefresh={refreshFaces}
           />
         ))}
     </div>
@@ -173,7 +174,7 @@ type FaceAttemptProps = {
   image: string;
   onRefresh: () => void;
 };
-function FaceAttempt({ image }: FaceAttemptProps) {
+function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
   const [hovered, setHovered] = useState(false);
 
   const data = useMemo(() => {
@@ -194,6 +195,7 @@ function FaceAttempt({ image }: FaceAttemptProps) {
           toast.success(`Successfully deleted face.`, {
             position: "top-center",
           });
+          onRefresh();
         }
       })
       .catch((error) => {
@@ -207,7 +209,7 @@ function FaceAttempt({ image }: FaceAttemptProps) {
           });
         }
       });
-  }, [image]);
+  }, [image, onRefresh]);
 
   return (
     <div
@@ -241,12 +243,23 @@ type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
   setUpload: (upload: boolean) => void;
+  onRefresh: () => void;
 };
-function FaceGrid({ faceImages, pageToggle, setUpload }: FaceGridProps) {
+function FaceGrid({
+  faceImages,
+  pageToggle,
+  setUpload,
+  onRefresh,
+}: FaceGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {faceImages.map((image: string) => (
-        <FaceImage key={image} name={pageToggle} image={image} />
+        <FaceImage
+          key={image}
+          name={pageToggle}
+          image={image}
+          onRefresh={onRefresh}
+        />
       ))}
       <Button key="upload" className="size-40" onClick={() => setUpload(true)}>
         <LuImagePlus className="size-10" />
@@ -258,8 +271,9 @@ function FaceGrid({ faceImages, pageToggle, setUpload }: FaceGridProps) {
 type FaceImageProps = {
   name: string;
   image: string;
+  onRefresh: () => void;
 };
-function FaceImage({ name, image }: FaceImageProps) {
+function FaceImage({ name, image, onRefresh }: FaceImageProps) {
   const [hovered, setHovered] = useState(false);
 
   const onDelete = useCallback(() => {
@@ -267,7 +281,10 @@ function FaceImage({ name, image }: FaceImageProps) {
       .post(`/faces/${name}/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.error(`Successfully deleted face.`, { position: "top-center" });
+          toast.success(`Successfully deleted face.`, {
+            position: "top-center",
+          });
+          onRefresh();
         }
       })
       .catch((error) => {
