@@ -29,6 +29,7 @@ import {
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { IoIosWarning } from "react-icons/io";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -177,6 +178,10 @@ export default function LiveContextMenu({
     }
   };
 
+  // navigate for debug view
+
+  const navigate = useNavigate();
+
   return (
     <div className={cn("w-full", className)}>
       <ContextMenu key={camera} onOpenChange={handleOpenChange}>
@@ -244,6 +249,14 @@ export default function LiveContextMenu({
               <div className="text-primary">
                 {statsState ? "Hide" : "Show"} Stream Stats
               </div>
+            </div>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            <div
+              className="flex w-full cursor-pointer items-center justify-start gap-2"
+              onClick={() => navigate(`/settings?page=debug&camera=${camera}`)}
+            >
+              <div className="text-primary">Debug View</div>
             </div>
           </ContextMenuItem>
           {cameraGroup && cameraGroup !== "default" && (
