@@ -119,8 +119,8 @@ export function CameraStreamingDialog({
         streamName,
         streamType,
         compatibilityMode,
-        playAudio: groupStreamingSettings[camera]?.playAudio ?? false,
-        volume: groupStreamingSettings[camera]?.volume ?? 1,
+        playAudio: groupStreamingSettings?.[camera]?.playAudio ?? false,
+        volume: groupStreamingSettings?.[camera]?.volume ?? 1,
       },
     };
 
