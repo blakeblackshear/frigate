@@ -246,7 +246,7 @@ export default function LiveContextMenu({
               </div>
             </div>
           </ContextMenuItem>
-          {isRestreamed && cameraGroup && cameraGroup !== "default" && (
+          {cameraGroup && cameraGroup !== "default" && (
             <>
               <ContextMenuSeparator />
               <ContextMenuItem>
