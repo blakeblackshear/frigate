@@ -298,7 +298,7 @@ export default function WebRtcPlayer({
     };
     // we need to listen on the value of the ref
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pcRef, pcRef.current]);
+  }, [pcRef, pcRef.current, getStats]);
 
   return (
     <video

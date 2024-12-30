@@ -581,7 +581,7 @@ function MSEPlayer({
 
   useEffect(() => {
     const video = videoRef.current;
-    let lastLoadedBytes = 0;
+    let lastLoadedBytes = totalBytesLoaded.current;
     let lastTimestamp = Date.now();
 
     if (!getStats) return;
