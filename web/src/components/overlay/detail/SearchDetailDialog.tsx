@@ -505,54 +505,51 @@ function ObjectDetailsTab({
 
         <div className="flex w-full flex-row justify-end gap-2">
           {config?.cameras[search.camera].genai.enabled && search.end_time && (
-            <>
-              <div className="flex items-start">
-                <Button
-                  className="rounded-r-none border-r-0"
-                  aria-label="Regenerate tracked object description"
-                  onClick={() => regenerateDescription("thumbnails")}
-                >
-                  Regenerate
-                </Button>
-                {search.has_snapshot && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        className="rounded-l-none border-l-0 px-2"
-                        aria-label="Expand regeneration menu"
-                      >
-                        <FaChevronDown className="size-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        aria-label="Regenerate from snapshot"
-                        onClick={() => regenerateDescription("snapshot")}
-                      >
-                        Regenerate from Snapshot
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        aria-label="Regenerate from thumbnails"
-                        onClick={() => regenerateDescription("thumbnails")}
-                      >
-                        Regenerate from Thumbnails
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-
+            <div className="flex items-start">
               <Button
-                variant="select"
-                aria-label="Save"
-                onClick={updateDescription}
+                className="rounded-r-none border-r-0"
+                aria-label="Regenerate tracked object description"
+                onClick={() => regenerateDescription("thumbnails")}
               >
-                Save
+                Regenerate
               </Button>
-            </>
+              {search.has_snapshot && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="rounded-l-none border-l-0 px-2"
+                      aria-label="Expand regeneration menu"
+                    >
+                      <FaChevronDown className="size-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      aria-label="Regenerate from snapshot"
+                      onClick={() => regenerateDescription("snapshot")}
+                    >
+                      Regenerate from Snapshot
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      aria-label="Regenerate from thumbnails"
+                      onClick={() => regenerateDescription("thumbnails")}
+                    >
+                      Regenerate from Thumbnails
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           )}
+          <Button
+            variant="select"
+            aria-label="Save"
+            onClick={updateDescription}
+          >
+            Save
+          </Button>
         </div>
       </div>
     </div>
