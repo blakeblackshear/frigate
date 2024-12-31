@@ -284,238 +284,251 @@ export default function NotificationView({
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-          <Heading as="h3" className="my-2">
-            Notification Settings
-          </Heading>
+          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="col-span-1">
+              <Heading as="h3" className="my-2">
+                Notification Settings
+              </Heading>
 
-          <div className="max-w-6xl">
-            <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-              <p>
-                Frigate can natively send push notifications to your device when
-                it is running in the browser or installed as a PWA.
-              </p>
-              <div className="flex items-center text-primary">
-                <Link
-                  to="https://docs.frigate.video/configuration/notifications"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline"
-                >
-                  Read the Documentation{" "}
-                  <LuExternalLink className="ml-2 inline-flex size-3" />
-                </Link>
+              <div className="max-w-6xl">
+                <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+                  <p>
+                    Frigate can natively send push notifications to your device
+                    when it is running in the browser or installed as a PWA.
+                  </p>
+                  <div className="flex items-center text-primary">
+                    <Link
+                      to="https://docs.frigate.video/configuration/notifications"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      Read the Documentation{" "}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="mt-2 space-y-6"
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                        placeholder="example@email.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Entering a valid email is required, as this is used by the
-                      push server in case problems occur.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cameras"
-                render={({ field }) => (
-                  <FormItem>
-                    {allCameras && allCameras?.length > 0 ? (
-                      <>
-                        <div className="mb-2">
-                          <FormLabel className="flex flex-row items-center text-base">
-                            Cameras
-                          </FormLabel>
-                        </div>
-                        <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
-                          <FormField
-                            control={form.control}
-                            name="allEnabled"
-                            render={({ field }) => (
-                              <FilterSwitch
-                                label="All Cameras"
-                                isChecked={field.value}
-                                onCheckedChange={(checked) => {
-                                  setChangedValue(true);
-                                  if (checked) {
-                                    form.setValue("cameras", []);
-                                  }
-                                  field.onChange(checked);
-                                }}
-                              />
-                            )}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="mt-2 space-y-6"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
+                            placeholder="example@email.com"
+                            {...field}
                           />
-                          {allCameras?.map((camera) => (
-                            <FilterSwitch
-                              key={camera.name}
-                              label={camera.name.replaceAll("_", " ")}
-                              isChecked={field.value?.includes(camera.name)}
-                              onCheckedChange={(checked) => {
-                                setChangedValue(true);
-                                let newCameras;
-                                if (checked) {
-                                  newCameras = [...field.value, camera.name];
+                        </FormControl>
+                        <FormDescription>
+                          Entering a valid email is required, as this is used by
+                          the push server in case problems occur.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cameras"
+                    render={({ field }) => (
+                      <FormItem>
+                        {allCameras && allCameras?.length > 0 ? (
+                          <>
+                            <div className="mb-2">
+                              <FormLabel className="flex flex-row items-center text-base">
+                                Cameras
+                              </FormLabel>
+                            </div>
+                            <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+                              <FormField
+                                control={form.control}
+                                name="allEnabled"
+                                render={({ field }) => (
+                                  <FilterSwitch
+                                    label="All Cameras"
+                                    isChecked={field.value}
+                                    onCheckedChange={(checked) => {
+                                      setChangedValue(true);
+                                      if (checked) {
+                                        form.setValue("cameras", []);
+                                      }
+                                      field.onChange(checked);
+                                    }}
+                                  />
+                                )}
+                              />
+                              {allCameras?.map((camera) => (
+                                <FilterSwitch
+                                  key={camera.name}
+                                  label={camera.name.replaceAll("_", " ")}
+                                  isChecked={field.value?.includes(camera.name)}
+                                  onCheckedChange={(checked) => {
+                                    setChangedValue(true);
+                                    let newCameras;
+                                    if (checked) {
+                                      newCameras = [
+                                        ...field.value,
+                                        camera.name,
+                                      ];
+                                    } else {
+                                      newCameras = field.value?.filter(
+                                        (value) => value !== camera.name,
+                                      );
+                                    }
+                                    field.onChange(newCameras);
+                                    form.setValue("allEnabled", false);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="font-normal text-destructive">
+                            No cameras available.
+                          </div>
+                        )}
+
+                        <FormMessage />
+                        <FormDescription>
+                          Select the cameras to enable notifications for.
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
+                    <Button
+                      className="flex flex-1"
+                      aria-label="Cancel"
+                      onClick={onCancel}
+                      type="button"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="select"
+                      disabled={isLoading}
+                      className="flex flex-1"
+                      aria-label="Save"
+                      type="submit"
+                    >
+                      {isLoading ? (
+                        <div className="flex flex-row items-center gap-2">
+                          <ActivityIndicator />
+                          <span>Saving...</span>
+                        </div>
+                      ) : (
+                        "Save"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+
+            <div className="col-span-1">
+              <div className="mt-4 gap-2 space-y-6">
+                <div className="space-y-3">
+                  <Separator className="my-2 flex bg-secondary md:hidden" />
+                  <Heading as="h4" className="my-2">
+                    Device-Specific Settings
+                  </Heading>
+                  <Button
+                    aria-label="Register or unregister notifications for this device"
+                    disabled={
+                      !config?.notifications.enabled || publicKey == undefined
+                    }
+                    onClick={() => {
+                      if (registration == null) {
+                        Notification.requestPermission().then((permission) => {
+                          if (permission === "granted") {
+                            navigator.serviceWorker
+                              .register(NOTIFICATION_SERVICE_WORKER)
+                              .then((registration) => {
+                                setRegistration(registration);
+
+                                if (registration.active) {
+                                  subscribeToNotifications(registration);
                                 } else {
-                                  newCameras = field.value?.filter(
-                                    (value) => value !== camera.name,
+                                  setTimeout(
+                                    () =>
+                                      subscribeToNotifications(registration),
+                                    1000,
                                   );
                                 }
-                                field.onChange(newCameras);
-                                form.setValue("allEnabled", false);
-                              }}
+                              });
+                          }
+                        });
+                      } else {
+                        registration.pushManager
+                          .getSubscription()
+                          .then((pushSubscription) => {
+                            pushSubscription?.unsubscribe();
+                            registration.unregister();
+                            setRegistration(null);
+                            removeMessage(
+                              "notification_settings",
+                              "registration",
+                            );
+                          });
+                      }
+                    }}
+                  >
+                    {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
+                  </Button>
+                  {registration != null && (
+                    <Button
+                      aria-label="Send a test notification"
+                      onClick={() => sendTestNotification("notification_test")}
+                    >
+                      Send a test notification
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {notificationCameras.length > 0 && (
+                <div className="mt-4 gap-2 space-y-6">
+                  <div className="space-y-3">
+                    <Separator className="my-2 flex bg-secondary" />
+                    <Heading as="h4" className="my-2">
+                      Global Settings
+                    </Heading>
+                    <div className="max-w-xl">
+                      <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
+                        <p>
+                          Temporarily suspend notifications for specific cameras
+                          on all registered devices.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex max-w-2xl flex-col gap-2.5">
+                      <div className="rounded-lg bg-secondary p-5">
+                        <div className="grid gap-6">
+                          {notificationCameras.map((item) => (
+                            <CameraNotificationSwitch
+                              config={config}
+                              camera={item.name}
                             />
                           ))}
                         </div>
-                      </>
-                    ) : (
-                      <div className="font-normal text-destructive">
-                        No cameras available.
                       </div>
-                    )}
-
-                    <FormMessage />
-                    <FormDescription>
-                      Select the cameras to enable notifications for.
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
-                <Button
-                  className="flex flex-1"
-                  aria-label="Cancel"
-                  onClick={onCancel}
-                  type="button"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="select"
-                  disabled={isLoading}
-                  className="flex flex-1"
-                  aria-label="Save"
-                  type="submit"
-                >
-                  {isLoading ? (
-                    <div className="flex flex-row items-center gap-2">
-                      <ActivityIndicator />
-                      <span>Saving...</span>
                     </div>
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-
-          <div className="mt-4 gap-2 space-y-6">
-            <div className="space-y-3">
-              <Separator className="my-2 flex bg-secondary" />
-              <Heading as="h4" className="my-2">
-                Register and Test
-              </Heading>
-              <Button
-                aria-label="Register or unregister notifications for this device"
-                disabled={
-                  !config?.notifications.enabled || publicKey == undefined
-                }
-                onClick={() => {
-                  if (registration == null) {
-                    Notification.requestPermission().then((permission) => {
-                      if (permission === "granted") {
-                        navigator.serviceWorker
-                          .register(NOTIFICATION_SERVICE_WORKER)
-                          .then((registration) => {
-                            setRegistration(registration);
-
-                            if (registration.active) {
-                              subscribeToNotifications(registration);
-                            } else {
-                              setTimeout(
-                                () => subscribeToNotifications(registration),
-                                1000,
-                              );
-                            }
-                          });
-                      }
-                    });
-                  } else {
-                    registration.pushManager
-                      .getSubscription()
-                      .then((pushSubscription) => {
-                        pushSubscription?.unsubscribe();
-                        registration.unregister();
-                        setRegistration(null);
-                        removeMessage("notification_settings", "registration");
-                      });
-                  }
-                }}
-              >
-                {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
-              </Button>
-              {registration != null && (
-                <Button
-                  aria-label="Send a test notification"
-                  onClick={() => sendTestNotification("notification_test")}
-                >
-                  Send a test notification
-                </Button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
-          {notificationCameras.length > 0 && (
-            <div className="mt-4 gap-2 space-y-6">
-              <div className="space-y-3">
-                <Separator className="my-2 flex bg-secondary" />
-                <Heading as="h4" className="my-2">
-                  Suspend Notifications
-                </Heading>
-                <div className="max-w-xl">
-                  <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
-                    <p>
-                      Temporarily suspend notifications for specific cameras on
-                      all registered devices.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex max-w-2xl flex-col gap-2.5">
-                  <div className="rounded-lg bg-secondary p-5">
-                    <div className="grid gap-6">
-                      {notificationCameras.map((item) => (
-                        <CameraNotificationSwitch
-                          config={config}
-                          camera={item.name}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </>
