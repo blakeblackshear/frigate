@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
-  const [page, setPage] = useState<string>("attempts");
+  const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
@@ -38,12 +38,18 @@ export default function FaceLibrary() {
   );
 
   useEffect(() => {
-    if (!pageToggle && faces) {
+    if (!pageToggle) {
+      if (faceAttempts.length > 0) {
+        setPageToggle("attempts");
+      } else if (faces) {
+        setPageToggle(faces[0]);
+      }
+    } else if (pageToggle == "attempts" && faceAttempts.length == 0) {
       setPageToggle(faces[0]);
     }
     // we need to listen on the value of the faces list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faces]);
+  }, [faceAttempts, faces]);
 
   // upload
 
