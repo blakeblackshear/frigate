@@ -166,7 +166,7 @@ class FaceClassificationModel:
         self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
-                radius=2, threshold=(1 - config.threshold) * 1000
+                radius=2, threshold=(1 - config.min_score) * 1000
             )
         )
         self.label_map: dict[int, str] = {}
