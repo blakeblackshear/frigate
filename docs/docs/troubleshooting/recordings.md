@@ -71,3 +71,7 @@ Some users found that mounting a drive via `fstab` with the `sync` option caused
 #### Copy Times < 1 second
 
 If the storage is working quickly then this error may be caused by CPU load on the machine being too high for Frigate to have the resources to keep up. Try temporarily shutting down other services to see if the issue improves.
+
+### Infinite spinner when viewing a recording in browser
+If you are experiencing issues when viewing a recording in your browser, this might be caused by the stream being in a format which your browser does not support. To validate this maybe being the issue, try to open the networkstream in VLC. You can grab the url (f.i. https://frigate/vod/garden/start/1735560000/end/1735562134/index-v1.m3u8) of the stream via the developer-console of your browser.
+In VLC you can then check the codec-info of the stream. 
