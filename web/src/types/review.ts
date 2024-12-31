@@ -50,6 +50,10 @@ export type ReviewSummary = {
   [day: string]: ReviewSummaryDay;
 };
 
+export type RecordingsSummary = {
+  [day: string]: boolean;
+};
+
 export type MotionData = {
   start_time: number;
   motion?: number;
