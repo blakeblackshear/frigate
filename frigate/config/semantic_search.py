@@ -23,17 +23,23 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 class FaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable face recognition.")
+    min_score: float = Field(
+        title="Minimum face distance score required to save the attempt.",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
     threshold: float = Field(
-        default=170,
-        title="minimum face distance score required to be considered a match.",
+        default=0.9,
+        title="Minimum face distance score required to be considered a match.",
         gt=0.0,
         le=1.0,
     )
     min_area: int = Field(
         default=500, title="Min area of face box to consider running face recognition."
     )
-    debug_save_images: bool = Field(
-        default=False, title="Save images of face detections for debugging."
+    save_attempts: bool = Field(
+        default=True, title="Save images of face detections for training."
     )
 
 
