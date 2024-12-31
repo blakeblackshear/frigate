@@ -304,7 +304,7 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
           });
         }
       });
-  }, [name, image]);
+  }, [name, image, onRefresh]);
 
   return (
     <div
