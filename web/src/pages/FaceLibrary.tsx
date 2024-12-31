@@ -23,7 +23,8 @@ export default function FaceLibrary() {
   const { data: faceData, mutate: refreshFaces } = useSWR("faces");
 
   const faces = useMemo<string[]>(
-    () => (faceData ? Object.keys(faceData) : []),
+    () =>
+      faceData ? Object.keys(faceData).filter((face) => face != "debug") : [],
     [faceData],
   );
   const faceImages = useMemo<string[]>(
@@ -31,13 +32,24 @@ export default function FaceLibrary() {
     [pageToggle, faceData],
   );
 
+  const faceAttempts = useMemo<string[]>(
+    () => faceData?.["debug"] || [],
+    [faceData],
+  );
+
   useEffect(() => {
-    if (!pageToggle && faces) {
+    if (!pageToggle) {
+      if (faceAttempts.length > 0) {
+        setPageToggle("attempts");
+      } else if (faces) {
+        setPageToggle(faces[0]);
+      }
+    } else if (pageToggle == "attempts" && faceAttempts.length == 0) {
       setPageToggle(faces[0]);
     }
     // we need to listen on the value of the faces list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faces]);
+  }, [faceAttempts, faces]);
 
   // upload
 
@@ -58,7 +70,7 @@ export default function FaceLibrary() {
             setUpload(false);
             refreshFaces();
             toast.success(
-              "Successfully uploaded iamge. View the file in the /exports folder.",
+              "Successfully uploaded image. View the file in the /exports folder.",
               { position: "top-center" },
             );
           }
@@ -105,10 +117,24 @@ export default function FaceLibrary() {
                 }
               }}
             >
+              {faceAttempts.length > 0 && (
+                <>
+                  <ToggleGroupItem
+                    value="attempts"
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "attempts" ? "" : "*:text-muted-foreground"}`}
+                    data-nav-item="attempts"
+                    aria-label="Select attempts"
+                  >
+                    <div>Attempts</div>
+                  </ToggleGroupItem>
+                  <div>|</div>
+                </>
+              )}
+
               {Object.values(faces).map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
@@ -121,37 +147,61 @@ export default function FaceLibrary() {
           </div>
         </ScrollArea>
       </div>
-      {pageToggle && (
-        <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
-          {faceImages.map((image: string) => (
-            <FaceImage key={image} name={pageToggle} image={image} />
-          ))}
-          <Button
-            key="upload"
-            className="size-40"
-            onClick={() => setUpload(true)}
-          >
-            <LuImagePlus className="size-10" />
-          </Button>
-        </div>
-      )}
+      {pageToggle &&
+        (pageToggle == "attempts" ? (
+          <AttemptsGrid attemptImages={faceAttempts} onRefresh={refreshFaces} />
+        ) : (
+          <FaceGrid
+            faceImages={faceImages}
+            pageToggle={pageToggle}
+            setUpload={setUpload}
+            onRefresh={refreshFaces}
+          />
+        ))}
     </div>
   );
 }
 
-type FaceImageProps = {
-  name: string;
-  image: string;
+type AttemptsGridProps = {
+  attemptImages: string[];
+  onRefresh: () => void;
 };
-function FaceImage({ name, image }: FaceImageProps) {
+function AttemptsGrid({ attemptImages, onRefresh }: AttemptsGridProps) {
+  return (
+    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+      {attemptImages.map((image: string) => (
+        <FaceAttempt key={image} image={image} onRefresh={onRefresh} />
+      ))}
+    </div>
+  );
+}
+
+type FaceAttemptProps = {
+  image: string;
+  onRefresh: () => void;
+};
+function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
   const [hovered, setHovered] = useState(false);
+
+  const data = useMemo(() => {
+    const parts = image.split("-");
+
+    return {
+      eventId: `${parts[0]}-${parts[1]}`,
+      name: parts[2],
+      score: parts[3],
+    };
+  }, [image]);
 
   const onDelete = useCallback(() => {
     axios
-      .post(`/faces/${name}/delete`, { ids: [image] })
+      .post(`/faces/debug/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.error(`Successfully deleted face.`, { position: "top-center" });
+          toast.success(`Successfully deleted face.`, {
+            position: "top-center",
+          });
+          onRefresh();
         }
       })
       .catch((error) => {
@@ -165,7 +215,96 @@ function FaceImage({ name, image }: FaceImageProps) {
           });
         }
       });
-  }, [name, image]);
+  }, [image, onRefresh]);
+
+  return (
+    <div
+      className="relative h-min"
+      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
+      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
+      onClick={isDesktop ? undefined : () => setHovered(!hovered)}
+    >
+      {hovered && (
+        <div className="absolute right-1 top-1">
+          <Chip
+            className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+            onClick={() => onDelete()}
+          >
+            <LuTrash className="size-4 fill-destructive text-destructive" />
+          </Chip>
+        </div>
+      )}
+      <div className="rounded-md bg-secondary">
+        <img
+          className="h-40 rounded-md"
+          src={`${baseUrl}clips/faces/debug/${image}`}
+        />
+        <div className="p-2">{`${data.name}: ${data.score}`}</div>
+      </div>
+    </div>
+  );
+}
+
+type FaceGridProps = {
+  faceImages: string[];
+  pageToggle: string;
+  setUpload: (upload: boolean) => void;
+  onRefresh: () => void;
+};
+function FaceGrid({
+  faceImages,
+  pageToggle,
+  setUpload,
+  onRefresh,
+}: FaceGridProps) {
+  return (
+    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+      {faceImages.map((image: string) => (
+        <FaceImage
+          key={image}
+          name={pageToggle}
+          image={image}
+          onRefresh={onRefresh}
+        />
+      ))}
+      <Button key="upload" className="size-40" onClick={() => setUpload(true)}>
+        <LuImagePlus className="size-10" />
+      </Button>
+    </div>
+  );
+}
+
+type FaceImageProps = {
+  name: string;
+  image: string;
+  onRefresh: () => void;
+};
+function FaceImage({ name, image, onRefresh }: FaceImageProps) {
+  const [hovered, setHovered] = useState(false);
+
+  const onDelete = useCallback(() => {
+    axios
+      .post(`/faces/${name}/delete`, { ids: [image] })
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success(`Successfully deleted face.`, {
+            position: "top-center",
+          });
+          onRefresh();
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to delete: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to delete: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [name, image, onRefresh]);
 
   return (
     <div
