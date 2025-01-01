@@ -5,7 +5,7 @@ title: Live View
 
 Frigate intelligently displays your camera streams on the Live view dashboard. By default, Frigate employs "smart streaming" where camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion or objects are detected, cameras seamlessly switch to a live stream.
 
-## Live View technologies
+### Live View technologies
 
 Frigate intelligently uses three different streaming technologies to display your camera streams on the dashboard and the single camera view, switching between available modes based on network bandwidth, player errors, or required features like two-way talk. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
@@ -53,23 +53,30 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-In Frigate 0.16 and later, you can edit your configuration to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This settings is _per device_ and is saved in your device's local storage.
+In version 0.16 and later, you can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
 
-Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard. The default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` for streaming.
+Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
+
+::: note
+
+Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` when playing live streams from your cameras.
+
+:::
 
 Configure the `streams` option with a "friendly name" for your stream followed by the go2rtc stream name.
 
-Go2rtc is required to use this feature. You cannot specify paths in the `streams` list, only go2rtc stream names.
+Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` list, only go2rtc stream names.
 
 ```yaml
 go2rtc:
   streams:
     test_cam:
-      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
+      - rtsp://192.168.1.5:554/live_main # <- stream which supports video & aac audio.
       - "ffmpeg:test_cam#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
     test_cam_sub:
-      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
-      - "ffmpeg:test_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
+      - rtsp://192.168.1.5:554/live_sub # <- stream which supports video & aac audio.
+    test_cam_another_sub:
+      - rtsp://192.168.1.5:554/live_alt # <- stream which supports video & aac audio.
 
 cameras:
   test_cam:
@@ -89,6 +96,7 @@ cameras:
       streams: # <--- Multiple streams for Frigate 0.16 and later
         - Main Stream: test_cam
         - Sub Stream: test_cam_sub
+        - Special Stream: test_cam_another_sub
 ```
 
 ### WebRTC extra configuration:
@@ -169,23 +177,23 @@ The default dashboard ("All Cameras") will always use Smart Streaming and the fi
 1. Why don't I have audio in my Live view?
    You must use go2rtc to hear audio in your live streams. If you have go2rtc already configured, you need to ensure your camera is sending AAC audio. If you can't change your camera's audio codec, you need to [transcode the audio to AAC](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) using go2rtc.
 
-   Note that the low bandwidth mode player is a video-only stream. You should not expect to hear audio, even if you've set up go2rtc.
+   Note that the low bandwidth mode player is a video-only stream. You should not expect to hear audio when in low bandwidth mode, even if you've set up go2rtc.
 
 2. Frigate 0.16 shows that my live stream is in "low bandwidth mode". What does this mean?
    Frigate 0.14 and later intelligently selects the live streaming technology based on a number of factors (user-selected modes like two-way talk, camera settings, browser capabilities, available bandwidth) and prioritizes showing an actual up-to-date live view of your camera's stream as quickly as possible.
 
-   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI calls "low bandwidth mode". You can try using the "reset" button to force a reload of your stream.
+   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI calls "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. You can also try using the "reset" button to force a reload of your stream.
 
-   If you are still having issues with Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the recommendations above.
+   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the recommendations above or ensure you have enough bandwidth available.
 
 3. It doesn't seem like my cameras are streaming on the Live dashboard. Why?
-   On the default Live dashboard, your camera images will update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a full-resolution live stream.
+   On the default Live dashboard ("All Cameras"), your camera images will update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any activity is detected, cameras seamlessly switch to a full-resolution live stream. If you want to customize this behavior, use a camera group.
 
 4. I see a strange diagonal line on my live view, but my recordings look fine. How can I fix it?
-   This is caused by incorrect dimensions set in your detect width or height (or incorrectly auto-detected), causing the jsmpeg player's rendering engine to display a slightly distorted image. You should enlarge the width and height of your `detect` resolution up to a standard aspect ratio (example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). If changing the resolution to match a standard 4:3, 16:9, or 32:9 aspect ratio does not solve the issue, you can enable "compatibility mode" in your camera group dashboard's stream settings. Depending on your browser and device, more than a few cameras in compatibility mode may not be supported, so only use this option if changing your `detect` width and height fails to resolve the color artifacts and diagonal line.
+   This is caused by incorrect dimensions set in your detect width or height (or incorrectly auto-detected), causing the jsmpeg player's rendering engine to display a slightly distorted image. You should enlarge the width and height of your `detect` resolution up to a standard aspect ratio (example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). If changing the resolution to match a standard (4:3, 16:9, or 32:9, etc) aspect ratio does not solve the issue, you can enable "compatibility mode" in your camera group dashboard's stream settings. Depending on your browser and device, more than a few cameras in compatibility mode may not be supported, so only use this option if changing your `detect` width and height fails to resolve the color artifacts and diagonal line.
 
 5. How does "smart streaming" work?
-   This feature was introduced in Frigate 0.14 with the Live dashboard. Because a static image of a scene looks exactly the same as a live stream with no motion or activity, smart streaming updates your camera images once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
+   This feature was introduced in Frigate 0.14 with the Live dashboard. Because a static image of a scene looks exactly the same as a live stream with no motion or activity, smart streaming updates your camera images once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any activity (motion or object/audio detection) occurs, cameras seamlessly switch to a live stream.
 
    This static image is pulled from the stream defined in your config with the `detect` role. When activity is detected, images from the `detect` stream immediately begin updating at ~5 frames per second until the live player is loaded and begins playing. This usually only takes a second or two. If the live player times out, buffers, or has streaming errors, the jsmpeg player is loaded and plays a video-only stream from the `detect` role. When activity ends, the players are destroyed and a static image is displayed until activity is detected again, and the process repeats.
 
