@@ -517,7 +517,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         if self.config.face_recognition.save_attempts:
             # write face to library
-            folder = os.path.join(FACE_DIR, "debug")
+            folder = os.path.join(FACE_DIR, "train")
             file = os.path.join(folder, f"{id}-{sub_label}-{score}-{face_score}.webp")
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, face_frame)
