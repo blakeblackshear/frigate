@@ -25,6 +25,12 @@ import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
+  // title
+
+  useEffect(() => {
+    document.title = "Face Library - Frigate";
+  }, []);
+
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
