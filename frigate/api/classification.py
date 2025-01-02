@@ -2,6 +2,9 @@
 
 import logging
 import os
+import random
+import shutil
+import string
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
@@ -35,6 +38,38 @@ async def register_face(request: Request, name: str, file: UploadFile):
     return JSONResponse(
         status_code=200,
         content={"success": True, "message": "Successfully registered face."},
+    )
+
+
+@router.post("/faces/{name}/train")
+def train_face(name: str, body: dict = None):
+    json: dict[str, any] = body or {}
+    file_name = sanitize_filename(json.get("training_file", ""))
+    training_file = os.path.join(FACE_DIR, f"train/{file_name}")
+
+    if not file_name or not os.path.isfile(training_file):
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Invalid filename or no file exists: {file_name}",
+                }
+            ),
+            status_code=404,
+        )
+
+    rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    new_name = f"{name}-{rand_id}.webp"
+    new_file = os.path.join(FACE_DIR, f"{name}/{new_name}")
+    shutil.move(training_file, new_file)
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Successfully saved {file_name} as {new_name}.",
+            }
+        ),
+        status_code=200,
     )
 
 

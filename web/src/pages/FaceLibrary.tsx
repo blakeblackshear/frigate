@@ -8,14 +8,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { LuImagePlus, LuTrash } from "react-icons/lu";
+import { LuImagePlus, LuTrash, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -126,12 +125,12 @@ export default function FaceLibrary() {
               {trainImages.length > 0 && (
                 <>
                   <ToggleGroupItem
-                    value="attempts"
-                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "attempts" ? "" : "*:text-muted-foreground"}`}
-                    data-nav-item="attempts"
-                    aria-label="Select attempts"
+                    value="train"
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+                    data-nav-item="train"
+                    aria-label="Select train"
                   >
-                    <div>Attempts</div>
+                    <div>Train</div>
                   </ToggleGroupItem>
                   <div>|</div>
                 </>
@@ -154,7 +153,7 @@ export default function FaceLibrary() {
         </ScrollArea>
       </div>
       {pageToggle &&
-        (pageToggle == "attempts" ? (
+        (pageToggle == "train" ? (
           <TrainingGrid attemptImages={trainImages} onRefresh={refreshFaces} />
         ) : (
           <FaceGrid
@@ -187,8 +186,6 @@ type FaceAttemptProps = {
   onRefresh: () => void;
 };
 function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
-  const [hovered, setHovered] = useState(false);
-
   const data = useMemo(() => {
     const parts = image.split("-");
 
@@ -224,33 +221,28 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
   }, [image, onRefresh]);
 
   return (
-    <div
-      className="relative h-min"
-      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
-      onClick={isDesktop ? undefined : () => setHovered(!hovered)}
-    >
-      {hovered && (
-        <Tooltip>
-          <div className="absolute right-1 top-1">
-            <TooltipTrigger>
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() => onDelete()}
-              >
-                <LuTrash className="size-4 fill-destructive text-destructive" />
-              </Chip>
-            </TooltipTrigger>
-            <TooltipContent>Delete Face Attempt</TooltipContent>
+    <div className="relative flex flex-col rounded-lg">
+      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="h-40" src={`${baseUrl}clips/faces/train/${image}`} />
+      </div>
+      <div className="rounded-b-lg bg-card p-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="capitalize">{data.name}</div>
+            <div>{Number.parseFloat(data.score) * 100}%</div>
           </div>
-        </Tooltip>
-      )}
-      <div className="rounded-md bg-secondary">
-        <img
-          className="h-40 rounded-md"
-          src={`${baseUrl}clips/faces/train/${image}`}
-        />
-        <div className="p-2">{`${data.name}: ${data.score}`}</div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={onDelete}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Face Attempt</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -291,8 +283,6 @@ type FaceImageProps = {
   onRefresh: () => void;
 };
 function FaceImage({ name, image, onRefresh }: FaceImageProps) {
-  const [hovered, setHovered] = useState(false);
-
   const onDelete = useCallback(() => {
     axios
       .post(`/faces/${name}/delete`, { ids: [image] })
@@ -318,31 +308,28 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
   }, [name, image, onRefresh]);
 
   return (
-    <div
-      className="relative h-40"
-      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
-      onClick={isDesktop ? undefined : () => setHovered(!hovered)}
-    >
-      {hovered && (
-        <Tooltip>
-          <div className="absolute right-1 top-1">
-            <TooltipTrigger>
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() => onDelete()}
-              >
-                <LuTrash className="size-4 fill-destructive text-destructive" />
-              </Chip>
-            </TooltipTrigger>
-            <TooltipContent>Delete Face</TooltipContent>
+    <div className="relative flex flex-col rounded-lg">
+      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
+      </div>
+      <div className="rounded-b-lg bg-card p-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="capitalize">{name}</div>
           </div>
-        </Tooltip>
-      )}
-      <img
-        className="h-40 rounded-md"
-        src={`${baseUrl}clips/faces/${name}/${image}`}
-      />
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={onDelete}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Face Attempt</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
