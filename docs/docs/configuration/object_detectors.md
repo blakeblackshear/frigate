@@ -144,7 +144,9 @@ detectors:
 
 #### SSDLite MobileNet v2
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. 
+
+Use the model configuration shown below when using the OpenVINO detector with the default OpenVINO model:
 
 ```yaml
 detectors:
@@ -254,6 +256,7 @@ yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
 yolov7-640
+yolov7-416
 yolov7-320
 yolov7x-640
 yolov7x-320
@@ -281,6 +284,8 @@ frigate:
 The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
+
+Use the config below to work with generated TRT models:
 
 ```yaml
 detectors:
