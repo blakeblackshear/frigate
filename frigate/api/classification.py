@@ -51,7 +51,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
 def train_face(name: str, body: dict = None):
     json: dict[str, any] = body or {}
     training_file = os.path.join(
-        FACE_DIR, f"train/{sanitize_filename(json.get("training_file", ""))}"
+        FACE_DIR, f"train/{sanitize_filename(json.get('training_file', ''))}"
     )
 
     if not training_file or not os.path.isfile(training_file):
