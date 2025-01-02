@@ -21,7 +21,13 @@ class OpenAIClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        return OpenAI(api_key=self.genai_config.api_key)
+
+        if self.genai_config.base_url == "":
+            self.genai_config.base_url = None
+
+        return OpenAI(
+            api_key=self.genai_config.api_key, base_url=self.genai_config.base_url
+        )
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to OpenAI."""
