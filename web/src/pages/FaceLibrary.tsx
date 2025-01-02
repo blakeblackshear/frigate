@@ -1,7 +1,14 @@
 import { baseUrl } from "@/api/baseUrl";
-import Chip from "@/components/indicators/Chip";
+import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,8 +20,7 @@ import {
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop } from "react-device-detect";
-import { LuImagePlus, LuTrash, LuTrash2 } from "react-icons/lu";
+import { LuImagePlus, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -154,7 +160,11 @@ export default function FaceLibrary() {
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (
-          <TrainingGrid attemptImages={trainImages} onRefresh={refreshFaces} />
+          <TrainingGrid
+            attemptImages={trainImages}
+            faceNames={faces}
+            onRefresh={refreshFaces}
+          />
         ) : (
           <FaceGrid
             faceImages={faceImages}
@@ -169,13 +179,23 @@ export default function FaceLibrary() {
 
 type TrainingGridProps = {
   attemptImages: string[];
+  faceNames: string[];
   onRefresh: () => void;
 };
-function TrainingGrid({ attemptImages, onRefresh }: TrainingGridProps) {
+function TrainingGrid({
+  attemptImages,
+  faceNames,
+  onRefresh,
+}: TrainingGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {attemptImages.map((image: string) => (
-        <FaceAttempt key={image} image={image} onRefresh={onRefresh} />
+        <FaceAttempt
+          key={image}
+          image={image}
+          faceNames={faceNames}
+          onRefresh={onRefresh}
+        />
       ))}
     </div>
   );
@@ -183,9 +203,10 @@ function TrainingGrid({ attemptImages, onRefresh }: TrainingGridProps) {
 
 type FaceAttemptProps = {
   image: string;
+  faceNames: string[];
   onRefresh: () => void;
 };
-function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
+function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
   const data = useMemo(() => {
     const parts = image.split("-");
 
@@ -195,6 +216,33 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
       score: parts[3],
     };
   }, [image]);
+
+  const onTrainAttempt = useCallback(
+    (trainName: string) => {
+      axios
+        .post(`/faces/train/${trainName}/classify`, { training_file: image })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(`Successfully trained face.`, {
+              position: "top-center",
+            });
+            onRefresh();
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(`Failed to train: ${error.response.data.message}`, {
+              position: "top-center",
+            });
+          } else {
+            toast.error(`Failed to train: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
+    },
+    [image, onRefresh],
+  );
 
   const onDelete = useCallback(() => {
     axios
@@ -232,6 +280,28 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
             <div>{Number.parseFloat(data.score) * 100}%</div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <TooltipTrigger>
+                    <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                  </TooltipTrigger>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Train Face as:</DropdownMenuLabel>
+                  {faceNames.map((faceName) => (
+                    <DropdownMenuItem
+                      key={faceName}
+                      className="cursor-pointer capitalize"
+                      onClick={() => onTrainAttempt(faceName)}
+                    >
+                      {faceName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <TooltipContent>Train Face as Person</TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2

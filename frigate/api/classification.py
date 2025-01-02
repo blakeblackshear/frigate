@@ -25,7 +25,13 @@ def get_faces():
 
     for name in os.listdir(FACE_DIR):
         face_dict[name] = []
-        for file in os.listdir(os.path.join(FACE_DIR, name)):
+
+        face_dir = os.path.join(FACE_DIR, name)
+
+        if not os.path.isdir(face_dir):
+            continue
+
+        for file in os.listdir(face_dir):
             face_dict[name].append(file)
 
     return JSONResponse(status_code=200, content=face_dict)
@@ -41,18 +47,17 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.post("/faces/{name}/train")
+@router.post("/faces/train/{name}/classify")
 def train_face(name: str, body: dict = None):
     json: dict[str, any] = body or {}
-    file_name = sanitize_filename(json.get("training_file", ""))
-    training_file = os.path.join(FACE_DIR, f"train/{file_name}")
+    training_file = os.path.join(FACE_DIR, f"train/{sanitize_filename(json.get("training_file", ""))}")
 
-    if not file_name or not os.path.isfile(training_file):
+    if not training_file or not os.path.isfile(training_file):
         return JSONResponse(
             content=(
                 {
                     "success": False,
-                    "message": f"Invalid filename or no file exists: {file_name}",
+                    "message": f"Invalid filename or no file exists: {training_file}",
                 }
             ),
             status_code=404,
@@ -66,7 +71,7 @@ def train_face(name: str, body: dict = None):
         content=(
             {
                 "success": True,
-                "message": f"Successfully saved {file_name} as {new_name}.",
+                "message": f"Successfully saved {training_file} as {new_name}.",
             }
         ),
         status_code=200,
