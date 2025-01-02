@@ -165,7 +165,9 @@ class FaceClassificationModel:
         self.landmark_detector = cv2.face.createFacemarkLBF()
 
         if os.path.isfile("/config/model_cache/facedet/landmarkdet.yaml"):
-            self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
+            self.landmark_detector.loadModel(
+                "/config/model_cache/facedet/landmarkdet.yaml"
+            )
 
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
