@@ -74,6 +74,7 @@ class OnvifConfig(FrigateBaseModel):
     port: int = Field(default=8000, title="Onvif Port")
     user: Optional[EnvString] = Field(default=None, title="Onvif Username")
     password: Optional[EnvString] = Field(default=None, title="Onvif Password")
+    tls_insecure: bool = Field(default=False, title="Onvif Disable TLS verification")
     autotracking: PtzAutotrackConfig = Field(
         default_factory=PtzAutotrackConfig,
         title="PTZ auto tracking config.",

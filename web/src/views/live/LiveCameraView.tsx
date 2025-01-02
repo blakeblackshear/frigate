@@ -17,7 +17,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
@@ -29,6 +34,7 @@ import {
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -518,6 +524,53 @@ export default function LiveCameraView({
   );
 }
 
+type TooltipButtonProps = {
+  label: string;
+  onClick?: () => void;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  onMouseUp?: (e: React.MouseEvent) => void;
+  onTouchStart?: (e: React.TouchEvent) => void;
+  onTouchEnd?: (e: React.TouchEvent) => void;
+  children: ReactNode;
+  className?: string;
+};
+
+function TooltipButton({
+  label,
+  onClick,
+  onMouseDown,
+  onMouseUp,
+  onTouchStart,
+  onTouchEnd,
+  children,
+  className,
+  ...props
+}: TooltipButtonProps) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            aria-label={label}
+            onClick={onClick}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            className={className}
+            {...props}
+          >
+            {children}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 function PtzControlPanel({
   camera,
   clickOverlay,
@@ -611,8 +664,8 @@ function PtzControlPanel({
     >
       {ptz?.features?.includes("pt") && (
         <>
-          <Button
-            aria-label="Move PTZ camera to the left"
+          <TooltipButton
+            label="Move camera left"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_LEFT");
@@ -625,9 +678,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleLeft />
-          </Button>
-          <Button
-            aria-label="Move PTZ camera up"
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera up"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_UP");
@@ -640,9 +693,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleUp />
-          </Button>
-          <Button
-            aria-label="Move PTZ camera down"
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera down"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_DOWN");
@@ -655,9 +708,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleDown />
-          </Button>
-          <Button
-            aria-label="Move PTZ camera to the right"
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera right"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_RIGHT");
@@ -670,13 +723,13 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleRight />
-          </Button>
+          </TooltipButton>
         </>
       )}
       {ptz?.features?.includes("zoom") && (
         <>
-          <Button
-            aria-label="Zoom PTZ camera in"
+          <TooltipButton
+            label="Zoom in"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_IN");
@@ -689,9 +742,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <MdZoomIn />
-          </Button>
-          <Button
-            aria-label="Zoom PTZ camera out"
+          </TooltipButton>
+          <TooltipButton
+            label="Zoom out"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_OUT");
@@ -704,45 +757,60 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <MdZoomOut />
-          </Button>
+          </TooltipButton>
         </>
       )}
+
       {ptz?.features?.includes("pt-r-fov") && (
-        <>
-          <Button
-            className={`${clickOverlay ? "text-selected" : "text-primary"}`}
-            aria-label="Click in the frame to center the PTZ camera"
-            onClick={() => setClickOverlay(!clickOverlay)}
-          >
-            <TbViewfinder />
-          </Button>
-        </>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className={`${clickOverlay ? "text-selected" : "text-primary"}`}
+                aria-label="Click in the frame to center the camera"
+                onClick={() => setClickOverlay(!clickOverlay)}
+              >
+                <TbViewfinder />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{clickOverlay ? "Disable" : "Enable"} click to move</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <DropdownMenu modal={!isDesktop}>
-          <DropdownMenuTrigger asChild>
-            <Button aria-label="PTZ camera presets">
-              <BsThreeDotsVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="scrollbar-container max-h-[40dvh] overflow-y-auto"
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            {ptz?.presets.map((preset) => {
-              return (
-                <DropdownMenuItem
-                  key={preset}
-                  aria-label={preset}
-                  className="cursor-pointer"
-                  onSelect={() => sendPtz(`preset_${preset}`)}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenu modal={!isDesktop}>
+                <DropdownMenuTrigger asChild>
+                  <Button aria-label="PTZ camera presets">
+                    <BsThreeDotsVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="scrollbar-container max-h-[40dvh] overflow-y-auto"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  {preset}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                  {ptz?.presets.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset}
+                      aria-label={preset}
+                      className="cursor-pointer"
+                      onSelect={() => sendPtz(`preset_${preset}`)}
+                    >
+                      {preset}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>PTZ camera presets</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );

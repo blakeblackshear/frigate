@@ -76,7 +76,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-        uses: actions/setup-python@v5.1.0
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
