@@ -1,19 +1,36 @@
 import { baseUrl } from "@/api/baseUrl";
-import Chip from "@/components/indicators/Chip";
+import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop } from "react-device-detect";
-import { LuImagePlus, LuTrash } from "react-icons/lu";
+import { LuImagePlus, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
+  // title
+
+  useEffect(() => {
+    document.title = "Face Library - Frigate";
+  }, []);
+
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +41,7 @@ export default function FaceLibrary() {
 
   const faces = useMemo<string[]>(
     () =>
-      faceData ? Object.keys(faceData).filter((face) => face != "debug") : [],
+      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
     [faceData],
   );
   const faceImages = useMemo<string[]>(
@@ -32,24 +49,24 @@ export default function FaceLibrary() {
     [pageToggle, faceData],
   );
 
-  const faceAttempts = useMemo<string[]>(
-    () => faceData?.["debug"] || [],
+  const trainImages = useMemo<string[]>(
+    () => faceData?.["train"] || [],
     [faceData],
   );
 
   useEffect(() => {
     if (!pageToggle) {
-      if (faceAttempts.length > 0) {
-        setPageToggle("attempts");
+      if (trainImages.length > 0) {
+        setPageToggle("train");
       } else if (faces) {
         setPageToggle(faces[0]);
       }
-    } else if (pageToggle == "attempts" && faceAttempts.length == 0) {
+    } else if (pageToggle == "train" && trainImages.length == 0) {
       setPageToggle(faces[0]);
     }
     // we need to listen on the value of the faces list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faceAttempts, faces]);
+  }, [trainImages, faces]);
 
   // upload
 
@@ -117,15 +134,15 @@ export default function FaceLibrary() {
                 }
               }}
             >
-              {faceAttempts.length > 0 && (
+              {trainImages.length > 0 && (
                 <>
                   <ToggleGroupItem
-                    value="attempts"
-                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "attempts" ? "" : "*:text-muted-foreground"}`}
-                    data-nav-item="attempts"
-                    aria-label="Select attempts"
+                    value="train"
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+                    data-nav-item="train"
+                    aria-label="Select train"
                   >
-                    <div>Attempts</div>
+                    <div>Train</div>
                   </ToggleGroupItem>
                   <div>|</div>
                 </>
@@ -148,8 +165,12 @@ export default function FaceLibrary() {
         </ScrollArea>
       </div>
       {pageToggle &&
-        (pageToggle == "attempts" ? (
-          <AttemptsGrid attemptImages={faceAttempts} onRefresh={refreshFaces} />
+        (pageToggle == "train" ? (
+          <TrainingGrid
+            attemptImages={trainImages}
+            faceNames={faces}
+            onRefresh={refreshFaces}
+          />
         ) : (
           <FaceGrid
             faceImages={faceImages}
@@ -162,15 +183,25 @@ export default function FaceLibrary() {
   );
 }
 
-type AttemptsGridProps = {
+type TrainingGridProps = {
   attemptImages: string[];
+  faceNames: string[];
   onRefresh: () => void;
 };
-function AttemptsGrid({ attemptImages, onRefresh }: AttemptsGridProps) {
+function TrainingGrid({
+  attemptImages,
+  faceNames,
+  onRefresh,
+}: TrainingGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {attemptImages.map((image: string) => (
-        <FaceAttempt key={image} image={image} onRefresh={onRefresh} />
+        <FaceAttempt
+          key={image}
+          image={image}
+          faceNames={faceNames}
+          onRefresh={onRefresh}
+        />
       ))}
     </div>
   );
@@ -178,11 +209,10 @@ function AttemptsGrid({ attemptImages, onRefresh }: AttemptsGridProps) {
 
 type FaceAttemptProps = {
   image: string;
+  faceNames: string[];
   onRefresh: () => void;
 };
-function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
-  const [hovered, setHovered] = useState(false);
-
+function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
   const data = useMemo(() => {
     const parts = image.split("-");
 
@@ -193,9 +223,36 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
     };
   }, [image]);
 
+  const onTrainAttempt = useCallback(
+    (trainName: string) => {
+      axios
+        .post(`/faces/train/${trainName}/classify`, { training_file: image })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(`Successfully trained face.`, {
+              position: "top-center",
+            });
+            onRefresh();
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(`Failed to train: ${error.response.data.message}`, {
+              position: "top-center",
+            });
+          } else {
+            toast.error(`Failed to train: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
+    },
+    [image, onRefresh],
+  );
+
   const onDelete = useCallback(() => {
     axios
-      .post(`/faces/debug/delete`, { ids: [image] })
+      .post(`/faces/train/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
           toast.success(`Successfully deleted face.`, {
@@ -218,28 +275,50 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
   }, [image, onRefresh]);
 
   return (
-    <div
-      className="relative h-min"
-      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
-      onClick={isDesktop ? undefined : () => setHovered(!hovered)}
-    >
-      {hovered && (
-        <div className="absolute right-1 top-1">
-          <Chip
-            className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-            onClick={() => onDelete()}
-          >
-            <LuTrash className="size-4 fill-destructive text-destructive" />
-          </Chip>
+    <div className="relative flex flex-col rounded-lg">
+      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="h-40" src={`${baseUrl}clips/faces/train/${image}`} />
+      </div>
+      <div className="rounded-b-lg bg-card p-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="capitalize">{data.name}</div>
+            <div>{Number.parseFloat(data.score) * 100}%</div>
+          </div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <TooltipTrigger>
+                    <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                  </TooltipTrigger>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Train Face as:</DropdownMenuLabel>
+                  {faceNames.map((faceName) => (
+                    <DropdownMenuItem
+                      key={faceName}
+                      className="cursor-pointer capitalize"
+                      onClick={() => onTrainAttempt(faceName)}
+                    >
+                      {faceName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <TooltipContent>Train Face as Person</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={onDelete}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Face Attempt</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      )}
-      <div className="rounded-md bg-secondary">
-        <img
-          className="h-40 rounded-md"
-          src={`${baseUrl}clips/faces/debug/${image}`}
-        />
-        <div className="p-2">{`${data.name}: ${data.score}`}</div>
       </div>
     </div>
   );
@@ -280,8 +359,6 @@ type FaceImageProps = {
   onRefresh: () => void;
 };
 function FaceImage({ name, image, onRefresh }: FaceImageProps) {
-  const [hovered, setHovered] = useState(false);
-
   const onDelete = useCallback(() => {
     axios
       .post(`/faces/${name}/delete`, { ids: [image] })
@@ -307,26 +384,28 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
   }, [name, image, onRefresh]);
 
   return (
-    <div
-      className="relative h-40"
-      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
-      onClick={isDesktop ? undefined : () => setHovered(!hovered)}
-    >
-      {hovered && (
-        <div className="absolute right-1 top-1">
-          <Chip
-            className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-            onClick={() => onDelete()}
-          >
-            <LuTrash className="size-4 fill-destructive text-destructive" />
-          </Chip>
+    <div className="relative flex flex-col rounded-lg">
+      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
+      </div>
+      <div className="rounded-b-lg bg-card p-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="capitalize">{name}</div>
+          </div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={onDelete}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Face Attempt</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      )}
-      <img
-        className="h-40 rounded-md"
-        src={`${baseUrl}clips/faces/${name}/${image}`}
-      />
+      </div>
     </div>
   );
 }
