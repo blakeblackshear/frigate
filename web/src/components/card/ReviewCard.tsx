@@ -35,6 +35,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { buttonVariants } from "../ui/button";
+import { t } from "i18next";
 
 type ReviewCardProps = {
   event: ReviewSegment;

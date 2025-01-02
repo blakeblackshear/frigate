@@ -15,6 +15,7 @@ import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
