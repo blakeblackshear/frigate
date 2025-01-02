@@ -17,6 +17,7 @@ import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.comms.async_webpush_client import AsyncWebPushClient
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Dispatcher
@@ -26,7 +27,6 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
-from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.config import FrigateConfig
@@ -309,7 +309,7 @@ class FrigateApp:
         ]
 
         if notification_cameras:
-            comms.append(WebPushClient(self.config))
+            comms.append(AsyncWebPushClient(self.config, self.stop_event))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)
