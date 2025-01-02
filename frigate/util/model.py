@@ -163,7 +163,12 @@ class FaceClassificationModel:
         self.config = config
         self.db = db
         self.landmark_detector = cv2.face.createFacemarkLBF()
-        self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
+
+        if os.path.isfile("/config/model_cache/facedet/landmarkdet.yaml"):
+            self.landmark_detector.loadModel(
+                "/config/model_cache/facedet/landmarkdet.yaml"
+            )
+
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
                 radius=2, threshold=(1 - config.min_score) * 1000
@@ -178,13 +183,21 @@ class FaceClassificationModel:
 
         dir = "/media/frigate/clips/faces"
         for idx, name in enumerate(os.listdir(dir)):
-            if name == "debug":
+            if name == "train":
+                continue
+
+            face_folder = os.path.join(dir, name)
+
+            if not os.path.isdir(face_folder):
                 continue
 
             self.label_map[idx] = name
-            face_folder = os.path.join(dir, name)
             for image in os.listdir(face_folder):
                 img = cv2.imread(os.path.join(face_folder, image))
+
+                if img is None:
+                    continue
+
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 img = self.__align_face(img, img.shape[1], img.shape[0])
                 faces.append(img)
