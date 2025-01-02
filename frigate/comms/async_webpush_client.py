@@ -98,9 +98,6 @@ class AsyncWebPushClient(WebPushClient):
                             f"Failed to send notification to {notification.user} :: {resp.status_code}"
                         )
 
-                self.cleanup_registrations()
-                self.notification_queue.task_done()
-
             except queue.Empty:
                 continue
             except Exception as e:
