@@ -238,7 +238,7 @@
     "ui.menu.user.logout": "Logout",
 
     "ui.cameraGroup": "Camera Groups",
-    "ui.cameraGroup.add": "添加摄像头组",
+    "ui.cameraGroup.add": "Add camera groups",
     "ui.cameraGroup.edit": "Edit camera groups",
     "ui.cameraGroup.delete.confirm": "Confirm Delete",
     "ui.cameraGroup.delete.confirm.desc": "Are you sure you want to delete the camera group <em>{{name}}</em>?",
