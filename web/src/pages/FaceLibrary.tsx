@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +30,7 @@ export default function FaceLibrary() {
 
   const faces = useMemo<string[]>(
     () =>
-      faceData ? Object.keys(faceData).filter((face) => face != "debug") : [],
+      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
     [faceData],
   );
   const faceImages = useMemo<string[]>(
@@ -32,24 +38,24 @@ export default function FaceLibrary() {
     [pageToggle, faceData],
   );
 
-  const faceAttempts = useMemo<string[]>(
-    () => faceData?.["debug"] || [],
+  const trainImages = useMemo<string[]>(
+    () => faceData?.["train"] || [],
     [faceData],
   );
 
   useEffect(() => {
     if (!pageToggle) {
-      if (faceAttempts.length > 0) {
-        setPageToggle("attempts");
+      if (trainImages.length > 0) {
+        setPageToggle("train");
       } else if (faces) {
         setPageToggle(faces[0]);
       }
-    } else if (pageToggle == "attempts" && faceAttempts.length == 0) {
+    } else if (pageToggle == "train" && trainImages.length == 0) {
       setPageToggle(faces[0]);
     }
     // we need to listen on the value of the faces list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faceAttempts, faces]);
+  }, [trainImages, faces]);
 
   // upload
 
@@ -117,7 +123,7 @@ export default function FaceLibrary() {
                 }
               }}
             >
-              {faceAttempts.length > 0 && (
+              {trainImages.length > 0 && (
                 <>
                   <ToggleGroupItem
                     value="attempts"
@@ -149,7 +155,7 @@ export default function FaceLibrary() {
       </div>
       {pageToggle &&
         (pageToggle == "attempts" ? (
-          <AttemptsGrid attemptImages={faceAttempts} onRefresh={refreshFaces} />
+          <TrainingGrid attemptImages={trainImages} onRefresh={refreshFaces} />
         ) : (
           <FaceGrid
             faceImages={faceImages}
@@ -162,11 +168,11 @@ export default function FaceLibrary() {
   );
 }
 
-type AttemptsGridProps = {
+type TrainingGridProps = {
   attemptImages: string[];
   onRefresh: () => void;
 };
-function AttemptsGrid({ attemptImages, onRefresh }: AttemptsGridProps) {
+function TrainingGrid({ attemptImages, onRefresh }: TrainingGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {attemptImages.map((image: string) => (
@@ -195,7 +201,7 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
 
   const onDelete = useCallback(() => {
     axios
-      .post(`/faces/debug/delete`, { ids: [image] })
+      .post(`/faces/train/delete`, { ids: [image] })
       .then((resp) => {
         if (resp.status == 200) {
           toast.success(`Successfully deleted face.`, {
@@ -225,19 +231,24 @@ function FaceAttempt({ image, onRefresh }: FaceAttemptProps) {
       onClick={isDesktop ? undefined : () => setHovered(!hovered)}
     >
       {hovered && (
-        <div className="absolute right-1 top-1">
-          <Chip
-            className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-            onClick={() => onDelete()}
-          >
-            <LuTrash className="size-4 fill-destructive text-destructive" />
-          </Chip>
-        </div>
+        <Tooltip>
+          <div className="absolute right-1 top-1">
+            <TooltipTrigger>
+              <Chip
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                onClick={() => onDelete()}
+              >
+                <LuTrash className="size-4 fill-destructive text-destructive" />
+              </Chip>
+            </TooltipTrigger>
+            <TooltipContent>Delete Face Attempt</TooltipContent>
+          </div>
+        </Tooltip>
       )}
       <div className="rounded-md bg-secondary">
         <img
           className="h-40 rounded-md"
-          src={`${baseUrl}clips/faces/debug/${image}`}
+          src={`${baseUrl}clips/faces/train/${image}`}
         />
         <div className="p-2">{`${data.name}: ${data.score}`}</div>
       </div>
@@ -314,14 +325,19 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
       onClick={isDesktop ? undefined : () => setHovered(!hovered)}
     >
       {hovered && (
-        <div className="absolute right-1 top-1">
-          <Chip
-            className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-            onClick={() => onDelete()}
-          >
-            <LuTrash className="size-4 fill-destructive text-destructive" />
-          </Chip>
-        </div>
+        <Tooltip>
+          <div className="absolute right-1 top-1">
+            <TooltipTrigger>
+              <Chip
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                onClick={() => onDelete()}
+              >
+                <LuTrash className="size-4 fill-destructive text-destructive" />
+              </Chip>
+            </TooltipTrigger>
+            <TooltipContent>Delete Face</TooltipContent>
+          </div>
+        </Tooltip>
       )}
       <img
         className="h-40 rounded-md"
