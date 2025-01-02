@@ -117,25 +117,27 @@ auth:
   hash_iterations: 600000
 
 # Optional: model modifications
+# NOTE: The default values are for the EdgeTPU detector.
+# Other detectors will require the model config to be set.
 model:
-  # Optional: path to the model (default: automatic based on detector)
+  # Required: path to the model (default: automatic based on detector)
   path: /edgetpu_model.tflite
-  # Optional: path to the labelmap (default: shown below)
+  # Required: path to the labelmap (default: shown below)
   labelmap_path: /labelmap.txt
   # Required: Object detection model input width (default: shown below)
   width: 320
   # Required: Object detection model input height (default: shown below)
   height: 320
-  # Optional: Object detection model input colorspace
+  # Required: Object detection model input colorspace
   # Valid values are rgb, bgr, or yuv. (default: shown below)
   input_pixel_format: rgb
-  # Optional: Object detection model input tensor format
+  # Required: Object detection model input tensor format
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
-  # Optional: Object detection model type, currently only used with the OpenVINO detector
+  # Required: Object detection model type, currently only used with the OpenVINO detector
   # Valid values are ssd, yolox, yolonas (default: shown below)
   model_type: ssd
-  # Optional: Label name modifications. These are merged into the standard labelmap.
+  # Required: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
   # Optional: Map of object labels to their attribute labels (default: depends on model)
