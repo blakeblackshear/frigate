@@ -35,13 +35,13 @@ import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
-import SearchSettingsView from "@/views/settings/SearchSettingsView";
+import ExploreSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import { t } from "i18next";
 
 const allSettingsViews = [
   "uiSettings",
-  "searchSettings",
+  "exploreSettings",
   "cameraSettings",
   "masksAndZones",
   "motionTuner",
@@ -178,8 +178,8 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
         {page == "uiSettings" && <UiSettingsView />}
-        {page == "searchSettings" && (
-          <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
+        {page == "exploreSettings" && (
+          <ExploreSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />

@@ -33,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Trans } from "react-i18next";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -91,7 +92,7 @@ export default function SearchFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      More Filters
+      <Trans>ui.filter.more</Trans>
     </Button>
   );
   const content = (
@@ -165,7 +166,7 @@ export default function SearchFilterDialog({
             setOpen(false);
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button
           aria-label="Reset filters to default values"
@@ -183,7 +184,7 @@ export default function SearchFilterDialog({
             }));
           }}
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </div>
@@ -260,7 +261,9 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <div className="text-lg">Time Range</div>
+      <div className="text-lg">
+        <Trans>ui.filter.timeRange</Trans>
+      </div>
       <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
@@ -358,7 +361,9 @@ export function ZoneFilterContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <div className="text-lg">Zones</div>
+        <div className="text-lg">
+          <Trans>ui.filter.zones</Trans>
+        </div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -366,7 +371,7 @@ export function ZoneFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                <Trans>ui.filter.allZones</Trans>
               </Label>
               <Switch
                 className="ml-1"
@@ -424,10 +429,12 @@ export function SubFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="text-lg">Sub Labels</div>
+      <div className="text-lg">
+        <Trans>ui.filter.subLabels</Trans>
+      </div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
-          All Sub Labels
+          <Trans>ui.filter.allSubLabels</Trans>
         </Label>
         <Switch
           className="ml-1"
@@ -482,7 +489,9 @@ export function ScoreFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Score</div>
+      <div className="mb-3 text-lg">
+        <Trans>ui.filter.score</Trans>
+      </div>
       <div className="flex items-center gap-1">
         <Input
           className="w-14 text-center"
@@ -568,7 +577,9 @@ export function SnapshotClipFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Features</div>
+      <div className="mb-3 text-lg">
+        <Trans>ui.filter.features</Trans>
+      </div>
 
       <div className="my-2.5 space-y-1">
         <div className="flex items-center justify-between">
@@ -590,7 +601,7 @@ export function SnapshotClipFilterContent({
               htmlFor="snapshot-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a snapshot
+              <Trans>ui.filter.features.hasSnapshot</Trans>
             </Label>
           </div>
           <ToggleGroup
@@ -611,14 +622,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              <Trans>ui.yes</Trans>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              <Trans>ui.no</Trans>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -652,12 +663,9 @@ export function SnapshotClipFilterContent({
                       side="left"
                       sideOffset={5}
                     >
-                      You must first filter on tracked objects that have a
-                      snapshot.
-                      <br />
-                      <br />
-                      Tracked objects without a snapshot cannot be submitted to
-                      Frigate+.
+                      <Trans>
+                        ui.filter.features.submittedToFrigatePlus.tips
+                      </Trans>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -666,7 +674,7 @@ export function SnapshotClipFilterContent({
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
               >
-                Submitted to Frigate+
+                <Trans>ui.filter.features.submittedToFrigatePlus</Trans>
               </Label>
             </div>
             <ToggleGroup
@@ -692,14 +700,14 @@ export function SnapshotClipFilterContent({
                 aria-label="Yes"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                Yes
+                <Trans>ui.yes</Trans>
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
                 aria-label="No"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                No
+                <Trans>ui.no</Trans>
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -728,7 +736,7 @@ export function SnapshotClipFilterContent({
               htmlFor="clip-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a video clip
+              <Trans>ui.filter.features.hasVideoClip</Trans>
             </Label>
           </div>
           <ToggleGroup
@@ -747,14 +755,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              <Trans>ui.yes</Trans>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              <Trans>ui.no</Trans>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

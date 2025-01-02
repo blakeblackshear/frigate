@@ -12,6 +12,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
+import { Trans } from "react-i18next";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -247,7 +248,7 @@ export default function DynamicVideoPlayer({
       )}
       {!isScrubbing && !isLoading && noRecording && (
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          No recordings found for this time
+          <Trans>ui.player.noRecordingsFoundForThisTime</Trans>
         </div>
       )}
     </>

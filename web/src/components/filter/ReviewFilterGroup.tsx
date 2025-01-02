@@ -354,7 +354,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        <Trans>ui.reviewFilter.filter</Trans>
+        <Trans>ui.filter</Trans>
       </div>
     </Button>
   );
@@ -462,7 +462,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans>ui.reviewFilter.filter.allLabels</Trans>
+            <Trans>ui.filter.allLabels</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -509,7 +509,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                <Trans>ui.reviewFilter.filter.allZones</Trans>
+                <Trans>ui.filter.allZones</Trans>
               </Label>
               <Switch
                 className="ml-1"

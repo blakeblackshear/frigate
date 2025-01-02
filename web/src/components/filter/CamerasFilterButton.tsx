@@ -13,6 +13,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
 import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -139,7 +140,7 @@ export function CamerasFilterContent({
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            Cameras
+            <Trans>ui.filter.allCameras.short</Trans>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -147,7 +148,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label="All Cameras"
+          label={t("ui.filter.allCameras")}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);
@@ -212,7 +213,7 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -221,7 +222,7 @@ export function CamerasFilterContent({
             updateCameraFilter(undefined);
           }}
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </>

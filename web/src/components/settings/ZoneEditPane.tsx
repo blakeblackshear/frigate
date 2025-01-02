@@ -321,7 +321,9 @@ export default function ZoneEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Zone - Frigate";
+    document.title = t(
+      "ui.settingView.masksAndZonesSettings.zone.documentTitle",
+    );
   }, []);
 
   if (!polygon) {

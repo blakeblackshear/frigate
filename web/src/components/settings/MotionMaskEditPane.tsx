@@ -204,7 +204,9 @@ export default function MotionMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Motion Mask - Frigate";
+    document.title = t(
+      "ui.settingView.masksAndZonesSettings.motionMasks.documentTitle",
+    );
   }, []);
 
   if (!polygon) {

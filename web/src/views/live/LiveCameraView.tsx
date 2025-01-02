@@ -412,7 +412,9 @@ export default function LiveCameraView({
                 >
                   <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                   {isDesktop && (
-                    <div className="text-secondary-foreground">Back</div>
+                    <div className="text-secondary-foreground">
+                      <Trans>ui.back</Trans>
+                    </div>
                   )}
                 </Button>
               )}

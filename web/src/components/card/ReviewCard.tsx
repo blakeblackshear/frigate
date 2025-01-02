@@ -82,10 +82,9 @@ export default function ReviewCard({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(
-            "Successfully started export. View the file in the /exports folder.",
-            { position: "top-center" },
-          );
+          toast.success(t("ui.dialog.export.toast.success"), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {

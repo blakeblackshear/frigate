@@ -475,8 +475,8 @@ export default function CameraSettingsView({
 
                       <div className="text-sm">
                         {watchedDetectionsZones &&
-                        watchedDetectionsZones.length > 0
-                          ? !selectDetections ? (
+                        watchedDetectionsZones.length > 0 ? (
+                          !selectDetections ? (
                             <Trans
                               i18nKey="ui.settingView.cameraSettings.reviewClassification.zoneObjectDetectionsTips"
                               values={{
@@ -513,7 +513,7 @@ export default function CameraSettingsView({
                               }}
                             />
                           )
-                         : (
+                        ) : (
                           <Trans
                             i18nKey="ui.settingView.cameraSettings.reviewClassification.objectDetectionsTips"
                             values={{

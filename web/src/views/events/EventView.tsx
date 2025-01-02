@@ -54,6 +54,7 @@ import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -194,10 +195,9 @@ export default function EventView({
         )
         .then((response) => {
           if (response.status == 200) {
-            toast.success(
-              "Successfully started export. View the file in the /exports folder.",
-              { position: "top-center" },
-            );
+            toast.success(t("ui.dialog.export.toast.success"), {
+              position: "top-center",
+            });
           }
         })
         .catch((error) => {

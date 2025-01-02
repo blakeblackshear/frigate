@@ -238,7 +238,9 @@ export default function ObjectMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Object Mask - Frigate";
+    document.title = t(
+      "ui.settingView.masksAndZonesSettings.objectMasks.documentTitle",
+    );
   }, []);
 
   if (!polygon) {

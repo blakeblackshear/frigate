@@ -32,16 +32,18 @@ i18n
     },
     keySeparator: false,
     parseMissingKeyHandler: (key: string) => {
-      console.debug("Missing key: " + key);
-      const parts = key.split('.');
+      const parts = key.split(".");
       if (parts.length > 1) {
-        if (parts[0] === 'object' || parts[0] === 'audio') {
-          return parts[1].replaceAll("_", " ").charAt(0).toUpperCase() + parts[1].slice(1);
+        if (parts[0] === "object" || parts[0] === "audio") {
+          return (
+            parts[1].replaceAll("_", " ").charAt(0).toUpperCase() +
+            parts[1].slice(1)
+          );
         }
         return parts[parts.length - 1];
       }
       return key;
-    }
+    },
   });
 
 export default i18n;
