@@ -7,19 +7,23 @@ FROM wheels as rk-wheels
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN sed -i "/https:\/\//d" /requirements-wheels.txt
+RUN sed -i "/onnxruntime/d" /requirements-wheels.txt
 RUN python3 -m pip config set global.break-system-packages true
 RUN pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
+RUN rm -rf /rk-wheels/opencv_python-*
 
 FROM deps AS rk-frigate
 ARG TARGETARCH
 
 RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
-    pip3 install -U /deps/rk-wheels/*.whl --break-system-packages
+    pip3 install --no-deps -U /deps/rk-wheels/*.whl --break-system-packages
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+COPY docker/rockchip/COCO /COCO
+COPY docker/rockchip/conv2rknn.py /opt/conv2rknn.py
 
-ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/librknnrt.so /usr/lib/
+ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.0/librknnrt.so /usr/lib/
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
