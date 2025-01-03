@@ -336,7 +336,7 @@ class CameraState:
                         "ratio": obj.obj_data["ratio"],
                         "score": obj.obj_data["score"],
                         "sub_label": sub_label,
-                        #"current_zones": obj.obj_data["current_zones"],
+                        "current_zones": obj.current_zones,
                     }
                 )
 
