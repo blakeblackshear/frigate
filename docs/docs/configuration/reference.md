@@ -244,6 +244,8 @@ ffmpeg:
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
   # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
   retry_interval: 10
+  # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
+  apple_compatibility: false
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
