@@ -167,7 +167,7 @@ class CameraConfig(FrigateBaseModel):
             record_args = get_ffmpeg_arg_list(
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
-                    self.ffmpeg.output_args._force_record_hvc1,
+                    self.ffmpeg.apple_compatibility,
                 )
                 or self.ffmpeg.output_args.record
             )

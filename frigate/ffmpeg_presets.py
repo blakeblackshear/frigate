@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any
 
 from frigate.const import (
+    FFMPEG_HVC1_ARGS,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
@@ -490,6 +491,6 @@ def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
 
     if force_record_hvc1:
         # Apple only supports HEVC if it is hvc1 (vs. hev1)
-        preset += ["-tag:v", "hvc1"]
+        preset += FFMPEG_HVC1_ARGS
 
     return preset
