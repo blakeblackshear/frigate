@@ -51,12 +51,14 @@ class ModelDownloader:
         download_path: str,
         file_names: List[str],
         download_func: Callable[[str], None],
+        complete_func: Callable[[], None] | None = None,
         silent: bool = False,
     ):
         self.model_name = model_name
         self.download_path = download_path
         self.file_names = file_names
         self.download_func = download_func
+        self.complete_func = complete_func
         self.silent = silent
         self.requestor = InterProcessRequestor()
         self.download_thread = None
@@ -96,6 +98,9 @@ class ModelDownloader:
                     "state": ModelStatusTypesEnum.downloaded,
                 },
             )
+
+        if self.complete_func:
+            self.complete_func()
 
         self.requestor.stop()
         self.download_complete.set()
