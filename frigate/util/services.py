@@ -255,7 +255,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
         return results
 
 
-def get_intel_gpu_stats() -> dict[str, str]:
+def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
     """Get stats using intel_gpu_top."""
 
     def get_stats_manually(output: str) -> dict[str, str]:
@@ -301,6 +301,9 @@ def get_intel_gpu_stats() -> dict[str, str]:
         "-s",
         "1",
     ]
+
+    if sriov:
+        intel_gpu_top_command += ["-d", "drm:/dev/dri/card0"]
 
     p = sp.run(
         intel_gpu_top_command,
