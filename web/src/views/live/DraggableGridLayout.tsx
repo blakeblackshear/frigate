@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { t } from "i18next";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -519,7 +520,7 @@ export default function DraggableGridLayout({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                      {fullscreen ? t("ui.exitFullscreen") : t("ui.fullscreen")}
                     </TooltipContent>
                   </Tooltip>
                 </>

@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
@@ -89,10 +91,9 @@ export default function MobileReviewSettingsDrawer({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(
-            "Successfully started export. View the file in the /exports folder.",
-            { position: "top-center" },
-          );
+          toast.success(t("ui.dialog.export.toast.success"), {
+            position: "top-center",
+          });
           setName("");
           setRange(undefined);
           setMode("none");
@@ -238,7 +239,7 @@ export default function MobileReviewSettingsDrawer({
               });
             }}
           >
-            Reset
+            <Trans>ui.reset</Trans>
           </Button>
         </div>
       </div>

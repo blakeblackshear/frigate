@@ -21,6 +21,7 @@ import {
 import EventView from "@/views/events/EventView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
+import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
@@ -76,9 +77,9 @@ export default function Events() {
 
   useEffect(() => {
     if (recording) {
-      document.title = "Recordings - Frigate";
+      document.title = t("ui.review.recordings.documentTitle");
     } else {
-      document.title = `Review - Frigate`;
+      document.title = t("ui.review.documentTitle");
     }
   }, [recording, severity]);
 

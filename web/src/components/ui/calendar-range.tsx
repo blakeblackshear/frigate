@@ -12,6 +12,8 @@ import {
 import { Switch } from "./switch";
 import { cn } from "@/lib/utils";
 import { LuCheck } from "react-icons/lu";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
@@ -59,15 +61,15 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: "today", label: "Today" },
-  { name: "yesterday", label: "Yesterday" },
-  { name: "last7", label: "Last 7 days" },
-  { name: "last14", label: "Last 14 days" },
-  { name: "last30", label: "Last 30 days" },
-  { name: "thisWeek", label: "This Week" },
-  { name: "lastWeek", label: "Last Week" },
-  { name: "thisMonth", label: "This Month" },
-  { name: "lastMonth", label: "Last Month" },
+  { name: "today", label: t("ui.time.today") },
+  { name: "yesterday", label: t("ui.time.yesterday") },
+  { name: "last7", label: t("ui.time.last7") },
+  { name: "last14", label: t("ui.time.last14") },
+  { name: "last30", label: t("ui.time.last30") },
+  { name: "thisWeek", label: t("ui.time.thisWeek") },
+  { name: "lastWeek", label: t("ui.time.lastWeek") },
+  { name: "thisMonth", label: t("ui.time.thisMonth") },
+  { name: "lastMonth", label: t("ui.time.lastMonth") },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -429,7 +431,7 @@ export function DateRangePicker({
             }
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button
           onClick={() => {
@@ -440,7 +442,7 @@ export function DateRangePicker({
           variant="ghost"
           aria-label="Reset"
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </div>
