@@ -2,7 +2,7 @@ import shutil
 from enum import Enum
 from typing import Union
 
-from pydantic import Field, PrivateAttr, field_validator
+from pydantic import Field, field_validator
 
 from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
 
@@ -42,7 +42,6 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
-    _force_record_hvc1: bool = PrivateAttr(default=False)
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -63,6 +62,10 @@ class FfmpegConfig(FrigateBaseModel):
     retry_interval: float = Field(
         default=10.0,
         title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
+    )
+    apple_compatibility: bool = Field(
+        default=False,
+        title="Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
     )
 
     @property
