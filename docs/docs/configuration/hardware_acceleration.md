@@ -175,6 +175,16 @@ For more information on the various values across different distributions, see h
 
 Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=2 >> /etc/sysctl.d/local.conf'`
 
+#### Stats for SR-IOV devices
+
+When using virtualized GPUs via SR-IOV, additional args are needed for GPU stats to function. This can be enabled with the following config:
+
+```yaml
+telemetry:
+  stats:
+    sriov: True
+```
+
 ## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
