@@ -2,7 +2,7 @@ import shutil
 from enum import Enum
 from typing import Union
 
-from pydantic import Field, PrivateAttr, field_validator
+from pydantic import Field, field_validator
 
 from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
 
