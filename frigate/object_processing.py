@@ -4,7 +4,7 @@ import logging
 import os
 import queue
 import threading
-from collections import Counter, defaultdict
+from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Callable, Optional
 
