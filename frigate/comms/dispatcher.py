@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
 from frigate.camera import PTZMetrics
+from frigate.camera.activity_manager import CameraActivityManager
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import (
@@ -64,7 +65,7 @@ class Dispatcher:
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
-        self.camera_activity = {}
+        self.camera_activity = CameraActivityManager(config, self.publish)
         self.model_state = {}
         self.embeddings_reindex = {}
 
@@ -130,7 +131,7 @@ class Dispatcher:
             ).execute()
 
         def handle_update_camera_activity():
-            self.camera_activity = payload
+            self.camera_activity.update_activity(payload)
 
         def handle_update_event_description():
             event: Event = Event.get(Event.id == payload["id"])
@@ -171,7 +172,7 @@ class Dispatcher:
             )
 
         def handle_on_connect():
-            camera_status = self.camera_activity.copy()
+            camera_status = self.camera_activity.last_camera_activity.copy()
 
             for camera in camera_status.keys():
                 camera_status[camera]["config"] = {
