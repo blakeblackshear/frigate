@@ -1,1 +1,2 @@
-rknn-toolkit-lite2 @ https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/rknn_toolkit_lite2-2.0.0b0-cp311-cp311-linux_aarch64.whl
+rknn-toolkit2 == 2.3.0
+rknn-toolkit-lite2 == 2.3.0
