@@ -242,6 +242,8 @@ ffmpeg:
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
   # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
   retry_interval: 10
+  # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
+  apple_compatibility: false
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
@@ -518,6 +520,14 @@ semantic_search:
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
   reindex: False
+  # Optional: Set the model size used for embeddings. (default: shown below)
+  # NOTE: small model runs on CPU and large model runs on GPU
+  model_size: "small"
+
+# Optional: Configuration for face recognition capability
+face_recognition:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
@@ -803,11 +813,13 @@ telemetry:
     - lo
   # Optional: Configure system stats
   stats:
-    # Enable AMD GPU stats (default: shown below)
+    # Optional: Enable AMD GPU stats (default: shown below)
     amd_gpu_stats: True
-    # Enable Intel GPU stats (default: shown below)
+    # Optional: Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
-    # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    # Optional: Treat GPU as SR-IOV to fix GPU stats (default: shown below)
+    sriov: False
+    # Optional: Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)

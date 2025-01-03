@@ -9,7 +9,7 @@ from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import SemanticSearchConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -59,9 +59,7 @@ def get_metadata(event: Event) -> dict:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(
-        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
-    ) -> None:
+    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase) -> None:
         self.config = config
         self.db = db
         self.requestor = InterProcessRequestor()
@@ -73,9 +71,13 @@ class Embeddings:
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.model_size == "large"
+            if config.semantic_search.model_size == "large"
             else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
+            "facenet-facenet.onnx",
+            "paddleocr-onnx-detection.onnx",
+            "paddleocr-onnx-classification.onnx",
+            "paddleocr-onnx-recognition.onnx",
         ]
 
         for model in models:
@@ -94,7 +96,7 @@ class Embeddings:
             download_urls={
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
@@ -102,7 +104,7 @@ class Embeddings:
 
         model_file = (
             "vision_model_fp16.onnx"
-            if self.config.model_size == "large"
+            if self.config.semantic_search.model_size == "large"
             else "vision_model_quantized.onnx"
         )
 
@@ -115,11 +117,65 @@ class Embeddings:
             model_name="jinaai/jina-clip-v1",
             model_file=model_file,
             download_urls=download_urls,
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
-            device="GPU" if config.model_size == "large" else "CPU",
+            device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
+
+        if self.config.face_recognition.enabled:
+            self.face_embedding = GenericONNXEmbedding(
+                model_name="facedet",
+                model_file="facedet.onnx",
+                download_urls={
+                    "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
+                    "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
+                },
+                model_size="small",
+                model_type=ModelTypeEnum.face,
+                requestor=self.requestor,
+            )
+
+        self.lpr_detection_model = None
+        self.lpr_classification_model = None
+        self.lpr_recognition_model = None
+
+        if self.config.lpr.enabled:
+            self.lpr_detection_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="detection.onnx",
+                download_urls={
+                    "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.lpr_detect,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_classification_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="classification.onnx",
+                download_urls={
+                    "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.lpr_classify,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_recognition_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="recognition.onnx",
+                download_urls={
+                    "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.lpr_recognize,
+                requestor=self.requestor,
+                device="CPU",
+            )
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True

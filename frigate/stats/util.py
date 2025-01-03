@@ -195,7 +195,7 @@ async def set_gpu_stats(
                 continue
 
             # intel QSV GPU
-            intel_usage = get_intel_gpu_stats()
+            intel_usage = get_intel_gpu_stats(config.telemetry.stats.sriov)
 
             if intel_usage is not None:
                 stats["intel-qsv"] = intel_usage or {"gpu": "", "mem": ""}
@@ -220,7 +220,7 @@ async def set_gpu_stats(
                     continue
 
                 # intel VAAPI GPU
-                intel_usage = get_intel_gpu_stats()
+                intel_usage = get_intel_gpu_stats(config.telemetry.stats.sriov)
 
                 if intel_usage is not None:
                     stats["intel-vaapi"] = intel_usage or {"gpu": "", "mem": ""}
