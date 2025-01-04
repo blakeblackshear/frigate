@@ -123,19 +123,6 @@ class Embeddings:
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
 
-        if self.config.face_recognition.enabled:
-            self.face_embedding = GenericONNXEmbedding(
-                model_name="facedet",
-                model_file="facedet.onnx",
-                download_urls={
-                    "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
-                    "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
-                },
-                model_size="small",
-                model_type=ModelTypeEnum.face,
-                requestor=self.requestor,
-            )
-
         self.lpr_detection_model = None
         self.lpr_classification_model = None
         self.lpr_recognition_model = None
