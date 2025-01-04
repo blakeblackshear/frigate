@@ -62,7 +62,7 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
-        self.embeddings = Embeddings(config, db)
+        self.embeddings = Embeddings(config, db, metrics)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -139,7 +139,8 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 elif topic == EmbeddingsRequestEnum.generate_search.value:
                     return serialize(
-                        self.embeddings.text_embedding([data])[0], pack=False
+                        self.embeddings.embed_description("", data, upsert=False),
+                        pack=False,
                     )
                 elif topic == EmbeddingsRequestEnum.register_face.value:
                     if not self.face_recognition_enabled:
