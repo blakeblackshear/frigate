@@ -120,7 +120,7 @@ export default function FaceLibrary() {
         onSave={onUploadImage}
       />
 
-      <div className="relative flex h-11 w-full items-center justify-between">
+      <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -163,6 +163,10 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
+        <Button className="flex gap-2" onClick={() => setUpload(true)}>
+          <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+          Upload Image
+        </Button>
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (
@@ -175,7 +179,6 @@ export default function FaceLibrary() {
           <FaceGrid
             faceImages={faceImages}
             pageToggle={pageToggle}
-            setUpload={setUpload}
             onRefresh={refreshFaces}
           />
         ))}
@@ -327,15 +330,9 @@ function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
 type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
-  setUpload: (upload: boolean) => void;
   onRefresh: () => void;
 };
-function FaceGrid({
-  faceImages,
-  pageToggle,
-  setUpload,
-  onRefresh,
-}: FaceGridProps) {
+function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {faceImages.map((image: string) => (
@@ -346,9 +343,6 @@ function FaceGrid({
           onRefresh={onRefresh}
         />
       ))}
-      <Button key="upload" className="size-40" onClick={() => setUpload(true)}>
-        <LuImagePlus className="size-10" />
-      </Button>
     </div>
   );
 }
