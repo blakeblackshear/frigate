@@ -11,7 +11,6 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config.semantic_search import FaceRecognitionConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.util.downloader import ModelDownloader
 
 try:
     import openvino as ov
@@ -178,6 +177,8 @@ class FaceClassificationModel:
             os.path.exists(os.path.join(download_path, n))
             for n in self.model_files.keys()
         ):
+            # conditionally import ModelDownloader
+            from frigate.util.downloader import ModelDownloader
             self.downloader = ModelDownloader(
                 model_name="facedet",
                 download_path=download_path,
