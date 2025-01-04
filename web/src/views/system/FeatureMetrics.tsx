@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
-import { InferenceThreshold } from "@/types/graph";
+import { EmbeddingThreshold } from "@/types/graph";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
@@ -105,7 +105,7 @@ export default function FeatureMetrics({
                     graphId={`${series.name}-inference`}
                     name={series.name}
                     unit="ms"
-                    threshold={InferenceThreshold}
+                    threshold={EmbeddingThreshold}
                     updateTimes={updateTimes}
                     data={[series]}
                   />
