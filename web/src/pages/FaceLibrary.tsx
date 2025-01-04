@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuImagePlus, LuTrash2 } from "react-icons/lu";
@@ -25,6 +28,8 @@ import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // title
 
   useEffect(() => {
@@ -108,6 +113,10 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces],
   );
 
+  if (!config) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
@@ -120,7 +129,7 @@ export default function FaceLibrary() {
         onSave={onUploadImage}
       />
 
-      <div className="relative flex h-11 w-full items-center justify-between">
+      <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -156,17 +165,24 @@ export default function FaceLibrary() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">{item}</div>
+                  <div className="capitalize">
+                    {item} ({faceData[item].length})
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
+        <Button className="flex gap-2" onClick={() => setUpload(true)}>
+          <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+          Upload Image
+        </Button>
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (
           <TrainingGrid
+            config={config}
             attemptImages={trainImages}
             faceNames={faces}
             onRefresh={refreshFaces}
@@ -175,7 +191,6 @@ export default function FaceLibrary() {
           <FaceGrid
             faceImages={faceImages}
             pageToggle={pageToggle}
-            setUpload={setUpload}
             onRefresh={refreshFaces}
           />
         ))}
@@ -184,11 +199,13 @@ export default function FaceLibrary() {
 }
 
 type TrainingGridProps = {
+  config: FrigateConfig;
   attemptImages: string[];
   faceNames: string[];
   onRefresh: () => void;
 };
 function TrainingGrid({
+  config,
   attemptImages,
   faceNames,
   onRefresh,
@@ -200,6 +217,7 @@ function TrainingGrid({
           key={image}
           image={image}
           faceNames={faceNames}
+          threshold={config.face_recognition.threshold}
           onRefresh={onRefresh}
         />
       ))}
@@ -210,9 +228,15 @@ function TrainingGrid({
 type FaceAttemptProps = {
   image: string;
   faceNames: string[];
+  threshold: number;
   onRefresh: () => void;
 };
-function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
+function FaceAttempt({
+  image,
+  faceNames,
+  threshold,
+  onRefresh,
+}: FaceAttemptProps) {
   const data = useMemo(() => {
     const parts = image.split("-");
 
@@ -283,7 +307,15 @@ function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="capitalize">{data.name}</div>
-            <div>{Number.parseFloat(data.score) * 100}%</div>
+            <div
+              className={cn(
+                Number.parseFloat(data.score) > threshold
+                  ? "text-success"
+                  : "text-danger",
+              )}
+            >
+              {Number.parseFloat(data.score) * 100}%
+            </div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>
@@ -327,15 +359,9 @@ function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
 type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
-  setUpload: (upload: boolean) => void;
   onRefresh: () => void;
 };
-function FaceGrid({
-  faceImages,
-  pageToggle,
-  setUpload,
-  onRefresh,
-}: FaceGridProps) {
+function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {faceImages.map((image: string) => (
@@ -346,9 +372,6 @@ function FaceGrid({
           onRefresh={onRefresh}
         />
       ))}
-      <Button key="upload" className="size-40" onClick={() => setUpload(true)}>
-        <LuImagePlus className="size-10" />
-      </Button>
     </div>
   );
 }

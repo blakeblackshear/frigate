@@ -290,6 +290,7 @@ export interface FrigateConfig {
 
   face_recognition: {
     enabled: boolean;
+    threshold: number;
   };
 
   ffmpeg: {

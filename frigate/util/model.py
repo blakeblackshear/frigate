@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -10,6 +10,7 @@ import onnxruntime as ort
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config.semantic_search import FaceRecognitionConfig
+from frigate.const import MODEL_CACHE_DIR
 
 try:
     import openvino as ov
@@ -162,22 +163,62 @@ class FaceClassificationModel:
     def __init__(self, config: FaceRecognitionConfig, db: SqliteQueueDatabase):
         self.config = config
         self.db = db
-        self.landmark_detector = cv2.face.createFacemarkLBF()
+        self.face_detector: cv2.FaceDetectorYN = None
+        self.landmark_detector: cv2.face.FacemarkLBF = None
+        self.face_recognizer: cv2.face.LBPHFaceRecognizer = None
 
-        if os.path.isfile("/config/model_cache/facedet/landmarkdet.yaml"):
-            self.landmark_detector.loadModel(
-                "/config/model_cache/facedet/landmarkdet.yaml"
-            )
+        download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
+        self.model_files = {
+            "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
+            "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
+        }
 
-        self.recognizer: cv2.face.LBPHFaceRecognizer = (
-            cv2.face.LBPHFaceRecognizer_create(
-                radius=2, threshold=(1 - config.min_score) * 1000
+        if not all(
+            os.path.exists(os.path.join(download_path, n))
+            for n in self.model_files.keys()
+        ):
+            # conditionally import ModelDownloader
+            from frigate.util.downloader import ModelDownloader
+
+            self.downloader = ModelDownloader(
+                model_name="facedet",
+                download_path=download_path,
+                file_names=self.model_files.keys(),
+                download_func=self.__download_models,
+                complete_func=self.__build_detector,
             )
-        )
+            self.downloader.ensure_model_files()
+        else:
+            self.__build_detector()
+
         self.label_map: dict[int, str] = {}
         self.__build_classifier()
 
+    def __download_models(self, path: str) -> None:
+        try:
+            file_name = os.path.basename(path)
+            # conditionally import ModelDownloader
+            from frigate.util.downloader import ModelDownloader
+
+            ModelDownloader.download_from_url(self.model_files[file_name], path)
+        except Exception as e:
+            logger.error(f"Failed to download {path}: {e}")
+
+    def __build_detector(self) -> None:
+        self.face_detector = cv2.FaceDetectorYN.create(
+            "/config/model_cache/facedet/facedet.onnx",
+            config="",
+            input_size=(320, 320),
+            score_threshold=0.8,
+            nms_threshold=0.3,
+        )
+        self.landmark_detector = cv2.face.createFacemarkLBF()
+        self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
+
     def __build_classifier(self) -> None:
+        if not self.landmark_detector:
+            return None
+
         labels = []
         faces = []
 
@@ -203,6 +244,11 @@ class FaceClassificationModel:
                 faces.append(img)
                 labels.append(idx)
 
+        self.recognizer: cv2.face.LBPHFaceRecognizer = (
+            cv2.face.LBPHFaceRecognizer_create(
+                radius=2, threshold=(1 - self.config.min_score) * 1000
+            )
+        )
         self.recognizer.train(faces, np.array(labels))
 
     def __align_face(
@@ -267,7 +313,17 @@ class FaceClassificationModel:
         self.labeler = None
         self.label_map = {}
 
-    def classify_face(self, face_image: np.ndarray) -> Optional[tuple[str, float]]:
+    def detect_faces(self, input: np.ndarray) -> tuple[int, cv2.typing.MatLike] | None:
+        if not self.face_detector:
+            return None
+
+        self.face_detector.setInputSize((input.shape[1], input.shape[0]))
+        return self.face_detector.detect(input)
+
+    def classify_face(self, face_image: np.ndarray) -> tuple[str, float] | None:
+        if not self.landmark_detector:
+            return None
+
         if not self.label_map:
             self.__build_classifier()
 

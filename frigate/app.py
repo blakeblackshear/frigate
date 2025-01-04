@@ -34,6 +34,7 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     EXPORT_DIR,
+    FACE_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
     SHM_FRAMES_VAR,
@@ -96,14 +97,19 @@ class FrigateApp:
         self.config = config
 
     def ensure_dirs(self) -> None:
-        for d in [
+        dirs = [
             CONFIG_DIR,
             RECORD_DIR,
             f"{CLIPS_DIR}/cache",
             CACHE_DIR,
             MODEL_CACHE_DIR,
             EXPORT_DIR,
-        ]:
+        ]
+
+        if self.config.face_recognition.enabled:
+            dirs.append(FACE_DIR)
+
+        for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
