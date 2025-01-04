@@ -179,6 +179,7 @@ class FaceClassificationModel:
         ):
             # conditionally import ModelDownloader
             from frigate.util.downloader import ModelDownloader
+
             self.downloader = ModelDownloader(
                 model_name="facedet",
                 download_path=download_path,
@@ -198,6 +199,7 @@ class FaceClassificationModel:
             file_name = os.path.basename(path)
             # conditionally import ModelDownloader
             from frigate.util.downloader import ModelDownloader
+
             ModelDownloader.download_from_url(self.model_files[file_name], path)
         except Exception as e:
             logger.error(f"Failed to download {path}: {e}")
