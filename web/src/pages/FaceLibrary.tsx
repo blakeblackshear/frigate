@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,8 @@ import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // title
 
   useEffect(() => {
@@ -110,6 +113,10 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces],
   );
 
+  if (!config) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
@@ -175,6 +182,7 @@ export default function FaceLibrary() {
       {pageToggle &&
         (pageToggle == "train" ? (
           <TrainingGrid
+            config={config}
             attemptImages={trainImages}
             faceNames={faces}
             onRefresh={refreshFaces}
@@ -301,7 +309,9 @@ function FaceAttempt({
             <div className="capitalize">{data.name}</div>
             <div
               className={cn(
-                data.score > threshold ? "text-success" : "text-danger",
+                Number.parseFloat(data.score) > threshold
+                  ? "text-success"
+                  : "text-danger",
               )}
             >
               {Number.parseFloat(data.score) * 100}%
