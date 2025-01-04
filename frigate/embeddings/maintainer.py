@@ -100,19 +100,6 @@ class EmbeddingMaintainer(threading.Thread):
                 self.lpr_config, self.requestor, self.embeddings
             )
 
-    @property
-    def face_detector(self) -> cv2.FaceDetectorYN:
-        # Lazily create the classifier.
-        if "face_detector" not in self.__dict__:
-            self.__dict__["face_detector"] = cv2.FaceDetectorYN.create(
-                "/config/model_cache/facedet/facedet.onnx",
-                config="",
-                input_size=(320, 320),
-                score_threshold=0.8,
-                nms_threshold=0.3,
-            )
-        return self.__dict__["face_detector"]
-
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
@@ -395,10 +382,9 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _detect_face(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Detect faces in input image."""
-        self.face_detector.setInputSize((input.shape[1], input.shape[0]))
-        faces = self.face_detector.detect(input)
+        faces = self.face_classifier.detect_faces(input)
 
-        if faces[1] is None:
+        if faces is None or faces[1] is None:
             return None
 
         face = None
