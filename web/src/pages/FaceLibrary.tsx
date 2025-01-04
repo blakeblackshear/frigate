@@ -156,7 +156,9 @@ export default function FaceLibrary() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">{item}</div>
+                  <div className="capitalize">
+                    {item} ({faceData[item].length})
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
