@@ -1,6 +1,7 @@
 """Maintain embeddings in SQLite-vec."""
 
 import base64
+import datetime
 import logging
 import os
 import random
@@ -41,6 +42,7 @@ from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
 from frigate.util.model import FaceClassificationModel
 
 from .embeddings import Embeddings
+from .types import EmbeddingsMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +56,12 @@ class EmbeddingMaintainer(threading.Thread):
         self,
         db: SqliteQueueDatabase,
         config: FrigateConfig,
+        metrics: EmbeddingsMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
+        self.metrics = metrics
         self.embeddings = Embeddings(config, db)
 
         # Check if we need to re-index events
@@ -219,10 +223,22 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         if self.face_recognition_enabled:
-            self._process_face(data, yuv_frame)
+            start = datetime.datetime.now().timestamp()
+            processed = self._process_face(data, yuv_frame)
+
+            if processed:
+                duration = datetime.datetime.now().timestamp() - start
+                self.metrics.face_rec_fps.value = (
+                    self.metrics.face_rec_fps.value * 9 + duration
+                ) / 10
 
         if self.lpr_config.enabled:
+            start = datetime.datetime.now().timestamp()
             self._process_license_plate(data, yuv_frame)
+            duration = datetime.datetime.now().timestamp() - start
+            self.metrics.alpr_pps.value = (
+                self.metrics.alpr_pps.value * 9 + duration
+            ) / 10
 
         # no need to save our own thumbnails if genai is not enabled
         # or if the object has become stationary
@@ -402,14 +418,14 @@ class EmbeddingMaintainer(threading.Thread):
 
         return face
 
-    def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
+    def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> bool:
         """Look for faces in image."""
         id = obj_data["id"]
 
         # don't run for non person objects
         if obj_data.get("label") != "person":
             logger.debug("Not a processing face for non person object.")
-            return
+            return False
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a face
@@ -417,7 +433,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
-            return
+            return False
 
         face: Optional[dict[str, any]] = None
 
@@ -426,7 +442,7 @@ class EmbeddingMaintainer(threading.Thread):
             person_box = obj_data.get("box")
 
             if not person_box:
-                return None
+                return False
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
@@ -435,7 +451,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
-                return
+                return False
 
             margin = int((face_box[2] - face_box[0]) * 0.25)
             face_frame = person[
@@ -451,7 +467,7 @@ class EmbeddingMaintainer(threading.Thread):
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
                 logger.debug("No attributes to parse.")
-                return
+                return False
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
             for attr in attributes:
@@ -463,14 +479,14 @@ class EmbeddingMaintainer(threading.Thread):
 
             # no faces detected in this frame
             if not face:
-                return
+                return False
 
             face_box = face.get("box")
 
             # check that face is valid
             if not face_box or area(face_box) < self.config.face_recognition.min_area:
                 logger.debug(f"Invalid face box {face}")
-                return
+                return False
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             margin = int((face_box[2] - face_box[0]) * 0.25)
@@ -487,7 +503,7 @@ class EmbeddingMaintainer(threading.Thread):
         res = self.face_classifier.classify_face(face_frame)
 
         if not res:
-            return
+            return False
 
         sub_label, score = res
 
@@ -512,13 +528,13 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Recognized face distance {score} is less than threshold {self.config.face_recognition.threshold}"
             )
-            return
+            return True
 
         if id in self.detected_faces and face_score <= self.detected_faces[id]:
             logger.debug(
                 f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
             )
-            return
+            return True
 
         resp = requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
@@ -531,6 +547,8 @@ class EmbeddingMaintainer(threading.Thread):
 
         if resp.status_code == 200:
             self.detected_faces[id] = face_score
+
+        return True
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
