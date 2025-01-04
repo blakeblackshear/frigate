@@ -235,11 +235,13 @@ class EmbeddingMaintainer(threading.Thread):
 
         if self.lpr_config.enabled:
             start = datetime.datetime.now().timestamp()
-            self._process_license_plate(data, yuv_frame)
-            duration = datetime.datetime.now().timestamp() - start
-            self.metrics.alpr_pps.value = (
-                self.metrics.alpr_pps.value * 9 + duration
-            ) / 10
+            processed = self._process_license_plate(data, yuv_frame)
+
+            if processed:
+                duration = datetime.datetime.now().timestamp() - start
+                self.metrics.alpr_pps.value = (
+                    self.metrics.alpr_pps.value * 9 + duration
+                ) / 10
 
         # no need to save our own thumbnails if genai is not enabled
         # or if the object has become stationary
@@ -558,19 +560,19 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_license_plate(
         self, obj_data: dict[str, any], frame: np.ndarray
-    ) -> None:
+    ) -> bool:
         """Look for license plates in image."""
         id = obj_data["id"]
 
         # don't run for non car objects
         if obj_data.get("label") != "car":
             logger.debug("Not a processing license plate for non car object.")
-            return
+            return False
 
         # don't run for stationary car objects
         if obj_data.get("stationary") == True:
             logger.debug("Not a processing license plate for a stationary car object.")
-            return
+            return False
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a license plate
@@ -578,7 +580,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
             )
-            return
+            return False
 
         license_plate: Optional[dict[str, any]] = None
 
@@ -587,7 +589,7 @@ class EmbeddingMaintainer(threading.Thread):
             car_box = obj_data.get("box")
 
             if not car_box:
-                return None
+                return False
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = car_box
@@ -596,7 +598,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             if not license_plate:
                 logger.debug("Detected no license plates for car object.")
-                return
+                return False
 
             license_plate_frame = car[
                 license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
@@ -606,7 +608,7 @@ class EmbeddingMaintainer(threading.Thread):
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
                 logger.debug("No attributes to parse.")
-                return
+                return False
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
             for attr in attributes:
@@ -620,7 +622,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             # no license plates detected in this frame
             if not license_plate:
-                return
+                return False
 
             license_plate_box = license_plate.get("box")
 
@@ -630,7 +632,7 @@ class EmbeddingMaintainer(threading.Thread):
                 or area(license_plate_box) < self.config.lpr.min_area
             ):
                 logger.debug(f"Invalid license plate box {license_plate}")
-                return
+                return False
 
             license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             license_plate_frame = license_plate_frame[
@@ -659,7 +661,7 @@ class EmbeddingMaintainer(threading.Thread):
         else:
             # no plates found
             logger.debug("No text detected")
-            return
+            return True
 
         top_plate, top_char_confidences, top_area = (
             license_plates[0],
@@ -705,14 +707,14 @@ class EmbeddingMaintainer(threading.Thread):
                     f"length={len(top_plate)}, avg_conf={avg_confidence:.2f}, area={top_area} "
                     f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}, area={prev_area}"
                 )
-                return
+                return True
 
         # Check against minimum confidence threshold
         if avg_confidence < self.lpr_config.threshold:
             logger.debug(
                 f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
             )
-            return
+            return True
 
         # Determine subLabel based on known plates, use regex matching
         # Default to the detected plate, use label name if there's a match
@@ -741,6 +743,8 @@ class EmbeddingMaintainer(threading.Thread):
                 "char_confidences": top_char_confidences,
                 "area": top_area,
             }
+
+        return True
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""
