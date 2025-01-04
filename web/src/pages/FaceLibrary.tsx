@@ -18,6 +18,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuImagePlus, LuTrash2 } from "react-icons/lu";
@@ -189,11 +191,13 @@ export default function FaceLibrary() {
 }
 
 type TrainingGridProps = {
+  config: FrigateConfig;
   attemptImages: string[];
   faceNames: string[];
   onRefresh: () => void;
 };
 function TrainingGrid({
+  config,
   attemptImages,
   faceNames,
   onRefresh,
@@ -205,6 +209,7 @@ function TrainingGrid({
           key={image}
           image={image}
           faceNames={faceNames}
+          threshold={config.face_recognition.threshold}
           onRefresh={onRefresh}
         />
       ))}
@@ -215,9 +220,15 @@ function TrainingGrid({
 type FaceAttemptProps = {
   image: string;
   faceNames: string[];
+  threshold: number;
   onRefresh: () => void;
 };
-function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
+function FaceAttempt({
+  image,
+  faceNames,
+  threshold,
+  onRefresh,
+}: FaceAttemptProps) {
   const data = useMemo(() => {
     const parts = image.split("-");
 
@@ -288,7 +299,13 @@ function FaceAttempt({ image, faceNames, onRefresh }: FaceAttemptProps) {
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="capitalize">{data.name}</div>
-            <div>{Number.parseFloat(data.score) * 100}%</div>
+            <div
+              className={cn(
+                data.score > threshold ? "text-success" : "text-danger",
+              )}
+            >
+              {Number.parseFloat(data.score) * 100}%
+            </div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>
