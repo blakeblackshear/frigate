@@ -14,6 +14,7 @@ from requests.exceptions import RequestException
 from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.embeddings.types import EmbeddingsMetrics
 from frigate.object_detection import ObjectDetectProcess
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
@@ -51,11 +52,13 @@ def get_latest_version(config: FrigateConfig) -> str:
 def stats_init(
     config: FrigateConfig,
     camera_metrics: dict[str, CameraMetrics],
+    embeddings_metrics: EmbeddingsMetrics | None,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
+        "embeddings_metrics": embeddings_metrics,
         "detectors": detectors,
         "started": int(time.time()),
         "latest_frigate_version": get_latest_version(config),
@@ -278,6 +281,27 @@ def stats_snapshot(
             "pid": pid,
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
+
+    if config.semantic_search.enabled:
+        embeddings_metrics = stats_tracking["embeddings_metrics"]
+        stats["embeddings"] = {
+            "image_embedding_speed": round(
+                embeddings_metrics.image_embeddings_fps.value * 1000, 2
+            ),
+            "text_embedding_speed": round(
+                embeddings_metrics.text_embeddings_sps.value * 1000, 2
+            ),
+        }
+
+        if config.face_recognition.enabled:
+            stats["embeddings"]["face_recognition_speed"] = round(
+                embeddings_metrics.face_rec_fps.value * 1000, 2
+            )
+
+        if config.lpr.enabled:
+            stats["embeddings"]["plate_recognition_speed"] = round(
+                embeddings_metrics.alpr_pps.value * 1000, 2
+            )
 
     get_processing_stats(config, stats, hwaccel_errors)
 
