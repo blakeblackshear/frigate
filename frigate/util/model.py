@@ -309,8 +309,7 @@ class FaceClassificationModel:
         )
 
     def clear_classifier(self) -> None:
-        self.classifier = None
-        self.labeler = None
+        self.face_recognizer = None
         self.label_map = {}
 
     def detect_faces(self, input: np.ndarray) -> tuple[int, cv2.typing.MatLike] | None:
