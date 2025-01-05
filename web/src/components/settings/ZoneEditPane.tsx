@@ -340,11 +340,13 @@ export default function ZoneEditPane({
       }
 
       let distancesQuery = "";
-      const distances = [lineA, lineB, lineC, lineD].join(",");
+      const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
       if (speedEstimation) {
         distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
       } else {
-        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+        if (distances != "") {
+          distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+        }
       }
 
       axios
