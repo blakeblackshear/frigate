@@ -1,6 +1,7 @@
 """Maintain embeddings in SQLite-vec."""
 
 import base64
+import datetime
 import logging
 import os
 import random
@@ -41,6 +42,7 @@ from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
 from frigate.util.model import FaceClassificationModel
 
 from .embeddings import Embeddings
+from .types import EmbeddingsMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +56,13 @@ class EmbeddingMaintainer(threading.Thread):
         self,
         db: SqliteQueueDatabase,
         config: FrigateConfig,
+        metrics: EmbeddingsMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
-        self.embeddings = Embeddings(config, db)
+        self.metrics = metrics
+        self.embeddings = Embeddings(config, db, metrics)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -135,7 +139,8 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 elif topic == EmbeddingsRequestEnum.generate_search.value:
                     return serialize(
-                        self.embeddings.text_embedding([data])[0], pack=False
+                        self.embeddings.embed_description("", data, upsert=False),
+                        pack=False,
                     )
                 elif topic == EmbeddingsRequestEnum.register_face.value:
                     if not self.face_recognition_enabled:
@@ -219,10 +224,24 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         if self.face_recognition_enabled:
-            self._process_face(data, yuv_frame)
+            start = datetime.datetime.now().timestamp()
+            processed = self._process_face(data, yuv_frame)
+
+            if processed:
+                duration = datetime.datetime.now().timestamp() - start
+                self.metrics.face_rec_fps.value = (
+                    self.metrics.face_rec_fps.value * 9 + duration
+                ) / 10
 
         if self.lpr_config.enabled:
-            self._process_license_plate(data, yuv_frame)
+            start = datetime.datetime.now().timestamp()
+            processed = self._process_license_plate(data, yuv_frame)
+
+            if processed:
+                duration = datetime.datetime.now().timestamp() - start
+                self.metrics.alpr_pps.value = (
+                    self.metrics.alpr_pps.value * 9 + duration
+                ) / 10
 
         # no need to save our own thumbnails if genai is not enabled
         # or if the object has become stationary
@@ -402,14 +421,14 @@ class EmbeddingMaintainer(threading.Thread):
 
         return face
 
-    def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
+    def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> bool:
         """Look for faces in image."""
         id = obj_data["id"]
 
         # don't run for non person objects
         if obj_data.get("label") != "person":
             logger.debug("Not a processing face for non person object.")
-            return
+            return False
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a face
@@ -417,7 +436,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
-            return
+            return False
 
         face: Optional[dict[str, any]] = None
 
@@ -426,7 +445,7 @@ class EmbeddingMaintainer(threading.Thread):
             person_box = obj_data.get("box")
 
             if not person_box:
-                return None
+                return False
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
@@ -435,7 +454,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
-                return
+                return False
 
             margin = int((face_box[2] - face_box[0]) * 0.25)
             face_frame = person[
@@ -451,7 +470,7 @@ class EmbeddingMaintainer(threading.Thread):
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
                 logger.debug("No attributes to parse.")
-                return
+                return False
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
             for attr in attributes:
@@ -463,14 +482,14 @@ class EmbeddingMaintainer(threading.Thread):
 
             # no faces detected in this frame
             if not face:
-                return
+                return False
 
             face_box = face.get("box")
 
             # check that face is valid
             if not face_box or area(face_box) < self.config.face_recognition.min_area:
                 logger.debug(f"Invalid face box {face}")
-                return
+                return False
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             margin = int((face_box[2] - face_box[0]) * 0.25)
@@ -487,7 +506,7 @@ class EmbeddingMaintainer(threading.Thread):
         res = self.face_classifier.classify_face(face_frame)
 
         if not res:
-            return
+            return False
 
         sub_label, score = res
 
@@ -512,13 +531,13 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Recognized face distance {score} is less than threshold {self.config.face_recognition.threshold}"
             )
-            return
+            return True
 
         if id in self.detected_faces and face_score <= self.detected_faces[id]:
             logger.debug(
                 f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
             )
-            return
+            return True
 
         resp = requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
@@ -532,6 +551,8 @@ class EmbeddingMaintainer(threading.Thread):
         if resp.status_code == 200:
             self.detected_faces[id] = face_score
 
+        return True
+
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
         height, width = input.shape[:2]
@@ -539,19 +560,19 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_license_plate(
         self, obj_data: dict[str, any], frame: np.ndarray
-    ) -> None:
+    ) -> bool:
         """Look for license plates in image."""
         id = obj_data["id"]
 
         # don't run for non car objects
         if obj_data.get("label") != "car":
             logger.debug("Not a processing license plate for non car object.")
-            return
+            return False
 
         # don't run for stationary car objects
         if obj_data.get("stationary") == True:
             logger.debug("Not a processing license plate for a stationary car object.")
-            return
+            return False
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a license plate
@@ -559,7 +580,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
             )
-            return
+            return False
 
         license_plate: Optional[dict[str, any]] = None
 
@@ -568,7 +589,7 @@ class EmbeddingMaintainer(threading.Thread):
             car_box = obj_data.get("box")
 
             if not car_box:
-                return None
+                return False
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = car_box
@@ -577,7 +598,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             if not license_plate:
                 logger.debug("Detected no license plates for car object.")
-                return
+                return False
 
             license_plate_frame = car[
                 license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
@@ -587,7 +608,7 @@ class EmbeddingMaintainer(threading.Thread):
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
                 logger.debug("No attributes to parse.")
-                return
+                return False
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
             for attr in attributes:
@@ -601,7 +622,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             # no license plates detected in this frame
             if not license_plate:
-                return
+                return False
 
             license_plate_box = license_plate.get("box")
 
@@ -611,7 +632,7 @@ class EmbeddingMaintainer(threading.Thread):
                 or area(license_plate_box) < self.config.lpr.min_area
             ):
                 logger.debug(f"Invalid license plate box {license_plate}")
-                return
+                return False
 
             license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             license_plate_frame = license_plate_frame[
@@ -640,7 +661,7 @@ class EmbeddingMaintainer(threading.Thread):
         else:
             # no plates found
             logger.debug("No text detected")
-            return
+            return True
 
         top_plate, top_char_confidences, top_area = (
             license_plates[0],
@@ -686,14 +707,14 @@ class EmbeddingMaintainer(threading.Thread):
                     f"length={len(top_plate)}, avg_conf={avg_confidence:.2f}, area={top_area} "
                     f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}, area={prev_area}"
                 )
-                return
+                return True
 
         # Check against minimum confidence threshold
         if avg_confidence < self.lpr_config.threshold:
             logger.debug(
                 f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
             )
-            return
+            return True
 
         # Determine subLabel based on known plates, use regex matching
         # Default to the detected plate, use label name if there's a match
@@ -722,6 +743,8 @@ class EmbeddingMaintainer(threading.Thread):
                 "char_confidences": top_char_confidences,
                 "area": top_area,
             }
+
+        return True
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""
