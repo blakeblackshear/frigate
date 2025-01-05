@@ -309,7 +309,7 @@ function FaceAttempt({
             <div className="capitalize">{data.name}</div>
             <div
               className={cn(
-                Number.parseFloat(data.score) > threshold
+                Number.parseFloat(data.score) >= threshold
                   ? "text-success"
                   : "text-danger",
               )}

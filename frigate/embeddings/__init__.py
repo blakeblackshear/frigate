@@ -21,12 +21,13 @@ from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
 from .maintainer import EmbeddingMaintainer
+from .types import EmbeddingsMetrics
 from .util import ZScoreNormalization
 
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig) -> None:
+def manage_embeddings(config: FrigateConfig, metrics: EmbeddingsMetrics) -> None:
     # Only initialize embeddings if semantic search is enabled
     if not config.semantic_search.enabled:
         return
@@ -60,6 +61,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     maintainer = EmbeddingMaintainer(
         db,
         config,
+        metrics,
         stop_event,
     )
     maintainer.start()
