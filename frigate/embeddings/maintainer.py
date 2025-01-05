@@ -456,14 +456,9 @@ class EmbeddingMaintainer(threading.Thread):
                 logger.debug("Detected no faces for person object.")
                 return False
 
-            margin = int((face_box[2] - face_box[0]) * 0.25)
             face_frame = person[
-                max(0, face_box[1] - margin) : min(
-                    frame.shape[0], face_box[3] + margin
-                ),
-                max(0, face_box[0] - margin) : min(
-                    frame.shape[1], face_box[2] + margin
-                ),
+                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
+                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
             face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
         else:
