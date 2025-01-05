@@ -6,7 +6,7 @@ on:
       - "docs/**"
 
 env:
-  DEFAULT_PYTHON: 3.9
+  DEFAULT_PYTHON: 3.11
 
 jobs:
   build_devcontainer:
