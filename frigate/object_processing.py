@@ -75,6 +75,15 @@ class CameraState:
 
         frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
         # draw on the frame
+
+        if draw_options.get("edges") and draw_options.get("edges_threshold"):
+            # Higher Threshold = 3 * Lower Threshold (following Canny's recommendation)
+            high_threshold = np.clip(draw_options.get("edges_threshold"), 0, 255)
+            low_threshold = np.floor_divide(high_threshold, 3)
+
+            edges = cv2.Canny(frame_copy, low_threshold, high_threshold)
+            frame_copy[edges==255] = (0,0,255)
+
         if draw_options.get("mask"):
             mask_overlay = np.where(self.camera_config.motion.mask == [0])
             frame_copy[mask_overlay] = [0, 0, 0]

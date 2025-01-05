@@ -3,6 +3,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { Toaster } from "@/components/ui/sonner";
+import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
@@ -19,6 +20,7 @@ import {
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "@/hooks/use-deep-memo";
 import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { LuExternalLink, LuInfo } from "react-icons/lu";
@@ -28,7 +30,7 @@ type ObjectSettingsViewProps = {
   selectedCamera?: string;
 };
 
-type Options = { [key: string]: boolean };
+type Options = { [key: string]: boolean | number };
 
 const emptyObject = Object.freeze({});
 
@@ -36,6 +38,7 @@ export default function ObjectSettingsView({
   selectedCamera,
 }: ObjectSettingsViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
 
   const DEBUG_OPTIONS = [
     {
@@ -123,7 +126,7 @@ export default function ObjectSettingsView({
   );
 
   const handleSetOption = useCallback(
-    (id: string, value: boolean) => {
+    (id: string, value: boolean | number) => {
       const newOptions = { ...options, [id]: value };
       setOptions(newOptions);
     },
@@ -147,8 +150,19 @@ export default function ObjectSettingsView({
 
     const params = new URLSearchParams(
       Object.keys(options || {}).reduce((memo, key) => {
-        //@ts-expect-error we know this is correct
-        memo.push([key, options[key] === true ? "1" : "0"]);
+
+        switch (typeof options[key]) {
+          case "boolean": {
+            //@ts-expect-error we know this is correct
+            memo.push([key, options[key] === true ? "1" : "0"]);
+            break;
+          }
+          case "number": {
+            memo.push([key, options[key]]);
+            break;
+          }
+        }
+
         return memo;
       }, []),
     );
@@ -255,6 +269,69 @@ export default function ObjectSettingsView({
                       />
                     </div>
                   ))}
+                  <Separator className="my-2 flex bg-secondary" />
+
+                    <div
+                      key="edges"
+                      className="flex w-full flex-row items-center justify-between"
+                    >
+                      <div className="mb-2 flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            className="mb-0 cursor-pointer capitalize text-primary"
+                            htmlFor="edges"
+                          >
+                          Edge Detection
+                          </Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <div className="cursor-pointer p-0">
+                                  <LuInfo className="size-4" />
+                                  <span className="sr-only">Info</span>
+                                </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                  <p className="mb-2">
+                                    <strong>Edge Detection</strong>
+                                  </p>
+                                  <p>
+                                    Bright red lines will be overlaid on areas of focus. 
+                                    Use the slider below to adjust the threshold if too many or too little lines are visible.
+                                  </p>
+                              </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                                Highlights edges to help set the camera focus
+                        </div>
+                      </div>
+                      <Switch
+                        key={`$"edges"-${selectedCamera}`}
+                        className="ml-1"
+                        id="edges"
+                        checked={options && options["edges"]}
+                        onCheckedChange={(isChecked) => {
+                          handleSetOption("edges", isChecked);
+                        }}
+                      />
+                    </div>
+                  <div className="flex flex-row justify-between">
+                    <Slider
+                      id="focus-threshold"
+                      className="w-full"
+                      disabled={options["edges"] === false}
+                      value={[options["ethreshold"] ?? 100]}
+                      min={0}
+                      max={255}
+                      step={1}
+                      onValueChange={(value) => {
+                        handleSetOption("ethreshold", value[0]);
+                      }}
+                    />
+                    <div className="align-center ml-6 mr-2 flex text-lg">
+                      {options["ethreshold"]}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

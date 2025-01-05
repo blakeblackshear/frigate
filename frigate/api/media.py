@@ -131,6 +131,8 @@ def latest_frame(
         "mask": params.mask,
         "motion_boxes": params.motion,
         "regions": params.regions,
+        "edges": params.edges,
+        "edges_threshold": params.ethreshold,
     }
     quality = params.quality
 

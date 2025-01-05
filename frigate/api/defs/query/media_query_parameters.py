@@ -20,6 +20,8 @@ class MediaLatestFrameQueryParams(BaseModel):
     regions: Optional[int] = None
     quality: Optional[int] = 70
     height: Optional[int] = None
+    edges: Optional[int] = None
+    ethreshold: Optional[int] = None
 
 
 class MediaEventsSnapshotQueryParams(BaseModel):
