@@ -65,6 +65,7 @@ INCLUDED_FFMPEG_VERSIONS = ["7.0", "5.0"]
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
+FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # Regex constants
 

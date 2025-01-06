@@ -1,6 +1,7 @@
 """SQLite-vec embeddings database."""
 
 import base64
+import datetime
 import logging
 import os
 import time
@@ -21,6 +22,7 @@ from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from .types import EmbeddingsMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +61,15 @@ def get_metadata(event: Event) -> dict:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        db: SqliteVecQueueDatabase,
+        metrics: EmbeddingsMetrics,
+    ) -> None:
         self.config = config
         self.db = db
+        self.metrics = metrics
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
@@ -123,19 +131,6 @@ class Embeddings:
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
 
-        if self.config.face_recognition.enabled:
-            self.face_embedding = GenericONNXEmbedding(
-                model_name="facedet",
-                model_file="facedet.onnx",
-                download_urls={
-                    "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
-                    "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
-                },
-                model_size="small",
-                model_type=ModelTypeEnum.face,
-                requestor=self.requestor,
-            )
-
         self.lpr_detection_model = None
         self.lpr_classification_model = None
         self.lpr_recognition_model = None
@@ -186,6 +181,7 @@ class Embeddings:
         @param: thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
         # Convert thumbnail bytes to PIL Image
         embedding = self.vision_embedding([thumbnail])[0]
 
@@ -198,6 +194,11 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.image_embeddings_fps.value = (
+            self.metrics.image_embeddings_fps.value * 9 + duration
+        ) / 10
+
         return embedding
 
     def batch_embed_thumbnail(
@@ -208,6 +209,7 @@ class Embeddings:
         @param: event_thumbs Map of Event IDs in DB to thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
         ids = list(event_thumbs.keys())
         embeddings = self.vision_embedding(list(event_thumbs.values()))
 
@@ -226,11 +228,17 @@ class Embeddings:
                 items,
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
+
         return embeddings
 
     def embed_description(
         self, event_id: str, description: str, upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         embedding = self.text_embedding([description])[0]
 
         if upsert:
@@ -242,11 +250,17 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + duration
+        ) / 10
+
         return embedding
 
     def batch_embed_description(
         self, event_descriptions: dict[str, str], upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         # upsert embeddings one by one to avoid token limit
         embeddings = []
 
@@ -268,6 +282,11 @@ class Embeddings:
                 """.format(", ".join(["(?, ?)"] * len(ids))),
                 items,
             )
+
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
 
         return embeddings
 
