@@ -144,7 +144,7 @@ export default function NotificationView({
                 setRegistration(null);
               });
             toast.success(
-              "Successfully registered for notifications. Restart to start receiving notifications.",
+              "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",
               {
                 position: "top-center",
               },
@@ -438,7 +438,7 @@ export default function NotificationView({
 
             <div className="col-span-1">
               <div className="mt-4 gap-2 space-y-6">
-                <div className="space-y-3">
+                <div className="flex flex-col gap-2 md:max-w-[50%]">
                   <Separator className="my-2 flex bg-secondary md:hidden" />
                   <Heading as="h4" className="my-2">
                     Device-Specific Settings
@@ -486,7 +486,7 @@ export default function NotificationView({
                   >
                     {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
                   </Button>
-                  {registration != null && (
+                  {registration != null && registration.active && (
                     <Button
                       aria-label="Send a test notification"
                       onClick={() => sendTestNotification("notification_test")}

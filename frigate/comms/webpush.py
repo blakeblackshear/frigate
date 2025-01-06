@@ -253,6 +253,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 payload={},
                 title="Test Notification",
                 message="This is a test notification from Frigate.",
+                direct_url="/",
                 notification_type="test",
             )
 
@@ -309,4 +310,5 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.cleanup_registrations()
 
     def stop(self) -> None:
+        logger.info("Closing notification queue")
         self.notification_thread.join()
