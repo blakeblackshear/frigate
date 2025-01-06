@@ -98,6 +98,39 @@ cameras:
       height: # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
+### Annke FCD600 (and other Annke ?)
+
+This camera needs an isapi stream to activate 2 way audio. 
+In the camera UI, set audio encoding to G.711ulaw. 
+Available streams seem to have the same syntax as Hikvision.
+
+```yaml
+ffmpeg:
+  output_args:
+    record: preset-record-generic-audio-copy
+
+go2rtc:
+  streams:
+    annkefcd600: # <------ Name the camera 
+       - rtsp://USER:PW@CAMERAIP:554/Streaming/Channels/101/
+       - isapi://USER:PW@CAMERAIP:80/
+       - ffmpeg:annkefcd600#audio=opus
+  webrtc:
+    candidates:
+      - 127.0.0.1:8555
+      - stun:8555
+
+cameras:
+  annkefcd600:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/annkefcd600
+          input_args: preset-rtsp-restream
+          roles: ...
+```
+
 ### Blue Iris RTSP Cameras
 
 You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
