@@ -88,25 +88,54 @@ class NorfairTracker(ObjectTracker):
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
-        # TODO: could also initialize a tracker per object class if there
-        #       was a good reason to have different distance calculations
-        self.tracker = Tracker(
+
+        # Define tracker configurations for each object type
+        self.object_type_configs = {
+            "car": {
+                "filter_factory": OptimizedKalmanFilterFactory(R=3.4, Q=0.03),
+                "distance_function": frigate_distance,
+                "distance_threshold": 2.5,
+            },
+        }
+
+        # Default tracker configuration
+        # use default filter factory with custom values
+        # R is the multiplier for the sensor measurement noise matrix, default of 4.0
+        # lowering R means that we trust the position of the bounding boxes more
+        # testing shows that the prediction was being relied on a bit too much
+        self.default_tracker_config = {
+            "filter_factory": OptimizedKalmanFilterFactory(R=4),
+            "distance_function": frigate_distance,
+            "distance_threshold": 2.5,
+        }
+
+        # Initialize trackers for each object type
+        self.trackers = {}
+        for obj_type, config in self.object_type_configs.items():
+            self.trackers[obj_type] = Tracker(
+                distance_function=config["distance_function"],
+                distance_threshold=config["distance_threshold"],
+                initialization_delay=self.detect_config.min_initialized,
+                hit_counter_max=self.detect_config.max_disappeared,
+                filter_factory=config["filter_factory"],
+            )
+
+        # Initialize default tracker
+        self.default_tracker = Tracker(
             distance_function=frigate_distance,
-            distance_threshold=2.5,
+            distance_threshold=self.default_tracker_config["distance_threshold"],
             initialization_delay=self.detect_config.min_initialized,
             hit_counter_max=self.detect_config.max_disappeared,
-            # use default filter factory with custom values
-            # R is the multiplier for the sensor measurement noise matrix, default of 4.0
-            # lowering R means that we trust the position of the bounding boxes more
-            # testing shows that the prediction was being relied on a bit too much
-            # TODO: could use different kalman filter values along with
-            #       the different tracker per object class
-            filter_factory=OptimizedKalmanFilterFactory(R=3.4),
+            filter_factory=self.default_tracker_config["filter_factory"],
         )
         if self.ptz_metrics.autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
+
+    def get_tracker_for_label(self, label: str) -> Tracker:
+        """Get the appropriate tracker for the given object label."""
+        return self.trackers.get(label, self.default_tracker)
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -116,10 +145,13 @@ class NorfairTracker(ObjectTracker):
         obj["start_time"] = obj["frame_time"]
         obj["motionless_count"] = 0
         obj["position_changes"] = 0
+
+        # Get the correct tracker for this object's label
+        tracker = self.get_tracker_for_label(obj["label"])
         obj["score_history"] = [
             p.data["score"]
             for p in next(
-                (o for o in self.tracker.tracked_objects if o.global_id == track_id)
+                (o for o in tracker.tracked_objects if o.global_id == track_id)
             ).past_detections
         ]
         self.tracked_objects[id] = obj
@@ -137,10 +169,13 @@ class NorfairTracker(ObjectTracker):
         self.stationary_box_history[id] = []
 
     def deregister(self, id, track_id):
+        obj = self.tracked_objects[id]
+        tracker = self.get_tracker_for_label(obj["label"])
+
         del self.tracked_objects[id]
         del self.disappeared[id]
-        self.tracker.tracked_objects = [
-            o for o in self.tracker.tracked_objects if o.global_id != track_id
+        tracker.tracked_objects = [
+            o for o in tracker.tracked_objects if o.global_id != track_id
         ]
         del self.track_id_map[track_id]
 
@@ -287,9 +322,13 @@ class NorfairTracker(ObjectTracker):
     def match_and_update(
         self, frame_name: str, frame_time: float, detections: list[dict[str, any]]
     ):
-        norfair_detections = []
-
+        # Group detections by object type
+        detections_by_type = {}
         for obj in detections:
+            label = obj[0]
+            if label not in detections_by_type:
+                detections_by_type[label] = []
+
             # centroid is used for other things downstream
             centroid_x = int((obj[2][0] + obj[2][2]) / 2.0)
             centroid_y = int((obj[2][1] + obj[2][3]) / 2.0)
@@ -297,22 +336,21 @@ class NorfairTracker(ObjectTracker):
             # track based on top,left and bottom,right corners instead of centroid
             points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
 
-            norfair_detections.append(
-                Detection(
-                    points=points,
-                    label=obj[0],
-                    data={
-                        "label": obj[0],
-                        "score": obj[1],
-                        "box": obj[2],
-                        "area": obj[3],
-                        "ratio": obj[4],
-                        "region": obj[5],
-                        "frame_time": frame_time,
-                        "centroid": (centroid_x, centroid_y),
-                    },
-                )
+            detection = Detection(
+                points=points,
+                label=label,
+                data={
+                    "label": label,
+                    "score": obj[1],
+                    "box": obj[2],
+                    "area": obj[3],
+                    "ratio": obj[4],
+                    "region": obj[5],
+                    "frame_time": frame_time,
+                    "centroid": (centroid_x, centroid_y),
+                },
             )
+            detections_by_type[label].append(detection)
 
         coord_transformations = None
 
@@ -327,13 +365,18 @@ class NorfairTracker(ObjectTracker):
                 detections, frame_name, frame_time, self.camera_name
             )
 
-        tracked_objects = self.tracker.update(
-            detections=norfair_detections, coord_transformations=coord_transformations
-        )
+        # Update each tracker with its corresponding detections
+        all_tracked_objects = []
+        for label, label_detections in detections_by_type.items():
+            tracker = self.get_tracker_for_label(label)
+            tracked_objects = tracker.update(
+                detections=label_detections, coord_transformations=coord_transformations
+            )
+            all_tracked_objects.extend(tracked_objects)
 
         # update or create new tracks
         active_ids = []
-        for t in tracked_objects:
+        for t in all_tracked_objects:
             estimate = tuple(t.estimate.flatten().astype(int))
             # keep the estimate within the bounds of the image
             estimate = (
@@ -374,18 +417,23 @@ class NorfairTracker(ObjectTracker):
         ]
 
     def debug_draw(self, frame, frame_time):
+        # Collect all tracked objects from each tracker
+        all_tracked_objects = []
+        for tracker in [*self.trackers.values(), self.default_tracker]:
+            all_tracked_objects.extend(tracker.tracked_objects)
+
         active_detections = [
             Drawable(id=obj.id, points=obj.last_detection.points, label=obj.label)
-            for obj in self.tracker.tracked_objects
+            for obj in all_tracked_objects
             if obj.last_detection.data["frame_time"] == frame_time
         ]
         missing_detections = [
             Drawable(id=obj.id, points=obj.last_detection.points, label=obj.label)
-            for obj in self.tracker.tracked_objects
+            for obj in all_tracked_objects
             if obj.last_detection.data["frame_time"] != frame_time
         ]
         # draw the estimated bounding box
-        draw_boxes(frame, self.tracker.tracked_objects, color="green", draw_ids=True)
+        draw_boxes(frame, all_tracked_objects, color="green", draw_ids=True)
         # draw the detections that were detected in the current frame
         draw_boxes(frame, active_detections, color="blue", draw_ids=True)
         # draw the detections that are missing in the current frame
@@ -393,7 +441,7 @@ class NorfairTracker(ObjectTracker):
 
         # draw the distance calculation for the last detection
         # estimate vs detection
-        for obj in self.tracker.tracked_objects:
+        for obj in all_tracked_objects:
             ld = obj.last_detection
             # bottom right
             text_anchor = (
