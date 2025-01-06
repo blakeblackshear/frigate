@@ -104,7 +104,7 @@ class NorfairTracker(ObjectTracker):
         # lowering R means that we trust the position of the bounding boxes more
         # testing shows that the prediction was being relied on a bit too much
         self.default_tracker_config = {
-            "filter_factory": OptimizedKalmanFilterFactory(R=4),
+            "filter_factory": OptimizedKalmanFilterFactory(R=3.4),
             "distance_function": frigate_distance,
             "distance_threshold": 2.5,
         }
