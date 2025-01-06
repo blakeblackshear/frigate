@@ -144,7 +144,7 @@ export default function HlsVideoPlayer({
 
   const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [muted, setMuted] = useOverlayState("playerMuted", true);
+  const [muted, setMuted] = usePersistence("hlsPlayerMuted", true);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
   const [defaultPlaybackRate] = usePersistence("playbackRate", 1);
   const [playbackRate, setPlaybackRate] = useOverlayState(
@@ -211,7 +211,7 @@ export default function HlsVideoPlayer({
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
-          setMuted={(muted) => setMuted(muted, true)}
+          setMuted={(muted) => setMuted(muted)}
           playbackRate={playbackRate ?? 1}
           hotKeys={hotKeys}
           onPlayPause={onPlayPause}
@@ -280,9 +280,12 @@ export default function HlsVideoPlayer({
                 }
               : undefined
           }
-          onVolumeChange={() =>
-            setVolume(videoRef.current?.volume ?? 1.0, true)
-          }
+          onVolumeChange={() => {
+            setVolume(videoRef.current?.volume ?? 1.0, true);
+            if (!frigateControls) {
+              setMuted(videoRef.current?.muted);
+            }
+          }}
           onPlay={() => {
             setIsPlaying(true);
 
