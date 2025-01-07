@@ -285,6 +285,7 @@ def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
             new_config["detectors"][detector]["model_path"] = path
             del new_config["detectors"][detector]["model"]
 
+    new_config["version"] = "0.15-1"
     return new_config
 
 
