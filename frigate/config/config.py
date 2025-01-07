@@ -612,9 +612,7 @@ class FrigateConfig(FrigateBaseModel):
                     model_config["path"] = "/edgetpu_model.tflite"
 
             model = ModelConfig.model_validate(model_config)
-            model.check_and_load_plus_model(
-                self.plus_api, detector_config.type
-            )
+            model.check_and_load_plus_model(self.plus_api, detector_config.type)
             model.compute_model_hash()
             detector_config.model = model
             self.detectors[key] = detector_config
