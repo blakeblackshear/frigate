@@ -52,7 +52,7 @@ detectors:
   # Required: name of the detector
   detector_name:
     # Required: type of the detector
-    # Frigate provided types include 'cpu', 'edgetpu', 'openvino' and 'tensorrt' (default: shown below)
+    # Frigate provides many types, see https://docs.frigate.video/configuration/object_detectors for more details (default: shown below)
     # Additional detector types can also be plugged in.
     # Detectors may require additional configuration.
     # Refer to the Detectors configuration page for more information.
