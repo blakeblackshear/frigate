@@ -29,7 +29,7 @@ The default video and audio codec on your camera may not always be compatible wi
 
 ### Audio Support
 
-MSE Requires AAC audio, WebRTC requires PCMU/PCMA, or opus audio. If you want to support both MSE and WebRTC then your restream config needs to make sure both are enabled.
+MSE Requires PCMA/PCMU or AAC audio, WebRTC requires PCMA/PCMU or opus audio. If you want to support both MSE and WebRTC then your restream config needs to make sure both are enabled.
 
 ```yaml
 go2rtc:
