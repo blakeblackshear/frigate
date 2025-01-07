@@ -194,6 +194,9 @@ class BaseDetectorConfig(BaseModel):
     model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )
+    model_path: Optional[str] = Field(
+        default=None, title="Detector specific model path."
+    )
     model_config = ConfigDict(
         extra="allow", arbitrary_types_allowed=True, protected_namespaces=()
     )
