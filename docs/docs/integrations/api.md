@@ -549,6 +549,26 @@ Get the audio activity for camera(s) during a specified time period.
 | `after`   | int  | Epoch time                  |
 | `cameras` | str  | , separated list of cameras |
 
+## Logs
+
+### `GET /api/logs/[frigate|nginx|go2rtc]`
+
+Retrieves the logs from the server. Accepts the following path strings parameter:
+
+| param      | Description                                                    |
+| ---------- | -------------------------------------------------------------- |
+| `frigate`  | Frigate log lines returned                                     |
+| `nginx`    | Web server log lines returned                                  |
+| `go2rtc`   | Stream monitoring log lines returned                           |
+
+Accepts the following query string parameter:
+
+| param      | Type | Description                                                    |
+| ---------- | ---- | -------------------------------------------------------------- |
+| `start`    | int  | Starting log line to return                                    |
+
+example: http://localhost:5000/api/logs/nginx?start=500
+
 ## Timeline
 
 ### `GET /api/timeline`
