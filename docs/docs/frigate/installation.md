@@ -305,8 +305,15 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 ## Proxmox
 
-It is recommended to run Frigate in LXC, rather than in a VM, for maximum performance. The setup can be complex so be prepared to read the Proxmox and LXC documentation. Suggestions include:
+[According to Proxmox documentation](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#chapter_pct) it is recommended that you run application containers like Frigate inside a Proxmox QEMU VM. This will give you all the advantages of application containerization, while also providing the benefits that VMs offer, such as strong isolation from the host and the ability to live-migrate, which otherwise isn’t possible with containers.
 
+:::warning
+
+If you choose to run Frigate via LXC in Proxmox the setup can be complex so be prepared to read the Proxmox and LXC documentation, Frigate does not officially support running inside of an LXC.
+
+:::
+
+ Suggestions include:
 - For Intel-based hardware acceleration, to allow access to the `/dev/dri/renderD128` device with major number 226 and minor number 128, add the following lines to the `/etc/pve/lxc/<id>.conf` LXC configuration:
   - `lxc.cgroup2.devices.allow: c 226:128 rwm`
   - `lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file`
