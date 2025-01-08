@@ -1,5 +1,6 @@
 """Configure and control camera via onvif."""
 
+import asyncio
 import logging
 from enum import Enum
 from importlib.util import find_spec
@@ -60,9 +61,7 @@ class OnvifController:
                             cam.onvif.port,
                             cam.onvif.user,
                             cam.onvif.password,
-                            wsdl_dir=str(
-                                Path(find_spec("onvif").origin).parent / "wsdl"
-                            ).replace("dist-packages/onvif", "site-packages"),
+                            wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl").replace("dist-packages/onvif", "site-packages"),
                             adjust_time=cam.onvif.ignore_time_mismatch,
                             transport=transport,
                         ),
@@ -74,8 +73,9 @@ class OnvifController:
                 except ONVIFError as e:
                     logger.error(f"Onvif connection to {cam.name} failed: {e}")
 
-    def _init_onvif(self, camera_name: str) -> bool:
+    async def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
+        await onvif.update_xaddrs()
 
         # create init services
         media = onvif.create_media_service()
@@ -560,7 +560,7 @@ class OnvifController:
             return
 
         if not self.cams[camera_name]["init"]:
-            if not self._init_onvif(camera_name):
+            if not asyncio.run(self._init_onvif(camera_name)):
                 return
 
         try:
