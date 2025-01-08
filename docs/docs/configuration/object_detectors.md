@@ -144,7 +144,7 @@ detectors:
 
 #### SSDLite MobileNet v2
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. 
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
 
 Use the model configuration shown below when using the OpenVINO detector with the default OpenVINO model:
 
@@ -506,11 +506,12 @@ detectors:
   cpu1:
     type: cpu
     num_threads: 3
-    model:
-      path: "/custom_model.tflite"
   cpu2:
     type: cpu
     num_threads: 3
+
+model:
+  path: "/custom_model.tflite"
 ```
 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
@@ -637,8 +638,6 @@ detectors:
   hailo8l:
     type: hailo8l
     device: PCIe
-    model:
-      path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 
 model:
   width: 300
@@ -646,4 +645,5 @@ model:
   input_tensor: nhwc
   input_pixel_format: bgr
   model_type: ssd
+  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 ```

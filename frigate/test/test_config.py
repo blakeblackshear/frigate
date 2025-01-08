@@ -75,11 +75,11 @@ class TestConfig(unittest.TestCase):
             "detectors": {
                 "cpu": {
                     "type": "cpu",
-                    "model": {"path": "/cpu_model.tflite"},
+                    "model_path": "/cpu_model.tflite",
                 },
                 "edgetpu": {
                     "type": "edgetpu",
-                    "model": {"path": "/edgetpu_model.tflite"},
+                    "model_path": "/edgetpu_model.tflite",
                 },
                 "openvino": {
                     "type": "openvino",
