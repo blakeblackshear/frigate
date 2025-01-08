@@ -84,9 +84,10 @@ def main() -> None:
             except Exception as traverse_error:
                 print(f"Could not determine exact line number: {traverse_error}")
 
-            print(f"Line #  : {line_number}")
-            print(f"Key     : {' -> '.join(map(str, error_path))}")
-            print(f"Value   : {error.get('input','-')}")
+            if current != full_config:
+                print(f"Line #  : {line_number}")
+                print(f"Key     : {' -> '.join(map(str, error_path))}")
+                print(f"Value   : {error.get('input','-')}")
             print(f"Message : {error.get('msg', error.get('type', 'Unknown'))}\n")
 
         print("*************************************************************")
