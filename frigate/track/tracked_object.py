@@ -220,6 +220,9 @@ class TrackedObject:
                 logger.debug(
                     f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, speed magnitude: {speed_magnitude}, velocity angle: {self.velocity_angle}, estimated speed: {self.current_estimated_speed:.1f}, average speed: {self.average_estimated_speed:.1f}, length: {len(self.speed_history)}"
                 )
+            else:
+                # ensure we do not display an estimate if the object is not currently in a speed tracking zone
+                self.current_estimated_speed = 0
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
