@@ -89,12 +89,24 @@ class NorfairTracker(ObjectTracker):
         self.camera_name = config.name
         self.track_id_map = {}
 
-        # Define tracker configurations for each object type
+        # Define tracker configurations for static camera
         self.object_type_configs = {
             "car": {
                 "filter_factory": OptimizedKalmanFilterFactory(R=3.4, Q=0.03),
                 "distance_function": frigate_distance,
                 "distance_threshold": 2.5,
+            },
+        }
+
+        # Define autotracking PTZ-specific configurations
+        self.ptz_object_type_configs = {
+            "person": {
+                "filter_factory": OptimizedKalmanFilterFactory(
+                    R=4,
+                    Q=0.15,
+                ),
+                "distance_function": frigate_distance,
+                "distance_threshold": 3,
             },
         }
 
@@ -109,33 +121,78 @@ class NorfairTracker(ObjectTracker):
             "distance_threshold": 2.5,
         }
 
-        # Initialize trackers for each object type
+        self.default_ptz_tracker_config = {
+            "filter_factory": OptimizedKalmanFilterFactory(R=4, Q=0.2),
+            "distance_function": frigate_distance,
+            "distance_threshold": 3,
+        }
+
         self.trackers = {}
-        for obj_type, config in self.object_type_configs.items():
-            self.trackers[obj_type] = Tracker(
-                distance_function=config["distance_function"],
-                distance_threshold=config["distance_threshold"],
+        # Handle static trackers
+        for obj_type, tracker_config in self.object_type_configs.items():
+            if obj_type in self.camera_config.objects.track:
+                if obj_type not in self.trackers:
+                    self.trackers[obj_type] = {}
+                self.trackers[obj_type]["static"] = Tracker(
+                    distance_function=tracker_config["distance_function"],
+                    distance_threshold=tracker_config["distance_threshold"],
+                    initialization_delay=self.detect_config.min_initialized,
+                    hit_counter_max=self.detect_config.max_disappeared,
+                    filter_factory=tracker_config["filter_factory"],
+                )
+
+        # Handle PTZ trackers
+        for obj_type, tracker_config in self.ptz_object_type_configs.items():
+            if (
+                obj_type in self.camera_config.onvif.autotracking.track
+                and self.camera_config.onvif.autotracking.enabled_in_config
+            ):
+                if obj_type not in self.trackers:
+                    self.trackers[obj_type] = {}
+                self.trackers[obj_type]["ptz"] = Tracker(
+                    distance_function=tracker_config["distance_function"],
+                    distance_threshold=tracker_config["distance_threshold"],
+                    initialization_delay=self.detect_config.min_initialized,
+                    hit_counter_max=self.detect_config.max_disappeared,
+                    filter_factory=tracker_config["filter_factory"],
+                )
+
+        # Initialize default trackers
+        self.default_tracker = {
+            "static": Tracker(
+                distance_function=frigate_distance,
+                distance_threshold=self.default_tracker_config["distance_threshold"],
                 initialization_delay=self.detect_config.min_initialized,
                 hit_counter_max=self.detect_config.max_disappeared,
-                filter_factory=config["filter_factory"],
-            )
+                filter_factory=self.default_tracker_config["filter_factory"],
+            ),
+            "ptz": Tracker(
+                distance_function=frigate_distance,
+                distance_threshold=self.default_ptz_tracker_config[
+                    "distance_threshold"
+                ],
+                initialization_delay=self.detect_config.min_initialized,
+                hit_counter_max=self.detect_config.max_disappeared,
+                filter_factory=self.default_ptz_tracker_config["filter_factory"],
+            ),
+        }
 
-        # Initialize default tracker
-        self.default_tracker = Tracker(
-            distance_function=frigate_distance,
-            distance_threshold=self.default_tracker_config["distance_threshold"],
-            initialization_delay=self.detect_config.min_initialized,
-            hit_counter_max=self.detect_config.max_disappeared,
-            filter_factory=self.default_tracker_config["filter_factory"],
-        )
         if self.ptz_metrics.autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
 
-    def get_tracker_for_label(self, label: str) -> Tracker:
-        """Get the appropriate tracker for the given object label."""
-        return self.trackers.get(label, self.default_tracker)
+    def get_tracker(self, object_type: str) -> Tracker:
+        """Get the appropriate tracker based on object type and camera mode."""
+        mode = (
+            "ptz"
+            if self.ptz_metrics.autotracker_enabled
+            and object_type in self.camera_config.onvif.autotracking.track
+            else "static"
+        )
+        if object_type in self.trackers:
+            return self.trackers[object_type][mode]
+        return self.default_tracker[mode]
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -147,7 +204,7 @@ class NorfairTracker(ObjectTracker):
         obj["position_changes"] = 0
 
         # Get the correct tracker for this object's label
-        tracker = self.get_tracker_for_label(obj["label"])
+        tracker = self.get_tracker(obj["label"])
         obj["score_history"] = [
             p.data["score"]
             for p in next(
@@ -170,7 +227,7 @@ class NorfairTracker(ObjectTracker):
 
     def deregister(self, id, track_id):
         obj = self.tracked_objects[id]
-        tracker = self.get_tracker_for_label(obj["label"])
+        tracker = self.get_tracker(obj["label"])
 
         del self.tracked_objects[id]
         del self.disappeared[id]
@@ -368,7 +425,7 @@ class NorfairTracker(ObjectTracker):
         # Update each tracker with its corresponding detections
         all_tracked_objects = []
         for label, label_detections in detections_by_type.items():
-            tracker = self.get_tracker_for_label(label)
+            tracker = self.get_tracker(label)
             tracked_objects = tracker.update(
                 detections=label_detections, coord_transformations=coord_transformations
             )
