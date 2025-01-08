@@ -142,6 +142,7 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
+    unzip \
     # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
     && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA4285295FC7B1A81600062A9605C66F00D6C9793" | \
     gpg --dearmor > /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
@@ -180,6 +181,14 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
+# Download the python-onvif-zeep package, build the wheel, move it to the /wheels directory, and clean up temporary files
+RUN wget https://github.com/FalkTannhaeuser/python-onvif-zeep/archive/zeep.zip \
+    && unzip zeep.zip -d . \
+    && cd python-onvif-zeep-zeep \
+    && python3 setup.py bdist_wheel \
+    && mv dist/onvif_zeep-0.2.12-py3-none-any.whl /wheels/ \
+    && cd .. \
+    && rm -rf python-onvif-zeep-zeep zeep.zip
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
