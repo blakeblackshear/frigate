@@ -173,8 +173,8 @@ go2rtc:
 For two-way talk to work with Frigate, you should:
 
 - Use the recommended Reolink config for your doorbell as suggested above.
-- Set up go2rtc with [WebRTC](https://docs.frigate.video/configuration/live#webrtc-extra-configuration).
-- Ensure you access Frigate via https (may require [opening port 8971](https://docs.frigate.video/frigate/installation/#ports)).
+- Set up go2rtc with [WebRTC](/configuration/live#webrtc-extra-configuration).
+- Ensure you access Frigate via https (may require [opening port 8971](/installation/#ports)).
 - For the Home Assistant Frigate card, [follow the docs](https://github.com/dermotduffy/frigate-hass-card?tab=readme-ov-file#using-2-way-audio) for the correct source.
 
 ### Unifi Protect Cameras
