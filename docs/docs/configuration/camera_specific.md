@@ -156,9 +156,9 @@ cameras:
 
 #### Reolink Doorbell
 
-The reolink doorbell supports 2-way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
+The reolink doorbell supports two way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
 
-Ensure HTTP is enabled in the camera's advanced network settings.
+Ensure HTTP is enabled in the camera's advanced network settings. To use two way talk with Frigate, see the [Live view documentation](/configuration/live#two-way-talk).
 
 ```yaml
 go2rtc:
@@ -169,13 +169,6 @@ go2rtc:
     your_reolink_doorbell_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
 ```
-
-For two-way talk to work with Frigate, you should:
-
-- Use the recommended Reolink config for your doorbell as suggested above.
-- Set up go2rtc with [WebRTC](/configuration/live#webrtc-extra-configuration).
-- Ensure you access Frigate via https (may require [opening port 8971](/installation/#ports)).
-- For the Home Assistant Frigate card, [follow the docs](https://github.com/dermotduffy/frigate-hass-card?tab=readme-ov-file#using-2-way-audio) for the correct source.
 
 ### Unifi Protect Cameras
 
