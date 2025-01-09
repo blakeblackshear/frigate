@@ -3,7 +3,15 @@ id: recordings
 title: Troubleshooting Recordings
 ---
 
-### WARNING : Unable to keep up with recording segments in cache for camera. Keeping the 5 most recent segments out of 6 and discarding the rest...
+## I have Frigate configured for motion recording only, but it still seems to be recording even with no motion. Why?
+
+You'll want to:
+
+- Make sure your camera's timestamp is masked out with a motion mask. Even if there is no motion occurring in your scene, your motion settings may be sensitive enough to count your timestamp as motion.
+- If you have audio detection enabled, keep in mind that audio that is heard above `min_volume` is considered motion.
+- [Tune your motion detection settings](/configuration/motion_detection) either by editing your config file or by using the UI's Motion Tuner.
+
+## I see the message: WARNING : Unable to keep up with recording segments in cache for camera. Keeping the 5 most recent segments out of 6 and discarding the rest...
 
 This error can be caused by a number of different issues. The first step in troubleshooting is to enable debug logging for recording. This will enable logging showing how long it takes for recordings to be moved from RAM cache to the disk.
 
@@ -40,6 +48,7 @@ On linux, some helpful tools/commands in diagnosing would be:
 On modern linux kernels, the system will utilize some swap if enabled. Setting vm.swappiness=1 no longer means that the kernel will only swap in order to avoid OOM. To prevent any swapping inside a container, set allocations memory and memory+swap to be the same and disable swapping by setting the following docker/podman run parameters:
 
 **Compose example**
+
 ```yaml
 version: "3.9"
 services:
@@ -54,6 +63,7 @@ services:
 ```
 
 **Run command example**
+
 ```
 --memory=<MAXRAM> --memory-swap=<MAXSWAP> --memory-swappiness=0
 ```
