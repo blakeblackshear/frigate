@@ -1,6 +1,7 @@
 import logging
 import os
 import urllib.request
+from typing import Optional
 
 import numpy as np
 
@@ -31,38 +32,46 @@ logger = logging.getLogger(__name__)
 # Define the detector key for Hailo
 DETECTOR_KEY = "hailo8l"
 
-
 # Configuration class for model settings
 class ModelConfig(BaseModel):
-    path: str = Field(default=None, title="Model Path")  # Path to the HEF file
-
+    path: Optional[str] = Field(default=None, title="Model Path")
+    type: str = Field(default="ssd_mobilenet_v1", title="Model Type")
+    url: str = Field(default="", title="Model URL")
+    width: int = Field(default=300, title="Model Width")
+    height: int = Field(default=300, title="Model Height")
+    score_threshold: float = Field(default=0.3, title="Score Threshold")
+    max_detections: int = Field(default=30, title="Maximum Detections")
+    input_tensor: str = Field(default="input_tensor", title="Input Tensor Name")
+    input_pixel_format: str = Field(default="RGB", title="Input Pixel Format")
 
 # Configuration class for Hailo detector
 class HailoDetectorConfig(BaseDetectorConfig):
-    type: Literal[DETECTOR_KEY]  # Type of the detector
-    device: str = Field(default="PCIe", title="Device Type")  # Device type (e.g., PCIe)
-
+    type: Literal[DETECTOR_KEY]
+    device: str = Field(default="PCIe", title="Device Type")
+    model: ModelConfig
 
 # Hailo detector class implementation
 class HailoDetector(DetectionApi):
-    type_key = DETECTOR_KEY  # Set the type key to the Hailo detector key
+    type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: HailoDetectorConfig):
-        # Initialize device type and model path from the configuration
+        # Initialize base configuration
         self.h8l_device_type = detector_config.device
         self.h8l_model_path = detector_config.model.path
         self.h8l_model_height = detector_config.model.height
         self.h8l_model_width = detector_config.model.width
-        self.h8l_model_type = detector_config.model.model_type
+        self.h8l_model_type = detector_config.model.type
         self.h8l_tensor_format = detector_config.model.input_tensor
         self.h8l_pixel_format = detector_config.model.input_pixel_format
-        self.model_url = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.11.0/hailo8l/ssd_mobilenet_v1.hef"
+        self.model_url = detector_config.model.url
+        self.score_threshold = detector_config.model.score_threshold
+        self.max_detections = detector_config.model.max_detections
+        
         self.cache_dir = "/config/model_cache/h8l_cache"
-        self.expected_model_filename = "ssd_mobilenet_v1.hef"
-        output_type = "FLOAT32"
 
         logger.info(f"Initializing Hailo device as {self.h8l_device_type}")
         self.check_and_prepare_model()
+
         try:
             # Validate device type
             if self.h8l_device_type not in ["PCIe", "M.2"]:
@@ -87,7 +96,8 @@ class HailoDetector(DetectionApi):
                 format_type=self.hef.get_input_vstream_infos()[0].format.type,
             )
             self.output_vstream_params = OutputVStreamParams.make(
-                self.network_group, format_type=getattr(FormatType, output_type)
+                self.network_group,
+                format_type=FormatType.FLOAT32
             )
 
             # Get input and output stream information from the HEF
@@ -99,9 +109,8 @@ class HailoDetector(DetectionApi):
             logger.debug(f"[__init__] Input Tensor Format: {self.h8l_tensor_format}")
             logger.debug(f"[__init__] Input Pixel Format: {self.h8l_pixel_format}")
             logger.debug(f"[__init__] Input VStream Info: {self.input_vstream_info[0]}")
-            logger.debug(
-                f"[__init__] Output VStream Info: {self.output_vstream_info[0]}"
-            )
+            logger.debug(f"[__init__] Output VStream Info: {self.output_vstream_info[0]}")
+            
         except HailoRTException as e:
             logger.error(f"HailoRTException during initialization: {e}")
             raise
@@ -110,12 +119,14 @@ class HailoDetector(DetectionApi):
             raise
 
     def check_and_prepare_model(self):
-        # Ensure cache directory exists
+        """Download and prepare the model if necessary"""
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
 
-        # Check for the expected model file
-        model_file_path = os.path.join(self.cache_dir, self.expected_model_filename)
+        model_filename = f"{self.h8l_model_type}.hef"
+        model_file_path = os.path.join(self.cache_dir, model_filename)
+        self.h8l_model_path = model_file_path
+
         if not os.path.isfile(model_file_path):
             logger.info(
                 f"A model file was not found at {model_file_path}, Downloading one from {self.model_url}."
@@ -134,9 +145,7 @@ class HailoDetector(DetectionApi):
         )
 
         if tensor_input is None:
-            raise ValueError(
-                "[detect_raw] The 'tensor_input' argument must be provided"
-            )
+            raise ValueError("[detect_raw] The 'tensor_input' argument must be provided")
 
         # Ensure tensor_input is a numpy array
         if isinstance(tensor_input, list):
@@ -182,104 +191,132 @@ class HailoDetector(DetectionApi):
                         logger.error(
                             f"[detect_raw] Missing output stream {self.output_vstream_info[0].name} in inference results"
                         )
-                        return np.zeros((20, 6), np.float32)
+                        return np.zeros((self.max_detections, 6), np.float32)
 
                     raw_output = raw_output[self.output_vstream_info[0].name][0]
                     logger.debug(
                         f"[detect_raw] Raw output for stream {self.output_vstream_info[0].name}: {raw_output}"
                     )
 
-            # Process the raw output
+            # Process the raw output based on model type
             detections = self.process_detections(raw_output)
             if len(detections) == 0:
                 logger.debug(
                     "[detect_raw] No detections found after processing. Setting default values."
                 )
-                return np.zeros((20, 6), np.float32)
+                return np.zeros((self.max_detections, 6), np.float32)
             else:
-                formatted_detections = detections
-                if (
-                    formatted_detections.shape[1] != 6
-                ):  # Ensure the formatted detections have 6 columns
-                    logger.error(
-                        f"[detect_raw] Unexpected shape for formatted detections: {formatted_detections.shape}. Expected (20, 6)."
-                    )
-                    return np.zeros((20, 6), np.float32)
-                return formatted_detections
+                return detections
+
         except HailoRTException as e:
             logger.error(f"[detect_raw] HailoRTException during inference: {e}")
-            return np.zeros((20, 6), np.float32)
+            return np.zeros((self.max_detections, 6), np.float32)
         except Exception as e:
             logger.error(f"[detect_raw] Exception during inference: {e}")
-            return np.zeros((20, 6), np.float32)
+            return np.zeros((self.max_detections, 6), np.float32)
         finally:
             logger.debug("[detect_raw] Exiting function")
 
-    def process_detections(self, raw_detections, threshold=0.5):
+    def process_detections(self, raw_detections, threshold=None):
+        """Process detections based on model type"""
+        if threshold is None:
+            threshold = self.score_threshold
+
+        if self.h8l_model_type == "ssd_mobilenet_v1":
+            return self._process_ssd_detections(raw_detections, threshold)
+        elif self.h8l_model_type == "yolov8s":
+            return self._process_yolo_detections(raw_detections, threshold, version=8)
+        elif self.h8l_model_type == "yolov6n":
+            return self._process_yolo_detections(raw_detections, threshold, version=6)
+        else:
+            logger.error(f"Unsupported model type: {self.h8l_model_type}")
+            return np.zeros((self.max_detections, 6), np.float32)
+
+    def _process_ssd_detections(self, raw_detections, threshold):
+        """Process SSD MobileNet detections"""
         boxes, scores, classes = [], [], []
         num_detections = 0
 
-        logger.debug(f"[process_detections] Raw detections: {raw_detections}")
-
-        for i, detection_set in enumerate(raw_detections):
-            if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
-                logger.debug(
-                    f"[process_detections] Detection set {i} is empty or not an array, skipping."
-                )
-                continue
-
-            logger.debug(
-                f"[process_detections] Detection set {i} shape: {detection_set.shape}"
-            )
-
-            for detection in detection_set:
-                if detection.shape[0] == 0:
-                    logger.debug(
-                        f"[process_detections] Detection in set {i} is empty, skipping."
-                    )
+        try:
+            for detection_set in raw_detections:
+                if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
                     continue
 
-                ymin, xmin, ymax, xmax = detection[:4]
-                score = np.clip(detection[4], 0, 1)  # Use np.clip for clarity
+                for detection in detection_set:
+                    if detection.shape[0] == 0:
+                        continue
 
-                if score < threshold:
-                    logger.debug(
-                        f"[process_detections] Detection in set {i} has a score {score} below threshold {threshold}. Skipping."
-                    )
-                    continue
+                    ymin, xmin, ymax, xmax = detection[:4]
+                    score = np.clip(detection[4], 0, 1)
 
-                logger.debug(
-                    f"[process_detections] Adding detection with coordinates: ({xmin}, {ymin}), ({xmax}, {ymax}) and score: {score}"
-                )
+                    if score < threshold:
+                        continue
+
+                    boxes.append([ymin, xmin, ymax, xmax])
+                    scores.append(score)
+                    classes.append(int(detection[5]))
+                    num_detections += 1
+
+            return self._format_output(boxes, scores, classes)
+
+        except Exception as e:
+            logger.error(f"Error processing SSD detections: {e}")
+            return np.zeros((self.max_detections, 6), np.float32)
+
+    def _process_yolo_detections(self, raw_detections, threshold, version):
+        """Process YOLO detections (v6 and v8)"""
+        boxes, scores, classes = [], [], []
+        
+        try:
+            detections = raw_detections[0]
+            
+            for detection in detections:
+                if version == 8:
+                    confidence = detection[4]
+                    if confidence < threshold:
+                        continue
+                    class_scores = detection[5:]
+                else:  # YOLOv6
+                    class_scores = detection[4:]
+                    confidence = np.max(class_scores)
+                    if confidence < threshold:
+                        continue
+
+                x, y, w, h = detection[:4]
+                
+                # Convert to corner format
+                ymin = y - h/2
+                xmin = x - w/2
+                ymax = y + h/2
+                xmax = x + w/2
+                
+                class_id = np.argmax(class_scores)
+                
                 boxes.append([ymin, xmin, ymax, xmax])
-                scores.append(score)
-                classes.append(i)
-                num_detections += 1
+                scores.append(confidence)
+                classes.append(class_id)
 
-        logger.debug(
-            f"[process_detections] Boxes: {boxes}, Scores: {scores}, Classes: {classes}, Num detections: {num_detections}"
-        )
+            return self._format_output(boxes, scores, classes)
 
-        if num_detections == 0:
-            logger.debug("[process_detections] No valid detections found.")
-            return np.zeros((20, 6), np.float32)
+        except Exception as e:
+            logger.error(f"Error processing YOLO detections: {e}")
+            return np.zeros((self.max_detections, 6), np.float32)
 
-        combined = np.hstack(
-            (
-                np.array(classes)[:, np.newaxis],
-                np.array(scores)[:, np.newaxis],
-                np.array(boxes),
-            )
-        )
-
-        if combined.shape[0] < 20:
-            padding = np.zeros(
-                (20 - combined.shape[0], combined.shape[1]), dtype=combined.dtype
-            )
+    def _format_output(self, boxes, scores, classes):
+        """Format detections to standard output format"""
+        if not boxes:
+            return np.zeros((self.max_detections, 6), np.float32)
+            
+        combined = np.hstack((
+            np.array(classes)[:, np.newaxis],
+            np.array(scores)[:, np.newaxis],
+            np.array(boxes)
+        ))
+        
+        if combined.shape[0] < self.max_detections:
+            padding = np.zeros((self.max_detections - combined.shape[0], 6), dtype=np.float32)
             combined = np.vstack((combined, padding))
-
-        logger.debug(
-            f"[process_detections] Combined detections (padded to 20 if necessary): {np.array_str(combined, precision=4, suppress_small=True)}"
-        )
-
-        return combined[:20, :6]
+        else:
+            combined = combined[:self.max_detections]
+            
+        return combined
