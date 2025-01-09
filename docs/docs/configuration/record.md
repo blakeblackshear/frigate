@@ -148,14 +148,6 @@ The above configuration example can be added globally or on a per camera basis.
 
 Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
-## I have Frigate configured for motion recording only, but it still seems to be recording even with no motion. Why?
-
-You'll want to:
-
-- Make sure your camera's timestamp is masked out with a motion mask. Even if there is no motion occurring in your scene, your motion settings may be sensitive enough to count your timestamp as motion.
-- If you have audio detection enabled, keep in mind that audio that is heard above `min_volume` is considered motion.
-- [Tune your motion detection settings](/configuration/motion_detection) either by editing your config file or by using the UI's Motion Tuner.
-
 ## How do I export recordings?
 
 Footage can be exported from Frigate by right-clicking (desktop) or long pressing (mobile) on a review item in the Review pane or by clicking the Export button in the History view. Exported footage is then organized and searchable through the Export view, accessible from the main navigation bar.
