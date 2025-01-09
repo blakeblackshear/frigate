@@ -138,3 +138,13 @@ services:
 :::
 
 See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.3#module-webrtc) for more information about this.
+
+### Two way talk
+
+For devices that support two way talk, Frigate can be configured to use the feature from the camera's Live view in the Web UI. You should:
+
+- Set up go2rtc with [WebRTC](#webrtc-extra-configuration).
+- Ensure you access Frigate via https (may require [opening port 8971](/frigate/installation/#ports)).
+- For the Home Assistant Frigate card, [follow the docs](https://github.com/dermotduffy/frigate-hass-card?tab=readme-ov-file#using-2-way-audio) for the correct source.
+
+To use the Reolink Doorbell with two way talk, you should use the [recommended Reolink configuration](/configuration/camera_specific#reolink-doorbell)
