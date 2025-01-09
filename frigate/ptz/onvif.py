@@ -56,7 +56,7 @@ class OnvifController:
                             cam.onvif.password,
                             wsdl_dir=str(
                                 Path(find_spec("onvif").origin).parent / "wsdl"
-                            ).replace("dist-packages/onvif", "site-packages"),
+                            ),
                             adjust_time=cam.onvif.ignore_time_mismatch,
                             encrypt=not cam.onvif.tls_insecure,
                         ),
