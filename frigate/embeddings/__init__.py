@@ -15,19 +15,19 @@ from setproctitle import setproctitle
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR, FACE_DIR
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
-from ..postprocessing.types import PostProcessingMetrics
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig, metrics: PostProcessingMetrics) -> None:
+def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
     # Only initialize embeddings if semantic search is enabled
     if not config.semantic_search.enabled:
         return
