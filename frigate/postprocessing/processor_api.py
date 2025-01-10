@@ -30,12 +30,23 @@ class ProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def handle_request(self, request_data: dict[str, any]) -> any | None:
+    def handle_request(self, request_data: dict[str, any]) -> dict[str, any] | None:
         """Handle metadata requests.
         Args:
             request_data (dict): containing data about requested change to process.
 
         Returns:
             None if request was not handled, otherwise return response.
+        """
+        pass
+
+    @abstractmethod
+    def expire_object(self, object_id: str) -> None:
+        """Handle objects that are no longer detected.
+        Args:
+            object_id (str): id of object that is no longer detected.
+
+        Returns:
+            None.
         """
         pass

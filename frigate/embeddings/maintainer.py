@@ -76,7 +76,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.processors: list[ProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.processors.append(FaceProcessor(self.config.face_recognition, metrics))
+            self.processors.append(FaceProcessor(self.config, metrics))
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -222,8 +222,8 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            if event_id in self.detected_faces:
-                self.detected_faces.pop(event_id)
+            for processor in self.processors:
+                processor.expire_object(event_id)
 
             if event_id in self.detected_license_plates:
                 self.detected_license_plates.pop(event_id)

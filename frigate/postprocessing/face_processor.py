@@ -392,3 +392,7 @@ class FaceProcessor(ProcessorApi):
             "message": "Successfully registered face.",
             "success": True,
         }
+
+    def expire_object(self, object_id: str):
+        if object_id in self.detected_faces:
+            self.detected_faces.pop(object_id)
