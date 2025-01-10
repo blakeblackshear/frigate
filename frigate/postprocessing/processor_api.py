@@ -10,10 +10,29 @@ logger = logging.getLogger(__name__)
 
 class ProcessorApi(ABC):
     @abstractmethod
-    def __init__(self, config: FrigateConfig):
+    def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         pass
 
     @abstractmethod
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
+    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
+        """Processes the frame with object data.
+        Args:
+            obj_data (dict): containing data about focused object in frame.
+            frame (ndarray): full yuv frame.
+
+        Returns:
+            None.
+        """
+        pass
+
+    @abstractmethod
+    def handle_request(self, request_data: dict[str, any]) -> any | None:
+        """Handle metadata requests.
+        Args:
+            request_data (dict): containing data about requested change to process.
+
+        Returns:
+            None if request was not handled, otherwise return response.
+        """
         pass

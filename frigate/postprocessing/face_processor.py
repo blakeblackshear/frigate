@@ -1,7 +1,10 @@
 """Handle processing images for face detection and recognition."""
 
+import base64
 import logging
 import os
+import random
+import string
 from typing import Optional
 
 import cv2
@@ -173,20 +176,17 @@ class FaceProcessor(ProcessorApi):
             image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
         )
 
-    def clear_classifier(self) -> None:
+    def __clear_classifier(self) -> None:
         self.face_recognizer = None
         self.label_map = {}
 
-    def detect_faces(self, input: np.ndarray) -> tuple[int, cv2.typing.MatLike] | None:
+    def __detect_face(self, input: np.ndarray) -> tuple[int, int, int, int]:
+        """Detect faces in input image."""
         if not self.face_detector:
             return None
 
         self.face_detector.setInputSize((input.shape[1], input.shape[0]))
-        return self.face_detector.detect(input)
-
-    def _detect_face(self, input: np.ndarray) -> tuple[int, int, int, int]:
-        """Detect faces in input image."""
-        faces = self.detect_faces(input)
+        faces = self.face_detector.detect(input)
 
         if faces is None or faces[1] is None:
             return None
@@ -205,6 +205,23 @@ class FaceProcessor(ProcessorApi):
                 face = bbox
 
         return face
+
+    def __classify_face(self, face_image: np.ndarray) -> tuple[str, float] | None:
+        if not self.landmark_detector:
+            return None
+
+        if not self.label_map:
+            self.__build_classifier()
+
+        img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+        img = self.__align_face(img, img.shape[1], img.shape[0])
+        index, distance = self.recognizer.predict(img)
+
+        if index == -1:
+            return None
+
+        score = 1.0 - (distance / 1000)
+        return self.label_map[index], round(score, 2)
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> bool:
         """Look for faces in image."""
@@ -235,7 +252,7 @@ class FaceProcessor(ProcessorApi):
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
             person = rgb[top:bottom, left:right]
-            face_box = self._detect_face(person)
+            face_box = self.__detect_face(person)
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
@@ -278,7 +295,7 @@ class FaceProcessor(ProcessorApi):
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
 
-        res = self.face_classifier.classify_face(face_frame)
+        res = self.__classify_face(face_frame)
 
         if not res:
             return False
@@ -328,19 +345,42 @@ class FaceProcessor(ProcessorApi):
 
         return True
 
-    def classify_face(self, face_image: np.ndarray) -> tuple[str, float] | None:
-        if not self.landmark_detector:
-            return None
+    def handle_request(self, request_data) -> dict[str, any] | None:
+        rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        label = request_data["face_name"]
+        id = f"{label}-{rand_id}"
 
-        if not self.label_map:
-            self.__build_classifier()
+        if request_data.get("cropped"):
+            thumbnail = request_data["image"]
+        else:
+            img = cv2.imdecode(
+                np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
+                cv2.IMREAD_COLOR,
+            )
+            face_box = self.__detect_face(img)
 
-        img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
-        img = self.__align_face(img, img.shape[1], img.shape[0])
-        index, distance = self.recognizer.predict(img)
+            if not face_box:
+                return {
+                    "message": "No face was detected.",
+                    "success": False,
+                }
 
-        if index == -1:
-            return None
+            face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
+            ret, thumbnail = cv2.imencode(
+                ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
+            )
 
-        score = 1.0 - (distance / 1000)
-        return self.label_map[index], round(score, 2)
+        # write face to library
+        folder = os.path.join(FACE_DIR, label)
+        file = os.path.join(folder, f"{id}.webp")
+        os.makedirs(folder, exist_ok=True)
+
+        # save face image
+        with open(file, "wb") as output:
+            output.write(thumbnail.tobytes())
+
+        self.__clear_classifier()
+        return {
+            "message": "Successfully registered face.",
+            "success": True,
+        }

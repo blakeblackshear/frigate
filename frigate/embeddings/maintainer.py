@@ -4,9 +4,7 @@ import base64
 import datetime
 import logging
 import os
-import random
 import re
-import string
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
@@ -28,7 +26,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
-    FACE_DIR,
     FRIGATE_LOCALHOST,
     UPDATE_EVENT_DESCRIPTION,
 )
@@ -37,6 +34,7 @@ from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.postprocessing.face_processor import FaceProcessor
+from frigate.postprocessing.processor_api import ProcessorApi
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
@@ -75,13 +73,10 @@ class EmbeddingMaintainer(threading.Thread):
         )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
+        self.processors: list[ProcessorApi] = []
 
-        # set face recognition conditions
-        self.face_processor = (
-            FaceProcessor(self.config.face_recognition, db)
-            if self.config.face_recognition.enabled
-            else None
-        )
+        if self.config.face_recognition.enabled:
+            self.processors.append(FaceProcessor(self.config.face_recognition, db))
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -139,55 +134,12 @@ class EmbeddingMaintainer(threading.Thread):
                         self.embeddings.embed_description("", data, upsert=False),
                         pack=False,
                     )
-                elif topic == EmbeddingsRequestEnum.register_face.value:
-                    if not self.face_recognition_enabled:
-                        return {
-                            "message": "Face recognition is not enabled.",
-                            "success": False,
-                        }
+                else:
+                    for processor in self.processors:
+                        resp = processor.handle_request(data)
 
-                    rand_id = "".join(
-                        random.choices(string.ascii_lowercase + string.digits, k=6)
-                    )
-                    label = data["face_name"]
-                    id = f"{label}-{rand_id}"
-
-                    if data.get("cropped"):
-                        pass
-                    else:
-                        img = cv2.imdecode(
-                            np.frombuffer(
-                                base64.b64decode(data["image"]), dtype=np.uint8
-                            ),
-                            cv2.IMREAD_COLOR,
-                        )
-                        face_box = self._detect_face(img)
-
-                        if not face_box:
-                            return {
-                                "message": "No face was detected.",
-                                "success": False,
-                            }
-
-                        face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
-                        ret, thumbnail = cv2.imencode(
-                            ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
-                        )
-
-                    # write face to library
-                    folder = os.path.join(FACE_DIR, label)
-                    file = os.path.join(folder, f"{id}.webp")
-                    os.makedirs(folder, exist_ok=True)
-
-                    # save face image
-                    with open(file, "wb") as output:
-                        output.write(thumbnail.tobytes())
-
-                self.face_classifier.clear_classifier()
-                return {
-                    "message": "Successfully registered face.",
-                    "success": True,
-                }
+                        if resp is not None:
+                            return resp
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 
