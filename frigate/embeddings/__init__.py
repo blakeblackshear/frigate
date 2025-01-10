@@ -20,14 +20,14 @@ from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
+from ..postprocessing.types import PostProcessingMetrics
 from .maintainer import EmbeddingMaintainer
-from .types import EmbeddingsMetrics
 from .util import ZScoreNormalization
 
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig, metrics: EmbeddingsMetrics) -> None:
+def manage_embeddings(config: FrigateConfig, metrics: PostProcessingMetrics) -> None:
     # Only initialize embeddings if semantic search is enabled
     if not config.semantic_search.enabled:
         return
@@ -192,8 +192,8 @@ class EmbeddingsContext:
 
         return results
 
-    def register_face(self, face_name: str, image_data: bytes) -> None:
-        self.requestor.send_data(
+    def register_face(self, face_name: str, image_data: bytes) -> dict[str, any]:
+        return self.requestor.send_data(
             EmbeddingsRequestEnum.register_face.value,
             {
                 "face_name": face_name,
