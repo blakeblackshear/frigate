@@ -39,8 +39,8 @@ from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
 
+from ..postprocessing.types import PostProcessingMetrics
 from .embeddings import Embeddings
-from .types import EmbeddingsMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class EmbeddingMaintainer(threading.Thread):
         self,
         db: SqliteQueueDatabase,
         config: FrigateConfig,
-        metrics: EmbeddingsMetrics,
+        metrics: PostProcessingMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
