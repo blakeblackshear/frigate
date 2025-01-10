@@ -162,8 +162,8 @@ class EmbeddingMaintainer(threading.Thread):
         # no need to process updated objects if face recognition, lpr, genai are disabled
         if (
             not camera_config.genai.enabled
-            and not self.face_processor
             and not self.lpr_config.enabled
+            and len(self.processors) == 0
         ):
             return
 
@@ -181,15 +181,8 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        if self.face_processor:
-            start = datetime.datetime.now().timestamp()
-            processed = self.face_processor.process_frame(data, yuv_frame)
-
-            if processed:
-                duration = datetime.datetime.now().timestamp() - start
-                self.metrics.face_rec_fps.value = (
-                    self.metrics.face_rec_fps.value * 9 + duration
-                ) / 10
+        for processor in self.processors:
+            processor.process_frame(data, yuv_frame)
 
         if self.lpr_config.enabled:
             start = datetime.datetime.now().timestamp()

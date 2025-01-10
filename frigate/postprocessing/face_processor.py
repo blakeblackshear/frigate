@@ -1,6 +1,7 @@
 """Handle processing images for face detection and recognition."""
 
 import base64
+import datetime
 import logging
 import os
 import random
@@ -223,14 +224,20 @@ class FaceProcessor(ProcessorApi):
         score = 1.0 - (distance / 1000)
         return self.label_map[index], round(score, 2)
 
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> bool:
+    def __update_metrics(self, duration: float) -> None:
+        self.metrics.face_rec_fps.value = (
+            self.metrics.face_rec_fps.value * 9 + duration
+        ) / 10
+
+    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
+        start = datetime.datetime.now().timestamp()
         id = obj_data["id"]
 
         # don't run for non person objects
         if obj_data.get("label") != "person":
             logger.debug("Not a processing face for non person object.")
-            return False
+            return
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a face
@@ -238,7 +245,7 @@ class FaceProcessor(ProcessorApi):
             logger.debug(
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
-            return False
+            return
 
         face: Optional[dict[str, any]] = None
 
@@ -247,7 +254,7 @@ class FaceProcessor(ProcessorApi):
             person_box = obj_data.get("box")
 
             if not person_box:
-                return False
+                return
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
@@ -256,7 +263,7 @@ class FaceProcessor(ProcessorApi):
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
-                return False
+                return
 
             face_frame = person[
                 max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
@@ -267,7 +274,7 @@ class FaceProcessor(ProcessorApi):
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
                 logger.debug("No attributes to parse.")
-                return False
+                return
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
             for attr in attributes:
@@ -279,14 +286,14 @@ class FaceProcessor(ProcessorApi):
 
             # no faces detected in this frame
             if not face:
-                return False
+                return
 
             face_box = face.get("box")
 
             # check that face is valid
             if not face_box or area(face_box) < self.config.face_recognition.min_area:
                 logger.debug(f"Invalid face box {face}")
-                return False
+                return
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
@@ -298,7 +305,7 @@ class FaceProcessor(ProcessorApi):
         res = self.__classify_face(face_frame)
 
         if not res:
-            return False
+            return
 
         sub_label, score = res
 
@@ -323,13 +330,15 @@ class FaceProcessor(ProcessorApi):
             logger.debug(
                 f"Recognized face distance {score} is less than threshold {self.config.face_recognition.threshold}"
             )
-            return True
+            self.__update_metrics(datetime.datetime.now().timestamp() - start)
+            return
 
         if id in self.detected_faces and face_score <= self.detected_faces[id]:
             logger.debug(
                 f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
             )
-            return True
+            self.__update_metrics(datetime.datetime.now().timestamp() - start)
+            return
 
         resp = requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
@@ -343,7 +352,7 @@ class FaceProcessor(ProcessorApi):
         if resp.status_code == 200:
             self.detected_faces[id] = face_score
 
-        return True
+        self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, request_data) -> dict[str, any] | None:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
