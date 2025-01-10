@@ -151,7 +151,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         camera: str = payload["after"]["camera"]
         title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
         message = f"Detected on {camera.replace('_', ' ').title()}"
-        image = f'{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
+        image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
