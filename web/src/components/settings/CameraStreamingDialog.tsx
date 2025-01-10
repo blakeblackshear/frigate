@@ -175,64 +175,97 @@ export function CameraStreamingDialog({
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col space-y-8">
-        {Object.entries(config?.cameras[camera].live.streams).length > 1 && (
-          <div className="flex flex-col items-start gap-2">
-            <Label htmlFor="stream" className="text-right">
-              Stream
-            </Label>
-            <Select value={streamName} onValueChange={setStreamName}>
-              <SelectTrigger className="">
-                <SelectValue placeholder="Choose a stream" />
-              </SelectTrigger>
-              <SelectContent>
-                {camera !== "birdseye" &&
-                  Object.entries(config?.cameras[camera].live.streams).map(
-                    ([name, stream]) => (
-                      <SelectItem key={stream} value={stream}>
-                        {name}
-                      </SelectItem>
-                    ),
-                  )}
-              </SelectContent>
-              <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                {supportsAudioOutput ? (
-                  <>
-                    <LuCheck className="size-4 text-success" />
-                    <div>Audio is available for this stream</div>
-                  </>
-                ) : (
-                  <>
-                    <LuX className="size-4 text-danger" />
-                    <div>Audio is unavailable for this stream</div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <div className="cursor-pointer p-0">
-                          <LuInfo className="size-4" />
-                          <span className="sr-only">Info</span>
-                        </div>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 text-xs">
-                        Audio must be output from your camera and configured in
-                        go2rtc for this stream.
-                        <div className="mt-2 flex items-center text-primary">
-                          <Link
-                            to="https://docs.frigate.video/configuration/live"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline"
-                          >
-                            Read the documentation{" "}
-                            <LuExternalLink className="ml-2 inline-flex size-3" />
-                          </Link>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </>
-                )}
-              </div>
-            </Select>
+        {!isRestreamed && (
+          <div className="flex flex-col gap-2">
+            <Label>Stream</Label>
+            <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+              <LuX className="size-4 text-danger" />
+              <div>Restreaming is not enabled for this camera.</div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="cursor-pointer p-0">
+                    <LuInfo className="size-4" />
+                    <span className="sr-only">Info</span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 text-xs">
+                  Set up go2rtc for additional live view options and audio for
+                  this camera.
+                  <div className="mt-2 flex items-center text-primary">
+                    <Link
+                      to="https://docs.frigate.video/configuration/live"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      Read the documentation{" "}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         )}
+        {isRestreamed &&
+          Object.entries(config?.cameras[camera].live.streams).length > 0 && (
+            <div className="flex flex-col items-start gap-2">
+              <Label htmlFor="stream" className="text-right">
+                Stream
+              </Label>
+              <Select value={streamName} onValueChange={setStreamName}>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Choose a stream" />
+                </SelectTrigger>
+                <SelectContent>
+                  {camera !== "birdseye" &&
+                    Object.entries(config?.cameras[camera].live.streams).map(
+                      ([name, stream]) => (
+                        <SelectItem key={stream} value={stream}>
+                          {name}
+                        </SelectItem>
+                      ),
+                    )}
+                </SelectContent>
+                <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                  {supportsAudioOutput ? (
+                    <>
+                      <LuCheck className="size-4 text-success" />
+                      <div>Audio is available for this stream</div>
+                    </>
+                  ) : (
+                    <>
+                      <LuX className="size-4 text-danger" />
+                      <div>Audio is unavailable for this stream</div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="cursor-pointer p-0">
+                            <LuInfo className="size-4" />
+                            <span className="sr-only">Info</span>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 text-xs">
+                          Audio must be output from your camera and configured
+                          in go2rtc for this stream.
+                          <div className="mt-2 flex items-center text-primary">
+                            <Link
+                              to="https://docs.frigate.video/configuration/live"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline"
+                            >
+                              Read the documentation{" "}
+                              <LuExternalLink className="ml-2 inline-flex size-3" />
+                            </Link>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </>
+                  )}
+                </div>
+              </Select>
+            </div>
+          )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
             Streaming Method
