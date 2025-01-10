@@ -3,8 +3,6 @@
 import logging
 from abc import ABC, abstractmethod
 
-import numpy as np
-
 from frigate.config import FrigateConfig
 
 from ..types import DataProcessorMetrics, PostProcessDataEnum
