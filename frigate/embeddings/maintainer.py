@@ -29,17 +29,17 @@ from frigate.const import (
     FRIGATE_LOCALHOST,
     UPDATE_EVENT_DESCRIPTION,
 )
+from frigate.data_processing.real_time.api import RealTimeProcessorApi
+from frigate.data_processing.real_time.face_processor import FaceProcessor
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.embeddings.lpr.lpr import LicensePlateRecognition
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
-from frigate.postprocessing.face_processor import FaceProcessor
-from frigate.postprocessing.processor_api import ProcessorApi
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
 
-from ..postprocessing.types import PostProcessingMetrics
 from .embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class EmbeddingMaintainer(threading.Thread):
         self,
         db: SqliteQueueDatabase,
         config: FrigateConfig,
-        metrics: PostProcessingMetrics,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
@@ -73,7 +73,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
-        self.processors: list[ProcessorApi] = []
+        self.processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
             self.processors.append(FaceProcessor(self.config, metrics))

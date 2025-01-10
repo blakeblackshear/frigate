@@ -16,8 +16,8 @@ from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, FRIGATE_LOCALHOST, MODEL_CACHE_DIR
 from frigate.util.image import area
 
-from .processor_api import ProcessorApi
-from .types import PostProcessingMetrics
+from ..types import DataProcessorMetrics
+from .api import RealTimeProcessorApi
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 MIN_MATCHING_FACES = 2
 
 
-class FaceProcessor(ProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics: PostProcessingMetrics):
+class FaceProcessor(RealTimeProcessorApi):
+    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
         super().__init__(config, metrics)
         self.face_config = config.face_recognition
         self.face_detector: cv2.FaceDetectorYN = None
