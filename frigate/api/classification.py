@@ -40,10 +40,10 @@ def get_faces():
 @router.post("/faces/{name}")
 async def register_face(request: Request, name: str, file: UploadFile):
     context: EmbeddingsContext = request.app.embeddings
-    context.register_face(name, await file.read())
+    result = context.register_face(name, await file.read())
     return JSONResponse(
-        status_code=200,
-        content={"success": True, "message": "Successfully registered face."},
+        status_code=200 if result.get("success", True) else 400,
+        content=result,
     )
 
 

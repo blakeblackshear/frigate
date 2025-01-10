@@ -144,7 +144,10 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 elif topic == EmbeddingsRequestEnum.register_face.value:
                     if not self.face_recognition_enabled:
-                        return False
+                        return {
+                            "message": "Face recognition is not enabled.",
+                            "success": False,
+                        }
 
                     rand_id = "".join(
                         random.choices(string.ascii_lowercase + string.digits, k=6)
@@ -164,7 +167,10 @@ class EmbeddingMaintainer(threading.Thread):
                         face_box = self._detect_face(img)
 
                         if not face_box:
-                            return False
+                            return {
+                                "message": "No face was detected.",
+                                "success": False,
+                            }
 
                         face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
                         ret, thumbnail = cv2.imencode(
@@ -181,7 +187,10 @@ class EmbeddingMaintainer(threading.Thread):
                         output.write(thumbnail.tobytes())
 
                 self.face_classifier.clear_classifier()
-                return True
+                return {
+                    "message": "Successfully registered face.",
+                    "success": True,
+                }
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 

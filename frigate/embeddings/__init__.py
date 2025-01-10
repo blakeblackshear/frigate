@@ -192,8 +192,8 @@ class EmbeddingsContext:
 
         return results
 
-    def register_face(self, face_name: str, image_data: bytes) -> None:
-        self.requestor.send_data(
+    def register_face(self, face_name: str, image_data: bytes) -> dict[str, any]:
+        return self.requestor.send_data(
             EmbeddingsRequestEnum.register_face.value,
             {
                 "face_name": face_name,
