@@ -4,7 +4,7 @@ import multiprocessing as mp
 from multiprocessing.sharedctypes import Synchronized
 
 
-class EmbeddingsMetrics:
+class PostProcessingMetrics:
     image_embeddings_fps: Synchronized
     text_embeddings_sps: Synchronized
     face_rec_fps: Synchronized

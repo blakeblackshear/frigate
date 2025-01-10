@@ -314,7 +314,7 @@ def get_relative_coordinates(
                             continue
 
                         rel_points.append(
-                            f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
+                            f"{round(x / frame_shape[1], 3)},{round(y / frame_shape[0], 3)}"
                         )
 
                     relative_masks.append(",".join(rel_points))
@@ -337,7 +337,7 @@ def get_relative_coordinates(
                     return []
 
                 rel_points.append(
-                    f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
+                    f"{round(x / frame_shape[1], 3)},{round(y / frame_shape[0], 3)}"
                 )
 
             mask = ",".join(rel_points)

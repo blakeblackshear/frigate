@@ -39,16 +39,28 @@ def get_faces():
 
 @router.post("/faces/{name}")
 async def register_face(request: Request, name: str, file: UploadFile):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
     context: EmbeddingsContext = request.app.embeddings
-    context.register_face(name, await file.read())
+    result = context.register_face(name, await file.read())
     return JSONResponse(
-        status_code=200,
-        content={"success": True, "message": "Successfully registered face."},
+        status_code=200 if result.get("success", True) else 400,
+        content=result,
     )
 
 
 @router.post("/faces/train/{name}/classify")
-def train_face(name: str, body: dict = None):
+def train_face(request: Request, name: str, body: dict = None):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
     json: dict[str, any] = body or {}
     training_file = os.path.join(
         FACE_DIR, f"train/{sanitize_filename(json.get('training_file', ''))}"
@@ -82,6 +94,12 @@ def train_face(name: str, body: dict = None):
 
 @router.post("/faces/{name}/delete")
 def deregister_faces(request: Request, name: str, body: dict = None):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 

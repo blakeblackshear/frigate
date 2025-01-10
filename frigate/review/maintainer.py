@@ -256,7 +256,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
-                    segment.detections[object["id"]] = f'{object["label"]}-verified'
+                    segment.detections[object["id"]] = f"{object['label']}-verified"
                     segment.sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
@@ -352,7 +352,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
-                    detections[object["id"]] = f'{object["label"]}-verified'
+                    detections[object["id"]] = f"{object['label']}-verified"
                     sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
