@@ -16,12 +16,12 @@ from frigate.const import (
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 
-from ..postprocessing.types import PostProcessingMetrics
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class Embeddings:
         self,
         config: FrigateConfig,
         db: SqliteVecQueueDatabase,
-        metrics: PostProcessingMetrics,
+        metrics: DataProcessorMetrics,
     ) -> None:
         self.config = config
         self.db = db

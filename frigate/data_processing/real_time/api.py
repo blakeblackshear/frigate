@@ -1,3 +1,5 @@
+"""Local only processors for handling real time object processing."""
+
 import logging
 from abc import ABC, abstractmethod
 
@@ -5,14 +7,14 @@ import numpy as np
 
 from frigate.config import FrigateConfig
 
-from .types import PostProcessingMetrics
+from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
 
-class ProcessorApi(ABC):
+class RealTimeProcessorApi(ABC):
     @abstractmethod
-    def __init__(self, config: FrigateConfig, metrics: PostProcessingMetrics) -> None:
+    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
         self.config = config
         self.metrics = metrics
         pass
