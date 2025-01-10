@@ -21,8 +21,8 @@ from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 
+from ..postprocessing.types import PostProcessingMetrics
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
-from .types import EmbeddingsMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class Embeddings:
         self,
         config: FrigateConfig,
         db: SqliteVecQueueDatabase,
-        metrics: EmbeddingsMetrics,
+        metrics: PostProcessingMetrics,
     ) -> None:
         self.config = config
         self.db = db
