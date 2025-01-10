@@ -5,13 +5,16 @@ import numpy as np
 
 from frigate.config import FrigateConfig
 
+from .types import PostProcessingMetrics
+
 logger = logging.getLogger(__name__)
 
 
 class ProcessorApi(ABC):
     @abstractmethod
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(self, config: FrigateConfig, metrics: PostProcessingMetrics) -> None:
         self.config = config
+        self.metrics = metrics
         pass
 
     @abstractmethod

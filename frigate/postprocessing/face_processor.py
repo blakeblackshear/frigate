@@ -11,13 +11,13 @@ from typing import Optional
 import cv2
 import numpy as np
 import requests
-from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, FRIGATE_LOCALHOST, MODEL_CACHE_DIR
 from frigate.util.image import area
 
 from .processor_api import ProcessorApi
+from .types import PostProcessingMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +26,9 @@ MIN_MATCHING_FACES = 2
 
 
 class FaceProcessor(ProcessorApi):
-    def __init__(self, config: FrigateConfig, db: SqliteQueueDatabase):
-        super().__init__(config)
+    def __init__(self, config: FrigateConfig, metrics: PostProcessingMetrics):
+        super().__init__(config, metrics)
         self.face_config = config.face_recognition
-        self.db = db
         self.face_detector: cv2.FaceDetectorYN = None
         self.landmark_detector: cv2.face.FacemarkLBF = None
         self.face_recognizer: cv2.face.LBPHFaceRecognizer = None

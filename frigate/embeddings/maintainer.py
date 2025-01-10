@@ -76,7 +76,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.processors: list[ProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.processors.append(FaceProcessor(self.config.face_recognition, db))
+            self.processors.append(FaceProcessor(self.config.face_recognition, metrics))
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
