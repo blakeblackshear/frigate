@@ -1047,93 +1047,82 @@ function FrigateCameraFeatures({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-w-96">
             <div className="flex flex-col gap-5 p-4">
-              {Object.values(camera.live.streams).length > 1 && (
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="streaming-method" className="">
-                    Stream
-                  </Label>
-                  <Select
-                    value={streamName}
-                    onValueChange={(value) => {
-                      setStreamName?.(value);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      {Object.keys(camera.live.streams).find(
-                        (key) => camera.live.streams[key] === streamName,
-                      )}
-                    </SelectTrigger>
-
-                    <SelectContent>
-                      <SelectGroup>
-                        {Object.entries(camera.live.streams).map(
-                          ([stream, name]) => (
-                            <SelectItem
-                              key={stream}
-                              className="cursor-pointer"
-                              value={name}
-                            >
-                              {stream}
-                            </SelectItem>
-                          ),
+              {!isRestreamed && (
+                <div className="flex flex-col gap-2">
+                  <Label>Stream</Label>
+                  <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                    <LuX className="size-4 text-danger" />
+                    <div>Restreaming is not enabled for this camera.</div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="cursor-pointer p-0">
+                          <LuInfo className="size-4" />
+                          <span className="sr-only">Info</span>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 text-xs">
+                        Set up go2rtc for additional live view options and audio
+                        for this camera.
+                        <div className="mt-2 flex items-center text-primary">
+                          <Link
+                            to="https://docs.frigate.video/configuration/live"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline"
+                          >
+                            Read the documentation{" "}
+                            <LuExternalLink className="ml-2 inline-flex size-3" />
+                          </Link>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              )}
+              {isRestreamed &&
+                Object.values(camera.live.streams).length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="streaming-method">Stream</Label>
+                    <Select
+                      value={streamName}
+                      onValueChange={(value) => {
+                        setStreamName?.(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        {Object.keys(camera.live.streams).find(
+                          (key) => camera.live.streams[key] === streamName,
                         )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                      </SelectTrigger>
 
-                  {preferredLiveMode != "jsmpeg" && isRestreamed && (
-                    <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                      {supportsAudioOutput ? (
-                        <>
-                          <LuCheck className="size-4 text-success" />
-                          <div>Audio is available for this stream</div>
-                        </>
-                      ) : (
-                        <>
-                          <LuX className="size-4 text-danger" />
-                          <div>Audio is unavailable for this stream</div>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <div className="cursor-pointer p-0">
-                                <LuInfo className="size-4" />
-                                <span className="sr-only">Info</span>
-                              </div>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80 text-xs">
-                              Audio must be output from your camera and
-                              configured in go2rtc for this stream.
-                              <div className="mt-2 flex items-center text-primary">
-                                <Link
-                                  to="https://docs.frigate.video/configuration/live"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline"
-                                >
-                                  Read the documentation{" "}
-                                  <LuExternalLink className="ml-2 inline-flex size-3" />
-                                </Link>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {preferredLiveMode != "jsmpeg" &&
-                    isRestreamed &&
-                    supportsAudioOutput && (
+                      <SelectContent>
+                        <SelectGroup>
+                          {Object.entries(camera.live.streams).map(
+                            ([stream, name]) => (
+                              <SelectItem
+                                key={stream}
+                                className="cursor-pointer"
+                                value={name}
+                              >
+                                {stream}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    {preferredLiveMode != "jsmpeg" && isRestreamed && (
                       <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                        {supports2WayTalk ? (
+                        {supportsAudioOutput ? (
                           <>
                             <LuCheck className="size-4 text-success" />
-                            <div>Two-way talk is available for this stream</div>
+                            <div>Audio is available for this stream</div>
                           </>
                         ) : (
                           <>
                             <LuX className="size-4 text-danger" />
-                            <div>
-                              Two-way talk is unavailable for this stream
-                            </div>
+                            <div>Audio is unavailable for this stream</div>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <div className="cursor-pointer p-0">
@@ -1142,11 +1131,11 @@ function FrigateCameraFeatures({
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent className="w-80 text-xs">
-                                Your device must suppport the feature and WebRTC
-                                must be configured for two-way talk.
+                                Audio must be output from your camera and
+                                configured in go2rtc for this stream.
                                 <div className="mt-2 flex items-center text-primary">
                                   <Link
-                                    to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                                    to="https://docs.frigate.video/configuration/live"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline"
@@ -1161,31 +1150,77 @@ function FrigateCameraFeatures({
                         )}
                       </div>
                     )}
+                    {preferredLiveMode != "jsmpeg" &&
+                      isRestreamed &&
+                      supportsAudioOutput && (
+                        <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                          {supports2WayTalk ? (
+                            <>
+                              <LuCheck className="size-4 text-success" />
+                              <div>
+                                Two-way talk is available for this stream
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <LuX className="size-4 text-danger" />
+                              <div>
+                                Two-way talk is unavailable for this stream
+                              </div>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <div className="cursor-pointer p-0">
+                                    <LuInfo className="size-4" />
+                                    <span className="sr-only">Info</span>
+                                  </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 text-xs">
+                                  Your device must suppport the feature and
+                                  WebRTC must be configured for two-way talk.
+                                  <div className="mt-2 flex items-center text-primary">
+                                    <Link
+                                      to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline"
+                                    >
+                                      Read the documentation{" "}
+                                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                                    </Link>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </>
+                          )}
+                        </div>
+                      )}
 
-                  {preferredLiveMode == "jsmpeg" && isRestreamed && (
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="flex flex-row items-center gap-2">
-                        <IoIosWarning className="mr-1 size-8 text-danger" />
+                    {preferredLiveMode == "jsmpeg" && isRestreamed && (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="flex flex-row items-center gap-2">
+                          <IoIosWarning className="mr-1 size-8 text-danger" />
 
-                        <p className="text-sm">
-                          Live view is in low-bandwidth mode due to buffering or
-                          stream errors.
-                        </p>
+                          <p className="text-sm">
+                            Live view is in low-bandwidth mode due to buffering
+                            or stream errors.
+                          </p>
+                        </div>
+                        <Button
+                          className={`flex items-center gap-2.5 rounded-lg`}
+                          aria-label="Reset the stream"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLowBandwidth(false)}
+                        >
+                          <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                          <div className="text-primary-variant">
+                            Reset stream
+                          </div>
+                        </Button>
                       </div>
-                      <Button
-                        className={`flex items-center gap-2.5 rounded-lg`}
-                        aria-label="Reset the stream"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setLowBandwidth(false)}
-                      >
-                        <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                        <div className="text-primary-variant">Reset stream</div>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
               {isRestreamed && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
@@ -1309,7 +1344,39 @@ function FrigateCameraFeatures({
           )}
         </div>
         <div className="mt-3 flex flex-col gap-5">
-          {Object.values(camera.live.streams).length > 1 && (
+          {!isRestreamed && (
+            <div className="flex flex-col gap-2 p-2">
+              <Label>Stream</Label>
+              <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                <LuX className="size-4 text-danger" />
+                <div>Restreaming is not enabled for this camera.</div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="cursor-pointer p-0">
+                      <LuInfo className="size-4" />
+                      <span className="sr-only">Info</span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 text-xs">
+                    Set up go2rtc for additional live view options and audio for
+                    this camera.
+                    <div className="mt-2 flex items-center text-primary">
+                      <Link
+                        to="https://docs.frigate.video/configuration/live"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        Read the documentation{" "}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
+          {isRestreamed && Object.values(camera.live.streams).length > 0 && (
             <div className="mt-1 p-2">
               <div className="mb-1 text-sm">Stream</div>
               <Select

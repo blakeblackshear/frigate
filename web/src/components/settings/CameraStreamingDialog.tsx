@@ -211,7 +211,7 @@ export function CameraStreamingDialog({
                           <span className="sr-only">Info</span>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80">
+                      <PopoverContent className="w-80 text-xs">
                         Audio must be output from your camera and configured in
                         go2rtc for this stream.
                         <div className="mt-2 flex items-center text-primary">
