@@ -36,10 +36,10 @@ from frigate.embeddings.lpr.lpr import LicensePlateRecognition
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
+from frigate.postprocessing.face_processor import FaceProcessor
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
-from frigate.util.model import FaceClassificationModel
 
 from .embeddings import Embeddings
 from .types import EmbeddingsMetrics
@@ -77,12 +77,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         # set face recognition conditions
-        self.face_recognition_enabled = self.config.face_recognition.enabled
-        self.requires_face_detection = "face" not in self.config.objects.all_objects
-        self.detected_faces: dict[str, float] = {}
-        self.face_classifier = (
-            FaceClassificationModel(self.config.face_recognition, db)
-            if self.face_recognition_enabled
+        self.face_processor = (
+            FaceProcessor(self.config.face_recognition, db)
+            if self.config.face_recognition.enabled
             else None
         )
 
@@ -213,7 +210,7 @@ class EmbeddingMaintainer(threading.Thread):
         # no need to process updated objects if face recognition, lpr, genai are disabled
         if (
             not camera_config.genai.enabled
-            and not self.face_recognition_enabled
+            and not self.face_processor
             and not self.lpr_config.enabled
         ):
             return
@@ -232,9 +229,9 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        if self.face_recognition_enabled:
+        if self.face_processor:
             start = datetime.datetime.now().timestamp()
-            processed = self._process_face(data, yuv_frame)
+            processed = self.face_processor.process_frame(data, yuv_frame)
 
             if processed:
                 duration = datetime.datetime.now().timestamp() - start
@@ -407,150 +404,6 @@ class EmbeddingMaintainer(threading.Thread):
 
         if event_id:
             self.handle_regenerate_description(event_id, source)
-
-    def _detect_face(self, input: np.ndarray) -> tuple[int, int, int, int]:
-        """Detect faces in input image."""
-        faces = self.face_classifier.detect_faces(input)
-
-        if faces is None or faces[1] is None:
-            return None
-
-        face = None
-
-        for _, potential_face in enumerate(faces[1]):
-            raw_bbox = potential_face[0:4].astype(np.uint16)
-            x: int = max(raw_bbox[0], 0)
-            y: int = max(raw_bbox[1], 0)
-            w: int = raw_bbox[2]
-            h: int = raw_bbox[3]
-            bbox = (x, y, x + w, y + h)
-
-            if face is None or area(bbox) > area(face):
-                face = bbox
-
-        return face
-
-    def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> bool:
-        """Look for faces in image."""
-        id = obj_data["id"]
-
-        # don't run for non person objects
-        if obj_data.get("label") != "person":
-            logger.debug("Not a processing face for non person object.")
-            return False
-
-        # don't overwrite sub label for objects that have a sub label
-        # that is not a face
-        if obj_data.get("sub_label") and id not in self.detected_faces:
-            logger.debug(
-                f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
-            )
-            return False
-
-        face: Optional[dict[str, any]] = None
-
-        if self.requires_face_detection:
-            logger.debug("Running manual face detection.")
-            person_box = obj_data.get("box")
-
-            if not person_box:
-                return False
-
-            rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
-            left, top, right, bottom = person_box
-            person = rgb[top:bottom, left:right]
-            face_box = self._detect_face(person)
-
-            if not face_box:
-                logger.debug("Detected no faces for person object.")
-                return False
-
-            face_frame = person[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
-            face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-        else:
-            # don't run for object without attributes
-            if not obj_data.get("current_attributes"):
-                logger.debug("No attributes to parse.")
-                return False
-
-            attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
-            for attr in attributes:
-                if attr.get("label") != "face":
-                    continue
-
-                if face is None or attr.get("score", 0.0) > face.get("score", 0.0):
-                    face = attr
-
-            # no faces detected in this frame
-            if not face:
-                return False
-
-            face_box = face.get("box")
-
-            # check that face is valid
-            if not face_box or area(face_box) < self.config.face_recognition.min_area:
-                logger.debug(f"Invalid face box {face}")
-                return False
-
-            face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-
-            face_frame = face_frame[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
-
-        res = self.face_classifier.classify_face(face_frame)
-
-        if not res:
-            return False
-
-        sub_label, score = res
-
-        # calculate the overall face score as the probability * area of face
-        # this will help to reduce false positives from small side-angle faces
-        # if a large front-on face image may have scored slightly lower but
-        # is more likely to be accurate due to the larger face area
-        face_score = round(score * face_frame.shape[0] * face_frame.shape[1], 2)
-
-        logger.debug(
-            f"Detected best face for person as: {sub_label} with probability {score} and overall face score {face_score}"
-        )
-
-        if self.config.face_recognition.save_attempts:
-            # write face to library
-            folder = os.path.join(FACE_DIR, "train")
-            file = os.path.join(folder, f"{id}-{sub_label}-{score}-{face_score}.webp")
-            os.makedirs(folder, exist_ok=True)
-            cv2.imwrite(file, face_frame)
-
-        if score < self.config.face_recognition.threshold:
-            logger.debug(
-                f"Recognized face distance {score} is less than threshold {self.config.face_recognition.threshold}"
-            )
-            return True
-
-        if id in self.detected_faces and face_score <= self.detected_faces[id]:
-            logger.debug(
-                f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
-            )
-            return True
-
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": sub_label,
-                "subLabelScore": score,
-            },
-        )
-
-        if resp.status_code == 200:
-            self.detected_faces[id] = face_score
-
-        return True
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """Return the dimensions of the input image as [x, y, width, height]."""
