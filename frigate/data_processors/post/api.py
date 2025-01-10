@@ -1,4 +1,4 @@
-"""Local only processors for handling real time object processing."""
+"""Local or remote processors to handle post processing."""
 
 import logging
 from abc import ABC, abstractmethod
@@ -7,12 +7,12 @@ import numpy as np
 
 from frigate.config import FrigateConfig
 
-from ..types import DataProcessorMetrics
+from ..types import DataProcessorMetrics, PostProcessDataEnum
 
 logger = logging.getLogger(__name__)
 
 
-class RealTimeProcessorApi(ABC):
+class PostProcessorApi(ABC):
     @abstractmethod
     def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
         self.config = config
@@ -20,11 +20,13 @@ class RealTimeProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
-        """Processes the frame with object data.
+    def process_data(
+        self, data: dict[str, any], data_type: PostProcessDataEnum
+    ) -> None:
+        """Processes the data of data type.
         Args:
-            obj_data (dict): containing data about focused object in frame.
-            frame (ndarray): full yuv frame.
+            data (dict): containing data about the input.
+            data_type (enum): Describing the data that is being processed.
 
         Returns:
             None.
@@ -39,16 +41,5 @@ class RealTimeProcessorApi(ABC):
 
         Returns:
             None if request was not handled, otherwise return response.
-        """
-        pass
-
-    @abstractmethod
-    def expire_object(self, object_id: str) -> None:
-        """Handle objects that are no longer detected.
-        Args:
-            object_id (str): id of object that is no longer detected.
-
-        Returns:
-            None.
         """
         pass
