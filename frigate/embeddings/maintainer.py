@@ -30,6 +30,7 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
+from frigate.data_processing.real_time.bird_processor import BirdProcessor
 from frigate.data_processing.real_time.face_processor import FaceProcessor
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.embeddings.lpr.lpr import LicensePlateRecognition
@@ -77,6 +78,8 @@ class EmbeddingMaintainer(threading.Thread):
 
         if self.config.face_recognition.enabled:
             self.processors.append(FaceProcessor(self.config, metrics))
+
+        self.processors.append(BirdProcessor(self.config, metrics))
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()

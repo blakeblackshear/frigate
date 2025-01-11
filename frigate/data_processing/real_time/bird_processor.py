@@ -8,8 +8,8 @@ import numpy as np
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 
-from .processor_api import ProcessorApi
-from .types import PostProcessingMetrics
+from ..types import DataProcessorMetrics
+from .api import RealTimeProcessorApi
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -19,8 +19,8 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-class BirdProcessor(ProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics: PostProcessingMetrics):
+class BirdProcessor(RealTimeProcessorApi):
+    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
         super().__init__(config, metrics)
         self.interpreter: Interpreter = None
         self.tensor_input_details: dict[str, any] = None
