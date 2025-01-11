@@ -527,7 +527,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                         if event_id in self.indefinite_events[camera]:
                             self.indefinite_events[camera].pop(event_id)
-                            current_segment.last_update = manual_info["end_time"]
+
+                            if len(self.indefinite_events[camera]) == 0:
+                                current_segment.last_update = manual_info["end_time"]
                         else:
                             logger.error(
                                 f"Event with ID {event_id} has a set duration and can not be ended manually."
