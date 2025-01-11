@@ -93,7 +93,6 @@ class BirdProcessor(RealTimeProcessorApi):
             x:x2,
         ]
 
-        logger.info(f"input shape is {input.shape}")
         cv2.imwrite("/media/frigate/test_class.png", input)
 
         input = np.expand_dims(input, axis=0)
@@ -103,7 +102,8 @@ class BirdProcessor(RealTimeProcessorApi):
         res: np.ndarray = self.interpreter.get_tensor(self.tensor_output_details[0]["index"])[0]
         probs = res / res.sum(axis=0)
         best_id = np.argmax(probs)
-        score = probs[best_id]
+        score = round(probs[best_id], 2)
+        logger.info(f"the best scoring index is {best_id} {score}%")
 
     def handle_request(self, request_data):
         return None
