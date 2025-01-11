@@ -449,7 +449,7 @@ class RecordingMaintainer(threading.Thread):
                     return None
                 else:
                     logger.debug(
-                        f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                        f"Copied {file_path} in {datetime.datetime.now().timestamp() - start_frame} seconds."
                     )
 
                 try:
