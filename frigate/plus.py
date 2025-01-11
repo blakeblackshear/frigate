@@ -116,15 +116,6 @@ class PlusApi:
             logger.error(f"Failed to upload original: {r.status_code} {r.text}")
             raise Exception(r.text)
 
-        # resize and submit annotate
-        files = {"file": get_jpg_bytes(image, 640, 70)}
-        data = presigned_urls["annotate"]["fields"]
-        data["content-type"] = "image/jpeg"
-        r = requests.post(presigned_urls["annotate"]["url"], files=files, data=data)
-        if not r.ok:
-            logger.error(f"Failed to upload annotate: {r.status_code} {r.text}")
-            raise Exception(r.text)
-
         # resize and submit thumbnail
         files = {"file": get_jpg_bytes(image, 200, 70)}
         data = presigned_urls["thumbnail"]["fields"]
