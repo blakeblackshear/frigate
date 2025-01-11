@@ -543,16 +543,16 @@ function ObjectDetailsTab({
               )}
             </div>
           )}
-          {(config?.cameras[search.camera].genai.enabled && search.end_time) ||
-            (!config?.cameras[search.camera].genai.enabled && (
-              <Button
-                variant="select"
-                aria-label="Save"
-                onClick={updateDescription}
-              >
-                Save
-              </Button>
-            ))}
+          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
+            !config?.cameras[search.camera].genai.enabled) && (
+            <Button
+              variant="select"
+              aria-label="Save"
+              onClick={updateDescription}
+            >
+              Save
+            </Button>
+          )}
         </div>
       </div>
     </div>
