@@ -72,8 +72,7 @@ class BaseServiceProcess(Service, ABC):
                 running = False
             except TimeoutError:
                 self.manager.logger.warning(
-                    f"{self.name} is still running after "
-                    f"{timeout} seconds. Killing."
+                    f"{self.name} is still running after {timeout} seconds. Killing."
                 )
 
         if running:

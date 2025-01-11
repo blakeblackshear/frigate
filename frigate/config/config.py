@@ -594,35 +594,27 @@ class FrigateConfig(FrigateBaseModel):
                 if isinstance(detector, dict)
                 else detector.model_dump(warnings="none")
             )
-            detector_config: DetectorConfig = adapter.validate_python(model_dict)
-            if detector_config.model is None:
-                detector_config.model = self.model.model_copy()
-            else:
-                path = detector_config.model.path
-                detector_config.model = self.model.model_copy()
-                detector_config.model.path = path
+            detector_config: BaseDetectorConfig = adapter.validate_python(model_dict)
 
-                if "path" not in model_dict or len(model_dict.keys()) > 1:
-                    logger.warning(
-                        "Customizing more than a detector model path is unsupported."
-                    )
+            # users should not set model themselves
+            if detector_config.model:
+                detector_config.model = None
 
-            merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
-                self.model.model_dump(exclude_unset=True, warnings="none"),
-            )
+            model_config = self.model.model_dump(exclude_unset=True, warnings="none")
 
-            if "path" not in merged_model:
+            if detector_config.model_path:
+                model_config["path"] = detector_config.model_path
+
+            if "path" not in model_config:
                 if detector_config.type == "cpu":
-                    merged_model["path"] = "/cpu_model.tflite"
+                    model_config["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":
-                    merged_model["path"] = "/edgetpu_model.tflite"
+                    model_config["path"] = "/edgetpu_model.tflite"
 
-            detector_config.model = ModelConfig.model_validate(merged_model)
-            detector_config.model.check_and_load_plus_model(
-                self.plus_api, detector_config.type
-            )
-            detector_config.model.compute_model_hash()
+            model = ModelConfig.model_validate(model_config)
+            model.check_and_load_plus_model(self.plus_api, detector_config.type)
+            model.compute_model_hash()
+            detector_config.model = model
             self.detectors[key] = detector_config
 
         return self
