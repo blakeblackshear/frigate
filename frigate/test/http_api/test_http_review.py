@@ -682,7 +682,7 @@ class TestHttpReview(BaseTestHttp):
                 response_json,
             )
 
-    def test_review_event_specific_not_found_in_data(self):
+    def test_review_event_not_found_in_data(self):
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
@@ -696,27 +696,29 @@ class TestHttpReview(BaseTestHttp):
                 response_json,
             )
 
-    def test_review_event_specific(self):
+    def test_review_get_specific_event(self):
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
-            id = "123456.random"
+            event_id = "123456.event.random"
+            super().insert_mock_event(event_id)
+            review_id = "123456.review.random"
             super().insert_mock_review_segment(
-                id, now + 1, now + 2, data={"detections": {"event_id": id}}
+                review_id, now + 1, now + 2, data={"detections": {"event_id": event_id}}
             )
-            response = client.get(f"/review/event/{id}")
+            response = client.get(f"/review/event/{event_id}")
             assert response.status_code == 200
             response_json = response.json()
             self.assertDictEqual(
                 {
-                    "id": id,
+                    "id": review_id,
                     "camera": "front_door",
                     "start_time": now + 1,
                     "end_time": now + 2,
                     "has_been_reviewed": False,
                     "severity": SeverityEnum.alert,
                     "thumb_path": 'False',
-                    "data": {"detections": {"event_id": id}},
+                    "data": {"detections": {"event_id": event_id}},
                 },
                 response_json,
             )

@@ -124,7 +124,8 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_event(
         self,
         id: str,
-        start_time: datetime.datetime = datetime.datetime.now().timestamp(),
+        start_time: float = datetime.datetime.now().timestamp(),
+        end_time: float = datetime.datetime.now().timestamp() + 20,
     ) -> Event:
         """Inserts a basic event model with a given id."""
         return Event.insert(
@@ -132,7 +133,7 @@ class BaseTestHttp(unittest.TestCase):
             label="Mock",
             camera="front_door",
             start_time=start_time,
-            end_time=start_time + 20,
+            end_time=end_time,
             top_score=100,
             false_positive=False,
             zones=list(),
