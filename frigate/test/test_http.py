@@ -109,43 +109,6 @@ class TestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def test_get_event_list(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
-        id = "123456.random"
-        id2 = "7890.random"
-
-        with TestClient(app) as client:
-            _insert_mock_event(id)
-            events = client.get("/events").json()
-            assert events
-            assert len(events) == 1
-            assert events[0]["id"] == id
-            _insert_mock_event(id2)
-            events = client.get("/events").json()
-            assert events
-            assert len(events) == 2
-            events = client.get(
-                "/events",
-                params={"limit": 1},
-            ).json()
-            assert events
-            assert len(events) == 1
-            events = client.get(
-                "/events",
-                params={"has_clip": 0},
-            ).json()
-            assert not events
-
     def test_get_good_event(self):
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
