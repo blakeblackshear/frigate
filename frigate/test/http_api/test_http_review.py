@@ -641,11 +641,9 @@ class TestHttpReview(BaseTestHttp):
         now = int(datetime.now().timestamp())
 
         with TestClient(self.app) as client:
+            one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
             id = "123456.random"
             id2 = "123451.random"
-
-            one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
-
             super().insert_mock_recording(id, now + 1, now + 2, motion=101)
             super().insert_mock_recording(id2, one_m + 1, one_m + 2, motion=200)
             params = {
@@ -662,7 +660,6 @@ class TestHttpReview(BaseTestHttp):
                 response_json[0],
             )
             for item in response_json[1:-1]:
-                print(item)
                 self.assertDictEqual(
                     {"motion": 0.0, "camera": "", "start_time": item["start_time"]},
                     item,
@@ -670,4 +667,56 @@ class TestHttpReview(BaseTestHttp):
             self.assertDictEqual(
                 {"motion": 100.0, "camera": "front_door", "start_time": one_m + 1},
                 response_json[len(response_json) - 1],
+            )
+
+    ####################################################################################################################
+    ###################################  GET /review/event/{event_id} Endpoint   #######################################
+    ####################################################################################################################
+    def test_review_event_not_found(self):
+        with TestClient(self.app) as client:
+            response = client.get("/review/event/123456.random")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_review_event_specific_not_found_in_data(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now + 1, now + 2)
+            response = client.get(f"/review/event/{id}")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_review_event_specific(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(
+                id, now + 1, now + 2, data={"detections": {"event_id": id}}
+            )
+            response = client.get(f"/review/event/{id}")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {
+                    "id": id,
+                    "camera": "front_door",
+                    "start_time": now + 1,
+                    "end_time": now + 2,
+                    "has_been_reviewed": False,
+                    "severity": SeverityEnum.alert,
+                    "thumb_path": 'False',
+                    "data": {"detections": {"event_id": id}},
+                },
+                response_json,
             )

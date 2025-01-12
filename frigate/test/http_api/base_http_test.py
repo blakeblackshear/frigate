@@ -6,6 +6,7 @@ import unittest
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import Json
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
@@ -150,6 +151,7 @@ class BaseTestHttp(unittest.TestCase):
         end_time: float = datetime.datetime.now().timestamp() + 20,
         severity: SeverityEnum = SeverityEnum.alert,
         has_been_reviewed: bool = False,
+        data: Json = {},
     ) -> Event:
         """Inserts a review segment model with a given id."""
         return ReviewSegment.insert(
@@ -160,7 +162,7 @@ class BaseTestHttp(unittest.TestCase):
             has_been_reviewed=has_been_reviewed,
             severity=severity,
             thumb_path=False,
-            data={},
+            data=data,
         ).execute()
 
     def insert_mock_recording(
