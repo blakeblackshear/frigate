@@ -722,3 +722,40 @@ class TestHttpReview(BaseTestHttp):
                 },
                 response_json,
             )
+
+    ####################################################################################################################
+    ###################################  GET /review/{event_id} Endpoint   #######################################
+    ####################################################################################################################
+    def test_review_not_found(self):
+        with TestClient(self.app) as client:
+            response = client.get("/review/123456.random")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_get_review(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            review_id = "123456.review.random"
+            super().insert_mock_review_segment(review_id, now + 1, now + 2)
+            response = client.get(f"/review/{review_id}")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {
+                    "id": review_id,
+                    "camera": "front_door",
+                    "start_time": now + 1,
+                    "end_time": now + 2,
+                    "has_been_reviewed": False,
+                    "severity": SeverityEnum.alert,
+                    "thumb_path": 'False',
+                    "data": {},
+                },
+                response_json,
+            )
+
