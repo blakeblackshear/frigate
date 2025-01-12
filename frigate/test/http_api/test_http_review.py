@@ -717,7 +717,7 @@ class TestHttpReview(BaseTestHttp):
                     "end_time": now + 2,
                     "has_been_reviewed": False,
                     "severity": SeverityEnum.alert,
-                    "thumb_path": 'False',
+                    "thumb_path": "False",
                     "data": {"detections": {"event_id": event_id}},
                 },
                 response_json,
@@ -753,9 +753,44 @@ class TestHttpReview(BaseTestHttp):
                     "end_time": now + 2,
                     "has_been_reviewed": False,
                     "severity": SeverityEnum.alert,
-                    "thumb_path": 'False',
+                    "thumb_path": "False",
                     "data": {},
                 },
                 response_json,
             )
 
+    ####################################################################################################################
+    ###################################  DELETE /review/{review_id}/viewed Endpoint   ##################################
+    ####################################################################################################################
+    def test_delete_review_viewed_review_not_found(self):
+        with TestClient(self.app) as client:
+            review_id = "123456.random"
+            response = client.delete(f"/review/{review_id}/viewed")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": f"Review {review_id} not found"},
+                response_json,
+            )
+
+    def test_delete_review_viewed(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            review_id = "123456.review.random"
+            super().insert_mock_review_segment(
+                review_id, now + 1, now + 2, has_been_reviewed=True
+            )
+            review_before = ReviewSegment.get(ReviewSegment.id == review_id)
+            assert review_before.has_been_reviewed == True
+
+            response = client.delete(f"/review/{review_id}/viewed")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": True, "message": f"Set Review {review_id} as not viewed"},
+                response_json,
+            )
+
+            review_after = ReviewSegment.get(ReviewSegment.id == review_id)
+            assert review_after.has_been_reviewed == False
