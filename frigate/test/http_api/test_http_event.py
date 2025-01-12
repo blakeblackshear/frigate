@@ -124,7 +124,7 @@ class TestHttpApp(BaseTestHttp):
         with TestClient(self.app) as client:
             id = "123456.random"
             id2 = "54321.random"
-            super().insert_mock_event(id, start_time=now+3)
+            super().insert_mock_event(id, start_time=now + 3)
             super().insert_mock_event(id2, start_time=now)
             events = client.get("/events", params={"sort": "date_asc"}).json()
             assert len(events) == 2
