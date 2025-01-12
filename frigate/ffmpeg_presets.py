@@ -50,16 +50,9 @@ class LibvaGpuSelector:
         return ""
 
 
-FPS_VFR_PARAM = (
-    "-fps_mode vfr"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
-    else "-vsync 2"
-)
-TIMEOUT_PARAM = (
-    "-timeout"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
-    else "-stimeout"
-)
+LIBAV_VERSION = int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59")
+FPS_VFR_PARAM = "-fps_mode vfr" if LIBAV_VERSION >= 59 else "-vsync 2"
+TIMEOUT_PARAM = "-timeout" if LIBAV_VERSION >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
@@ -71,8 +64,8 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     FFMPEG_HWACCEL_VAAPI: f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv -bsf:v dump_extra",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv -bsf:v dump_extra",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAV_VERSION >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAV_VERSION >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
