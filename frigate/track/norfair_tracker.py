@@ -103,10 +103,13 @@ class NorfairTracker(ObjectTracker):
             "person": {
                 "filter_factory": OptimizedKalmanFilterFactory(
                     R=4,
-                    Q=0.15,
+                    Q=0.2,
+                    pos_variance=15,
+                    vel_variance=2.0,
+                    pos_vel_covariance=0.5,
                 ),
                 "distance_function": frigate_distance,
-                "distance_threshold": 3,
+                "distance_threshold": 2.5,
             },
         }
 
@@ -476,7 +479,14 @@ class NorfairTracker(ObjectTracker):
     def debug_draw(self, frame, frame_time):
         # Collect all tracked objects from each tracker
         all_tracked_objects = []
-        for tracker in [*self.trackers.values(), self.default_tracker]:
+
+        # Get tracked objects from type-specific trackers
+        for object_trackers in self.trackers.values():
+            for tracker in object_trackers.values():
+                all_tracked_objects.extend(tracker.tracked_objects)
+
+        # Get tracked objects from default trackers
+        for tracker in self.default_tracker.values():
             all_tracked_objects.extend(tracker.tracked_objects)
 
         active_detections = [
