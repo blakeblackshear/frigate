@@ -168,6 +168,7 @@ class BaseTestHttp(unittest.TestCase):
         id: str,
         start_time: float = datetime.datetime.now().timestamp(),
         end_time: float = datetime.datetime.now().timestamp() + 20,
+        motion: int = 0,
     ) -> Event:
         """Inserts a recording model with a given id."""
         return Recordings.insert(
@@ -177,4 +178,5 @@ class BaseTestHttp(unittest.TestCase):
             start_time=start_time,
             end_time=end_time,
             duration=end_time - start_time,
+            motion=motion,
         ).execute()

@@ -569,3 +569,105 @@ class TestHttpReview(BaseTestHttp):
             recording_ids_in_db_after = self._get_recordings(ids)
             assert len(review_ids_in_db_after) == 0
             assert len(recording_ids_in_db_after) == 0
+
+    ####################################################################################################################
+    ###################################  GET /review/activity/motion Endpoint   ########################################
+    ####################################################################################################################
+    def test_review_activity_motion_no_data_for_time_range(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            params = {
+                "after": now,
+                "before": now + 3,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 0
+
+    def test_review_activity_motion(self):
+        now = int(datetime.now().timestamp())
+
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            id2 = "123451.random"
+
+            one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
+
+            super().insert_mock_recording(id, now + 1, now + 2, motion=101)
+            super().insert_mock_recording(id2, one_m + 1, one_m + 2, motion=200)
+            params = {
+                "after": now,
+                "before": one_m + 3,
+                "scale": 1,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 61
+            self.assertDictEqual(
+                {"motion": 50.5, "camera": "front_door", "start_time": now + 1},
+                response_json[0],
+            )
+            for item in response_json[1:-1]:
+                print(item)
+                self.assertDictEqual(
+                    {"motion": 0.0, "camera": "", "start_time": item["start_time"]},
+                    item,
+                )
+            self.assertDictEqual(
+                {"motion": 100.0, "camera": "front_door", "start_time": one_m + 1},
+                response_json[len(response_json) - 1],
+            )
+
+    ####################################################################################################################
+    ###################################  GET /review/activity/motion Endpoint   ########################################
+    ####################################################################################################################
+    def test_review_activity_motion_no_data_for_time_range(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            params = {
+                "after": now,
+                "before": now + 3,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 0
+
+    def test_review_activity_motion(self):
+        now = int(datetime.now().timestamp())
+
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            id2 = "123451.random"
+
+            one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
+
+            super().insert_mock_recording(id, now + 1, now + 2, motion=101)
+            super().insert_mock_recording(id2, one_m + 1, one_m + 2, motion=200)
+            params = {
+                "after": now,
+                "before": one_m + 3,
+                "scale": 1,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 61
+            self.assertDictEqual(
+                {"motion": 50.5, "camera": "front_door", "start_time": now + 1},
+                response_json[0],
+            )
+            for item in response_json[1:-1]:
+                print(item)
+                self.assertDictEqual(
+                    {"motion": 0.0, "camera": "", "start_time": item["start_time"]},
+                    item,
+                )
+            self.assertDictEqual(
+                {"motion": 100.0, "camera": "front_door", "start_time": one_m + 1},
+                response_json[len(response_json) - 1],
+            )
