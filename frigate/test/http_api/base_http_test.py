@@ -126,6 +126,10 @@ class BaseTestHttp(unittest.TestCase):
         id: str,
         start_time: float = datetime.datetime.now().timestamp(),
         end_time: float = datetime.datetime.now().timestamp() + 20,
+        has_clip: bool = True,
+        top_score: int = 100,
+        score: int = 0,
+        data: Json = {},
     ) -> Event:
         """Inserts a basic event model with a given id."""
         return Event.insert(
@@ -134,15 +138,17 @@ class BaseTestHttp(unittest.TestCase):
             camera="front_door",
             start_time=start_time,
             end_time=end_time,
-            top_score=100,
+            top_score=top_score,
+            score=score,
             false_positive=False,
             zones=list(),
             thumbnail="",
             region=[],
             box=[],
             area=0,
-            has_clip=True,
+            has_clip=has_clip,
             has_snapshot=True,
+            data=data,
         ).execute()
 
     def insert_mock_review_segment(
