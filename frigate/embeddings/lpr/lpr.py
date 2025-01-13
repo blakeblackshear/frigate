@@ -8,7 +8,7 @@ from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import LicensePlateRecognitionConfig
+from frigate.config.classification import LicensePlateRecognitionConfig
 from frigate.embeddings.embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
