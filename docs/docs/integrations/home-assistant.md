@@ -47,7 +47,7 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the `URL` of your Frigate instance which needs to be pointed at the internal unauthenticated port (`5000`) for your instance. This may look like `http://<host>:5000/`.
+When configuring the integration, you will be asked for the `URL` of your Frigate instance which can be pointed at the internal unauthenticated port (`5000`) or the authenticated port (`8971`) for your instance. This may look like `http://<host>:5000/`.
 
 ### Docker Compose Examples
 
@@ -55,7 +55,7 @@ If you are running Home Assistant Core and Frigate with Docker Compose on the sa
 
 #### Home Assistant running with host networking
 
-It is not recommended to run Frigate in host networking mode. In this example, you would use `http://172.17.0.1:5000` when configuring the integration.
+It is not recommended to run Frigate in host networking mode. In this example, you would use `http://172.17.0.1:5000` or `http://172.17.0.1:8971` when configuring the integration.
 
 ```yaml
 services:
@@ -75,7 +75,7 @@ services:
 
 #### Home Assistant _not_ running with host networking or in a separate compose file
 
-In this example, you would use `http://frigate:5000` when configuring the integration. There is no need to map the port for the Frigate container.
+In this example, it is recommended to connect to the authenticated port, for example, `http://frigate:8971` when configuring the integration. There is no need to map the port for the Frigate container.
 
 ```yaml
 services:
@@ -103,14 +103,15 @@ If you are using HassOS with the addon, the URL should be one of the following d
 | Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |
 | Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`    |
 | Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
+| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000`    |
 
 ### Frigate running on a separate machine
 
-If you run Frigate on a separate device within your local network, Home Assistant will need access to port 5000.
+If you run Frigate on a separate device within your local network, Home Assistant will need access to port 8971.
 
 #### Local network
 
-Use `http://<frigate_device_ip>:5000` as the URL for the integration. If you want to protect access to port 5000, you can use firewall rules to limit access to the device running Home Assistant.
+Use `http://<frigate_device_ip>:8971` as the URL for the integration so that authentication is required.
 
 ```yaml
 services:
@@ -118,7 +119,7 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     ...
     ports:
-      - "5000:5000"
+      - "8971:8971"
       ...
 ```
 
@@ -195,10 +196,28 @@ To load a snapshot for a tracked object:
 https://HA_URL/api/frigate/notifications/<event-id>/snapshot.jpg
 ```
 
-To load a video clip of a tracked object:
+To load a video clip of a tracked object using an Android device:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
+```
+
+To load a video clip of a tracked object using an iOS device:
+
+```
+https://HA_URL/api/frigate/notifications/<event-id>/master.m3u8
+```
+
+To load a preview gif of a tracked object:
+
+```
+https://HA_URL/api/frigate/notifications/<event-id>/event_preview.gif
+```
+
+To load a preview gif of a review item:
+
+```
+https://HA_URL/api/frigate/notifications/<review-id>/review_preview.gif
 ```
 
 <a name="streams"></a>
