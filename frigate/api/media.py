@@ -134,6 +134,13 @@ def latest_frame(
     }
     quality = params.quality
 
+    if extension == "png":
+      quality_params = None
+    elif extension == "webp":
+      quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+    else:
+      quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
         retry_interval = float(
@@ -174,7 +181,7 @@ def latest_frame(
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+            f".{extension}", frame, quality_params
         )
         return Response(
             content=img.tobytes(),
@@ -193,7 +200,7 @@ def latest_frame(
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+            f".{extension}", frame, quality_params
         )
         return Response(
             content=img.tobytes(),
