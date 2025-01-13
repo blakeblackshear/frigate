@@ -123,6 +123,11 @@ class BirdProcessor(RealTimeProcessorApi):
             return
 
         score = round(probs[best_id], 2)
+
+        if score < self.config.classification.bird.threshold:
+            logger.debug(f"Score {score} is not above required threshold")
+            return
+
         previous_score = self.detected_birds.get(obj_data["id"], 0.0)
 
         if score <= previous_score:
@@ -145,4 +150,5 @@ class BirdProcessor(RealTimeProcessorApi):
         return None
 
     def expire_object(self, object_id):
-        pass
+        if object_id in self.detected_birds:
+            self.detected_birds.pop(object_id)

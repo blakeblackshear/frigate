@@ -9,7 +9,7 @@ from .logger import *  # noqa: F403
 from .mqtt import *  # noqa: F403
 from .notification import *  # noqa: F403
 from .proxy import *  # noqa: F403
-from .semantic_search import *  # noqa: F403
+from .classification import *  # noqa: F403
 from .telemetry import *  # noqa: F403
 from .tls import *  # noqa: F403
 from .ui import *  # noqa: F403

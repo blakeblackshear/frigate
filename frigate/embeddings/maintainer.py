@@ -79,7 +79,8 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.face_recognition.enabled:
             self.processors.append(FaceProcessor(self.config, metrics))
 
-        self.processors.append(BirdProcessor(self.config, metrics))
+        if self.config.classification.bird.enabled:
+            self.processors.append(BirdProcessor(self.config, metrics))
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
