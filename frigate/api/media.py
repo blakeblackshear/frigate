@@ -133,6 +133,7 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
+    mime_type = extension
 
     if extension == "png":
       quality_params = None
@@ -140,6 +141,7 @@ def latest_frame(
       quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
     else:
       quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+      mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -186,7 +188,7 @@ def latest_frame(
         return Response(
             content=img.tobytes(),
             media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
@@ -205,7 +207,7 @@ def latest_frame(
         return Response(
             content=img.tobytes(),
             media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
         )
     else:
         return JSONResponse(
@@ -248,6 +250,7 @@ def get_snapshot_from_recording(
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
+        mime_type = "png" if format == "png" else "jpeg"
         config: FrigateConfig = request.app.frigate_config
 
         image_data = get_image_from_recording(
@@ -264,7 +267,7 @@ def get_snapshot_from_recording(
                 ),
                 status_code=404,
             )
-        return Response(image_data, headers={"Content-Type": f"image/{format}"})
+        return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
     except DoesNotExist:
         return JSONResponse(
             content={
