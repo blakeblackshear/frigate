@@ -136,12 +136,12 @@ def latest_frame(
     mime_type = extension
 
     if extension == "png":
-      quality_params = None
+        quality_params = None
     elif extension == "webp":
-      quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
     else:
-      quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-      mime_type = "jpeg"
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -182,12 +182,10 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, quality_params
-        )
+        ret, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
+            media_type=f"image/{mime_type}",
             headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
@@ -201,12 +199,10 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, quality_params
-        )
+        ret, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
+            media_type=f"image/{mime_type}",
             headers={"Content-Type": f"image/{mime_type}", "Cache-Control": "no-store"},
         )
     else:
