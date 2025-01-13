@@ -51,17 +51,18 @@ from .camera.review import ReviewConfig
 from .camera.snapshots import SnapshotsConfig
 from .camera.timestamp import TimestampStyleConfig
 from .camera_group import CameraGroupConfig
+from .classification import (
+    ClassificationConfig,
+    FaceRecognitionConfig,
+    LicensePlateRecognitionConfig,
+    SemanticSearchConfig,
+)
 from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .notification import NotificationConfig
 from .proxy import ProxyConfig
-from .semantic_search import (
-    FaceRecognitionConfig,
-    LicensePlateRecognitionConfig,
-    SemanticSearchConfig,
-)
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
 from .ui import UIConfig
@@ -331,6 +332,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
+    classification: ClassificationConfig = Field(
+        default_factory=ClassificationConfig, title="Object classification config."
+    )
     semantic_search: SemanticSearchConfig = Field(
         default_factory=SemanticSearchConfig, title="Semantic search configuration."
     )

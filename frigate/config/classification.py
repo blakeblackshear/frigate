@@ -11,6 +11,22 @@ __all__ = [
 ]
 
 
+class BirdClassificationConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable bird classification.")
+    threshold: float = Field(
+        default=0.9,
+        title="Minimum classification score required to be considered a match.",
+        gt=0.0,
+        le=1.0,
+    )
+
+
+class ClassificationConfig(FrigateBaseModel):
+    bird: BirdClassificationConfig = Field(
+        default_factory=BirdClassificationConfig, title="Bird classification config."
+    )
+
+
 class SemanticSearchConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable semantic search.")
     reindex: Optional[bool] = Field(
