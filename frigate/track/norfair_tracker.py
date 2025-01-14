@@ -1,7 +1,9 @@
 import logging
 import random
 import string
+from typing import Sequence
 
+import cv2
 import numpy as np
 from norfair import (
     Detection,
@@ -11,6 +13,9 @@ from norfair import (
     draw_boxes,
 )
 from norfair.drawing.drawer import Drawer
+from rich import print
+from rich.console import Console
+from rich.table import Table
 
 from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
@@ -71,6 +76,30 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
     return distance(detection.points, tracked_object.estimate)
 
 
+def histogram_distance(matched_not_init_trackers, unmatched_trackers):
+    snd_embedding = unmatched_trackers.last_detection.embedding
+
+    if snd_embedding is None:
+        for detection in reversed(unmatched_trackers.past_detections):
+            if detection.embedding is not None:
+                snd_embedding = detection.embedding
+                break
+        else:
+            return 1
+
+    for detection_fst in matched_not_init_trackers.past_detections:
+        if detection_fst.embedding is None:
+            continue
+
+        distance = 1 - cv2.compareHist(
+            snd_embedding, detection_fst.embedding, cv2.HISTCMP_CORREL
+        )
+        print("ReID distance", distance)
+        if distance < 0.5:
+            return distance
+    return 1
+
+
 class NorfairTracker(ObjectTracker):
     def __init__(
         self,
@@ -102,14 +131,15 @@ class NorfairTracker(ObjectTracker):
         self.ptz_object_type_configs = {
             "person": {
                 "filter_factory": OptimizedKalmanFilterFactory(
-                    R=4,
-                    Q=0.2,
-                    pos_variance=15,
-                    vel_variance=2.0,
-                    pos_vel_covariance=0.5,
+                    R=4.5,
+                    Q=0.25,
                 ),
                 "distance_function": frigate_distance,
-                "distance_threshold": 2.5,
+                "distance_threshold": 2,
+                "past_detections_length": 5,
+                "reid_distance_function": histogram_distance,
+                "reid_distance_threshold": 0.5,
+                "reid_hit_counter_max": 10,
             },
         }
 
@@ -136,13 +166,36 @@ class NorfairTracker(ObjectTracker):
             if obj_type in self.camera_config.objects.track:
                 if obj_type not in self.trackers:
                     self.trackers[obj_type] = {}
-                self.trackers[obj_type]["static"] = Tracker(
-                    distance_function=tracker_config["distance_function"],
-                    distance_threshold=tracker_config["distance_threshold"],
-                    initialization_delay=self.detect_config.min_initialized,
-                    hit_counter_max=self.detect_config.max_disappeared,
-                    filter_factory=tracker_config["filter_factory"],
-                )
+                tracker_params = {
+                    "distance_function": tracker_config["distance_function"],
+                    "distance_threshold": tracker_config["distance_threshold"],
+                    "initialization_delay": self.detect_config.min_initialized,
+                    "hit_counter_max": self.detect_config.max_disappeared,
+                    "filter_factory": tracker_config["filter_factory"],
+                }
+
+                # Add reid parameters only if max_frames is None and keys exist in tracker_config
+                if (
+                    self.detect_config.stationary.max_frames.objects.get(
+                        obj_type, self.detect_config.stationary.max_frames.default
+                    )
+                    is None
+                ):
+                    reid_keys = [
+                        "past_detections_length",
+                        "reid_distance_function",
+                        "reid_distance_threshold",
+                        "reid_hit_counter_max",
+                    ]
+                    tracker_params.update(
+                        {
+                            key: tracker_config[key]
+                            for key in reid_keys
+                            if key in tracker_config
+                        }
+                    )
+
+                self.trackers[obj_type]["static"] = Tracker(**tracker_params)
 
         # Handle PTZ trackers
         for obj_type, tracker_config in self.ptz_object_type_configs.items():
@@ -152,13 +205,37 @@ class NorfairTracker(ObjectTracker):
             ):
                 if obj_type not in self.trackers:
                     self.trackers[obj_type] = {}
-                self.trackers[obj_type]["ptz"] = Tracker(
-                    distance_function=tracker_config["distance_function"],
-                    distance_threshold=tracker_config["distance_threshold"],
-                    initialization_delay=self.detect_config.min_initialized,
-                    hit_counter_max=self.detect_config.max_disappeared,
-                    filter_factory=tracker_config["filter_factory"],
-                )
+                tracker_params = {
+                    "distance_function": tracker_config["distance_function"],
+                    "distance_threshold": tracker_config["distance_threshold"],
+                    "initialization_delay": self.detect_config.min_initialized,
+                    "hit_counter_max": self.detect_config.max_disappeared,
+                    "filter_factory": tracker_config["filter_factory"],
+                }
+
+                # Add reid parameters only if max_frames is None and keys exist in tracker_config
+                if (
+                    self.detect_config.stationary.max_frames.objects.get(
+                        obj_type, self.detect_config.stationary.max_frames.default
+                    )
+                    is None
+                ):
+                    print("adding reid keys for ptz: ", obj_type)
+                    reid_keys = [
+                        "past_detections_length",
+                        "reid_distance_function",
+                        "reid_distance_threshold",
+                        "reid_hit_counter_max",
+                    ]
+                    tracker_params.update(
+                        {
+                            key: tracker_config[key]
+                            for key in reid_keys
+                            if key in tracker_config
+                        }
+                    )
+
+                self.trackers[obj_type]["ptz"] = Tracker(**tracker_params)
 
         # Initialize default trackers
         self.default_tracker = {
@@ -230,13 +307,24 @@ class NorfairTracker(ObjectTracker):
 
     def deregister(self, id, track_id):
         obj = self.tracked_objects[id]
-        tracker = self.get_tracker(obj["label"])
 
         del self.tracked_objects[id]
         del self.disappeared[id]
-        tracker.tracked_objects = [
-            o for o in tracker.tracked_objects if o.global_id != track_id
-        ]
+
+        # only manually deregister objects from norfair's list if max_frames is defined
+        if (
+            self.detect_config.stationary.max_frames.objects.get(
+                obj["label"], self.detect_config.stationary.max_frames.default
+            )
+            is not None
+        ):
+            tracker = self.get_tracker(obj["label"])
+            tracker.tracked_objects = [
+                o
+                for o in tracker.tracked_objects
+                if o.global_id != track_id and o.hit_counter < 0
+            ]
+
         del self.track_id_map[track_id]
 
     # tracks the current position of the object based on the last N bounding boxes
@@ -399,6 +487,7 @@ class NorfairTracker(ObjectTracker):
             detection = Detection(
                 points=points,
                 label=label,
+                embedding=obj[6],
                 data={
                     "label": label,
                     "score": obj[1],
@@ -490,9 +579,31 @@ class NorfairTracker(ObjectTracker):
             o[2] for o in detections if o[2] not in tracked_object_boxes
         ]
 
+    def print_objects_as_table(self, tracked_objects: Sequence):
+        """Used for helping in debugging"""
+        print()
+        console = Console()
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Id", style="yellow", justify="center")
+        table.add_column("Age", justify="right")
+        table.add_column("Hit Counter", justify="right")
+        table.add_column("Last distance", justify="right")
+        table.add_column("Init Id", justify="center")
+        for obj in tracked_objects:
+            table.add_row(
+                str(obj.id),
+                str(obj.age),
+                str(obj.hit_counter),
+                f"{obj.last_distance:.4f}" if obj.last_distance is not None else "N/A",
+                str(obj.initializing_id),
+            )
+        console.print(table)
+
     def debug_draw(self, frame, frame_time):
         # Collect all tracked objects from each tracker
         all_tracked_objects = []
+
+        self.print_objects_as_table(self.trackers["person"]["ptz"].tracked_objects)
 
         # Get tracked objects from type-specific trackers
         for object_trackers in self.trackers.values():
