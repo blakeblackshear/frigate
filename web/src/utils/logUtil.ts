@@ -116,18 +116,63 @@ export function parseLogLines(logService: LogType, logs: string[]) {
   } else if (logService == "nginx") {
     return logs
       .map((line) => {
-        if (line.length == 0) {
-          return null;
-        }
+        if (line.trim().length === 0) return null;
 
-        return {
-          dateStamp: line.substring(0, 19),
-          severity: "info",
-          section: httpMethods.exec(line)?.at(0)?.toString() ?? "META",
-          content: line.substring(line.indexOf(" ", 20)).trim(),
-        };
+        // Match full timestamp including nanoseconds
+        const timestampRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+/;
+        const timestampMatch = timestampRegex.exec(line);
+        const fullTimestamp = timestampMatch ? timestampMatch[0] : "";
+        // Remove nanoseconds from the final output
+        const dateStamp = fullTimestamp.split(".")[0];
+
+        // Handle different types of lines
+        if (line.includes("[INFO]")) {
+          // Info log
+          return {
+            dateStamp,
+            severity: "info",
+            section: "startup",
+            content: line.slice(fullTimestamp.length).trim(),
+          };
+        } else if (line.includes("[error]")) {
+          // Error log
+          const errorMatch = line.match(/(\[error\].*?,.*request: "[^"]*")/);
+          const content = errorMatch ? errorMatch[1] : line;
+          return {
+            dateStamp,
+            severity: "error",
+            section: "error",
+            content,
+          };
+        } else if (
+          line.includes("GET") ||
+          line.includes("POST") ||
+          line.includes("HTTP")
+        ) {
+          // HTTP request log
+          const httpMethodMatch = httpMethods.exec(line);
+          const section = httpMethodMatch ? httpMethodMatch[0] : "META";
+          const contentStart = line.indexOf('"', fullTimestamp.length);
+          const content =
+            contentStart !== -1 ? line.slice(contentStart).trim() : line;
+
+          return {
+            dateStamp,
+            severity: "info",
+            section,
+            content,
+          };
+        } else {
+          // Fallback: unknown format
+          return {
+            dateStamp,
+            severity: "unknown",
+            section: "unknown",
+            content: line.slice(fullTimestamp.length).trim(),
+          };
+        }
       })
-      .filter((value) => value != null) as LogLine[];
+      .filter((value) => value !== null) as LogLine[];
   }
 
   return [];
