@@ -425,14 +425,28 @@ class NorfairTracker(ObjectTracker):
                 detections, frame_name, frame_time, self.camera_name
             )
 
-        # Update each tracker with its corresponding detections
+        # Update all configured trackers
         all_tracked_objects = []
-        for label, label_detections in detections_by_type.items():
+        for label in self.trackers:
             tracker = self.get_tracker(label)
             tracked_objects = tracker.update(
-                detections=label_detections, coord_transformations=coord_transformations
+                detections=detections_by_type.get(label, []),
+                coord_transformations=coord_transformations,
             )
             all_tracked_objects.extend(tracked_objects)
+
+        # Collect detections for objects without specific trackers
+        default_detections = []
+        for label, dets in detections_by_type.items():
+            if label not in self.trackers:
+                default_detections.extend(dets)
+
+        # Update default tracker with untracked detections
+        mode = "ptz" if self.ptz_metrics.autotracker_enabled else "static"
+        tracked_objects = self.default_tracker[mode].update(
+            detections=default_detections, coord_transformations=coord_transformations
+        )
+        all_tracked_objects.extend(tracked_objects)
 
         # update or create new tracks
         active_ids = []
