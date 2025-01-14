@@ -531,7 +531,7 @@ class NorfairTracker(ObjectTracker):
                 default_detections.extend(dets)
 
         # Update default tracker with untracked detections
-        mode = "ptz" if self.ptz_metrics.autotracker_enabled else "static"
+        mode = "ptz" if self.ptz_metrics.autotracker_enabled.value else "static"
         tracked_objects = self.default_tracker[mode].update(
             detections=default_detections, coord_transformations=coord_transformations
         )
