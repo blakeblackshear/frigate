@@ -487,7 +487,8 @@ class NorfairTracker(ObjectTracker):
             detection = Detection(
                 points=points,
                 label=label,
-                embedding=obj[6],
+                # TODO: stationary objects won't have embeddings
+                embedding=obj[6] if len(obj) > 6 else None,
                 data={
                     "label": label,
                     "score": obj[1],
