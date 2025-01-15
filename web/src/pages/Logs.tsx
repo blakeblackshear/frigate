@@ -536,7 +536,7 @@ function LogLineData({
             : "md:col-span-8 lg:col-span-9",
         )}
       >
-        <div className="w-full overflow-hidden text-ellipsis">
+        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.content}
         </div>
       </div>
