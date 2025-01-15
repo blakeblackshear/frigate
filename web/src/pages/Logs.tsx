@@ -331,9 +331,9 @@ function Logs() {
       </div>
 
       <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-xs sm:p-1">
-        <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 sm:grid-cols-8 md:grid-cols-12">
+        <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
           <div className="ml-1 flex items-center p-1 capitalize">Type</div>
-          <div className="col-span-2 flex items-center sm:col-span-1">
+          <div className="col-span-2 flex items-center lg:col-span-1">
             Timestamp
           </div>
           <div
@@ -346,8 +346,8 @@ function Logs() {
           </div>
           <div
             className={cn(
-              "col-span-4 flex items-center",
-              logService == "frigate" ? "md:col-span-8" : "md:col-span-9",
+              "col-span-5 flex items-center",
+              logService == "frigate" ? "md:col-span-7" : "md:col-span-8",
             )}
           >
             <div className="flex flex-1">Message</div>
@@ -402,7 +402,7 @@ function LogLineData({
   return (
     <div
       className={cn(
-        "grid w-full cursor-pointer grid-cols-8 gap-2 border-t border-secondary py-0 hover:bg-muted md:grid-cols-12",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-0 hover:bg-muted md:grid-cols-12",
         className,
         "*:text-xs",
       )}
@@ -411,7 +411,7 @@ function LogLineData({
       <div className="log-severity flex h-full items-center gap-2 p-1">
         <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
-      <div className="log-timestamp col-span-1 flex h-full items-center">
+      <div className="log-timestamp col-span-2 flex h-full items-center lg:col-span-1">
         {line.dateStamp}
       </div>
       <div
@@ -426,8 +426,8 @@ function LogLineData({
       </div>
       <div
         className={cn(
-          "log-content col-span-4 flex size-full items-center justify-between pr-2",
-          logService == "frigate" ? "md:col-span-8" : "md:col-span-9",
+          "log-content col-span-5 flex size-full items-center justify-between pr-2",
+          logService == "frigate" ? "md:col-span-7" : "md:col-span-8",
         )}
       >
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
