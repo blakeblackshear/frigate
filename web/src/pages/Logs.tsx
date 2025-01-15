@@ -33,6 +33,7 @@ function Logs() {
   const [filterSeverity, setFilterSeverity] = useState<LogSeverity[]>();
   const [selectedLog, setSelectedLog] = useState<LogLine>();
   const lazyLogRef = useRef<LazyLog>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
@@ -69,6 +70,7 @@ function Logs() {
   // fetchers
 
   const fetchInitialLogs = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get(`logs/${logService}`);
       if (
@@ -85,6 +87,8 @@ function Logs() {
       toast.error(`Error fetching logs: ${errorMessage}`, {
         position: "top-center",
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [logService, filterLines]);
 
@@ -159,6 +163,8 @@ function Logs() {
   }, [logService, filterSeverity]);
 
   useEffect(() => {
+    setIsLoading(true);
+    setLogs([]);
     fetchInitialLogs().then(() => {
       // Start streaming after initial load
       setIsStreaming(true);
@@ -454,24 +460,28 @@ function Logs() {
         </div>
 
         <div ref={lazyLogWrapperRef} className="size-full">
-          <EnhancedScrollFollow
-            startFollowing={true}
-            render={({ follow, onScroll }) => (
-              <LazyLog
-                ref={lazyLogRef}
-                enableLineNumbers={false}
-                selectableLines
-                lineClassName="text-primary bg-background"
-                highlightLineClassName="bg-primary/20"
-                onRowClick={handleRowClick}
-                formatPart={formatPart}
-                text={logs.join("\n")}
-                follow={follow}
-                onScroll={onScroll}
-                loadingComponent={<ActivityIndicator />}
-              />
-            )}
-          />
+          {isLoading ? (
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          ) : (
+            <EnhancedScrollFollow
+              startFollowing={true}
+              render={({ follow, onScroll }) => (
+                <LazyLog
+                  ref={lazyLogRef}
+                  enableLineNumbers={false}
+                  selectableLines
+                  lineClassName="text-primary bg-background"
+                  highlightLineClassName="bg-primary/20"
+                  onRowClick={handleRowClick}
+                  formatPart={formatPart}
+                  text={logs.join("\n")}
+                  follow={follow}
+                  onScroll={onScroll}
+                  loadingComponent={<ActivityIndicator />}
+                />
+              )}
+            />
+          )}
         </div>
       </div>
     </div>
