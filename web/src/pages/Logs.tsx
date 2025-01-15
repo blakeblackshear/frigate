@@ -506,7 +506,7 @@ function LogLineData({
   return (
     <div
       className={cn(
-        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-0 hover:bg-muted md:grid-cols-12",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-2 hover:bg-muted md:grid-cols-12 md:py-0",
         className,
         "*:text-xs",
       )}
@@ -530,13 +530,13 @@ function LogLineData({
       </div>
       <div
         className={cn(
-          "log-content col-span-5 flex size-full items-center justify-between pr-2",
+          "log-content col-span-5 flex size-full items-center justify-between px-2 md:px-0 md:pr-2",
           logService == "frigate"
-            ? "md:col-span-7"
+            ? "md:col-span-7 lg:col-span-8"
             : "md:col-span-8 lg:col-span-9",
         )}
       >
-        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="w-full overflow-hidden text-ellipsis">
           {line.content}
         </div>
       </div>

@@ -418,12 +418,15 @@ def process_logs(
 
         if date_end == 0:
             date_end = clean_line.index("  ")
+            # for frigate logs attempt to consolidate by comparing
+            # the first 3 characters of the millisecond portion
             key_length = date_end - (6 if service == "frigate" else 0)
 
         new_key = clean_line[:key_length]
 
         if new_key == current_key:
-            current_line += f"\n{clean_line[date_end:].strip()}"
+            # use zero-width space character to delineate that this is a continuation
+            current_line += f"\u200b{clean_line[date_end:].strip()}"
             continue
         else:
             if current_line:
