@@ -24,7 +24,10 @@ export function parseLogLines(logService: LogType, logs: string[]) {
               dateStamp: line.substring(0, 19),
               severity: "info",
               section: "startup",
-              content: line.substring(infoIndex + 6).trim(),
+              content: line
+                .substring(infoIndex + 6)
+                .trim()
+                .replace(/\u200b/g, "\n"),
             };
           }
 
@@ -32,7 +35,10 @@ export function parseLogLines(logService: LogType, logs: string[]) {
             dateStamp: line.substring(0, 19),
             severity: "unknown",
             section: "unknown",
-            content: line.substring(30).trim(),
+            content: line
+              .substring(30)
+              .trim()
+              .replace(/\u200b/g, "\n"),
           };
         }
 
@@ -44,7 +50,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           return null;
         }
 
-        return {
+        const logLine = {
           dateStamp: match.toString().slice(1, -1),
           severity: pythonSeverity
             .exec(line)
@@ -54,8 +60,11 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           section: sectionMatch.toString(),
           content: line
             .substring(line.indexOf(":", match.index + match[0].length) + 2)
-            .trim(),
+            .trim()
+            .replace(/\u200b/g, "\n"),
         };
+
+        return logLine;
       })
       .filter((value) => value != null) as LogLine[];
   } else if (logService == "go2rtc") {
