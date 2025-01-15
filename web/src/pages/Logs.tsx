@@ -52,48 +52,6 @@ function Logs() {
     }
   }, [tabsRef, logService]);
 
-  // handlers
-
-  const handleCopyLogs = useCallback(() => {
-    if (logs.length) {
-      copy(logs.join("\n"));
-      toast.success("Copied logs to clipboard");
-    } else {
-      toast.error("Could not copy logs to clipboard");
-    }
-  }, [logs]);
-
-  const handleDownloadLogs = useCallback(() => {
-    axios
-      .get(`api/logs/${logService}?download=true`)
-      .then((resp) => {
-        const element = document.createElement("a");
-        element.setAttribute(
-          "href",
-          "data:text/plain;charset=utf-8," + encodeURIComponent(resp.data),
-        );
-        element.setAttribute("download", `${logService}-logs.txt`);
-
-        element.style.display = "none";
-        document.body.appendChild(element);
-
-        element.click();
-
-        document.body.removeChild(element);
-      })
-      .catch(() => {});
-  }, [logService]);
-
-  const handleRowClick = useCallback(
-    (rowInfo: { lineNumber: number; rowIndex: number }) => {
-      const clickedLine = parseLogLines(logService, [
-        logs[rowInfo.rowIndex],
-      ])[0];
-      setSelectedLog(clickedLine);
-    },
-    [logs, logService],
-  );
-
   // filter
 
   const filterLines = useCallback(
@@ -212,6 +170,52 @@ function Logs() {
       setIsStreaming(false);
     };
   }, [fetchInitialLogs, fetchLogsStream]);
+
+  // handlers
+
+  const handleCopyLogs = useCallback(() => {
+    if (logs.length) {
+      fetchInitialLogs()
+        .then(() => {
+          copy(logs.join("\n"));
+          toast.success("Copied logs to clipboard");
+        })
+        .catch(() => {
+          toast.error("Could not copy logs to clipboard");
+        });
+    }
+  }, [logs, fetchInitialLogs]);
+
+  const handleDownloadLogs = useCallback(() => {
+    axios
+      .get(`logs/${logService}?download=true`)
+      .then((resp) => {
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(resp.data),
+        );
+        element.setAttribute("download", `${logService}-logs.txt`);
+
+        element.style.display = "none";
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+      })
+      .catch(() => {});
+  }, [logService]);
+
+  const handleRowClick = useCallback(
+    (rowInfo: { lineNumber: number; rowIndex: number }) => {
+      const clickedLine = parseLogLines(logService, [
+        logs[rowInfo.rowIndex],
+      ])[0];
+      setSelectedLog(clickedLine);
+    },
+    [logs, logService],
+  );
 
   // keyboard listener
 

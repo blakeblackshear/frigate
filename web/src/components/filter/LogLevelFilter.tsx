@@ -84,7 +84,7 @@ export function GeneralFilterContent({
         <DropdownMenuSeparator />
         <div className="my-2.5 flex flex-col gap-2.5">
           {["debug", "info", "warning", "error"].map((item) => (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" key={item}>
               <Label
                 className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
