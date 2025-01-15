@@ -19,6 +19,11 @@ import { LazyLog } from "@melloware/react-logviewer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import EnhancedScrollFollow from "@/components/dynamic/EnhancedScrollFollow";
 import { MdCircle } from "react-icons/md";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -93,11 +98,9 @@ function Logs() {
 
   const filterLines = useCallback(
     (lines: string[]) => {
-      // console.log(lines);
       if (!filterSeverity?.length) return lines;
 
       return lines.filter((line) => {
-        // console.log(line);
         const parsedLine = parseLogLines(logService, [line])[0];
         return filterSeverity.includes(parsedLine.severity);
       });
@@ -266,6 +269,84 @@ function Logs() {
     [logService, setFilterSeverity, setSelectedLog],
   );
 
+  useEffect(() => {
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      if (!lazyLogWrapperRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      const range = selection.getRangeAt(0);
+      const fragment = range.cloneContents();
+
+      const extractLogData = (element: Element) => {
+        const severity =
+          element.querySelector(".log-severity")?.textContent?.trim() || "";
+        const dateStamp =
+          element.querySelector(".log-timestamp")?.textContent?.trim() || "";
+        const section =
+          element.querySelector(".log-section")?.textContent?.trim() || "";
+        const content =
+          element.querySelector(".log-content")?.textContent?.trim() || "";
+
+        return { severity, dateStamp, section, content };
+      };
+
+      let copyData: {
+        severity: string;
+        dateStamp: string;
+        section: string;
+        content: string;
+      }[] = [];
+
+      if (fragment.querySelectorAll(".grid").length > 0) {
+        // Multiple grid elements
+        copyData = Array.from(fragment.querySelectorAll(".grid")).map(
+          extractLogData,
+        );
+      } else {
+        // Try to find the closest grid element or use the first child element
+        const gridElement =
+          fragment.querySelector(".grid") || (fragment.firstChild as Element);
+
+        if (gridElement) {
+          const data = extractLogData(gridElement);
+          if (data.severity || data.dateStamp || data.section || data.content) {
+            copyData.push(data);
+          }
+        }
+      }
+
+      if (copyData.length === 0) return; // No valid data to copy
+
+      // Calculate maximum widths for each column
+      const maxWidths = {
+        severity: Math.max(...copyData.map((d) => d.severity.length)),
+        dateStamp: Math.max(...copyData.map((d) => d.dateStamp.length)),
+        section: Math.max(...copyData.map((d) => d.section.length)),
+      };
+
+      const pad = (str: string, length: number) => str.padEnd(length, " ");
+
+      // Create the formatted copy text
+      const copyText = copyData
+        .map(
+          (d) =>
+            `${pad(d.severity, maxWidths.severity)} | ${pad(d.dateStamp, maxWidths.dateStamp)} | ${pad(d.section, maxWidths.section)} | ${d.content}`,
+        )
+        .join("\n");
+
+      e.clipboardData?.setData("text/plain", copyText);
+    };
+
+    const content = lazyLogWrapperRef.current;
+    content?.addEventListener("copy", handleCopy);
+    return () => {
+      content?.removeEventListener("copy", handleCopy);
+    };
+  }, []);
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster position="top-center" closeButton={true} />
@@ -347,13 +428,22 @@ function Logs() {
           <div
             className={cn(
               "col-span-5 flex items-center",
-              logService == "frigate" ? "md:col-span-7" : "md:col-span-8",
+              logService == "frigate"
+                ? "md:col-span-7 lg:col-span-8"
+                : "md:col-span-8 lg:col-span-9",
             )}
           >
             <div className="flex flex-1">Message</div>
             {isStreaming && (
               <div className="flex flex-row justify-end">
-                <MdCircle className="mr-2 size-2 animate-pulse text-selected shadow-selected drop-shadow-md" />
+                <Tooltip>
+                  <TooltipTrigger>
+                    <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Logs are streaming from the server
+                  </TooltipContent>
+                </Tooltip>
               </div>
             )}
           </div>
@@ -411,7 +501,7 @@ function LogLineData({
       <div className="log-severity flex h-full items-center gap-2 p-1">
         <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
-      <div className="log-timestamp col-span-2 flex h-full items-center lg:col-span-1">
+      <div className="log-timestamp col-span-2 flex h-full items-center whitespace-normal lg:col-span-1">
         {line.dateStamp}
       </div>
       <div
@@ -427,7 +517,9 @@ function LogLineData({
       <div
         className={cn(
           "log-content col-span-5 flex size-full items-center justify-between pr-2",
-          logService == "frigate" ? "md:col-span-7" : "md:col-span-8",
+          logService == "frigate"
+            ? "md:col-span-7"
+            : "md:col-span-8 lg:col-span-9",
         )}
       >
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
