@@ -266,7 +266,7 @@ class NorfairTracker(ObjectTracker):
         """Get the appropriate tracker based on object type and camera mode."""
         mode = (
             "ptz"
-            if self.ptz_metrics.autotracker_enabled.value
+            if self.camera_config.onvif.autotracking.enabled_in_config
             and object_type in self.camera_config.onvif.autotracking.track
             else "static"
         )
