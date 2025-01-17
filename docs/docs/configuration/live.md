@@ -117,6 +117,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
   ```
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
+- Note that WebRTC does not support H.265.
 
 :::tip
 
