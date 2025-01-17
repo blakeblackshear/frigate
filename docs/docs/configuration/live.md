@@ -94,9 +94,9 @@ cameras:
             - detect
     live:
       streams: # <--- Multiple streams for Frigate 0.16 and later
-        - Main Stream: test_cam
-        - Sub Stream: test_cam_sub
-        - Special Stream: test_cam_another_sub
+        Main Stream: test_cam # <--- Specify a "friendly name" followed by the go2rtc stream name
+        Sub Stream: test_cam_sub
+        Special Stream: test_cam_another_sub
 ```
 
 ### WebRTC extra configuration:
