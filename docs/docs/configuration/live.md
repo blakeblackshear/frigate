@@ -65,7 +65,7 @@ Frigate's default dashboard ("All Cameras") will always use the first entry you'
 
 Configure the `streams` option with a "friendly name" for your stream followed by the go2rtc stream name.
 
-Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` list, only go2rtc stream names.
+Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` configuration, only go2rtc stream names.
 
 ```yaml
 go2rtc:
@@ -176,14 +176,14 @@ The default dashboard ("All Cameras") will always use Smart Streaming and the fi
 ## Live view FAQ
 
 1. Why don't I have audio in my Live view?
-   You must use go2rtc to hear audio in your live streams. If you have go2rtc already configured, you need to ensure your camera is sending AAC audio. If you can't change your camera's audio codec, you need to [transcode the audio to AAC](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) using go2rtc.
+   You must use go2rtc to hear audio in your live streams. If you have go2rtc already configured, you need to ensure your camera is sending PCMA/PCMU or AAC audio. If you can't change your camera's audio codec, you need to [transcode the audio](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) using go2rtc.
 
    Note that the low bandwidth mode player is a video-only stream. You should not expect to hear audio when in low bandwidth mode, even if you've set up go2rtc.
 
 2. Frigate 0.16 shows that my live stream is in "low bandwidth mode". What does this mean?
    Frigate 0.14 and later intelligently selects the live streaming technology based on a number of factors (user-selected modes like two-way talk, camera settings, browser capabilities, available bandwidth) and prioritizes showing an actual up-to-date live view of your camera's stream as quickly as possible.
 
-   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI calls "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. You can also try using the "reset" button to force a reload of your stream.
+   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI labels as "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. You can also try using the _Reset_ button to force a reload of your stream.
 
    If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the recommendations above or ensure you have enough bandwidth available.
 
