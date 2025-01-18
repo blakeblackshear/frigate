@@ -97,6 +97,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest ASH21                |      ✅      |      ❌      | ONVIF service port: 80                                                                                                                          |
 | Amcrest IP4M-S2112EW-AI      |      ✅      |      ❌      | FOV relative movement not supported.                                                                                                            |
 | Amcrest IP5M-1190EW          |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                            |
+| Annke CPT500                 |      ✅      |      ❌      | ONVIF Port: 80                                                                                                                                  |
 | Ctronics PTZ                 |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                        |      ✅      |      ✅      |                                                                                                                                                 |
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
