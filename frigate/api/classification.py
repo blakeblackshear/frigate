@@ -31,7 +31,10 @@ def get_faces():
         if not os.path.isdir(face_dir):
             continue
 
-        for file in os.listdir(face_dir):
+        for file in sorted(
+            os.listdir(face_dir),
+            key=lambda f: os.path.getctime(os.path.join(face_dir, f)),
+        ):
             face_dict[name].append(file)
 
     return JSONResponse(status_code=200, content=face_dict)
