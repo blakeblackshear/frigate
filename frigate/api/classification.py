@@ -24,14 +24,18 @@ def get_faces():
     face_dict: dict[str, list[str]] = {}
 
     for name in os.listdir(FACE_DIR):
-        face_dict[name] = []
-
         face_dir = os.path.join(FACE_DIR, name)
 
         if not os.path.isdir(face_dir):
             continue
 
-        for file in os.listdir(face_dir):
+        face_dict[name] = []
+
+        for file in sorted(
+            os.listdir(face_dir),
+            key=lambda f: os.path.getctime(os.path.join(face_dir, f)),
+            reverse=True,
+        ):
             face_dict[name].append(file)
 
     return JSONResponse(status_code=200, content=face_dict)
@@ -81,6 +85,10 @@ def train_face(request: Request, name: str, body: dict = None):
     new_name = f"{name}-{rand_id}.webp"
     new_file = os.path.join(FACE_DIR, f"{name}/{new_name}")
     shutil.move(training_file, new_file)
+
+    context: EmbeddingsContext = request.app.embeddings
+    context.clear_face_classifier()
+
     return JSONResponse(
         content=(
             {

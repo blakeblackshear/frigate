@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 import requests
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, FRIGATE_LOCALHOST, MODEL_CACHE_DIR
 from frigate.util.image import area
@@ -353,45 +354,52 @@ class FaceProcessor(RealTimeProcessorApi):
 
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
-    def handle_request(self, request_data) -> dict[str, any] | None:
-        rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
-        label = request_data["face_name"]
-        id = f"{label}-{rand_id}"
-
-        if request_data.get("cropped"):
-            thumbnail = request_data["image"]
-        else:
-            img = cv2.imdecode(
-                np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
-                cv2.IMREAD_COLOR,
+    def handle_request(self, topic, request_data) -> dict[str, any] | None:
+        if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
+            self.__clear_classifier()
+        elif topic == EmbeddingsRequestEnum.register_face.value:
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
             )
-            face_box = self.__detect_face(img)
+            label = request_data["face_name"]
+            id = f"{label}-{rand_id}"
 
-            if not face_box:
-                return {
-                    "message": "No face was detected.",
-                    "success": False,
-                }
+            if request_data.get("cropped"):
+                thumbnail = request_data["image"]
+            else:
+                img = cv2.imdecode(
+                    np.frombuffer(
+                        base64.b64decode(request_data["image"]), dtype=np.uint8
+                    ),
+                    cv2.IMREAD_COLOR,
+                )
+                face_box = self.__detect_face(img)
 
-            face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
-            ret, thumbnail = cv2.imencode(
-                ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
-            )
+                if not face_box:
+                    return {
+                        "message": "No face was detected.",
+                        "success": False,
+                    }
 
-        # write face to library
-        folder = os.path.join(FACE_DIR, label)
-        file = os.path.join(folder, f"{id}.webp")
-        os.makedirs(folder, exist_ok=True)
+                face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
+                _, thumbnail = cv2.imencode(
+                    ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
+                )
 
-        # save face image
-        with open(file, "wb") as output:
-            output.write(thumbnail.tobytes())
+            # write face to library
+            folder = os.path.join(FACE_DIR, label)
+            file = os.path.join(folder, f"{id}.webp")
+            os.makedirs(folder, exist_ok=True)
 
-        self.__clear_classifier()
-        return {
-            "message": "Successfully registered face.",
-            "success": True,
-        }
+            # save face image
+            with open(file, "wb") as output:
+                output.write(thumbnail.tobytes())
+
+            self.__clear_classifier()
+            return {
+                "message": "Successfully registered face.",
+                "success": True,
+            }
 
     def expire_object(self, object_id: str):
         if object_id in self.detected_faces:
