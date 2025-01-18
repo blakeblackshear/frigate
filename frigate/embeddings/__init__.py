@@ -211,6 +211,11 @@ class EmbeddingsContext:
 
         return self.db.execute_sql(sql_query).fetchall()
 
+    def clear_face_classifier(self) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
     def delete_face_ids(self, face: str, ids: list[str]) -> None:
         folder = os.path.join(FACE_DIR, face)
         for id in ids:
