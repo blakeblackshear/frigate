@@ -9,6 +9,7 @@ SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
 
 
 class EmbeddingsRequestEnum(Enum):
+    clear_face_classifier = "clear_face_classifier"
     embed_description = "embed_description"
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
