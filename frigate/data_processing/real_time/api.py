@@ -32,7 +32,9 @@ class RealTimeProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def handle_request(self, topic: str, request_data: dict[str, any]) -> dict[str, any] | None:
+    def handle_request(
+        self, topic: str, request_data: dict[str, any]
+    ) -> dict[str, any] | None:
         """Handle metadata requests.
         Args:
             topic (str): topic that dictates what work is requested.
