@@ -43,7 +43,7 @@ function migrate_db_path() {
 }
 
 function set_libva_version() {
-    local ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+    local ffmpeg_path=$(python3 docker/main/rootfs/usr/local/ffmpeg/get_ffmpeg_path.py)
     export LIBAVFORMAT_VERSION_MAJOR=$($ffmpeg_path -version | grep -Po "libavformat\W+\K\d+")
 }
 

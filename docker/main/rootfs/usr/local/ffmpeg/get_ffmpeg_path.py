@@ -43,4 +43,3 @@ elif path in INCLUDED_FFMPEG_VERSIONS:
     print(f"/usr/lib/ffmpeg/{path}/bin/ffmpeg")
 else:
     print(f"{path}/bin/ffmpeg")
-
