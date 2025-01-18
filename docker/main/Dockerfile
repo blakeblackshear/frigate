@@ -215,7 +215,6 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
-ENV LIBAVFORMAT_VERSION_MAJOR=60
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
