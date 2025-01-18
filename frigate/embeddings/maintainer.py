@@ -140,7 +140,7 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 else:
                     for processor in self.processors:
-                        resp = processor.handle_request(data)
+                        resp = processor.handle_request(topic, data)
 
                         if resp is not None:
                             return resp

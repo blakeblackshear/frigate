@@ -146,7 +146,7 @@ class BirdProcessor(RealTimeProcessorApi):
         if resp.status_code == 200:
             self.detected_birds[obj_data["id"]] = score
 
-    def handle_request(self, request_data):
+    def handle_request(self, topic, request_data):
         return None
 
     def expire_object(self, object_id):
