@@ -85,6 +85,7 @@ type SearchDetailDialogProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function SearchDetailDialog({
   search,
@@ -92,6 +93,7 @@ export default function SearchDetailDialog({
   setSearch,
   setSearchPage,
   setSimilarity,
+  setInputFocused,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -232,6 +234,7 @@ export default function SearchDetailDialog({
             config={config}
             setSearch={setSearch}
             setSimilarity={setSimilarity}
+            setInputFocused={setInputFocused}
           />
         )}
         {page == "snapshot" && (
@@ -266,12 +269,14 @@ type ObjectDetailsTabProps = {
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
   setSimilarity,
+  setInputFocused,
 }: ObjectDetailsTabProps) {
   const apiHost = useApiHost();
 
@@ -282,6 +287,14 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+
+  const handleDescriptionFocus = useCallback(() => {
+    setInputFocused(true);
+  }, [setInputFocused]);
+
+  const handleDescriptionBlur = useCallback(() => {
+    setInputFocused(false);
+  }, [setInputFocused]);
 
   // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.data.description ?? ""), [search]);
@@ -499,6 +512,8 @@ function ObjectDetailsTab({
               placeholder="Description of the tracked object"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
+              onFocus={handleDescriptionFocus}
+              onBlur={handleDescriptionBlur}
             />
           </>
         )}
