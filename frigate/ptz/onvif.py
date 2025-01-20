@@ -163,7 +163,7 @@ class OnvifController:
                     for i, space in enumerate(
                         ptz_config.Spaces.RelativePanTiltTranslationSpace
                     )
-                    if "TranslationSpaceFov" in space["URI"]
+                    if "TranslationGenericSpace" in space["URI"]
                 ),
                 None,
             )
