@@ -66,7 +66,7 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: rpi
@@ -94,7 +94,7 @@ jobs:
           BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
           SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
           TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: tensorrt
@@ -122,7 +122,7 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: tensorrt
@@ -149,7 +149,7 @@ jobs:
       - name: Build and push TensorRT (x86 GPU)
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: tensorrt
@@ -174,7 +174,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Rockchip build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: rk
@@ -199,7 +199,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: h8l
@@ -212,7 +212,7 @@ jobs:
         env:
           AMDGPU: gfx
           HSA_OVERRIDE: 0
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v5
         with:
           push: true
           targets: rocm
