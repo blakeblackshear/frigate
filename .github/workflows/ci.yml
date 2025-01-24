@@ -66,8 +66,9 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rpi
           files: docker/rpi/rpi.hcl
@@ -94,8 +95,9 @@ jobs:
           BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
           SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
           TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -122,8 +124,9 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -149,8 +152,9 @@ jobs:
       - name: Build and push TensorRT (x86 GPU)
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -174,8 +178,9 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Rockchip build
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rk
           files: docker/rockchip/rk.hcl
@@ -199,8 +204,9 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: h8l
           files: docker/hailo8l/h8l.hcl
@@ -212,8 +218,9 @@ jobs:
         env:
           AMDGPU: gfx
           HSA_OVERRIDE: 0
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rocm
           files: docker/rocm/rocm.hcl
