@@ -102,7 +102,8 @@ Message published for updates to tracked object metadata, for example when GenAI
 {
   "type": "description",
   "id": "1607123955.475377-mxklsc",
-  "description": "The car is a red sedan moving away from the camera."
+  "description": "The car is a red sedan moving away from the camera.",
+  "camera": "front_door"
 }
 ```
 
