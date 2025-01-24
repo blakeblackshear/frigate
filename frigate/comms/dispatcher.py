@@ -143,6 +143,7 @@ class Dispatcher:
                         "type": TrackedObjectUpdateTypesEnum.description,
                         "id": event.id,
                         "description": event.data["description"],
+                        "camera": event.camera,
                     }
                 ),
             )
