@@ -20,7 +20,7 @@ env:
 
 jobs:
   amd64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Build
     steps:
       - name: Check out code
@@ -43,7 +43,7 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: ARM Build
     steps:
       - name: Check out code
@@ -78,7 +78,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
   jetson_jp4_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Jetson Jetpack 4
     steps:
       - name: Check out code
@@ -107,7 +107,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Jetson Jetpack 5
     steps:
       - name: Check out code
@@ -136,7 +136,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   amd64_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Extra Build
     needs:
       - amd64_build
@@ -164,7 +164,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
   arm64_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: ARM Extra Build
     needs:
       - arm64_build
@@ -189,7 +189,7 @@ jobs:
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
   combined_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Combined Extra Builds
     needs:
       - amd64_build
@@ -231,7 +231,7 @@ jobs:
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Assemble and push default build
     needs:
       - amd64_build
