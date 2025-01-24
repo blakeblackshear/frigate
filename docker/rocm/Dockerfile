@@ -2,29 +2,24 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=5.7.3
+ARG ROCM=6.3.1
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
 
 #######################################################################
-FROM ubuntu:focal as rocm
+FROM wget as rocm
 
 ARG ROCM
+ARG AMDGPU
 
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get -y install gnupg wget
-
-RUN mkdir --parents --mode=0755 /etc/apt/keyrings
-
-RUN wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
-COPY docker/rocm/rocm.list /etc/apt/sources.list.d/
-COPY docker/rocm/rocm-pin-600 /etc/apt/preferences.d/
-
-RUN apt-get update
-
-RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer
-RUN apt-get -y install --no-install-recommends migraphx-dev
+RUN apt update && \
+    apt install -y "linux-headers-$(uname -r)" && \
+    apt install -y wget gpg && \
+    wget https://repo.radeon.com/amdgpu-install/6.3.1/ubuntu/jammy/amdgpu-install_6.3.60301-1_all.deb && \
+    apt install -y ./amdgpu-install_6.3.60301-1_all.deb && \
+    apt update && \
+    apt install -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
@@ -34,30 +29,22 @@ RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
 RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 
 #######################################################################
-FROM --platform=linux/amd64 debian:12 as debian-base
-
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get -y install --no-install-recommends libelf1 libdrm2 libdrm-amdgpu1 libnuma1 kmod
-
-RUN apt-get -y install python3
-
-#######################################################################
 # ROCm does not come with migraphx wrappers for python 3.9, so we build it here
-FROM debian-base as debian-build
+# FROM debian-base as debian-build
 
-ARG ROCM
+# ARG ROCM
 
-COPY --from=rocm /opt/rocm-$ROCM /opt/rocm-$ROCM
-RUN ln -s /opt/rocm-$ROCM /opt/rocm
+# COPY --from=rocm /opt/rocm-$ROCM /opt/rocm-$ROCM
+# RUN ln -s /opt/rocm-$ROCM /opt/rocm
 
-RUN apt-get -y install g++ cmake
-RUN apt-get -y install python3-pybind11 python3-distutils python3-dev
+# RUN apt-get -y install g++ cmake
+# RUN apt-get -y install python3-pybind11 python3-distutils python3-dev
 
-WORKDIR /opt/build
+# WORKDIR /opt/build
 
-COPY docker/rocm/migraphx .
+# COPY docker/rocm/migraphx .
 
-RUN mkdir build && cd build && cmake .. && make install
+# RUN mkdir build && cd build && cmake .. && make install
 
 #######################################################################
 FROM deps AS deps-prelim
@@ -70,11 +57,11 @@ RUN apt-get -y install libnuma1
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-# Temporarily disabled to see if a new wheel can be built to support py3.11
-#COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
-#RUN python3 -m pip install --upgrade pip \
-#    && pip3 uninstall -y onnxruntime-openvino \
-#    && pip3 install -r /requirements.txt
+COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
+RUN wget https://repo.radeon.com/rocm/manylinux/rocm-rel-6.3.1/onnxruntime_rocm-1.19.0-cp312-cp312-linux_x86_64.whl && \
+   python3 -m pip install --upgrade pip && \
+   pip3 uninstall -y onnxruntime-openvino && \
+   pip3 install onnxruntime_rocm-1.19.0-cp312-cp312-linux_x86_64.whl
 
 #######################################################################
 FROM scratch AS rocm-dist
@@ -87,12 +74,11 @@ COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
-COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-311-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
+#COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-311-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
-\
-    ENV HSA_ENABLE_SDMA=0
+ENV HSA_ENABLE_SDMA=0
 
 COPY --from=rocm-dist / /
 
