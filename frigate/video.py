@@ -436,7 +436,11 @@ def track_camera(
     object_filters = config.objects.filters
 
     motion_detector = ImprovedMotionDetector(
-        frame_shape, config.motion, config.detect.fps, name=config.name
+        frame_shape,
+        config.motion,
+        config.detect.fps,
+        name=config.name,
+        ptz_metrics=ptz_metrics,
     )
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_config, stop_event

@@ -94,7 +94,6 @@ def histogram_distance(matched_not_init_trackers, unmatched_trackers):
         distance = 1 - cv2.compareHist(
             snd_embedding, detection_fst.embedding, cv2.HISTCMP_CORREL
         )
-        print("ReID distance", distance)
         if distance < 0.5:
             return distance
     return 1
@@ -220,7 +219,6 @@ class NorfairTracker(ObjectTracker):
                     )
                     is None
                 ):
-                    print("adding reid keys for ptz: ", obj_type)
                     reid_keys = [
                         "past_detections_length",
                         "reid_distance_function",
@@ -604,7 +602,9 @@ class NorfairTracker(ObjectTracker):
         # Collect all tracked objects from each tracker
         all_tracked_objects = []
 
-        self.print_objects_as_table(self.trackers["person"]["ptz"].tracked_objects)
+        # print a table to the console with norfair tracked object info
+        if False:
+            self.print_objects_as_table(self.trackers["person"]["ptz"].tracked_objects)
 
         # Get tracked objects from type-specific trackers
         for object_trackers in self.trackers.values():

@@ -465,7 +465,6 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.ptz_metrics[camera_name].motor_stopped.clear()
         self.ptz_metrics[camera_name].start_time.value = 0
         self.ptz_metrics[camera_name].stop_time.value = 0
         move_request = self.cams[camera_name]["move_request"]
