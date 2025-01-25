@@ -8,13 +8,12 @@ ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
 
 #######################################################################
-FROM wget as rocm
+FROM wget AS rocm
 
 ARG ROCM
 ARG AMDGPU
 
 RUN apt update && \
-    apt install -y "linux-headers-$(uname -r)" && \
     apt install -y wget gpg && \
     wget https://repo.radeon.com/amdgpu-install/6.3.1/ubuntu/jammy/amdgpu-install_6.3.60301-1_all.deb && \
     apt install -y ./amdgpu-install_6.3.60301-1_all.deb && \
@@ -22,46 +21,30 @@ RUN apt update && \
     apt install -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
-RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-$ROCM/lib && \
+    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-6.3.1/lib/ && \
+    mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
+    cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-6.3.1/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
 RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 
 #######################################################################
-# ROCm does not come with migraphx wrappers for python 3.9, so we build it here
-# FROM debian-base as debian-build
-
-# ARG ROCM
-
-# COPY --from=rocm /opt/rocm-$ROCM /opt/rocm-$ROCM
-# RUN ln -s /opt/rocm-$ROCM /opt/rocm
-
-# RUN apt-get -y install g++ cmake
-# RUN apt-get -y install python3-pybind11 python3-distutils python3-dev
-
-# WORKDIR /opt/build
-
-# COPY docker/rocm/migraphx .
-
-# RUN mkdir build && cd build && cmake .. && make install
-
-#######################################################################
 FROM deps AS deps-prelim
 
-# need this to install libnuma1
-RUN apt-get update
-# no ugprade?!?!
-RUN apt-get -y install libnuma1
+RUN apt-get update && apt-get install -y libnuma1
 
-WORKDIR /opt/frigate/
+WORKDIR /opt/frigate
 COPY --from=rootfs / /
 
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip" --break-system-packages
+RUN python3 -m pip config set global.break-system-packages true
+
 COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
-RUN wget https://repo.radeon.com/rocm/manylinux/rocm-rel-6.3.1/onnxruntime_rocm-1.19.0-cp312-cp312-linux_x86_64.whl && \
-   python3 -m pip install --upgrade pip && \
-   pip3 uninstall -y onnxruntime-openvino && \
-   pip3 install onnxruntime_rocm-1.19.0-cp312-cp312-linux_x86_64.whl
+RUN pip3 uninstall -y onnxruntime-openvino \
+    && pip3 install -r /requirements.txt
 
 #######################################################################
 FROM scratch AS rocm-dist
@@ -74,7 +57,6 @@ COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
-#COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-311-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
