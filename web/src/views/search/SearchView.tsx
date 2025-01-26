@@ -554,13 +554,10 @@ export default function SearchView({
                           ctrl: boolean,
                           detail: boolean,
                         ) => {
-                          if (detail && selectedObjects.length == 0) {
+                          if (detail) {
                             setSearchDetail(value);
                           } else {
-                            onSelectSearch(
-                              value,
-                              ctrl || selectedObjects.length > 0,
-                            );
+                            onSelectSearch(value, ctrl);
                           }
                         }}
                       />
