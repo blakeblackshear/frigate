@@ -153,6 +153,7 @@ def config(request: Request):
 
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
+    config["model"]["all_attributes"] = config_obj.model.all_attributes
 
     # use merged labelamp
     for detector_config in config["detectors"].values():
