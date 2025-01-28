@@ -24,6 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 MIN_MATCHING_FACES = 2
+MIN_FACE_SCORE = 0.8
+NMS_THRESHOLD = 0.3
+FACE_INPUT_SIZE = (320, 320)
+FACE_QUALITY = 100
 
 
 class FaceProcessor(RealTimeProcessorApi):
@@ -358,49 +362,83 @@ class FaceProcessor(RealTimeProcessorApi):
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
             self.__clear_classifier()
         elif topic == EmbeddingsRequestEnum.register_face.value:
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
-            label = request_data["face_name"]
-            id = f"{label}-{rand_id}"
-
-            if request_data.get("cropped"):
-                thumbnail = request_data["image"]
-            else:
-                img = cv2.imdecode(
-                    np.frombuffer(
-                        base64.b64decode(request_data["image"]), dtype=np.uint8
-                    ),
-                    cv2.IMREAD_COLOR,
+            face_name = request_data.get("face_name")
+            if not self.__validate_face_name(face_name):
+                return {
+                    "message": "Invalid face name",
+                    "success": False,
+                }
+            
+            try:
+                rand_id = "".join(
+                    random.choices(string.ascii_lowercase + string.digits, k=6)
                 )
-                face_box = self.__detect_face(img)
+                id = f"{face_name}-{rand_id}"
 
-                if not face_box:
-                    return {
-                        "message": "No face was detected.",
-                        "success": False,
-                    }
+                if request_data.get("cropped"):
+                    thumbnail = request_data["image"]
+                else:
+                    img = cv2.imdecode(
+                        np.frombuffer(
+                            base64.b64decode(request_data["image"]), dtype=np.uint8
+                        ),
+                        cv2.IMREAD_COLOR,
+                    )
+                    face_box = self.__detect_face(img)
 
-                face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
-                _, thumbnail = cv2.imencode(
-                    ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
-                )
+                    if not face_box:
+                        return {
+                            "message": "No face was detected.",
+                            "success": False,
+                        }
 
-            # write face to library
-            folder = os.path.join(FACE_DIR, label)
-            file = os.path.join(folder, f"{id}.webp")
-            os.makedirs(folder, exist_ok=True)
+                    face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
+                    _, thumbnail = cv2.imencode(
+                        ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
+                    )
 
-            # save face image
-            with open(file, "wb") as output:
-                output.write(thumbnail.tobytes())
+                # write face to library
+                folder = os.path.join(FACE_DIR, face_name)
+                file = os.path.join(folder, f"{id}.webp")
+                os.makedirs(folder, exist_ok=True)
 
-            self.__clear_classifier()
-            return {
-                "message": "Successfully registered face.",
-                "success": True,
-            }
+                # save face image
+                with open(file, "wb") as output:
+                    output.write(thumbnail.tobytes())
+
+                self.__clear_classifier()
+                return {
+                    "message": "Successfully registered face.",
+                    "success": True,
+                }
+            except cv2.error as e:
+                return {
+                    "message": f"Failed to process image: {str(e)}",
+                    "success": False,
+                }
+            except Exception as e:
+                logger.error(f"Unexpected error registering face: {str(e)}")
+                return {
+                    "message": "Internal server error",
+                    "success": False,
+                }
 
     def expire_object(self, object_id: str):
         if object_id in self.detected_faces:
             self.detected_faces.pop(object_id)
+
+    def __validate_face_name(self, name: str) -> bool:
+        """Validate face name meets requirements."""
+        if not name or not isinstance(name, str):
+            return False
+        # Add any other validation rules (e.g., no special chars)
+        return True
+
+    def cleanup(self):
+        """Cleanup resources when shutting down."""
+        if self.face_detector:
+            self.face_detector = None
+        if self.landmark_detector:
+            self.landmark_detector = None
+        if self.face_recognizer:
+            self.face_recognizer = None

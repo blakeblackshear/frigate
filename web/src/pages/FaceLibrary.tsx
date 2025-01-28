@@ -116,29 +116,38 @@ export default function FaceLibrary() {
   );
 
   const [newFaceDialog, setNewFaceDialog] = useState(false);
+  const [isCreatingFace, setIsCreatingFace] = useState(false);
   const [newFaceName, setNewFaceName] = useState("");
 
-  const createNewFace = useCallback(() => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      createNewFace();
+    }
+  };
+
+  const createNewFace = useCallback(async () => {
     if (!newFaceName.trim()) {
       toast.error("Face name cannot be empty", { position: "top-center" });
       return;
     }
-
-    axios
-      .post(`/faces/${newFaceName}`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          setNewFaceDialog(false);
-          setNewFaceName("");
-          refreshFaces();
-          toast.success("Successfully created new face", { position: "top-center" });
-        }
-      })
-      .catch((error) => {
-        toast.error(`Failed to create face: ${error.response?.data?.message || error.message}`, {
-          position: "top-center",
-        });
-      });
+    
+    setIsCreatingFace(true);
+    try {
+      const resp = await axios.post(`/faces/${newFaceName}`);
+      if (resp.status === 200) {
+        setNewFaceDialog(false);
+        setNewFaceName("");
+        refreshFaces();
+        toast.success("Successfully created new face", { position: "top-center" });
+      }
+    } catch (error) {
+      toast.error(
+        `Failed to create face: ${error.response?.data?.message || error.message}`,
+        { position: "top-center" }
+      );
+    } finally {
+      setIsCreatingFace(false);
+    }
   }, [newFaceName, refreshFaces]);
 
   if (!config) {
@@ -159,8 +168,12 @@ export default function FaceLibrary() {
               placeholder="Enter face name"
               value={newFaceName}
               onChange={(e) => setNewFaceName(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isCreatingFace}
             />
-            <Button onClick={createNewFace}>Create</Button>
+            <Button onClick={createNewFace} disabled={isCreatingFace}>
+              {isCreatingFace ? "Creating..." : "Create"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
