@@ -169,6 +169,7 @@ export default function FaceLibrary() {
       });
 
       setRenameDialog(false);
+      setPageToggle(renameData.newName);
       setRenameData({ oldName: '', newName: '' });
       await refreshFaces();
       toast.success("Successfully renamed face", { position: "top-center" });
@@ -181,13 +182,14 @@ export default function FaceLibrary() {
     } finally {
       setIsRenaming(false);
     }
-  }, [renameData, refreshFaces]);
+  }, [renameData, refreshFaces, setPageToggle]);
 
   const deleteFace = useCallback(async () => {
     try {
       const images = faceData[renameData.oldName] || [];
       await axios.post(`/faces/${renameData.oldName}/delete`, {
-        ids: images.length ? images : ['dummy']
+        ids: images.length ? images : ['dummy'],
+        delete_directory: true
       });
       setRenameDialog(false);
       

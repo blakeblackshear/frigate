@@ -110,6 +110,7 @@ def deregister_faces(request: Request, name: str, body: dict = None):
 
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", [])
+    delete_directory = json.get("delete_directory", False)  # New flag for directory deletion
 
     if not list_of_ids:
         return JSONResponse(
@@ -125,18 +126,18 @@ def deregister_faces(request: Request, name: str, body: dict = None):
             content={"message": f"Face '{name}' not found", "success": False},
         )
 
-    context: EmbeddingsContext = request.app.embeddings
-    context.delete_face_ids(
-        name, map(lambda file: sanitize_filename(file), list_of_ids)
-    )
-
     try:
-        if os.path.exists(face_dir):
+        if delete_directory:
             shutil.rmtree(face_dir)
+        else:
+            context: EmbeddingsContext = request.app.embeddings
+            context.delete_face_ids(
+                name, map(lambda file: sanitize_filename(file), list_of_ids)
+            )
     except Exception as e:
-        logger.error(f"Failed to remove directory {face_dir}: {str(e)}")
+        logger.error(f"Failed to delete face: {str(e)}")
         return JSONResponse(
-            content={"success": False, "message": f"Failed to remove directory: {str(e)}"},
+            content={"success": False, "message": f"Failed to delete face: {str(e)}"},
             status_code=500,
         )
 
