@@ -422,6 +422,49 @@ class FaceProcessor(RealTimeProcessorApi):
                     "message": "Internal server error",
                     "success": False,
                 }
+        elif topic == "rename_face":
+            old_name = request_data.get("old_name")
+            new_name = request_data.get("new_name")
+            
+            if not self.__validate_face_name(new_name):
+                return {
+                    "message": "Invalid new face name",
+                    "success": False,
+                }
+            
+            try:
+                old_folder = os.path.join(FACE_DIR, old_name)
+                new_folder = os.path.join(FACE_DIR, new_name)
+                
+                if not os.path.exists(old_folder):
+                    return {
+                        "message": f"Face '{old_name}' not found",
+                        "success": False,
+                    }
+                    
+                if os.path.exists(new_folder):
+                    return {
+                        "message": f"Face name '{new_name}' already exists",
+                        "success": False,
+                    }
+                    
+                # Rename the directory
+                os.rename(old_folder, new_folder)
+                
+                # Clear and rebuild classifier with new names
+                self.__clear_classifier()
+                self.__build_classifier()
+                
+                return {
+                    "message": "Successfully renamed face",
+                    "success": True,
+                }
+            except Exception as e:
+                logger.error(f"Failed to rename face: {str(e)}")
+                return {
+                    "message": f"Failed to rename face: {str(e)}",
+                    "success": False,
+                }
 
     def expire_object(self, object_id: str):
         if object_id in self.detected_faces:

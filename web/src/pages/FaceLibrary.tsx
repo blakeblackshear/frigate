@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuTrash2, LuUserPlus } from "react-icons/lu";
+import { LuImagePlus, LuTrash2, LuUserPlus, LuEdit } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Input } from "@/components/ui/input";
@@ -150,6 +150,37 @@ export default function FaceLibrary() {
     }
   }, [newFaceName, refreshFaces]);
 
+  const [renameDialog, setRenameDialog] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameData, setRenameData] = useState<{ oldName: string; newName: string }>({ oldName: '', newName: '' });
+
+  const renameFace = useCallback(async () => {
+    if (!renameData.newName.trim()) {
+      toast.error("Face name cannot be empty", { position: "top-center" });
+      return;
+    }
+
+    setIsRenaming(true);
+    try {
+      const resp = await axios.post(`/faces/${renameData.oldName}/rename`, {
+        new_name: renameData.newName
+      });
+      if (resp.status === 200) {
+        setRenameDialog(false);
+        setRenameData({ oldName: '', newName: '' });
+        refreshFaces();
+        toast.success("Successfully renamed face", { position: "top-center" });
+      }
+    } catch (error) {
+      toast.error(
+        `Failed to rename face: ${error.response?.data?.message || error.message}`,
+        { position: "top-center" }
+      );
+    } finally {
+      setIsRenaming(false);
+    }
+  }, [renameData, refreshFaces]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -173,6 +204,26 @@ export default function FaceLibrary() {
             />
             <Button onClick={createNewFace} disabled={isCreatingFace}>
               {isCreatingFace ? "Creating..." : "Create"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={renameDialog} onOpenChange={setRenameDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Face</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Enter new name"
+              value={renameData.newName}
+              onChange={(e) => setRenameData(prev => ({ ...prev, newName: e.target.value }))}
+              onKeyPress={(e) => e.key === 'Enter' && renameFace()}
+              disabled={isRenaming}
+            />
+            <Button onClick={renameFace} disabled={isRenaming}>
+              {isRenaming ? "Renaming..." : "Rename"}
             </Button>
           </div>
         </DialogContent>
@@ -217,7 +268,9 @@ export default function FaceLibrary() {
               {Object.values(faces).map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${
+                    pageToggle == item ? "" : "*:text-muted-foreground"
+                  }`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
@@ -225,6 +278,23 @@ export default function FaceLibrary() {
                   <div className="capitalize">
                     {item} ({faceData[item].length})
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRenameData({ oldName: item, newName: item });
+                          setRenameDialog(true);
+                        }}
+                      >
+                        <LuEdit className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Rename Face</TooltipContent>
+                  </Tooltip>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
