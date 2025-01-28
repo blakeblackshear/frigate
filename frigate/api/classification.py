@@ -134,17 +134,20 @@ def deregister_faces(request: Request, name: str, body: dict = None):
             context.delete_face_ids(
                 name, map(lambda file: sanitize_filename(file), list_of_ids)
             )
+        
+        context: EmbeddingsContext = request.app.embeddings
+        context.clear_face_classifier()
+
+        return JSONResponse(
+            content={"success": True, "message": "Successfully deleted faces."},
+            status_code=200,
+        )
     except Exception as e:
         logger.error(f"Failed to delete face: {str(e)}")
         return JSONResponse(
             content={"success": False, "message": f"Failed to delete face: {str(e)}"},
             status_code=500,
         )
-
-    return JSONResponse(
-        content={"success": True, "message": "Successfully deleted faces."},
-        status_code=200,
-    )
 
 
 @router.post("/faces/{name}/create")
@@ -198,11 +201,9 @@ def rename_face(request: Request, name: str, body: dict = None):
         )
 
     try:
-        # Use atomic operation when possible
         try:
             os.rename(old_folder, new_folder)
         except OSError:
-            # Fallback to copy+delete if rename fails
             shutil.copytree(old_folder, new_folder)
             shutil.rmtree(old_folder)
 
