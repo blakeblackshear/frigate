@@ -80,7 +80,12 @@ export default function FaceLibrary() {
   const [upload, setUpload] = useState(false);
 
   const onUploadImage = useCallback(
-    (file: File) => {
+    (file: File | null) => {
+      if (!file) {
+        setUpload(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       axios
@@ -138,7 +143,8 @@ export default function FaceLibrary() {
       if (resp.status === 200) {
         setNewFaceDialog(false);
         setNewFaceName("");
-        refreshFaces();
+        await refreshFaces();
+        setPageToggle(newFaceName);
         toast.success("Successfully created new face", { position: "top-center" });
       }
     } catch (error) {
@@ -150,7 +156,7 @@ export default function FaceLibrary() {
     } finally {
       setIsCreatingFace(false);
     }
-  }, [newFaceName, refreshFaces]);
+  }, [newFaceName, refreshFaces, setPageToggle]);
 
   const [renameDialog, setRenameDialog] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -341,7 +347,6 @@ export default function FaceLibrary() {
         </ScrollArea>
         <div className="flex gap-2">
           <Button 
-            variant="outline"
             className="flex gap-2" 
             onClick={() => setNewFaceDialog(true)}
           >
