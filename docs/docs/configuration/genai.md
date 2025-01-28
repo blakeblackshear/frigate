@@ -116,6 +116,12 @@ genai:
   model: gpt-4o
 ```
 
+::: note
+
+To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+
+:::
+
 ## Azure OpenAI
 
 Microsoft offers several vision models through Azure OpenAI. A subscription is required.
