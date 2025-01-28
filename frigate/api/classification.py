@@ -110,7 +110,7 @@ def deregister_faces(request: Request, name: str, body: dict = None):
 
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", [])
-    delete_directory = json.get("delete_directory", False)  # New flag for directory deletion
+    delete_directory = json.get("delete_directory", False)
 
     if not list_of_ids:
         return JSONResponse(
