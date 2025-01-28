@@ -21,7 +21,7 @@ import {
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuImagePlus, LuTrash2, LuUserPlus, LuEdit } from "react-icons/lu";
 import { toast } from "sonner";
@@ -150,8 +150,9 @@ export default function FaceLibrary() {
         toast.success("Successfully created new face", { position: "top-center" });
       }
     } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
       toast.error(
-        `Failed to create face: ${error.response?.data?.message || error.message}`,
+        `Failed to create face: ${axiosError.response?.data?.message || axiosError.message}`,
         { position: "top-center" }
       );
     } finally {
@@ -195,8 +196,9 @@ export default function FaceLibrary() {
       refreshFaces();
       toast.success("Successfully renamed face", { position: "top-center" });
     } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
       toast.error(
-        `Failed to rename face: ${error.response?.data?.message || error.message}`,
+        `Failed to rename face: ${axiosError.response?.data?.message || axiosError.message}`,
         { position: "top-center" }
       );
     } finally {
