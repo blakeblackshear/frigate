@@ -143,6 +143,7 @@ export default function FaceLibrary() {
 
       const formData = new FormData();
       formData.append('file', blob, 'placeholder.webp');
+      formData.append('cropped', 'true');
 
       const resp = await axios.post(`/faces/${newFaceName}`, formData, {
         headers: {
@@ -189,6 +190,7 @@ export default function FaceLibrary() {
 
       const formData = new FormData();
       formData.append('file', blob, 'placeholder.webp');
+      formData.append('cropped', 'true');
       await axios.post(`/faces/${renameData.newName}`, formData);
 
       const oldFaceImages = faceData[renameData.oldName] || [];
