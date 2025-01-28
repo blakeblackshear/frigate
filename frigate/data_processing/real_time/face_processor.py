@@ -81,9 +81,9 @@ class FaceProcessor(RealTimeProcessorApi):
         self.face_detector = cv2.FaceDetectorYN.create(
             "/config/model_cache/facedet/facedet.onnx",
             config="",
-            input_size=(320, 320),
-            score_threshold=0.8,
-            nms_threshold=0.3,
+            input_size=FACE_INPUT_SIZE,
+            score_threshold=MIN_FACE_SCORE,
+            nms_threshold=NMS_THRESHOLD
         )
         self.landmark_detector = cv2.face.createFacemarkLBF()
         self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
@@ -394,7 +394,7 @@ class FaceProcessor(RealTimeProcessorApi):
 
                     face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
                     _, thumbnail = cv2.imencode(
-                        ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
+                        ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), FACE_QUALITY]
                     )
 
                 # write face to library
