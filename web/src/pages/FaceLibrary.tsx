@@ -133,22 +133,24 @@ export default function FaceLibrary() {
     
     setIsCreatingFace(true);
     try {
-      // Create a 1x1 transparent WebP image
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      const blob = await new Promise<Blob>((resolve) => 
-        canvas.toBlob((b) => resolve(b!), 'image/webp')
-      );
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 1, 1);
+      }
+      
+      const base64Image = canvas.toDataURL('image/webp').split(',')[1];
 
       const formData = new FormData();
-      formData.append('file', blob, 'placeholder.webp');
       formData.append('cropped', 'true');
+      formData.append('image', base64Image);
 
-      const resp = await axios.post(`/faces/${newFaceName}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const resp = await axios.post(`/faces/${newFaceName}`, {
+        cropped: true,
+        image: base64Image
       });
       
       if (resp.status === 200) {
@@ -180,19 +182,26 @@ export default function FaceLibrary() {
 
     setIsRenaming(true);
     try {
-      // Create a 1x1 transparent WebP image for the new face directory
+      // Create a 1x1 transparent WebP image
       const canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
-      const blob = await new Promise<Blob>((resolve) => 
-        canvas.toBlob((b) => resolve(b!), 'image/webp')
-      );
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 1, 1);
+      }
+      
+      // Convert to base64
+      const base64Image = canvas.toDataURL('image/webp').split(',')[1];
 
-      const formData = new FormData();
-      formData.append('file', blob, 'placeholder.webp');
-      formData.append('cropped', 'true');
-      await axios.post(`/faces/${renameData.newName}`, formData);
+      // Create new face directory
+      await axios.post(`/faces/${renameData.newName}`, {
+        cropped: true,
+        image: base64Image
+      });
 
+      // Copy existing images
       const oldFaceImages = faceData[renameData.oldName] || [];
       for (const image of oldFaceImages) {
         const response = await fetch(`${baseUrl}clips/faces/${renameData.oldName}/${image}`);
