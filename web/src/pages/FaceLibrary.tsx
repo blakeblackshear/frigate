@@ -210,7 +210,8 @@ export default function FaceLibrary() {
         ids: images.length ? images : ['dummy']
       });
       setRenameDialog(false);
-      await refreshFaces(); // Wait for refresh
+      setPageToggle(faces[0]);
+      await refreshFaces();
       toast.success("Successfully deleted face", { position: "top-center" });
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
@@ -219,7 +220,7 @@ export default function FaceLibrary() {
         { position: "top-center" }
       );
     }
-  }, [renameData.oldName, faceData, refreshFaces]);
+  }, [renameData.oldName, faceData, refreshFaces, faces, setPageToggle]);
 
   if (!config) {
     return <ActivityIndicator />;

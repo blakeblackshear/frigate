@@ -125,10 +125,14 @@ def deregister_faces(request: Request, name: str, body: dict = None):
     )
 
     try:
-        if os.path.exists(face_dir) and not os.listdir(face_dir):
-            os.rmdir(face_dir)
+        if os.path.exists(face_dir):
+            shutil.rmtree(face_dir)
     except Exception as e:
         logger.error(f"Failed to remove directory {face_dir}: {str(e)}")
+        return JSONResponse(
+            content=({"success": False, "message": f"Failed to remove directory: {str(e)}"}),
+            status_code=500,
+        )
 
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),

@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import string
+import shutil
 from typing import Optional
 
 import cv2
@@ -448,8 +449,8 @@ class FaceProcessor(RealTimeProcessorApi):
                         "success": False,
                     }
                     
-                # Rename the directory
-                os.rename(old_folder, new_folder)
+                shutil.copytree(old_folder, new_folder)
+                shutil.rmtree(old_folder)
                 
                 # Clear and rebuild classifier with new names
                 self.__clear_classifier()
