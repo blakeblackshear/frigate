@@ -109,16 +109,22 @@ def deregister_faces(request: Request, name: str, body: dict = None):
         )
 
     json: dict[str, any] = body or {}
-    list_of_ids = json.get("ids", "")
+    list_of_ids = json.get("ids", [])
 
-    if not list_of_ids or len(list_of_ids) == 0:
+    if not list_of_ids:
         return JSONResponse(
-            content=({"success": False, "message": "Not a valid list of ids"}),
+            content={"success": False, "message": "Not a valid list of ids"},
             status_code=404,
         )
 
     face_dir = os.path.join(FACE_DIR, name)
     
+    if not os.path.exists(face_dir):
+        return JSONResponse(
+            status_code=404,
+            content={"message": f"Face '{name}' not found", "success": False},
+        )
+
     context: EmbeddingsContext = request.app.embeddings
     context.delete_face_ids(
         name, map(lambda file: sanitize_filename(file), list_of_ids)
@@ -130,12 +136,12 @@ def deregister_faces(request: Request, name: str, body: dict = None):
     except Exception as e:
         logger.error(f"Failed to remove directory {face_dir}: {str(e)}")
         return JSONResponse(
-            content=({"success": False, "message": f"Failed to remove directory: {str(e)}"}),
+            content={"success": False, "message": f"Failed to remove directory: {str(e)}"},
             status_code=500,
         )
 
     return JSONResponse(
-        content=({"success": True, "message": "Successfully deleted faces."}),
+        content={"success": True, "message": "Successfully deleted faces."},
         status_code=200,
     )
 
@@ -155,3 +161,60 @@ def create_face(name: str):
         status_code=200,
         content={"message": "Successfully created face", "success": True},
     )
+
+
+@router.post("/faces/{name}/rename")
+def rename_face(request: Request, name: str, body: dict = None):
+    """Rename a face directory."""
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
+    json: dict[str, any] = body or {}
+    new_name = json.get("new_name")
+
+    if not new_name:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "New name is required", "success": False},
+        )
+
+    old_folder = os.path.join(FACE_DIR, name)
+    new_folder = os.path.join(FACE_DIR, new_name)
+
+    if not os.path.exists(old_folder):
+        return JSONResponse(
+            status_code=404,
+            content={"message": f"Face '{name}' not found", "success": False},
+        )
+
+    if os.path.exists(new_folder):
+        return JSONResponse(
+            status_code=400,
+            content={"message": f"Face '{new_name}' already exists", "success": False},
+        )
+
+    try:
+        # Use atomic operation when possible
+        try:
+            os.rename(old_folder, new_folder)
+        except OSError:
+            # Fallback to copy+delete if rename fails
+            shutil.copytree(old_folder, new_folder)
+            shutil.rmtree(old_folder)
+
+        context: EmbeddingsContext = request.app.embeddings
+        context.clear_face_classifier()
+
+        return JSONResponse(
+            status_code=200,
+            content={"message": "Successfully renamed face", "success": True},
+        )
+    except Exception as e:
+        logger.error(f"Failed to rename face: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"message": f"Failed to rename face: {str(e)}", "success": False},
+        )

@@ -164,28 +164,8 @@ export default function FaceLibrary() {
 
     setIsRenaming(true);
     try {
-      await axios.post(`/faces/${renameData.newName}/create`);
-
-      const oldFaceImages = faceData[renameData.oldName] || [];
-      const copyPromises = oldFaceImages.map(async (image: string) => {
-        const response = await fetch(`${baseUrl}clips/faces/${renameData.oldName}/${image}`);
-        const blob = await response.blob();
-        
-        const formData = new FormData();
-        formData.append('file', new File([blob], image));
-        formData.append('cropped', 'true');
-        
-        return axios.post(`/faces/${renameData.newName}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      });
-
-      await Promise.all(copyPromises);
-
-      await axios.post(`/faces/${renameData.oldName}/delete`, {
-        ids: oldFaceImages.length ? oldFaceImages : ['dummy']
+      await axios.post(`/faces/${renameData.oldName}/rename`, {
+        new_name: renameData.newName
       });
 
       setRenameDialog(false);
@@ -201,7 +181,7 @@ export default function FaceLibrary() {
     } finally {
       setIsRenaming(false);
     }
-  }, [renameData, faceData, refreshFaces]);
+  }, [renameData, refreshFaces]);
 
   const deleteFace = useCallback(async () => {
     try {
@@ -210,7 +190,9 @@ export default function FaceLibrary() {
         ids: images.length ? images : ['dummy']
       });
       setRenameDialog(false);
-      setPageToggle(faces[0]);
+      
+      const nextFace = faces.find(face => face !== renameData.oldName) || null;
+      setPageToggle(nextFace);
       await refreshFaces();
       toast.success("Successfully deleted face", { position: "top-center" });
     } catch (error) {
