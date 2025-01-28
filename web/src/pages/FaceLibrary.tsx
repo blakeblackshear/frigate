@@ -167,7 +167,7 @@ export default function FaceLibrary() {
       await axios.post(`/faces/${renameData.newName}/create`);
 
       const oldFaceImages = faceData[renameData.oldName] || [];
-      const copyPromises = oldFaceImages.map(async (image) => {
+      const copyPromises = oldFaceImages.map(async (image: string) => {
         const response = await fetch(`${baseUrl}clips/faces/${renameData.oldName}/${image}`);
         const blob = await response.blob();
         
@@ -190,7 +190,7 @@ export default function FaceLibrary() {
 
       setRenameDialog(false);
       setRenameData({ oldName: '', newName: '' });
-      await refreshFaces(); // Wait for refresh to complete
+      await refreshFaces();
       toast.success("Successfully renamed face", { position: "top-center" });
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
