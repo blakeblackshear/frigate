@@ -117,10 +117,19 @@ def deregister_faces(request: Request, name: str, body: dict = None):
             status_code=404,
         )
 
+    face_dir = os.path.join(FACE_DIR, name)
+    
     context: EmbeddingsContext = request.app.embeddings
     context.delete_face_ids(
         name, map(lambda file: sanitize_filename(file), list_of_ids)
     )
+
+    try:
+        if os.path.exists(face_dir) and not os.listdir(face_dir):
+            os.rmdir(face_dir)
+    except Exception as e:
+        logger.error(f"Failed to remove directory {face_dir}: {str(e)}")
+
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,

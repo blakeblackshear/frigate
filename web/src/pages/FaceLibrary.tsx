@@ -172,8 +172,13 @@ export default function FaceLibrary() {
         const blob = await response.blob();
         
         const formData = new FormData();
-        formData.append('file', blob, image);
-        await axios.post(`/faces/${renameData.newName}`, formData);
+        formData.append('file', new File([blob], image));
+        
+        await axios.post(`/faces/${renameData.newName}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       }
 
       if (oldFaceImages.length > 0) {
@@ -182,7 +187,7 @@ export default function FaceLibrary() {
         });
       } else {
         await axios.post(`/faces/${renameData.oldName}/delete`, {
-          ids: ['dummy']  // Send a dummy ID to pass validation
+          ids: ['dummy']
         });
       }
 
