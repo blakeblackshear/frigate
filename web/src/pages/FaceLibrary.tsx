@@ -167,33 +167,30 @@ export default function FaceLibrary() {
       await axios.post(`/faces/${renameData.newName}/create`);
 
       const oldFaceImages = faceData[renameData.oldName] || [];
-      for (const image of oldFaceImages) {
+      const copyPromises = oldFaceImages.map(async (image) => {
         const response = await fetch(`${baseUrl}clips/faces/${renameData.oldName}/${image}`);
         const blob = await response.blob();
         
         const formData = new FormData();
         formData.append('file', new File([blob], image));
+        formData.append('cropped', 'true');
         
-        await axios.post(`/faces/${renameData.newName}`, formData, {
+        return axios.post(`/faces/${renameData.newName}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-      }
+      });
 
-      if (oldFaceImages.length > 0) {
-        await axios.post(`/faces/${renameData.oldName}/delete`, {
-          ids: oldFaceImages
-        });
-      } else {
-        await axios.post(`/faces/${renameData.oldName}/delete`, {
-          ids: ['dummy']
-        });
-      }
+      await Promise.all(copyPromises);
+
+      await axios.post(`/faces/${renameData.oldName}/delete`, {
+        ids: oldFaceImages.length ? oldFaceImages : ['dummy']
+      });
 
       setRenameDialog(false);
       setRenameData({ oldName: '', newName: '' });
-      refreshFaces();
+      await refreshFaces(); // Wait for refresh to complete
       toast.success("Successfully renamed face", { position: "top-center" });
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
@@ -205,6 +202,24 @@ export default function FaceLibrary() {
       setIsRenaming(false);
     }
   }, [renameData, faceData, refreshFaces]);
+
+  const deleteFace = useCallback(async () => {
+    try {
+      const images = faceData[renameData.oldName] || [];
+      await axios.post(`/faces/${renameData.oldName}/delete`, {
+        ids: images.length ? images : ['dummy']
+      });
+      setRenameDialog(false);
+      await refreshFaces(); // Wait for refresh
+      toast.success("Successfully deleted face", { position: "top-center" });
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(
+        `Failed to delete face: ${axiosError.response?.data?.message || axiosError.message}`,
+        { position: "top-center" }
+      );
+    }
+  }, [renameData.oldName, faceData, refreshFaces]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -247,9 +262,22 @@ export default function FaceLibrary() {
               onKeyPress={(e) => e.key === 'Enter' && renameFace()}
               disabled={isRenaming}
             />
-            <Button onClick={renameFace} disabled={isRenaming}>
-              {isRenaming ? "Renaming..." : "Rename"}
-            </Button>
+            <div className="flex gap-2 justify-between">
+              <Button onClick={renameFace} disabled={isRenaming} className="flex-1">
+                {isRenaming ? "Renaming..." : "Rename"}
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete ${renameData.oldName}?`)) {
+                    deleteFace();
+                  }
+                }}
+                className="flex-1"
+              >
+                Delete Face
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
