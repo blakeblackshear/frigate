@@ -133,9 +133,16 @@ export default function FaceLibrary() {
     
     setIsCreatingFace(true);
     try {
+      // Create a 1x1 transparent WebP image
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const blob = await new Promise<Blob>((resolve) => 
+        canvas.toBlob((b) => resolve(b!), 'image/webp')
+      );
+
       const formData = new FormData();
-      const emptyBlob = new Blob([], { type: 'image/webp' });
-      formData.append('file', emptyBlob, 'empty.webp');
+      formData.append('file', blob, 'placeholder.webp');
 
       const resp = await axios.post(`/faces/${newFaceName}`, formData, {
         headers: {
@@ -172,9 +179,16 @@ export default function FaceLibrary() {
 
     setIsRenaming(true);
     try {
+      // Create a 1x1 transparent WebP image for the new face directory
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const blob = await new Promise<Blob>((resolve) => 
+        canvas.toBlob((b) => resolve(b!), 'image/webp')
+      );
+
       const formData = new FormData();
-      const emptyBlob = new Blob([], { type: 'image/webp' });
-      formData.append('file', emptyBlob, 'empty.webp');
+      formData.append('file', blob, 'placeholder.webp');
       await axios.post(`/faces/${renameData.newName}`, formData);
 
       const oldFaceImages = faceData[renameData.oldName] || [];
