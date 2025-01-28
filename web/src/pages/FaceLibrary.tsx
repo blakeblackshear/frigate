@@ -264,7 +264,7 @@ export default function FaceLibrary() {
                     deleteFace();
                   }
                 }}
-                className="flex-1"
+                className="flex-1 text-secondary-foreground"
               >
                 Delete Face
               </Button>
