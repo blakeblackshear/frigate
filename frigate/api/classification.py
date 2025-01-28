@@ -125,3 +125,20 @@ def deregister_faces(request: Request, name: str, body: dict = None):
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
     )
+
+
+@router.post("/faces/{name}/create")
+def create_face(name: str):
+    """Create a new face directory without requiring an image."""
+    folder = os.path.join(FACE_DIR, name)
+    if os.path.exists(folder):
+        return JSONResponse(
+            status_code=400,
+            content={"message": f"Face '{name}' already exists", "success": False},
+        )
+    
+    os.makedirs(folder, exist_ok=True)
+    return JSONResponse(
+        status_code=200,
+        content={"message": "Successfully created face", "success": True},
+    )
