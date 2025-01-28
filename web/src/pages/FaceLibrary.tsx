@@ -191,7 +191,7 @@ export default function FaceLibrary() {
       });
       setRenameDialog(false);
       
-      const nextFace = faces.find(face => face !== renameData.oldName) || null;
+      const nextFace = faces.find(face => face !== renameData.oldName) || undefined;
       setPageToggle(nextFace);
       await refreshFaces();
       toast.success("Successfully deleted face", { position: "top-center" });
