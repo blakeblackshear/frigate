@@ -23,9 +23,11 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuTrash2 } from "react-icons/lu";
+import { LuImagePlus, LuTrash2, LuUserPlus } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function FaceLibrary() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -113,6 +115,32 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces],
   );
 
+  const [newFaceDialog, setNewFaceDialog] = useState(false);
+  const [newFaceName, setNewFaceName] = useState("");
+
+  const createNewFace = useCallback(() => {
+    if (!newFaceName.trim()) {
+      toast.error("Face name cannot be empty", { position: "top-center" });
+      return;
+    }
+
+    axios
+      .post(`/faces/${newFaceName}`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          setNewFaceDialog(false);
+          setNewFaceName("");
+          refreshFaces();
+          toast.success("Successfully created new face", { position: "top-center" });
+        }
+      })
+      .catch((error) => {
+        toast.error(`Failed to create face: ${error.response?.data?.message || error.message}`, {
+          position: "top-center",
+        });
+      });
+  }, [newFaceName, refreshFaces]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -120,6 +148,22 @@ export default function FaceLibrary() {
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
+
+      <Dialog open={newFaceDialog} onOpenChange={setNewFaceDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Face</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Enter face name"
+              value={newFaceName}
+              onChange={(e) => setNewFaceName(e.target.value)}
+            />
+            <Button onClick={createNewFace}>Create</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <UploadImageDialog
         open={upload}
@@ -174,10 +218,20 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        <Button className="flex gap-2" onClick={() => setUpload(true)}>
-          <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-          Upload Image
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            className="flex gap-2" 
+            onClick={() => setNewFaceDialog(true)}
+          >
+            <LuUserPlus className="size-5" />
+            New Face
+          </Button>
+          <Button className="flex gap-2" onClick={() => setUpload(true)}>
+            <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+            Upload Image
+          </Button>
+        </div>
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (
