@@ -133,7 +133,6 @@ export default function FaceLibrary() {
     
     setIsCreatingFace(true);
     try {
-      // Create a directory by making a POST request without a file
       const resp = await axios.post(`/faces/${newFaceName}/create`);
       
       if (resp.status === 200) {
