@@ -133,7 +133,16 @@ export default function FaceLibrary() {
     
     setIsCreatingFace(true);
     try {
-      const resp = await axios.post(`/faces/${newFaceName}`);
+      const formData = new FormData();
+      const emptyBlob = new Blob([], { type: 'image/webp' });
+      formData.append('file', emptyBlob, 'empty.webp');
+
+      const resp = await axios.post(`/faces/${newFaceName}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       if (resp.status === 200) {
         setNewFaceDialog(false);
         setNewFaceName("");
@@ -162,15 +171,29 @@ export default function FaceLibrary() {
 
     setIsRenaming(true);
     try {
-      const resp = await axios.post(`/faces/${renameData.oldName}/rename`, {
-        new_name: renameData.newName
-      });
-      if (resp.status === 200) {
-        setRenameDialog(false);
-        setRenameData({ oldName: '', newName: '' });
-        refreshFaces();
-        toast.success("Successfully renamed face", { position: "top-center" });
+      const formData = new FormData();
+      const emptyBlob = new Blob([], { type: 'image/webp' });
+      formData.append('file', emptyBlob, 'empty.webp');
+      await axios.post(`/faces/${renameData.newName}`, formData);
+
+      const oldFaceImages = faceData[renameData.oldName] || [];
+      for (const image of oldFaceImages) {
+        const response = await fetch(`${baseUrl}clips/faces/${renameData.oldName}/${image}`);
+        const blob = await response.blob();
+        
+        const formData = new FormData();
+        formData.append('file', blob, image);
+        await axios.post(`/faces/${renameData.newName}`, formData);
       }
+
+      await axios.post(`/faces/${renameData.oldName}/delete`, {
+        ids: oldFaceImages
+      });
+
+      setRenameDialog(false);
+      setRenameData({ oldName: '', newName: '' });
+      refreshFaces();
+      toast.success("Successfully renamed face", { position: "top-center" });
     } catch (error) {
       toast.error(
         `Failed to rename face: ${error.response?.data?.message || error.message}`,
@@ -179,7 +202,7 @@ export default function FaceLibrary() {
     } finally {
       setIsRenaming(false);
     }
-  }, [renameData, refreshFaces]);
+  }, [renameData, faceData, refreshFaces]);
 
   if (!config) {
     return <ActivityIndicator />;
