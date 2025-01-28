@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios, { AxiosError } from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuTrash2, LuUserPlus, LuEdit } from "react-icons/lu";
+import { LuImagePlus, LuTrash2, LuUserPlus, LuPencil } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Input } from "@/components/ui/input";
@@ -315,7 +315,7 @@ export default function FaceLibrary() {
                           setRenameDialog(true);
                         }}
                       >
-                        <LuEdit className="h-3 w-3" />
+                        <LuPencil className="h-3 w-3" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Rename Face</TooltipContent>
