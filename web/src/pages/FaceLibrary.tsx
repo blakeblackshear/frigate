@@ -176,9 +176,15 @@ export default function FaceLibrary() {
         await axios.post(`/faces/${renameData.newName}`, formData);
       }
 
-      await axios.post(`/faces/${renameData.oldName}/delete`, {
-        ids: oldFaceImages
-      });
+      if (oldFaceImages.length > 0) {
+        await axios.post(`/faces/${renameData.oldName}/delete`, {
+          ids: oldFaceImages
+        });
+      } else {
+        await axios.post(`/faces/${renameData.oldName}/delete`, {
+          ids: ['dummy']  // Send a dummy ID to pass validation
+        });
+      }
 
       setRenameDialog(false);
       setRenameData({ oldName: '', newName: '' });
