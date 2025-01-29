@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import random
+import shutil
 import string
 from typing import Optional
 
@@ -400,6 +401,34 @@ class FaceProcessor(RealTimeProcessorApi):
                 "message": "Successfully registered face.",
                 "success": True,
             }
+        elif topic == EmbeddingsRequestEnum.reprocess_face:
+            current_file = request_data["image_file"]
+            face_score = current_file[current_file.rfind("-") : current_file.rfind(".")]
+            img = None
+
+            if current_file:
+                img = cv2.imread(current_file)
+
+            if not img:
+                return {
+                    "message": "Invalid image file.",
+                    "success": False,
+                }
+
+            res = self.__classify_face(img)
+
+            if not res:
+                return
+
+            sub_label, score = res
+
+            if self.config.face_recognition.save_attempts:
+                # write face to library
+                folder = os.path.join(FACE_DIR, "train")
+                new_file = os.path.join(
+                    folder, f"{id}-{sub_label}-{score}-{face_score}.webp"
+                )
+                shutil.move(current_file, new_file)
 
     def expire_object(self, object_id: str):
         if object_id in self.detected_faces:
