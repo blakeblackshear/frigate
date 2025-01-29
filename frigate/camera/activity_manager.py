@@ -103,7 +103,7 @@ class CameraActivityManager:
 
         # run through each object and check what topics need to be updated
         for label in self.config.cameras[camera].objects.track:
-            if label in self.config.model.all_attributes:
+            if label in self.config.model.non_logo_attributes:
                 continue
 
             new_count = all_objects[label]
