@@ -274,32 +274,29 @@ function FaceAttempt({
     [image, onRefresh],
   );
 
-  const onReprocess = useCallback(
-    (trainName: string) => {
-      axios
-        .post(`/faces/train/${trainName}/reprocess`, { training_file: image })
-        .then((resp) => {
-          if (resp.status == 200) {
-            toast.success(`Successfully trained face.`, {
-              position: "top-center",
-            });
-            onRefresh();
-          }
-        })
-        .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(`Failed to train: ${error.response.data.message}`, {
-              position: "top-center",
-            });
-          } else {
-            toast.error(`Failed to train: ${error.message}`, {
-              position: "top-center",
-            });
-          }
-        });
-    },
-    [image, onRefresh],
-  );
+  const onReprocess = useCallback(() => {
+    axios
+      .post(`/faces/reprocess`, { training_file: image })
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success(`Successfully trained face.`, {
+            position: "top-center",
+          });
+          onRefresh();
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to train: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to train: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [image, onRefresh]);
 
   const onDelete = useCallback(() => {
     axios
@@ -371,7 +368,7 @@ function FaceAttempt({
               <TooltipTrigger>
                 <LuRefreshCw
                   className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={onReprocess}
+                  onClick={() => onReprocess()}
                 />
               </TooltipTrigger>
               <TooltipContent>Delete Face Attempt</TooltipContent>

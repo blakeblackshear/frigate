@@ -100,7 +100,7 @@ def train_face(request: Request, name: str, body: dict = None):
     )
 
 
-@router.post("/faces/train/{name}/reprocess")
+@router.post("/faces/reprocess")
 def reclassify_face(request: Request, name: str, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
