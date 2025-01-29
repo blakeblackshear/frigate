@@ -401,7 +401,7 @@ class FaceProcessor(RealTimeProcessorApi):
                 "message": "Successfully registered face.",
                 "success": True,
             }
-        elif topic == EmbeddingsRequestEnum.reprocess_face:
+        elif topic == EmbeddingsRequestEnum.reprocess_face.value:
             current_file = request_data["image_file"]
             face_score = current_file[current_file.rfind("-") : current_file.rfind(".")]
             img = None
