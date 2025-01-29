@@ -411,19 +411,19 @@ class OnvifController:
         # The onvif spec says this can report as +INF and -INF, so this may need to be modified
         pan = numpy.interp(
             pan,
+            [-1, 1],
             [
                 self.cams[camera_name]["relative_fov_range"]["XRange"]["Min"],
                 self.cams[camera_name]["relative_fov_range"]["XRange"]["Max"],
             ],
-            [-1, 1],
         )
         tilt = numpy.interp(
             tilt,
+            [-1, 1],
             [
                 self.cams[camera_name]["relative_fov_range"]["YRange"]["Min"],
                 self.cams[camera_name]["relative_fov_range"]["YRange"]["Max"],
             ],
-            [-1, 1],
         )
 
         move_request.Speed = {
@@ -536,11 +536,11 @@ class OnvifController:
         # function takes in 0 to 1 for zoom, interpolate to the values of the camera.
         zoom = numpy.interp(
             zoom,
+            [0, 1],
             [
                 self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Min"],
                 self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Max"],
             ],
-            [0, 1],
         )
 
         move_request.Speed = {"Zoom": speed}
