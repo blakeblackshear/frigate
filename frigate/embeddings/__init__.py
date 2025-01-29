@@ -211,6 +211,11 @@ class EmbeddingsContext:
 
         return self.db.execute_sql(sql_query).fetchall()
 
+    def reprocess_face(self, face_file: str) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.reprocess_face.value, {"image_file": face_file}
+        )
+
     def clear_face_classifier(self) -> None:
         self.requestor.send_data(
             EmbeddingsRequestEnum.clear_face_classifier.value, None

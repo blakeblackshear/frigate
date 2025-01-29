@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuTrash2 } from "react-icons/lu";
+import { LuImagePlus, LuRefreshCw, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -274,6 +274,30 @@ function FaceAttempt({
     [image, onRefresh],
   );
 
+  const onReprocess = useCallback(() => {
+    axios
+      .post(`/faces/reprocess`, { training_file: image })
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success(`Successfully trained face.`, {
+            position: "top-center",
+          });
+          onRefresh();
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to train: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to train: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [image, onRefresh]);
+
   const onDelete = useCallback(() => {
     axios
       .post(`/faces/train/delete`, { ids: [image] })
@@ -301,7 +325,7 @@ function FaceAttempt({
   return (
     <div className="relative flex flex-col rounded-lg">
       <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="h-40" src={`${baseUrl}clips/faces/train/${image}`} />
+        <img className="size-40" src={`${baseUrl}clips/faces/train/${image}`} />
       </div>
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -339,6 +363,15 @@ function FaceAttempt({
                 </DropdownMenuContent>
               </DropdownMenu>
               <TooltipContent>Train Face as Person</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <LuRefreshCw
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={() => onReprocess()}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Face Attempt</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger>
