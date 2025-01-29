@@ -402,14 +402,15 @@ class FaceProcessor(RealTimeProcessorApi):
                 "success": True,
             }
         elif topic == EmbeddingsRequestEnum.reprocess_face.value:
-            current_file = request_data["image_file"]
+            current_file: str = request_data["image_file"]
+            id = current_file[0 : current_file.index("-", current_file.index("-") + 1)]
             face_score = current_file[current_file.rfind("-") : current_file.rfind(".")]
             img = None
 
             if current_file:
                 img = cv2.imread(current_file)
 
-            if not img:
+            if img is None:
                 return {
                     "message": "Invalid image file.",
                     "success": False,

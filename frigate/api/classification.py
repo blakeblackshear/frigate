@@ -125,7 +125,7 @@ def reclassify_face(request: Request, name: str, body: dict = None):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    response = context.reprocess_face()
+    response = context.reprocess_face(training_file)
 
     return JSONResponse(
         content=response,
