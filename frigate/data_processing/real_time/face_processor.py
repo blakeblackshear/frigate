@@ -33,7 +33,7 @@ class FaceProcessor(RealTimeProcessorApi):
         self.face_config = config.face_recognition
         self.face_detector: cv2.FaceDetectorYN = None
         self.landmark_detector: cv2.face.FacemarkLBF = None
-        self.face_recognizer: cv2.face.LBPHFaceRecognizer = None
+        self.recognizer: cv2.face.LBPHFaceRecognizer = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.detected_faces: dict[str, float] = {}
 
@@ -113,6 +113,9 @@ class FaceProcessor(RealTimeProcessorApi):
                 img = self.__align_face(img, img.shape[1], img.shape[0])
                 faces.append(img)
                 labels.append(idx)
+
+        if not faces:
+            return
 
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
             cv2.face.LBPHFaceRecognizer_create(
@@ -212,8 +215,11 @@ class FaceProcessor(RealTimeProcessorApi):
         if not self.landmark_detector:
             return None
 
-        if not self.label_map:
+        if not self.recognizer:
             self.__build_classifier()
+
+            if not self.recognizer:
+                return None
 
         img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
         img = self.__align_face(img, img.shape[1], img.shape[0])
