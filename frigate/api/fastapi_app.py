@@ -26,14 +26,13 @@ from frigate.storage import StorageMaintainer
 logger = logging.getLogger(__name__)
 
 
-def check_csrf(request: Request):
+def check_csrf(request: Request) -> bool:
     if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
-        pass
+        return True
     if "origin" in request.headers and "x-csrf-token" not in request.headers:
-        return JSONResponse(
-            content={"success": False, "message": "Missing CSRF header"},
-            status_code=401,
-        )
+        return False
+
+    return True
 
 
 # Used to retrieve the remote-user header: https://starlette-context.readthedocs.io/en/latest/plugins.html#easy-mode
@@ -71,7 +70,12 @@ def create_fastapi_app(
     @app.middleware("http")
     async def frigate_middleware(request: Request, call_next):
         # Before request
-        check_csrf(request)
+        if not check_csrf(request):
+            return JSONResponse(
+                content={"success": False, "message": "Missing CSRF header"},
+                status_code=401,
+            )
+
         if database.is_closed():
             database.connect()
 
