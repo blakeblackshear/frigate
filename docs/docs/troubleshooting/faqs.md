@@ -17,6 +17,12 @@ ffmpeg:
     record: preset-record-generic-audio-aac
 ```
 
+### No audio in live stream or recordings in Web UI.
+
+Audio is only supported in the browser using webRTC or MSE APIs. Frigate only supports these APIs when go2rtc is configured so if you are 
+hoping to experience audio in the browser you need to enable and configure go2rtc.
+
+
 ### I can't view recordings in the Web UI.
 
 Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md).
