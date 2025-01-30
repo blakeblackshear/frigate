@@ -219,6 +219,7 @@ export interface CameraConfig {
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;
+      speed_threshold: number;
       objects: string[];
       color: number[];
     };

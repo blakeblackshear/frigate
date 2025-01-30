@@ -181,6 +181,13 @@ export default function ZoneEditPane({
         })
         .optional()
         .or(z.literal("")),
+      speed_threshold: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Speed threshold must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
     })
     .refine(
       (data) => {
@@ -192,6 +199,21 @@ export default function ZoneEditPane({
       {
         message: "All distance fields must be filled to use speed estimation.",
         path: ["speedEstimation"],
+      },
+    )
+    .refine(
+      (data) => {
+        // Prevent speed estimation when loitering_time is greater than 0
+        return !(
+          data.speedEstimation &&
+          data.loitering_time &&
+          data.loitering_time > 0
+        );
+      },
+      {
+        message:
+          "Zones with loitering times greater than 0 should not be used with speed estimation.",
+        path: ["loitering_time"],
       },
     );
 
@@ -215,6 +237,10 @@ export default function ZoneEditPane({
       lineB,
       lineC,
       lineD,
+      speed_threshold:
+        polygon?.camera &&
+        polygon?.name &&
+        config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold,
     },
   });
 
@@ -243,6 +269,7 @@ export default function ZoneEditPane({
         lineB,
         lineC,
         lineD,
+        speed_threshold,
       }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
@@ -349,9 +376,22 @@ export default function ZoneEditPane({
         }
       }
 
+      let speedThresholdQuery = "";
+      if (speed_threshold >= 0 && speedEstimation) {
+        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold=${speed_threshold}`;
+      } else {
+        if (
+          polygon?.camera &&
+          polygon?.name &&
+          config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold
+        ) {
+          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold`;
+        }
+      }
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
           { requires_restart: 0 },
         )
         .then((res) => {
@@ -573,6 +613,14 @@ export default function ZoneEditPane({
                             );
                             return;
                           }
+                          const loiteringTime =
+                            form.getValues("loitering_time");
+
+                          if (checked && loiteringTime && loiteringTime > 0) {
+                            toast.error(
+                              "Zones with loitering times greater than 0 should not be used with speed estimation.",
+                            );
+                          }
                           field.onChange(checked);
                         }}
                       />
@@ -607,6 +655,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(1)}
                           onBlur={() => setActiveLine(undefined)}
@@ -629,6 +678,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(2)}
                           onBlur={() => setActiveLine(undefined)}
@@ -651,6 +701,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(3)}
                           onBlur={() => setActiveLine(undefined)}
@@ -673,11 +724,37 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(4)}
                           onBlur={() => setActiveLine(undefined)}
                         />
                       </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Separator className="my-2 flex bg-secondary" />
+                <FormField
+                  control={form.control}
+                  name="speed_threshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Speed Threshold (
+                        {config?.ui.unit_system == "imperial" ? "mph" : "kph"})
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Specifies a minimum speed for objects to be considered
+                        in this zone.
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

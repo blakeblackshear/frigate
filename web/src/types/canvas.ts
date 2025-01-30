@@ -24,6 +24,7 @@ export type ZoneFormValuesType = {
   lineB: number;
   lineC: number;
   lineD: number;
+  speed_threshold: number;
 };
 
 export type ObjectMaskFormValuesType = {

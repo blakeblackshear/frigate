@@ -146,6 +146,7 @@ class TrackedObject:
         current_zones = []
         bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
         in_loitering_zone = False
+        in_speed_zone = False
 
         # check each zone
         for name, zone in self.camera_config.zones.items():
@@ -154,12 +155,66 @@ class TrackedObject:
                 continue
             contour = zone.contour
             zone_score = self.zone_presence.get(name, 0) + 1
+
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
-                    # an object is only considered present in a zone if it has a zone inertia of 3+
+                    # Calculate speed first if this is a speed zone
+                    if (
+                        zone.distances
+                        and obj_data["frame_time"] == current_frame_time
+                        and self.active
+                    ):
+                        speed_magnitude, self.velocity_angle = (
+                            calculate_real_world_speed(
+                                zone.contour,
+                                zone.distances,
+                                self.obj_data["estimate_velocity"],
+                                bottom_center,
+                                self.camera_config.detect.fps,
+                            )
+                        )
+
+                        if self.ui_config.unit_system == "metric":
+                            self.current_estimated_speed = (
+                                speed_magnitude * 3.6
+                            )  # m/s to km/h
+                        else:
+                            self.current_estimated_speed = (
+                                speed_magnitude * 0.681818
+                            )  # ft/s to mph
+
+                        self.speed_history.append(self.current_estimated_speed)
+                        if len(self.speed_history) > 10:
+                            self.speed_history = self.speed_history[-10:]
+
+                        self.average_estimated_speed = sum(self.speed_history) / len(
+                            self.speed_history
+                        )
+
+                        # we've exceeded the speed threshold on the zone
+                        # or we don't have a speed threshold set
+                        if (
+                            zone.speed_threshold is None
+                            or self.average_estimated_speed > zone.speed_threshold
+                        ):
+                            in_speed_zone = True
+
+                        logger.debug(
+                            f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, "
+                            f"zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, "
+                            f"speed magnitude: {speed_magnitude}, velocity angle: {self.velocity_angle}, "
+                            f"estimated speed: {self.current_estimated_speed:.1f}, "
+                            f"average speed: {self.average_estimated_speed:.1f}, "
+                            f"length: {len(self.speed_history)}"
+                        )
+
+                    # Check zone entry conditions - for speed zones, require both inertia and speed
                     if zone_score >= zone.inertia:
+                        if zone.distances and not in_speed_zone:
+                            continue  # Skip zone entry for speed zones until speed threshold met
+
                         # if the zone has loitering time, update loitering status
                         if zone.loitering_time > 0:
                             in_loitering_zone = True
@@ -184,44 +239,8 @@ class TrackedObject:
                 if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
 
-            # update speed
-            if (
-                zone.distances
-                and name in self.current_zones
-                and obj_data["frame_time"] == current_frame_time
-                and self.active
-            ):
-                speed_magnitude, self.velocity_angle = (
-                    calculate_real_world_speed(
-                        zone.contour,
-                        zone.distances,
-                        self.obj_data["estimate_velocity"],
-                        bottom_center,
-                        self.camera_config.detect.fps,
-                    )
-                    if self.active
-                    else (0, 0)
-                )
-                if self.ui_config.unit_system == "metric":
-                    # Convert m/s to km/h
-                    self.current_estimated_speed = speed_magnitude * 3.6
-                elif self.ui_config.unit_system == "imperial":
-                    # Convert ft/s to mph
-                    self.current_estimated_speed = speed_magnitude * 0.681818
-
-                # only keep the last 10 speeds
-                if len(self.speed_history) > 10:
-                    self.speed_history = self.speed_history[-10:]
-
-                self.speed_history.append(self.current_estimated_speed)
-                self.average_estimated_speed = sum(self.speed_history) / len(
-                    self.speed_history
-                )
-                logger.debug(
-                    f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, speed magnitude: {speed_magnitude}, velocity angle: {self.velocity_angle}, estimated speed: {self.current_estimated_speed:.1f}, average speed: {self.average_estimated_speed:.1f}, length: {len(self.speed_history)}"
-                )
-            else:
-                # ensure we do not display an estimate if the object is not currently in a speed tracking zone
+            # Reset speed if not in speed zone
+            if zone.distances and name not in current_zones:
                 self.current_estimated_speed = 0
 
         # update loitering status
@@ -392,7 +411,7 @@ class TrackedObject:
                 box[2],
                 box[3],
                 self.obj_data["label"],
-                f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}"
+                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}"
                 + (
                     f" {self.thumbnail_data['current_estimated_speed']:.1f}"
                     if self.thumbnail_data["current_estimated_speed"] != 0
