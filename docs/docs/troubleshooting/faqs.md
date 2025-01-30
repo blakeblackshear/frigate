@@ -19,7 +19,8 @@ ffmpeg:
 
 ### How can I get sound in live view?
 
-Audio is only supported for live view when go2rtc is configured, see [the live docs](../configuration/live.md) for more information.```
+Audio is only supported for live view when go2rtc is configured, see [the live docs](../configuration/live.md) for more information.
+
 ### I can't view recordings in the Web UI.
 
 Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md).
