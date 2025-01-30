@@ -215,7 +215,7 @@ class FaceProcessor(RealTimeProcessorApi):
         if not self.landmark_detector:
             return None
 
-        if not self.recognizer:
+        if not self.label_map or not self.recognizer:
             self.__build_classifier()
 
             if not self.recognizer:
