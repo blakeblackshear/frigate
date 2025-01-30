@@ -70,9 +70,7 @@ def create_fastapi_app(
     @app.middleware("http")
     async def frigate_middleware(request: Request, call_next):
         # Before request
-        csrf_passed = check_csrf(request)
-
-        if not csrf_passed:
+        if not check_csrf(request):
             return JSONResponse(
                 content={"success": False, "message": "Missing CSRF header"},
                 status_code=401,
