@@ -19,6 +19,8 @@ ffmpeg:
 
 ### No audio in live stream or recordings in Web UI.
 
+Audio is only supported for live view when go2rtc is configured, see [the live docs](../configuration/live.md) for more information.```
+
 Audio is only supported in the browser using webRTC or MSE APIs. Frigate only supports these APIs when go2rtc is configured so if you are 
 hoping to experience audio in the browser you need to enable and configure go2rtc.
 
