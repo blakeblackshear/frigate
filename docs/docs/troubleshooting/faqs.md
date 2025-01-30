@@ -17,7 +17,7 @@ ffmpeg:
     record: preset-record-generic-audio-aac
 ```
 
-### No audio in live stream or recordings in Web UI.
+### How can I get sound in live view?
 
 Audio is only supported for live view when go2rtc is configured, see [the live docs](../configuration/live.md) for more information.```
 ### I can't view recordings in the Web UI.
