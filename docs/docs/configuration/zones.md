@@ -163,3 +163,17 @@ The average speed of your object as it moved through your zone is saved in Friga
 - The more accurate your real-world dimensions can be measured, the more accurate speed estimation will be. However, due to the way Frigate's tracking algorithm works, you may need to tweak the real-world distance values so that estimated speeds better match real-world speeds.
 - Once an object leaves the zone, speed accuracy will likely decrease due to perspective distortion and misalignment with the calibrated area. Therefore, speed values will show as a zero through MQTT and will not be visible on the debug view when an object is outside of a speed tracking zone.
 - The speeds are only an _estimation_ and are highly dependent on camera position, zone points, and real-world measurements. This feature should not be used for law enforcement.
+
+### Speed Threshold
+
+Zones can be configured with a minimum speed requirement, meaning an object must be moving at or above this speed to be considered inside the zone. Zone `distances` must be defined as described above.
+
+```yaml
+cameras:
+  name_of_your_camera:
+    zones:
+      sidewalk:
+        coordinates: ...
+        distances: ...
+        speed_threshold: 20 # unit is in kph or mph, depending on how unit_system is set (see above)
+```
