@@ -9,7 +9,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
-from typing import Any, Optional
+from typing import Any, List, Optional, Tuple
 
 import aiofiles
 import requests
@@ -461,7 +461,7 @@ def process_logs(
     service: Optional[str] = None,
     start: Optional[int] = None,
     end: Optional[int] = None,
-) -> list:
+) -> Tuple[int, List[str]]:
     log_lines = []
     key_length = 0
     date_end = 0
@@ -498,7 +498,7 @@ def process_logs(
             current_line = clean_line
 
     log_lines.append(current_line)
-    return log_lines[start:end]
+    return len(log_lines), log_lines[start:end]
 
 
 @router.get("/logs/{service}", tags=[Tags.logs])
@@ -536,7 +536,7 @@ async def logs(
                         buffer += line
                         # Process logs only when there are enough lines in the buffer
                         if "\n" in buffer:
-                            processed_lines = process_logs(buffer, service)
+                            _, processed_lines = process_logs(buffer, service)
                             buffer = ""
                             for processed_line in processed_lines:
                                 yield f"{processed_line}\n"
@@ -569,9 +569,9 @@ async def logs(
         async with aiofiles.open(service_location, "r") as file:
             contents = await file.read()
 
-        log_lines = process_logs(contents, service, start, end)
+        total_lines, log_lines = process_logs(contents, service, start, end)
         return JSONResponse(
-            content={"totalLines": len(log_lines), "lines": log_lines},
+            content={"totalLines": total_lines, "lines": log_lines},
             status_code=200,
         )
     except FileNotFoundError as e:

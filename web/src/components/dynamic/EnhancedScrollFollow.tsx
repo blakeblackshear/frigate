@@ -1,9 +1,14 @@
-import { useRef, useCallback, ReactNode } from "react";
+import { useRef, useCallback, useEffect, type ReactNode } from "react";
 import { ScrollFollow } from "@melloware/react-logviewer";
 
 export type ScrollFollowProps = {
   startFollowing?: boolean;
   render: (renderProps: ScrollFollowRenderProps) => ReactNode;
+  onCustomScroll?: (
+    scrollTop: number,
+    scrollHeight: number,
+    clientHeight: number,
+  ) => void;
 };
 
 export type ScrollFollowRenderProps = {
@@ -15,12 +20,22 @@ export type ScrollFollowRenderProps = {
   }) => void;
   startFollowing: () => void;
   stopFollowing: () => void;
+  onCustomScroll?: (
+    scrollTop: number,
+    scrollHeight: number,
+    clientHeight: number,
+  ) => void;
 };
 
-const SCROLL_BUFFER = 5; // Additional buffer for scroll checks
+const SCROLL_BUFFER = 5;
 
 export default function EnhancedScrollFollow(props: ScrollFollowProps) {
   const followRef = useRef(props.startFollowing || false);
+  const prevScrollTopRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    prevScrollTopRef.current = undefined;
+  }, []);
 
   const wrappedRender = useCallback(
     (renderProps: ScrollFollowRenderProps) => {
@@ -29,6 +44,17 @@ export default function EnhancedScrollFollow(props: ScrollFollowProps) {
         scrollHeight: number;
         clientHeight: number;
       }) => {
+        // Check if scrolling up and immediately stop following
+        if (
+          prevScrollTopRef.current !== undefined &&
+          args.scrollTop < prevScrollTopRef.current
+        ) {
+          if (followRef.current) {
+            renderProps.stopFollowing();
+            followRef.current = false;
+          }
+        }
+
         const bottomThreshold =
           args.scrollHeight - args.clientHeight - SCROLL_BUFFER;
         const isNearBottom = args.scrollTop >= bottomThreshold;
@@ -41,24 +67,20 @@ export default function EnhancedScrollFollow(props: ScrollFollowProps) {
           followRef.current = false;
         }
 
+        prevScrollTopRef.current = args.scrollTop;
         renderProps.onScroll(args);
-      };
-
-      const wrappedStartFollowing = () => {
-        renderProps.startFollowing();
-        followRef.current = true;
-      };
-
-      const wrappedStopFollowing = () => {
-        renderProps.stopFollowing();
-        followRef.current = false;
+        if (props.onCustomScroll) {
+          props.onCustomScroll(
+            args.scrollTop,
+            args.scrollHeight,
+            args.clientHeight,
+          );
+        }
       };
 
       return props.render({
         ...renderProps,
         onScroll: wrappedOnScroll,
-        startFollowing: wrappedStartFollowing,
-        stopFollowing: wrappedStopFollowing,
         follow: followRef.current,
       });
     },

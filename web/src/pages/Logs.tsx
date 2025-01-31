@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LogLine, LogSeverity, LogType, logTypes } from "@/types/log";
 import copy from "copy-to-clipboard";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import LogInfoDialog from "@/components/overlay/LogInfoDialog";
 import { LogChip } from "@/components/indicators/Chip";
@@ -24,6 +24,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { debounce } from "lodash";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -34,6 +35,7 @@ function Logs() {
   const [selectedLog, setSelectedLog] = useState<LogLine>();
   const lazyLogRef = useRef<LazyLog>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const lastFetchedIndexRef = useRef(-1);
 
   useEffect(() => {
     document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
@@ -53,6 +55,17 @@ function Logs() {
     }
   }, [tabsRef, logService]);
 
+  // scrolling data
+
+  const pageSize = useMemo(() => {
+    const startIndex =
+      lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
+    const endIndex = lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
+    return endIndex - startIndex;
+    // recalculate page size when new logs load too
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lazyLogRef, logs]);
+
   // filter
 
   const filterLines = useCallback(
@@ -69,10 +82,38 @@ function Logs() {
 
   // fetchers
 
+  const fetchLogRange = useCallback(
+    async (start: number, end: number) => {
+      try {
+        const response = await axios.get(`logs/${logService}`, {
+          params: { start, end },
+        });
+        if (
+          response.status === 200 &&
+          response.data &&
+          Array.isArray(response.data.lines)
+        ) {
+          const filteredLines = filterLines(response.data.lines);
+          return filteredLines;
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(`Error fetching logs: ${errorMessage}`, {
+          position: "top-center",
+        });
+      }
+      return [];
+    },
+    [logService, filterLines],
+  );
+
   const fetchInitialLogs = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`logs/${logService}`);
+      const response = await axios.get(`logs/${logService}`, {
+        params: { start: -100 },
+      });
       if (
         response.status === 200 &&
         response.data &&
@@ -80,6 +121,8 @@ function Logs() {
       ) {
         const filteredLines = filterLines(response.data.lines);
         setLogs(filteredLines);
+        lastFetchedIndexRef.current =
+          response.data.totalLines - filteredLines.length;
       }
     } catch (error) {
       const errorMessage =
@@ -92,7 +135,6 @@ function Logs() {
     }
   }, [logService, filterLines]);
 
-  const [isStreaming, setIsStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchLogsStream = useCallback(() => {
@@ -157,7 +199,6 @@ function Logs() {
               ? error.message
               : "An unknown error occurred";
           toast.error(`Error while streaming logs: ${errorMessage}`);
-          setIsStreaming(false);
         }
       });
   }, [logService, filterSeverity]);
@@ -165,19 +206,55 @@ function Logs() {
   useEffect(() => {
     setIsLoading(true);
     setLogs([]);
+    lastFetchedIndexRef.current = -1;
     fetchInitialLogs().then(() => {
       // Start streaming after initial load
-      setIsStreaming(true);
       fetchLogsStream();
     });
 
     return () => {
       abortControllerRef.current?.abort();
-      setIsStreaming(false);
     };
-  }, [fetchInitialLogs, fetchLogsStream]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logService, filterSeverity]);
 
   // handlers
+
+  // debounced 200ms
+  const handleScroll = useMemo(
+    () =>
+      debounce((scrollTop: number) => {
+        const scrollThreshold = 0;
+        if (
+          scrollTop <= scrollThreshold &&
+          lastFetchedIndexRef.current > 0 &&
+          !isLoading
+        ) {
+          const savedStart =
+            lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
+          const savedEnd =
+            lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
+          const nextEnd = lastFetchedIndexRef.current;
+          const nextStart = Math.max(0, nextEnd - (pageSize || 100));
+          setIsLoading(true);
+
+          fetchLogRange(nextStart, nextEnd).then((newLines) => {
+            if (newLines.length > 0) {
+              setLogs((prev) => [...newLines, ...prev]);
+              lastFetchedIndexRef.current = nextStart;
+
+              lazyLogRef.current?.listRef.current?.scrollTo(
+                savedEnd + (pageSize - savedStart),
+              );
+            }
+          });
+
+          setIsLoading(false);
+        }
+      }, 200),
+    [fetchLogRange, isLoading, pageSize],
+  );
 
   const handleCopyLogs = useCallback(() => {
     if (logs.length) {
@@ -444,18 +521,6 @@ function Logs() {
             )}
           >
             <div className="flex flex-1">Message</div>
-            {isStreaming && (
-              <div className="flex flex-row justify-end">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Logs are streaming from the server
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
           </div>
         </div>
 
@@ -464,21 +529,37 @@ function Logs() {
             <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           ) : (
             <EnhancedScrollFollow
-              startFollowing={true}
+              startFollowing={!isLoading}
+              onCustomScroll={handleScroll}
               render={({ follow, onScroll }) => (
-                <LazyLog
-                  ref={lazyLogRef}
-                  enableLineNumbers={false}
-                  selectableLines
-                  lineClassName="text-primary bg-background"
-                  highlightLineClassName="bg-primary/20"
-                  onRowClick={handleRowClick}
-                  formatPart={formatPart}
-                  text={logs.join("\n")}
-                  follow={follow}
-                  onScroll={onScroll}
-                  loadingComponent={<ActivityIndicator />}
-                />
+                <>
+                  {follow && (
+                    <div className="absolute right-1 top-3">
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Logs are streaming from the server
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  )}
+                  <LazyLog
+                    ref={lazyLogRef}
+                    enableLineNumbers={false}
+                    selectableLines
+                    lineClassName="text-primary bg-background"
+                    highlightLineClassName="bg-primary/20"
+                    onRowClick={handleRowClick}
+                    formatPart={formatPart}
+                    text={logs.join("\n")}
+                    follow={follow}
+                    onScroll={onScroll}
+                    loadingComponent={<ActivityIndicator />}
+                    loading={isLoading}
+                  />
+                </>
               )}
             />
           )}
@@ -506,7 +587,7 @@ function LogLineData({
   return (
     <div
       className={cn(
-        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-2 hover:bg-muted md:grid-cols-12 md:py-0",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary bg-background_alt py-2 hover:bg-muted md:grid-cols-12 md:py-0",
         className,
         "*:text-xs",
       )}
