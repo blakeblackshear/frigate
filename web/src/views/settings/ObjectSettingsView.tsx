@@ -260,7 +260,7 @@ export default function ObjectSettingsView({
             </div>
           </TabsContent>
           <TabsContent value="objectlist">
-            {ObjectList(memoizedObjects)}
+            <ObjectList cameraConfig={cameraConfig} objects={memoizedObjects} />
           </TabsContent>
         </Tabs>
       </div>
@@ -284,7 +284,12 @@ export default function ObjectSettingsView({
   );
 }
 
-function ObjectList(objects?: ObjectType[]) {
+type ObjectListProps = {
+  cameraConfig: CameraConfig;
+  objects?: ObjectType[];
+};
+
+function ObjectList({ cameraConfig, objects }: ObjectListProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const colormap = useMemo(() => {
@@ -326,7 +331,7 @@ function ObjectList(objects?: ObjectType[]) {
                     {capitalizeFirstLetter(obj.label.replaceAll("_", " "))}
                   </div>
                 </div>
-                <div className="flex w-8/12 flex-row items-end justify-end">
+                <div className="flex w-8/12 flex-row items-center justify-end">
                   <div className="text-md mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
@@ -351,7 +356,25 @@ function ObjectList(objects?: ObjectType[]) {
                       <p className="mb-1.5 text-sm text-primary-variant">
                         Area
                       </p>
-                      {obj.area ? obj.area.toString() : "-"}
+                      {obj.area ? (
+                        <>
+                          <div className="text-xs">
+                            px: {obj.area.toString()}
+                          </div>
+                          <div className="text-xs">
+                            %:{" "}
+                            {(
+                              obj.area /
+                              (cameraConfig.detect.width *
+                                cameraConfig.detect.height)
+                            )
+                              .toFixed(4)
+                              .toString()}
+                          </div>
+                        </>
+                      ) : (
+                        "-"
+                      )}
                     </div>
                   </div>
                 </div>
