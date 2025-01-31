@@ -463,10 +463,9 @@ def process_logs(
     end: Optional[int] = None,
 ) -> Tuple[int, List[str]]:
     log_lines = []
-    key_length = 0
-    date_end = 0
-    current_key = ""
-    current_line = ""
+    last_message = None
+    last_timestamp = None
+    repeat_count = 0
 
     for raw_line in contents.splitlines():
         clean_line = raw_line.strip()
@@ -474,28 +473,37 @@ def process_logs(
         if len(clean_line) < 10:
             continue
 
-        # handle cases where S6 does not include date in log line
+        # Handle cases where S6 does not include date in log line
         if "  " not in clean_line:
             clean_line = f"{datetime.now()}  {clean_line}"
 
-        if date_end == 0:
-            date_end = clean_line.index("  ")
-            key_length = date_end
+        # Find the position of the first double space to extract timestamp and message
+        date_end = clean_line.index("  ")
+        timestamp = clean_line[:date_end]
+        message_part = clean_line[date_end:].strip()
 
-        new_key = clean_line[:key_length]
-
-        if new_key == current_key:
-            # use zero-width space character to delineate that this is a continuation
-            current_line += f"\u200b{clean_line[date_end:].strip()}"
+        if message_part == last_message:
+            repeat_count += 1
             continue
         else:
-            if current_line:
-                log_lines.append(current_line)
+            if repeat_count > 0:
+                # Insert a deduplication message formatted the same way as logs
+                dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                log_lines.append(dedup_message)
+                repeat_count = 0
 
-            current_key = new_key
-            current_line = clean_line
+            log_lines.append(clean_line)
+            last_timestamp = timestamp
 
-    log_lines.append(current_line)
+        last_message = message_part
+
+    # If there were repeated messages at the end, log the count
+    if repeat_count > 0:
+        dedup_message = (
+            f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+        )
+        log_lines.append(dedup_message)
+
     return len(log_lines), log_lines[start:end]
 
 

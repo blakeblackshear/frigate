@@ -18,6 +18,19 @@ export function parseLogLines(logService: LogType, logs: string[]) {
 
         if (!match) {
           const infoIndex = line.indexOf("[INFO]");
+          const loggingIndex = line.indexOf("[LOGGING]");
+
+          if (loggingIndex != -1) {
+            return {
+              dateStamp: line.substring(0, 19),
+              severity: "info",
+              section: "logging",
+              content: line
+                .substring(loggingIndex + 9)
+                .trim()
+                .replace(/\u200b/g, "\n"),
+            };
+          }
 
           if (infoIndex != -1) {
             return {
@@ -50,7 +63,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           return null;
         }
 
-        const logLine = {
+        return {
           dateStamp: match.toString().slice(1, -1),
           severity: pythonSeverity
             .exec(line)
@@ -63,8 +76,6 @@ export function parseLogLines(logService: LogType, logs: string[]) {
             .trim()
             .replace(/\u200b/g, "\n"),
         };
-
-        return logLine;
       })
       .filter((value) => value != null) as LogLine[];
   } else if (logService == "go2rtc") {
@@ -93,6 +104,15 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           }
         } else {
           contentStart = line.indexOf(section) + section.length + 2;
+        }
+
+        if (line.includes("[LOGGING]")) {
+          return {
+            dateStamp: line.substring(0, 19),
+            severity: "info",
+            section: "logging",
+            content: line.substring(line.indexOf("[LOGGING]") + 9).trim(),
+          };
         }
 
         let severityCat: LogSeverity;
@@ -134,9 +154,14 @@ export function parseLogLines(logService: LogType, logs: string[]) {
         // Remove nanoseconds from the final output
         const dateStamp = fullTimestamp.split(".")[0];
 
-        // Handle different types of lines
-        if (line.includes("[INFO]")) {
-          // Info log
+        if (line.includes("[LOGGING]")) {
+          return {
+            dateStamp,
+            severity: "info",
+            section: "logging",
+            content: line.slice(line.indexOf("[LOGGING]") + 9).trim(),
+          };
+        } else if (line.includes("[INFO]")) {
           return {
             dateStamp,
             severity: "info",
