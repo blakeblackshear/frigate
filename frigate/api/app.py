@@ -480,9 +480,7 @@ def process_logs(
 
         if date_end == 0:
             date_end = clean_line.index("  ")
-            # for frigate logs attempt to consolidate by comparing
-            # the first 3 characters of the millisecond portion
-            key_length = date_end - (6 if service == "frigate" else 0)
+            key_length = date_end
 
         new_key = clean_line[:key_length]
 
