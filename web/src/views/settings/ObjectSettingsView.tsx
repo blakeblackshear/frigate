@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
@@ -23,6 +23,9 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { LuExternalLink, LuInfo } from "react-icons/lu";
 import { Link } from "react-router-dom";
+import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
+import { Separator } from "@/components/ui/separator";
+import { isDesktop } from "react-device-detect";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -36,6 +39,8 @@ export default function ObjectSettingsView({
   selectedCamera,
 }: ObjectSettingsViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const DEBUG_OPTIONS = [
     {
@@ -129,6 +134,12 @@ export default function ObjectSettingsView({
     },
     [options, setOptions],
   );
+
+  const [debugDraw, setDebugDraw] = useState(false);
+
+  useEffect(() => {
+    setDebugDraw(false);
+  }, [selectedCamera]);
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -234,7 +245,7 @@ export default function ObjectSettingsView({
                                   <span className="sr-only">Info</span>
                                 </div>
                               </PopoverTrigger>
-                              <PopoverContent className="w-80">
+                              <PopoverContent className="w-80 text-sm">
                                 {info}
                               </PopoverContent>
                             </Popover>
@@ -256,6 +267,62 @@ export default function ObjectSettingsView({
                     </div>
                   ))}
                 </div>
+                {isDesktop && (
+                  <>
+                    <Separator className="my-2" />
+                    <div className="flex w-full flex-row items-center justify-between">
+                      <div className="mb-2 flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <Label
+                            className="mb-0 cursor-pointer capitalize text-primary"
+                            htmlFor="debugdraw"
+                          >
+                            Object Shape Filter Drawing
+                          </Label>
+
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <div className="cursor-pointer p-0">
+                                <LuInfo className="size-4" />
+                                <span className="sr-only">Info</span>
+                              </div>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 text-sm">
+                              Enable this option to draw a rectangle on the
+                              camera image to show its area and ratio. These
+                              values can then be used to set object shape filter
+                              parameters in your config.
+                              <div className="mt-2 flex items-center text-primary">
+                                <Link
+                                  to="https://docs.frigate.video/configuration/object_filters#object-shape"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline"
+                                >
+                                  Read the documentation{" "}
+                                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                                </Link>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          Draw a rectangle on the image to view area and ratio
+                          details
+                        </div>
+                      </div>
+                      <Switch
+                        key={`$draw-${selectedCamera}`}
+                        className="ml-1"
+                        id="debug_draw"
+                        checked={debugDraw}
+                        onCheckedChange={(isChecked) => {
+                          setDebugDraw(isChecked);
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -267,7 +334,7 @@ export default function ObjectSettingsView({
 
       {cameraConfig ? (
         <div className="flex md:h-dvh md:max-h-full md:w-7/12 md:grow">
-          <div className="size-full min-h-10">
+          <div ref={containerRef} className="relative size-full min-h-10">
             <AutoUpdatingCameraImage
               camera={cameraConfig.name}
               searchParams={searchParams}
@@ -275,6 +342,13 @@ export default function ObjectSettingsView({
               className="size-full"
               cameraClasses="relative w-full h-full flex flex-col justify-start"
             />
+            {debugDraw && (
+              <DebugDrawingLayer
+                containerRef={containerRef}
+                cameraWidth={cameraConfig.detect.width}
+                cameraHeight={cameraConfig.detect.height}
+              />
+            )}
           </div>
         </div>
       ) : (
