@@ -175,5 +175,6 @@ cameras:
       sidewalk:
         coordinates: ...
         distances: ...
+        inertia: 1
         speed_threshold: 20 # unit is in kph or mph, depending on how unit_system is set (see above)
 ```
