@@ -110,6 +110,28 @@ def review(params: ReviewQueryParams = Depends()):
     return JSONResponse(content=[r for r in review])
 
 
+@router.get("/review_ids", response_model=list[ReviewSegmentResponse])
+def review_ids(ids: str):
+    ids = ids.split(",")
+
+    if not ids:
+        return JSONResponse(
+            content=({"success": False, "message": "Valid list of ids must be sent"}),
+            status_code=400,
+        )
+
+    try:
+        reviews = (
+            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
+        )
+        return JSONResponse(list(reviews))
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Review segments not found"}),
+            status_code=400,
+        )
+
+
 @router.get("/review/summary", response_model=ReviewSummaryResponse)
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
