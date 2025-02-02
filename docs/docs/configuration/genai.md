@@ -116,7 +116,7 @@ genai:
   model: gpt-4o
 ```
 
-::: note
+:::note
 
 To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
 
