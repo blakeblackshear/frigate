@@ -33,6 +33,14 @@ Frigate supports multiple different detectors that work on different types of ha
 
 :::
 
+:::note
+
+Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time). 
+
+This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
+
+:::
+
 # Officially Supported Detectors
 
 Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
@@ -115,6 +123,30 @@ detectors:
     type: edgetpu
     device: pci
 ```
+
+## Hailo-8l
+
+This detector is available for use with Hailo-8 AI Acceleration Module.
+
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+
+### Configuration
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  model_type: ssd
+  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+```
+
 
 ## OpenVINO Detector
 
@@ -624,26 +656,3 @@ $ cat /sys/kernel/debug/rknpu/load
 
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
-
-## Hailo-8l
-
-This detector is available for use with Hailo-8 AI Acceleration Module.
-
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
-
-### Configuration
-
-```yaml
-detectors:
-  hailo8l:
-    type: hailo8l
-    device: PCIe
-
-model:
-  width: 300
-  height: 300
-  input_tensor: nhwc
-  input_pixel_format: bgr
-  model_type: ssd
-  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
-```

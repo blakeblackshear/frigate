@@ -54,22 +54,22 @@ More information is available [in the detector docs](/configuration/object_detec
 
 Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known examples are below:
 
-| Name                 | Inference Speed | Notes                                                                 |
-| -------------------- | --------------- | --------------------------------------------------------------------- |
-| Intel NCS2 VPU       | 60 - 65 ms      | May vary based on host device                                         |
-| Intel Celeron J4105  | ~ 25 ms         | Inference speeds on CPU were 150 - 200 ms                             |
-| Intel Celeron N3060  | 130 - 150 ms    | Inference speeds on CPU were ~ 550 ms                                 |
-| Intel Celeron N3205U | ~ 120 ms        | Inference speeds on CPU were ~ 380 ms                                 |
-| Intel Celeron N4020  | 50 - 200 ms     | Inference speeds on CPU were ~ 800 ms, greatly depends on other loads |
-| Intel i3 6100T       | 15 - 35 ms      | Inference speeds on CPU were 60 - 120 ms                              |
-| Intel i3 8100        | ~ 15 ms         | Inference speeds on CPU were ~ 65 ms                                  |
-| Intel i5 4590        | ~ 20 ms         | Inference speeds on CPU were ~ 230 ms                                 |
-| Intel i5 6500        | ~ 15 ms         | Inference speeds on CPU were ~ 150 ms                                 |
-| Intel i5 7200u       | 15 - 25 ms      | Inference speeds on CPU were ~ 150 ms                                 |
-| Intel i5 7500        | ~ 15 ms         | Inference speeds on CPU were ~ 260 ms                                 |
-| Intel i5 1135G7      | 10 - 15 ms      |                                                                       |
-| Intel i5 12600K      | ~ 15 ms         | Inference speeds on CPU were ~ 35 ms                                  |
-| Intel Arc A750       | ~ 4 ms          |                                                                       |
+| Name                 | MobileNetV2 Inference Speed | YOLO-NAS Inference Speed  | Notes                                  |
+| -------------------- | --------------------------- | ------------------------- | -------------------------------------- |
+| Intel Celeron J4105  | ~ 25 ms                     |                           | Can only run one detector instance     |
+| Intel Celeron N3060  | 130 - 150 ms                |                           | Can only run one detector instance     |
+| Intel Celeron N3205U | ~ 120 ms                    |                           | Can only run one detector instance     |
+| Intel Celeron N4020  | 50 - 200 ms                 |                           | Inference speed depends on other loads |
+| Intel i3 6100T       | 15 - 35 ms                  |                           | Can only run one detector instance     |
+| Intel i3 8100        | ~ 15 ms                     |                           |                                        |
+| Intel i5 4590        | ~ 20 ms                     |                           |                                        |
+| Intel i5 6500        | ~ 15 ms                     |                           |                                        |
+| Intel i5 7200u       | 15 - 25 ms                  |                           |                                        |
+| Intel i5 7500        | ~ 15 ms                     |                           |                                        |
+| Intel i5 1135G7      | 10 - 15 ms                  |                           |                                        |
+| Intel i5 12600K      | ~ 15 ms                     | 320: ~ 20 ms 640: ~ 46 ms |                                        |
+| Intel Arc A380       | ~ 6 ms                      | 320: ~ 10 ms              |                                        |
+| Intel Arc A750       | ~ 4 ms                      | 320: ~ 8 ms               |                                        |
 
 ### TensorRT - Nvidia GPU
 
@@ -78,29 +78,35 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | Inference Speed |
-| --------------- | --------------- |
-| GTX 1060 6GB    | ~ 7 ms          |
-| GTX 1070        | ~ 6 ms          |
-| GTX 1660 SUPER  | ~ 4 ms          |
-| RTX 3050        | 5 - 7 ms        |
-| RTX 3070 Mobile | ~ 5 ms          |
-| Quadro P400 2GB | 20 - 25 ms      |
-| Quadro P2000    | ~ 12 ms         |
+| Name            | YoloV7 Inference Speed | YOLO-NAS Inference Speed  |
+| --------------- | ---------------------- | ------------------------- |
+| GTX 1060 6GB    | ~ 7 ms                 |                           |
+| GTX 1070        | ~ 6 ms                 |                           |
+| GTX 1660 SUPER  | ~ 4 ms                 |                           |
+| RTX 3050        | 5 - 7 ms               | 320: ~ 10 ms 640: ~ 16 ms |
+| RTX 3070 Mobile | ~ 5 ms                 |                           |
+| Quadro P400 2GB | 20 - 25 ms             |                           |
+| Quadro P2000    | ~ 12 ms                |                           |
 
-#### AMD GPUs
+### AMD GPUs
 
-With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs.
+With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-### Community Supported:
+### Hailo-8l PCIe
 
-#### Nvidia Jetson
+Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
+
+The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
+
+## Community Supported Detectors
+
+### Nvidia Jetson
 
 Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
-#### Rockchip platform
+### Rockchip platform
 
 Frigate supports hardware video processing on all Rockchip boards. However, hardware object detection is only supported on these boards:
 
@@ -111,12 +117,6 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 - RK3588
 
 The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
-
-#### Hailo-8l PCIe
-
-Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
-
-The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
