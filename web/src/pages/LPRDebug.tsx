@@ -124,10 +124,10 @@ export default function LPRDebug() {
             <DropdownMenuContent>
               <DropdownMenuLabel>Sort by</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
-                Score (High to Low)
+                Ascending Score
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
-                Score (Low to High)
+                Descending Score
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
                 Most Recent
@@ -211,35 +211,36 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
 
       <div className="relative flex flex-col rounded-lg">
         <div 
-          className="w-full cursor-pointer overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground hover:opacity-90"
+          className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground cursor-pointer"
           onClick={() => setShowDialog(true)}
         >
-          <img className="h-40" src={`${baseUrl}clips/lpr/${attempt}`} />
+          <img 
+            className="h-40 w-full" 
+            src={`${baseUrl}clips/lpr/${attempt}`} 
+          />
         </div>
-        <div className="rounded-b-lg bg-card p-2">
-          <div className="flex w-full flex-row items-center justify-between gap-2">
-            <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="capitalize">{data.plate}</div>
-              <div className="text-success">
-                {Number.parseFloat(data.score) * 100}%
+        <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="capitalize">{data.plate}</div>
+            <div className="text-success">
+              {Number.parseFloat(data.score) * 100}%
+            </div>
+            {event && (
+              <div className="text-xs text-muted-foreground">
+                {timestamp}
               </div>
-              {event && (
-                <div className="text-xs text-muted-foreground">
-                  {timestamp}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              <Tooltip>
-                <TooltipTrigger>
-                  <LuTrash2
-                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                    onClick={onDelete}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Delete Image</TooltipContent>
-              </Tooltip>
-            </div>
+            )}
+          </div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={onDelete}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete Image</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
