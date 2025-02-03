@@ -40,16 +40,28 @@ export default function LPRDebug() {
     
     const attempts = Object.keys(lprData).filter((attempt) => attempt != "train");
     
+    // Get all events first to access their scores
+    const eventScores = new Map<string, number>();
+    attempts.forEach((attempt) => {
+      const parts = attempt.split("-");
+      const eventId = `${parts[0]}-${parts[1]}`;
+      const event = lprData[eventId];
+      if (event?.data?.sub_label_score) {
+        eventScores.set(attempt, event.data.sub_label_score);
+      }
+    });
+    
     return attempts.sort((a, b) => {
-      const [, , plateA, scoreA] = a.split("-");
-      const [, , plateB, scoreB] = b.split("-");
+      const scoreA = eventScores.get(a) || 0;
+      const scoreB = eventScores.get(b) || 0;
       
       switch (sortBy) {
         case "score_desc":
-          return (Number(scoreB) || 0) - (Number(scoreA) || 0);
+          return scoreB - scoreA;
         case "score_asc":
-          return (Number(scoreA) || 0) - (Number(scoreB) || 0);
+          return scoreA - scoreB;
         case "time_desc":
+          // For time sorting, we'll use the file creation order (default order)
           return b.localeCompare(a);
         case "time_asc":
           return a.localeCompare(b);
