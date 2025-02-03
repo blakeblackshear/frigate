@@ -35,9 +35,9 @@ Frigate supports multiple different detectors that work on different types of ha
 
 :::note
 
-Multiple detectors can not be mixed for object detection (ex: OpenVINO and a coral can not be used for object detection). 
+Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time). 
 
-This does not affect using hardware for other tasks like [semantic search](./semantic_search.md)
+This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
 
 :::
 
