@@ -98,7 +98,7 @@ Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only 
 
 The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
 
-## Community Supported Detectors:
+## Community Supported Detectors
 
 ### Nvidia Jetson
 
