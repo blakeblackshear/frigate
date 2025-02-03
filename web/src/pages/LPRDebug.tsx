@@ -1,6 +1,14 @@
 import { baseUrl } from "@/api/baseUrl";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import LPRDetailDialog from "@/components/overlay/dialog/LPRDetailDialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -9,12 +17,15 @@ import { Event } from "@/types/event";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { LuTrash2 } from "react-icons/lu";
+import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
 
+type SortOption = "score_desc" | "score_asc" | "time_desc" | "time_asc";
+
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [sortBy, setSortBy] = useState<SortOption>("time_desc");
 
   // title
   useEffect(() => {
@@ -24,10 +35,29 @@ export default function LPRDebug() {
   // lpr data
   const { data: lprData, mutate: refreshLPR } = useSWR("lpr/debug");
 
-  const lprAttempts = useMemo<string[]>(
-    () => (lprData ? Object.keys(lprData).filter((attempt) => attempt != "train") : []),
-    [lprData],
-  );
+  const lprAttempts = useMemo<string[]>(() => {
+    if (!lprData) return [];
+    
+    const attempts = Object.keys(lprData).filter((attempt) => attempt != "train");
+    
+    return attempts.sort((a, b) => {
+      const [, , plateA, scoreA] = a.split("-");
+      const [, , plateB, scoreB] = b.split("-");
+      
+      switch (sortBy) {
+        case "score_desc":
+          return (Number(scoreB) || 0) - (Number(scoreA) || 0);
+        case "score_asc":
+          return (Number(scoreA) || 0) - (Number(scoreB) || 0);
+        case "time_desc":
+          return b.localeCompare(a);
+        case "time_asc":
+          return a.localeCompare(b);
+        default:
+          return 0;
+      }
+    });
+  }, [lprData, sortBy]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -39,9 +69,33 @@ export default function LPRDebug() {
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex flex-row">
-            <div className="text-lg font-semibold">License Plate Recognition</div>
           </div>
         </ScrollArea>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="flex gap-2">
+                <LuArrowDownUp className="size-5" />
+                Sort
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setSortBy("score_desc")}>
+                Score (High to Low)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("score_asc")}>
+                Score (Low to High)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("time_desc")}>
+                Most Recent
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("time_asc")}>
+                Oldest First
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
         {lprAttempts.map((attempt: string) => (

@@ -7,7 +7,7 @@ import { FaCompactDisc, FaVideo } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { LuConstruction } from "react-icons/lu";
 import { MdVideoLibrary } from "react-icons/md";
-import { TbFaceId, TbLicense } from "react-icons/tb";
+import { TbCar, TbFaceId } from "react-icons/tb";
 import useSWR from "swr";
 
 export const ID_LIVE = 1;
@@ -75,7 +75,7 @@ export default function useNavigation(
         {
           id: ID_LPR_DEBUG,
           variant,
-          icon: TbLicense,
+          icon: TbCar,
           title: "LPR",
           url: "/lpr",
           enabled: isDesktop && config?.lpr.enabled,
