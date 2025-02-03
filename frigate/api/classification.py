@@ -243,3 +243,45 @@ def get_lpr_debug(request: Request):
         lpr_images[image] = image
 
     return lpr_images
+
+
+@router.post("/lpr/debug/delete")
+def delete_lpr_debug(request: Request, body: dict = None):
+    """Delete LPR debug images."""
+    if not request.app.frigate_config.lpr.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "LPR is not enabled.", "success": False},
+        )
+
+    json: dict[str, any] = body or {}
+    list_of_ids = json.get("ids", [])
+
+    if not list_of_ids:
+        return JSONResponse(
+            content={"success": False, "message": "Not a valid list of ids"},
+            status_code=404,
+        )
+
+    lpr_dir = os.path.join(CLIPS_DIR, "lpr")
+    if not os.path.exists(lpr_dir):
+        return JSONResponse(
+            status_code=404,
+            content={"message": "LPR debug directory not found", "success": False},
+        )
+
+    try:
+        for image_id in list_of_ids:
+            image_path = os.path.join(lpr_dir, sanitize_filename(image_id))
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+        return JSONResponse(
+            content={"success": True, "message": "Successfully deleted LPR debug images."},
+            status_code=200,
+        )
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "message": f"Failed to delete LPR debug images: {str(e)}"},
+            status_code=500,
+        )

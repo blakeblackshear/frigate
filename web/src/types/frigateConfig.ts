@@ -469,4 +469,9 @@ export interface FrigateConfig {
   };
 
   ui: UiConfig;
+
+  lpr: {
+    enabled: boolean;
+    threshold: number;
+  };
 }
