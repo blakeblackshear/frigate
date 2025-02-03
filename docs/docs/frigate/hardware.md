@@ -88,25 +88,25 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | Quadro P400 2GB | 20 - 25 ms             |                           |
 | Quadro P2000    | ~ 12 ms                |                           |
 
-#### AMD GPUs
+### AMD GPUs
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-#### Hailo-8l PCIe
+### Hailo-8l PCIe
 
 Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
 
 The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
 
-### Community Supported:
+## Community Supported Detectors:
 
-#### Nvidia Jetson
+### Nvidia Jetson
 
 Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
-#### Rockchip platform
+### Rockchip platform
 
 Frigate supports hardware video processing on all Rockchip boards. However, hardware object detection is only supported on these boards:
 
