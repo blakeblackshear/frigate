@@ -11,12 +11,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { FaDownload, FaImage, FaPlay, FaVideo } from "react-icons/fa";
-import { FaRegListAlt } from "react-icons/fa6";
+import { FaDownload, FaImage, FaPlay, FaVideo, FaRegListAlt } from "react-icons/fa";
 import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { isDesktop, isIOS, isMobile, isSafari } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -139,7 +138,7 @@ export default function LPRDetailDialog({
           </div>
         </ScrollArea>
         {page === "details" && (
-          <DetailsTab event={event} config={config} timestamp={timestamp} />
+          <DetailsTab event={event} timestamp={timestamp} />
         )}
         {page === "snapshot" && (
           <SnapshotTab event={event} />
@@ -157,11 +156,10 @@ export default function LPRDetailDialog({
 
 type DetailsTabProps = {
   event: Event;
-  config: FrigateConfig;
   timestamp: string;
 };
 
-function DetailsTab({ event, config, timestamp }: DetailsTabProps) {
+function DetailsTab({ event, timestamp }: DetailsTabProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
