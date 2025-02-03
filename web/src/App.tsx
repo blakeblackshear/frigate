@@ -20,6 +20,7 @@ const System = lazy(() => import("@/pages/System"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const UIPlayground = lazy(() => import("@/pages/UIPlayground"));
 const FaceLibrary = lazy(() => import("@/pages/FaceLibrary"));
+const LPRDebug = lazy(() => import("@/pages/LPRDebug"));
 const Logs = lazy(() => import("@/pages/Logs"));
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/logs" element={<Logs />} />
                   <Route path="/playground" element={<UIPlayground />} />
                   <Route path="/faces" element={<FaceLibrary />} />
+                  <Route path="/lpr" element={<LPRDebug />} />
                   <Route path="*" element={<Redirect to="/" />} />
                 </Routes>
               </Suspense>

@@ -1,5 +1,7 @@
 import logging
 import math
+import os
+import time
 from typing import List, Tuple
 
 import cv2
@@ -10,6 +12,7 @@ from shapely.geometry import Polygon
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.classification import LicensePlateRecognitionConfig
 from frigate.embeddings.embeddings import Embeddings
+from frigate.const import CLIPS_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,10 @@ class LicensePlateRecognition:
         self.max_size = 960
         self.box_thresh = 0.8
         self.mask_thresh = 0.8
+
+        # Create debug directory
+        self.debug_dir = os.path.join(CLIPS_DIR, "lpr")
+        os.makedirs(self.debug_dir, exist_ok=True)
 
         if self.lpr_config.enabled:
             # all models need to be loaded to run LPR
@@ -187,13 +194,12 @@ class LicensePlateRecognition:
 
                 average_confidence = conf
 
-                # set to True to write each cropped image for debugging
-                if False:
-                    save_image = cv2.cvtColor(
-                        rotated_images[original_idx], cv2.COLOR_RGB2BGR
-                    )
-                    filename = f"/config/plate_{original_idx}_{plate}_{area}.jpg"
-                    cv2.imwrite(filename, save_image)
+                # Save debug image
+                save_image = cv2.cvtColor(
+                    rotated_images[original_idx], cv2.COLOR_RGB2BGR
+                )
+                filename = f"{plate}_{int(average_confidence[0] * 100)}_{area}.jpg"
+                cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
@@ -215,6 +221,12 @@ class LicensePlateRecognition:
 
             if sorted_data:
                 return map(list, zip(*sorted_data))
+
+        # Save debug image for failed recognition
+        for i, image in enumerate(rotated_images):
+            save_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            filename = f"no_text_{i}_{int(time.time())}.jpg"
+            cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
 
         return [], [], []
 

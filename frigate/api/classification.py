@@ -5,13 +5,14 @@ import os
 import random
 import shutil
 import string
+from typing import Optional
 
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pathvalidate import sanitize_filename
 
 from frigate.api.defs.tags import Tags
-from frigate.const import FACE_DIR
+from frigate.const import FACE_DIR, CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 
 logger = logging.getLogger(__name__)
@@ -220,3 +221,25 @@ def rename_face(request: Request, name: str, body: dict = None):
             status_code=500,
             content={"message": f"Failed to rename face: {str(e)}", "success": False},
         )
+
+
+@router.get("/lpr/debug")
+def get_lpr_debug(request: Request):
+    """Get all LPR debug images."""
+    if not request.app.frigate_config.lpr.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "LPR is not enabled.", "success": False},
+        )
+
+    lpr_dir = os.path.join(CLIPS_DIR, "lpr")
+    if not os.path.exists(lpr_dir):
+        return {}
+
+    lpr_images = {}
+    for image in os.listdir(lpr_dir):
+        if not image.endswith(('.jpg', '.webp')):
+            continue
+        lpr_images[image] = image
+
+    return lpr_images

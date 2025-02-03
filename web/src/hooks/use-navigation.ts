@@ -7,7 +7,7 @@ import { FaCompactDisc, FaVideo } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { LuConstruction } from "react-icons/lu";
 import { MdVideoLibrary } from "react-icons/md";
-import { TbFaceId } from "react-icons/tb";
+import { TbFaceId, TbLicense } from "react-icons/tb";
 import useSWR from "swr";
 
 export const ID_LIVE = 1;
@@ -16,6 +16,7 @@ export const ID_EXPLORE = 3;
 export const ID_EXPORT = 4;
 export const ID_PLAYGROUND = 5;
 export const ID_FACE_LIBRARY = 6;
+export const ID_LPR_DEBUG = 7;
 
 export default function useNavigation(
   variant: "primary" | "secondary" = "primary",
@@ -71,7 +72,15 @@ export default function useNavigation(
           url: "/faces",
           enabled: isDesktop && config?.face_recognition.enabled,
         },
+        {
+          id: ID_LPR_DEBUG,
+          variant,
+          icon: TbLicense,
+          title: "LPR",
+          url: "/lpr",
+          enabled: isDesktop && config?.lpr.enabled,
+        },
       ] as NavData[],
-    [config?.face_recognition.enabled, variant],
+    [config?.face_recognition.enabled, config?.lpr.enabled, variant],
   );
 }
