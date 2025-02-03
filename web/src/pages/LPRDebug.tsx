@@ -2,6 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import LPRDetailDialog from "@/components/overlay/dialog/LPRDetailDialog";
 import { Button } from "@/components/ui/button";
+import { CamerasFilterButton } from "@/components/filter/CamerasFilterButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ type SortOption = "score_desc" | "score_asc" | "time_desc" | "time_asc";
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<SortOption>("time_desc");
+  const [selectedCameras, setSelectedCameras] = useState<string[] | undefined>();
 
   // title
   useEffect(() => {
@@ -40,8 +42,9 @@ export default function LPRDebug() {
     
     const attempts = Object.keys(lprData).filter((attempt) => attempt != "train");
     
-    // Get all events first to access their scores
+    // Get all events first to access their scores and cameras
     const eventScores = new Map<string, number>();
+    const eventCameras = new Map<string, string>();
     attempts.forEach((attempt) => {
       const parts = attempt.split("-");
       const eventId = `${parts[0]}-${parts[1]}`;
@@ -49,9 +52,20 @@ export default function LPRDebug() {
       if (event?.data?.sub_label_score) {
         eventScores.set(attempt, event.data.sub_label_score);
       }
+      if (event?.camera) {
+        eventCameras.set(attempt, event.camera);
+      }
     });
     
-    return attempts.sort((a, b) => {
+    // Filter by selected cameras if any
+    const filteredAttempts = selectedCameras?.length
+      ? attempts.filter((attempt) => {
+          const camera = eventCameras.get(attempt);
+          return camera && selectedCameras.includes(camera);
+        })
+      : attempts;
+    
+    return filteredAttempts.sort((a, b) => {
       const scoreA = eventScores.get(a) || 0;
       const scoreB = eventScores.get(b) || 0;
       
@@ -69,7 +83,17 @@ export default function LPRDebug() {
           return 0;
       }
     });
-  }, [lprData, sortBy]);
+  }, [lprData, sortBy, selectedCameras]);
+
+  const cameras = useMemo(() => {
+    if (!config) return [];
+    return Object.keys(config.cameras);
+  }, [config]);
+
+  const cameraGroups = useMemo(() => {
+    if (!config?.camera_groups) return [];
+    return Object.entries(config.camera_groups);
+  }, [config]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -84,25 +108,31 @@ export default function LPRDebug() {
           </div>
         </ScrollArea>
         <div className="flex gap-2">
+          <CamerasFilterButton
+            allCameras={cameras}
+            groups={cameraGroups}
+            selectedCameras={selectedCameras}
+            updateCameraFilter={setSelectedCameras}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="flex gap-2">
+              <Button className="flex gap-2" variant={sortBy !== "time_desc" ? "select" : "default"}>
                 <LuArrowDownUp className="size-5" />
                 Sort
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setSortBy("score_desc")}>
+              <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
                 Score (High to Low)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("score_asc")}>
+              <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
                 Score (Low to High)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("time_desc")}>
+              <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
                 Most Recent
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("time_asc")}>
+              <DropdownMenuItem onClick={() => setSortBy("time_asc")} className={sortBy === "time_asc" ? "bg-accent" : ""}>
                 Oldest First
               </DropdownMenuItem>
             </DropdownMenuContent>
