@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -21,13 +21,17 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 type SortOption = "score_desc" | "score_asc" | "time_desc" | "time_asc";
+type ViewMode = "detected" | "raw";
 
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<SortOption>("time_desc");
   const [selectedCameras, setSelectedCameras] = useState<string[] | undefined>();
+  const [viewMode, setViewMode] = useState<ViewMode>("detected");
 
   // title
   useEffect(() => {
@@ -105,6 +109,35 @@ export default function LPRDebug() {
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex flex-row">
+            <ToggleGroup
+              className="*:rounded-md *:px-3 *:py-4"
+              type="single"
+              size="sm"
+              value={viewMode}
+              onValueChange={(value: ViewMode) => {
+                if (value) {
+                  setViewMode(value);
+                }
+              }}
+            >
+              <ToggleGroupItem
+                value="detected"
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${viewMode == "detected" ? "" : "*:text-muted-foreground"}`}
+                data-nav-item="detected"
+                aria-label="Select detected"
+              >
+                <div>Detected</div>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="raw"
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${viewMode == "raw" ? "" : "*:text-muted-foreground"}`}
+                data-nav-item="raw"
+                aria-label="Select raw"
+              >
+                <div>Raw</div>
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
         <div className="flex gap-2">
@@ -141,7 +174,13 @@ export default function LPRDebug() {
       </div>
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
         {lprAttempts.map((attempt: string) => (
-          <LPRAttempt key={attempt} attempt={attempt} config={config} onRefresh={refreshLPR} />
+          <LPRAttempt 
+            key={attempt} 
+            attempt={attempt} 
+            config={config} 
+            onRefresh={refreshLPR}
+            viewMode={viewMode}
+          />
         ))}
       </div>
     </div>
@@ -152,9 +191,10 @@ type LPRAttemptProps = {
   attempt: string;
   config: FrigateConfig;
   onRefresh: () => void;
+  viewMode: ViewMode;
 };
 
-function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
+function LPRAttempt({ attempt, config, onRefresh, viewMode }: LPRAttemptProps) {
   const [showDialog, setShowDialog] = useState(false);
   const data = useMemo(() => {
     const parts = attempt.split("_");
@@ -206,7 +246,7 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
         setOpen={setShowDialog}
         event={event}
         config={config}
-        lprImage={attempt}
+        lprImage={viewMode === "detected" ? attempt : `raw_${data.eventId}.jpg`}
       />
 
       <div className="relative flex flex-col rounded-lg">
@@ -217,7 +257,7 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
           <div className="aspect-[2/1] flex items-center justify-center bg-black">
             <img 
               className="h-40 max-w-none" 
-              src={`${baseUrl}clips/lpr/${attempt}`} 
+              src={`${baseUrl}clips/lpr/${viewMode === "detected" ? attempt : `raw_${data.eventId}.jpg`}`} 
             />
           </div>
         </div>

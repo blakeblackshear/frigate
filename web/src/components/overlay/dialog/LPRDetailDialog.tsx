@@ -32,7 +32,7 @@ import {
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
 
-const LPR_TABS = ["details", "snapshot", "video", "plate"] as const;
+const LPR_TABS = ["details", "snapshot", "video"] as const;
 export type LPRTab = (typeof LPR_TABS)[number];
 
 type LPRDetailDialogProps = {
@@ -146,7 +146,6 @@ export default function LPRDetailDialog({
                   {item == "details" && <FaRegListAlt className="size-4" />}
                   {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
-                  {item == "plate" && <FaImage className="size-4" />}
                   <div className="capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
@@ -163,7 +162,7 @@ export default function LPRDetailDialog({
         {page === "video" && (
           <VideoTab event={event} />
         )}
-        {page === "plate" && (
+        {(page === "details" || !event) && (
           <PlateTab lprImage={lprImage} />
         )}
       </Content>

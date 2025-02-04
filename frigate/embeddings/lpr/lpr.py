@@ -165,6 +165,14 @@ class LicensePlateRecognition:
             logger.debug("Model runners not loaded")
             return [], [], []
 
+        # Save raw image before processing if event_id is provided
+        if event_id:
+            try:
+                raw_filename = f"raw_{event_id}.jpg"
+                cv2.imwrite(os.path.join(self.debug_dir, raw_filename), image)
+            except Exception as e:
+                logger.warning(f"Failed to save raw debug image: {e}")
+
         plate_points = self.detect(image)
         if len(plate_points) == 0:
             return [], [], []
