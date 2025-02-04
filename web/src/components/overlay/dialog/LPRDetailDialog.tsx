@@ -52,6 +52,13 @@ export default function LPRDetailDialog({
 }: LPRDetailDialogProps) {
   const [page, setPage] = useState<LPRTab>("details");
 
+  // content components
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
+
   const timestamp = useFormattedTimestamp(
     event?.start_time ?? 0,
     config?.ui.time_format == "24hour" ? "%b %-d %Y, %H:%M" : "%b %-d %Y, %I:%M %p",
@@ -98,13 +105,6 @@ export default function LPRDetailDialog({
       </Overlay>
     );
   }
-
-  // content
-  const Overlay = isDesktop ? Dialog : MobilePage;
-  const Content = isDesktop ? DialogContent : MobilePageContent;
-  const Header = isDesktop ? DialogHeader : MobilePageHeader;
-  const Title = isDesktop ? DialogTitle : MobilePageTitle;
-  const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
     <Overlay open={open} onOpenChange={setOpen}>
