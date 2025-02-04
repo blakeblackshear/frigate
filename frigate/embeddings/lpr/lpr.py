@@ -195,11 +195,15 @@ class LicensePlateRecognition:
                 average_confidence = conf
 
                 # Save debug image
-                save_image = cv2.cvtColor(
-                    rotated_images[original_idx], cv2.COLOR_RGB2BGR
-                )
-                filename = f"{plate}_{int(average_confidence[0] * 100)}_{area}.jpg"
-                cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
+                try:
+                    save_image = cv2.cvtColor(
+                        rotated_images[original_idx], cv2.COLOR_RGB2BGR
+                    )
+                    confidence_value = average_confidence[0] if average_confidence and len(average_confidence) > 0 else 0
+                    filename = f"{plate}_{int(confidence_value * 100)}_{area}.jpg"
+                    cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
+                except Exception as e:
+                    logger.warning(f"Failed to save debug image: {e}")
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
