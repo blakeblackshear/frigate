@@ -103,7 +103,7 @@ export default function LPRDetailDialog({
             <Title>License Plate Image</Title>
             <Description className="sr-only">License plate image details</Description>
           </Header>
-          <PlateTab lprImage={lprImage} config={config} />
+          <PlateTab lprImage={lprImage} />
         </Content>
       </Overlay>
     );
@@ -169,12 +169,11 @@ export default function LPRDetailDialog({
             {page === "raw" && (
               <PlateTab
                 lprImage={rawImage}
-                config={config}
               />
             )}
           </>
         ) : (
-          <PlateTab lprImage={lprImage} config={config} />
+          <PlateTab lprImage={lprImage} />
         )}
       </Content>
     </Overlay>
@@ -344,10 +343,9 @@ function VideoTab({ event }: VideoTabProps) {
 
 type PlateTabProps = {
   lprImage: string;
-  config: FrigateConfig;
 };
 
-function PlateTab({ lprImage, config }: PlateTabProps) {
+function PlateTab({ lprImage }: PlateTabProps) {
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   return (

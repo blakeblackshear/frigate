@@ -21,11 +21,8 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { cn } from "@/lib/utils";
 
 type SortOption = "score_desc" | "score_asc" | "time_desc" | "time_asc";
-type ViewMode = "detected" | "raw";
 
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
