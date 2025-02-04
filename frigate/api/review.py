@@ -490,8 +490,6 @@ def set_not_reviewed(review_id: str):
     review.save()
 
     return JSONResponse(
-        content=(
-            {"success": True, "message": "Set Review " + review_id + " as not viewed"}
-        ),
+        content=({"success": True, "message": f"Set Review {review_id} as not viewed"}),
         status_code=200,
     )
