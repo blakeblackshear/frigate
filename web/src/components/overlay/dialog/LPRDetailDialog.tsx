@@ -79,7 +79,24 @@ export default function LPRDetailDialog({
   }, [config, event]);
 
   if (!event) {
-    return null;
+    return (
+      <Overlay open={open} onOpenChange={setOpen}>
+        <Content
+          className={cn(
+            "scrollbar-container overflow-y-auto",
+            isDesktop &&
+              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+            isMobile && "px-4",
+          )}
+        >
+          <Header>
+            <Title>License Plate Image</Title>
+            <Description className="sr-only">License plate image details</Description>
+          </Header>
+          <PlateTab lprImage={lprImage} />
+        </Content>
+      </Overlay>
+    );
   }
 
   // content

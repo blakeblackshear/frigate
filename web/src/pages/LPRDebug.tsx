@@ -214,16 +214,18 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
           className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground cursor-pointer"
           onClick={() => setShowDialog(true)}
         >
-          <img 
-            className="h-40 w-full" 
-            src={`${baseUrl}clips/lpr/${attempt}`} 
-          />
+          <div className="aspect-[2/1] flex items-center justify-center bg-black">
+            <img 
+              className="h-40 max-w-none" 
+              src={`${baseUrl}clips/lpr/${attempt}`} 
+            />
+          </div>
         </div>
         <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="capitalize">{data.plate}</div>
             <div className="text-success">
-              {Number.parseFloat(data.score) * 100}%
+              {data.score === "0" || !data.score ? "No score" : `${data.score}%`}
             </div>
             {event && (
               <div className="text-xs text-muted-foreground">
