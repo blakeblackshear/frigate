@@ -122,7 +122,10 @@ export default function LPRDebug() {
             >
               <ToggleGroupItem
                 value="detected"
-                className={`flex scroll-mx-10 items-center justify-between gap-2 ${viewMode == "detected" ? "" : "*:text-muted-foreground"}`}
+                className={cn(
+                  "flex scroll-mx-10 items-center justify-between gap-2",
+                  viewMode !== "detected" && "*:text-muted-foreground"
+                )}
                 data-nav-item="detected"
                 aria-label="Select detected"
               >
@@ -130,7 +133,10 @@ export default function LPRDebug() {
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="raw"
-                className={`flex scroll-mx-10 items-center justify-between gap-2 ${viewMode == "raw" ? "" : "*:text-muted-foreground"}`}
+                className={cn(
+                  "flex scroll-mx-10 items-center justify-between gap-2",
+                  viewMode !== "raw" && "*:text-muted-foreground"
+                )}
                 data-nav-item="raw"
                 aria-label="Select raw"
               >
