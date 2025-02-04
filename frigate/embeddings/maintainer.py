@@ -443,7 +443,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         # run detection, returns results sorted by confidence, best first
         license_plates, confidences, areas = (
-            self.license_plate_recognition.process_license_plate(license_plate_frame)
+            self.license_plate_recognition.process_license_plate(license_plate_frame, id)
         )
 
         logger.debug(f"Text boxes: {license_plates}")

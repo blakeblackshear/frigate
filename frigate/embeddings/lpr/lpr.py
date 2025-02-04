@@ -144,13 +144,14 @@ class LicensePlateRecognition:
         return self.ctc_decoder(outputs)
 
     def process_license_plate(
-        self, image: np.ndarray
+        self, image: np.ndarray, event_id: str = ""
     ) -> Tuple[List[str], List[float], List[int]]:
         """
         Complete pipeline for detecting, classifying, and recognizing license plates in the input image.
 
         Args:
             image (np.ndarray): The input image in which to detect, classify, and recognize license plates.
+            event_id (str): The ID of the event associated with this license plate detection.
 
         Returns:
             Tuple[List[str], List[float], List[int]]: Detected license plate texts, confidence scores, and areas of the plates.
@@ -193,14 +194,14 @@ class LicensePlateRecognition:
                 area = height * width
 
                 average_confidence = conf
+                avg_confidence = sum(average_confidence) / len(average_confidence) if average_confidence else 0
 
                 # Save debug image
                 try:
                     save_image = cv2.cvtColor(
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
                     )
-                    confidence_value = average_confidence[0] if average_confidence and len(average_confidence) > 0 else 0
-                    filename = f"{plate}_{int(confidence_value * 100)}_{area}.jpg"
+                    filename = f"{plate}_{int(avg_confidence * 100)}_{event_id}.jpg" if event_id else f"{plate}_{int(avg_confidence * 100)}.jpg"
                     cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
                 except Exception as e:
                     logger.warning(f"Failed to save debug image: {e}")

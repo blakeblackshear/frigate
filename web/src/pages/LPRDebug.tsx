@@ -157,11 +157,11 @@ type LPRAttemptProps = {
 function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
   const [showDialog, setShowDialog] = useState(false);
   const data = useMemo(() => {
-    const parts = attempt.split("-");
+    const parts = attempt.split("_");
     return {
-      eventId: `${parts[0]}-${parts[1]}`,
-      plate: parts[2] || "Text not extracted",
-      score: parts[3] || "0",
+      plate: parts[0] || "Text not extracted",
+      score: parts[1] || "0",
+      eventId: parts[2]?.replace(".jpg", "") || null,
     };
   }, [attempt]);
 
