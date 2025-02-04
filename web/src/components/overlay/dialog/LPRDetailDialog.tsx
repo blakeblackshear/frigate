@@ -110,7 +110,7 @@ export default function LPRDetailDialog({
     <Overlay open={open} onOpenChange={setOpen}>
       <Content
         className={cn(
-          "scrollbar-container overflow-y-auto",
+          "scrollbar-container overflow-y-auto min-w-[50vw]",
           isDesktop &&
             "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
           isMobile && "px-4",
@@ -345,7 +345,7 @@ function PlateTab({ lprImage }: PlateTabProps) {
         className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
         imgLoaded={imgLoaded}
       />
-      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+      <div className={`${imgLoaded ? "visible" : "invisible"} min-h-[60dvh]`}>
         <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
           <div className="flex flex-col space-y-3">
             <TransformComponent
@@ -357,12 +357,15 @@ function PlateTab({ lprImage }: PlateTabProps) {
                 position: "relative",
                 width: "100%",
                 height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
               }}
             >
-              <div className="relative mx-auto">
+              <div className="relative mx-auto w-full h-full flex items-center justify-center">
                 <img
                   ref={imgRef}
-                  className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                  className="mx-auto max-h-[60dvh] w-auto h-auto bg-black object-contain"
                   src={`${baseUrl}clips/lpr/${lprImage}`}
                   alt="License plate"
                   loading={isSafari ? "eager" : "lazy"}
