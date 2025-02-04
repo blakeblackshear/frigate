@@ -21,6 +21,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type SortOption = "score_desc" | "score_asc" | "time_desc" | "time_asc";
 
@@ -234,7 +235,12 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
         <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="capitalize">{data.plate}</div>
-            <div className="text-success">
+            <div className={cn(
+              "font-semibold",
+              Number(data.score) >= (config?.lpr?.threshold || 0.8) * 100
+                ? "text-success"
+                : "text-danger"
+            )}>
               {data.score === "0" || !data.score ? "No score" : `${data.score}%`}
             </div>
             {event && (
