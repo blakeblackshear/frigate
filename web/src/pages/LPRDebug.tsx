@@ -31,7 +31,6 @@ export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<SortOption>("time_desc");
   const [selectedCameras, setSelectedCameras] = useState<string[] | undefined>();
-  const [viewMode, setViewMode] = useState<ViewMode>("detected");
 
   // title
   useEffect(() => {
@@ -109,40 +108,6 @@ export default function LPRDebug() {
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={viewMode}
-              onValueChange={(value: ViewMode) => {
-                if (value) {
-                  setViewMode(value);
-                }
-              }}
-            >
-              <ToggleGroupItem
-                value="detected"
-                className={cn(
-                  "flex scroll-mx-10 items-center justify-between gap-2",
-                  viewMode !== "detected" && "*:text-muted-foreground"
-                )}
-                data-nav-item="detected"
-                aria-label="Select detected"
-              >
-                <div>Detected</div>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="raw"
-                className={cn(
-                  "flex scroll-mx-10 items-center justify-between gap-2",
-                  viewMode !== "raw" && "*:text-muted-foreground"
-                )}
-                data-nav-item="raw"
-                aria-label="Select raw"
-              >
-                <div>Raw</div>
-              </ToggleGroupItem>
-            </ToggleGroup>
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
@@ -178,14 +143,13 @@ export default function LPRDebug() {
           </DropdownMenu>
         </div>
       </div>
-      <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+      <div className="scrollbar-container grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 overflow-y-auto">
         {lprAttempts.map((attempt: string) => (
           <LPRAttempt 
             key={attempt} 
             attempt={attempt} 
             config={config} 
             onRefresh={refreshLPR}
-            viewMode={viewMode}
           />
         ))}
       </div>
@@ -197,10 +161,9 @@ type LPRAttemptProps = {
   attempt: string;
   config: FrigateConfig;
   onRefresh: () => void;
-  viewMode: ViewMode;
 };
 
-function LPRAttempt({ attempt, config, onRefresh, viewMode }: LPRAttemptProps) {
+function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
   const [showDialog, setShowDialog] = useState(false);
   const data = useMemo(() => {
     const parts = attempt.split("_");
@@ -245,6 +208,9 @@ function LPRAttempt({ attempt, config, onRefresh, viewMode }: LPRAttemptProps) {
       });
   }, [attempt, onRefresh]);
 
+  // Extract event ID from processed image filename (format: PLATE_SCORE_EVENTID.jpg)
+  const eventId = useMemo(() => attempt.split("_").slice(2).join("_").replace(".jpg", ""), [attempt]);
+
   return (
     <>
       <LPRDetailDialog
@@ -252,7 +218,8 @@ function LPRAttempt({ attempt, config, onRefresh, viewMode }: LPRAttemptProps) {
         setOpen={setShowDialog}
         event={event}
         config={config}
-        lprImage={viewMode === "detected" ? attempt : `raw_${data.eventId}.jpg`}
+        lprImage={attempt}
+        rawImage={`raw_${eventId}.jpg`}
       />
 
       <div className="relative flex flex-col rounded-lg">
@@ -263,7 +230,7 @@ function LPRAttempt({ attempt, config, onRefresh, viewMode }: LPRAttemptProps) {
           <div className="aspect-[2/1] flex items-center justify-center bg-black">
             <img 
               className="h-40 max-w-none" 
-              src={`${baseUrl}clips/lpr/${viewMode === "detected" ? attempt : `raw_${data.eventId}.jpg`}`} 
+              src={`${baseUrl}clips/lpr/${attempt}`} 
             />
           </div>
         </div>

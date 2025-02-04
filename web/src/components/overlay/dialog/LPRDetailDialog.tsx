@@ -32,7 +32,7 @@ import {
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
 
-const LPR_TABS = ["details", "snapshot", "video"] as const;
+const LPR_TABS = ["details", "snapshot", "video", "raw"] as const;
 export type LPRTab = (typeof LPR_TABS)[number];
 
 type LPRDetailDialogProps = {
@@ -41,6 +41,7 @@ type LPRDetailDialogProps = {
   event?: Event;
   config: FrigateConfig;
   lprImage: string;
+  rawImage: string;
 };
 
 export default function LPRDetailDialog({
@@ -49,6 +50,7 @@ export default function LPRDetailDialog({
   event,
   config,
   lprImage,
+  rawImage,
 }: LPRDetailDialogProps) {
   const [page, setPage] = useState<LPRTab>("details");
 
@@ -66,20 +68,21 @@ export default function LPRDetailDialog({
   );
 
   const lprTabs = useMemo(() => {
-    if (!config || !event) {
-      return [];
-    }
-
     const views = [...LPR_TABS];
 
-    if (!event.has_snapshot) {
-      const index = views.indexOf("snapshot");
-      views.splice(index, 1);
-    }
+    if (event) {
+      if (!event.has_snapshot) {
+        const index = views.indexOf("snapshot");
+        views.splice(index, 1);
+      }
 
-    if (!event.has_clip) {
-      const index = views.indexOf("video");
-      views.splice(index, 1);
+      if (!event.has_clip) {
+        const index = views.indexOf("video");
+        views.splice(index, 1);
+      }
+    } else {
+      // When no event, show only raw tab
+      return ['raw'];
     }
 
     return views;
@@ -100,7 +103,7 @@ export default function LPRDetailDialog({
             <Title>License Plate Image</Title>
             <Description className="sr-only">License plate image details</Description>
           </Header>
-          <PlateTab lprImage={lprImage} />
+          <PlateTab lprImage={lprImage} config={config} />
         </Content>
       </Overlay>
     );
@@ -110,60 +113,68 @@ export default function LPRDetailDialog({
     <Overlay open={open} onOpenChange={setOpen}>
       <Content
         className={cn(
-          "scrollbar-container overflow-y-auto min-w-[50vw]",
+          "scrollbar-container overflow-y-auto",
           isDesktop &&
             "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
           isMobile && "px-4",
         )}
       >
         <Header>
-          <Title>License Plate Event Details</Title>
-          <Description className="sr-only">License plate event details</Description>
+          <Title>{event ? "License Plate Event Details" : "License Plate Image"}</Title>
+          <Description className="sr-only">License plate details</Description>
         </Header>
-        <ScrollArea
-          className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
-        >
-          <div className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={page}
-              onValueChange={(value: LPRTab) => {
-                if (value) {
-                  setPage(value);
-                }
-              }}
-            >
-              {Object.values(lprTabs).map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${page == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={`Select ${item}`}
-                >
-                  {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "snapshot" && <FaImage className="size-4" />}
-                  {item == "video" && <FaVideo className="size-4" />}
-                  <div className="capitalize">{item}</div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
-          </div>
-        </ScrollArea>
-        {page === "details" && (
-          <DetailsTab event={event} timestamp={timestamp} />
+        
+        {event && (
+          <ScrollArea className={cn("w-full whitespace-nowrap", isMobile && "my-2")}>
+            <div className="flex flex-row">
+              <ToggleGroup
+                className="*:rounded-md *:px-3 *:py-4"
+                type="single"
+                size="sm"
+                value={page}
+                onValueChange={(value: LPRTab) => {
+                  if (value) {
+                    setPage(value);
+                  }
+                }}
+              >
+                {lprTabs.map((item) => (
+                  <ToggleGroupItem
+                    key={item}
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${
+                      page === item ? "" : "*:text-muted-foreground"
+                    }`}
+                    value={item}
+                    data-nav-item={item}
+                    aria-label={`Select ${item}`}
+                  >
+                    {item === "details" && <FaRegListAlt className="size-4" />}
+                    {item === "snapshot" && <FaImage className="size-4" />}
+                    {item === "video" && <FaVideo className="size-4" />}
+                    {item === "raw" && <FaImage className="size-4" />}
+                    <div className="capitalize">{item}</div>
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              <ScrollBar orientation="horizontal" className="h-0" />
+            </div>
+          </ScrollArea>
         )}
-        {page === "snapshot" && (
-          <SnapshotTab event={event} />
-        )}
-        {page === "video" && (
-          <VideoTab event={event} />
-        )}
-        {(page === "details" || !event) && (
-          <PlateTab lprImage={lprImage} />
+
+        {event ? (
+          <>
+            {page === "details" && <DetailsTab event={event} timestamp={timestamp} />}
+            {page === "snapshot" && <SnapshotTab event={event} />}
+            {page === "video" && <VideoTab event={event} />}
+            {page === "raw" && (
+              <PlateTab
+                lprImage={rawImage}
+                config={config}
+              />
+            )}
+          </>
+        ) : (
+          <PlateTab lprImage={lprImage} config={config} />
         )}
       </Content>
     </Overlay>
@@ -333,9 +344,10 @@ function VideoTab({ event }: VideoTabProps) {
 
 type PlateTabProps = {
   lprImage: string;
+  config: FrigateConfig;
 };
 
-function PlateTab({ lprImage }: PlateTabProps) {
+function PlateTab({ lprImage, config }: PlateTabProps) {
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   return (
@@ -346,33 +358,31 @@ function PlateTab({ lprImage }: PlateTabProps) {
       />
       <div className={`${imgLoaded ? "visible" : "invisible"} min-h-[60dvh]`}>
         <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-3 h-full">
             <TransformComponent
               wrapperStyle={{
-                width: "100%",
-                height: "100%",
-              }}
-              contentStyle={{
-                position: "relative",
                 width: "100%",
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center"
               }}
+              contentStyle={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+              }}
             >
-              <div className="relative mx-auto w-full h-full flex items-center justify-center">
+              <div className="relative w-full h-full flex items-center justify-center">
                 <img
                   ref={imgRef}
-                  className="mx-auto max-h-[60dvh] w-auto h-auto bg-black object-contain"
+                  className="max-h-[70vh] w-auto object-contain bg-black"
                   src={`${baseUrl}clips/lpr/${lprImage}`}
                   alt="License plate"
                   loading={isSafari ? "eager" : "lazy"}
-                  onLoad={() => {
-                    onImgLoad();
-                  }}
+                  onLoad={onImgLoad}
                 />
-                <div className={cn("absolute right-1 top-1 flex items-center gap-2")}>
+                <div className="absolute right-2 top-2 flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <a download href={`${baseUrl}clips/lpr/${lprImage}`}>
