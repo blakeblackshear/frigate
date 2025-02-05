@@ -97,13 +97,13 @@ services:
 
 If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
 
-| Addon Version                  | URL                                    |
-| ------------------------------ | -------------------------------------- |
-| Frigate NVR                    | `http://ccab4aaf-frigate:5000`         |
-| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |
-| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`    |
-| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
-| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000`    |
+| Addon Version                  | URL                                       |
+| ------------------------------ | ----------------------------------------- |
+| Frigate NVR                    | `http://ccab4aaf-frigate:5000`            |
+| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
+| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`       |
+| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
+| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
 
 ### Frigate running on a separate machine
 
@@ -301,3 +301,7 @@ which server they are referring to.
 #### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
 
 The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
+
+#### I have set up automations based on the occupancy sensors. Sometimes the automation runs because the sensors are turned on, but then I look at Frigate I can't find the object that triggered the sensor. Is this a bug?
+
+No. The occupancy sensors have fewer checks in place because they are often used for things like turning the lights on where latency needs to be as low as possible. So false positives can sometimes trigger these sensors. If you want false positive filtering, you should use an mqtt sensor on the `frigate/events` or `frigate/reviews` topic.
