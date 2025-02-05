@@ -9,7 +9,46 @@ set -o errexit -o nounset -o pipefail
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
-function migrate_db_path() {
+function migrate_from_homeassistant_config() {
+    # Find old config file in yaml or yml, but prefer yaml
+    local ha_config_file="/homeassistant_config/config.yml"
+    local ha_config_file_yaml="${ha_config_file//.yml/.yaml}"
+    if [[ -f "${ha_config_file_yaml}" ]]; then
+        ha_config_file="${ha_config_file_yaml}"
+    elif [[ ! -f "${ha_config_file}" ]]; then
+        # Nothing to migrate
+        return 0
+    fi
+    unset ha_config_file_yaml
+
+    # Confirm there isn't a config yet in the target location
+    local config_file="${CONFIG_FILE:-"/config/config.yml"}"
+    local config_file_yaml="${config_file//.yml/.yaml}"
+    if [[ -f "${config_file_yaml}" || -f "${config_file}" ]]; then
+        echo "[ERROR] TODO" >&2
+        return 1
+    fi
+    unset config_file config_file_yaml
+
+    local db_path
+    db_path=$(yq eval '.database.path' "${config_file}")
+
+    if [[ "${db_path}" == "null" ]]; then
+        db_path="/config/frigate.db"
+    fi
+
+    local previous_db_path="/homeassistant/frigate.db"
+    if [[ -f "${previous_db_path}" ]]; then
+        # /config is a mount point, move the db
+        echo "[INFO] Moving db from '${previous_db_path}' to '${db_path}'..."
+        # Move all files that starts with frigate.db to the new directory
+        mv -vf "${previous_db_path}"* "${new_db_dir}" # TODO FIX
+    fi
+
+    # TODO migrate config
+}
+
+function migrate_db_from_media_to_config() {
     # Find config file in yaml or yml, but prefer yaml
     local config_file="${CONFIG_FILE:-"/config/config.yml"}"
     local config_file_yaml="${config_file//.yml/.yaml}"
@@ -48,7 +87,7 @@ function set_libva_version() {
 }
 
 echo "[INFO] Preparing Frigate..."
-migrate_db_path
+migrate_db_from_media_to_config
 set_libva_version
 echo "[INFO] Starting Frigate..."
 
