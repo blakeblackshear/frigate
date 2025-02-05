@@ -13,7 +13,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 project(migraphx_py)
 
-include_directories(/opt/rocm/include)
+include_directories(/opt/rocm/include /opt/rocm/lib)
 
 find_package(pybind11 REQUIRED)
 pybind11_add_module(migraphx migraphx_py.cpp)
