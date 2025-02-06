@@ -111,7 +111,7 @@ For Raspberry Pi 5 users with the AI Kit, installation is straightforward. Simpl
 For other installations, follow these steps for installation:
 
 1. Install the driver from the [Hailo GitHub repository](https://github.com/hailo-ai/hailort-drivers). A convenient script for Linux is available to clone the repository, build the driver, and install it.
-2. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/41c9b13d2fffce508b32dfc971fa529b49295fbd/docker/hailo8l/user_installation.sh).
+2. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/hailo8l/user_installation.sh).
 3. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
 4. Run the script with `./user_installation.sh`
 
