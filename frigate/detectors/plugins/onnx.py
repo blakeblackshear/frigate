@@ -79,6 +79,10 @@ class ONNXDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
+        elif self.onnx_model_type == ModelTypeEnum.yolov9:
+            # see https://github.com/MultimediaTechLab/YOLO/blob/main/yolo/utils/bounding_box_utils.py#L338
+            logger.info(f"the output shape is {tensor_output[0][0].shape} which has {tensor_output[0][0][0]}")
+            return np.zeros((20, 6), np.float32)
         else:
             raise Exception(
                 f"{self.onnx_model_type} is currently not supported for rocm. See the docs for more info on supported models."
