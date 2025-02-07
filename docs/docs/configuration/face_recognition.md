@@ -54,6 +54,6 @@ When first enabling face recognition it is important to build a foundation of st
 
 Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle. Once a person starts to be consistently recognized correctly on images that are straight-on, it is time to move on to the next step.
 
-# Step 2 - Expanding The Dataset
+### Step 2 - Expanding The Dataset
 
 Once straight-on images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.
