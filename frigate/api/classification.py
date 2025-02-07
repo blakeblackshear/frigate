@@ -100,7 +100,7 @@ def train_face(request: Request, name: str, body: dict = None):
 
     rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
     new_name = f"{name}-{rand_id}.webp"
-    new_file = os.path.join(FACE_DIR, f"{name}/{new_name}")
+    new_file = sanitize_filename(os.path.join(FACE_DIR, f"{name}/{new_name}"))
     shutil.move(training_file, new_file)
 
     context: EmbeddingsContext = request.app.embeddings
