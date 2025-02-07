@@ -32,7 +32,7 @@ Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVi
 
 :::warning
 
-Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15, which is still under development.
+Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15 and later.
 
 :::
 
