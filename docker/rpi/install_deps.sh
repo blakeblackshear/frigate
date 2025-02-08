@@ -18,7 +18,8 @@ apt-get -qq install --no-install-recommends -y \
 mkdir -p -m 600 /root/.gnupg
 
 # enable non-free repo
-sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
+echo "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" | tee -a /etc/apt/sources.list
+apt update
 
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
