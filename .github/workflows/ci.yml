@@ -77,6 +77,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
   jetson_jp4_build:
+    if: false
     runs-on: ubuntu-22.04
     name: Jetson Jetpack 4
     steps:
@@ -106,6 +107,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
+    if: false
     runs-on: ubuntu-22.04
     name: Jetson Jetpack 5
     steps:
@@ -162,6 +164,19 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+      - name: AMD/ROCm general build
+        env:
+          AMDGPU: gfx
+          HSA_OVERRIDE: 0
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-from=type=gha
   arm64_extra_builds:
     runs-on: ubuntu-22.04
     name: ARM Extra Build
@@ -214,19 +229,6 @@ jobs:
             h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
-      - name: AMD/ROCm general build
-        env:
-          AMDGPU: gfx
-          HSA_OVERRIDE: 0
-        uses: docker/bake-action@v6
-        with:
-          source: .
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
-            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
