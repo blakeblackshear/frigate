@@ -52,7 +52,8 @@
         "csstools.postcss",
         "blanu.vscode-styled-jsx",
         "bradlc.vscode-tailwindcss",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "eamodio.gitlens"
       ],
       "settings": {
         "remote.autoForwardPorts": false,

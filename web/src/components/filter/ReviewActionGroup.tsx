@@ -1,7 +1,7 @@
 import { FaCircleCheck } from "react-icons/fa6";
 import { useCallback, useState } from "react";
 import axios from "axios";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { isDesktop } from "react-device-detect";
 import { FaCompactDisc } from "react-icons/fa";
 import { HiTrash } from "react-icons/hi";
@@ -79,7 +79,10 @@ export default function ReviewActionGroup({
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive" onClick={onDelete}>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={onDelete}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -101,6 +104,7 @@ export default function ReviewActionGroup({
           {selectedReviews.length == 1 && (
             <Button
               className="flex items-center gap-2 p-2"
+              aria-label="Export"
               size="sm"
               onClick={() => {
                 onExport(selectedReviews[0]);
@@ -113,6 +117,7 @@ export default function ReviewActionGroup({
           )}
           <Button
             className="flex items-center gap-2 p-2"
+            aria-label="Mark as reviewed"
             size="sm"
             onClick={onMarkAsReviewed}
           >
@@ -121,6 +126,7 @@ export default function ReviewActionGroup({
           </Button>
           <Button
             className="flex items-center gap-2 p-2"
+            aria-label="Delete"
             size="sm"
             onClick={handleDelete}
           >

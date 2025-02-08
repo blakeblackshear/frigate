@@ -2,9 +2,11 @@ import { baseUrl } from "./baseUrl";
 import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import {
+  EmbeddingsReindexProgressType,
   FrigateCameraState,
   FrigateEvent,
   FrigateReview,
+  ModelState,
   ToggleableSetting,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
@@ -63,8 +65,14 @@ function useValue(): useValueReturn {
         : "OFF";
     });
 
-    setWsState({ ...wsState, ...cameraStates });
-    setHasCameraState(true);
+    setWsState((prevState) => ({
+      ...prevState,
+      ...cameraStates,
+    }));
+
+    if (Object.keys(cameraStates).length > 0) {
+      setHasCameraState(true);
+    }
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsState]);
@@ -75,7 +83,10 @@ function useValue(): useValueReturn {
       const data: Update = JSON.parse(event.data);
 
       if (data) {
-        setWsState({ ...wsState, [data.topic]: data.payload });
+        setWsState((prevState) => ({
+          ...prevState,
+          [data.topic]: data.payload,
+        }));
       }
     },
     onOpen: () => {
@@ -84,6 +95,9 @@ function useValue(): useValueReturn {
         message: "",
         retain: false,
       });
+    },
+    onClose: () => {
+      setHasCameraState(false);
     },
     shouldReconnect: () => true,
     retryOnError: true,
@@ -266,6 +280,77 @@ export function useInitialCameraState(
   return { payload: data ? data[camera] : undefined };
 }
 
+export function useModelState(
+  model: string,
+  revalidateOnFocus: boolean = true,
+): { payload: ModelState } {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("model_state", "modelState");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("modelState");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("modelState");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data ? data[model] : undefined };
+}
+
+export function useEmbeddingsReindexProgress(
+  revalidateOnFocus: boolean = true,
+): {
+  payload: EmbeddingsReindexProgressType;
+} {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("embeddings_reindex_progress", "embeddingsReindexProgress");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("embeddingsReindexProgress");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("embeddingsReindexProgress");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data };
+}
+
 export function useMotionActivity(camera: string): { payload: string } {
   const {
     value: { payload },
@@ -320,4 +405,11 @@ export function useImproveContrast(camera: string): {
     `${camera}/improve_contrast/set`,
   );
   return { payload: payload as ToggleableSetting, send };
+}
+
+export function useTrackedObjectUpdate(): { payload: string } {
+  const {
+    value: { payload },
+  } = useWs("tracked_object_update", "");
+  return useDeepMemo(JSON.parse(payload as string));
 }

@@ -29,8 +29,11 @@ export function ApiProvider({ children, options }: ApiProviderType) {
             error.response &&
             [401, 302, 307].includes(error.response.status)
           ) {
-            window.location.href =
-              error.response.headers.get("location") ?? "login";
+            // redirect to the login page if not already there
+            const loginPage = error.response.headers.get("location") ?? "login";
+            if (window.location.href !== loginPage) {
+              window.location.href = loginPage;
+            }
           }
         },
         ...options,

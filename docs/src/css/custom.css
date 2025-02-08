@@ -23,3 +23,214 @@
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
 }
+
+/**
+  Custom CSS for OpenAPI Specification. Based of openapi https://github.com/PaloAltoNetworks/docusaurus-openapi-docs/tree/main/demo
+*/
+
+/* Sidebar Method labels */
+.api-method > .menu__link,
+.schema > .menu__link {
+  align-items: center;
+  justify-content: start;
+}
+
+.api-method > .menu__link::before,
+.schema > .menu__link::before {
+  width: 55px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  border: 1px solid;
+  margin-right: var(--ifm-spacing-horizontal);
+  text-align: center;
+  flex-shrink: 0;
+  border-color: transparent;
+  color: white;
+}
+
+.get > .menu__link::before {
+  content: "get";
+  background-color: var(--ifm-color-primary);
+}
+
+.post > .menu__link::before {
+  content: "post";
+  background-color: var(--ifm-color-success);
+}
+
+.delete > .menu__link::before {
+  content: "del";
+  background-color: var(--openapi-code-red);
+}
+
+.put > .menu__link::before {
+  content: "put";
+  background-color: var(--openapi-code-blue);
+}
+
+.patch > .menu__link::before {
+  content: "patch";
+  background-color: var(--openapi-code-orange);
+}
+
+.head > .menu__link::before {
+  content: "head";
+  background-color: var(--ifm-color-secondary-darkest);
+}
+
+.event > .menu__link::before {
+  content: "event";
+  background-color: var(--ifm-color-secondary-darkest);
+}
+
+.schema > .menu__link::before {
+  content: "schema";
+  background-color: var(--ifm-color-secondary-darkest);
+}
+
+.menu__list-item--deprecated > .menu__link,
+.menu__list-item--deprecated > .menu__link:hover {
+  text-decoration: line-through;
+}
+/* Sidebar Method labels High Contrast */
+.api-method-contrast > .menu__link,
+.schema-contrast > .menu__link {
+  align-items: center;
+  justify-content: start;
+}
+
+.api-method-contrast > .menu__link::before,
+.schema-contrast > .menu__link::before {
+  width: 55px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  border: 1px solid;
+  border-inline-start-width: 5px;
+  margin-right: var(--ifm-spacing-horizontal);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.get-contrast > .menu__link::before {
+  content: "get";
+  background-color: var(--ifm-color-info-contrast-background);
+  color: var(--ifm-color-info-contrast-foreground);
+  border-color: var(--ifm-color-info-dark);
+}
+
+.post-contrast > .menu__link::before {
+  content: "post";
+  background-color: var(--ifm-color-success-contrast-background);
+  color: var(--ifm-color-success-contrast-foreground);
+  border-color: var(--ifm-color-success-dark);
+}
+
+.delete-contrast > .menu__link::before {
+  content: "del";
+  background-color: var(--ifm-color-danger-contrast-background);
+  color: var(--ifm-color-danger-contrast-foreground);
+  border-color: var(--ifm-color-danger-dark);
+}
+
+.put-contrast > .menu__link::before {
+  content: "put";
+  background-color: var(--ifm-color-warning-contrast-background);
+  color: var(--ifm-color-warning-contrast-foreground);
+  border-color: var(--ifm-color-warning-dark);
+}
+
+.patch-contrast > .menu__link::before {
+  content: "patch";
+  background-color: var(--ifm-color-success-contrast-background);
+  color: var(--ifm-color-success-contrast-foreground);
+  border-color: var(--ifm-color-success-dark);
+}
+
+.head-contrast > .menu__link::before {
+  content: "head";
+  background-color: var(--ifm-color-secondary-contrast-background);
+  color: var(--ifm-color-secondary-contrast-foreground);
+  border-color: var(--ifm-color-secondary-dark);
+}
+
+.event-contrast > .menu__link::before {
+  content: "event";
+  background-color: var(--ifm-color-secondary-contrast-background);
+  color: var(--ifm-color-secondary-contrast-foreground);
+  border-color: var(--ifm-color-secondary-dark);
+}
+
+.schema-contrast > .menu__link::before {
+  content: "schema";
+  background-color: var(--ifm-color-secondary-contrast-background);
+  color: var(--ifm-color-secondary-contrast-foreground);
+  border-color: var(--ifm-color-secondary-dark);
+}
+
+/* Simple */
+.api-method-simple > .menu__link {
+  align-items: center;
+  justify-content: start;
+}
+.api-method-simple > .menu__link::before {
+  width: 55px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  align-content: start;
+  margin-right: var(--ifm-spacing-horizontal);
+  text-align: right;
+  flex-shrink: 0;
+  border-color: transparent;
+}
+
+.get-simple > .menu__link::before {
+  content: "get";
+  color: var(--ifm-color-info);
+}
+
+.post-simple > .menu__link::before {
+  content: "post";
+  color: var(--ifm-color-success);
+}
+
+.delete-simple > .menu__link::before {
+  content: "del";
+  color: var(--ifm-color-danger);
+}
+
+.put-simple > .menu__link::before {
+  content: "put";
+  color: var(--ifm-color-warning);
+}
+
+.patch-simple > .menu__link::before {
+  content: "patch";
+  color: var(--ifm-color-warning);
+}
+
+.head-simple > .menu__link::before {
+  content: "head";
+  color: var(--ifm-color-secondary-contrast-foreground);
+}
+
+.event-simple > .menu__link::before {
+  content: "event";
+  color: var(--ifm-color-secondary-contrast-foreground);
+}
+
+.schema-simple > .menu__link::before {
+  content: "schema";
+  color: var(--ifm-color-secondary-contrast-foreground);
+}

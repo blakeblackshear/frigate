@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -22,10 +23,13 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { getUTCOffset } from "@/utils/dateUtil";
+import { baseUrl } from "@/api/baseUrl";
+import { cn } from "@/lib/utils";
+import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -44,8 +48,10 @@ type ExportDialogProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
+  showPreview: boolean;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  setShowPreview: (showPreview: boolean) => void;
 };
 export default function ExportDialog({
   camera,
@@ -53,10 +59,13 @@ export default function ExportDialog({
   currentTime,
   range,
   mode,
+  showPreview,
   setRange,
   setMode,
+  setShowPreview,
 }: ExportDialogProps) {
   const [name, setName] = useState("");
+
   const onStartExport = useCallback(() => {
     if (!range) {
       toast.error("No valid time range selected", { position: "top-center" });
@@ -109,9 +118,16 @@ export default function ExportDialog({
 
   return (
     <>
+      <ExportPreviewDialog
+        camera={camera}
+        range={range}
+        showPreview={showPreview}
+        setShowPreview={setShowPreview}
+      />
       <SaveExportOverlay
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
         show={mode == "timeline"}
+        onPreview={() => setShowPreview(true)}
         onSave={() => onStartExport()}
         onCancel={() => setMode("none")}
       />
@@ -126,6 +142,7 @@ export default function ExportDialog({
         <Trigger asChild>
           <Button
             className="flex items-center gap-2"
+            aria-label="Export"
             size="sm"
             onClick={() => {
               const now = new Date(latestTime * 1000);
@@ -273,7 +290,7 @@ export function ExportContent({
         />
       )}
       <Input
-        className="my-6"
+        className="text-md my-6"
         type="search"
         placeholder="Name the Export"
         value={name}
@@ -291,6 +308,7 @@ export function ExportContent({
         </div>
         <Button
           className={isDesktop ? "" : "w-full"}
+          aria-label="Select or export"
           variant="select"
           size="sm"
           onClick={() => {
@@ -404,6 +422,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+            aria-label="Start time"
             variant={startOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
@@ -431,19 +450,22 @@ function CustomTimeSelector({
           />
           <SelectSeparator className="bg-secondary" />
           <input
-            className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
             type="time"
             value={startClock}
-            step="1"
+            step={isIOS ? "60" : "1"}
             onChange={(e) => {
               const clock = e.target.value;
-              const [hour, minute, second] = clock.split(":");
+              const [hour, minute, second] = isIOS
+                ? [...clock.split(":"), "00"]
+                : clock.split(":");
+
               const start = new Date(startTime * 1000);
               start.setHours(
                 parseInt(hour),
                 parseInt(minute),
-                parseInt(second),
+                parseInt(second ?? 0),
                 0,
               );
               setRange({
@@ -466,6 +488,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+            aria-label="End time"
             variant={endOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
@@ -493,19 +516,22 @@ function CustomTimeSelector({
           />
           <SelectSeparator className="bg-secondary" />
           <input
-            className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
             type="time"
             value={endClock}
-            step="1"
+            step={isIOS ? "60" : "1"}
             onChange={(e) => {
               const clock = e.target.value;
-              const [hour, minute, second] = clock.split(":");
-              const end = new Date(endTime * 1000);
+              const [hour, minute, second] = isIOS
+                ? [...clock.split(":"), "00"]
+                : clock.split(":");
+
+              const end = new Date(startTime * 1000);
               end.setHours(
                 parseInt(hour),
                 parseInt(minute),
-                parseInt(second),
+                parseInt(second ?? 0),
                 0,
               );
               setRange({
@@ -517,5 +543,46 @@ function CustomTimeSelector({
         </PopoverContent>
       </Popover>
     </div>
+  );
+}
+
+type ExportPreviewDialogProps = {
+  camera: string;
+  range?: TimeRange;
+  showPreview: boolean;
+  setShowPreview: (showPreview: boolean) => void;
+};
+
+export function ExportPreviewDialog({
+  camera,
+  range,
+  showPreview,
+  setShowPreview,
+}: ExportPreviewDialogProps) {
+  if (!range) {
+    return null;
+  }
+
+  const source = `${baseUrl}vod/${camera}/start/${range.after}/end/${range.before}/index.m3u8`;
+
+  return (
+    <Dialog open={showPreview} onOpenChange={setShowPreview}>
+      <DialogContent
+        className={cn(
+          "scrollbar-container overflow-y-auto",
+          isDesktop &&
+            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+          isMobile && "px-4",
+        )}
+      >
+        <DialogHeader>
+          <DialogTitle>Preview Export</DialogTitle>
+          <DialogDescription className="sr-only">
+            Preview Export
+          </DialogDescription>
+        </DialogHeader>
+        <GenericVideoPlayer source={source} />
+      </DialogContent>
+    </Dialog>
   );
 }

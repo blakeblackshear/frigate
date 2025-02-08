@@ -19,13 +19,7 @@ export interface BirdseyeConfig {
   width: number;
 }
 
-export const ATTRIBUTE_LABELS = [
-  "amazon",
-  "face",
-  "fedex",
-  "license_plate",
-  "ups",
-];
+export type SearchModelSize = "small" | "large";
 
 export interface CameraConfig {
   audio: {
@@ -83,6 +77,13 @@ export interface CameraConfig {
     cmd: string;
     roles: string[];
   }[];
+  genai: {
+    enabled: string;
+    prompt: string;
+    object_prompts: { [key: string]: string };
+    required_zones: string[];
+    objects: string[];
+  };
   live: {
     height: number;
     quality: number;
@@ -141,6 +142,7 @@ export interface CameraConfig {
     password: string | null;
     port: number;
     user: string | null;
+    tls_insecure: boolean;
   };
   record: {
     enabled: boolean;
@@ -298,6 +300,18 @@ export interface FrigateConfig {
     retry_interval: number;
   };
 
+  genai: {
+    enabled: boolean;
+    provider: string;
+    base_url?: string;
+    api_key?: string;
+    model: string;
+    prompt: string;
+    object_prompts: { [key: string]: string };
+    required_zones: string[];
+    objects: string[];
+  };
+
   go2rtc: {
     streams: string[];
     webrtc: {
@@ -328,6 +342,8 @@ export interface FrigateConfig {
     path: string | null;
     width: number;
     colormap: { [key: string]: [number, number, number] };
+    attributes_map: { [key: string]: [string] };
+    all_attributes: [string];
   };
 
   motion: Record<string, unknown> | null;
@@ -344,6 +360,11 @@ export interface FrigateConfig {
     tls_insecure: boolean | null;
     topic_prefix: string;
     user: string | null;
+  };
+
+  notifications: {
+    enabled: boolean;
+    email?: string;
   };
 
   objects: {
@@ -396,6 +417,12 @@ export interface FrigateConfig {
 
   rtmp: {
     enabled: boolean;
+  };
+
+  semantic_search: {
+    enabled: boolean;
+    reindex: boolean;
+    model_size: SearchModelSize;
   };
 
   snapshots: {

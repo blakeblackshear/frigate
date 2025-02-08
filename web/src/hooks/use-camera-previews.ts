@@ -29,7 +29,7 @@ export function useCameraPreviews(
     { revalidateOnFocus: autoRefresh, revalidateOnReconnect: autoRefresh },
   );
 
-  return allPreviews;
+  return fetchPreviews ? allPreviews : [];
 }
 
 // we need to add a buffer of 5 seconds to the end preview times

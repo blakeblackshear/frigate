@@ -55,13 +55,13 @@ class FrigateMotionDetector(MotionDetector):
 
         # Improve contrast
         if self.improve_contrast.value:
-            minval = np.percentile(resized_frame, 4)
-            maxval = np.percentile(resized_frame, 96)
+            min_value = np.percentile(resized_frame, 4)
+            max_value = np.percentile(resized_frame, 96)
             # don't adjust if the image is a single color
-            if minval < maxval:
-                resized_frame = np.clip(resized_frame, minval, maxval)
+            if min_value < max_value:
+                resized_frame = np.clip(resized_frame, min_value, max_value)
                 resized_frame = (
-                    ((resized_frame - minval) / (maxval - minval)) * 255
+                    ((resized_frame - min_value) / (max_value - min_value)) * 255
                 ).astype(np.uint8)
 
         # mask frame
@@ -100,13 +100,13 @@ class FrigateMotionDetector(MotionDetector):
             # dilate the thresholded image to fill in holes, then find contours
             # on thresholded image
             thresh_dilated = cv2.dilate(thresh, None, iterations=2)
-            cnts = cv2.findContours(
+            contours = cv2.findContours(
                 thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
-            cnts = imutils.grab_contours(cnts)
+            contours = imutils.grab_contours(contours)
 
             # loop over the contours
-            for c in cnts:
+            for c in contours:
                 # if the contour is big enough, count it as motion
                 contour_area = cv2.contourArea(c)
                 if contour_area > self.contour_area.value:
@@ -124,7 +124,7 @@ class FrigateMotionDetector(MotionDetector):
                 thresh_dilated = cv2.cvtColor(thresh_dilated, cv2.COLOR_GRAY2BGR)
                 # print("--------")
                 # print(self.frame_counter)
-                for c in cnts:
+                for c in contours:
                     contour_area = cv2.contourArea(c)
                     if contour_area > self.contour_area.value:
                         x, y, w, h = cv2.boundingRect(c)

@@ -4,6 +4,7 @@ from statistics import mean
 
 import numpy as np
 
+import frigate.util as util
 from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
     ObjectDetectProcess,
@@ -60,7 +61,7 @@ def start(id, num_detections, detection_queue, event):
     object_detector.cleanup()
     print(f"{id} - Processed for {duration:.2f} seconds.")
     print(f"{id} - FPS: {object_detector.fps.eps():.2f}")
-    print(f"{id} - Average frame processing time: {mean(frame_times)*1000:.2f}ms")
+    print(f"{id} - Average frame processing time: {mean(frame_times) * 1000:.2f}ms")
 
 
 ######
@@ -90,7 +91,7 @@ edgetpu_process_2 = ObjectDetectProcess(
 )
 
 for x in range(0, 10):
-    camera_process = mp.Process(
+    camera_process = util.Process(
         target=start, args=(x, 300, detection_queue, events[str(x)])
     )
     camera_process.daemon = True

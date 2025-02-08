@@ -65,8 +65,11 @@ class InterProcessRequestor:
 
     def send_data(self, topic: str, data: any) -> any:
         """Sends data and then waits for reply."""
-        self.socket.send_json((topic, data))
-        return self.socket.recv_json()
+        try:
+            self.socket.send_json((topic, data))
+            return self.socket.recv_json()
+        except zmq.ZMQError:
+            return ""
 
     def stop(self) -> None:
         self.socket.close()

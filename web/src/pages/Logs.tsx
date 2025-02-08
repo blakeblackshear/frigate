@@ -21,15 +21,33 @@ import { cn } from "@/lib/utils";
 import { MdVerticalAlignBottom } from "react-icons/md";
 import { parseLogLines } from "@/utils/logUtil";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import scrollIntoView from "scroll-into-view-if-needed";
+import { FaDownload } from "react-icons/fa";
 
 type LogRange = { start: number; end: number };
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
+  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
   }, [logService]);
+
+  useEffect(() => {
+    if (tabsRef.current) {
+      const element = tabsRef.current.querySelector(
+        `[data-nav-item="${logService}"]`,
+      );
+      if (element instanceof HTMLElement) {
+        scrollIntoView(element, {
+          behavior: "smooth",
+          inline: "start",
+        });
+      }
+    }
+  }, [tabsRef, logService]);
 
   // log data handling
 
@@ -117,6 +135,27 @@ function Logs() {
       toast.error("Could not copy logs to clipboard");
     }
   }, [logs, logRange]);
+
+  const handleDownloadLogs = useCallback(() => {
+    axios
+      .get(`logs/${logService}?download=true`)
+      .then((resp) => {
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(resp.data),
+        );
+        element.setAttribute("download", `${logService}-logs.txt`);
+
+        element.style.display = "none";
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+      })
+      .catch(() => {});
+  }, [logService]);
 
   // scroll to bottom
 
@@ -261,41 +300,124 @@ function Logs() {
     },
   );
 
+  useEffect(() => {
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      if (!contentRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      const range = selection.getRangeAt(0);
+      const fragment = range.cloneContents();
+
+      const extractLogData = (element: Element) => {
+        const severity =
+          element.querySelector(".log-severity")?.textContent?.trim() || "";
+        const dateStamp =
+          element.querySelector(".log-timestamp")?.textContent?.trim() || "";
+        const section =
+          element.querySelector(".log-section")?.textContent?.trim() || "";
+        const content =
+          element.querySelector(".log-content")?.textContent?.trim() || "";
+
+        return { severity, dateStamp, section, content };
+      };
+
+      let copyData: {
+        severity: string;
+        dateStamp: string;
+        section: string;
+        content: string;
+      }[] = [];
+
+      if (fragment.querySelectorAll(".grid").length > 0) {
+        // Multiple grid elements
+        copyData = Array.from(fragment.querySelectorAll(".grid")).map(
+          extractLogData,
+        );
+      } else {
+        // Try to find the closest grid element or use the first child element
+        const gridElement =
+          fragment.querySelector(".grid") || (fragment.firstChild as Element);
+
+        if (gridElement) {
+          const data = extractLogData(gridElement);
+          if (data.severity || data.dateStamp || data.section || data.content) {
+            copyData.push(data);
+          }
+        }
+      }
+
+      if (copyData.length === 0) return; // No valid data to copy
+
+      // Calculate maximum widths for each column
+      const maxWidths = {
+        severity: Math.max(...copyData.map((d) => d.severity.length)),
+        dateStamp: Math.max(...copyData.map((d) => d.dateStamp.length)),
+        section: Math.max(...copyData.map((d) => d.section.length)),
+      };
+
+      const pad = (str: string, length: number) => str.padEnd(length, " ");
+
+      // Create the formatted copy text
+      const copyText = copyData
+        .map(
+          (d) =>
+            `${pad(d.severity, maxWidths.severity)} | ${pad(d.dateStamp, maxWidths.dateStamp)} | ${pad(d.section, maxWidths.section)} | ${d.content}`,
+        )
+        .join("\n");
+
+      e.clipboardData?.setData("text/plain", copyText);
+    };
+
+    const content = contentRef.current;
+    content?.addEventListener("copy", handleCopy);
+    return () => {
+      content?.removeEventListener("copy", handleCopy);
+    };
+  }, []);
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster position="top-center" closeButton={true} />
       <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
 
-      <div className="flex items-center justify-between">
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={logService}
-          onValueChange={(value: LogType) => {
-            if (value) {
-              setLogs([]);
-              setLogLines([]);
-              setFilterSeverity(undefined);
-              setLogService(value);
-            }
-          }} // don't allow the severity to be unselected
-        >
-          {Object.values(logTypes).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
-              value={item}
-              data-nav-item={item}
-              aria-label={`Select ${item}`}
+      <div className="relative flex h-11 w-full items-center justify-between">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div ref={tabsRef} className="flex flex-row">
+            <ToggleGroup
+              type="single"
+              size="sm"
+              value={logService}
+              onValueChange={(value: LogType) => {
+                if (value) {
+                  setLogs([]);
+                  setLogLines([]);
+                  setFilterSeverity(undefined);
+                  setLogService(value);
+                }
+              }} // don't allow the severity to be unselected
             >
-              <div className="capitalize">{item}</div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+              {Object.values(logTypes).map((item) => (
+                <ToggleGroupItem
+                  key={item}
+                  className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
+                  value={item}
+                  data-nav-item={item}
+                  aria-label={`Select ${item}`}
+                >
+                  <div className="capitalize">{item}</div>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <ScrollBar orientation="horizontal" className="h-0" />
+          </div>
+        </ScrollArea>
         <div className="flex items-center gap-2">
           <Button
             className="flex items-center justify-between gap-2"
+            aria-label="Copy logs to clipboard"
             size="sm"
             onClick={handleCopyLogs}
           >
@@ -303,6 +425,15 @@ function Logs() {
             <div className="hidden text-primary md:block">
               Copy to Clipboard
             </div>
+          </Button>
+          <Button
+            className="flex items-center justify-between gap-2"
+            aria-label="Download logs"
+            size="sm"
+            onClick={handleDownloadLogs}
+          >
+            <FaDownload className="text-secondary-foreground" />
+            <div className="hidden text-primary md:block">Download</div>
           </Button>
           <LogLevelFilterButton
             selectedLabels={filterSeverity}
@@ -314,6 +445,7 @@ function Logs() {
       {initialScroll && !endVisible && (
         <Button
           className="absolute bottom-8 left-[50%] z-20 flex -translate-x-[50%] items-center gap-1 rounded-md p-2"
+          aria-label="Jump to bottom of logs"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,
@@ -413,18 +545,18 @@ function LogLineData({
       )}
       onClick={onSelect}
     >
-      <div className="flex h-full items-center gap-2 p-1">
+      <div className="log-severity flex h-full items-center gap-2 p-1">
         <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
-      <div className="col-span-2 flex h-full items-center sm:col-span-1">
+      <div className="log-timestamp col-span-2 flex h-full items-center sm:col-span-1">
         {line.dateStamp}
       </div>
-      <div className="col-span-2 flex size-full items-center pr-2">
+      <div className="log-section col-span-2 flex size-full items-center pr-2">
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.section}
         </div>
       </div>
-      <div className="col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
+      <div className="log-content col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.content}
         </div>

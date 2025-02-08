@@ -1,83 +1,103 @@
 """Event apis."""
 
+import datetime
 import logging
 import os
-from datetime import datetime
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
 
 import cv2
-from flask import (
-    Blueprint,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
-from peewee import DoesNotExist, fn, operator
+from fastapi import APIRouter, Request
+from fastapi.params import Depends
+from fastapi.responses import JSONResponse
+from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import (
-    CLIPS_DIR,
+from frigate.api.defs.query.events_query_parameters import (
+    DEFAULT_TIME_RANGE,
+    EventsQueryParams,
+    EventsSearchQueryParams,
+    EventsSummaryQueryParams,
 )
-from frigate.models import Event, Timeline
-from frigate.object_processing import TrackedObject
+from frigate.api.defs.query.regenerate_query_parameters import (
+    RegenerateQueryParameters,
+)
+from frigate.api.defs.request.events_body import (
+    EventsCreateBody,
+    EventsDeleteBody,
+    EventsDescriptionBody,
+    EventsEndBody,
+    EventsSubLabelBody,
+    SubmitPlusBody,
+)
+from frigate.api.defs.response.event_response import (
+    EventCreateResponse,
+    EventMultiDeleteResponse,
+    EventResponse,
+    EventUploadPlusResponse,
+)
+from frigate.api.defs.response.generic_response import GenericResponse
+from frigate.api.defs.tags import Tags
+from frigate.const import CLIPS_DIR
+from frigate.embeddings import EmbeddingsContext
+from frigate.events.external import ExternalEventProcessor
+from frigate.models import Event, ReviewSegment, Timeline
+from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
-EventBp = Blueprint("events", __name__)
-
-DEFAULT_TIME_RANGE = "00:00,24:00"
+router = APIRouter(tags=[Tags.events])
 
 
-@EventBp.route("/events")
-def events():
-    camera = request.args.get("camera", "all")
-    cameras = request.args.get("cameras", "all")
+@router.get("/events", response_model=list[EventResponse])
+def events(params: EventsQueryParams = Depends()):
+    camera = params.camera
+    cameras = params.cameras
 
     # handle old camera arg
     if cameras == "all" and camera != "all":
         cameras = camera
 
-    label = unquote(request.args.get("label", "all"))
-    labels = request.args.get("labels", "all")
+    label = unquote(params.label)
+    labels = params.labels
 
     # handle old label arg
     if labels == "all" and label != "all":
         labels = label
 
-    sub_label = request.args.get("sub_label", "all")
-    sub_labels = request.args.get("sub_labels", "all")
+    sub_label = params.sub_label
+    sub_labels = params.sub_labels
 
     # handle old sub_label arg
     if sub_labels == "all" and sub_label != "all":
         sub_labels = sub_label
 
-    zone = request.args.get("zone", "all")
-    zones = request.args.get("zones", "all")
+    zone = params.zone
+    zones = params.zones
 
     # handle old label arg
     if zones == "all" and zone != "all":
         zones = zone
 
-    limit = request.args.get("limit", 100)
-    after = request.args.get("after", type=float)
-    before = request.args.get("before", type=float)
-    time_range = request.args.get("time_range", DEFAULT_TIME_RANGE)
-    has_clip = request.args.get("has_clip", type=int)
-    has_snapshot = request.args.get("has_snapshot", type=int)
-    in_progress = request.args.get("in_progress", type=int)
-    include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
-    favorites = request.args.get("favorites", type=int)
-    min_score = request.args.get("min_score", type=float)
-    max_score = request.args.get("max_score", type=float)
-    is_submitted = request.args.get("is_submitted", type=int)
-    min_length = request.args.get("min_length", type=float)
-    max_length = request.args.get("max_length", type=float)
+    limit = params.limit
+    after = params.after
+    before = params.before
+    time_range = params.time_range
+    has_clip = params.has_clip
+    has_snapshot = params.has_snapshot
+    in_progress = params.in_progress
+    include_thumbnails = params.include_thumbnails
+    favorites = params.favorites
+    min_score = params.min_score
+    max_score = params.max_score
+    is_submitted = params.is_submitted
+    min_length = params.min_length
+    max_length = params.max_length
+    event_id = params.event_id
 
-    sort = request.args.get("sort", type=str)
+    sort = params.sort
 
     clauses = []
 
@@ -157,7 +177,7 @@ def events():
 
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
-        tz_name = request.args.get("timezone", default="utc", type=str)
+        tz_name = params.timezone
         hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
 
         times = time_range.split(",")
@@ -218,6 +238,9 @@ def events():
         elif is_submitted > 0:
             clauses.append((Event.plus_id != ""))
 
+    if event_id is not None:
+        clauses.append((Event.id == event_id))
+
     if len(clauses) == 0:
         clauses.append((True))
 
@@ -229,6 +252,8 @@ def events():
         elif sort == "date_asc":
             order_by = Event.start_time.asc()
         elif sort == "date_desc":
+            order_by = Event.start_time.desc()
+        else:
             order_by = Event.start_time.desc()
     else:
         order_by = Event.start_time.desc()
@@ -242,15 +267,353 @@ def events():
         .iterator()
     )
 
-    return jsonify(list(events))
+    return JSONResponse(content=list(events))
 
 
-@EventBp.route("/events/summary")
-def events_summary():
-    tz_name = request.args.get("timezone", default="utc", type=str)
+@router.get("/events/explore", response_model=list[EventResponse])
+def events_explore(limit: int = 10):
+    # get distinct labels for all events
+    distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
+
+    label_counts = {}
+
+    def event_generator():
+        for label_obj in distinct_labels.iterator():
+            label = label_obj.label
+
+            # get most recent events for this label
+            label_events = (
+                Event.select()
+                .where(Event.label == label)
+                .order_by(Event.start_time.desc())
+                .limit(limit)
+                .iterator()
+            )
+
+            # count total events for this label
+            label_counts[label] = Event.select().where(Event.label == label).count()
+
+            yield from label_events
+
+    def process_events():
+        for event in event_generator():
+            processed_event = {
+                "id": event.id,
+                "camera": event.camera,
+                "label": event.label,
+                "zones": event.zones,
+                "start_time": event.start_time,
+                "end_time": event.end_time,
+                "has_clip": event.has_clip,
+                "has_snapshot": event.has_snapshot,
+                "plus_id": event.plus_id,
+                "retain_indefinitely": event.retain_indefinitely,
+                "sub_label": event.sub_label,
+                "top_score": event.top_score,
+                "false_positive": event.false_positive,
+                "box": event.box,
+                "data": {
+                    k: v
+                    for k, v in event.data.items()
+                    if k
+                    in ["type", "score", "top_score", "description", "sub_label_score"]
+                },
+                "event_count": label_counts[event.label],
+            }
+            yield processed_event
+
+    # convert iterator to list and sort
+    processed_events = sorted(
+        process_events(),
+        key=lambda x: (x["event_count"], x["start_time"]),
+        reverse=True,
+    )
+
+    return JSONResponse(content=processed_events)
+
+
+@router.get("/event_ids", response_model=list[EventResponse])
+def event_ids(ids: str):
+    ids = ids.split(",")
+
+    if not ids:
+        return JSONResponse(
+            content=({"success": False, "message": "Valid list of ids must be sent"}),
+            status_code=400,
+        )
+
+    try:
+        events = Event.select().where(Event.id << ids).dicts().iterator()
+        return JSONResponse(list(events))
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Events not found"}), status_code=400
+        )
+
+
+@router.get("/events/search")
+def events_search(request: Request, params: EventsSearchQueryParams = Depends()):
+    query = params.query
+    search_type = params.search_type
+    include_thumbnails = params.include_thumbnails
+    limit = params.limit
+    sort = params.sort
+
+    # Filters
+    cameras = params.cameras
+    labels = params.labels
+    zones = params.zones
+    after = params.after
+    before = params.before
+    min_score = params.min_score
+    max_score = params.max_score
+    time_range = params.time_range
+    has_clip = params.has_clip
+    has_snapshot = params.has_snapshot
+    is_submitted = params.is_submitted
+
+    # for similarity search
+    event_id = params.event_id
+
+    if not query and not event_id:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "A search query must be supplied",
+                }
+            ),
+            status_code=400,
+        )
+
+    if not request.app.frigate_config.semantic_search.enabled:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Semantic search is not enabled",
+                }
+            ),
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+
+    selected_columns = [
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.top_score,
+        Event.data,
+        Event.plus_id,
+        ReviewSegment.thumb_path,
+    ]
+
+    if include_thumbnails:
+        selected_columns.append(Event.thumbnail)
+
+    # Build the initial SQLite query filters
+    event_filters = []
+
+    if cameras != "all":
+        event_filters.append((Event.camera << cameras.split(",")))
+
+    if labels != "all":
+        event_filters.append((Event.label << labels.split(",")))
+
+    if zones != "all":
+        zone_clauses = []
+        filtered_zones = zones.split(",")
+
+        if "None" in filtered_zones:
+            filtered_zones.remove("None")
+            zone_clauses.append((Event.zones.length() == 0))
+
+        for zone in filtered_zones:
+            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+
+        event_filters.append((reduce(operator.or_, zone_clauses)))
+
+    if after:
+        event_filters.append((Event.start_time > after))
+
+    if before:
+        event_filters.append((Event.start_time < before))
+
+    if has_clip is not None:
+        event_filters.append((Event.has_clip == has_clip))
+
+    if has_snapshot is not None:
+        event_filters.append((Event.has_snapshot == has_snapshot))
+
+    if is_submitted is not None:
+        if is_submitted == 0:
+            event_filters.append((Event.plus_id.is_null()))
+        elif is_submitted > 0:
+            event_filters.append((Event.plus_id != ""))
+
+    if min_score is not None and max_score is not None:
+        event_filters.append((Event.data["score"].between(min_score, max_score)))
+    else:
+        if min_score is not None:
+            event_filters.append((Event.data["score"] >= min_score))
+        if max_score is not None:
+            event_filters.append((Event.data["score"] <= max_score))
+
+    if time_range != DEFAULT_TIME_RANGE:
+        tz_name = params.timezone
+        hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
+
+        times = time_range.split(",")
+        time_after, time_before = times
+
+        start_hour_fun = fn.strftime(
+            "%H:%M",
+            fn.datetime(Event.start_time, "unixepoch", hour_modifier, minute_modifier),
+        )
+
+        # cases where user wants events overnight, ex: from 20:00 to 06:00
+        # should use or operator
+        if time_after > time_before:
+            event_filters.append(
+                (
+                    reduce(
+                        operator.or_,
+                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    )
+                )
+            )
+        # all other cases should be and operator
+        else:
+            event_filters.append((start_hour_fun > time_after))
+            event_filters.append((start_hour_fun < time_before))
+
+    # Perform semantic search
+    search_results = {}
+    if search_type == "similarity":
+        try:
+            search_event: Event = Event.get(Event.id == event_id)
+        except DoesNotExist:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Event not found",
+                },
+                status_code=404,
+            )
+
+        thumb_result = context.search_thumbnail(search_event)
+        thumb_ids = {result[0]: result[1] for result in thumb_result}
+        search_results = {
+            event_id: {"distance": distance, "source": "thumbnail"}
+            for event_id, distance in thumb_ids.items()
+        }
+    else:
+        search_types = search_type.split(",")
+
+        # only save stats for multi-modal searches
+        save_stats = "thumbnail" in search_types and "description" in search_types
+
+        if "thumbnail" in search_types:
+            thumb_result = context.search_thumbnail(query)
+
+            thumb_distances = context.thumb_stats.normalize(
+                [result[1] for result in thumb_result], save_stats
+            )
+
+            thumb_ids = dict(
+                zip([result[0] for result in thumb_result], thumb_distances)
+            )
+            search_results.update(
+                {
+                    event_id: {"distance": distance, "source": "thumbnail"}
+                    for event_id, distance in thumb_ids.items()
+                }
+            )
+
+        if "description" in search_types:
+            desc_result = context.search_description(query)
+
+            desc_distances = context.desc_stats.normalize(
+                [result[1] for result in desc_result], save_stats
+            )
+
+            desc_ids = dict(zip([result[0] for result in desc_result], desc_distances))
+
+            for event_id, distance in desc_ids.items():
+                if (
+                    event_id not in search_results
+                    or distance < search_results[event_id]["distance"]
+                ):
+                    search_results[event_id] = {
+                        "distance": distance,
+                        "source": "description",
+                    }
+
+    if not search_results:
+        return JSONResponse(content=[])
+
+    # Fetch events in a single query
+    events_query = Event.select(*selected_columns).join(
+        ReviewSegment,
+        JOIN.LEFT_OUTER,
+        on=(fn.json_extract(ReviewSegment.data, "$.detections").contains(Event.id)),
+    )
+
+    # Apply filters, if any
+    if event_filters:
+        events_query = events_query.where(reduce(operator.and_, event_filters))
+
+    # If we did a similarity search, limit events to those in search_results
+    if search_results:
+        events_query = events_query.where(Event.id << list(search_results.keys()))
+
+    # Fetch events and process them in a single pass
+    processed_events = []
+    for event in events_query.dicts():
+        processed_event = {k: v for k, v in event.items() if k != "data"}
+        processed_event["data"] = {
+            k: v
+            for k, v in event["data"].items()
+            if k in ["type", "score", "top_score", "description"]
+        }
+
+        if event["id"] in search_results:
+            processed_event["search_distance"] = search_results[event["id"]]["distance"]
+            processed_event["search_source"] = search_results[event["id"]]["source"]
+
+        processed_events.append(processed_event)
+
+    if (sort is None or sort == "relevance") and search_results:
+        processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
+    elif min_score is not None and max_score is not None and sort == "score_asc":
+        processed_events.sort(key=lambda x: x["score"])
+    elif min_score is not None and max_score is not None and sort == "score_desc":
+        processed_events.sort(key=lambda x: x["score"], reverse=True)
+    elif sort == "date_asc":
+        processed_events.sort(key=lambda x: x["start_time"])
+    else:
+        # "date_desc" default
+        processed_events.sort(key=lambda x: x["start_time"], reverse=True)
+
+    # Limit the number of events returned
+    processed_events = processed_events[:limit]
+
+    return JSONResponse(content=processed_events)
+
+
+@router.get("/events/summary")
+def events_summary(params: EventsSummaryQueryParams = Depends()):
+    tz_name = params.timezone
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
-    has_clip = request.args.get("has_clip", type=int)
-    has_snapshot = request.args.get("has_snapshot", type=int)
+    has_clip = params.has_clip
+    has_snapshot = params.has_snapshot
 
     clauses = []
 
@@ -287,59 +650,61 @@ def events_summary():
         )
     )
 
-    return jsonify([e for e in groups.dicts()])
+    return JSONResponse(content=[e for e in groups.dicts()])
 
 
-@EventBp.route("/events/<id>", methods=("GET",))
-def event(id):
+@router.get("/events/{event_id}", response_model=EventResponse)
+def event(event_id: str):
     try:
-        return model_to_dict(Event.get(Event.id == id))
+        return model_to_dict(Event.get(Event.id == event_id))
     except DoesNotExist:
-        return "Event not found", 404
+        return JSONResponse(content="Event not found", status_code=404)
 
 
-@EventBp.route("/events/<id>/retain", methods=("POST",))
-def set_retain(id):
+@router.post("/events/{event_id}/retain", response_model=GenericResponse)
+def set_retain(event_id: str):
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
         )
 
     event.retain_indefinitely = True
     event.save()
 
-    return make_response(
-        jsonify({"success": True, "message": "Event " + id + " retained"}), 200
+    return JSONResponse(
+        content=({"success": True, "message": "Event " + event_id + " retained"}),
+        status_code=200,
     )
 
 
-@EventBp.route("/events/<id>/plus", methods=("POST",))
-def send_to_plus(id):
-    if not current_app.plus_api.is_active():
+@router.post("/events/{event_id}/plus", response_model=EventUploadPlusResponse)
+def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
+    if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": message,
                 }
             ),
-            400,
+            status_code=400,
         )
 
-    include_annotation = (
-        request.json.get("include_annotation") if request.is_json else None
-    )
+    include_annotation = body.include_annotation if body is not None else None
 
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        message = f"Event {id} not found"
+        message = f"Event {event_id} not found"
         logger.error(message)
-        return make_response(jsonify({"success": False, "message": message}), 404)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=404
+        )
 
     # events from before the conversion to relative dimensions cant include annotations
     if event.data.get("box") is None:
@@ -347,20 +712,22 @@ def send_to_plus(id):
 
     if event.end_time is None:
         logger.error(f"Unable to load clean png for in-progress event: {event.id}")
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": "Unable to load clean png for in-progress event",
                 }
             ),
-            400,
+            status_code=400,
         )
 
     if event.plus_id:
         message = "Already submitted to plus"
         logger.error(message)
-        return make_response(jsonify({"success": False, "message": message}), 400)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=400
+        )
 
     # load clean.png
     try:
@@ -368,29 +735,29 @@ def send_to_plus(id):
         image = cv2.imread(os.path.join(CLIPS_DIR, filename))
     except Exception:
         logger.error(f"Unable to load clean png for event: {event.id}")
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {"success": False, "message": "Unable to load clean png for event"}
             ),
-            400,
+            status_code=400,
         )
 
     if image is None or image.size == 0:
         logger.error(f"Unable to load clean png for event: {event.id}")
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {"success": False, "message": "Unable to load clean png for event"}
             ),
-            400,
+            status_code=400,
         )
 
     try:
-        plus_id = current_app.plus_api.upload_image(image, event.camera)
+        plus_id = request.app.frigate_config.plus_api.upload_image(image, event.camera)
     except Exception as ex:
         logger.exception(ex)
-        return make_response(
-            jsonify({"success": False, "message": "Error uploading image"}),
-            400,
+        return JSONResponse(
+            content=({"success": False, "message": "Error uploading image"}),
+            status_code=400,
         )
 
     # store image id in the database
@@ -401,7 +768,7 @@ def send_to_plus(id):
         box = event.data["box"]
 
         try:
-            current_app.plus_api.add_annotation(
+            request.app.frigate_config.plus_api.add_annotation(
                 event.plus_id,
                 box,
                 event.label,
@@ -409,59 +776,67 @@ def send_to_plus(id):
         except ValueError:
             message = "Error uploading annotation, unsupported label provided."
             logger.error(message)
-            return make_response(
-                jsonify({"success": False, "message": message}),
-                400,
+            return JSONResponse(
+                content=({"success": False, "message": message}),
+                status_code=400,
             )
         except Exception as ex:
             logger.exception(ex)
-            return make_response(
-                jsonify({"success": False, "message": "Error uploading annotation"}),
-                400,
+            return JSONResponse(
+                content=({"success": False, "message": "Error uploading annotation"}),
+                status_code=400,
             )
 
-    return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
+    return JSONResponse(
+        content=({"success": True, "plus_id": plus_id}), status_code=200
+    )
 
 
-@EventBp.route("/events/<id>/false_positive", methods=("PUT",))
-def false_positive(id):
-    if not current_app.plus_api.is_active():
+@router.put("/events/{event_id}/false_positive", response_model=EventUploadPlusResponse)
+def false_positive(request: Request, event_id: str):
+    if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": message,
                 }
             ),
-            400,
+            status_code=400,
         )
 
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        message = f"Event {id} not found"
+        message = f"Event {event_id} not found"
         logger.error(message)
-        return make_response(jsonify({"success": False, "message": message}), 404)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=404
+        )
 
     # events from before the conversion to relative dimensions cant include annotations
     if event.data.get("box") is None:
         message = "Events prior to 0.13 cannot be submitted as false positives"
         logger.error(message)
-        return make_response(jsonify({"success": False, "message": message}), 400)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=400
+        )
 
     if event.false_positive:
         message = "False positive already submitted to Frigate+"
         logger.error(message)
-        return make_response(jsonify({"success": False, "message": message}), 400)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=400
+        )
 
     if not event.plus_id:
-        plus_response = send_to_plus(id)
+        plus_response = send_to_plus(request, event_id)
         if plus_response.status_code != 200:
             return plus_response
         # need to refetch the event now that it has a plus_id
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == event_id)
 
     region = event.data["region"]
     box = event.data["box"]
@@ -474,7 +849,7 @@ def false_positive(id):
     )
 
     try:
-        current_app.plus_api.add_false_positive(
+        request.app.frigate_config.plus_api.add_false_positive(
             event.plus_id,
             region,
             box,
@@ -487,92 +862,65 @@ def false_positive(id):
     except ValueError:
         message = "Error uploading false positive, unsupported label provided."
         logger.error(message)
-        return make_response(
-            jsonify({"success": False, "message": message}),
-            400,
+        return JSONResponse(
+            content=({"success": False, "message": message}),
+            status_code=400,
         )
     except Exception as ex:
         logger.exception(ex)
-        return make_response(
-            jsonify({"success": False, "message": "Error uploading false positive"}),
-            400,
+        return JSONResponse(
+            content=({"success": False, "message": "Error uploading false positive"}),
+            status_code=400,
         )
 
     event.false_positive = True
     event.save()
 
-    return make_response(jsonify({"success": True, "plus_id": event.plus_id}), 200)
+    return JSONResponse(
+        content=({"success": True, "plus_id": event.plus_id}), status_code=200
+    )
 
 
-@EventBp.route("/events/<id>/retain", methods=("DELETE",))
-def delete_retain(id):
+@router.delete("/events/{event_id}/retain", response_model=GenericResponse)
+def delete_retain(event_id: str):
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
         )
 
     event.retain_indefinitely = False
     event.save()
 
-    return make_response(
-        jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
+    return JSONResponse(
+        content=({"success": True, "message": "Event " + event_id + " un-retained"}),
+        status_code=200,
     )
 
 
-@EventBp.route("/events/<id>/sub_label", methods=("POST",))
-def set_sub_label(id):
+@router.post("/events/{event_id}/sub_label", response_model=GenericResponse)
+def set_sub_label(
+    request: Request,
+    event_id: str,
+    body: EventsSubLabelBody,
+):
     try:
-        event: Event = Event.get(Event.id == id)
+        event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
         )
 
-    json: dict[str, any] = request.get_json(silent=True) or {}
-    new_sub_label = json.get("subLabel")
-    new_score = json.get("subLabelScore")
-
-    if new_sub_label is None:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": "A sub label must be supplied",
-                }
-            ),
-            400,
-        )
-
-    if new_sub_label and len(new_sub_label) > 100:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": new_sub_label
-                    + " exceeds the 100 character limit for sub_label",
-                }
-            ),
-            400,
-        )
-
-    if new_score is not None and (new_score > 1.0 or new_score < 0):
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": new_score
-                    + " does not fit within the expected bounds 0 <= score <= 1.0",
-                }
-            ),
-            400,
-        )
+    new_sub_label = body.subLabel
+    new_score = body.subLabelScore
 
     if not event.end_time:
         # update tracked object
         tracked_obj: TrackedObject = (
-            current_app.detected_frames_processor.camera_states[
+            request.app.detected_frames_processor.camera_states[
                 event.camera
             ].tracked_objects.get(event.id)
         )
@@ -583,7 +931,7 @@ def set_sub_label(id):
         # update timeline items
         Timeline.update(
             data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
-        ).where(Timeline.source_id == id).execute()
+        ).where(Timeline.source_id == event_id).execute()
 
     event.sub_label = new_sub_label
 
@@ -593,108 +941,238 @@ def set_sub_label(id):
         event.data = data
 
     event.save()
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
-                "message": "Event " + id + " sub label set to " + new_sub_label,
+                "message": "Event " + event_id + " sub label set to " + new_sub_label,
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@EventBp.route("/events/<id>", methods=("DELETE",))
-def delete_event(id):
+@router.post("/events/{event_id}/description", response_model=GenericResponse)
+def set_description(
+    request: Request,
+    event_id: str,
+    body: EventsDescriptionBody,
+):
     try:
-        event = Event.get(Event.id == id)
+        event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
         )
+
+    new_description = body.description
+
+    event.data["description"] = new_description
+    event.save()
+
+    # If semantic search is enabled, update the index
+    if request.app.frigate_config.semantic_search.enabled:
+        context: EmbeddingsContext = request.app.embeddings
+        if len(new_description) > 0:
+            context.update_description(
+                event_id,
+                new_description,
+            )
+        else:
+            context.db.delete_embeddings_description(event_ids=[event_id])
+
+    response_message = (
+        f"Event {event_id} description is now blank"
+        if new_description is None or len(new_description) == 0
+        else f"Event {event_id} description set to {new_description}"
+    )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": response_message,
+            }
+        ),
+        status_code=200,
+    )
+
+
+@router.put("/events/{event_id}/description/regenerate", response_model=GenericResponse)
+def regenerate_description(
+    request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
+):
+    try:
+        event: Event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
+        )
+
+    camera_config = request.app.frigate_config.cameras[event.camera]
+
+    if (
+        request.app.frigate_config.semantic_search.enabled
+        and camera_config.genai.enabled
+    ):
+        request.app.event_metadata_updater.publish((event.id, params.source))
+
+        return JSONResponse(
+            content=(
+                {
+                    "success": True,
+                    "message": "Event "
+                    + event_id
+                    + " description regeneration has been requested using "
+                    + params.source,
+                }
+            ),
+            status_code=200,
+        )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": False,
+                "message": "Semantic Search and Generative AI must be enabled to regenerate a description",
+            }
+        ),
+        status_code=400,
+    )
+
+
+def delete_single_event(event_id: str, request: Request) -> dict:
+    try:
+        event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        return {"success": False, "message": f"Event {event_id} not found"}
 
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-        media.unlink(missing_ok=True)
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-        media.unlink(missing_ok=True)
-    if event.has_clip:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-        media.unlink(missing_ok=True)
+        snapshot_paths = [
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg"),
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"),
+        ]
+        for media in snapshot_paths:
+            media.unlink(missing_ok=True)
 
     event.delete_instance()
-    Timeline.delete().where(Timeline.source_id == id).execute()
-    return make_response(
-        jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
-    )
+    Timeline.delete().where(Timeline.source_id == event_id).execute()
+
+    # If semantic search is enabled, update the index
+    if request.app.frigate_config.semantic_search.enabled:
+        context: EmbeddingsContext = request.app.embeddings
+        context.db.delete_embeddings_thumbnail(event_ids=[event_id])
+        context.db.delete_embeddings_description(event_ids=[event_id])
+
+    return {"success": True, "message": f"Event {event_id} deleted"}
 
 
-@EventBp.route("/events/<camera_name>/<label>/create", methods=["POST"])
-def create_event(camera_name, label):
-    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
-        return make_response(
-            jsonify(
+@router.delete("/events/{event_id}", response_model=GenericResponse)
+def delete_event(request: Request, event_id: str):
+    result = delete_single_event(event_id, request)
+    status_code = 200 if result["success"] else 404
+    return JSONResponse(content=result, status_code=status_code)
+
+
+@router.delete("/events/", response_model=EventMultiDeleteResponse)
+def delete_events(request: Request, body: EventsDeleteBody):
+    if not body.event_ids:
+        return JSONResponse(
+            content=({"success": False, "message": "No event IDs provided."}),
+            status_code=404,
+        )
+
+    deleted_events = []
+    not_found_events = []
+
+    for event_id in body.event_ids:
+        result = delete_single_event(event_id, request)
+        if result["success"]:
+            deleted_events.append(event_id)
+        else:
+            not_found_events.append(event_id)
+
+    response = {
+        "success": True,
+        "deleted_events": deleted_events,
+        "not_found_events": not_found_events,
+    }
+    return JSONResponse(content=response, status_code=200)
+
+
+@router.post("/events/{camera_name}/{label}/create", response_model=EventCreateResponse)
+def create_event(
+    request: Request,
+    camera_name: str,
+    label: str,
+    body: EventsCreateBody = EventsCreateBody(),
+):
+    if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
+        return JSONResponse(
+            content=(
                 {"success": False, "message": f"{camera_name} is not a valid camera."}
             ),
-            404,
+            status_code=404,
         )
 
     if not label:
-        return make_response(
-            jsonify({"success": False, "message": f"{label} must be set."}), 404
+        return JSONResponse(
+            content=({"success": False, "message": f"{label} must be set."}),
+            status_code=404,
         )
 
-    json: dict[str, any] = request.get_json(silent=True) or {}
-
     try:
-        frame = current_app.detected_frames_processor.get_current_frame(camera_name)
+        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
+        external_processor: ExternalEventProcessor = request.app.external_processor
 
-        event_id = current_app.external_processor.create_manual_event(
+        frame = frame_processor.get_current_frame(camera_name)
+        event_id = external_processor.create_manual_event(
             camera_name,
             label,
-            json.get("source_type", "api"),
-            json.get("sub_label", None),
-            json.get("score", 0),
-            json.get("duration", 30),
-            json.get("include_recording", True),
-            json.get("draw", {}),
+            body.source_type,
+            body.sub_label,
+            body.score,
+            body.duration,
+            body.include_recording,
+            body.draw,
             frame,
         )
     except Exception as e:
         logger.error(e)
-        return make_response(
-            jsonify({"success": False, "message": "An unknown error occurred"}),
-            500,
+        return JSONResponse(
+            content=({"success": False, "message": "An unknown error occurred"}),
+            status_code=500,
         )
 
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Successfully created event.",
                 "event_id": event_id,
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@EventBp.route("/events/<event_id>/end", methods=["PUT"])
-def end_event(event_id):
-    json: dict[str, any] = request.get_json(silent=True) or {}
-
+@router.put("/events/{event_id}/end", response_model=GenericResponse)
+def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
-        end_time = json.get("end_time", datetime.now().timestamp())
-        current_app.external_processor.finish_manual_event(event_id, end_time)
+        end_time = body.end_time or datetime.datetime.now().timestamp()
+        request.app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {"success": False, "message": f"{event_id} must be set and valid."}
             ),
-            404,
+            status_code=404,
         )
 
-    return make_response(
-        jsonify({"success": True, "message": "Event successfully ended."}), 200
+    return JSONResponse(
+        content=({"success": True, "message": "Event successfully ended."}),
+        status_code=200,
     )

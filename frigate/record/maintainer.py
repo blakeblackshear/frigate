@@ -28,7 +28,8 @@ from frigate.const import (
     MAX_SEGMENTS_IN_CACHE,
     RECORD_DIR,
 )
-from frigate.models import Event, Recordings
+from frigate.models import Recordings, ReviewSegment
+from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -62,8 +63,7 @@ class SegmentInfo:
 
 class RecordingMaintainer(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
-        threading.Thread.__init__(self)
-        self.name = "recording_maintainer"
+        super().__init__(name="recording_maintainer")
         self.config = config
 
         # create communication for retained recordings
@@ -90,9 +90,9 @@ class RecordingMaintainer(threading.Thread):
             try:
                 if process.name() != "ffmpeg":
                     continue
-                flist = process.open_files()
-                if flist:
-                    for nt in flist:
+                file_list = process.open_files()
+                if file_list:
+                    for nt in file_list:
                         if nt.path.startswith(CACHE_DIR):
                             files_in_use.append(nt.path.split("/")[-1])
             except psutil.Error:
@@ -129,10 +129,40 @@ class RecordingMaintainer(threading.Thread):
                 grouped_recordings[camera], key=lambda s: s["start_time"]
             )
 
-            segment_count = len(grouped_recordings[camera])
-            if segment_count > keep_count:
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
+            )
+
+            processed_segment_count = len(
+                list(
+                    filter(
+                        lambda r: r["start_time"].timestamp()
+                        < most_recently_processed_frame_time,
+                        grouped_recordings[camera],
+                    )
+                )
+            )
+
+            # see if the recording mover is too slow and segments need to be deleted
+            if processed_segment_count > keep_count:
                 logger.warning(
-                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
+                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {processed_segment_count} and discarding the rest..."
+                )
+                to_remove = grouped_recordings[camera][:-keep_count]
+                for rec in to_remove:
+                    cache_path = rec["cache_path"]
+                    Path(cache_path).unlink(missing_ok=True)
+                    self.end_time_cache.pop(cache_path, None)
+                grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
+
+            # see if detection has failed and unprocessed segments need to be deleted
+            unprocessed_segment_count = (
+                len(grouped_recordings[camera]) - processed_segment_count
+            )
+            if unprocessed_segment_count > keep_count:
+                logger.warning(
+                    f"Too many unprocessed recording segments in cache for {camera}. This likely indicates an issue with the detect stream, keeping the {keep_count} most recent segments out of {unprocessed_segment_count} and discarding the rest..."
                 )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for rec in to_remove:
@@ -159,25 +189,28 @@ class RecordingMaintainer(threading.Thread):
             ):
                 self.audio_recordings_info[camera].pop(0)
 
-            # get all events with the end time after the start of the oldest cache file
+            # get all reviews with the end time after the start of the oldest cache file
             # or with end_time None
-            events: Event = (
-                Event.select(
-                    Event.start_time,
-                    Event.end_time,
-                    Event.data,
+            reviews: ReviewSegment = (
+                ReviewSegment.select(
+                    ReviewSegment.start_time,
+                    ReviewSegment.end_time,
+                    ReviewSegment.severity,
+                    ReviewSegment.data,
                 )
                 .where(
-                    Event.camera == camera,
-                    (Event.end_time == None)
-                    | (Event.end_time >= recordings[0]["start_time"].timestamp()),
-                    Event.has_clip,
+                    ReviewSegment.camera == camera,
+                    (ReviewSegment.end_time == None)
+                    | (
+                        ReviewSegment.end_time
+                        >= recordings[0]["start_time"].timestamp()
+                    ),
                 )
-                .order_by(Event.start_time)
+                .order_by(ReviewSegment.start_time)
             )
 
             tasks.extend(
-                [self.validate_and_move_segment(camera, events, r) for r in recordings]
+                [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
@@ -188,25 +221,31 @@ class RecordingMaintainer(threading.Thread):
             [r for r in recordings_to_insert if r is not None],
         )
 
+    def drop_segment(self, cache_path: str) -> None:
+        Path(cache_path).unlink(missing_ok=True)
+        self.end_time_cache.pop(cache_path, None)
+
     async def validate_and_move_segment(
-        self, camera: str, events: list[Event], recording: dict[str, any]
+        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, any]
     ) -> None:
-        cache_path = recording["cache_path"]
-        start_time = recording["start_time"]
+        cache_path: str = recording["cache_path"]
+        start_time: datetime.datetime = recording["start_time"]
+        record_config = self.config.cameras[camera].record
 
         # Just delete files if recordings are turned off
         if (
             camera not in self.config.cameras
             or not self.config.cameras[camera].record.enabled
         ):
-            Path(cache_path).unlink(missing_ok=True)
-            self.end_time_cache.pop(cache_path, None)
+            self.drop_segment(cache_path)
             return
 
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
         else:
-            segment_info = await get_video_properties(cache_path, get_duration=True)
+            segment_info = await get_video_properties(
+                self.config.ffmpeg, cache_path, get_duration=True
+            )
 
             if segment_info["duration"]:
                 duration = float(segment_info["duration"])
@@ -226,29 +265,43 @@ class RecordingMaintainer(threading.Thread):
                 return
 
         # if cached file's start_time is earlier than the retain days for the camera
+        # meaning continuous recording is not enabled
         if start_time <= (
             datetime.datetime.now().astimezone(datetime.timezone.utc)
             - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
         ):
-            # if the cached segment overlaps with the events:
+            # if the cached segment overlaps with the review items:
             overlaps = False
-            for event in events:
-                # if the event starts in the future, stop checking events
+            for review in reviews:
+                severity = SeverityEnum[review.severity]
+
+                # if the review item starts in the future, stop checking review items
                 # and remove this segment
-                if event.start_time > end_time.timestamp():
+                if (
+                    review.start_time - record_config.get_review_pre_capture(severity)
+                ) > end_time.timestamp():
                     overlaps = False
-                    Path(cache_path).unlink(missing_ok=True)
-                    self.end_time_cache.pop(cache_path, None)
                     break
 
-                # if the event is in progress or ends after the recording starts, keep it
-                # and stop looking at events
-                if event.end_time is None or event.end_time >= start_time.timestamp():
+                # if the review item is in progress or ends after the recording starts, keep it
+                # and stop looking at review items
+                if (
+                    review.end_time is None
+                    or (
+                        review.end_time
+                        + record_config.get_review_post_capture(severity)
+                    )
+                    >= start_time.timestamp()
+                ):
                     overlaps = True
                     break
 
             if overlaps:
-                record_mode = self.config.cameras[camera].record.events.retain.mode
+                record_mode = (
+                    record_config.alerts.retain.mode
+                    if review.severity == "alert"
+                    else record_config.detections.retain.mode
+                )
                 # move from cache to recordings immediately
                 return await self.move_segment(
                     camera,
@@ -257,23 +310,21 @@ class RecordingMaintainer(threading.Thread):
                     duration,
                     cache_path,
                     record_mode,
-                    event.data["type"] == "api",
                 )
-            # if it doesn't overlap with an event, go ahead and drop the segment
+            # if it doesn't overlap with an review item, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
             else:
-                pre_capture = self.config.cameras[camera].record.events.pre_capture
                 camera_info = self.object_recordings_info[camera]
                 most_recently_processed_frame_time = (
                     camera_info[-1][0] if len(camera_info) > 0 else 0
                 )
                 retain_cutoff = datetime.datetime.fromtimestamp(
-                    most_recently_processed_frame_time - pre_capture
+                    most_recently_processed_frame_time - record_config.event_pre_capture
                 ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
-                    Path(cache_path).unlink(missing_ok=True)
-                    self.end_time_cache.pop(cache_path, None)
+                    self.drop_segment(cache_path)
         # else retain days includes this segment
+        # meaning continuous recording is enabled
         else:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
@@ -349,14 +400,12 @@ class RecordingMaintainer(threading.Thread):
         duration: float,
         cache_path: str,
         store_mode: RetainModeEnum,
-        manual_event: bool = False,  # if this segment is being moved due to a manual event
     ) -> Optional[Recordings]:
         segment_info = self.segment_stats(camera, start_time, end_time)
 
         # check if the segment shouldn't be stored
-        if not manual_event and segment_info.should_discard_segment(store_mode):
-            Path(cache_path).unlink(missing_ok=True)
-            self.end_time_cache.pop(cache_path, None)
+        if segment_info.should_discard_segment(store_mode):
+            self.drop_segment(cache_path)
             return
 
         # directory will be in utc due to start_time being in utc
@@ -379,7 +428,7 @@ class RecordingMaintainer(threading.Thread):
 
                 # add faststart to kept segments to improve metadata reading
                 p = await asyncio.create_subprocess_exec(
-                    "ffmpeg",
+                    self.config.ffmpeg.ffmpeg_path,
                     "-hide_banner",
                     "-y",
                     "-i",
@@ -400,7 +449,7 @@ class RecordingMaintainer(threading.Thread):
                     return None
                 else:
                     logger.debug(
-                        f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                        f"Copied {file_path} in {datetime.datetime.now().timestamp() - start_frame} seconds."
                     )
 
                 try:
@@ -427,8 +476,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.duration.name: duration,
                     Recordings.motion.name: segment_info.motion_count,
                     # TODO: update this to store list of active objects at some point
-                    Recordings.objects.name: segment_info.active_object_count
-                    + (1 if manual_event else 0),
+                    Recordings.objects.name: segment_info.active_object_count,
                     Recordings.regions.name: segment_info.region_count,
                     Recordings.dBFS.name: segment_info.average_dBFS,
                     Recordings.segment_size.name: segment_size,
@@ -470,7 +518,7 @@ class RecordingMaintainer(threading.Thread):
             stale_frame_count_threshold = 10
             # empty the object recordings info queue
             while True:
-                (topic, data) = self.detection_subscriber.get_data(
+                (topic, data) = self.detection_subscriber.check_for_update(
                     timeout=QUEUE_READ_TIMEOUT
                 )
 
@@ -480,6 +528,7 @@ class RecordingMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     (
                         camera,
+                        _,
                         frame_time,
                         current_tracked_objects,
                         motion_boxes,

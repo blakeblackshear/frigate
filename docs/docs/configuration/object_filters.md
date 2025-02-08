@@ -20,15 +20,13 @@ For object filters in your configuration, any single detection below `min_score`
 
 In frame 2, the score is below the `min_score` value, so Frigate ignores it and it becomes a 0.0. The computed score is the median of the score history (padding to at least 3 values), and only when that computed score crosses the `threshold` is the object marked as a true positive. That happens in frame 4 in the example.
 
-show image of snapshot vs event with differing scores
-
 ### Minimum Score
 
-Any detection below `min_score` will be immediately thrown out and never tracked because it is considered a false positive. If `min_score` is too low then false positives may be detected and tracked which can confuse the object tracker and may lead to wasted resources. If `min_score` is too high then lower scoring true positives like objects that are further away or partially occluded may be thrown out which can also confuse the tracker and cause valid events to be lost or disjointed.
+Any detection below `min_score` will be immediately thrown out and never tracked because it is considered a false positive. If `min_score` is too low then false positives may be detected and tracked which can confuse the object tracker and may lead to wasted resources. If `min_score` is too high then lower scoring true positives like objects that are further away or partially occluded may be thrown out which can also confuse the tracker and cause valid tracked objects to be lost or disjointed.
 
 ### Threshold
 
-`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create an event. If `threshold` is too high then true positive events may be missed due to the object never scoring high enough.
+`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create an tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
 
 ## Object Shape
 
@@ -52,7 +50,7 @@ Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "
 
 ### Zones
 
-[Required zones](/configuration/zones.md) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create events for objects that enter the zone.
+[Required zones](/configuration/zones.md) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
 
 ### Object Masks
 

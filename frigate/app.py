@@ -1,47 +1,49 @@
-import argparse
 import datetime
 import logging
 import multiprocessing as mp
 import os
 import secrets
 import shutil
-import signal
-import sys
-import traceback
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from types import FrameType
 from typing import Optional
 
 import psutil
+import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
-from playhouse.sqliteq import SqliteQueueDatabase
-from pydantic import ValidationError
 
-from frigate.api.app import create_app
+import frigate.util as util
 from frigate.api.auth import hash_password
+from frigate.api.fastapi_app import create_fastapi_app
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
-from frigate.comms.detections_updater import DetectionProxy
 from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import FrigateConfig
+from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     CONFIG_DIR,
-    DEFAULT_DB_PATH,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
+    SHM_FRAMES_VAR,
 )
-from frigate.events.audio import listen_to_audio
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
-from frigate.log import log_process, root_configurer
 from frigate.models import (
     Event,
     Export,
@@ -56,7 +58,6 @@ from frigate.models import (
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output.output import output_frames
-from frigate.plus import PlusApi
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
@@ -67,9 +68,8 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, PTZMetricsTypes
-from frigate.util.builtin import empty_and_close_queue, save_default_config
-from frigate.util.config import migrate_frigate_config
+from frigate.util.builtin import empty_and_close_queue
+from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -79,22 +79,21 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
+        self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.plus_api = PlusApi()
-        self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
+        self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
+        self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-
-    def set_environment_vars(self) -> None:
-        for key, value in self.config.environment_vars.items():
-            os.environ[key] = value
+        self.frame_manager = SharedMemoryFrameManager()
+        self.config = config
 
     def ensure_dirs(self) -> None:
         for d in [
@@ -111,103 +110,15 @@ class FrigateApp:
             else:
                 logger.debug(f"Skipping directory: {d}")
 
-    def init_logger(self) -> None:
-        self.log_process = mp.Process(
-            target=log_process, args=(self.log_queue,), name="log_process"
-        )
-        self.log_process.daemon = True
-        self.log_process.start()
-        self.processes["logger"] = self.log_process.pid or 0
-        root_configurer(self.log_queue)
-
-    def init_config(self) -> None:
-        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-        # Check if we can use .yaml instead of .yml
-        config_file_yaml = config_file.replace(".yml", ".yaml")
-        if os.path.isfile(config_file_yaml):
-            config_file = config_file_yaml
-
-        if not os.path.isfile(config_file):
-            print("No config file found, saving default config")
-            config_file = config_file_yaml
-            save_default_config(config_file)
-
-        # check if the config file needs to be migrated
-        migrate_frigate_config(config_file)
-
-        user_config = FrigateConfig.parse_file(config_file)
-        self.config = user_config.runtime_config(self.plus_api)
-
+    def init_camera_metrics(self) -> None:
+        # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            # create camera_metrics
-            self.camera_metrics[camera_name] = {
-                "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "skipped_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "detection_frame": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "read_start": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "frame_queue": mp.Queue(maxsize=2),
-                "capture_process": None,
-                "process": None,
-                "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "audio_dBFS": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-            }
-            self.ptz_metrics[camera_name] = {
-                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].onvif.autotracking.enabled,
-                ),
-                "ptz_tracking_active": mp.Event(),
-                "ptz_motor_stopped": mp.Event(),
-                "ptz_reset": mp.Event(),
-                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_frame_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_zoom_level": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_max_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_min_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-            }
-            self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
-
-    def set_log_levels(self) -> None:
-        logging.getLogger().setLevel(self.config.logger.default.value.upper())
-        for log, level in self.config.logger.logs.items():
-            logging.getLogger(log).setLevel(level.value.upper())
-
-        if "werkzeug" not in self.config.logger.logs:
-            logging.getLogger("werkzeug").setLevel("ERROR")
-
-        if "ws4py" not in self.config.logger.logs:
-            logging.getLogger("ws4py").setLevel("ERROR")
+            self.camera_metrics[camera_name] = CameraMetrics()
+            self.ptz_metrics[camera_name] = PTZMetrics(
+                autotracker_enabled=self.config.cameras[
+                    camera_name
+                ].onvif.autotracking.enabled
+            )
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -239,13 +150,6 @@ class FrigateApp:
                     f.write(str(datetime.datetime.now().timestamp()))
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
-
-        # Migrate DB location
-        old_db_path = DEFAULT_DB_PATH
-        if not os.path.isfile(self.config.database.path) and os.path.isfile(
-            old_db_path
-        ):
-            os.rename(old_db_path, self.config.database.path)
 
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
@@ -295,7 +199,7 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = mp.Process(
+        recording_process = util.Process(
             target=manage_recordings,
             name="recording_manager",
             args=(self.config,),
@@ -307,7 +211,7 @@ class FrigateApp:
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = mp.Process(
+        review_segment_process = util.Process(
             target=manage_review_segments,
             name="review_segment_manager",
             args=(self.config,),
@@ -316,12 +220,27 @@ class FrigateApp:
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
-        logger.info(f"Recording process started: {review_segment_process.pid}")
+        logger.info(f"Review process started: {review_segment_process.pid}")
+
+    def init_embeddings_manager(self) -> None:
+        if not self.config.semantic_search.enabled:
+            return
+
+        embedding_process = util.Process(
+            target=manage_embeddings,
+            name="embeddings_manager",
+            args=(self.config,),
+        )
+        embedding_process.daemon = True
+        self.embedding_process = embedding_process
+        embedding_process.start()
+        self.processes["embeddings"] = embedding_process.pid or 0
+        logger.info(f"Embedding process started: {embedding_process.pid}")
 
     def bind_database(self) -> None:
         """Bind db to the main process."""
         # NOTE: all db accessing processes need to be created before the db can be bound to the main process
-        self.db = SqliteQueueDatabase(
+        self.db = SqliteVecQueueDatabase(
             self.config.database.path,
             pragmas={
                 "auto_vacuum": "FULL",  # Does not defragment database
@@ -331,6 +250,7 @@ class FrigateApp:
             timeout=max(
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
+            load_vec_extension=self.config.semantic_search.enabled,
         )
         models = [
             Event,
@@ -354,7 +274,12 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save export state")
 
-            migrate_exports(self.config.cameras.keys())
+            migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
+
+    def init_embeddings_client(self) -> None:
+        if self.config.semantic_search.enabled:
+            # Create a client for other processes to use
+            self.embeddings = EmbeddingsContext(self.db)
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
@@ -362,19 +287,10 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
-        self.inter_detection_proxy = DetectionProxy()
-
-    def init_web_server(self) -> None:
-        self.flask_app = create_app(
-            self.config,
-            self.db,
-            self.detected_frames_processor,
-            self.storage_maintainer,
-            self.onvif_controller,
-            self.external_event_processor,
-            self.plus_api,
-            self.stats_emitter,
+        self.event_metadata_updater = EventMetadataPublisher(
+            EventMetadataTypeEnum.regenerate_description
         )
+        self.inter_zmq_proxy = ZmqProxy()
 
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
@@ -384,6 +300,9 @@ class FrigateApp:
 
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
+
+        if self.config.notifications.enabled_in_config:
+            comms.append(WebPushClient(self.config))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)
@@ -404,23 +323,25 @@ class FrigateApp:
                 largest_frame = max(
                     [
                         det.model.height * det.model.width * 3
-                        for (name, det) in self.config.detectors.items()
+                        if det.model is not None
+                        else 320
+                        for det in self.config.detectors.values()
                     ]
                 )
-                shm_in = mp.shared_memory.SharedMemory(
+                shm_in = UntrackedSharedMemory(
                     name=name,
                     create=True,
                     size=largest_frame,
                 )
             except FileExistsError:
-                shm_in = mp.shared_memory.SharedMemory(name=name)
+                shm_in = UntrackedSharedMemory(name=name)
 
             try:
-                shm_out = mp.shared_memory.SharedMemory(
+                shm_out = UntrackedSharedMemory(
                     name=f"out-{name}", create=True, size=20 * 6 * 4
                 )
             except FileExistsError:
-                shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}")
+                shm_out = UntrackedSharedMemory(name=f"out-{name}")
 
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
@@ -454,7 +375,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = mp.Process(
+        output_processor = util.Process(
             target=output_frames,
             name="output_processor",
             args=(self.config,),
@@ -471,6 +392,7 @@ class FrigateApp:
 
         # create or update region grids for each camera
         for camera in self.config.cameras.values():
+            assert camera.name is not None
             self.region_grids[camera.name] = get_camera_regions_grid(
                 camera.name,
                 camera.detect,
@@ -483,7 +405,7 @@ class FrigateApp:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
-            camera_process = mp.Process(
+            camera_process = util.Process(
                 target=track_camera,
                 name=f"camera_processor:{name}",
                 args=(
@@ -498,43 +420,46 @@ class FrigateApp:
                     self.ptz_metrics[name],
                     self.region_grids[name],
                 ),
+                daemon=True,
             )
-            camera_process.daemon = True
-            self.camera_metrics[name]["process"] = camera_process
+            self.camera_metrics[name].process = camera_process
             camera_process.start()
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self) -> None:
+        shm_frame_count = self.shm_frame_count()
+
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
-            capture_process = mp.Process(
+            # pre-create shms
+            for i in range(shm_frame_count):
+                frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
+                self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
+
+            capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, self.camera_metrics[name]),
+                args=(name, config, shm_frame_count, self.camera_metrics[name]),
             )
             capture_process.daemon = True
-            self.camera_metrics[name]["capture_process"] = capture_process
+            self.camera_metrics[name].capture_process = capture_process
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
-    def start_audio_processors(self) -> None:
-        self.audio_process = None
-        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
-            self.audio_process = mp.Process(
-                target=listen_to_audio,
-                name="audio_capture",
-                args=(
-                    self.config,
-                    self.camera_metrics,
-                ),
-            )
-            self.audio_process.daemon = True
+    def start_audio_processor(self) -> None:
+        audio_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.audio.enabled_in_config
+        ]
+
+        if audio_cameras:
+            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
-            logger.info(f"Audio process started: {self.audio_process.pid}")
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -551,7 +476,7 @@ class FrigateApp:
         self.event_processor.start()
 
     def start_event_cleanup(self) -> None:
-        self.event_cleanup = EventCleanup(self.config, self.stop_event)
+        self.event_cleanup = EventCleanup(self.config, self.stop_event, self.db)
         self.event_cleanup.start()
 
     def start_record_cleanup(self) -> None:
@@ -576,21 +501,44 @@ class FrigateApp:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
 
-    def check_shm(self) -> None:
-        available_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
-        min_req_shm = 30
+    def shm_frame_count(self) -> int:
+        total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
 
-        for _, camera in self.config.cameras.items():
-            min_req_shm += round(
-                (camera.detect.width * camera.detect.height * 1.5 * 9 + 270480)
-                / 1048576,
-                1,
-            )
+        # required for log files + nginx cache
+        min_req_shm = 40 + 10
 
-        if available_shm < min_req_shm:
+        if self.config.birdseye.restream:
+            min_req_shm += 8
+
+        available_shm = total_shm - min_req_shm
+        cam_total_frame_size = 0.0
+
+        for camera in self.config.cameras.values():
+            if camera.enabled and camera.detect.width and camera.detect.height:
+                cam_total_frame_size += round(
+                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
+                    / 1048576,
+                    1,
+                )
+
+        if cam_total_frame_size == 0.0:
+            return 0
+
+        shm_frame_count = min(
+            int(os.environ.get(SHM_FRAMES_VAR, "50")),
+            int(available_shm / (cam_total_frame_size)),
+        )
+
+        logger.debug(
+            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
+        )
+
+        if shm_frame_count < 20:
             logger.warning(
-                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
+                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size * 20)}MB."
             )
+
+        return shm_frame_count
 
     def init_auth(self) -> None:
         if self.config.auth.enabled:
@@ -603,6 +551,7 @@ class FrigateApp:
                     {
                         User.username: "admin",
                         User.password_hash: password_hash,
+                        User.notification_tokens: [],
                     }
                 ).execute()
 
@@ -619,7 +568,11 @@ class FrigateApp:
                 password_hash = hash_password(
                     password, iterations=self.config.auth.hash_iterations
                 )
-                User.replace(username="admin", password_hash=password_hash).execute()
+                User.replace(
+                    username="admin",
+                    password_hash=password_hash,
+                    notification_tokens=[],
+                ).execute()
 
                 logger.info("********************************************************")
                 logger.info("********************************************************")
@@ -629,98 +582,63 @@ class FrigateApp:
                 logger.info("********************************************************")
 
     def start(self) -> None:
-        parser = argparse.ArgumentParser(
-            prog="Frigate",
-            description="An NVR with realtime local object detection for IP cameras.",
-        )
-        parser.add_argument("--validate-config", action="store_true")
-        args = parser.parse_args()
-
-        self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
 
-        try:
-            self.ensure_dirs()
-            try:
-                self.init_config()
-            except Exception as e:
-                print("*************************************************************")
-                print("*************************************************************")
-                print("***    Your config file is not valid!                     ***")
-                print("***    Please check the docs at                           ***")
-                print("***    https://docs.frigate.video/configuration/index     ***")
-                print("*************************************************************")
-                print("*************************************************************")
-                print("***    Config Validation Errors                           ***")
-                print("*************************************************************")
-                if isinstance(e, ValidationError):
-                    for error in e.errors():
-                        location = ".".join(str(item) for item in error["loc"])
-                        print(f"{location}: {error['msg']}")
-                else:
-                    print(e)
-                    print(traceback.format_exc())
-                print("*************************************************************")
-                print("***    End Config Validation Errors                       ***")
-                print("*************************************************************")
-                self.log_process.terminate()
-                sys.exit(1)
-            if args.validate_config:
-                print("*************************************************************")
-                print("*** Your config file is valid.                            ***")
-                print("*************************************************************")
-                self.log_process.terminate()
-                sys.exit(0)
-            self.set_environment_vars()
-            self.set_log_levels()
-            self.init_queues()
-            self.init_database()
-            self.init_onvif()
-            self.init_recording_manager()
-            self.init_review_segment_manager()
-            self.init_go2rtc()
-            self.bind_database()
-            self.check_db_data_migrations()
-            self.init_inter_process_communicator()
-            self.init_dispatcher()
-        except Exception as e:
-            print(e)
-            self.log_process.terminate()
-            sys.exit(1)
+        # Ensure global state.
+        self.ensure_dirs()
+
+        # Start frigate services.
+        self.init_camera_metrics()
+        self.init_queues()
+        self.init_database()
+        self.init_onvif()
+        self.init_recording_manager()
+        self.init_review_segment_manager()
+        self.init_go2rtc()
         self.start_detectors()
+        self.init_embeddings_manager()
+        self.bind_database()
+        self.check_db_data_migrations()
+        self.init_inter_process_communicator()
+        self.init_dispatcher()
+        self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
         self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
-        self.start_audio_processors()
+        self.start_audio_processor()
         self.start_storage_maintainer()
         self.init_external_event_processor()
         self.start_stats_emitter()
-        self.init_web_server()
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
-        self.check_shm()
+
         self.init_auth()
 
-        # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT
-        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            os.kill(os.getpid(), signal.SIGINT)
-
-        signal.signal(signal.SIGTERM, receiveSignal)
-
         try:
-            self.flask_app.run(host="127.0.0.1", port=5001, debug=False, threaded=True)
-        except KeyboardInterrupt:
-            pass
-
-        logger.info("Flask has exited...")
-
-        self.stop()
+            uvicorn.run(
+                create_fastapi_app(
+                    self.config,
+                    self.db,
+                    self.embeddings,
+                    self.detected_frames_processor,
+                    self.storage_maintainer,
+                    self.onvif_controller,
+                    self.external_event_processor,
+                    self.stats_emitter,
+                    self.event_metadata_updater,
+                ),
+                host="127.0.0.1",
+                port=5001,
+                log_level="error",
+            )
+        finally:
+            self.stop()
 
     def stop(self) -> None:
         logger.info("Stopping...")
@@ -736,28 +654,27 @@ class FrigateApp:
         ).execute()
 
         # stop the audio process
-        if self.audio_process is not None:
+        if self.audio_process:
             self.audio_process.terminate()
             self.audio_process.join()
 
         # ensure the capture processes are done
-        for camera in self.camera_metrics.keys():
-            capture_process = self.camera_metrics[camera]["capture_process"]
+        for camera, metrics in self.camera_metrics.items():
+            capture_process = metrics.capture_process
             if capture_process is not None:
                 logger.info(f"Waiting for capture process for {camera} to stop")
                 capture_process.terminate()
                 capture_process.join()
 
         # ensure the camera processors are done
-        for camera in self.camera_metrics.keys():
-            camera_process = self.camera_metrics[camera]["process"]
+        for camera, metrics in self.camera_metrics.items():
+            camera_process = metrics.process
             if camera_process is not None:
                 logger.info(f"Waiting for process for {camera} to stop")
                 camera_process.terminate()
                 camera_process.join()
                 logger.info(f"Closing frame queue for {camera}")
-                frame_queue = self.camera_metrics[camera]["frame_queue"]
-                empty_and_close_queue(frame_queue)
+                empty_and_close_queue(metrics.frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():
@@ -794,17 +711,20 @@ class FrigateApp:
         self.frigate_watchdog.join()
         self.db.stop()
 
+        # Save embeddings stats to disk
+        if self.embeddings:
+            self.embeddings.stop()
+
         # Stop Communicators
         self.inter_process_communicator.stop()
         self.inter_config_updater.stop()
-        self.inter_detection_proxy.stop()
+        self.event_metadata_updater.stop()
+        self.inter_zmq_proxy.stop()
 
+        self.frame_manager.cleanup()
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
-
-        self.log_process.terminate()
-        self.log_process.join()
 
         os._exit(os.EX_OK)

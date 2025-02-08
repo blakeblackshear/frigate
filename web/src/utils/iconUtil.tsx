@@ -1,4 +1,5 @@
 import { IconName } from "@/components/icons/IconPicker";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
@@ -7,19 +8,47 @@ import {
   FaCarSide,
   FaCat,
   FaCheckCircle,
+  FaDhl,
   FaDog,
   FaFedex,
   FaFire,
   FaFootballBall,
+  FaHockeyPuck,
+  FaHorse,
   FaMotorcycle,
   FaMouse,
+  FaRegTrashAlt,
+  FaUmbrella,
   FaUps,
   FaUsps,
 } from "react-icons/fa";
-import { GiDeer, GiHummingbird, GiPolarBear, GiSailboat } from "react-icons/gi";
+import {
+  GiDeer,
+  GiFox,
+  GiGoat,
+  GiPolarBear,
+  GiPostStamp,
+  GiRabbit,
+  GiRaccoonHead,
+  GiSailboat,
+} from "react-icons/gi";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
+import { PiBirdFill } from "react-icons/pi";
+
+export function getAttributeLabels(config?: FrigateConfig) {
+  if (!config) {
+    return [];
+  }
+
+  const labels = new Set();
+
+  Object.values(config.model.attributes_map).forEach((values) =>
+    values.forEach((label) => labels.add(label)),
+  );
+  return [...labels];
+}
 
 export function isValidIconName(value: string): value is IconName {
   return Object.keys(LuIcons).includes(value as IconName);
@@ -37,7 +66,7 @@ export function getIconForLabel(label: string, className?: string) {
     case "bicycle":
       return <FaBicycle key={label} className={className} />;
     case "bird":
-      return <GiHummingbird key={label} className={className} />;
+      return <PiBirdFill key={label} className={className} />;
     case "boat":
       return <GiSailboat key={label} className={className} />;
     case "bus":
@@ -53,8 +82,12 @@ export function getIconForLabel(label: string, className?: string) {
     case "bark":
     case "dog":
       return <FaDog key={label} className={className} />;
-    case "fire_alarm":
-      return <FaFire key={label} className={className} />;
+    case "fox":
+      return <GiFox key={label} className={className} />;
+    case "goat":
+      return <GiGoat key={label} className={className} />;
+    case "horse":
+      return <FaHorse key={label} className={className} />;
     case "motorcycle":
       return <FaMotorcycle key={label} className={className} />;
     case "mouse":
@@ -63,8 +96,20 @@ export function getIconForLabel(label: string, className?: string) {
       return <LuBox key={label} className={className} />;
     case "person":
       return <BsPersonWalking key={label} className={className} />;
+    case "rabbit":
+      return <GiRabbit key={label} className={className} />;
+    case "raccoon":
+      return <GiRaccoonHead key={label} className={className} />;
+    case "robot_lawnmower":
+      return <FaHockeyPuck key={label} className={className} />;
     case "sports_ball":
       return <FaFootballBall key={label} className={className} />;
+    case "squirrel":
+      return <LuIcons.LuSquirrel key={label} className={className} />;
+    case "umbrella":
+      return <FaUmbrella key={label} className={className} />;
+    case "waste_bin":
+      return <FaRegTrashAlt key={label} className={className} />;
     // audio
     case "crying":
     case "laughter":
@@ -72,9 +117,21 @@ export function getIconForLabel(label: string, className?: string) {
     case "speech":
     case "yell":
       return <MdRecordVoiceOver key={label} className={className} />;
+    case "fire_alarm":
+      return <FaFire key={label} className={className} />;
     // sub labels
     case "amazon":
       return <FaAmazon key={label} className={className} />;
+    case "an_post":
+    case "dpd":
+    case "gls":
+    case "nzpost":
+    case "postnl":
+    case "postnord":
+    case "purolator":
+      return <GiPostStamp key={label} className={className} />;
+    case "dhl":
+      return <FaDhl key={label} className={className} />;
     case "fedex":
       return <FaFedex key={label} className={className} />;
     case "ups":

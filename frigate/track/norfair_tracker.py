@@ -12,10 +12,10 @@ from norfair import (
 )
 from norfair.drawing.drawer import Drawer
 
+from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
-from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
 from frigate.util.object import average_boxes, median_of_boxes
 
@@ -75,7 +75,7 @@ class NorfairTracker(ObjectTracker):
     def __init__(
         self,
         config: CameraConfig,
-        ptz_metrics: PTZMetricsTypes,
+        ptz_metrics: PTZMetrics,
     ):
         self.tracked_objects = {}
         self.untracked_object_boxes: list[list[int]] = []
@@ -85,7 +85,6 @@ class NorfairTracker(ObjectTracker):
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
-        self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
@@ -104,7 +103,7 @@ class NorfairTracker(ObjectTracker):
             #       the different tracker per object class
             filter_factory=OptimizedKalmanFilterFactory(R=3.4),
         )
-        if self.ptz_autotracker_enabled.value:
+        if self.ptz_metrics.autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
@@ -269,7 +268,7 @@ class NorfairTracker(ObjectTracker):
 
         self.tracked_objects[id].update(obj)
 
-    def update_frame_times(self, frame_time):
+    def update_frame_times(self, frame_name: str, frame_time: float):
         # if the object was there in the last frame, assume it's still there
         detections = [
             (
@@ -283,9 +282,11 @@ class NorfairTracker(ObjectTracker):
             for id, obj in self.tracked_objects.items()
             if self.disappeared[id] == 0
         ]
-        self.match_and_update(frame_time, detections=detections)
+        self.match_and_update(frame_name, frame_time, detections=detections)
 
-    def match_and_update(self, frame_time, detections):
+    def match_and_update(
+        self, frame_name: str, frame_time: float, detections: list[dict[str, any]]
+    ):
         norfair_detections = []
 
         for obj in detections:
@@ -315,7 +316,7 @@ class NorfairTracker(ObjectTracker):
 
         coord_transformations = None
 
-        if self.ptz_autotracker_enabled.value:
+        if self.ptz_metrics.autotracker_enabled.value:
             # we must have been enabled by mqtt, so set up the estimator
             if not self.ptz_motion_estimator:
                 self.ptz_motion_estimator = PtzMotionEstimator(
@@ -323,7 +324,7 @@ class NorfairTracker(ObjectTracker):
                 )
 
             coord_transformations = self.ptz_motion_estimator.motion_estimator(
-                detections, frame_time, self.camera_name
+                detections, frame_name, frame_time, self.camera_name
             )
 
         tracked_objects = self.tracker.update(

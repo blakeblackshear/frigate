@@ -539,6 +539,7 @@ function PreviewFramesPlayer({
       <img
         ref={imgRef}
         className={`size-full rounded-lg bg-black object-contain md:rounded-2xl`}
+        loading="lazy"
         onLoad={onImageLoaded}
       />
       {previewFrames?.length === 0 && (

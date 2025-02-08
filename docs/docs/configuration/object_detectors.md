@@ -3,37 +3,47 @@ id: object_detectors
 title: Object Detectors
 ---
 
-# Officially Supported Detectors
+# Supported Hardware
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, and `rknn`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+:::info
 
-## CPU Detector (not recommended)
+Frigate supports multiple different detectors that work on different types of hardware:
 
-The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
+**Most Hardware**
+- [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+- [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 
-:::tip
+**AMD**
+- [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
+- [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
 
-If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
+**Intel**
+- [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [ONNX](#onnx): OpenVINO will automatically be detected and used as a detector in the default Frigate image when a supported ONNX model is configured.
+
+**Nvidia**
+- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs and Jetson devices, using one of many default models.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp(4/5)` Frigate images when a supported ONNX model is configured.
+
+**Rockchip**
+- [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
+
+**For Testing**
+- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
 
 :::
 
-The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
+:::note
 
-A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time). 
 
-```yaml
-detectors:
-  cpu1:
-    type: cpu
-    num_threads: 3
-    model:
-      path: "/custom_model.tflite"
-  cpu2:
-    type: cpu
-    num_threads: 3
-```
+This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
 
-When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
+:::
+
+# Officially Supported Detectors
+
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -114,6 +124,30 @@ detectors:
     device: pci
 ```
 
+## Hailo-8l
+
+This detector is available for use with Hailo-8 AI Acceleration Module.
+
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+
+### Configuration
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  model_type: ssd
+  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+```
+
+
 ## OpenVINO Detector
 
 The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
@@ -122,11 +156,29 @@ The OpenVINO device to be used is specified using the `"device"` attribute accor
 
 OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2024/about-openvino/release-notes-openvino/system-requirements.html)
 
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  ov_0:
+    type: openvino
+    device: GPU
+  ov_1:
+    type: openvino
+    device: GPU
+```
+
+:::
+
 ### Supported Models
 
 #### SSDLite MobileNet v2
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
+
+Use the model configuration shown below when using the OpenVINO detector with the default OpenVINO model:
 
 ```yaml
 detectors:
@@ -205,7 +257,7 @@ The model used for TensorRT must be preprocessed on the same hardware platform t
 
 The Frigate image will generate model files during startup if the specified model is not found. Processed models are stored in the `/config/model_cache` folder. Typically the `/config` path is mapped to a directory on the host already and the `model_cache` does not need to be mapped separately unless the user wants to store it in a different location on the host.
 
-By default, the `yolov7-320` model will be generated, but this can be overridden by specifying the `YOLO_MODELS` environment variable in Docker. One or more models may be listed in a comma-separated format, and each one will be generated. To select no model generation, set the variable to an empty string, `YOLO_MODELS=""`. Models will only be generated if the corresponding `{model}.trt` file is not present in the `model_cache` folder, so you can force a model to be regenerated by deleting it from your Frigate data folder.
+By default, no models will be generated, but this can be overridden by specifying the `YOLO_MODELS` environment variable in Docker. One or more models may be listed in a comma-separated format, and each one will be generated. Models will only be generated if the corresponding `{model}.trt` file is not present in the `model_cache` folder, so you can force a model to be regenerated by deleting it from your Frigate data folder.
 
 If you have a Jetson device with DLAs (Xavier or Orin), you can generate a model that will run on the DLA by appending `-dla` to your model name, e.g. specify `YOLO_MODELS=yolov7-320-dla`. The model will run on DLA0 (Frigate does not currently support DLA1). DLA-incompatible layers will fall back to running on the GPU.
 
@@ -236,6 +288,7 @@ yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
 yolov7-640
+yolov7-416
 yolov7-320
 yolov7x-640
 yolov7x-320
@@ -246,7 +299,7 @@ An example `docker-compose.yml` fragment that converts the `yolov4-608` and `yol
 ```yml
 frigate:
   environment:
-    - YOLO_MODELS=yolov4-608,yolov7x-640
+    - YOLO_MODELS=yolov7-320,yolov7x-640
     - USE_FP16=false
 ```
 
@@ -264,6 +317,8 @@ The TensorRT detector can be selected by specifying `tensorrt` as the model type
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
 
+Use the config below to work with generated TRT models:
+
 ```yaml
 detectors:
   tensorrt:
@@ -277,6 +332,221 @@ model:
   width: 320
   height: 320
 ```
+
+## AMD/ROCm GPU detector
+
+### Setup
+
+The `rocm` detector supports running YOLO-NAS models on AMD GPUs. Use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
+
+### Docker settings for GPU access
+
+ROCm needs access to the `/dev/kfd` and `/dev/dri` devices. When docker or frigate is not run under root then also `video` (and possibly `render` and `ssl/_ssl`) groups should be added.
+
+When running docker directly the following flags should be added for device access:
+
+```bash
+$ docker run --device=/dev/kfd --device=/dev/dri  \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+---
+devices:
+  - /dev/dri
+  - /dev/kfd
+```
+
+For reference on recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
+
+### Docker settings for overriding the GPU chipset
+
+Your GPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer or missing models you will have to override the chipset version to an older/generic version to get things working.
+
+Also AMD/ROCm does not "officially" support integrated GPUs. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
+
+For the rocm frigate build there is some automatic detection:
+
+- gfx90c -> 9.0.0
+- gfx1031 -> 10.3.0
+- gfx1103 -> 11.0.0
+
+If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
+
+```bash
+$ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+environment:
+  HSA_OVERRIDE_GFX_VERSION: "9.0.0"
+```
+
+Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
+
+- first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
+- find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
+- use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
+- override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
+- if things are not working check the frigate docker logs
+
+#### Figuring out if AMD/ROCm is working and found your GPU
+
+```bash
+$ docker exec -it frigate /opt/rocm/bin/rocminfo
+```
+
+#### Figuring out your AMD GPU chipset version:
+
+We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from messing up the result:
+
+```bash
+$ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
+```
+
+### Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO-NAS
+
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  rocm:
+    type: rocm
+
+model:
+  model_type: yolonas
+  width: 320 # <--- should match whatever was set in notebook
+  height: 320 # <--- should match whatever was set in notebook
+  input_pixel_format: bgr
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+## ONNX
+
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+
+:::info
+
+If the correct build is used for your GPU then the GPU will be detected and used automatically.
+
+- **AMD**
+
+  - ROCm will automatically be detected and used with the ONNX detector in the `-rocm` Frigate image.
+
+- **Intel**
+
+  - OpenVINO will automatically be detected and used with the ONNX detector in the default Frigate image.
+
+- **Nvidia**
+  - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp(4/5)` Frigate image.
+
+:::
+
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  onnx_0:
+    type: onnx
+  onnx_1:
+    type: onnx
+```
+
+:::
+
+### Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO-NAS
+
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolonas
+  width: 320 # <--- should match whatever was set in notebook
+  height: 320 # <--- should match whatever was set in notebook
+  input_pixel_format: bgr
+  input_tensor: nchw
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+## CPU Detector (not recommended)
+
+The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
+
+:::danger
+
+The CPU detector is not recommended for general use. If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) in CPU mode is often more efficient than using the CPU detector.
+
+:::
+
+The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
+
+A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+
+```yaml
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 3
+  cpu2:
+    type: cpu
+    num_threads: 3
+
+model:
+  path: "/custom_model.tflite"
+```
+
+When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
 
 ## Deepstack / CodeProject.AI Server Detector
 

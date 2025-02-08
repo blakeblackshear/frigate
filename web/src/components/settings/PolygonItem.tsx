@@ -35,6 +35,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { buttonVariants } from "../ui/button";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -257,7 +258,10 @@ export default function PolygonItem({
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={handleDelete}
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -272,6 +276,7 @@ export default function PolygonItem({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
+                  aria-label="Edit"
                   onClick={() => {
                     setActivePolygonIndex(index);
                     setEditPane(polygon.type);
@@ -279,10 +284,14 @@ export default function PolygonItem({
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleCopyCoordinates(index)}>
+                <DropdownMenuItem
+                  aria-label="Copy"
+                  onClick={() => handleCopyCoordinates(index)}
+                >
                   Copy
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  aria-label="Delete"
                   disabled={isLoading}
                   onClick={() => setDeleteDialogOpen(true)}
                 >

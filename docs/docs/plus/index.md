@@ -32,7 +32,7 @@ Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVi
 
 :::warning
 
-Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15, which is still under development.
+Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15 and later.
 
 :::
 
@@ -60,7 +60,7 @@ Other object types available in the default Frigate model are not available. Add
 
 ### Label attributes
 
-Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, and delivery logos such as `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate events. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
+Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, and delivery logos such as `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate review items directly. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
 
 In order to have Frigate start using these attribute labels, you will need to add them to the list of objects to track:
 

@@ -2,21 +2,19 @@
 
 import datetime
 import logging
-import multiprocessing as mp
-import signal
 import threading
 import time
-from types import FrameType
-from typing import Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 import requests
-from setproctitle import setproctitle
 
+import frigate.util as util
+from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
+from frigate.config import CameraConfig, CameraInput, FfmpegConfig
 from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
@@ -28,17 +26,13 @@ from frigate.const import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
-from frigate.types import CameraMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
-from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
     from tflite_runtime.interpreter import Interpreter
 except ModuleNotFoundError:
     from tensorflow.lite.python.interpreter import Interpreter
-
-logger = logging.getLogger(__name__)
 
 
 def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
@@ -50,7 +44,7 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
         or get_ffmpeg_arg_list(ffmpeg.input_args)
     )
     return (
-        ["ffmpeg", "-vn", "-threads", "1"]
+        [ffmpeg.ffmpeg_path, "-vn", "-threads", "1"]
         + input_args
         + ["-i"]
         + [ffmpeg_input.path]
@@ -69,111 +63,63 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     )
 
 
-def listen_to_audio(
-    config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetricsTypes],
-) -> None:
-    stop_event = mp.Event()
-    audio_threads: list[threading.Thread] = []
+class AudioProcessor(util.Process):
+    name = "frigate.audio_manager"
 
-    def exit_process() -> None:
-        for thread in audio_threads:
-            thread.join()
+    def __init__(
+        self,
+        cameras: list[CameraConfig],
+        camera_metrics: dict[str, CameraMetrics],
+    ):
+        super().__init__(name="frigate.audio_manager", daemon=True)
 
-        logger.info("Exiting audio detector...")
+        self.camera_metrics = camera_metrics
+        self.cameras = cameras
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        logger.debug(f"Audio process received signal {signalNumber}")
-        stop_event.set()
-        exit_process()
+    def run(self) -> None:
+        audio_threads: list[AudioEventMaintainer] = []
 
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
+        threading.current_thread().name = "process:audio_manager"
 
-    threading.current_thread().name = "process:audio_manager"
-    setproctitle("frigate.audio_manager")
-    listen()
+        if len(self.cameras) == 0:
+            return
 
-    for camera in config.cameras.values():
-        if camera.enabled and camera.audio.enabled_in_config:
-            audio = AudioEventMaintainer(
+        for camera in self.cameras:
+            audio_thread = AudioEventMaintainer(
                 camera,
-                camera_metrics,
-                stop_event,
+                self.camera_metrics,
+                self.stop_event,
             )
-            audio_threads.append(audio)
-            audio.start()
+            audio_threads.append(audio_thread)
+            audio_thread.start()
 
+        self.logger.info(f"Audio processor started (pid: {self.pid})")
 
-class AudioTfl:
-    def __init__(self, stop_event: mp.Event, num_threads=2):
-        self.stop_event = stop_event
-        self.num_threads = num_threads
-        self.labels = load_labels("/audio-labelmap.txt", prefill=521)
-        self.interpreter = Interpreter(
-            model_path="/cpu_audio_model.tflite",
-            num_threads=self.num_threads,
-        )
+        while not self.stop_event.wait():
+            pass
 
-        self.interpreter.allocate_tensors()
+        for thread in audio_threads:
+            thread.join(1)
+            if thread.is_alive():
+                self.logger.info(f"Waiting for thread {thread.name:s} to exit")
+                thread.join(10)
 
-        self.tensor_input_details = self.interpreter.get_input_details()
-        self.tensor_output_details = self.interpreter.get_output_details()
+        for thread in audio_threads:
+            if thread.is_alive():
+                self.logger.warning(f"Thread {thread.name} is still alive")
 
-    def _detect_raw(self, tensor_input):
-        self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
-        self.interpreter.invoke()
-        detections = np.zeros((20, 6), np.float32)
-
-        res = self.interpreter.get_tensor(self.tensor_output_details[0]["index"])[0]
-        non_zero_indices = res > 0
-        class_ids = np.argpartition(-res, 20)[:20]
-        class_ids = class_ids[np.argsort(-res[class_ids])]
-        class_ids = class_ids[non_zero_indices[class_ids]]
-        scores = res[class_ids]
-        boxes = np.full((scores.shape[0], 4), -1, np.float32)
-        count = len(scores)
-
-        for i in range(count):
-            if scores[i] < AUDIO_MIN_CONFIDENCE or i == 20:
-                break
-            detections[i] = [
-                class_ids[i],
-                float(scores[i]),
-                boxes[i][0],
-                boxes[i][1],
-                boxes[i][2],
-                boxes[i][3],
-            ]
-
-        return detections
-
-    def detect(self, tensor_input, threshold=AUDIO_MIN_CONFIDENCE):
-        detections = []
-
-        if self.stop_event.is_set():
-            return detections
-
-        raw_detections = self._detect_raw(tensor_input)
-
-        for d in raw_detections:
-            if d[1] < threshold:
-                break
-            detections.append(
-                (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
-            )
-        return detections
+        self.logger.info("Exiting audio processor")
 
 
 class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
-        camera_metrics: dict[str, CameraMetricsTypes],
-        stop_event: mp.Event,
+        camera_metrics: dict[str, CameraMetrics],
+        stop_event: threading.Event,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = f"{camera.name}_audio_event_processor"
+        super().__init__(name=f"{camera.name}_audio_event_processor")
+
         self.config = camera
         self.camera_metrics = camera_metrics
         self.detections: dict[dict[str, any]] = {}
@@ -198,8 +144,8 @@ class AudioEventMaintainer(threading.Thread):
         audio_as_float = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
-        self.camera_metrics[self.config.name]["audio_rms"].value = rms
-        self.camera_metrics[self.config.name]["audio_dBFS"].value = dBFS
+        self.camera_metrics[self.config.name].audio_rms.value = rms
+        self.camera_metrics[self.config.name].audio_dBFS.value = dBFS
 
         # only run audio detection when volume is above min_volume
         if rms >= self.config.audio.min_volume:
@@ -209,7 +155,7 @@ class AudioEventMaintainer(threading.Thread):
             audio_detections = []
 
             for label, score, _ in model_detections:
-                logger.debug(
+                self.logger.debug(
                     f"{self.config.name} heard {label} with a score of {score}"
                 )
 
@@ -223,7 +169,7 @@ class AudioEventMaintainer(threading.Thread):
                     audio_detections.append(label)
 
             # send audio detection data
-            self.detection_publisher.send_data(
+            self.detection_publisher.publish(
                 (
                     self.config.name,
                     datetime.datetime.now().timestamp(),
@@ -270,6 +216,10 @@ class AudioEventMaintainer(threading.Thread):
                     "label": label,
                     "last_detection": datetime.datetime.now().timestamp(),
                 }
+            else:
+                self.logger.warning(
+                    f"Failed to create audio event with status code {resp.status_code}"
+                )
 
     def expire_detections(self) -> None:
         now = datetime.datetime.now().timestamp()
@@ -288,16 +238,13 @@ class AudioEventMaintainer(threading.Thread):
 
                 resp = requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
-                    json={
-                        "end_time": detection["last_detection"]
-                        + self.config.record.events.post_capture
-                    },
+                    json={"end_time": detection["last_detection"]},
                 )
 
                 if resp.status_code == 200:
                     self.detections[detection["label"]] = None
                 else:
-                    self.logger.warn(
+                    self.logger.warning(
                         f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
                     )
 
@@ -356,3 +303,63 @@ class AudioEventMaintainer(threading.Thread):
         self.requestor.stop()
         self.config_subscriber.stop()
         self.detection_publisher.stop()
+
+
+class AudioTfl:
+    def __init__(self, stop_event: threading.Event, num_threads=2):
+        self.stop_event = stop_event
+        self.num_threads = num_threads
+        self.labels = load_labels("/audio-labelmap.txt", prefill=521)
+        self.interpreter = Interpreter(
+            model_path="/cpu_audio_model.tflite",
+            num_threads=self.num_threads,
+        )
+
+        self.interpreter.allocate_tensors()
+
+        self.tensor_input_details = self.interpreter.get_input_details()
+        self.tensor_output_details = self.interpreter.get_output_details()
+
+    def _detect_raw(self, tensor_input):
+        self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
+        self.interpreter.invoke()
+        detections = np.zeros((20, 6), np.float32)
+
+        res = self.interpreter.get_tensor(self.tensor_output_details[0]["index"])[0]
+        non_zero_indices = res > 0
+        class_ids = np.argpartition(-res, 20)[:20]
+        class_ids = class_ids[np.argsort(-res[class_ids])]
+        class_ids = class_ids[non_zero_indices[class_ids]]
+        scores = res[class_ids]
+        boxes = np.full((scores.shape[0], 4), -1, np.float32)
+        count = len(scores)
+
+        for i in range(count):
+            if scores[i] < AUDIO_MIN_CONFIDENCE or i == 20:
+                break
+            detections[i] = [
+                class_ids[i],
+                float(scores[i]),
+                boxes[i][0],
+                boxes[i][1],
+                boxes[i][2],
+                boxes[i][3],
+            ]
+
+        return detections
+
+    def detect(self, tensor_input, threshold=AUDIO_MIN_CONFIDENCE):
+        detections = []
+
+        if self.stop_event.is_set():
+            return detections
+
+        raw_detections = self._detect_raw(tensor_input)
+
+        for d in raw_detections:
+            if d[1] < threshold:
+                break
+            detections.append(
+                (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
+            )
+        return detections

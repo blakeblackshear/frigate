@@ -1,5 +1,6 @@
 """Utilities for builtin types manipulation."""
 
+import ast
 import copy
 import datetime
 import logging
@@ -7,18 +8,17 @@ import multiprocessing as mp
 import queue
 import re
 import shlex
+import struct
 import urllib.parse
-from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
+from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
 import pytz
-import yaml
 from ruamel.yaml import YAML
 from tzlocal import get_localzone
-from zoneinfo import ZoneInfoNotFoundError
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -86,34 +86,6 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
         else:
             merged[k] = copy.deepcopy(v2)
     return merged
-
-
-def load_config_with_no_duplicates(raw_config) -> dict:
-    """Get config ensuring duplicate keys are not allowed."""
-
-    # https://stackoverflow.com/a/71751051
-    # important to use SafeLoader here to avoid RCE
-    class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
-        pass
-
-    def map_constructor(loader, node, deep=False):
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                raise ValueError(
-                    f"Config input {key} is defined multiple times for the same field, this is not allowed."
-                )
-            else:
-                data[key] = val
-        return data
-
-    PreserveDuplicatesLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
-    )
-    return yaml.load(raw_config, PreserveDuplicatesLoader)
 
 
 def clean_camera_user_pass(line: str) -> str:
@@ -210,23 +182,35 @@ def update_yaml_from_url(file_path, url):
         if len(new_value_list) > 1:
             update_yaml_file(file_path, key_path, new_value_list)
         else:
-            value = str(new_value_list[0])
-
-            if value.isnumeric():
-                value = int(value)
-
+            value = new_value_list[0]
+            try:
+                # no need to convert if we have a mask/zone string
+                value = ast.literal_eval(value) if "," not in value else value
+            except (ValueError, SyntaxError):
+                pass
             update_yaml_file(file_path, key_path, value)
 
 
 def update_yaml_file(file_path, key_path, new_value):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(file_path, "r") as f:
-        data = yaml.load(f)
+
+    try:
+        with open(file_path, "r") as f:
+            data = yaml.load(f)
+    except FileNotFoundError:
+        logger.error(
+            f"Unable to read from Frigate config file {file_path}. Make sure it exists and is readable."
+        )
+        return
 
     data = update_yaml(data, key_path, new_value)
-    with open(file_path, "w") as f:
-        yaml.dump(data, f)
+
+    try:
+        with open(file_path, "w") as f:
+            yaml.dump(data, f)
+    except Exception as e:
+        logger.error(f"Unable to write to Frigate config file {file_path}: {e}")
 
 
 def update_yaml(data, key_path, new_value):
@@ -281,37 +265,6 @@ def find_by_key(dictionary, target_key):
     return None
 
 
-def save_default_config(location: str) -> None:
-    try:
-        with open(location, "w") as f:
-            f.write(
-                """
-mqtt:
-  enabled: False
-
-cameras:
-  name_of_your_camera: # <------ Name the camera
-    enabled: True
-    ffmpeg:
-      inputs:
-        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
-          roles:
-            - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
-      width: 1280
-      height: 720
-                    """
-            )
-    except PermissionError:
-        logger.error("Unable to write default config to /config")
-        return
-
-    logger.info(
-        "Created default config file, see the getting started docs for configuration https://docs.frigate.video/guides/getting_started"
-    )
-
-
 def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
     try:
@@ -327,6 +280,17 @@ def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
         datetime.timezone.utc
     )
+
+
+def is_current_hour(timestamp: int) -> bool:
+    """Returns if timestamp is in the current UTC hour."""
+    start_of_next_hour = (
+        datetime.datetime.now(datetime.timezone.utc).replace(
+            minute=0, second=0, microsecond=0
+        )
+        + datetime.timedelta(hours=1)
+    ).timestamp()
+    return timestamp < start_of_next_hour
 
 
 def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
@@ -385,3 +349,32 @@ def generate_color_palette(n):
         colors.append(interpolate(color1, color2, factor))
 
     return colors
+
+
+def serialize(
+    vector: Union[list[float], np.ndarray, float], pack: bool = True
+) -> bytes:
+    """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
+    if isinstance(vector, np.ndarray):
+        # Convert numpy array to list of floats
+        vector = vector.flatten().tolist()
+    elif isinstance(vector, (float, np.float32, np.float64)):
+        # Handle single float values
+        vector = [vector]
+    elif not isinstance(vector, list):
+        raise TypeError(
+            f"Input must be a list of floats, a numpy array, or a single float. Got {type(vector)}"
+        )
+
+    try:
+        if pack:
+            return struct.pack("%sf" % len(vector), *vector)
+        else:
+            return vector
+    except struct.error as e:
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
+
+
+def deserialize(bytes_data: bytes) -> list[float]:
+    """Deserializes a compact "raw bytes" format into a list of floats"""
+    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))

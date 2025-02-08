@@ -41,6 +41,7 @@ cameras:
     ...
     onvif:
       # Required: host of the camera being connected to.
+      # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
@@ -49,6 +50,8 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
+      # Optional: Skip TLS verification from the ONVIF server (default: shown below)
+      tls_insecure: False
       # Optional: PTZ camera object autotracking. Keeps a moving object in
       # the center of the frame by automatically moving the PTZ camera.
       autotracking:

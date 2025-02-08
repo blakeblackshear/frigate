@@ -38,14 +38,12 @@ def output_frames(
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.debug(f"Output frames process received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    previous_frames = {}
 
     # start a websocket server on 8082
     WebSocketWSGIHandler.http_version = "1.1"
@@ -64,6 +62,8 @@ def output_frames(
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
+    preview_write_times: dict[str, float] = {}
+    failed_frame_requests: dict[str, int] = {}
 
     move_preview_frames("cache")
 
@@ -73,29 +73,42 @@ def output_frames(
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
         preview_recorders[camera] = PreviewRecorder(cam_config)
+        preview_write_times[camera] = 0
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
+        birdseye = Birdseye(config, stop_event, websocket_server)
 
     websocket_thread.start()
 
     while not stop_event.is_set():
-        (topic, data) = detection_subscriber.get_data(timeout=1)
+        (topic, data) = detection_subscriber.check_for_update(timeout=1)
 
         if not topic:
             continue
 
         (
             camera,
+            frame_name,
             frame_time,
             current_tracked_objects,
             motion_boxes,
-            regions,
+            _,
         ) = data
 
-        frame_id = f"{camera}{frame_time}"
+        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
 
-        frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
+        if frame is None:
+            logger.debug(f"Failed to get frame {frame_name} from SHM")
+            failed_frame_requests[camera] = failed_frame_requests.get(camera, 0) + 1
+
+            if failed_frame_requests[camera] > config.cameras[camera].detect.fps:
+                logger.warning(
+                    f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+                )
+
+            continue
+        else:
+            failed_frame_requests[camera] = 0
 
         # send camera frame to ffmpeg process if websockets are connected
         if any(
@@ -121,35 +134,44 @@ def output_frames(
             )
 
         # send frames for low fps recording
-        preview_recorders[camera].write_data(
+        generated_preview = preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
+        preview_write_times[camera] = frame_time
 
-        # delete frames after they have been used for output
-        if camera in previous_frames:
-            frame_manager.delete(f"{camera}{previous_frames[camera]}")
+        # if another camera generated a preview,
+        # check for any cameras that are currently offline
+        # and need to generate a preview
+        if generated_preview:
+            logger.debug(
+                "Checking for offline cameras because another camera generated a preview."
+            )
+            for camera, time in preview_write_times.copy().items():
+                if time != 0 and frame_time - time > 10:
+                    preview_recorders[camera].flag_offline(frame_time)
+                    preview_write_times[camera] = frame_time
 
-        previous_frames[camera] = frame_time
+        frame_manager.close(frame_name)
 
     move_preview_frames("clips")
 
     while True:
-        (topic, data) = detection_subscriber.get_data(timeout=0)
+        (topic, data) = detection_subscriber.check_for_update(timeout=0)
 
         if not topic:
             break
 
         (
             camera,
+            frame_name,
             frame_time,
             current_tracked_objects,
             motion_boxes,
             regions,
         ) = data
 
-        frame_id = f"{camera}{frame_time}"
-        frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
-        frame_manager.delete(frame_id)
+        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
+        frame_manager.close(frame_name)
 
     detection_subscriber.stop()
 

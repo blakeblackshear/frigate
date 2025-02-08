@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -31,6 +32,9 @@ function ConfigEditor() {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
   const configRef = useRef<HTMLDivElement | null>(null);
+  const schemaConfiguredRef = useRef(false);
+
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -79,50 +83,59 @@ function ConfigEditor() {
       return;
     }
 
-    if (modelRef.current != null) {
-      // we don't need to recreate the editor if it already exists
-      editorRef.current?.layout();
-      return;
+    const modelUri = monaco.Uri.parse(
+      `a://b/api/config/schema_${Date.now()}.json`,
+    );
+
+    // Configure Monaco YAML schema only once
+    if (!schemaConfiguredRef.current) {
+      configureMonacoYaml(monaco, {
+        enableSchemaRequest: true,
+        hover: true,
+        completion: true,
+        validate: true,
+        format: true,
+        schemas: [
+          {
+            uri: `${apiHost}api/config/schema.json`,
+            fileMatch: [String(modelUri)],
+          },
+        ],
+      });
+      schemaConfiguredRef.current = true;
     }
 
-    const modelUri = monaco.Uri.parse("a://b/api/config/schema.json");
-
-    if (monaco.editor.getModels().length > 0) {
-      modelRef.current = monaco.editor.getModel(modelUri);
-    } else {
+    if (!modelRef.current) {
       modelRef.current = monaco.editor.createModel(config, "yaml", modelUri);
+    } else {
+      modelRef.current.setValue(config);
     }
-
-    configureMonacoYaml(monaco, {
-      enableSchemaRequest: true,
-      hover: true,
-      completion: true,
-      validate: true,
-      format: true,
-      schemas: [
-        {
-          uri: `${apiHost}api/config/schema.json`,
-          fileMatch: [String(modelUri)],
-        },
-      ],
-    });
 
     const container = configRef.current;
 
-    if (container != null) {
+    if (container && !editorRef.current) {
       editorRef.current = monaco.editor.create(container, {
         language: "yaml",
         model: modelRef.current,
         scrollBeyondLastLine: false,
         theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
+    } else if (editorRef.current) {
+      editorRef.current.setModel(modelRef.current);
     }
 
     return () => {
-      configRef.current = null;
-      modelRef.current = null;
+      if (editorRef.current) {
+        editorRef.current.dispose();
+        editorRef.current = null;
+      }
+      if (modelRef.current) {
+        modelRef.current.dispose();
+        modelRef.current = null;
+      }
+      schemaConfiguredRef.current = false;
     };
-  });
+  }, [config, apiHost, systemTheme, theme]);
 
   // monitoring state
 
@@ -182,6 +195,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Copy config"
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
@@ -190,7 +204,8 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
-              onClick={() => onHandleSaveConfig("restart")}
+              aria-label="Save and restart"
+              onClick={() => setRestartDialogOpen(true)}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
@@ -201,6 +216,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Save only without restarting"
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
@@ -210,7 +226,7 @@ function ConfigEditor() {
         </div>
 
         {error && (
-          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-full">
+          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
             {error}
           </div>
         )}
@@ -218,6 +234,11 @@ function ConfigEditor() {
         <div ref={configRef} className="mt-2 h-[calc(100%-2.75rem)]" />
       </div>
       <Toaster closeButton={true} />
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => onHandleSaveConfig("restart")}
+      />
     </div>
   );
 }

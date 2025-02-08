@@ -79,12 +79,15 @@ class ImprovedMotionDetector(MotionDetector):
         # Improve contrast
         if self.config.improve_contrast:
             # TODO tracking moving average of min/max to avoid sudden contrast changes
-            minval = np.percentile(resized_frame, 4).astype(np.uint8)
-            maxval = np.percentile(resized_frame, 96).astype(np.uint8)
+            min_value = np.percentile(resized_frame, 4).astype(np.uint8)
+            max_value = np.percentile(resized_frame, 96).astype(np.uint8)
             # skip contrast calcs if the image is a single color
-            if minval < maxval:
+            if min_value < max_value:
                 # keep track of the last 50 contrast values
-                self.contrast_values[self.contrast_values_index] = [minval, maxval]
+                self.contrast_values[self.contrast_values_index] = [
+                    min_value,
+                    max_value,
+                ]
                 self.contrast_values_index += 1
                 if self.contrast_values_index == len(self.contrast_values):
                     self.contrast_values_index = 0
@@ -122,14 +125,14 @@ class ImprovedMotionDetector(MotionDetector):
         # dilate the thresholded image to fill in holes, then find contours
         # on thresholded image
         thresh_dilated = cv2.dilate(thresh, None, iterations=1)
-        cnts = cv2.findContours(
+        contours = cv2.findContours(
             thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        cnts = imutils.grab_contours(cnts)
+        contours = imutils.grab_contours(contours)
 
         # loop over the contours
         total_contour_area = 0
-        for c in cnts:
+        for c in contours:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             total_contour_area += contour_area

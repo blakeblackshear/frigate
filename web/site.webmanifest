@@ -20,6 +20,12 @@
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/images/maskable-badge.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "theme_color": "#ffffff",

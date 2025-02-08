@@ -52,7 +52,7 @@ detectors:
   # Required: name of the detector
   detector_name:
     # Required: type of the detector
-    # Frigate provided types include 'cpu', 'edgetpu', 'openvino' and 'tensorrt' (default: shown below)
+    # Frigate provides many types, see https://docs.frigate.video/configuration/object_detectors for more details (default: shown below)
     # Additional detector types can also be plugged in.
     # Detectors may require additional configuration.
     # Refer to the Detectors configuration page for more information.
@@ -117,27 +117,39 @@ auth:
   hash_iterations: 600000
 
 # Optional: model modifications
+# NOTE: The default values are for the EdgeTPU detector.
+# Other detectors will require the model config to be set.
 model:
-  # Optional: path to the model (default: automatic based on detector)
+  # Required: path to the model (default: automatic based on detector)
   path: /edgetpu_model.tflite
-  # Optional: path to the labelmap (default: shown below)
+  # Required: path to the labelmap (default: shown below)
   labelmap_path: /labelmap.txt
   # Required: Object detection model input width (default: shown below)
   width: 320
   # Required: Object detection model input height (default: shown below)
   height: 320
-  # Optional: Object detection model input colorspace
+  # Required: Object detection model input colorspace
   # Valid values are rgb, bgr, or yuv. (default: shown below)
   input_pixel_format: rgb
-  # Optional: Object detection model input tensor format
+  # Required: Object detection model input tensor format
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
-  # Optional: Object detection model type, currently only used with the OpenVINO detector
+  # Required: Object detection model type, currently only used with the OpenVINO detector
   # Valid values are ssd, yolox, yolonas (default: shown below)
   model_type: ssd
-  # Optional: Label name modifications. These are merged into the standard labelmap.
+  # Required: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
+  # Optional: Map of object labels to their attribute labels (default: depends on model)
+  attributes_map:
+    person:
+      - amazon
+      - face
+    car:
+      - amazon
+      - fedex
+      - license_plate
+      - ups
 
 # Optional: Audio Events Configuration
 # NOTE: Can be overridden at the camera level
@@ -210,6 +222,10 @@ birdseye:
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
+  # Optional: ffmpeg binry path (default: shown below)
+  # can also be set to `7.0` or `5.0` to specify one of the included versions
+  # or can be set to any path that holds `bin/ffmpeg` & `bin/ffprobe`
+  path: "default"
   # Optional: global ffmpeg args (default: shown below)
   global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: auto detect)
@@ -271,13 +287,13 @@ detect:
   # especially when using separate streams for detect and record.
   # Use this setting to make the timeline bounding boxes more closely align
   # with the recording. The value can be positive or negative.
-  # TIP: Imagine there is an event clip with a person walking from left to right.
-  #      If the event timeline bounding box is consistently to the left of the person
+  # TIP: Imagine there is an tracked object clip with a person walking from left to right.
+  #      If the tracked object lifecycle bounding box is consistently to the left of the person
   #      then the value should be decreased. Similarly, if a person is walking from
   #      left to right and the bounding box is consistently ahead of the person
   #      then the value should be increased.
   # TIP: This offset is dynamic so you can change the value and it will update existing
-  #      events, this makes it easy to tune.
+  #      tracked objects, this makes it easy to tune.
   # WARNING: Fast moving objects will likely not have the bounding box align.
   annotation_offset: 0
 
@@ -383,6 +399,14 @@ motion:
   # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
   mqtt_off_delay: 30
 
+# Optional: Notification Configuration
+notifications:
+  # Optional: Enable notification service (default: shown below)
+  enabled: False
+  # Optional: Email for push service to reach out to
+  # NOTE: This is required to use notifications
+  email: "admin@example.com"
+
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
 record:
@@ -397,9 +421,9 @@ record:
   sync_recordings: False
   # Optional: Retention settings for recording
   retain:
-    # Optional: Number of days to retain recordings regardless of events (default: shown below)
-    # NOTE: This should be set to 0 and retention should be defined in events section below
-    #       if you only want to retain recordings of events.
+    # Optional: Number of days to retain recordings regardless of tracked objects (default: shown below)
+    # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
+    #       if you only want to retain recordings of alerts and detections.
     days: 0
     # Optional: Mode for retention. Available options are: all, motion, and active_objects
     #   all - save all recording segments regardless of activity
@@ -422,34 +446,48 @@ record:
     # Optional: Quality of recording preview (default: shown below).
     # Options are: very_low, low, medium, high, very_high
     quality: medium
-  # Optional: Event recording settings
-  events:
-    # Optional: Number of seconds before the event to include (default: shown below)
+  # Optional: alert recording settings
+  alerts:
+    # Optional: Number of seconds before the alert to include (default: shown below)
     pre_capture: 5
-    # Optional: Number of seconds after the event to include (default: shown below)
+    # Optional: Number of seconds after the alert to include (default: shown below)
     post_capture: 5
-    # Optional: Objects to save recordings for. (default: all tracked objects)
-    objects:
-      - person
-    # Optional: Retention settings for recordings of events
+    # Optional: Retention settings for recordings of alerts
     retain:
-      # Required: Default retention days (default: shown below)
-      default: 10
+      # Required: Retention days (default: shown below)
+      days: 14
       # Optional: Mode for retention. (default: shown below)
-      #   all - save all recording segments for events regardless of activity
-      #   motion - save all recordings segments for events with any detected motion
-      #   active_objects - save all recording segments for event with active/moving objects
+      #   all - save all recording segments for alerts regardless of activity
+      #   motion - save all recordings segments for alerts with any detected motion
+      #   active_objects - save all recording segments for alerts with active/moving objects
       #
       # NOTE: If the retain mode for the camera is more restrictive than the mode configured
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
-      # Optional: Per object retention days
-      objects:
-        person: 15
+  # Optional: detection recording settings
+  detections:
+    # Optional: Number of seconds before the detection to include (default: shown below)
+    pre_capture: 5
+    # Optional: Number of seconds after the detection to include (default: shown below)
+    post_capture: 5
+    # Optional: Retention settings for recordings of detections
+    retain:
+      # Required: Retention days (default: shown below)
+      days: 14
+      # Optional: Mode for retention. (default: shown below)
+      #   all - save all recording segments for detections regardless of activity
+      #   motion - save all recordings segments for detections with any detected motion
+      #   active_objects - save all recording segments for detections with active/moving objects
+      #
+      # NOTE: If the retain mode for the camera is more restrictive than the mode configured
+      #       here, the segments will already be gone by the time this mode is applied.
+      #       For example, if the camera retain mode is "motion", the segments without motion are
+      #       never stored, so setting the mode to "all" here won't bring them back.
+      mode: motion
 
-# Optional: Configuration for the jpg snapshots written to the clips directory for each event
+# Optional: Configuration for the jpg snapshots written to the clips directory for each tracked object
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
@@ -476,8 +514,42 @@ snapshots:
   # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
   quality: 70
 
+# Optional: Configuration for semantic search capability
+semantic_search:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
+  # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
+  reindex: False
+  # Optional: Set the model size used for embeddings. (default: shown below)
+  # NOTE: small model runs on CPU and large model runs on GPU
+  model_size: "small"
+
+# Optional: Configuration for AI generated tracked object descriptions
+# NOTE: Semantic Search must be enabled for this to do anything.
+# WARNING: Depending on the provider, this will send thumbnails over the internet
+# to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
+# the camera level (enabled: False) to enhance privacy for indoor cameras.
+genai:
+  # Optional: Enable AI description generation (default: shown below)
+  enabled: False
+  # Required if enabled: Provider must be one of ollama, gemini, or openai
+  provider: ollama
+  # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
+  base_url: http://localhost::11434
+  # Required if gemini or openai
+  api_key: "{FRIGATE_GENAI_API_KEY}"
+  # Optional: The default prompt for generating descriptions. Can use replacement
+  # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+  prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
+  # Optional: Object specific prompts to customize description results
+  # Format: {label}: {prompt}
+  object_prompts:
+    person: "My special person prompt."
+
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
+# NOTE: The default go2rtc API port (1984) must be used,
+#       changing this port for the integrated go2rtc instance is not supported. 
 go2rtc:
 
 # Optional: Live stream configuration for WebUI.
@@ -618,6 +690,7 @@ cameras:
     # to enable PTZ controls.
     onvif:
       # Required: host of the camera being connected to.
+      # NOTE: HTTP is assumed by default; HTTPS is supported if you specify the scheme, ex: "https://0.0.0.0".
       host: 0.0.0.0
       # Optional: ONVIF port for device (default: shown below).
       port: 8000
@@ -626,6 +699,8 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
+      # Optional: Skip TLS verification from the ONVIF server (default: shown below)
+      tls_insecure: False
       # Optional: Ignores time synchronization mismatches between the camera and the server during authentication.
       # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents.
       ignore_time_mismatch: False
@@ -669,6 +744,28 @@ cameras:
       # Optional: Adjust sort order of cameras in the Birdseye view. Larger numbers come later (default: shown below)
       # By default the cameras are sorted alphabetically.
       order: 0
+
+    # Optional: Configuration for AI generated tracked object descriptions
+    genai:
+      # Optional: Enable AI description generation (default: shown below)
+      enabled: False
+      # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
+      use_snapshot: False
+      # Optional: The default prompt for generating descriptions. Can use replacement
+      # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+      prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
+      # Optional: Object specific prompts to customize description results
+      # Format: {label}: {prompt}
+      object_prompts:
+        person: "My special person prompt."
+      # Optional: objects to generate descriptions for (default: all objects that are tracked)
+      objects:
+        - person
+        - cat
+      # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
+      required_zones: []
+      # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
+      debug_save_thumbnails: False
 
 # Optional
 ui:

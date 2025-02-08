@@ -28,8 +28,7 @@ from frigate.video import (  # noqa: E402
     start_or_restart_ffmpeg,
 )
 
-logging.basicConfig()
-logging.root.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +208,7 @@ class ProcessClip:
                 box[2],
                 box[3],
                 obj["id"],
-                f"{int(obj['score']*100)}% {int(obj['area'])}",
+                f"{int(obj['score'] * 100)}% {int(obj['area'])}",
                 thickness=thickness,
                 color=color,
             )
@@ -228,7 +227,7 @@ class ProcessClip:
             )
 
         cv2.imwrite(
-            f"{os.path.join(debug_path, os.path.basename(self.clip_path))}.{int(frame_time*1000000)}.jpg",
+            f"{os.path.join(debug_path, os.path.basename(self.clip_path))}.{int(frame_time * 1000000)}.jpg",
             current_frame,
         )
 
@@ -281,10 +280,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config()
-        runtime_config.cameras["camera"].create_ffmpeg_cmds()
-
-        process_clip = ProcessClip(c, frame_shape, runtime_config)
+        process_clip = ProcessClip(c, frame_shape, frigate_config)
         process_clip.load_frames()
         process_clip.process_frames(object_detector, objects_to_track=[label])
 
@@ -294,7 +290,7 @@ def process(path, label, output, debug_path):
         1 for result in results if result[1]["true_positive_objects"] > 0
     )
     print(
-        f"Objects were detected in {positive_count}/{len(results)}({positive_count/len(results)*100:.2f}%) clip(s)."
+        f"Objects were detected in {positive_count}/{len(results)}({positive_count / len(results) * 100:.2f}%) clip(s)."
     )
 
     if output:

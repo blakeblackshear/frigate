@@ -14,8 +14,12 @@ import {
   ReviewSummary,
   SegmentedReviewData,
 } from "@/types/review";
+import {
+  getBeginningOfDayTimestamp,
+  getEndOfDayTimestamp,
+} from "@/utils/dateUtil";
 import EventView from "@/views/events/EventView";
-import { RecordingView } from "@/views/events/RecordingView";
+import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -35,18 +39,28 @@ export default function Events() {
 
   const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
 
-  const [recording, setRecording] =
-    useOverlayState<RecordingStartingPoint>("recording");
+  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
+    "recording",
+    undefined,
+    false,
+  );
 
   useSearchEffect("id", (reviewId: string) => {
     axios
       .get(`review/${reviewId}`)
       .then((resp) => {
         if (resp.status == 200 && resp.data) {
+          const startTime = resp.data.start_time - REVIEW_PADDING;
+          const date = new Date(startTime * 1000);
+
+          setReviewFilter({
+            after: getBeginningOfDayTimestamp(date),
+            before: getEndOfDayTimestamp(date),
+          });
           setRecording(
             {
               camera: resp.data.camera,
-              startTime: resp.data.start_time - REVIEW_PADDING,
+              startTime,
               severity: resp.data.severity,
             },
             true,
@@ -54,6 +68,8 @@ export default function Events() {
         }
       })
       .catch(() => {});
+
+    return true;
   });
 
   const [startTime, setStartTime] = useState<number>();
@@ -71,6 +87,30 @@ export default function Events() {
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
     useApiFilter<ReviewFilter>();
 
+  useSearchEffect("cameras", (cameras: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      cameras: cameras.includes(",") ? cameras.split(",") : [cameras],
+    });
+    return true;
+  });
+
+  useSearchEffect("labels", (labels: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      labels: labels.includes(",") ? labels.split(",") : [labels],
+    });
+    return true;
+  });
+
+  useSearchEffect("zones", (zones: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      zones: zones.includes(",") ? zones.split(",") : [zones],
+    });
+    return true;
+  });
+
   useSearchEffect("group", (reviewGroup) => {
     if (config && reviewGroup && reviewGroup != "default") {
       const group = config.camera_groups[reviewGroup];
@@ -83,7 +123,11 @@ export default function Events() {
           cameras: group.cameras,
         });
       }
+
+      return true;
     }
+
+    return false;
   });
 
   const onUpdateFilter = useCallback(
@@ -366,10 +410,6 @@ export default function Events() {
                   review.severity == "detection"
                     ? item.reviewed_detection + 1
                     : item.reviewed_detection,
-                reviewed_motion:
-                  review.severity == "significant_motion"
-                    ? item.reviewed_motion + 1
-                    : item.reviewed_motion,
               },
             };
           },

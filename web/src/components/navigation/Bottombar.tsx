@@ -3,11 +3,10 @@ import { IoIosWarning } from "react-icons/io";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useFrigateStats } from "@/api/ws";
+import { useEmbeddingsReindexProgress, useFrigateStats } from "@/api/ws";
 import { useContext, useEffect, useMemo } from "react";
 import useStats from "@/hooks/use-stats";
 import GeneralSettings from "../menu/GeneralSettings";
-import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
 import {
   StatusBarMessagesContext,
@@ -28,14 +27,13 @@ function Bottombar() {
         isPWA && isIOS
           ? "portrait:items-start portrait:pt-1 landscape:items-center"
           : "items-center",
-        isMobile && !isPWA && "h-12 landscape:md:h-16",
+        isMobile && !isPWA && "h-12 md:h-16",
       )}
     >
       {navItems.map((item) => (
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
       <GeneralSettings className="p-2" />
-      <AccountSettings className="p-2" />
       <StatusAlertNav className="p-2" />
     </div>
   );
@@ -75,6 +73,23 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
       );
     });
   }, [potentialProblems, addMessage, clearMessages]);
+
+  const { payload: reindexState } = useEmbeddingsReindexProgress();
+
+  useEffect(() => {
+    if (reindexState) {
+      if (reindexState.status == "indexing") {
+        clearMessages("embeddings-reindex");
+        addMessage(
+          "embeddings-reindex",
+          `Reindexing embeddings (${Math.floor((reindexState.processed_objects / reindexState.total_objects) * 100)}% complete)`,
+        );
+      }
+      if (reindexState.status === "completed") {
+        clearMessages("embeddings-reindex");
+      }
+    }
+  }, [reindexState, addMessage, clearMessages]);
 
   if (!messages || Object.keys(messages).length === 0) {
     return;

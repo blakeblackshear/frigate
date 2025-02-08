@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
@@ -45,6 +46,20 @@ function Exports() {
         .includes(search.toLowerCase()),
     );
   }, [exports, search]);
+
+  // Viewing
+
+  const [selected, setSelected] = useState<Export>();
+  const [selectedAspect, setSelectedAspect] = useState(0.0);
+
+  useSearchEffect("id", (id) => {
+    if (!exports) {
+      return false;
+    }
+
+    setSelected(exports.find((exp) => exp.id == id));
+    return true;
+  });
 
   // Deleting
 
@@ -91,11 +106,6 @@ function Exports() {
     [mutate],
   );
 
-  // Viewing
-
-  const [selected, setSelected] = useState<Export>();
-  const [selectedAspect, setSelectedAspect] = useState(0.0);
-
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
       <Toaster closeButton={true} />
@@ -115,6 +125,7 @@ function Exports() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
               className="text-white"
+              aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >
@@ -165,7 +176,7 @@ function Exports() {
       {exports && (
         <div className="flex w-full items-center justify-center p-2">
           <Input
-            className="w-full bg-muted md:w-1/3"
+            className="text-md w-full bg-muted md:w-1/3"
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

@@ -1,8 +1,14 @@
 click == 8.1.*
-Flask == 3.0.*
-Flask_Limiter == 3.7.*
+# FastAPI
+aiohttp == 3.11.2
+starlette == 0.41.2
+starlette-context == 0.3.6
+fastapi == 0.115.*
+uvicorn == 0.30.*
+slowapi == 0.1.*
 imutils == 0.5.*
-joserfc == 0.11.*
+joserfc == 1.0.*
+pathvalidate == 3.2.*
 markupsafe == 2.1.*
 mypy == 1.6.1
 numpy == 1.26.*
@@ -11,16 +17,14 @@ opencv-python-headless == 4.9.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
-peewee_migrate == 1.12.*
-psutil == 5.9.*
-pydantic == 2.7.*
+peewee_migrate == 1.13.*
+psutil == 6.1.*
+pydantic == 2.8.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
-PyYAML == 6.0.*
-pytz == 2024.1
-pyzmq == 26.0.*
+pytz == 2024.*
+pyzmq == 26.2.*
 ruamel.yaml == 0.18.*
 tzlocal == 5.2
-types-PyYAML == 6.0.*
 requests == 2.32.*
 types-requests == 2.32.*
 scipy == 1.13.*
@@ -28,5 +32,16 @@ norfair == 2.2.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
-onnxruntime == 1.18.*
-openvino == 2024.1.*
+# OpenVino & ONNX
+openvino == 2024.3.*
+onnxruntime-openvino == 1.19.* ; platform_machine == 'x86_64'
+onnxruntime == 1.19.* ; platform_machine == 'aarch64'
+# Embeddings
+transformers == 4.45.*
+# Generative AI
+google-generativeai == 0.8.*
+ollama == 0.3.*
+openai == 1.51.*
+# push notifications
+py-vapid == 1.9.*
+pywebpush == 2.0.*

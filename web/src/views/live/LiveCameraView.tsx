@@ -17,7 +17,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
@@ -29,6 +34,7 @@ import {
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -236,6 +242,25 @@ export default function LiveCameraView({
     return "mse";
   }, [lowBandwidth, mic, webRTC, isRestreamed]);
 
+  useKeyboardListener(["m"], (key, modifiers) => {
+    if (!modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "m":
+        if (supportsAudioOutput) {
+          setAudio(!audio);
+        }
+        break;
+      case "t":
+        if (supports2WayTalk) {
+          setMic(!mic);
+        }
+        break;
+    }
+  });
+
   // layout state
 
   const windowAspectRatio = useMemo(() => {
@@ -333,6 +358,7 @@ export default function LiveCameraView({
             >
               <Button
                 className={`flex items-center gap-2.5 rounded-lg`}
+                aria-label="Go back"
                 size="sm"
                 onClick={() => navigate(-1)}
               >
@@ -341,6 +367,7 @@ export default function LiveCameraView({
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
+                aria-label="Show historical footage"
                 size="sm"
                 onClick={() => {
                   navigate("review", {
@@ -369,6 +396,7 @@ export default function LiveCameraView({
               {fullscreen && (
                 <Button
                   className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
+                  aria-label="Go back"
                   size="sm"
                   onClick={() => navigate(-1)}
                 >
@@ -412,7 +440,13 @@ export default function LiveCameraView({
                   Icon={mic ? FaMicrophone : FaMicrophoneSlash}
                   isActive={mic}
                   title={`${mic ? "Disable" : "Enable"} Two Way Talk`}
-                  onClick={() => setMic(!mic)}
+                  onClick={() => {
+                    setMic(!mic);
+                    // Turn on audio when enabling the mic if audio is currently off
+                    if (!mic && !audio) {
+                      setAudio(true);
+                    }
+                  }}
                 />
               )}
               {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
@@ -490,6 +524,53 @@ export default function LiveCameraView({
   );
 }
 
+type TooltipButtonProps = {
+  label: string;
+  onClick?: () => void;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  onMouseUp?: (e: React.MouseEvent) => void;
+  onTouchStart?: (e: React.TouchEvent) => void;
+  onTouchEnd?: (e: React.TouchEvent) => void;
+  children: ReactNode;
+  className?: string;
+};
+
+function TooltipButton({
+  label,
+  onClick,
+  onMouseDown,
+  onMouseUp,
+  onTouchStart,
+  onTouchEnd,
+  children,
+  className,
+  ...props
+}: TooltipButtonProps) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            aria-label={label}
+            onClick={onClick}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            className={className}
+            {...props}
+          >
+            {children}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 function PtzControlPanel({
   camera,
   clickOverlay,
@@ -512,9 +593,37 @@ function PtzControlPanel({
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-"],
+    [
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "+",
+      "-",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+    ],
     (key, modifiers) => {
-      if (modifiers.repeat) {
+      if (modifiers.repeat || !key) {
+        return;
+      }
+
+      if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(key)) {
+        const presetNumber = parseInt(key);
+        if (
+          ptz &&
+          (ptz.presets?.length ?? 0) > 0 &&
+          presetNumber <= ptz.presets.length
+        ) {
+          sendPtz(`preset_${ptz.presets[presetNumber - 1]}`);
+        }
         return;
       }
 
@@ -555,7 +664,8 @@ function PtzControlPanel({
     >
       {ptz?.features?.includes("pt") && (
         <>
-          <Button
+          <TooltipButton
+            label="Move camera left"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_LEFT");
@@ -568,8 +678,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleLeft />
-          </Button>
-          <Button
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera up"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_UP");
@@ -582,8 +693,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleUp />
-          </Button>
-          <Button
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera down"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_DOWN");
@@ -596,8 +708,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleDown />
-          </Button>
-          <Button
+          </TooltipButton>
+          <TooltipButton
+            label="Move camera right"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_RIGHT");
@@ -610,12 +723,13 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <FaAngleRight />
-          </Button>
+          </TooltipButton>
         </>
       )}
       {ptz?.features?.includes("zoom") && (
         <>
-          <Button
+          <TooltipButton
+            label="Zoom in"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_IN");
@@ -628,8 +742,9 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <MdZoomIn />
-          </Button>
-          <Button
+          </TooltipButton>
+          <TooltipButton
+            label="Zoom out"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_OUT");
@@ -642,43 +757,60 @@ function PtzControlPanel({
             onTouchEnd={onStop}
           >
             <MdZoomOut />
-          </Button>
+          </TooltipButton>
         </>
       )}
+
       {ptz?.features?.includes("pt-r-fov") && (
-        <>
-          <Button
-            className={`${clickOverlay ? "text-selected" : "text-primary"}`}
-            onClick={() => setClickOverlay(!clickOverlay)}
-          >
-            <TbViewfinder />
-          </Button>
-        </>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className={`${clickOverlay ? "text-selected" : "text-primary"}`}
+                aria-label="Click in the frame to center the camera"
+                onClick={() => setClickOverlay(!clickOverlay)}
+              >
+                <TbViewfinder />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{clickOverlay ? "Disable" : "Enable"} click to move</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <DropdownMenu modal={!isDesktop}>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <BsThreeDotsVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="scrollbar-container max-h-[40dvh] overflow-y-auto"
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            {ptz?.presets.map((preset) => {
-              return (
-                <DropdownMenuItem
-                  key={preset}
-                  className="cursor-pointer"
-                  onSelect={() => sendPtz(`preset_${preset}`)}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenu modal={!isDesktop}>
+                <DropdownMenuTrigger asChild>
+                  <Button aria-label="PTZ camera presets">
+                    <BsThreeDotsVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="scrollbar-container max-h-[40dvh] overflow-y-auto"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  {preset}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                  {ptz?.presets.map((preset) => (
+                    <DropdownMenuItem
+                      key={preset}
+                      aria-label={preset}
+                      className="cursor-pointer"
+                      onSelect={() => sendPtz(`preset_${preset}`)}
+                    >
+                      {preset}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>PTZ camera presets</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );

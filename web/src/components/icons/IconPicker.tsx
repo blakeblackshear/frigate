@@ -66,7 +66,10 @@ export default function IconPicker({
       >
         <PopoverTrigger asChild>
           {!selectedIcon?.name || !selectedIcon?.Icon ? (
-            <Button className="mt-2 w-full text-muted-foreground">
+            <Button
+              className="mt-2 w-full text-muted-foreground"
+              aria-label="Select an icon"
+            >
               Select an icon
             </Button>
           ) : (

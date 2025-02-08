@@ -10,6 +10,7 @@ from enum import Enum
 from typing import Optional
 
 import cv2
+from numpy import ndarray
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.events_updater import EventUpdatePublisher
@@ -45,7 +46,7 @@ class ExternalEventProcessor:
         duration: Optional[int],
         include_recording: bool,
         draw: dict[str, any],
-        snapshot_frame: any,
+        snapshot_frame: Optional[ndarray],
     ) -> str:
         now = datetime.datetime.now().timestamp()
         camera_config = self.config.cameras.get(camera)
@@ -57,24 +58,21 @@ class ExternalEventProcessor:
         thumbnail = self._write_images(
             camera_config, label, event_id, draw, snapshot_frame
         )
-        end = (
-            now + duration + camera_config.record.events.post_capture
-            if duration is not None
-            else None
-        )
+        end = now + duration if duration is not None else None
 
         self.event_sender.publish(
             (
                 EventTypeEnum.api,
                 EventStateEnum.start,
                 camera,
+                "",
                 {
                     "id": event_id,
                     "label": label,
                     "sub_label": sub_label,
                     "score": score,
                     "camera": camera,
-                    "start_time": now - camera_config.record.events.pre_capture,
+                    "start_time": now - camera_config.record.event_pre_capture,
                     "end_time": end,
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
@@ -86,7 +84,7 @@ class ExternalEventProcessor:
 
         if source_type == "api":
             self.event_camera[event_id] = camera
-            self.detection_updater.send_data(
+            self.detection_updater.publish(
                 (
                     camera,
                     now,
@@ -110,12 +108,13 @@ class ExternalEventProcessor:
                 EventTypeEnum.api,
                 EventStateEnum.end,
                 None,
+                "",
                 {"id": event_id, "end_time": end_time},
             )
         )
 
         if event_id in self.event_camera:
-            self.detection_updater.send_data(
+            self.detection_updater.publish(
                 (
                     self.event_camera[event_id],
                     end_time,
@@ -134,8 +133,11 @@ class ExternalEventProcessor:
         label: str,
         event_id: str,
         draw: dict[str, any],
-        img_frame: any,
-    ) -> str:
+        img_frame: Optional[ndarray],
+    ) -> Optional[str]:
+        if img_frame is None:
+            return None
+
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_frame)

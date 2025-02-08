@@ -55,7 +55,7 @@ environment_vars:
 
 ### `database`
 
-Event and recording information is managed in a sqlite database at `/config/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
+Tracked object and recording information is managed in a sqlite database at `/config/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
 
 If you are storing your database on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
 
@@ -176,19 +176,19 @@ listen [::]:5000 ipv6only=off;
 
 ### Custom ffmpeg build
 
-Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, a docker volume mapping can be used to overwrite the included ffmpeg build with an ffmpeg build that works for your specific hardware setup.
+Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to /config and used.
 
 To do this:
 
-1. Download your ffmpeg build and uncompress to a folder on the host (let's use `/home/appdata/frigate/custom-ffmpeg` for this example).
+1. Download your ffmpeg build and uncompress to the Frigate config folder.
 2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
 3. Restart Frigate and the custom version will be used if the mapping was done correctly.
 
-NOTE: The folder that is mapped from the host needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then `/home/appdata/frigate/custom-ffmpeg` needs to be mapped to `/usr/lib/btbn-ffmpeg`.
+NOTE: The folder that is set for the config needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then the `ffmpeg -> path` field should be `/config/custom-ffmpeg/bin`.
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.4, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.2, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 
@@ -225,5 +225,5 @@ docker run                                \
   --entrypoint python3                    \
   ghcr.io/blakeblackshear/frigate:stable  \
   -u -m frigate                           \
-  --validate_config
+  --validate-config
 ```

@@ -42,10 +42,8 @@ type ReviewSummaryDay = {
   day: string;
   reviewed_alert: number;
   reviewed_detection: number;
-  reviewed_motion: number;
   total_alert: number;
   total_detection: number;
-  total_motion: number;
 };
 
 export type ReviewSummary = {
@@ -60,3 +58,5 @@ export type MotionData = {
 };
 
 export const REVIEW_PADDING = 4;
+
+export type ReviewDetailPaneType = "overview" | "details";

@@ -47,7 +47,7 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the `URL` of your Frigate instance which needs to be pointed at the internal unauthenticated port (`5000`) for your instance. This may look like `http://<host>:5000/`.
+When configuring the integration, you will be asked for the `URL` of your Frigate instance which can be pointed at the internal unauthenticated port (`5000`) or the authenticated port (`8971`) for your instance. This may look like `http://<host>:5000/`.
 
 ### Docker Compose Examples
 
@@ -55,7 +55,7 @@ If you are running Home Assistant Core and Frigate with Docker Compose on the sa
 
 #### Home Assistant running with host networking
 
-It is not recommended to run Frigate in host networking mode. In this example, you would use `http://172.17.0.1:5000` when configuring the integration.
+It is not recommended to run Frigate in host networking mode. In this example, you would use `http://172.17.0.1:5000` or `http://172.17.0.1:8971` when configuring the integration.
 
 ```yaml
 services:
@@ -75,7 +75,7 @@ services:
 
 #### Home Assistant _not_ running with host networking or in a separate compose file
 
-In this example, you would use `http://frigate:5000` when configuring the integration. There is no need to map the port for the Frigate container.
+In this example, it is recommended to connect to the authenticated port, for example, `http://frigate:8971` when configuring the integration. There is no need to map the port for the Frigate container.
 
 ```yaml
 services:
@@ -97,20 +97,21 @@ services:
 
 If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
 
-| Addon Version                  | URL                                    |
-| ------------------------------ | -------------------------------------- |
-| Frigate NVR                    | `http://ccab4aaf-frigate:5000`         |
-| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |
-| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`    |
-| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
+| Addon Version                  | URL                                       |
+| ------------------------------ | ----------------------------------------- |
+| Frigate NVR                    | `http://ccab4aaf-frigate:5000`            |
+| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
+| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`       |
+| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
+| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
 
 ### Frigate running on a separate machine
 
-If you run Frigate on a separate device within your local network, Home Assistant will need access to port 5000.
+If you run Frigate on a separate device within your local network, Home Assistant will need access to port 8971.
 
 #### Local network
 
-Use `http://<frigate_device_ip>:5000` as the URL for the integration. If you want to protect access to port 5000, you can use firewall rules to limit access to the device running Home Assistant.
+Use `http://<frigate_device_ip>:8971` as the URL for the integration so that authentication is required.
 
 ```yaml
 services:
@@ -118,7 +119,7 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     ...
     ports:
-      - "5000:5000"
+      - "8971:8971"
       ...
 ```
 
@@ -148,19 +149,19 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 ## Entities Provided
 
-| Platform        | Description                                                                       |
-| --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTSP).                                               |
-| `image`         | Image of the latest detected object for each camera.                              |
-| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
-| `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
-| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |
+| Platform        | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| `camera`        | Live camera stream (requires RTSP).                                             |
+| `image`         | Image of the latest detected object for each camera.                            |
+| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras. |
+| `switch`        | Switch entities to toggle detection, recordings and snapshots.                  |
+| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                         |
 
 ## Media Browser Support
 
 The integration provides:
 
-- Browsing event recordings with thumbnails
+- Browsing tracked object recordings with thumbnails
 - Browsing snapshots
 - Browsing recordings by month, day, camera, time
 
@@ -183,22 +184,40 @@ For clips to be castable to media devices, audio is required and may need to be 
 
 Many people do not want to expose Frigate to the web, so the integration creates some public API endpoints that can be used for notifications.
 
-To load a thumbnail for an event:
+To load a thumbnail for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
 ```
 
-To load a snapshot for an event:
+To load a snapshot for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/snapshot.jpg
 ```
 
-To load a video clip of an event:
+To load a video clip of a tracked object using an Android device:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
+```
+
+To load a video clip of a tracked object using an iOS device:
+
+```
+https://HA_URL/api/frigate/notifications/<event-id>/master.m3u8
+```
+
+To load a preview gif of a tracked object:
+
+```
+https://HA_URL/api/frigate/notifications/<event-id>/event_preview.gif
+```
+
+To load a preview gif of a review item:
+
+```
+https://HA_URL/api/frigate/notifications/<review-id>/review_preview.gif
 ```
 
 <a name="streams"></a>
@@ -215,7 +234,7 @@ For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
-variables from [Frigate API](api.md)
+variables from [Frigate API](../integrations/api)
 available for the template. Note that no Home Assistant state is available to the
 template, only the camera dict from Frigate.
 
@@ -282,3 +301,7 @@ which server they are referring to.
 #### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
 
 The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
+
+#### I have set up automations based on the occupancy sensors. Sometimes the automation runs because the sensors are turned on, but then I look at Frigate I can't find the object that triggered the sensor. Is this a bug?
+
+No. The occupancy sensors have fewer checks in place because they are often used for things like turning the lights on where latency needs to be as low as possible. So false positives can sometimes trigger these sensors. If you want false positive filtering, you should use an mqtt sensor on the `frigate/events` or `frigate/reviews` topic.

@@ -1,8 +1,16 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -65,6 +73,12 @@ function useDraggableElement({
       timelineDuration: timelineDuration,
       timelineRef,
     });
+
+  // track user interaction and adjust scrolling behavior
+
+  const [userInteracting, setUserInteracting] = useState(false);
+  const interactionTimeout = useRef<NodeJS.Timeout>();
+  const isProgrammaticScroll = useRef(false);
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current && scrollEdgeSize) {
@@ -155,6 +169,19 @@ function useDraggableElement({
     [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
+  const getFormattedTimestamp = useCallback(
+    (segmentStartTime: number) => {
+      return formatUnixTimestampToDateTime(segmentStartTime, {
+        timezone: config?.ui.timezone,
+        strftime_fmt:
+          config?.ui.time_format == "24hour"
+            ? `%H:%M${segmentDuration < 60 && !dense ? ":%S" : ""}`
+            : `%I:%M${segmentDuration < 60 && !dense ? ":%S" : ""} %p`,
+      });
+    },
+    [config, dense, segmentDuration],
+  );
+
   const updateDraggableElementPosition = useCallback(
     (
       newElementPosition: number,
@@ -171,15 +198,9 @@ function useDraggableElement({
           }
 
           if (draggableElementTimeRef.current) {
-            draggableElementTimeRef.current.textContent = new Date(
-              segmentStartTime * 1000,
-            ).toLocaleTimeString([], {
-              hour12: config?.ui.time_format != "24hour",
-              hour: "2-digit",
-              minute: "2-digit",
-              ...(segmentDuration < 60 && !dense && { second: "2-digit" }),
-            });
-            if (scrollTimeline) {
+            draggableElementTimeRef.current.textContent =
+              getFormattedTimestamp(segmentStartTime);
+            if (scrollTimeline && !userInteracting) {
               scrollIntoView(thumb, {
                 block: "center",
                 behavior: "smooth",
@@ -195,13 +216,12 @@ function useDraggableElement({
       }
     },
     [
-      segmentDuration,
       draggableElementTimeRef,
       draggableElementRef,
       setDraggableElementTime,
       setDraggableElementPosition,
-      dense,
-      config,
+      getFormattedTimestamp,
+      userInteracting,
     ],
   );
 
@@ -509,6 +529,47 @@ function useDraggableElement({
       );
     }
   }, [timelineRef, segmentsRef, segments]);
+
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      if (!isProgrammaticScroll.current) {
+        setUserInteracting(true);
+
+        if (interactionTimeout.current) {
+          clearTimeout(interactionTimeout.current);
+        }
+
+        interactionTimeout.current = setTimeout(() => {
+          setUserInteracting(false);
+        }, 3000);
+      } else {
+        isProgrammaticScroll.current = false;
+      }
+    };
+
+    const timelineElement = timelineRef.current;
+
+    if (timelineElement) {
+      timelineElement.addEventListener("scroll", handleUserInteraction);
+      timelineElement.addEventListener("mousedown", handleUserInteraction);
+      timelineElement.addEventListener("mouseup", handleUserInteraction);
+      timelineElement.addEventListener("touchstart", handleUserInteraction);
+      timelineElement.addEventListener("touchmove", handleUserInteraction);
+      timelineElement.addEventListener("touchend", handleUserInteraction);
+
+      return () => {
+        timelineElement.removeEventListener("scroll", handleUserInteraction);
+        timelineElement.removeEventListener("mousedown", handleUserInteraction);
+        timelineElement.removeEventListener("mouseup", handleUserInteraction);
+        timelineElement.removeEventListener(
+          "touchstart",
+          handleUserInteraction,
+        );
+        timelineElement.removeEventListener("touchmove", handleUserInteraction);
+        timelineElement.removeEventListener("touchend", handleUserInteraction);
+      };
+    }
+  }, [timelineRef]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }

@@ -52,6 +52,7 @@ import { cn } from "@/lib/utils";
 import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -116,13 +117,11 @@ export default function EventView({
       return {
         alert: summary.total_alert ?? 0,
         detection: summary.total_detection ?? 0,
-        significant_motion: summary.total_motion ?? 0,
       };
     } else {
       return {
         alert: summary.total_alert - summary.reviewed_alert,
         detection: summary.total_detection - summary.reviewed_detection,
-        significant_motion: summary.total_motion - summary.reviewed_motion,
       };
     }
   }, [filter, showReviewed, reviewSummary]);
@@ -190,7 +189,7 @@ export default function EventView({
       axios
         .post(
           `export/${review.camera}/start/${review.start_time - REVIEW_PADDING}/end/${endTime}`,
-          { playback: "realtime" },
+          { playback: "realtime", image_path: review.thumb_path },
         )
         .then((response) => {
           if (response.status == 200) {
@@ -464,6 +463,10 @@ function DetectionReview({
 
   const segmentDuration = 60;
 
+  // detail
+
+  const [reviewDetail, setReviewDetail] = useState<ReviewSegment>();
+
   // preview
 
   const [previewTime, setPreviewTime] = useState<number>();
@@ -606,35 +609,54 @@ function DetectionReview({
 
   // keyboard
 
-  useKeyboardListener(["a", "r"], (key, modifiers) => {
+  useKeyboardListener(["a", "r", "PageDown", "PageUp"], (key, modifiers) => {
     if (modifiers.repeat || !modifiers.down) {
       return;
     }
 
-    if (key == "a" && modifiers.ctrl) {
-      onSelectAllReviews();
-    }
-
-    if (key == "r" && selectedReviews.length > 0) {
-      currentItems?.forEach((item) => {
-        if (selectedReviews.includes(item.id)) {
-          item.has_been_reviewed = true;
-          markItemAsReviewed(item);
+    switch (key) {
+      case "a":
+        if (modifiers.ctrl) {
+          onSelectAllReviews();
         }
-      });
-      setSelectedReviews([]);
+        break;
+      case "r":
+        if (selectedReviews.length > 0) {
+          currentItems?.forEach((item) => {
+            if (selectedReviews.includes(item.id)) {
+              item.has_been_reviewed = true;
+              markItemAsReviewed(item);
+            }
+          });
+          setSelectedReviews([]);
+        }
+        break;
+      case "PageDown":
+        contentRef.current?.scrollBy({
+          top: contentRef.current.clientHeight / 2,
+          behavior: "smooth",
+        });
+        break;
+      case "PageUp":
+        contentRef.current?.scrollBy({
+          top: -contentRef.current.clientHeight / 2,
+          behavior: "smooth",
+        });
+        break;
     }
   });
 
   return (
     <>
+      <ReviewDetailDialog review={reviewDetail} setReview={setReviewDetail} />
+
       <div
         ref={contentRef}
         className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4"
       >
         {filter?.before == undefined && (
           <NewReviewData
-            className="pointer-events-none absolute left-1/2 z-50 -translate-x-1/2"
+            className="pointer-events-none absolute left-1/2 z-[49] -translate-x-1/2"
             contentRef={contentRef}
             reviewItems={currentItems}
             itemsToReview={loading ? 0 : itemsToReview}
@@ -682,7 +704,17 @@ function DetectionReview({
                         setReviewed={markItemAsReviewed}
                         scrollLock={scrollLock}
                         onTimeUpdate={onPreviewTimeUpdate}
-                        onClick={onSelectReview}
+                        onClick={(
+                          review: ReviewSegment,
+                          ctrl: boolean,
+                          detail: boolean,
+                        ) => {
+                          if (detail) {
+                            setReviewDetail(review);
+                          } else {
+                            onSelectReview(review, ctrl);
+                          }
+                        }}
                       />
                     </div>
                     <div
@@ -703,6 +735,7 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
+                  aria-label="Mark these items as reviewed"
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);

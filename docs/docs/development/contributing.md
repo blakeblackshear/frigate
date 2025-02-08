@@ -193,7 +193,7 @@ npm run test
 #### 1. Installation
 
 ```console
-npm install
+cd docs && npm install
 ```
 
 #### 2. Local Development

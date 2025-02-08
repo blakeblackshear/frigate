@@ -1,4 +1,4 @@
-export type Timeline = {
+export type ObjectLifecycleSequence = {
   camera: string;
   timestamp: number;
   data: {

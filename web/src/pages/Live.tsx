@@ -1,4 +1,5 @@
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import {
   useHashState,
   usePersistedOverlayState,
@@ -29,7 +30,11 @@ function Live() {
       if (group) {
         setCameraGroup(cameraGroup);
       }
+
+      return true;
     }
+
+    return false;
   });
 
   // fullscreen
@@ -39,12 +44,25 @@ function Live() {
   const { fullscreen, toggleFullscreen, supportsFullScreen } =
     useFullscreen(mainRef);
 
+  useKeyboardListener(["f"], (key, modifiers) => {
+    if (!modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "f":
+        toggleFullscreen();
+        break;
+    }
+  });
+
   // document title
 
   useEffect(() => {
     if (selectedCameraName) {
       const capitalized = selectedCameraName
         .split("_")
+        .filter((text) => text)
         .map((text) => text[0].toUpperCase() + text.substring(1));
       document.title = `${capitalized.join(" ")} - Live - Frigate`;
     } else if (cameraGroup && cameraGroup != "default") {
