@@ -5,7 +5,7 @@ title: Requesting your first model
 
 ## Step 1: Upload and annotate your images
 
-Before requesting your first model, you will need to upload and verify at least 1 image to Frigate+. The more images you upload, annotate, and verify the better your results will be. Most users start to see very good results once they have at least 100 verified images per camera. Keep in mind that varying conditions should be included. You will want images from cloudy days, sunny days, dawn, dusk, and night. Refer to the [integration docs](../integrations/plus.md#generate-an-api-key) for instructions on how to easily submit images to Frigate+ directly from Frigate.
+Before requesting your first model, you will need to upload and verify at least 10 images to Frigate+. The more images you upload, annotate, and verify the better your results will be. Most users start to see very good results once they have at least 100 verified images per camera. Keep in mind that varying conditions should be included. You will want images from cloudy days, sunny days, dawn, dusk, and night. Refer to the [integration docs](../integrations/plus.md#generate-an-api-key) for instructions on how to easily submit images to Frigate+ directly from Frigate.
 
 It is recommended to submit **both** true positives and false positives. This will help the model differentiate between what is and isn't correct. You should aim for a target of 80% true positive submissions and 20% false positives across all of your images. If you are experiencing false positives in a specific area, submitting true positives for any object type near that area in similar lighting conditions will help teach the model what that area looks like when no objects are present.
 
