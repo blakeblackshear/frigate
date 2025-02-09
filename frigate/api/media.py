@@ -25,6 +25,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
+    MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -370,6 +371,50 @@ def get_recordings_storage_usage(request: Request):
             ) * 100
 
     return JSONResponse(content=camera_usages)
+
+
+@router.get("/recordings/summary")
+def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()):
+    """Returns true/false by day indicating if recordings exist"""
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
+
+    cameras = params.cameras
+
+    query = (
+        Recordings.select(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            ).alias("day")
+        )
+        .group_by(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            )
+        )
+        .order_by(Recordings.start_time.desc())
+    )
+
+    if cameras != "all":
+        query = query.where(Recordings.camera << cameras.split(","))
+
+    print(query)
+
+    recording_days = query.namedtuples()
+    days = {day.day: True for day in recording_days}
+
+    return JSONResponse(content=days)
 
 
 @router.get("/{camera_name}/recordings/summary")

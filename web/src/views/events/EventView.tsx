@@ -12,6 +12,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -59,6 +60,7 @@ type EventViewProps = {
   reviewItems?: SegmentedReviewData;
   currentReviewItems: ReviewSegment[] | null;
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   relevantPreviews?: Preview[];
   timeRange: TimeRange;
   filter?: ReviewFilter;
@@ -77,6 +79,7 @@ export default function EventView({
   reviewItems,
   currentReviewItems,
   reviewSummary,
+  recordingsSummary,
   relevantPreviews,
   timeRange,
   filter,
@@ -359,6 +362,7 @@ export default function EventView({
             }
             currentSeverity={severityToggle}
             reviewSummary={reviewSummary}
+            recordingsSummary={recordingsSummary}
             filter={filter}
             motionOnly={motionOnly}
             filterList={reviewFilterList}

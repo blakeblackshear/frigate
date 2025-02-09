@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -46,6 +47,7 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type RecordingViewProps = {
@@ -73,6 +75,18 @@ export function RecordingView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // recordings summary
+
+  const timezone = useTimezone(config);
+
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
+    "recordings/summary",
+    {
+      timezone: timezone,
+      cameras: allCameras ?? null,
+    },
+  ]);
 
   // controller state
 
@@ -430,6 +444,7 @@ export function RecordingView({
             <ReviewFilterGroup
               filters={["date", "general"]}
               reviewSummary={reviewSummary}
+              recordingsSummary={recordingsSummary}
               filter={filter}
               motionOnly={false}
               filterList={reviewFilterList}
@@ -475,6 +490,7 @@ export function RecordingView({
             filter={filter}
             currentTime={currentTime}
             latestTime={timeRange.before}
+            recordingsSummary={recordingsSummary}
             mode={exportMode}
             range={exportRange}
             showExportPreview={showExportPreview}
