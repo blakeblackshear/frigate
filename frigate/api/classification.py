@@ -117,7 +117,7 @@ def train_face(request: Request, name: str, body: dict = None):
     )
 
 
-@router.post("/faces/{name}")
+@router.post("/faces/{name}/create")
 async def create_face(request: Request, name: str, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -125,7 +125,9 @@ async def create_face(request: Request, name: str, file: UploadFile):
             content={"message": "Face recognition is not enabled.", "success": False},
         )
 
-    os.makedirs(sanitize_filename(os.path.join(FACE_DIR, name)), exist_ok=True)
+    os.makedirs(
+        sanitize_filename(os.path.join(FACE_DIR, name.replace(" ", "_"))), exist_ok=True
+    )
     return JSONResponse(
         status_code=200,
         content={"success": False, "message": "Successfully created face folder."},
