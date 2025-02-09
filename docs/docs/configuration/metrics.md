@@ -5,7 +5,7 @@ title: Metrics
 
 # Metrics
 
-Frigate exposes Prometheus metrics at the `/metrics` endpoint that can be used to monitor the performance and health of your Frigate instance.
+Frigate exposes Prometheus metrics at the `/api/metrics` endpoint that can be used to monitor the performance and health of your Frigate instance.
 
 ## Available Metrics
 
@@ -49,7 +49,7 @@ To scrape metrics from Frigate, add the following to your Prometheus configurati
 ```yaml
 scrape_configs:
   - job_name: 'frigate'
-    metrics_path: '/metrics'
+    metrics_path: '/api/metrics'
     static_configs:
       - targets: ['frigate:5000']
     scrape_interval: 15s
