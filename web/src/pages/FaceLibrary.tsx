@@ -93,10 +93,9 @@ export default function FaceLibrary() {
           if (resp.status == 200) {
             setUpload(false);
             refreshFaces();
-            toast.success(
-              "Successfully uploaded image. View the file in the /exports folder.",
-              { position: "top-center" },
-            );
+            toast.success("Successfully uploaded image.", {
+              position: "top-center",
+            });
           }
         })
         .catch((error) => {
@@ -125,22 +124,21 @@ export default function FaceLibrary() {
         })
         .then((resp) => {
           if (resp.status == 200) {
-            setUpload(false);
+            setAddFace(false);
             refreshFaces();
-            toast.success(
-              "Successfully uploaded image. View the file in the /exports folder.",
-              { position: "top-center" },
-            );
+            toast.success("Successfully add face library.", {
+              position: "top-center",
+            });
           }
         })
         .catch((error) => {
           if (error.response?.data?.message) {
             toast.error(
-              `Failed to upload image: ${error.response.data.message}`,
+              `Failed to set face name: ${error.response.data.message}`,
               { position: "top-center" },
             );
           } else {
-            toast.error(`Failed to upload image: ${error.message}`, {
+            toast.error(`Failed to set face name: ${error.message}`, {
               position: "top-center",
             });
           }
