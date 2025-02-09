@@ -41,7 +41,7 @@ export default function UploadImageDialog({
 
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
-      if (!data["file"]) {
+      if (!data["file"] || Object.keys(data.file).length == 0) {
         return;
       }
 
