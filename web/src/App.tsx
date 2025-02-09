@@ -19,6 +19,7 @@ const ConfigEditor = lazy(() => import("@/pages/ConfigEditor"));
 const System = lazy(() => import("@/pages/System"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const UIPlayground = lazy(() => import("@/pages/UIPlayground"));
+const FaceLibrary = lazy(() => import("@/pages/FaceLibrary"));
 const Logs = lazy(() => import("@/pages/Logs"));
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
                   <Route path="/config" element={<ConfigEditor />} />
                   <Route path="/logs" element={<Logs />} />
                   <Route path="/playground" element={<UIPlayground />} />
+                  <Route path="/faces" element={<FaceLibrary />} />
                   <Route path="*" element={<Redirect to="/" />} />
                 </Routes>
               </Suspense>

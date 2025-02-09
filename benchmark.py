@@ -61,7 +61,7 @@ def start(id, num_detections, detection_queue, event):
     object_detector.cleanup()
     print(f"{id} - Processed for {duration:.2f} seconds.")
     print(f"{id} - FPS: {object_detector.fps.eps():.2f}")
-    print(f"{id} - Average frame processing time: {mean(frame_times)*1000:.2f}ms")
+    print(f"{id} - Average frame processing time: {mean(frame_times) * 1000:.2f}ms")
 
 
 ######

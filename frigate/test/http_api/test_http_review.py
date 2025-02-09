@@ -569,3 +569,177 @@ class TestHttpReview(BaseTestHttp):
             recording_ids_in_db_after = self._get_recordings(ids)
             assert len(review_ids_in_db_after) == 0
             assert len(recording_ids_in_db_after) == 0
+
+    ####################################################################################################################
+    ###################################  GET /review/activity/motion Endpoint   ########################################
+    ####################################################################################################################
+    def test_review_activity_motion_no_data_for_time_range(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            params = {
+                "after": now,
+                "before": now + 3,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 0
+
+    def test_review_activity_motion(self):
+        now = int(datetime.now().timestamp())
+
+        with TestClient(self.app) as client:
+            one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
+            id = "123456.random"
+            id2 = "123451.random"
+            super().insert_mock_recording(id, now + 1, now + 2, motion=101)
+            super().insert_mock_recording(id2, one_m + 1, one_m + 2, motion=200)
+            params = {
+                "after": now,
+                "before": one_m + 3,
+                "scale": 1,
+            }
+            response = client.get("/review/activity/motion", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 61
+            self.assertDictEqual(
+                {"motion": 50.5, "camera": "front_door", "start_time": now + 1},
+                response_json[0],
+            )
+            for item in response_json[1:-1]:
+                self.assertDictEqual(
+                    {"motion": 0.0, "camera": "", "start_time": item["start_time"]},
+                    item,
+                )
+            self.assertDictEqual(
+                {"motion": 100.0, "camera": "front_door", "start_time": one_m + 1},
+                response_json[len(response_json) - 1],
+            )
+
+    ####################################################################################################################
+    ###################################  GET /review/event/{event_id} Endpoint   #######################################
+    ####################################################################################################################
+    def test_review_event_not_found(self):
+        with TestClient(self.app) as client:
+            response = client.get("/review/event/123456.random")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_review_event_not_found_in_data(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now + 1, now + 2)
+            response = client.get(f"/review/event/{id}")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_review_get_specific_event(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            event_id = "123456.event.random"
+            super().insert_mock_event(event_id)
+            review_id = "123456.review.random"
+            super().insert_mock_review_segment(
+                review_id, now + 1, now + 2, data={"detections": {"event_id": event_id}}
+            )
+            response = client.get(f"/review/event/{event_id}")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {
+                    "id": review_id,
+                    "camera": "front_door",
+                    "start_time": now + 1,
+                    "end_time": now + 2,
+                    "has_been_reviewed": False,
+                    "severity": SeverityEnum.alert,
+                    "thumb_path": "False",
+                    "data": {"detections": {"event_id": event_id}},
+                },
+                response_json,
+            )
+
+    ####################################################################################################################
+    ###################################  GET /review/{review_id} Endpoint   #######################################
+    ####################################################################################################################
+    def test_review_not_found(self):
+        with TestClient(self.app) as client:
+            response = client.get("/review/123456.random")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response_json,
+            )
+
+    def test_get_review(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            review_id = "123456.review.random"
+            super().insert_mock_review_segment(review_id, now + 1, now + 2)
+            response = client.get(f"/review/{review_id}")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {
+                    "id": review_id,
+                    "camera": "front_door",
+                    "start_time": now + 1,
+                    "end_time": now + 2,
+                    "has_been_reviewed": False,
+                    "severity": SeverityEnum.alert,
+                    "thumb_path": "False",
+                    "data": {},
+                },
+                response_json,
+            )
+
+    ####################################################################################################################
+    ###################################  DELETE /review/{review_id}/viewed Endpoint   ##################################
+    ####################################################################################################################
+    def test_delete_review_viewed_review_not_found(self):
+        with TestClient(self.app) as client:
+            review_id = "123456.random"
+            response = client.delete(f"/review/{review_id}/viewed")
+            assert response.status_code == 404
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": False, "message": f"Review {review_id} not found"},
+                response_json,
+            )
+
+    def test_delete_review_viewed(self):
+        now = datetime.now().timestamp()
+
+        with TestClient(self.app) as client:
+            review_id = "123456.review.random"
+            super().insert_mock_review_segment(
+                review_id, now + 1, now + 2, has_been_reviewed=True
+            )
+            review_before = ReviewSegment.get(ReviewSegment.id == review_id)
+            assert review_before.has_been_reviewed == True
+
+            response = client.delete(f"/review/{review_id}/viewed")
+            assert response.status_code == 200
+            response_json = response.json()
+            self.assertDictEqual(
+                {"success": True, "message": f"Set Review {review_id} as not viewed"},
+                response_json,
+            )
+
+            review_after = ReviewSegment.get(ReviewSegment.id == review_id)
+            assert review_after.has_been_reviewed == False

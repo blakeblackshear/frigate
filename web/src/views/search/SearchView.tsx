@@ -444,6 +444,7 @@ export default function SearchView({
         setSimilarity={
           searchDetail && (() => setSimilaritySearch(searchDetail))
         }
+        setInputFocused={setInputFocused}
       />
 
       <div

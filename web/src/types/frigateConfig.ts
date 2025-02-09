@@ -288,6 +288,11 @@ export interface FrigateConfig {
 
   environment_vars: Record<string, unknown>;
 
+  face_recognition: {
+    enabled: boolean;
+    threshold: number;
+  };
+
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -343,6 +348,7 @@ export interface FrigateConfig {
     width: number;
     colormap: { [key: string]: [number, number, number] };
     attributes_map: { [key: string]: [string] };
+    all_attributes: [string];
   };
 
   motion: Record<string, unknown> | null;

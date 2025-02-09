@@ -4,7 +4,9 @@ title: Advanced Options
 sidebar_label: Advanced Options
 ---
 
-### `logger`
+### Logging
+
+#### Frigate `logger`
 
 Change the default log level for troubleshooting purposes.
 
@@ -27,6 +29,18 @@ Examples of available modules are:
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
+
+#### Go2RTC Logging
+
+See [the go2rtc docs](for logging configuration)
+
+```yaml
+go2rtc:
+  streams:
+    ...
+  log:
+    exec: trace
+```
 
 ### `environment_vars`
 
@@ -189,16 +203,16 @@ When frigate starts up, it checks whether your config file is valid, and if it i
 
 ### Via API
 
-Frigate can accept a new configuration file as JSON at the `/config/save` endpoint. When updating the config this way, Frigate will validate the config before saving it, and return a `400` if the config is not valid.
+Frigate can accept a new configuration file as JSON at the `/api/config/save` endpoint. When updating the config this way, Frigate will validate the config before saving it, and return a `400` if the config is not valid.
 
 ```bash
-curl -X POST http://frigate_host:5000/config/save -d @config.json
+curl -X POST http://frigate_host:5000/api/config/save -d @config.json
 ```
 
 if you'd like you can use your yaml config directly by using [`yq`](https://github.com/mikefarah/yq) to convert it to json:
 
 ```bash
-yq r -j config.yml | curl -X POST http://frigate_host:5000/config/save -d @-
+yq r -j config.yml | curl -X POST http://frigate_host:5000/api/config/save -d @-
 ```
 
 ### Via Command Line

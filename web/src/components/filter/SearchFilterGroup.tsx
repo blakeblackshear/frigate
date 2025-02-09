@@ -61,7 +61,9 @@ export default function SearchFilterGroup({
       }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        labels.add(label);
+        if (!config.model.all_attributes.includes(label)) {
+          labels.add(label);
+        }
       });
 
       if (cameraConfig.audio.enabled_in_config) {

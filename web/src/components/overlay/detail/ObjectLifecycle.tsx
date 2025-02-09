@@ -490,12 +490,27 @@ export default function ObjectLifecycle({
                             Area
                           </p>
                           {Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? Math.round(
-                                detectArea *
-                                  (item.data.box[2] * item.data.box[3]),
-                              )
-                            : "N/A"}
+                          item.data.box.length >= 4 ? (
+                            <>
+                              <div className="flex flex-col text-xs">
+                                px:{" "}
+                                {Math.round(
+                                  detectArea *
+                                    (item.data.box[2] * item.data.box[3]),
+                                )}
+                              </div>
+                              <div className="flex flex-col text-xs">
+                                %:{" "}
+                                {(
+                                  (detectArea *
+                                    (item.data.box[2] * item.data.box[3])) /
+                                  detectArea
+                                ).toFixed(4)}
+                              </div>
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
                         </div>
                       </div>
                     </div>

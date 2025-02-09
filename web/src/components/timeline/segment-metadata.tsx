@@ -22,7 +22,7 @@ type TimestampSegmentProps = {
   isLastSegmentInMinimap: boolean;
   timestamp: Date;
   timestampSpread: number;
-  segmentKey: number;
+  segmentKey: string;
 };
 
 export function MinimapBounds({
