@@ -98,9 +98,10 @@ def train_face(request: Request, name: str, body: dict = None):
             status_code=404,
         )
 
+    sanitized_name = sanitize_filename(name)
     rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    new_name = f"{name}-{rand_id}.webp"
-    new_file = sanitize_filename(os.path.join(FACE_DIR, f"{name}/{new_name}"))
+    new_name = f"{sanitized_name}-{rand_id}.webp"
+    new_file = os.path.join(FACE_DIR, f"{sanitized_name}/{new_name}")
     shutil.move(training_file, new_file)
 
     context: EmbeddingsContext = request.app.embeddings
@@ -118,7 +119,7 @@ def train_face(request: Request, name: str, body: dict = None):
 
 
 @router.post("/faces/{name}/create")
-async def create_face(request: Request, name: str, file: UploadFile):
+async def create_face(request: Request, name: str):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
             status_code=400,
@@ -126,7 +127,7 @@ async def create_face(request: Request, name: str, file: UploadFile):
         )
 
     os.makedirs(
-        sanitize_filename(os.path.join(FACE_DIR, name.replace(" ", "_"))), exist_ok=True
+        os.path.join(FACE_DIR, sanitize_filename(name.replace(" ", "_"))), exist_ok=True
     )
     return JSONResponse(
         status_code=200,
