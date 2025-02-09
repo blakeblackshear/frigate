@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuRefreshCw, LuTrash2 } from "react-icons/lu";
+import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -76,13 +77,14 @@ export default function FaceLibrary() {
   // upload
 
   const [upload, setUpload] = useState(false);
+  const [addFace, setAddFace] = useState(false);
 
   const onUploadImage = useCallback(
     (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
       axios
-        .post(`faces/${pageToggle}`, formData, {
+        .post(`faces/${pageToggle}/register`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -113,6 +115,40 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces],
   );
 
+  const onAddName = useCallback(
+    (name: string) => {
+      axios
+        .post(`faces/${name}/create`, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            setUpload(false);
+            refreshFaces();
+            toast.success(
+              "Successfully uploaded image. View the file in the /exports folder.",
+              { position: "top-center" },
+            );
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(
+              `Failed to upload image: ${error.response.data.message}`,
+              { position: "top-center" },
+            );
+          } else {
+            toast.error(`Failed to upload image: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
+    },
+    [refreshFaces],
+  );
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -127,6 +163,14 @@ export default function FaceLibrary() {
         description={`Upload an image to scan for faces and include for ${pageToggle}`}
         setOpen={setUpload}
         onSave={onUploadImage}
+      />
+
+      <TextEntryDialog
+        title="Create Face Library"
+        description="Create a new face library"
+        open={addFace}
+        setOpen={setAddFace}
+        onSave={onAddName}
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
@@ -174,10 +218,16 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        <Button className="flex gap-2" onClick={() => setUpload(true)}>
-          <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-          Upload Image
-        </Button>
+        <div className="flex items-center justify-center gap-2">
+          <Button className="flex gap-2" onClick={() => setAddFace(true)}>
+            <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
+            Add Face
+          </Button>
+          <Button className="flex gap-2" onClick={() => setUpload(true)}>
+            <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+            Upload Image
+          </Button>
+        </div>
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (

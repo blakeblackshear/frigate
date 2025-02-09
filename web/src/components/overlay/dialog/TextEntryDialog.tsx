@@ -14,38 +14,38 @@ import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type UploadImageDialogProps = {
+type TextEntryDialogProps = {
   open: boolean;
   title: string;
   description?: string;
   setOpen: (open: boolean) => void;
-  onSave: (file: File) => void;
+  onSave: (text: string) => void;
 };
-export default function UploadImageDialog({
+export default function TextEntryDialog({
   open,
   title,
   description,
   setOpen,
   onSave,
-}: UploadImageDialogProps) {
+}: TextEntryDialogProps) {
   const formSchema = z.object({
-    file: z.instanceof(FileList, { message: "Please select an image file." }),
+    text: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  const fileRef = form.register("file");
+  const fileRef = form.register("text");
 
   // upload handler
 
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
-      if (!data["file"] || Object.keys(data.file).length == 0) {
+      if (!data["text"]) {
         return;
       }
 
-      onSave(data["file"]["0"]);
+      onSave(data["text"]);
     },
     [onSave],
   );
@@ -61,13 +61,13 @@ export default function UploadImageDialog({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
-              name="file"
+              name="text"
               render={() => (
                 <FormItem>
                   <FormControl>
                     <Input
-                      className="aspect-video h-40 w-full"
-                      type="file"
+                      className="aspect-video h-8 w-full"
+                      type="text"
                       {...fileRef}
                     />
                   </FormControl>
