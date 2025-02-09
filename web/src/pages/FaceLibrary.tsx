@@ -82,7 +82,7 @@ export default function FaceLibrary() {
       const formData = new FormData();
       formData.append("file", file);
       axios
-        .post(`faces/${pageToggle}`, formData, {
+        .post(`faces/${pageToggle}/register`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
