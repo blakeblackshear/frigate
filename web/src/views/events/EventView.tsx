@@ -53,6 +53,7 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -461,8 +462,6 @@ function DetectionReview({
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
-  const segmentDuration = 60;
-
   // detail
 
   const [reviewDetail, setReviewDetail] = useState<ReviewSegment>();
@@ -492,9 +491,38 @@ function DetectionReview({
     [timeRange],
   );
 
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 60,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 60, timestampSpread: 15 },
+      { segmentDuration: 30, timestampSpread: 5 },
+      { segmentDuration: 10, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration,
+  });
+
   const { alignStartDateToTimeline, getVisibleTimelineDuration } =
     useTimelineUtils({
-      segmentDuration,
+      segmentDuration: zoomSettings.segmentDuration,
       timelineDuration,
       timelineRef: reviewTimelineRef,
     });
@@ -692,7 +720,7 @@ function DetectionReview({
                     data-start={value.start_time}
                     data-segment-start={
                       alignStartDateToTimeline(value.start_time) -
-                      segmentDuration
+                      zoomSettings.segmentDuration
                     }
                     className="review-item relative rounded-lg"
                   >
@@ -749,13 +777,13 @@ function DetectionReview({
         </div>
       </div>
       <div className="flex w-[65px] flex-row md:w-[110px]">
-        <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
+        <div className="no-scrollbar w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
           ) : (
             <EventReviewTimeline
-              segmentDuration={segmentDuration}
-              timestampSpread={15}
+              segmentDuration={zoomSettings.segmentDuration}
+              timestampSpread={zoomSettings.timestampSpread}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
               showMinimap={showMinimap && !previewTime}
@@ -769,6 +797,8 @@ function DetectionReview({
               contentRef={contentRef}
               timelineRef={reviewTimelineRef}
               dense={isMobile}
+              isZooming={isZooming}
+              zoomDirection={zoomDirection}
             />
           )}
         </div>
@@ -780,7 +810,7 @@ function DetectionReview({
               reviewTimelineRef={reviewTimelineRef}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
-              segmentDuration={segmentDuration}
+              segmentDuration={zoomSettings.segmentDuration}
               events={reviewItems?.all ?? []}
               severityType={severity}
             />
@@ -1095,7 +1125,6 @@ function MotionReview({
             setHandlebarTime={setCurrentTime}
             events={reviewItems?.all ?? []}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => {
               if (playing && scrubbing) {
@@ -1105,6 +1134,8 @@ function MotionReview({
               setScrubbing(scrubbing);
             }}
             dense={isMobileOnly}
+            isZooming={false}
+            zoomDirection={null}
           />
         ) : (
           <Skeleton className="size-full" />

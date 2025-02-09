@@ -46,8 +46,7 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-
-const SEGMENT_DURATION = 30;
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -633,6 +632,7 @@ export function RecordingView({
 
 type TimelineProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
+  timelineRef?: MutableRefObject<HTMLDivElement | null>;
   mainCamera: string;
   timelineType: TimelineType;
   timeRange: TimeRange;
@@ -646,6 +646,7 @@ type TimelineProps = {
 };
 function Timeline({
   contentRef,
+  timelineRef,
   mainCamera,
   timelineType,
   timeRange,
@@ -657,12 +658,48 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
-  const { data: motionData } = useSWR<MotionData[]>([
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+
+  // timeline interaction
+
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 30,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 30, timestampSpread: 15 },
+      { segmentDuration: 15, timestampSpread: 5 },
+      { segmentDuration: 5, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: selectedTimelineRef,
+    timelineDuration: timeRange.after - timeRange.before,
+  });
+
+  // motion data
+
+  const { data: motionData, isLoading } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,
-      scale: SEGMENT_DURATION / 2,
+      scale: Math.round(zoomSettings.segmentDuration / 2),
       cameras: mainCamera,
     },
   ]);
@@ -695,10 +732,11 @@ function Timeline({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
       {timelineType == "timeline" ? (
-        motionData ? (
+        !isLoading ? (
           <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
+            timelineRef={selectedTimelineRef}
+            segmentDuration={zoomSettings.segmentDuration}
+            timestampSpread={zoomSettings.timestampSpread}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
             showHandlebar={exportRange == undefined}
@@ -711,9 +749,10 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            isZooming={isZooming}
+            zoomDirection={zoomDirection}
           />
         ) : (
           <Skeleton className="size-full" />
