@@ -84,6 +84,7 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       'integrations/mqtt',
+      'configuration/metrics',
       'integrations/third_party_extensions',
     ],
     'Frigate+': [

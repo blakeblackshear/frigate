@@ -18,6 +18,7 @@ from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from markupsafe import escape
 from peewee import operator
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import ValidationError
 
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
@@ -106,6 +107,12 @@ def stats_history(request: Request, keys: str = None):
         keys = keys.split(",")
 
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
+
+
+@router.get("/metrics")
+def metrics():
+    """Expose Prometheus metrics endpoint"""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @router.get("/config")
