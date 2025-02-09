@@ -500,9 +500,28 @@ class PtzAutoTracker:
 
             # simple linear regression with intercept
             X_with_intercept = np.column_stack((np.ones(X.shape[0]), X))
-            self.move_coefficients[camera] = np.linalg.lstsq(
-                X_with_intercept, y, rcond=None
-            )[0]
+            coefficients = np.linalg.lstsq(X_with_intercept, y, rcond=None)[0]
+
+            intercept, slope = coefficients
+
+            # Define reasonable bounds for PTZ movement times
+            MIN_MOVEMENT_TIME = 0.1  # Minimum time for any movement (100ms)
+            MAX_MOVEMENT_TIME = 10.0  # Maximum time for any movement
+            MAX_SLOPE = 2.0  # Maximum seconds per unit of movement
+
+            coefficients_valid = (
+                MIN_MOVEMENT_TIME <= intercept <= MAX_MOVEMENT_TIME
+                and 0 < slope <= MAX_SLOPE
+            )
+
+            if not coefficients_valid:
+                logger.warning(
+                    f"{camera}: Autotracking calibration failed. See the Frigate documentation."
+                )
+                return False
+
+            # If coefficients are valid, proceed with updates
+            self.move_coefficients[camera] = coefficients
 
             # only assign a new intercept if we're calibrating
             if calibration:
