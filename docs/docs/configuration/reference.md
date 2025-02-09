@@ -312,9 +312,11 @@ objects:
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
-      # Optional: minimum width*height of the bounding box for the detected object (default: 0)
+      # Optional: minimum size of the bounding box for the detected object (default: 0).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       min_area: 5000
-      # Optional: maximum width*height of the bounding box for the detected object (default: 24000000)
+      # Optional: maximum size of the bounding box for the detected object (default: 24000000).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       max_area: 100000
       # Optional: minimum width/height of the bounding box for the detected object (default: 0)
       min_ratio: 0.5
@@ -559,7 +561,7 @@ genai:
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
 # NOTE: The default go2rtc API port (1984) must be used,
-#       changing this port for the integrated go2rtc instance is not supported. 
+#       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:
 
 # Optional: Live stream configuration for WebUI.

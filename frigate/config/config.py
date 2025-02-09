@@ -29,6 +29,7 @@ from frigate.util.builtin import (
 )
 from frigate.util.config import (
     StreamInfoRetriever,
+    convert_area_to_pixels,
     find_config_file,
     get_relative_coordinates,
     migrate_frigate_config,
@@ -147,6 +148,13 @@ class RuntimeFilterConfig(FilterConfig):
 
         if mask is not None:
             config["mask"] = create_mask(frame_shape, mask)
+
+        # Convert min_area and max_area to pixels if they're percentages
+        if "min_area" in config:
+            config["min_area"] = convert_area_to_pixels(config["min_area"], frame_shape)
+
+        if "max_area" in config:
+            config["max_area"] = convert_area_to_pixels(config["max_area"], frame_shape)
 
         super().__init__(**config)
 

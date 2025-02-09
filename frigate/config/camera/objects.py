@@ -11,11 +11,13 @@ DEFAULT_TRACKED_OBJECTS = ["person"]
 
 
 class FilterConfig(FrigateBaseModel):
-    min_area: int = Field(
-        default=0, title="Minimum area of bounding box for object to be counted."
+    min_area: Union[int, float] = Field(
+        default=0,
+        title="Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
     )
-    max_area: int = Field(
-        default=24000000, title="Maximum area of bounding box for object to be counted."
+    max_area: Union[int, float] = Field(
+        default=24000000,
+        title="Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
     )
     min_ratio: float = Field(
         default=0,

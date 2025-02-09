@@ -347,6 +347,36 @@ def get_relative_coordinates(
     return mask
 
 
+def convert_area_to_pixels(
+    area_value: Union[int, float], frame_shape: tuple[int, int]
+) -> int:
+    """
+    Convert area specification to pixels.
+
+    Args:
+        area_value: Area value (pixels or percentage)
+        frame_shape: Tuple of (height, width) for the frame
+
+    Returns:
+        Area in pixels
+    """
+    # If already an integer, assume it's in pixels
+    if isinstance(area_value, int):
+        return area_value
+
+    # Check if it's a percentage
+    if isinstance(area_value, float):
+        if 0.000001 <= area_value <= 0.99:
+            frame_area = frame_shape[0] * frame_shape[1]
+            return max(1, int(frame_area * area_value))
+        else:
+            raise ValueError(
+                f"Percentage must be between 0.000001 and 0.99, got {area_value}"
+            )
+
+    raise TypeError(f"Unexpected type for area: {type(area_value)}")
+
+
 class StreamInfoRetriever:
     def __init__(self) -> None:
         self.stream_cache: dict[str, tuple[int, int]] = {}
