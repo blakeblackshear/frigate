@@ -94,33 +94,63 @@ genai:
   model: gemini-1.5-flash
 ```
 
-## OpenAI
+# OpenAI and OpenAI-Compatible APIs
 
-OpenAI does not have a free tier for their API. With the release of gpt-4o, pricing has been reduced and each generation should cost fractions of a cent if you choose to go this route.
+The OpenAI API specification has become a de facto standard that many AI providers and tools have adopted. This means you can use Frigate's OpenAI provider configuration with:
 
-### Supported Models
+- OpenAI's own API service
+- Local model servers like Ollama or LM Studio when configured to serve via OpenAI-compatible endpoints
+- Other commercial providers that implement the OpenAI API spec (e.g., DeepSeek, Together.ai, Anthropic)
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+This gives you significant flexibility in choosing where to run your vision models - whether in the cloud or locally on your own hardware.
 
-### Get API Key
+## OpenAI's API Service
 
-To start using OpenAI, you must first [create an API key](https://platform.openai.com/api-keys) and [configure billing](https://platform.openai.com/settings/organization/billing/overview).
+If using OpenAI's official API service:
 
-### Configuration
+1. [Create an API key](https://platform.openai.com/api-keys)
+2. [Configure billing](https://platform.openai.com/settings/organization/billing/overview)
+3. Use a vision-capable model like `gpt-4-vision-preview`
 
 ```yaml
 genai:
   enabled: True
   provider: openai
   api_key: "{FRIGATE_OPENAI_API_KEY}"
-  model: gpt-4o
+  model: gpt-4-vision-preview
 ```
 
-:::note
+## Using Alternative Providers
 
-To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+To use an alternative provider or local model server that implements the OpenAI API spec:
 
+1. Set up your chosen provider/server (e.g., Ollama, LM Studio, DeepSeek)
+2. Configure it to serve via an OpenAI-compatible endpoint
+3. Set the `OPENAI_BASE_URL` environment variable to your provider's API URL
+4. Use the appropriate model name for your chosen provider
+
+For example, with a local Ollama server serving the LLaVA model:
+
+```yaml
+genai:
+  enabled: True
+  provider: openai
+  api_key: "not-needed-for-local"  # Some providers may not require an API key
+  model: llava
+  # Set OPENAI_BASE_URL=http://localhost:11434/v1 in your environment
+```
+
+:::tip
+When using local model servers, ensure you've configured them properly to handle vision inputs through the OpenAI API compatibility layer. Check your provider's documentation for specific setup instructions.
 :::
+
+## Choosing a Provider
+
+Consider these factors when selecting a provider:
+- **Local vs Cloud**: Local providers like Ollama offer privacy and no usage costs, but require suitable hardware
+- **Cost**: Cloud providers typically charge per API call
+- **Performance**: Model size and hardware affect response speed
+- **Ease of Setup**: Cloud APIs are typically simpler to configure than local setups
 
 ## Azure OpenAI
 
