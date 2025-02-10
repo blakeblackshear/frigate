@@ -85,6 +85,7 @@ type SearchDetailDialogProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function SearchDetailDialog({
   search,
@@ -92,6 +93,7 @@ export default function SearchDetailDialog({
   setSearch,
   setSearchPage,
   setSimilarity,
+  setInputFocused,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -232,6 +234,7 @@ export default function SearchDetailDialog({
             config={config}
             setSearch={setSearch}
             setSimilarity={setSimilarity}
+            setInputFocused={setInputFocused}
           />
         )}
         {page == "snapshot" && (
@@ -266,12 +269,14 @@ type ObjectDetailsTabProps = {
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
   setSimilarity,
+  setInputFocused,
 }: ObjectDetailsTabProps) {
   const apiHost = useApiHost();
 
@@ -282,6 +287,14 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+
+  const handleDescriptionFocus = useCallback(() => {
+    setInputFocused(true);
+  }, [setInputFocused]);
+
+  const handleDescriptionBlur = useCallback(() => {
+    setInputFocused(false);
+  }, [setInputFocused]);
 
   // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.data.description ?? ""), [search]);
@@ -309,7 +322,7 @@ function ObjectDetailsTab({
       return undefined;
     }
 
-    if (search.sub_label) {
+    if (search.sub_label && search.data?.sub_label_score) {
       return Math.round((search.data?.sub_label_score ?? 0) * 100);
     } else {
       return undefined;
@@ -452,7 +465,7 @@ function ObjectDetailsTab({
             draggable={false}
             src={`${apiHost}api/events/${search.id}/thumbnail.jpg`}
           />
-          {config?.semantic_search.enabled && (
+          {config?.semantic_search.enabled && search.data.type == "object" && (
             <Button
               aria-label="Find similar tracked objects"
               onClick={() => {
@@ -469,16 +482,45 @@ function ObjectDetailsTab({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="text-sm text-primary/40">Description</div>
-        <Textarea
-          className="h-64"
-          placeholder="Description of the tracked object"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-        />
+        {config?.cameras[search.camera].genai.enabled &&
+        !search.end_time &&
+        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+          search.zones.some((zone) =>
+            config.cameras[search.camera].genai.required_zones.includes(zone),
+          )) &&
+        (config.cameras[search.camera].genai.objects.length === 0 ||
+          config.cameras[search.camera].genai.objects.includes(
+            search.label,
+          )) ? (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <div className="flex h-64 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
+              <div className="flex">
+                <ActivityIndicator />
+              </div>
+              <div className="flex">
+                Frigate will not request a description from your Generative AI
+                provider until the tracked object's lifecycle has ended.
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <Textarea
+              className="h-64"
+              placeholder="Description of the tracked object"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              onFocus={handleDescriptionFocus}
+              onBlur={handleDescriptionBlur}
+            />
+          </>
+        )}
+
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search.camera].genai.enabled && (
-            <div className="flex items-center">
+          {config?.cameras[search.camera].genai.enabled && search.end_time && (
+            <div className="flex items-start">
               <Button
                 className="rounded-r-none border-r-0"
                 aria-label="Regenerate tracked object description"
@@ -516,13 +558,16 @@ function ObjectDetailsTab({
               )}
             </div>
           )}
-          <Button
-            variant="select"
-            aria-label="Save"
-            onClick={updateDescription}
-          >
-            Save
-          </Button>
+          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
+            !config?.cameras[search.camera].genai.enabled) && (
+            <Button
+              variant="select"
+              aria-label="Save"
+              onClick={updateDescription}
+            >
+              Save
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -626,7 +671,8 @@ export function ObjectSnapshotTab({
                 </div>
               )}
             </TransformComponent>
-            {search.plus_id !== "not_enabled" &&
+            {search.data.type == "object" &&
+              search.plus_id !== "not_enabled" &&
               search.end_time &&
               search.label != "on_demand" && (
                 <Card className="p-1 text-sm md:p-2">

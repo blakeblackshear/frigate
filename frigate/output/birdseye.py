@@ -268,12 +268,10 @@ class BirdsEyeFrameManager:
     def __init__(
         self,
         config: FrigateConfig,
-        frame_manager: SharedMemoryFrameManager,
         stop_event: mp.Event,
     ):
         self.config = config
         self.mode = config.birdseye.mode
-        self.frame_manager = frame_manager
         width, height = get_canvas_shape(config.birdseye.width, config.birdseye.height)
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
@@ -351,18 +349,13 @@ class BirdsEyeFrameManager:
         logger.debug("Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
 
-    def copy_to_position(self, position, camera=None, frame_time=None):
+    def copy_to_position(self, position, camera=None, frame: np.ndarray = None):
         if camera is None:
             frame = None
             channel_dims = None
         else:
-            frame_id = f"{camera}{frame_time}"
-            frame = self.frame_manager.get(
-                frame_id, self.config.cameras[camera].frame_shape_yuv
-            )
-
             if frame is None:
-                logger.debug(f"Unable to copy frame {camera}{frame_time} to birdseye.")
+                logger.debug(f"Unable to copy frame {camera} to birdseye.")
                 return
 
             channel_dims = self.cameras[camera]["channel_dims"]
@@ -375,8 +368,6 @@ class BirdsEyeFrameManager:
             channel_dims,
         )
 
-        self.frame_manager.close(frame_id)
-
     def camera_active(self, mode, object_box_count, motion_box_count):
         if mode == BirdseyeModeEnum.continuous:
             return True
@@ -387,7 +378,7 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
-    def update_frame(self):
+    def update_frame(self, frame: np.ndarray):
         """Update to a new frame for birdseye."""
 
         # determine how many cameras are tracking objects within the last inactivity_threshold seconds
@@ -397,7 +388,7 @@ class BirdsEyeFrameManager:
                 for cam, cam_data in self.cameras.items()
                 if self.config.cameras[cam].birdseye.enabled
                 and cam_data["last_active_frame"] > 0
-                and cam_data["current_frame"] - cam_data["last_active_frame"]
+                and cam_data["current_frame_time"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
             ]
         )
@@ -414,7 +405,7 @@ class BirdsEyeFrameManager:
                 limited_active_cameras = sorted(
                     active_cameras,
                     key=lambda active_camera: (
-                        self.cameras[active_camera]["current_frame"]
+                        self.cameras[active_camera]["current_frame_time"]
                         - self.cameras[active_camera]["last_active_frame"]
                     ),
                 )
@@ -524,7 +515,9 @@ class BirdsEyeFrameManager:
         for row in self.camera_layout:
             for position in row:
                 self.copy_to_position(
-                    position[1], position[0], self.cameras[position[0]]["current_frame"]
+                    position[1],
+                    position[0],
+                    self.cameras[position[0]]["current_frame"],
                 )
 
         return True
@@ -672,7 +665,14 @@ class BirdsEyeFrameManager:
         else:
             return standard_candidate_layout
 
-    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+    def update(
+        self,
+        camera: str,
+        object_count: int,
+        motion_count: int,
+        frame_time: float,
+        frame: np.ndarray,
+    ) -> bool:
         # don't process if birdseye is disabled for this camera
         camera_config = self.config.cameras[camera].birdseye
 
@@ -689,7 +689,8 @@ class BirdsEyeFrameManager:
             return False
 
         # update the last active frame for the camera
-        self.cameras[camera]["current_frame"] = frame_time
+        self.cameras[camera]["current_frame"] = frame.copy()
+        self.cameras[camera]["current_frame_time"] = frame_time
         if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
@@ -700,7 +701,7 @@ class BirdsEyeFrameManager:
             return False
 
         try:
-            updated_frame = self.update_frame()
+            updated_frame = self.update_frame(frame)
         except Exception:
             updated_frame = False
             self.active_cameras = []
@@ -737,12 +738,12 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        frame_manager = SharedMemoryFrameManager()
-        self.birdseye_manager = BirdsEyeFrameManager(config, frame_manager, stop_event)
+        self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
         self.config_subscriber = ConfigSubscriber("config/birdseye/")
+        self.frame_manager = SharedMemoryFrameManager()
 
         if config.birdseye.restream:
-            self.birdseye_buffer = frame_manager.create(
+            self.birdseye_buffer = self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
             )
@@ -756,7 +757,7 @@ class Birdseye:
         current_tracked_objects: list[dict[str, any]],
         motion_boxes: list[list[int]],
         frame_time: float,
-        frame,
+        frame: np.ndarray,
     ) -> None:
         # check if there is an updated config
         while True:

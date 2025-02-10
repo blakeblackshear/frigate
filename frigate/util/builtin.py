@@ -13,12 +13,12 @@ import urllib.parse
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
+from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
 import pytz
 from ruamel.yaml import YAML
 from tzlocal import get_localzone
-from zoneinfo import ZoneInfoNotFoundError
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 

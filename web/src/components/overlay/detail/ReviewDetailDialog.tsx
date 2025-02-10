@@ -74,6 +74,23 @@ export default function ReviewDetailDialog({
     return events.length != review?.data.detections.length;
   }, [review, events]);
 
+  const missingObjects = useMemo(() => {
+    if (!review || !events) {
+      return [];
+    }
+
+    const detectedIds = review.data.detections;
+    const missing = Array.from(
+      new Set(
+        events
+          .filter((event) => !detectedIds.includes(event.id))
+          .map((event) => event.label),
+      ),
+    );
+
+    return missing;
+  }, [review, events]);
+
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
@@ -263,8 +280,25 @@ export default function ReviewDetailDialog({
               </div>
               {hasMismatch && (
                 <div className="p-4 text-center text-sm">
-                  Some objects that were detected are not included in this list
-                  because the object does not have a snapshot
+                  {(() => {
+                    const detectedCount = Math.abs(
+                      (events?.length ?? 0) -
+                        (review?.data.detections.length ?? 0),
+                    );
+                    const objectLabel =
+                      detectedCount === 1 ? "object was" : "objects were";
+
+                    return `${detectedCount} unavailable ${objectLabel} detected and included in this review item.`;
+                  })()}{" "}
+                  Those objects either did not qualify as an alert or detection
+                  or have already been cleaned up/deleted.
+                  {missingObjects.length > 0 && (
+                    <div className="mt-2">
+                      Adjust your configuration if you want Frigate to save
+                      tracked objects for the following labels:{" "}
+                      {missingObjects.join(", ")}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="relative flex size-full flex-col gap-2">
@@ -379,6 +413,7 @@ function EventItem({
 
               {event.has_snapshot &&
                 event.plus_id == undefined &&
+                event.data.type == "object" &&
                 config?.plus.enabled && (
                   <Tooltip>
                     <TooltipTrigger>

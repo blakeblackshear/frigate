@@ -20,11 +20,12 @@ from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
-from frigate.api.defs.media_query_parameters import (
+from frigate.api.defs.query.media_query_parameters import (
     Extension,
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
+    MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -36,6 +37,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
+from frigate.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 from frigate.util.image import get_image_from_recording
 
@@ -79,7 +81,11 @@ def mjpeg_feed(
 
 
 def imagestream(
-    detected_frames_processor, camera_name: str, fps: int, height: int, draw_options
+    detected_frames_processor: TrackedObjectProcessor,
+    camera_name: str,
+    fps: int,
+    height: int,
+    draw_options: dict[str, any],
 ):
     while True:
         # max out at specified FPS
@@ -118,6 +124,7 @@ def latest_frame(
     extension: Extension,
     params: MediaLatestFrameQueryParams = Depends(),
 ):
+    frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
     draw_options = {
         "bounding_boxes": params.bbox,
         "timestamp": params.timestamp,
@@ -127,19 +134,25 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
+    mime_type = extension
+
+    if extension == "png":
+        quality_params = None
+    elif extension == "webp":
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+    else:
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
-        frame = request.app.detected_frames_processor.get_current_frame(
-            camera_name, draw_options
-        )
+        frame = frame_processor.get_current_frame(camera_name, draw_options)
         retry_interval = float(
             request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            request.app.detected_frames_processor.get_current_frame_time(camera_name)
-            + retry_interval
+            frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             if request.app.camera_error_image is None:
                 error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
@@ -170,17 +183,20 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-        )
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            media_type=f"image/{mime_type}",
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
-            request.app.detected_frames_processor.get_current_frame(camera_name),
+            frame_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
         )
 
@@ -189,13 +205,16 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-        )
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            media_type=f"image/{mime_type}",
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     else:
         return JSONResponse(
@@ -238,6 +257,7 @@ def get_snapshot_from_recording(
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
+        mime_type = "png" if format == "png" else "jpeg"
         config: FrigateConfig = request.app.frigate_config
 
         image_data = get_image_from_recording(
@@ -254,7 +274,7 @@ def get_snapshot_from_recording(
                 ),
                 status_code=404,
             )
-        return Response(image_data, headers={"Content-Type": f"image/{format}"})
+        return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
     except DoesNotExist:
         return JSONResponse(
             content={
@@ -351,6 +371,50 @@ def get_recordings_storage_usage(request: Request):
             ) * 100
 
     return JSONResponse(content=camera_usages)
+
+
+@router.get("/recordings/summary")
+def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()):
+    """Returns true/false by day indicating if recordings exist"""
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
+
+    cameras = params.cameras
+
+    query = (
+        Recordings.select(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            ).alias("day")
+        )
+        .group_by(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            )
+        )
+        .order_by(Recordings.start_time.desc())
+    )
+
+    if cameras != "all":
+        query = query.where(Recordings.camera << cameras.split(","))
+
+    print(query)
+
+    recording_days = query.namedtuples()
+    days = {day.day: True for day in recording_days}
+
+    return JSONResponse(content=days)
 
 
 @router.get("/{camera_name}/recordings/summary")
@@ -813,15 +877,15 @@ def grid_snapshot(
 ):
     if camera_name in request.app.frigate_config.cameras:
         detect = request.app.frigate_config.cameras[camera_name].detect
-        frame = request.app.detected_frames_processor.get_current_frame(camera_name, {})
+        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
+        frame = frame_processor.get_current_frame(camera_name, {})
         retry_interval = float(
             request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            request.app.detected_frames_processor.get_current_frame_time(camera_name)
-            + retry_interval
+            frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             return JSONResponse(
                 content={"success": False, "message": "Unable to get valid frame"},

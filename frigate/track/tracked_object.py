@@ -4,6 +4,7 @@ import base64
 import logging
 from collections import defaultdict
 from statistics import median
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -12,6 +13,7 @@ from frigate.config import (
     CameraConfig,
     ModelConfig,
 )
+from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
     calculate_region,
@@ -57,6 +59,27 @@ class TrackedObject:
         self.active = True
         self.pending_loitering = False
         self.previous = self.to_dict()
+
+    @property
+    def max_severity(self) -> Optional[str]:
+        review_config = self.camera_config.review
+
+        if self.obj_data["label"] in review_config.alerts.labels and (
+            not review_config.alerts.required_zones
+            or set(self.entered_zones) & set(review_config.alerts.required_zones)
+        ):
+            return SeverityEnum.alert
+
+        if (
+            not review_config.detections.labels
+            or self.obj_data["label"] in review_config.detections.labels
+        ) and (
+            not review_config.detections.required_zones
+            or set(self.entered_zones) & set(review_config.detections.required_zones)
+        ):
+            return SeverityEnum.detection
+
+        return None
 
     def _is_false_positive(self):
         # once a true positive, always a true positive
@@ -231,6 +254,7 @@ class TrackedObject:
             "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
+            "max_severity": self.max_severity,
         }
 
         if include_thumbnail:
@@ -315,7 +339,7 @@ class TrackedObject:
                 box[2],
                 box[3],
                 self.obj_data["label"],
-                f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}",
+                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}",
                 thickness=thickness,
                 color=color,
             )
@@ -423,10 +447,11 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, any]]) -> str:
+    def find_best_object(self, objects: list[dict[str, any]]) -> Optional[str]:
         """Find the best attribute for each object and return its ID."""
         best_object_area = None
         best_object_id = None
+        best_object_label = None
 
         for obj in objects:
             if not box_inside(obj["box"], self.box):
@@ -440,8 +465,15 @@ class TrackedObjectAttribute:
             if best_object_area is None:
                 best_object_area = object_area
                 best_object_id = obj["id"]
-            elif object_area < best_object_area:
-                best_object_area = object_area
-                best_object_id = obj["id"]
+                best_object_label = obj["label"]
+            else:
+                if best_object_label == "car" and obj["label"] == "car":
+                    # if multiple cars are overlapping with the same label then the label will not be assigned
+                    return None
+                elif object_area < best_object_area:
+                    # if a car and person are overlapping then assign the label to the smaller object (which should be the person)
+                    best_object_area = object_area
+                    best_object_id = obj["id"]
+                    best_object_label = obj["label"]
 
         return best_object_id

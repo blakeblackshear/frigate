@@ -41,7 +41,7 @@ import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 const allSettingsViews = [
   "UI settings",
-  "search settings",
+  "explore settings",
   "camera settings",
   "masks / zones",
   "motion tuner",
@@ -191,7 +191,7 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
         {page == "UI settings" && <UiSettingsView />}
-        {page == "search settings" && (
+        {page == "explore settings" && (
           <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (

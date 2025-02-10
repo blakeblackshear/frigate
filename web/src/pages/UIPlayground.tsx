@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { isMobile } from "react-device-detect";
 import IconPicker, { IconElement } from "@/components/icons/IconPicker";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 // Color data
 const colors = [
@@ -173,32 +174,37 @@ function UIPlayground() {
     return Math.floor(Date.now() / 1000); // Default to current time if no events
   }, [mockEvents]);
 
-  const [zoomLevel, setZoomLevel] = useState(0);
   const [zoomSettings, setZoomSettings] = useState({
     segmentDuration: 60,
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = [
-    { segmentDuration: 60, timestampSpread: 15 },
-    { segmentDuration: 30, timestampSpread: 5 },
-    { segmentDuration: 10, timestampSpread: 1 },
-  ];
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 60, timestampSpread: 15 },
+      { segmentDuration: 30, timestampSpread: 5 },
+      { segmentDuration: 10, timestampSpread: 1 },
+    ],
+    [],
+  );
 
-  function handleZoomIn() {
-    const nextZoomLevel = Math.min(
-      possibleZoomLevels.length - 1,
-      zoomLevel + 1,
-    );
-    setZoomLevel(nextZoomLevel);
-    setZoomSettings(possibleZoomLevels[nextZoomLevel]);
-  }
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
 
-  function handleZoomOut() {
-    const nextZoomLevel = Math.max(0, zoomLevel - 1);
-    setZoomLevel(nextZoomLevel);
-    setZoomSettings(possibleZoomLevels[nextZoomLevel]);
-  }
+  const { zoomLevel, handleZoom, isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration: 4 * 60 * 60,
+  });
+
+  const handleZoomIn = () => handleZoom(-1);
+  const handleZoomOut = () => handleZoom(1);
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -330,6 +336,7 @@ function UIPlayground() {
               <div className="my-4 w-[40px]">
                 <CameraActivityIndicator />
               </div>
+              zoom level: {zoomLevel}
               <p>
                 <Button
                   variant="default"
@@ -367,7 +374,6 @@ function UIPlayground() {
                 </a>{" "}
                 for usage.
               </p>
-
               <div className="my-5">
                 {colors.map((color, index) => (
                   <ColorSwatch
@@ -401,9 +407,10 @@ function UIPlayground() {
                 setExportEndTime={setExportEndTime}
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
                 motion_events={mockMotionData}
-                severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
                 dense={isMobile} // dense will produce a smaller handlebar and only minute resolution on timestamps
+                isZooming={isZooming} // is the timeline actively zooming?
+                zoomDirection={zoomDirection} // is the timeline zooming in or out
               />
             )}
             {isEventsReviewTimeline && (
@@ -429,6 +436,8 @@ function UIPlayground() {
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
                 timelineRef={reviewTimelineRef} // save a ref to this timeline to connect with the summary timeline
                 dense // dense will produce a smaller handlebar and only minute resolution on timestamps
+                isZooming={isZooming} // is the timeline actively zooming?
+                zoomDirection={zoomDirection} // is the timeline zooming in or out
               />
             )}
           </div>

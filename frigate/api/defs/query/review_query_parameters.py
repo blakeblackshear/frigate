@@ -3,7 +3,7 @@ from typing import Union
 from pydantic import BaseModel
 from pydantic.json_schema import SkipJsonSchema
 
-from frigate.review.maintainer import SeverityEnum
+from frigate.review.types import SeverityEnum
 
 
 class ReviewQueryParams(BaseModel):

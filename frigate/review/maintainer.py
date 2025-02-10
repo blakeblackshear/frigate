@@ -7,7 +7,6 @@ import random
 import string
 import sys
 import threading
-from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Optional
@@ -27,6 +26,7 @@ from frigate.const import (
 from frigate.events.external import ManualEventState
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
+from frigate.review.types import SeverityEnum
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
 
 logger = logging.getLogger(__name__)
@@ -37,11 +37,6 @@ THUMB_WIDTH = 320
 
 THRESHOLD_ALERT_ACTIVITY = 120
 THRESHOLD_DETECTION_ACTIVITY = 30
-
-
-class SeverityEnum(str, Enum):
-    alert = "alert"
-    detection = "detection"
 
 
 class PendingReviewSegment:
@@ -234,6 +229,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def update_existing_segment(
         self,
         segment: PendingReviewSegment,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -260,7 +256,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
-                    segment.detections[object["id"]] = f'{object["label"]}-verified'
+                    segment.detections[object["id"]] = f"{object['label']}-verified"
                     segment.sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
@@ -292,36 +288,34 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if should_update:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     self._publish_segment_update(
                         segment, camera_config, yuv_frame, active_objects, prev_data
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                 except FileNotFoundError:
                     return
 
         if not has_activity:
             if not segment.has_frame:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     segment.save_full_frame(camera_config, yuv_frame)
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self._publish_segment_update(
                         segment, camera_config, None, [], prev_data
                     )
@@ -338,6 +332,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def check_if_new_segment(
         self,
         camera: str,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -357,7 +352,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
-                    detections[object["id"]] = f'{object["label"]}-verified'
+                    detections[object["id"]] = f"{object['label']}-verified"
                     sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
@@ -414,19 +409,18 @@ class ReviewSegmentMaintainer(threading.Thread):
                 )
 
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
 
                     if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_name} from SHM")
                         return
 
                     self.active_review_segments[camera].update_frame(
                         camera_config, yuv_frame, active_objects
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self._publish_segment_start(self.active_review_segments[camera])
                 except FileNotFoundError:
                     return
@@ -454,16 +448,17 @@ class ReviewSegmentMaintainer(threading.Thread):
             if topic == DetectionTypeEnum.video:
                 (
                     camera,
+                    frame_name,
                     frame_time,
                     current_tracked_objects,
-                    motion_boxes,
-                    regions,
+                    _,
+                    _,
                 ) = data
             elif topic == DetectionTypeEnum.audio:
                 (
                     camera,
                     frame_time,
-                    dBFS,
+                    _,
                     audio_detections,
                 ) = data
             elif topic == DetectionTypeEnum.api:
@@ -480,7 +475,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if not self.config.cameras[camera].record.enabled:
                 if current_segment:
-                    self.update_existing_segment(current_segment, frame_time, [])
+                    self.update_existing_segment(
+                        current_segment, frame_name, frame_time, []
+                    )
 
                 continue
 
@@ -488,6 +485,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.update_existing_segment(
                         current_segment,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )
@@ -529,7 +527,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                         if event_id in self.indefinite_events[camera]:
                             self.indefinite_events[camera].pop(event_id)
-                            current_segment.last_update = manual_info["end_time"]
+
+                            if len(self.indefinite_events[camera]) == 0:
+                                current_segment.last_update = manual_info["end_time"]
                         else:
                             logger.error(
                                 f"Event with ID {event_id} has a set duration and can not be ended manually."
@@ -538,6 +538,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
                         camera,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )

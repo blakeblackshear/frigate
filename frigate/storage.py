@@ -17,6 +17,8 @@ bandwidth_equation = Recordings.segment_size / (
     Recordings.end_time - Recordings.start_time
 )
 
+MAX_CALCULATED_BANDWIDTH = 10000  # 10Gb/hr
+
 
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
@@ -52,6 +54,12 @@ class StorageMaintainer(threading.Thread):
                         * 3600,
                         2,
                     )
+
+                    if bandwidth > MAX_CALCULATED_BANDWIDTH:
+                        logger.warning(
+                            f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
+                        )
+                        bandwidth = MAX_CALCULATED_BANDWIDTH
                 except TypeError:
                     bandwidth = 0
 

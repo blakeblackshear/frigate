@@ -33,9 +33,11 @@ const sidebars: SidebarsConfig = {
         'configuration/object_detectors',
         'configuration/audio_detectors',
       ],
-      'Semantic Search': [
+      Classifiers: [
         'configuration/semantic_search',
         'configuration/genai',
+        'configuration/face_recognition',
+        'configuration/license_plate_recognition',
       ],
       Cameras: [
         'configuration/cameras',
@@ -82,6 +84,7 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       'integrations/mqtt',
+      'configuration/metrics',
       'integrations/third_party_extensions',
     ],
     'Frigate+': [

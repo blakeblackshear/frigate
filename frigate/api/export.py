@@ -9,6 +9,7 @@ import psutil
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.tags import Tags
@@ -207,3 +208,14 @@ def export_delete(event_id: str):
         ),
         status_code=200,
     )
+
+
+@router.get("/exports/{export_id}")
+def get_export(export_id: str):
+    try:
+        return JSONResponse(content=model_to_dict(Export.get(Export.id == export_id)))
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export not found"},
+            status_code=404,
+        )

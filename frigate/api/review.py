@@ -12,20 +12,21 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.generic_response import GenericResponse
-from frigate.api.defs.review_body import ReviewModifyMultipleBody
-from frigate.api.defs.review_query_parameters import (
+from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
     ReviewSummaryQueryParams,
 )
-from frigate.api.defs.review_responses import (
+from frigate.api.defs.request.review_body import ReviewModifyMultipleBody
+from frigate.api.defs.response.generic_response import GenericResponse
+from frigate.api.defs.response.review_response import (
     ReviewActivityMotionResponse,
     ReviewSegmentResponse,
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
+from frigate.review.types import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -109,6 +110,28 @@ def review(params: ReviewQueryParams = Depends()):
     return JSONResponse(content=[r for r in review])
 
 
+@router.get("/review_ids", response_model=list[ReviewSegmentResponse])
+def review_ids(ids: str):
+    ids = ids.split(",")
+
+    if not ids:
+        return JSONResponse(
+            content=({"success": False, "message": "Valid list of ids must be sent"}),
+            status_code=400,
+        )
+
+    try:
+        reviews = (
+            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
+        )
+        return JSONResponse(list(reviews))
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Review segments not found"}),
+            status_code=400,
+        )
+
+
 @router.get("/review/summary", response_model=ReviewSummaryResponse)
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
@@ -161,7 +184,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -173,7 +196,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -185,7 +208,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -197,7 +220,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],
@@ -230,6 +253,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
+    day_in_seconds = 60 * 60 * 24
     last_month = (
         ReviewSegment.select(
             fn.strftime(
@@ -246,7 +270,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -258,7 +282,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             ReviewSegment.has_been_reviewed,
                         )
                     ],
@@ -270,7 +294,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "alert"),
+                            (ReviewSegment.severity == SeverityEnum.alert),
                             1,
                         )
                     ],
@@ -282,7 +306,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "detection"),
+                            (ReviewSegment.severity == SeverityEnum.detection),
                             1,
                         )
                     ],
@@ -292,7 +316,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
         )
         .where(reduce(operator.and_, clauses))
         .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / (3600 * 24),
+            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds,
         )
         .order_by(ReviewSegment.start_time.desc())
     )
@@ -362,7 +386,7 @@ def delete_reviews(body: ReviewModifyMultipleBody):
     ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
 
     return JSONResponse(
-        content=({"success": True, "message": "Delete reviews"}), status_code=200
+        content=({"success": True, "message": "Deleted review items."}), status_code=200
     )
 
 
@@ -488,8 +512,6 @@ def set_not_reviewed(review_id: str):
     review.save()
 
     return JSONResponse(
-        content=(
-            {"success": True, "message": "Set Review " + review_id + " as not viewed"}
-        ),
+        content=({"success": True, "message": f"Set Review {review_id} as not viewed"}),
         status_code=200,
     )

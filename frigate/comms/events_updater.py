@@ -14,7 +14,7 @@ class EventUpdatePublisher(Publisher):
         super().__init__("update")
 
     def publish(
-        self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, any]]
+        self, payload: tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, any]]
     ) -> None:
         super().publish(payload)
 

@@ -132,6 +132,28 @@ cameras:
             - detect
 ```
 
+## Handling Complex Passwords
+
+go2rtc expects URL-encoded passwords in the config, [urlencoder.org](https://urlencoder.org) can be used for this purpose. 
+
+For example:
+
+```yaml
+go2rtc:
+  streams:
+    my_camera: rtsp://username:$@foo%@192.168.1.100
+```
+
+becomes
+
+```yaml
+go2rtc:
+  streams:
+    my_camera: rtsp://username:$%40foo%25@192.168.1.100
+```
+
+See [this comment(https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
+
 ## Advanced Restream Configurations
 
 The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.9.2#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:

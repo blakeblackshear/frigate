@@ -6,6 +6,7 @@ const SEARCH_FILTERS = [
   "zone",
   "sub",
   "source",
+  "sort",
 ] as const;
 export type SearchFilters = (typeof SEARCH_FILTERS)[number];
 export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
@@ -16,9 +17,17 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
   "zone",
   "sub",
   "source",
+  "sort",
 ];
 
 export type SearchSource = "similarity" | "thumbnail" | "description";
+
+export type SearchSortType =
+  | "date_asc"
+  | "date_desc"
+  | "score_asc"
+  | "score_desc"
+  | "relevance";
 
 export type SearchResult = {
   id: string;
@@ -65,6 +74,7 @@ export type SearchFilter = {
   time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;
+  sort?: SearchSortType;
 };
 
 export const DEFAULT_TIME_RANGE_AFTER = "00:00";
@@ -86,6 +96,7 @@ export type SearchQueryParams = {
   query?: string;
   page?: number;
   time_range?: string;
+  sort?: SearchSortType;
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;

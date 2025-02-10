@@ -3,8 +3,10 @@
 import datetime
 import logging
 import subprocess as sp
+import threading
 from abc import ABC, abstractmethod
-from multiprocessing import shared_memory
+from multiprocessing import resource_tracker as _mprt
+from multiprocessing import shared_memory as _mpshm
 from string import printable
 from typing import AnyStr, Optional
 
@@ -217,19 +219,35 @@ def draw_box_with_label(
     text_width = size[0][0]
     text_height = size[0][1]
     line_height = text_height + size[1]
+    # get frame height
+    frame_height = frame.shape[0]
     # set the text start position
     if position == "ul":
         text_offset_x = x_min
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "ur":
-        text_offset_x = x_max - (text_width + 8)
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_x = max(0, x_max - (text_width + 8))
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "bl":
         text_offset_x = x_min
-        text_offset_y = y_max
+        text_offset_y = min(frame_height - line_height, y_max)
     elif position == "br":
-        text_offset_x = x_max - (text_width + 8)
-        text_offset_y = y_max
+        text_offset_x = max(0, x_max - (text_width + 8))
+        text_offset_y = min(frame_height - line_height, y_max)
+    # Adjust position if it overlaps with the box or goes out of frame
+    if position in {"ul", "ur"}:
+        if text_offset_y < y_min + thickness:  # Label overlaps with the box
+            if y_min - (line_height + 8) < 0 and y_max + line_height <= frame_height:
+                # Not enough space above, and there is space below
+                text_offset_y = y_max
+            elif y_min - (line_height + 8) >= 0:
+                # Enough space above, keep the label at the top
+                text_offset_y = max(0, y_min - (line_height + 8))
+    elif position in {"bl", "br"}:
+        if text_offset_y + line_height > frame_height:
+            # If there's not enough space below, try above the box
+            text_offset_y = max(0, y_min - (line_height + 8))
+
     # make the coords of the box with a small padding of two pixels
     textbox_coords = (
         (text_offset_x, text_offset_y),
@@ -715,57 +733,109 @@ def clipped(obj, frame_shape):
 
 class FrameManager(ABC):
     @abstractmethod
-    def create(self, name, size) -> AnyStr:
+    def create(self, name: str, size: int) -> AnyStr:
         pass
 
     @abstractmethod
-    def get(self, name, timeout_ms=0):
+    def write(self, name: str) -> memoryview:
         pass
 
     @abstractmethod
-    def close(self, name):
+    def get(self, name: str, timeout_ms: int = 0):
         pass
 
     @abstractmethod
-    def delete(self, name):
+    def close(self, name: str):
+        pass
+
+    @abstractmethod
+    def delete(self, name: str):
+        pass
+
+    @abstractmethod
+    def cleanup(self):
         pass
 
 
-class DictFrameManager(FrameManager):
-    def __init__(self):
-        self.frames = {}
+class UntrackedSharedMemory(_mpshm.SharedMemory):
+    # https://github.com/python/cpython/issues/82300#issuecomment-2169035092
 
-    def create(self, name, size) -> AnyStr:
-        mem = bytearray(size)
-        self.frames[name] = mem
-        return mem
+    __lock = threading.Lock()
 
-    def get(self, name, shape):
-        mem = self.frames[name]
-        return np.ndarray(shape, dtype=np.uint8, buffer=mem)
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        create: bool = False,
+        size: int = 0,
+        *,
+        track: bool = False,
+    ) -> None:
+        self._track = track
 
-    def close(self, name):
-        pass
+        # if tracking, normal init will suffice
+        if track:
+            return super().__init__(name=name, create=create, size=size)
 
-    def delete(self, name):
-        del self.frames[name]
+        # lock so that other threads don't attempt to use the
+        # register function during this time
+        with self.__lock:
+            # temporarily disable registration during initialization
+            orig_register = _mprt.register
+            _mprt.register = self.__tmp_register
+
+            # initialize; ensure original register function is
+            # re-instated
+            try:
+                super().__init__(name=name, create=create, size=size)
+            finally:
+                _mprt.register = orig_register
+
+    @staticmethod
+    def __tmp_register(*args, **kwargs) -> None:
+        return
+
+    def unlink(self) -> None:
+        if _mpshm._USE_POSIX and self._name:
+            _mpshm._posixshmem.shm_unlink(self._name)
+            if self._track:
+                _mprt.unregister(self._name, "shared_memory")
 
 
 class SharedMemoryFrameManager(FrameManager):
     def __init__(self):
-        self.shm_store: dict[str, shared_memory.SharedMemory] = {}
+        self.shm_store: dict[str, UntrackedSharedMemory] = {}
 
     def create(self, name: str, size) -> AnyStr:
-        shm = shared_memory.SharedMemory(name=name, create=True, size=size)
+        try:
+            shm = UntrackedSharedMemory(
+                name=name,
+                create=True,
+                size=size,
+            )
+        except FileExistsError:
+            shm = UntrackedSharedMemory(name=name)
+
         self.shm_store[name] = shm
         return shm.buf
+
+    def write(self, name: str) -> memoryview:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+            return shm.buf
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return None
 
     def get(self, name: str, shape) -> Optional[np.ndarray]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
             else:
-                shm = shared_memory.SharedMemory(name=name)
+                shm = UntrackedSharedMemory(name=name)
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
@@ -788,8 +858,17 @@ class SharedMemoryFrameManager(FrameManager):
             del self.shm_store[name]
         else:
             try:
-                shm = shared_memory.SharedMemory(name=name)
+                shm = UntrackedSharedMemory(name=name)
                 shm.close()
+                shm.unlink()
+            except FileNotFoundError:
+                pass
+
+    def cleanup(self) -> None:
+        for shm in self.shm_store.values():
+            shm.close()
+
+            try:
                 shm.unlink()
             except FileNotFoundError:
                 pass

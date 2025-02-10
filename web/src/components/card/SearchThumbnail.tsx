@@ -12,10 +12,11 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import useContextMenu from "@/hooks/use-contextmenu";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
-  onClick: (searchResult: SearchResult) => void;
+  onClick: (searchResult: SearchResult, ctrl: boolean, detail: boolean) => void;
 };
 
 export default function SearchThumbnail({
@@ -28,9 +29,19 @@ export default function SearchThumbnail({
 
   // interactions
 
-  const handleOnClick = useCallback(() => {
-    onClick(searchResult);
-  }, [searchResult, onClick]);
+  useContextMenu(imgRef, () => {
+    onClick(searchResult, true, false);
+  });
+
+  const handleOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.metaKey) {
+        e.stopPropagation();
+        onClick(searchResult, true, false);
+      }
+    },
+    [searchResult, onClick],
+  );
 
   const objectLabel = useMemo(() => {
     if (
@@ -45,7 +56,10 @@ export default function SearchThumbnail({
   }, [config, searchResult]);
 
   return (
-    <div className="relative size-full cursor-pointer" onClick={handleOnClick}>
+    <div
+      className="relative size-full cursor-pointer"
+      onClick={() => onClick(searchResult, false, true)}
+    >
       <ImageLoadingIndicator
         className="absolute inset-0"
         imgLoaded={imgLoaded}
@@ -53,6 +67,7 @@ export default function SearchThumbnail({
       <div className={`size-full ${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
+          onClick={handleOnClick}
           className={cn(
             "size-full select-none object-cover object-center opacity-100 transition-opacity",
           )}
@@ -79,7 +94,7 @@ export default function SearchThumbnail({
                 <div className="mx-3 pb-1 text-sm text-white">
                   <Chip
                     className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs`}
-                    onClick={() => onClick(searchResult)}
+                    onClick={() => onClick(searchResult, false, true)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
                     {Math.round(

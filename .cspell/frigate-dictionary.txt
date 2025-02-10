@@ -2,6 +2,7 @@ aarch
 absdiff
 airockchip
 Alloc
+alpr
 Amcrest
 amdgpu
 analyzeduration
@@ -12,6 +13,7 @@ argmax
 argmin
 argpartition
 ascontiguousarray
+astype
 authelia
 authentik
 autodetected
@@ -60,6 +62,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+facenet
 fastapi
 faststart
 fflags
@@ -113,6 +116,8 @@ itemsize
 Jellyfin
 jetson
 jetsons
+jina
+jinaai
 joserfc
 jsmpeg
 jsonify
@@ -186,6 +191,7 @@ openai
 opencv
 openvino
 OWASP
+paddleocr
 paho
 passwordless
 popleft
@@ -195,6 +201,7 @@ poweroff
 preexec
 probesize
 protobuf
+pstate
 psutil
 pubkey
 putenv
@@ -278,6 +285,7 @@ uvicorn
 vaapi
 vainfo
 variations
+vbios
 vconcat
 vitb
 vstream

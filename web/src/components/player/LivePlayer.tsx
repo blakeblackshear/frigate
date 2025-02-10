@@ -349,10 +349,11 @@ export default function LivePlayer({
       >
         <AutoUpdatingCameraImage
           className="pointer-events-none size-full"
+          cameraClasses="relative size-full flex justify-center"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
-          cameraClasses="relative size-full flex justify-center"
+          periodicCache
         />
       </div>
 

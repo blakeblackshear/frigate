@@ -78,6 +78,7 @@
     "tailwind-merge": "^2.4.0",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
+    "use-long-press": "^3.2.0",
     "vaul": "^0.9.1",
     "vite-plugin-monaco-editor": "^1.1.0",
     "zod": "^3.23.8"

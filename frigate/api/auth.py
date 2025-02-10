@@ -18,7 +18,7 @@ from joserfc import jwt
 from peewee import DoesNotExist
 from slowapi import Limiter
 
-from frigate.api.defs.app_body import (
+from frigate.api.defs.request.app_body import (
     AppPostLoginBody,
     AppPostUsersBody,
     AppPutPasswordBody,
@@ -85,7 +85,12 @@ def get_remote_addr(request: Request):
             return str(ip)
 
     # if there wasn't anything in the route, just return the default
-    return request.remote_addr or "127.0.0.1"
+    remote_addr = None
+
+    if hasattr(request, "remote_addr"):
+        remote_addr = request.remote_addr
+
+    return remote_addr or "127.0.0.1"
 
 
 def get_jwt_secret() -> str:
@@ -324,7 +329,7 @@ def login(request: Request, body: AppPostLoginBody):
     try:
         db_user: User = User.get_by_id(user)
     except DoesNotExist:
-        return JSONResponse(content={"message": "Login failed"}, status_code=400)
+        return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
@@ -335,7 +340,7 @@ def login(request: Request, body: AppPostLoginBody):
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
         return response
-    return JSONResponse(content={"message": "Login failed"}, status_code=400)
+    return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
 @router.get("/users")

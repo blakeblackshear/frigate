@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -7,6 +7,9 @@ class EventsSubLabelBody(BaseModel):
     subLabel: str = Field(title="Sub label", max_length=100)
     subLabelScore: Optional[float] = Field(
         title="Score for sub label", default=None, gt=0.0, le=1.0
+    )
+    camera: Optional[str] = Field(
+        title="Camera this object is detected on.", default=None
     )
 
 
@@ -17,14 +20,18 @@ class EventsDescriptionBody(BaseModel):
 class EventsCreateBody(BaseModel):
     source_type: Optional[str] = "api"
     sub_label: Optional[str] = None
-    score: Optional[int] = 0
+    score: Optional[float] = 0
     duration: Optional[int] = 30
     include_recording: Optional[bool] = True
     draw: Optional[dict] = {}
 
 
 class EventsEndBody(BaseModel):
-    end_time: Optional[int] = None
+    end_time: Optional[float] = None
+
+
+class EventsDeleteBody(BaseModel):
+    event_ids: List[str] = Field(title="The event IDs to delete")
 
 
 class SubmitPlusBody(BaseModel):

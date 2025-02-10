@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
 from frigate.camera import PTZMetrics
+from frigate.camera.activity_manager import CameraActivityManager
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import (
@@ -22,7 +23,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
-from frigate.types import ModelStatusTypesEnum
+from frigate.types import ModelStatusTypesEnum, TrackedObjectUpdateTypesEnum
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -64,7 +65,7 @@ class Dispatcher:
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
-        self.camera_activity = {}
+        self.camera_activity = CameraActivityManager(config, self.publish)
         self.model_state = {}
         self.embeddings_reindex = {}
 
@@ -130,15 +131,21 @@ class Dispatcher:
             ).execute()
 
         def handle_update_camera_activity():
-            self.camera_activity = payload
+            self.camera_activity.update_activity(payload)
 
         def handle_update_event_description():
             event: Event = Event.get(Event.id == payload["id"])
             event.data["description"] = payload["description"]
             event.save()
             self.publish(
-                "event_update",
-                json.dumps({"id": event.id, "description": event.data["description"]}),
+                "tracked_object_update",
+                json.dumps(
+                    {
+                        "type": TrackedObjectUpdateTypesEnum.description,
+                        "id": event.id,
+                        "description": event.data["description"],
+                    }
+                ),
             )
 
         def handle_update_model_state():
@@ -165,7 +172,7 @@ class Dispatcher:
             )
 
         def handle_on_connect():
-            camera_status = self.camera_activity.copy()
+            camera_status = self.camera_activity.last_camera_activity.copy()
 
             for camera in camera_status.keys():
                 camera_status[camera]["config"] = {

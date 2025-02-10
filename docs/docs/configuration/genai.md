@@ -5,6 +5,8 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
+Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle. Descriptions can also be regenerated manually via the Frigate UI.
+
 :::info
 
 Semantic Search must be enabled to use Generative AI.
@@ -13,9 +15,9 @@ Semantic Search must be enabled to use Generative AI.
 
 ## Configuration
 
-Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 providers available to integrate with Frigate.
+Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
-If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
+To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ```yaml
 genai:
@@ -35,7 +37,7 @@ cameras:
 
 :::warning
 
-Using Ollama on CPU is not recommended, high inference times and a lack of support for multi-modal parallel requests will make using Generative AI impractical.
+Using Ollama on CPU is not recommended, high inference times make using Generative AI impractical.
 
 :::
 
@@ -43,7 +45,7 @@ Using Ollama on CPU is not recommended, high inference times and a lack of suppo
 
 Most of the 7b parameter 4-bit vision models will fit inside 8GB of VRAM. There is also a [Docker container](https://hub.docker.com/r/ollama/ollama) available.
 
-Parallel requests also come with some caveats, and multi-modal parallel requests are currently not supported by Ollama. Depending on your hardware and the number of requests made to the Ollama API, these limitations may prevent Ollama from being an optimal solution for many users. See the [Ollama documentation](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-handle-concurrent-requests).
+Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_PARALLEL=1` and choose a `OLLAMA_MAX_QUEUE` and `OLLAMA_MAX_LOADED_MODELS` values that are appropriate for your hardware and preferences. See the [Ollama documentation](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-handle-concurrent-requests).
 
 ### Supported Models
 
@@ -114,6 +116,12 @@ genai:
   model: gpt-4o
 ```
 
+:::note
+
+To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+
+:::
+
 ## Azure OpenAI
 
 Microsoft offers several vision models through Azure OpenAI. A subscription is required.
@@ -141,6 +149,10 @@ genai:
 Frigate's thumbnail search excels at identifying specific details about tracked objects – for example, using an "image caption" approach to find a "person wearing a yellow vest," "a white dog running across the lawn," or "a red car on a residential street." To enhance this further, Frigate’s default prompts are designed to ask your AI provider about the intent behind the object's actions, rather than just describing its appearance.
 
 While generating simple descriptions of detected objects is useful, understanding intent provides a deeper layer of insight. Instead of just recognizing "what" is in a scene, Frigate’s default prompts aim to infer "why" it might be there or "what" it could do next. Descriptions tell you what’s happening, but intent gives context. For instance, a person walking toward a door might seem like a visitor, but if they’re moving quickly after hours, you can infer a potential break-in attempt. Detecting a person loitering near a door at night can trigger an alert sooner than simply noting "a person standing by the door," helping you respond based on the situation’s context.
+
+### Using GenAI for notifications
+
+Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_update`, that is updated with a JSON payload containing `event_id` and `description` when your AI provider returns a description for a tracked object. This description could be used directly in notifications, such as sending alerts to your phone or making audio announcements. If additional details from the tracked object are needed, you can query the [HTTP API](/integrations/api/event-events-event-id-get) using the `event_id`, eg: `http://frigate_ip:5000/api/events/<event_id>`.
 
 ## Custom Prompts
 
@@ -172,7 +184,7 @@ genai:
 
 Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. By default, descriptions will be generated for all tracked objects and all zones. But you can also optionally specify `objects` and `required_zones` to only generate descriptions for certain tracked objects or zones.
 
-Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the thumbnails collected over the object's lifetime to the model. Using a snapshot provides the AI with a higher-resolution image (typically downscaled by the AI itself), but the trade-off is that only a single image is used, which might limit the model's ability to determine object movement or direction.
+Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the uncompressed images from the `detect` stream collected over the object's lifetime to the model. Once the object lifecycle ends, only a single compressed and cropped thumbnail is saved with the tracked object. Using a snapshot might be useful when you want to _regenerate_ a tracked object's description as it will provide the AI with a higher-quality image (typically downscaled by the AI itself) than the cropped/compressed thumbnail. Using a snapshot otherwise has a trade-off in that only a single image is sent to your provider, which will limit the model's ability to determine object movement or direction.
 
 ```yaml
 cameras:

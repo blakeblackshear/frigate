@@ -5,13 +5,16 @@ DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
-RECORD_DIR = f"{BASE_DIR}/recordings"
 EXPORT_DIR = f"{BASE_DIR}/exports"
+FACE_DIR = f"{CLIPS_DIR}/faces"
+RECORD_DIR = f"{BASE_DIR}/recordings"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
+
+SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
 
 # Attribute & Object constants
 
@@ -62,6 +65,7 @@ INCLUDED_FFMPEG_VERSIONS = ["7.0", "5.0"]
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
+FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # Regex constants
 
