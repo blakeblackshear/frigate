@@ -481,7 +481,7 @@ def detect(
     detect_config: DetectConfig,
     object_detector,
     frame,
-    model_config,
+    model_config: ModelConfig,
     region,
     objects_to_track,
     object_filters,
