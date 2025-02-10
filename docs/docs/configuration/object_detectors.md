@@ -521,6 +521,12 @@ model:
 
 [YOLOv9](https://github.com/MultimediaTechLab/YOLO) models are supported, but not included by default.
 
+:::tip
+
+The YOLOv9 detector has been designed to support YOLOv9 models, but may support other YOLO model architectures as well.
+
+:::
+
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
 ```yaml
