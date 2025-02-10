@@ -31,7 +31,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { debounce } from "lodash";
-import { usePersistence } from "@/hooks/use-persistence";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -64,13 +63,7 @@ function Logs() {
 
   // log settings
 
-  // const [logSettings, setLogSettings] = usePersistence<LogSettingsType>(
-  //   "logSettings",
-  //   { alwaysLoadFull: false, disableStreaming: false },
-  // );
-
   const [logSettings, setLogSettings] = useState<LogSettingsType>({
-    alwaysLoadFull: false,
     disableStreaming: false,
   });
 
@@ -120,7 +113,7 @@ function Logs() {
     setIsLoading(true);
     try {
       const response = await axios.get(`logs/${logService}`, {
-        params: { start: logSettings.alwaysLoadFull ? 0 : -100 },
+        params: { start: filterSeverity ? 0 : -100 },
       });
       if (
         response.status === 200 &&
@@ -141,7 +134,7 @@ function Logs() {
     } finally {
       setIsLoading(false);
     }
-  }, [logService, filterLines, logSettings]);
+  }, [logService, filterLines, filterSeverity]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 

@@ -52,26 +52,14 @@ export function LogSettingsButton({
           <div className="text-md">Loading</div>
           <div className="mt-2.5 flex flex-col gap-2.5">
             <div className="space-y-1 text-xs text-muted-foreground">
-              By default, logs are loaded in chunks on scroll to save bandwidth,
-              and when the log pane is scrolled to the bottom, new logs
+              When the log pane is scrolled to the bottom, new logs
               automatically stream as they are added.
             </div>
-            <FilterSwitch
-              label="Always load full log"
-              isChecked={logSettings?.alwaysLoadFull ?? false}
-              onCheckedChange={(isChecked) => {
-                setLogSettings({
-                  alwaysLoadFull: isChecked,
-                  disableStreaming: logSettings?.disableStreaming ?? false,
-                });
-              }}
-            />
             <FilterSwitch
               label="Disable log streaming"
               isChecked={logSettings?.disableStreaming ?? false}
               onCheckedChange={(isChecked) => {
                 setLogSettings({
-                  alwaysLoadFull: logSettings?.alwaysLoadFull ?? false,
                   disableStreaming: isChecked,
                 });
               }}
