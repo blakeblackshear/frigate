@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.16-1"
+CURRENT_CONFIG_VERSION = "0.16-0"
 DEFAULT_CONFIG_FILE = "/config/config.yml"
 
 

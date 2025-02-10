@@ -576,7 +576,8 @@ live:
   # that should be used for live view in frigate WebUI. (default: name of camera)
   # NOTE: In most cases this should be set at the camera level only.
   streams:
-    - friendly_name: stream_name
+    main_stream: main_stream_name
+    sub_stream: sub_stream_name
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
