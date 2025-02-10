@@ -55,15 +55,6 @@ class ONNXDetector(DetectionApi):
 
         logger.info(f"ONNX: {path} loaded")
 
-    def xywh2xyxy(self, x):
-        # Convert bounding box (x, y, w, h) to bounding box (x1, y1, x2, y2)
-        y = np.copy(x)
-        y[..., 0] = x[..., 0] - x[..., 2] / 2
-        y[..., 1] = x[..., 1] - x[..., 3] / 2
-        y[..., 2] = x[..., 0] + x[..., 2] / 2
-        y[..., 3] = x[..., 1] + x[..., 3] / 2
-        return y
-
     def detect_raw(self, tensor_input: np.ndarray):
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
@@ -103,14 +94,12 @@ class ONNXDetector(DetectionApi):
 
             input_shape = np.array([self.w, self.h, self.w, self.h])
             boxes = np.divide(boxes, input_shape, dtype=np.float32)
-            boxes *= np.array([self.w, self.h, self.w, self.h])
-            boxes = boxes.astype(np.int32)
             indices = cv2.dnn.NMSBoxes(
                 boxes, scores, score_threshold=0.4, nms_threshold=0.4
             )
             detections = np.zeros((20, 6), np.float32)
             for i, (bbox, confidence, class_id) in enumerate(
-                zip(self.xywh2xyxy(boxes[indices]), scores[indices], class_ids[indices])
+                zip(boxes[indices], scores[indices], class_ids[indices])
             ):
                 if i == 20:
                     break
@@ -118,10 +107,10 @@ class ONNXDetector(DetectionApi):
                 detections[i] = [
                     class_id,
                     confidence,
-                    bbox[0],
-                    bbox[1],
-                    bbox[2],
-                    bbox[3],
+                    bbox[1] - bbox[3] / 2,
+                    bbox[0] - bbox[2] / 2,
+                    bbox[1] + bbox[3] / 2,
+                    bbox[0] + bbox[2] / 2,
                 ]
 
             return detections
