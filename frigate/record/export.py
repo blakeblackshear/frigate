@@ -333,7 +333,14 @@ class RecordingExporter(threading.Thread):
             self.user_provided_name
             or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
-        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
+        filename_start_datetime = datetime.datetime.fromtimestamp(
+            self.start_time
+        ).strftime("%Y%m%d_%H%M%S")
+        filename_end_datetime = datetime.datetime.fromtimestamp(self.end_time).strftime(
+            "%Y%m%d_%H%M%S"
+        )
+        cleaned_export_id = self.export_id.split("_")[-1]
+        video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
         thumb_path = self.save_thumbnail(self.export_id)
 
         Export.insert(
