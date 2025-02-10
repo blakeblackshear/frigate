@@ -409,6 +409,7 @@ motion:
   mqtt_off_delay: 30
 
 # Optional: Notification Configuration
+# NOTE: Can be overridden at the camera level (except email)
 notifications:
   # Optional: Enable notification service (default: shown below)
   enabled: False
