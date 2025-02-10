@@ -180,6 +180,11 @@ html {
   opacity: 0.5 !important;
 }
 
+.react-grid-layout,
+.react-grid-layout .react-grid-item {
+  transition: none !important;
+}
+
 .react-lazylog,
 .react-lazylog-searchbar {
   background-color: transparent !important;

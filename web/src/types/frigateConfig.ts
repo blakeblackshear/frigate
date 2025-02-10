@@ -87,7 +87,7 @@ export interface CameraConfig {
   live: {
     height: number;
     quality: number;
-    stream_name: string;
+    streams: { [key: string]: string };
   };
   motion: {
     contour_area: number;
@@ -175,10 +175,18 @@ export interface CameraConfig {
     alerts: {
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
     detections: {
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
   };
   rtmp: {
@@ -228,6 +236,24 @@ export type CameraGroupConfig = {
   cameras: string[];
   icon: IconName;
   order: number;
+};
+
+export type StreamType = "no-streaming" | "smart" | "continuous";
+
+export type CameraStreamingSettings = {
+  streamName: string;
+  streamType: StreamType;
+  compatibilityMode: boolean;
+  playAudio: boolean;
+  volume: number;
+};
+
+export type GroupStreamingSettings = {
+  [cameraName: string]: CameraStreamingSettings;
+};
+
+export type AllGroupsStreamingSettings = {
+  [groupName: string]: GroupStreamingSettings;
 };
 
 export interface FrigateConfig {
@@ -325,12 +351,6 @@ export interface FrigateConfig {
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
-
-  live: {
-    height: number;
-    quality: number;
-    stream_name: string;
-  };
 
   logger: {
     default: string;

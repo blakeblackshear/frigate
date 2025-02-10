@@ -199,17 +199,18 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         )
 
 
-def verify_valid_live_stream_name(
+def verify_valid_live_stream_names(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
-    if (
-        camera_config.live.stream_name
-        not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
-    ):
-        return ValueError(
-            f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
-        )
+    for _, stream_name in camera_config.live.streams.items():
+        if (
+            stream_name
+            not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
+        ):
+            return ValueError(
+                f"No restream with name {stream_name} exists for camera {camera_config.name}."
+            )
 
 
 def verify_recording_retention(camera_config: CameraConfig) -> None:
@@ -586,15 +587,15 @@ class FrigateConfig(FrigateBaseModel):
                     zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
-            if not camera_config.live.stream_name:
-                camera_config.live.stream_name = name
+            if not camera_config.live.streams:
+                camera_config.live.streams = {name: name}
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             self.cameras[name] = camera_config
 
             verify_config_roles(camera_config)
-            verify_valid_live_stream_name(self, camera_config)
+            verify_valid_live_stream_names(self, camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
