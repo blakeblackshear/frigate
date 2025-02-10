@@ -7,7 +7,7 @@ title: Configuring go2rtc
 
 Use of the bundled go2rtc is optional. You can still configure FFmpeg to connect directly to your cameras. However, adding go2rtc to your configuration is required for the following features:
 
-- WebRTC or MSE for live viewing with higher resolutions and frame rates than the jsmpeg stream which is limited to the detect stream
+- WebRTC or MSE for live viewing with audio, higher resolutions and frame rates than the jsmpeg stream which is limited to the detect stream and does not support audio
 - Live stream support for cameras in Home Assistant Integration
 - RTSP relay for use with other consumers to reduce the number of connections to your camera streams
 

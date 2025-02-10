@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import Field
 
 from frigate.const import MAX_PRE_CAPTURE
+from frigate.review.types import SeverityEnum
 
 from ..base import FrigateBaseModel
 
@@ -101,3 +102,15 @@ class RecordConfig(FrigateBaseModel):
             self.alerts.pre_capture,
             self.detections.pre_capture,
         )
+
+    def get_review_pre_capture(self, severity: SeverityEnum) -> int:
+        if severity == SeverityEnum.alert:
+            return self.alerts.pre_capture
+        else:
+            return self.detections.pre_capture
+
+    def get_review_post_capture(self, severity: SeverityEnum) -> int:
+        if severity == SeverityEnum.alert:
+            return self.alerts.post_capture
+        else:
+            return self.detections.post_capture

@@ -37,10 +37,11 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 const allSettingsViews = [
   "UI settings",
-  "search settings",
+  "explore settings",
   "camera settings",
   "masks / zones",
   "motion tuner",
@@ -119,6 +120,21 @@ export default function Settings() {
     }
   }, [tabsRef, pageToggle]);
 
+  useSearchEffect("page", (page: string) => {
+    if (allSettingsViews.includes(page as SettingsType)) {
+      setPage(page as SettingsType);
+    }
+    return true;
+  });
+
+  useSearchEffect("camera", (camera: string) => {
+    const cameraNames = cameras.map((c) => c.name);
+    if (cameraNames.includes(camera)) {
+      setSelectedCamera(camera);
+    }
+    return true;
+  });
+
   useEffect(() => {
     document.title = "Settings - Frigate";
   }, []);
@@ -175,7 +191,7 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
         {page == "UI settings" && <UiSettingsView />}
-        {page == "search settings" && (
+        {page == "explore settings" && (
           <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (

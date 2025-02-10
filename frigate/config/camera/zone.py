@@ -85,7 +85,7 @@ class ZoneConfig(BaseModel):
             if explicit:
                 self.coordinates = ",".join(
                     [
-                        f'{round(int(p.split(",")[0]) / frame_shape[1], 3)},{round(int(p.split(",")[1]) / frame_shape[0], 3)}'
+                        f"{round(int(p.split(',')[0]) / frame_shape[1], 3)},{round(int(p.split(',')[1]) / frame_shape[0], 3)}"
                         for p in coordinates
                     ]
                 )

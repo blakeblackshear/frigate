@@ -40,9 +40,9 @@ export default function CameraFeatureToggle({
     <div
       onClick={onClick}
       className={cn(
-        className,
         "flex flex-col items-center justify-center",
         variants[variant][isActive ? "active" : "inactive"],
+        className,
       )}
     >
       <Icon

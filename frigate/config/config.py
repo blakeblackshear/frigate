@@ -29,6 +29,7 @@ from frigate.util.builtin import (
 )
 from frigate.util.config import (
     StreamInfoRetriever,
+    convert_area_to_pixels,
     find_config_file,
     get_relative_coordinates,
     migrate_frigate_config,
@@ -52,12 +53,17 @@ from .camera.review import ReviewConfig
 from .camera.snapshots import SnapshotsConfig
 from .camera.timestamp import TimestampStyleConfig
 from .camera_group import CameraGroupConfig
+from .classification import (
+    ClassificationConfig,
+    FaceRecognitionConfig,
+    LicensePlateRecognitionConfig,
+    SemanticSearchConfig,
+)
 from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .proxy import ProxyConfig
-from .semantic_search import SemanticSearchConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
 from .ui import UIConfig
@@ -143,6 +149,13 @@ class RuntimeFilterConfig(FilterConfig):
         if mask is not None:
             config["mask"] = create_mask(frame_shape, mask)
 
+        # Convert min_area and max_area to pixels if they're percentages
+        if "min_area" in config:
+            config["min_area"] = convert_area_to_pixels(config["min_area"], frame_shape)
+
+        if "max_area" in config:
+            config["max_area"] = convert_area_to_pixels(config["max_area"], frame_shape)
+
         super().__init__(**config)
 
     def dict(self, **kwargs):
@@ -157,6 +170,16 @@ class RuntimeFilterConfig(FilterConfig):
 
 class RestreamConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
+
+
+def verify_semantic_search_dependent_configs(config: FrigateConfig) -> None:
+    """Verify that semantic search is enabled if required features are enabled."""
+    if not config.semantic_search.enabled:
+        if config.genai.enabled:
+            raise ValueError("Genai requires semantic search to be enabled.")
+
+        if config.face_recognition.enabled:
+            raise ValueError("Face recognition requires semantic to be enabled.")
 
 
 def verify_config_roles(camera_config: CameraConfig) -> None:
@@ -176,17 +199,18 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         )
 
 
-def verify_valid_live_stream_name(
+def verify_valid_live_stream_names(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
-    if (
-        camera_config.live.stream_name
-        not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
-    ):
-        return ValueError(
-            f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
-        )
+    for _, stream_name in camera_config.live.streams.items():
+        if (
+            stream_name
+            not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
+        ):
+            return ValueError(
+                f"No restream with name {stream_name} exists for camera {camera_config.name}."
+            )
 
 
 def verify_recording_retention(camera_config: CameraConfig) -> None:
@@ -317,8 +341,18 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
+    classification: ClassificationConfig = Field(
+        default_factory=ClassificationConfig, title="Object classification config."
+    )
     semantic_search: SemanticSearchConfig = Field(
         default_factory=SemanticSearchConfig, title="Semantic search configuration."
+    )
+    face_recognition: FaceRecognitionConfig = Field(
+        default_factory=FaceRecognitionConfig, title="Face recognition config."
+    )
+    lpr: LicensePlateRecognitionConfig = Field(
+        default_factory=LicensePlateRecognitionConfig,
+        title="License Plate recognition config.",
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
 
@@ -438,13 +472,12 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.ffmpeg.hwaccel_args = self.ffmpeg.hwaccel_args
 
             for input in camera_config.ffmpeg.inputs:
-                need_record_fourcc = False and "record" in input.roles
                 need_detect_dimensions = "detect" in input.roles and (
                     camera_config.detect.height is None
                     or camera_config.detect.width is None
                 )
 
-                if need_detect_dimensions or need_record_fourcc:
+                if need_detect_dimensions:
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
                         stream_info = stream_info_retriever.get_stream_info(
@@ -466,14 +499,6 @@ class FrigateConfig(FrigateBaseModel):
                         stream_info["height"]
                         if stream_info.get("height")
                         else DEFAULT_DETECT_DIMENSIONS["height"]
-                    )
-
-                if need_record_fourcc:
-                    # Apple only supports HEVC if it is hvc1 (vs. hev1)
-                    camera_config.ffmpeg.output_args._force_record_hvc1 = (
-                        stream_info["fourcc"] == "hevc"
-                        if stream_info.get("hevc")
-                        else False
                     )
 
             # Warn if detect fps > 10
@@ -566,15 +591,15 @@ class FrigateConfig(FrigateBaseModel):
                     zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
-            if not camera_config.live.stream_name:
-                camera_config.live.stream_name = name
+            if not camera_config.live.streams:
+                camera_config.live.streams = {name: name}
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             self.cameras[name] = camera_config
 
             verify_config_roles(camera_config)
-            verify_valid_live_stream_name(self, camera_config)
+            verify_valid_live_stream_names(self, camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
@@ -582,13 +607,8 @@ class FrigateConfig(FrigateBaseModel):
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
 
-        # get list of unique enabled labels for tracking
-        enabled_labels = set(self.objects.track)
-
-        for camera in self.cameras.values():
-            enabled_labels.update(camera.objects.track)
-
-        self.model.create_colormap(sorted(enabled_labels))
+        self.objects.parse_all_objects(self.cameras)
+        self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
 
         for key, detector in self.detectors.items():
@@ -598,37 +618,30 @@ class FrigateConfig(FrigateBaseModel):
                 if isinstance(detector, dict)
                 else detector.model_dump(warnings="none")
             )
-            detector_config: DetectorConfig = adapter.validate_python(model_dict)
-            if detector_config.model is None:
-                detector_config.model = self.model.model_copy()
-            else:
-                path = detector_config.model.path
-                detector_config.model = self.model.model_copy()
-                detector_config.model.path = path
+            detector_config: BaseDetectorConfig = adapter.validate_python(model_dict)
 
-                if "path" not in model_dict or len(model_dict.keys()) > 1:
-                    logger.warning(
-                        "Customizing more than a detector model path is unsupported."
-                    )
+            # users should not set model themselves
+            if detector_config.model:
+                detector_config.model = None
 
-            merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
-                self.model.model_dump(exclude_unset=True, warnings="none"),
-            )
+            model_config = self.model.model_dump(exclude_unset=True, warnings="none")
 
-            if "path" not in merged_model:
+            if detector_config.model_path:
+                model_config["path"] = detector_config.model_path
+
+            if "path" not in model_config:
                 if detector_config.type == "cpu":
-                    merged_model["path"] = "/cpu_model.tflite"
+                    model_config["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":
-                    merged_model["path"] = "/edgetpu_model.tflite"
+                    model_config["path"] = "/edgetpu_model.tflite"
 
-            detector_config.model = ModelConfig.model_validate(merged_model)
-            detector_config.model.check_and_load_plus_model(
-                self.plus_api, detector_config.type
-            )
-            detector_config.model.compute_model_hash()
+            model = ModelConfig.model_validate(model_config)
+            model.check_and_load_plus_model(self.plus_api, detector_config.type)
+            model.compute_model_hash()
+            detector_config.model = model
             self.detectors[key] = detector_config
 
+        verify_semantic_search_dependent_configs(self)
         return self
 
     @field_validator("cameras")
