@@ -183,4 +183,8 @@ html {
 .react-grid-layout,
 .react-grid-layout .react-grid-item {
   transition: none !important;
+
+.react-lazylog,
+.react-lazylog-searchbar {
+  background-color: transparent !important;
 }

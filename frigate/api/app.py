@@ -1,5 +1,6 @@
 """Main api runner."""
 
+import asyncio
 import copy
 import json
 import logging
@@ -10,12 +11,13 @@ from functools import reduce
 from io import StringIO
 from typing import Any, Optional
 
+import aiofiles
 import requests
 import ruamel.yaml
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
 from peewee import operator
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
@@ -35,6 +37,7 @@ from frigate.util.config import find_config_file
 from frigate.util.services import (
     ffprobe_stream,
     get_nvidia_driver_info,
+    process_logs,
     restart_frigate,
     vainfo_hwaccel,
 )
@@ -455,9 +458,10 @@ def nvinfo():
 
 
 @router.get("/logs/{service}", tags=[Tags.logs])
-def logs(
+async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
     download: Optional[str] = None,
+    stream: Optional[bool] = False,
     start: Optional[int] = 0,
     end: Optional[int] = None,
 ):
@@ -476,6 +480,27 @@ def logs(
                 status_code=500,
             )
 
+    async def stream_logs(file_path: str):
+        """Asynchronously stream log lines."""
+        buffer = ""
+        try:
+            async with aiofiles.open(file_path, "r") as file:
+                await file.seek(0, 2)
+                while True:
+                    line = await file.readline()
+                    if line:
+                        buffer += line
+                        # Process logs only when there are enough lines in the buffer
+                        if "\n" in buffer:
+                            _, processed_lines = process_logs(buffer, service)
+                            buffer = ""
+                            for processed_line in processed_lines:
+                                yield f"{processed_line}\n"
+                    else:
+                        await asyncio.sleep(0.1)
+        except FileNotFoundError:
+            yield "Log file not found.\n"
+
     log_locations = {
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
@@ -492,48 +517,17 @@ def logs(
     if download:
         return download_logs(service_location)
 
+    if stream:
+        return StreamingResponse(stream_logs(service_location), media_type="text/plain")
+
+    # For full logs initially
     try:
-        file = open(service_location, "r")
-        contents = file.read()
-        file.close()
+        async with aiofiles.open(service_location, "r") as file:
+            contents = await file.read()
 
-        # use the start timestamp to group logs together``
-        logLines = []
-        keyLength = 0
-        dateEnd = 0
-        currentKey = ""
-        currentLine = ""
-
-        for rawLine in contents.splitlines():
-            cleanLine = rawLine.strip()
-
-            if len(cleanLine) < 10:
-                continue
-
-            # handle cases where S6 does not include date in log line
-            if "  " not in cleanLine:
-                cleanLine = f"{datetime.now()}  {cleanLine}"
-
-            if dateEnd == 0:
-                dateEnd = cleanLine.index("  ")
-                keyLength = dateEnd - (6 if service_location == "frigate" else 0)
-
-            newKey = cleanLine[0:keyLength]
-
-            if newKey == currentKey:
-                currentLine += f"\n{cleanLine[dateEnd:].strip()}"
-                continue
-            else:
-                if len(currentLine) > 0:
-                    logLines.append(currentLine)
-
-                currentKey = newKey
-                currentLine = cleanLine
-
-        logLines.append(currentLine)
-
+        total_lines, log_lines = process_logs(contents, service, start, end)
         return JSONResponse(
-            content={"totalLines": len(logLines), "lines": logLines[start:end]},
+            content={"totalLines": total_lines, "lines": log_lines},
             status_code=200,
         )
     except FileNotFoundError as e:

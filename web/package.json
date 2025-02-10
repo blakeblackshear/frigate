@@ -16,6 +16,7 @@
   "dependencies": {
     "@cycjimmy/jsmpeg-player": "^6.1.1",
     "@hookform/resolvers": "^3.9.0",
+    "@melloware/react-logviewer": "^6.1.2",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.2",
