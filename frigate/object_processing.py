@@ -160,7 +160,12 @@ class CameraState:
                     box[2],
                     box[3],
                     text,
-                    f"{obj['score']:.0%} {int(obj['area'])}",
+                    f"{obj['score']:.0%} {int(obj['area'])}"
+                    + (
+                        f" {float(obj['current_estimated_speed']):.1f}"
+                        if obj["current_estimated_speed"] != 0
+                        else ""
+                    ),
                     thickness=thickness,
                     color=color,
                 )
@@ -254,6 +259,7 @@ class CameraState:
             new_obj = tracked_objects[id] = TrackedObject(
                 self.config.model,
                 self.camera_config,
+                self.config.ui,
                 self.frame_cache,
                 current_detections[id],
             )

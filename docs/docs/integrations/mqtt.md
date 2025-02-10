@@ -52,7 +52,9 @@ Message published for each changed tracked object. The first message is publishe
     "attributes": {
       "face": 0.64
     }, // attributes with top score that have been identified on the object at any point
-    "current_attributes": [] // detailed data about the current attributes in this frame
+    "current_attributes": [], // detailed data about the current attributes in this frame
+    "current_estimated_speed": 0.71, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -89,7 +91,9 @@ Message published for each changed tracked object. The first message is publishe
         "box": [442, 506, 534, 524],
         "score": 0.86
       }
-    ]
+    ],
+    "current_estimated_speed": 0.77, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
   }
 }
 ```
