@@ -256,7 +256,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
-                    segment.detections[object["id"]] = f'{object["label"]}-verified'
+                    segment.detections[object["id"]] = f"{object['label']}-verified"
                     segment.sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
@@ -352,7 +352,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 elif object["sub_label"][0] in self.config.model.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
-                    detections[object["id"]] = f'{object["label"]}-verified'
+                    detections[object["id"]] = f"{object['label']}-verified"
                     sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
@@ -527,7 +527,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                         if event_id in self.indefinite_events[camera]:
                             self.indefinite_events[camera].pop(event_id)
-                            current_segment.last_update = manual_info["end_time"]
+
+                            if len(self.indefinite_events[camera]) == 0:
+                                current_segment.last_update = manual_info["end_time"]
                         else:
                             logger.error(
                                 f"Event with ID {event_id} has a set duration and can not be ended manually."

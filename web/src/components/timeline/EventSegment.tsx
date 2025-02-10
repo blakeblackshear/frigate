@@ -8,7 +8,6 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import {
   HoverCard,
@@ -31,6 +30,7 @@ type EventSegmentProps = {
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   dense: boolean;
 };
 
@@ -45,6 +45,7 @@ export function EventSegment({
   severityType,
   contentRef,
   setHandlebarTime,
+  scrollToSegment,
   dense,
 }: EventSegmentProps) {
   const {
@@ -95,7 +96,10 @@ export function EventSegment({
   }, [getEventThumbnail, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
-  const segmentKey = useMemo(() => segmentTime, [segmentTime]);
+  const segmentKey = useMemo(
+    () => `${segmentTime}_${segmentDuration}`,
+    [segmentTime, segmentDuration],
+  );
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
@@ -133,10 +137,7 @@ export function EventSegment({
     // Check if the first segment is out of view
     const firstSegment = firstMinimapSegmentRef.current;
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
-      scrollIntoView(firstSegment, {
-        scrollMode: "if-needed",
-        behavior: "smooth",
-      });
+      scrollToSegment(alignedMinimapStartTime);
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,49 +197,10 @@ export function EventSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTimestamp]);
 
-  const [segmentRendered, setSegmentRendered] = useState(false);
-  const segmentObserverRef = useRef<IntersectionObserver | null>(null);
-  const segmentRef = useRef(null);
-
-  useEffect(() => {
-    const segmentObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !segmentRendered) {
-          setSegmentRendered(true);
-        }
-      },
-      { threshold: 0 },
-    );
-
-    if (segmentRef.current) {
-      segmentObserver.observe(segmentRef.current);
-    }
-
-    segmentObserverRef.current = segmentObserver;
-
-    return () => {
-      if (segmentObserverRef.current) {
-        segmentObserverRef.current.disconnect();
-      }
-    };
-  }, [segmentRendered]);
-
-  if (!segmentRendered) {
-    return (
-      <div
-        key={segmentKey}
-        ref={segmentRef}
-        data-segment-id={segmentKey}
-        className={`segment ${segmentClasses}`}
-      />
-    );
-  }
-
   return (
     <div
       key={segmentKey}
-      ref={segmentRef}
-      data-segment-id={segmentKey}
+      data-segment-id={segmentTime}
       className={`segment ${segmentClasses}`}
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}

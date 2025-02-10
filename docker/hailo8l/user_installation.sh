@@ -4,6 +4,7 @@
 sudo apt-get update
 sudo apt-get install -y build-essential cmake git wget
 
+hailo_version="4.20.0"
 arch=$(uname -m)
 
 if [[ $arch == "x86_64" ]]; then
@@ -13,7 +14,7 @@ else
 fi
 
 # Clone the HailoRT driver repository
-git clone --depth 1 --branch v4.19.0 https://github.com/hailo-ai/hailort-drivers.git
+git clone --depth 1 --branch v${hailo_version} https://github.com/hailo-ai/hailort-drivers.git
 
 # Build and install the HailoRT driver
 cd hailort-drivers/linux/pcie

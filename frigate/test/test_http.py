@@ -2,7 +2,6 @@ import datetime
 import logging
 import os
 import unittest
-from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 from peewee_migrate import Router
@@ -13,7 +12,6 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings, Timeline
-from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
@@ -110,43 +108,6 @@ class TestHttp(unittest.TestCase):
                 os.remove(file)
         except OSError:
             pass
-
-    def test_get_event_list(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
-        id = "123456.random"
-        id2 = "7890.random"
-
-        with TestClient(app) as client:
-            _insert_mock_event(id)
-            events = client.get("/events").json()
-            assert events
-            assert len(events) == 1
-            assert events[0]["id"] == id
-            _insert_mock_event(id2)
-            events = client.get("/events").json()
-            assert events
-            assert len(events) == 2
-            events = client.get(
-                "/events",
-                params={"limit": 1},
-            ).json()
-            assert events
-            assert len(events) == 1
-            events = client.get(
-                "/events",
-                params={"has_clip": 0},
-            ).json()
-            assert not events
 
     def test_get_good_event(self):
         app = create_fastapi_app(
@@ -380,25 +341,6 @@ class TestHttp(unittest.TestCase):
             recording = response.json()
             assert recording
             assert recording[0]["id"] == id
-
-    def test_stats(self):
-        stats = Mock(spec=StatsEmitter)
-        stats.get_latest_stats.return_value = self.test_stats
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            stats,
-            None,
-        )
-
-        with TestClient(app) as client:
-            full_stats = client.get("/stats").json()
-            assert full_stats == self.test_stats
 
 
 def _insert_mock_event(

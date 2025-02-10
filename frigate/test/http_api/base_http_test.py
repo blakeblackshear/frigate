@@ -6,6 +6,7 @@ import unittest
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import Json
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
@@ -123,7 +124,12 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_event(
         self,
         id: str,
-        start_time: datetime.datetime = datetime.datetime.now().timestamp(),
+        start_time: float = datetime.datetime.now().timestamp(),
+        end_time: float = datetime.datetime.now().timestamp() + 20,
+        has_clip: bool = True,
+        top_score: int = 100,
+        score: int = 0,
+        data: Json = {},
     ) -> Event:
         """Inserts a basic event model with a given id."""
         return Event.insert(
@@ -131,16 +137,18 @@ class BaseTestHttp(unittest.TestCase):
             label="Mock",
             camera="front_door",
             start_time=start_time,
-            end_time=start_time + 20,
-            top_score=100,
+            end_time=end_time,
+            top_score=top_score,
+            score=score,
             false_positive=False,
             zones=list(),
             thumbnail="",
             region=[],
             box=[],
             area=0,
-            has_clip=True,
+            has_clip=has_clip,
             has_snapshot=True,
+            data=data,
         ).execute()
 
     def insert_mock_review_segment(
@@ -150,6 +158,7 @@ class BaseTestHttp(unittest.TestCase):
         end_time: float = datetime.datetime.now().timestamp() + 20,
         severity: SeverityEnum = SeverityEnum.alert,
         has_been_reviewed: bool = False,
+        data: Json = {},
     ) -> Event:
         """Inserts a review segment model with a given id."""
         return ReviewSegment.insert(
@@ -160,7 +169,7 @@ class BaseTestHttp(unittest.TestCase):
             has_been_reviewed=has_been_reviewed,
             severity=severity,
             thumb_path=False,
-            data={},
+            data=data,
         ).execute()
 
     def insert_mock_recording(
@@ -168,6 +177,7 @@ class BaseTestHttp(unittest.TestCase):
         id: str,
         start_time: float = datetime.datetime.now().timestamp(),
         end_time: float = datetime.datetime.now().timestamp() + 20,
+        motion: int = 0,
     ) -> Event:
         """Inserts a recording model with a given id."""
         return Recordings.insert(
@@ -177,4 +187,5 @@ class BaseTestHttp(unittest.TestCase):
             start_time=start_time,
             end_time=end_time,
             duration=end_time - start_time,
+            motion=motion,
         ).execute()

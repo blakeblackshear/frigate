@@ -64,7 +64,9 @@ class PtzAutotrackConfig(FrigateBaseModel):
             raise ValueError("Invalid type for movement_weights")
 
         if len(weights) != 5:
-            raise ValueError("movement_weights must have exactly 5 floats")
+            raise ValueError(
+                "movement_weights must have exactly 5 floats, remove this line from your config and run autotracking calibration"
+            )
 
         return weights
 
@@ -74,6 +76,7 @@ class OnvifConfig(FrigateBaseModel):
     port: int = Field(default=8000, title="Onvif Port")
     user: Optional[EnvString] = Field(default=None, title="Onvif Username")
     password: Optional[EnvString] = Field(default=None, title="Onvif Password")
+    tls_insecure: bool = Field(default=False, title="Onvif Disable TLS verification")
     autotracking: PtzAutotrackConfig = Field(
         default_factory=PtzAutotrackConfig,
         title="PTZ auto tracking config.",

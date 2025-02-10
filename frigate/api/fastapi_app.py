@@ -11,7 +11,16 @@ from starlette_context import middleware, plugins
 from starlette_context.plugins import Plugin
 
 from frigate.api import app as main_app
-from frigate.api import auth, event, export, media, notification, preview, review
+from frigate.api import (
+    auth,
+    classification,
+    event,
+    export,
+    media,
+    notification,
+    preview,
+    review,
+)
 from frigate.api.auth import get_jwt_secret, limiter
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
@@ -26,14 +35,13 @@ from frigate.storage import StorageMaintainer
 logger = logging.getLogger(__name__)
 
 
-def check_csrf(request: Request):
+def check_csrf(request: Request) -> bool:
     if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
-        pass
+        return True
     if "origin" in request.headers and "x-csrf-token" not in request.headers:
-        return JSONResponse(
-            content={"success": False, "message": "Missing CSRF header"},
-            status_code=401,
-        )
+        return False
+
+    return True
 
 
 # Used to retrieve the remote-user header: https://starlette-context.readthedocs.io/en/latest/plugins.html#easy-mode
@@ -71,7 +79,12 @@ def create_fastapi_app(
     @app.middleware("http")
     async def frigate_middleware(request: Request, call_next):
         # Before request
-        check_csrf(request)
+        if not check_csrf(request):
+            return JSONResponse(
+                content={"success": False, "message": "Missing CSRF header"},
+                status_code=401,
+            )
+
         if database.is_closed():
             database.connect()
 
@@ -87,7 +100,11 @@ def create_fastapi_app(
         logger.info("FastAPI started")
 
     # Rate limiter (used for login endpoint)
-    auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit or "")
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
+    else:
+        auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit)
+
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
@@ -95,6 +112,7 @@ def create_fastapi_app(
     # Routes
     # Order of include_router matters: https://fastapi.tiangolo.com/tutorial/path-params/#order-matters
     app.include_router(auth.router)
+    app.include_router(classification.router)
     app.include_router(review.router)
     app.include_router(main_app.router)
     app.include_router(preview.router)

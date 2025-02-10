@@ -5,6 +5,8 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
+Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle. Descriptions can also be regenerated manually via the Frigate UI.
+
 :::info
 
 Semantic Search must be enabled to use Generative AI.
@@ -13,9 +15,9 @@ Semantic Search must be enabled to use Generative AI.
 
 ## Configuration
 
-Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 providers available to integrate with Frigate.
+Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
-If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
+To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ```yaml
 genai:
@@ -113,6 +115,12 @@ genai:
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
 ```
+
+:::note
+
+To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` environment variable to your provider's API URL.
+
+:::
 
 ## Azure OpenAI
 

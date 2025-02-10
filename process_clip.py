@@ -208,7 +208,7 @@ class ProcessClip:
                 box[2],
                 box[3],
                 obj["id"],
-                f"{int(obj['score']*100)}% {int(obj['area'])}",
+                f"{int(obj['score'] * 100)}% {int(obj['area'])}",
                 thickness=thickness,
                 color=color,
             )
@@ -227,7 +227,7 @@ class ProcessClip:
             )
 
         cv2.imwrite(
-            f"{os.path.join(debug_path, os.path.basename(self.clip_path))}.{int(frame_time*1000000)}.jpg",
+            f"{os.path.join(debug_path, os.path.basename(self.clip_path))}.{int(frame_time * 1000000)}.jpg",
             current_frame,
         )
 
@@ -290,7 +290,7 @@ def process(path, label, output, debug_path):
         1 for result in results if result[1]["true_positive_objects"] > 0
     )
     print(
-        f"Objects were detected in {positive_count}/{len(results)}({positive_count/len(results)*100:.2f}%) clip(s)."
+        f"Objects were detected in {positive_count}/{len(results)}({positive_count / len(results) * 100:.2f}%) clip(s)."
     )
 
     if output:

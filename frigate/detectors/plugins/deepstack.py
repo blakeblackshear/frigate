@@ -32,6 +32,7 @@ class DeepStack(DetectionApi):
         self.api_timeout = detector_config.api_timeout
         self.api_key = detector_config.api_key
         self.labels = detector_config.model.merged_labelmap
+        self.session = requests.Session()
 
     def get_label_index(self, label_value):
         if label_value.lower() == "truck":
@@ -51,7 +52,7 @@ class DeepStack(DetectionApi):
         data = {"api_key": self.api_key}
 
         try:
-            response = requests.post(
+            response = self.session.post(
                 self.api_url,
                 data=data,
                 files={"image": image_bytes},

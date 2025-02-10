@@ -11,6 +11,9 @@ class StatsConfig(FrigateBaseModel):
     network_bandwidth: bool = Field(
         default=False, title="Enable network bandwidth for ffmpeg processes."
     )
+    sriov: bool = Field(
+        default=False, title="Treat device as SR-IOV to support GPU stats."
+    )
 
 
 class TelemetryConfig(FrigateBaseModel):

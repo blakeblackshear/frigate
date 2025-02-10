@@ -8,7 +8,8 @@ import re
 import signal
 import subprocess as sp
 import traceback
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional, Tuple
 
 import cv2
 import psutil
@@ -255,7 +256,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
         return results
 
 
-def get_intel_gpu_stats() -> dict[str, str]:
+def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
     """Get stats using intel_gpu_top."""
 
     def get_stats_manually(output: str) -> dict[str, str]:
@@ -301,6 +302,9 @@ def get_intel_gpu_stats() -> dict[str, str]:
         "-s",
         "1",
     ]
+
+    if sriov:
+        intel_gpu_top_command += ["-d", "drm:/dev/dri/card0"]
 
     p = sp.run(
         intel_gpu_top_command,
@@ -390,12 +394,22 @@ def try_get_info(f, h, default="N/A"):
 
 
 def get_nvidia_gpu_stats() -> dict[int, dict]:
+    names: dict[str, int] = {}
     results = {}
     try:
         nvml.nvmlInit()
         deviceCount = nvml.nvmlDeviceGetCount()
         for i in range(deviceCount):
             handle = nvml.nvmlDeviceGetHandleByIndex(i)
+            gpu_name = nvml.nvmlDeviceGetName(handle)
+
+            # handle case where user has multiple of same GPU
+            if gpu_name in names:
+                names[gpu_name] += 1
+                gpu_name += f" ({names.get(gpu_name)})"
+            else:
+                names[gpu_name] = 1
+
             meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
             enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
@@ -423,7 +437,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 dec_util = -1
 
             results[i] = {
-                "name": nvml.nvmlDeviceGetName(handle),
+                "name": gpu_name,
                 "gpu": gpu_util,
                 "mem": gpu_mem_util,
                 "enc": enc_util,
@@ -622,3 +636,54 @@ async def get_video_properties(
         result["fourcc"] = fourcc
 
     return result
+
+
+def process_logs(
+    contents: str,
+    service: Optional[str] = None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+) -> Tuple[int, List[str]]:
+    log_lines = []
+    last_message = None
+    last_timestamp = None
+    repeat_count = 0
+
+    for raw_line in contents.splitlines():
+        clean_line = raw_line.strip()
+
+        if len(clean_line) < 10:
+            continue
+
+        # Handle cases where S6 does not include date in log line
+        if "  " not in clean_line:
+            clean_line = f"{datetime.now()}  {clean_line}"
+
+        # Find the position of the first double space to extract timestamp and message
+        date_end = clean_line.index("  ")
+        timestamp = clean_line[:date_end]
+        message_part = clean_line[date_end:].strip()
+
+        if message_part == last_message:
+            repeat_count += 1
+            continue
+        else:
+            if repeat_count > 0:
+                # Insert a deduplication message formatted the same way as logs
+                dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                log_lines.append(dedup_message)
+                repeat_count = 0
+
+            log_lines.append(clean_line)
+            last_timestamp = timestamp
+
+        last_message = message_part
+
+    # If there were repeated messages at the end, log the count
+    if repeat_count > 0:
+        dedup_message = (
+            f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+        )
+        log_lines.append(dedup_message)
+
+    return len(log_lines), log_lines[start:end]
