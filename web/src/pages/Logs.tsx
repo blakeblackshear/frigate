@@ -1,12 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { LogLine, LogSeverity, LogType, logTypes } from "@/types/log";
+import {
+  LogLine,
+  LogSettingsType,
+  LogSeverity,
+  LogType,
+  logTypes,
+} from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import LogInfoDialog from "@/components/overlay/LogInfoDialog";
 import { LogChip } from "@/components/indicators/Chip";
-import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
+import { LogSettingsButton } from "@/components/filter/LogSettingsButton";
 import { FaCopy, FaDownload } from "react-icons/fa";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -25,6 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { debounce } from "lodash";
+import { usePersistence } from "@/hooks/use-persistence";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -55,16 +62,17 @@ function Logs() {
     }
   }, [tabsRef, logService]);
 
-  // scrolling data
+  // log settings
 
-  const pageSize = useMemo(() => {
-    const startIndex =
-      lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
-    const endIndex = lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
-    return endIndex - startIndex;
-    // recalculate page size when new logs load too
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lazyLogRef, logs]);
+  // const [logSettings, setLogSettings] = usePersistence<LogSettingsType>(
+  //   "logSettings",
+  //   { alwaysLoadFull: false, disableStreaming: false },
+  // );
+
+  const [logSettings, setLogSettings] = useState<LogSettingsType>({
+    alwaysLoadFull: false,
+    disableStreaming: false,
+  });
 
   // filter
 
@@ -112,7 +120,7 @@ function Logs() {
     setIsLoading(true);
     try {
       const response = await axios.get(`logs/${logService}`, {
-        params: { start: -100 },
+        params: { start: logSettings.alwaysLoadFull ? 0 : -100 },
       });
       if (
         response.status === 200 &&
@@ -133,7 +141,7 @@ function Logs() {
     } finally {
       setIsLoading(false);
     }
-  }, [logService, filterLines]);
+  }, [logService, filterLines, logSettings]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -209,7 +217,9 @@ function Logs() {
     lastFetchedIndexRef.current = -1;
     fetchInitialLogs().then(() => {
       // Start streaming after initial load
-      fetchLogsStream();
+      if (!logSettings.disableStreaming) {
+        fetchLogsStream();
+      }
     });
 
     return () => {
@@ -221,39 +231,56 @@ function Logs() {
 
   // handlers
 
-  // debounced 200ms
+  const prependLines = useCallback((newLines: string[]) => {
+    if (!lazyLogRef.current) return;
+
+    const newLinesArray = newLines.map(
+      (line) => new Uint8Array(new TextEncoder().encode(line + "\n")),
+    );
+
+    lazyLogRef.current.setState((prevState) => ({
+      ...prevState,
+      lines: prevState.lines.unshift(...newLinesArray),
+      count: prevState.count + newLines.length,
+    }));
+  }, []);
+
+  // debounced
   const handleScroll = useMemo(
     () =>
-      debounce((scrollTop: number) => {
-        const scrollThreshold = 0;
+      debounce(() => {
+        const scrollThreshold =
+          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 10;
+        const startIndex =
+          lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
+        const endIndex =
+          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
+        const pageSize = endIndex - startIndex;
         if (
-          scrollTop <= scrollThreshold &&
+          scrollThreshold < pageSize + pageSize / 2 &&
           lastFetchedIndexRef.current > 0 &&
           !isLoading
         ) {
-          const savedStart =
-            lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
-          const savedEnd =
-            lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
           const nextEnd = lastFetchedIndexRef.current;
           const nextStart = Math.max(0, nextEnd - (pageSize || 100));
           setIsLoading(true);
 
           fetchLogRange(nextStart, nextEnd).then((newLines) => {
             if (newLines.length > 0) {
-              setLogs((prev) => [...newLines, ...prev]);
+              prependLines(newLines);
               lastFetchedIndexRef.current = nextStart;
 
               lazyLogRef.current?.listRef.current?.scrollTo(
-                savedEnd + (pageSize - savedStart),
+                newLines.length *
+                  lazyLogRef.current?.listRef.current?.getItemSize(1),
               );
             }
           });
 
           setIsLoading(false);
         }
-      }, 200),
-    [fetchLogRange, isLoading, pageSize],
+      }, 50),
+    [fetchLogRange, isLoading, prependLines],
   );
 
   const handleCopyLogs = useCallback(() => {
@@ -490,19 +517,22 @@ function Logs() {
             <FaDownload className="text-secondary-foreground" />
             <div className="hidden text-primary md:block">Download</div>
           </Button>
-          <LogLevelFilterButton
+          <LogSettingsButton
             selectedLabels={filterSeverity}
             updateLabelFilter={setFilterSeverity}
-            // setStreaming={setStreaming}
+            logSettings={logSettings}
+            setLogSettings={setLogSettings}
           />
         </div>
       </div>
 
       <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-xs sm:p-1">
         <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
-          <div className="ml-1 flex items-center p-1 capitalize">Type</div>
-          <div className="col-span-2 flex items-center lg:col-span-1">
-            Timestamp
+          <div className="col-span-3 lg:col-span-2">
+            <div className="flex w-full flex-row items-center">
+              <div className="ml-1 min-w-16 capitalize lg:min-w-20">Type</div>
+              <div className="mr-3">Timestamp</div>
+            </div>
           </div>
           <div
             className={cn(
@@ -533,7 +563,7 @@ function Logs() {
               onCustomScroll={handleScroll}
               render={({ follow, onScroll }) => (
                 <>
-                  {follow && (
+                  {follow && !logSettings.disableStreaming && (
                     <div className="absolute right-1 top-3">
                       <Tooltip>
                         <TooltipTrigger>
@@ -556,7 +586,9 @@ function Logs() {
                     text={logs.join("\n")}
                     follow={follow}
                     onScroll={onScroll}
-                    loadingComponent={<ActivityIndicator />}
+                    loadingComponent={
+                      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    }
                     loading={isLoading}
                   />
                 </>
@@ -587,18 +619,26 @@ function LogLineData({
   return (
     <div
       className={cn(
-        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary bg-background_alt py-2 hover:bg-muted md:grid-cols-12 md:py-0",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary bg-background_alt py-1 hover:bg-muted md:grid-cols-12 md:py-0",
         className,
-        "*:text-xs",
+        "text-xs lg:text-sm/5",
       )}
       onClick={onSelect}
     >
-      <div className="log-severity flex h-full items-center gap-2 p-1">
-        <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
+      <div className="col-span-3 flex h-full items-center gap-2 lg:col-span-2">
+        <div className="flex w-full flex-row items-center">
+          <div className="log-severity p-1">
+            <LogChip
+              severity={line.severity}
+              onClickSeverity={onClickSeverity}
+            />
+          </div>
+          <div className="log-timestamp whitespace-normal">
+            {line.dateStamp}
+          </div>
+        </div>
       </div>
-      <div className="log-timestamp col-span-2 flex h-full items-center whitespace-normal lg:col-span-1">
-        {line.dateStamp}
-      </div>
+
       <div
         className={cn(
           "log-section flex size-full items-center pr-2",

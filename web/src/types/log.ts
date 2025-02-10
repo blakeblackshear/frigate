@@ -14,3 +14,8 @@ export type LogLine = {
 
 export const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 export type LogType = (typeof logTypes)[number];
+
+export type LogSettingsType = {
+  alwaysLoadFull: boolean;
+  disableStreaming: boolean;
+};
