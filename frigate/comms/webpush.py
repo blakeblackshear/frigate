@@ -39,6 +39,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
         self.config = config
+        self.stop_event = stop_event
         self.claim_headers: dict[str, dict[str, str]] = {}
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
@@ -51,7 +52,6 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             target=self._process_notifications, daemon=True
         )
         self.notification_thread.start()
-        self.stop_event = stop_event
 
         if not self.config.notifications.email:
             logger.warning("Email must be provided for push notifications to be sent.")
