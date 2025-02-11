@@ -82,7 +82,7 @@ export default function LiveContextMenu({
     );
 
   useEffect(() => {
-    if (cameraGroup) {
+    if (cameraGroup && cameraGroup != "default") {
       setGroupStreamingSettings(allGroupsStreamingSettings[cameraGroup]);
     }
     // set individual group when all groups changes
@@ -91,7 +91,12 @@ export default function LiveContextMenu({
 
   const onSave = useCallback(
     (settings: GroupStreamingSettings) => {
-      if (!cameraGroup || !allGroupsStreamingSettings) {
+      if (
+        !cameraGroup ||
+        !allGroupsStreamingSettings ||
+        cameraGroup == "default" ||
+        !settings
+      ) {
         return;
       }
 
