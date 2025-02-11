@@ -76,8 +76,6 @@ class Dispatcher:
         self.web_push_client = next(
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
         )
-        if self.web_push_client is None:
-            logger.warning("WebPushClient not found in communicators")
 
     def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
