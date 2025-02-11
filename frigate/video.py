@@ -33,7 +33,6 @@ from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
     draw_box_with_label,
-    get_histogram,
 )
 from frigate.util.object import (
     create_tensor_input,
@@ -511,16 +510,7 @@ def detect(
         height = y_max - y_min
         area = width * height
         ratio = width / max(1, height)
-        hist = get_histogram(frame, x_min, y_min, x_max, y_max)
-        det = (
-            d[0],
-            d[1],
-            (x_min, y_min, x_max, y_max),
-            area,
-            ratio,
-            region,
-            hist,
-        )
+        det = (d[0], d[1], (x_min, y_min, x_max, y_max), area, ratio, region)
         # apply object filters
         if is_object_filtered(det, objects_to_track, object_filters):
             continue

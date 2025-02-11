@@ -21,7 +21,11 @@ from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
-from frigate.util.image import intersection_over_union
+from frigate.util.image import (
+    SharedMemoryFrameManager,
+    get_histogram,
+    intersection_over_union,
+)
 from frigate.util.object import average_boxes, median_of_boxes
 
 logger = logging.getLogger(__name__)
@@ -105,6 +109,7 @@ class NorfairTracker(ObjectTracker):
         config: CameraConfig,
         ptz_metrics: PTZMetrics,
     ):
+        self.frame_manager = SharedMemoryFrameManager()
         self.tracked_objects = {}
         self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
@@ -457,11 +462,20 @@ class NorfairTracker(ObjectTracker):
             # track based on top,left and bottom,right corners instead of centroid
             points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
 
+            embedding = None
+            if self.ptz_metrics.autotracker_enabled.value:
+                yuv_frame = self.frame_manager.get(
+                    frame_name, self.camera_config.frame_shape_yuv
+                )
+                embedding = get_histogram(
+                    yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
+                )
+
             detection = Detection(
                 points=points,
                 label=label,
                 # TODO: stationary objects won't have embeddings
-                embedding=obj[6] if len(obj) > 6 else None,
+                embedding=embedding,
                 data={
                     "label": label,
                     "score": obj[1],
