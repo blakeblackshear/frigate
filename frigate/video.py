@@ -435,7 +435,11 @@ def track_camera(
     object_filters = config.objects.filters
 
     motion_detector = ImprovedMotionDetector(
-        frame_shape, config.motion, config.detect.fps, name=config.name
+        frame_shape,
+        config.motion,
+        config.detect.fps,
+        name=config.name,
+        ptz_metrics=ptz_metrics,
     )
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
@@ -506,14 +510,7 @@ def detect(
         height = y_max - y_min
         area = width * height
         ratio = width / max(1, height)
-        det = (
-            d[0],
-            d[1],
-            (x_min, y_min, x_max, y_max),
-            area,
-            ratio,
-            region,
-        )
+        det = (d[0], d[1], (x_min, y_min, x_max, y_max), area, ratio, region)
         # apply object filters
         if is_object_filtered(det, objects_to_track, object_filters):
             continue
