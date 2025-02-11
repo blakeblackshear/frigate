@@ -165,36 +165,9 @@ class NorfairTracker(ObjectTracker):
             if obj_type in self.camera_config.objects.track:
                 if obj_type not in self.trackers:
                     self.trackers[obj_type] = {}
-                tracker_params = {
-                    "distance_function": tracker_config["distance_function"],
-                    "distance_threshold": tracker_config["distance_threshold"],
-                    "initialization_delay": self.detect_config.min_initialized,
-                    "hit_counter_max": self.detect_config.max_disappeared,
-                    "filter_factory": tracker_config["filter_factory"],
-                }
-
-                # Add reid parameters only if max_frames is None and keys exist in tracker_config
-                if (
-                    self.detect_config.stationary.max_frames.objects.get(
-                        obj_type, self.detect_config.stationary.max_frames.default
-                    )
-                    is None
-                ):
-                    reid_keys = [
-                        "past_detections_length",
-                        "reid_distance_function",
-                        "reid_distance_threshold",
-                        "reid_hit_counter_max",
-                    ]
-                    tracker_params.update(
-                        {
-                            key: tracker_config[key]
-                            for key in reid_keys
-                            if key in tracker_config
-                        }
-                    )
-
-                self.trackers[obj_type]["static"] = Tracker(**tracker_params)
+                self.trackers[obj_type]["static"] = self._create_tracker(
+                    obj_type, tracker_config
+                )
 
         # Handle PTZ trackers
         for obj_type, tracker_config in self.ptz_object_type_configs.items():
@@ -204,36 +177,9 @@ class NorfairTracker(ObjectTracker):
             ):
                 if obj_type not in self.trackers:
                     self.trackers[obj_type] = {}
-                tracker_params = {
-                    "distance_function": tracker_config["distance_function"],
-                    "distance_threshold": tracker_config["distance_threshold"],
-                    "initialization_delay": self.detect_config.min_initialized,
-                    "hit_counter_max": self.detect_config.max_disappeared,
-                    "filter_factory": tracker_config["filter_factory"],
-                }
-
-                # Add reid parameters only if max_frames is None and keys exist in tracker_config
-                if (
-                    self.detect_config.stationary.max_frames.objects.get(
-                        obj_type, self.detect_config.stationary.max_frames.default
-                    )
-                    is None
-                ):
-                    reid_keys = [
-                        "past_detections_length",
-                        "reid_distance_function",
-                        "reid_distance_threshold",
-                        "reid_hit_counter_max",
-                    ]
-                    tracker_params.update(
-                        {
-                            key: tracker_config[key]
-                            for key in reid_keys
-                            if key in tracker_config
-                        }
-                    )
-
-                self.trackers[obj_type]["ptz"] = Tracker(**tracker_params)
+                self.trackers[obj_type]["ptz"] = self._create_tracker(
+                    obj_type, tracker_config
+                )
 
         # Initialize default trackers
         self.default_tracker = {
@@ -259,6 +205,35 @@ class NorfairTracker(ObjectTracker):
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
+
+    def _create_tracker(self, obj_type, tracker_config):
+        """Helper function to create a tracker with given configuration."""
+        tracker_params = {
+            "distance_function": tracker_config["distance_function"],
+            "distance_threshold": tracker_config["distance_threshold"],
+            "initialization_delay": self.detect_config.min_initialized,
+            "hit_counter_max": self.detect_config.max_disappeared,
+            "filter_factory": tracker_config["filter_factory"],
+        }
+
+        # Add reid parameters if max_frames is None
+        if (
+            self.detect_config.stationary.max_frames.objects.get(
+                obj_type, self.detect_config.stationary.max_frames.default
+            )
+            is None
+        ):
+            reid_keys = [
+                "past_detections_length",
+                "reid_distance_function",
+                "reid_distance_threshold",
+                "reid_hit_counter_max",
+            ]
+            tracker_params.update(
+                {key: tracker_config[key] for key in reid_keys if key in tracker_config}
+            )
+
+        return Tracker(**tracker_params)
 
     def get_tracker(self, object_type: str) -> Tracker:
         """Get the appropriate tracker based on object type and camera mode."""
