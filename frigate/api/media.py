@@ -1088,9 +1088,7 @@ def event_clip(request: Request, event_id: str):
             content={"success": False, "message": "Clip not available"}, status_code=404
         )
 
-    end_ts = (
-        datetime.now().timestamp() if event.end_time is None else event.end_time
-    )
+    end_ts = datetime.now().timestamp() if event.end_time is None else event.end_time
     return recording_clip(request, event.camera, event.start_time, end_ts)
 
 
