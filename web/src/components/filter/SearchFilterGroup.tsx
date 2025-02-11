@@ -61,7 +61,9 @@ export default function SearchFilterGroup({
       }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        labels.add(label);
+        if (!config.model.all_attributes.includes(label)) {
+          labels.add(label);
+        }
       });
 
       if (cameraConfig.audio.enabled_in_config) {
@@ -113,6 +115,9 @@ export default function SearchFilterGroup({
     const sortTypes = ["date_asc", "date_desc"];
     if (filter?.min_score || filter?.max_score) {
       sortTypes.push("score_desc", "score_asc");
+    }
+    if (filter?.min_speed || filter?.max_speed) {
+      sortTypes.push("speed_desc", "speed_asc");
     }
     if (filter?.event_id || filter?.query) {
       sortTypes.push("relevance");
@@ -496,6 +501,8 @@ export function SortTypeContent({
     date_desc: "Date (Descending)",
     score_asc: "Object Score (Ascending)",
     score_desc: "Object Score (Descending)",
+    speed_asc: "Estimated Speed (Ascending)",
+    speed_desc: "Estimated Speed (Descending)",
     relevance: "Relevance",
   };
 

@@ -112,6 +112,8 @@ export default function Explore() {
           search_type: searchSearchParams["search_type"],
           min_score: searchSearchParams["min_score"],
           max_score: searchSearchParams["max_score"],
+          min_speed: searchSearchParams["min_speed"],
+          max_speed: searchSearchParams["max_speed"],
           has_snapshot: searchSearchParams["has_snapshot"],
           is_submitted: searchSearchParams["is_submitted"],
           has_clip: searchSearchParams["has_clip"],
@@ -145,6 +147,8 @@ export default function Explore() {
         search_type: searchSearchParams["search_type"],
         min_score: searchSearchParams["min_score"],
         max_score: searchSearchParams["max_score"],
+        min_speed: searchSearchParams["min_speed"],
+        max_speed: searchSearchParams["max_speed"],
         has_snapshot: searchSearchParams["has_snapshot"],
         is_submitted: searchSearchParams["is_submitted"],
         has_clip: searchSearchParams["has_clip"],
@@ -328,12 +332,12 @@ export default function Explore() {
           <div className="flex max-w-96 flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
             <div className="my-5 flex flex-col items-center gap-2 text-xl">
               <TbExclamationCircle className="mb-3 size-10" />
-              <div>Search Unavailable</div>
+              <div>Explore is Unavailable</div>
             </div>
             {embeddingsReindexing && allModelsLoaded && (
               <>
                 <div className="text-center text-primary-variant">
-                  Search can be used after tracked object embeddings have
+                  Explore can be used after tracked object embeddings have
                   finished reindexing.
                 </div>
                 <div className="pt-5 text-center">
@@ -384,8 +388,8 @@ export default function Explore() {
               <>
                 <div className="text-center text-primary-variant">
                   Frigate is downloading the necessary embeddings models to
-                  support semantic searching. This may take several minutes
-                  depending on the speed of your network connection.
+                  support the Semantic Search feature. This may take several
+                  minutes depending on the speed of your network connection.
                 </div>
                 <div className="flex w-96 flex-col gap-2 py-5">
                   <div className="flex flex-row items-center justify-center gap-2">

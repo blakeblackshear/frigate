@@ -32,6 +32,8 @@ module.exports = {
         scale2: "scale2 3s ease-in-out infinite",
         scale3: "scale3 3s ease-in-out infinite",
         scale4: "scale4 3s ease-in-out infinite",
+        "timeline-zoom-in": "timeline-zoom-in 0.3s ease-out",
+        "timeline-zoom-out": "timeline-zoom-out 0.3s ease-out",
       },
       aspectRatio: {
         wide: "32 / 9",
@@ -139,6 +141,16 @@ module.exports = {
           "50%": { transform: "scale(1.3)" },
           "40%, 60%": { transform: "scale(1.4)" },
           "30%, 70%": { transform: "scale(1)" },
+        },
+        "timeline-zoom-in": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "50%": { transform: "translateY(0%)", opacity: "0.5" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "timeline-zoom-out": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "50%": { transform: "translateY(0%)", opacity: "0.5" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
         },
       },
       screens: {

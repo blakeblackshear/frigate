@@ -4,6 +4,8 @@ import logging
 import os
 from typing import Any
 
+import cv2
+import numpy as np
 import onnxruntime as ort
 
 try:
@@ -13,6 +15,43 @@ except ImportError:
     pass
 
 logger = logging.getLogger(__name__)
+
+### Post Processing
+
+
+def post_process_yolov9(predictions: np.ndarray, width, height) -> np.ndarray:
+    predictions = np.squeeze(predictions).T
+    scores = np.max(predictions[:, 4:], axis=1)
+    predictions = predictions[scores > 0.4, :]
+    scores = scores[scores > 0.4]
+    class_ids = np.argmax(predictions[:, 4:], axis=1)
+
+    # Rescale box
+    boxes = predictions[:, :4]
+
+    input_shape = np.array([width, height, width, height])
+    boxes = np.divide(boxes, input_shape, dtype=np.float32)
+    indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
+    detections = np.zeros((20, 6), np.float32)
+    for i, (bbox, confidence, class_id) in enumerate(
+        zip(boxes[indices], scores[indices], class_ids[indices])
+    ):
+        if i == 20:
+            break
+
+        detections[i] = [
+            class_id,
+            confidence,
+            bbox[1] - bbox[3] / 2,
+            bbox[0] - bbox[2] / 2,
+            bbox[1] + bbox[3] / 2,
+            bbox[0] + bbox[2] / 2,
+        ]
+
+    return detections
+
+
+### ONNX Utilities
 
 
 def get_ort_providers(

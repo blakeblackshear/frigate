@@ -38,6 +38,10 @@ class GenAICameraConfig(BaseModel):
         default_factory=list,
         title="List of required zones to be entered in order to run generative AI.",
     )
+    debug_save_thumbnails: bool = Field(
+        default=False,
+        title="Save thumbnails sent to generative AI for debugging purposes.",
+    )
 
     @field_validator("required_zones", mode="before")
     @classmethod

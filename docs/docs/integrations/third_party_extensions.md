@@ -19,6 +19,10 @@ Please use your own knowledge to assess and vet them before you install anything
 It supports automatically setting the sub labels in Frigate for person objects that are detected and recognized.
 This is a fork (with fixed errors and new features) of [original Double Take](https://github.com/jakowenko/double-take) project which, unfortunately, isn't being maintained by author.
 
+## [Frigate Notify](https://github.com/0x2142/frigate-notify)
+
+[Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate NVR to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
+
 ## [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.

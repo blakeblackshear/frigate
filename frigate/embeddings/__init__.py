@@ -1,5 +1,6 @@
 """SQLite-vec embeddings database."""
 
+import base64
 import json
 import logging
 import multiprocessing as mp
@@ -13,7 +14,8 @@ from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR
+from frigate.const import CONFIG_DIR, FACE_DIR
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
@@ -25,7 +27,7 @@ from .util import ZScoreNormalization
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig) -> None:
+def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
     # Only initialize embeddings if semantic search is enabled
     if not config.semantic_search.enabled:
         return
@@ -59,6 +61,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     maintainer = EmbeddingMaintainer(
         db,
         config,
+        metrics,
         stop_event,
     )
     maintainer.start()
@@ -188,6 +191,43 @@ class EmbeddingsContext:
         results = self.db.execute_sql(sql_query, parameters).fetchall()
 
         return results
+
+    def register_face(self, face_name: str, image_data: bytes) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.register_face.value,
+            {
+                "face_name": face_name,
+                "image": base64.b64encode(image_data).decode("ASCII"),
+            },
+        )
+
+    def get_face_ids(self, name: str) -> list[str]:
+        sql_query = f"""
+            SELECT
+                id
+            FROM vec_descriptions
+            WHERE id LIKE '%{name}%'
+        """
+
+        return self.db.execute_sql(sql_query).fetchall()
+
+    def reprocess_face(self, face_file: str) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.reprocess_face.value, {"image_file": face_file}
+        )
+
+    def clear_face_classifier(self) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
+    def delete_face_ids(self, face: str, ids: list[str]) -> None:
+        folder = os.path.join(FACE_DIR, face)
+        for id in ids:
+            file_path = os.path.join(folder, id)
+
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
 
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(

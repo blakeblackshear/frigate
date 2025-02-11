@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
@@ -33,6 +33,16 @@ export default function SearchThumbnail({
     onClick(searchResult, true, false);
   });
 
+  const handleOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.metaKey) {
+        e.stopPropagation();
+        onClick(searchResult, true, false);
+      }
+    },
+    [searchResult, onClick],
+  );
+
   const objectLabel = useMemo(() => {
     if (
       !config ||
@@ -57,6 +67,7 @@ export default function SearchThumbnail({
       <div className={`size-full ${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
+          onClick={handleOnClick}
           className={cn(
             "size-full select-none object-cover object-center opacity-100 transition-opacity",
           )}

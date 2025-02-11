@@ -38,6 +38,11 @@ class OllamaClient(GenAIClient):
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Ollama"""
+        if self.provider is None:
+            logger.warning(
+                "Ollama provider has not been initialized, a description will not be generated. Check your Ollama configuration."
+            )
+            return None
         try:
             result = self.provider.generate(
                 self.genai_config.model,

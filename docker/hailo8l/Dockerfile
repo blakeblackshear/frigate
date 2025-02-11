@@ -5,6 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Build Python wheels
 FROM wheels AS h8l-wheels
 
+RUN python3 -m pip config set global.break-system-packages true
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/hailo8l/requirements-wheels-h8l.txt /requirements-wheels-h8l.txt
 
@@ -30,6 +31,7 @@ COPY --from=hailort /hailo-wheels /deps/hailo-wheels
 COPY --from=hailort /rootfs/ /
 
 # Install the wheels
+RUN python3 -m pip config set global.break-system-packages true
 RUN pip3 install -U /deps/h8l-wheels/*.whl
 RUN pip3 install -U /deps/hailo-wheels/*.whl
 

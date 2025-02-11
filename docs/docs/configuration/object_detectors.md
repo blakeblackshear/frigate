@@ -33,6 +33,14 @@ Frigate supports multiple different detectors that work on different types of ha
 
 :::
 
+:::note
+
+Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time).
+
+This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
+
+:::
+
 # Officially Supported Detectors
 
 Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
@@ -116,6 +124,30 @@ detectors:
     device: pci
 ```
 
+## Hailo-8l
+
+This detector is available for use with Hailo-8 AI Acceleration Module.
+
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+
+### Configuration
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  model_type: ssd
+  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+```
+
+
 ## OpenVINO Detector
 
 The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
@@ -144,7 +176,9 @@ detectors:
 
 #### SSDLite MobileNet v2
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
+
+Use the model configuration shown below when using the OpenVINO detector with the default OpenVINO model:
 
 ```yaml
 detectors:
@@ -254,6 +288,7 @@ yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
 yolov7-640
+yolov7-416
 yolov7-320
 yolov7x-640
 yolov7x-320
@@ -281,6 +316,8 @@ frigate:
 The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
+
+Use the config below to work with generated TRT models:
 
 ```yaml
 detectors:
@@ -413,7 +450,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
 
 :::info
 
@@ -480,6 +517,33 @@ model:
   labelmap_path: /labelmap/coco-80.txt
 ```
 
+#### YOLOv9
+
+[YOLOv9](https://github.com/MultimediaTechLab/YOLO) models are supported, but not included by default.
+
+:::tip
+
+The YOLOv9 detector has been designed to support YOLOv9 models, but may support other YOLO model architectures as well.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolov9
+  width: 640 # <--- should match the imgsize set during model export
+  height: 640 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
 ## CPU Detector (not recommended)
@@ -501,11 +565,12 @@ detectors:
   cpu1:
     type: cpu
     num_threads: 3
-    model:
-      path: "/custom_model.tflite"
   cpu2:
     type: cpu
     num_threads: 3
+
+model:
+  path: "/custom_model.tflite"
 ```
 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
@@ -544,7 +609,7 @@ Hardware accelerated object detection is supported on the following SoCs:
 - RK3576
 - RK3588
 
-This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.0.0.beta0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
 
 ### Prerequisites
 
@@ -619,26 +684,36 @@ $ cat /sys/kernel/debug/rknpu/load
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
 
-## Hailo-8l
+### Converting your own onnx model to rknn format
 
-This detector is available for use with Hailo-8 AI Acceleration Module.
+To convert a onnx model to the rknn format using the [rknn-toolkit2](https://github.com/airockchip/rknn-toolkit2/) you have to:
 
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+- Place one ore more models in onnx format in the directory `config/model_cache/rknn_cache/onnx` on your docker host (this might require `sudo` privileges).
+- Save the configuration file under `config/conv2rknn.yaml` (see below for details).
+- Run `docker exec <frigate_container_id> python3 /opt/conv2rknn.py`. If the conversion was successful, the rknn models will be placed in `config/model_cache/rknn_cache`.
 
-### Configuration
+This is an example configuration file that you need to adjust to your specific onnx model:
 
 ```yaml
-detectors:
-  hailo8l:
-    type: hailo8l
-    device: PCIe
-    model:
-      path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+soc: ["rk3562","rk3566", "rk3568", "rk3576", "rk3588"]
+quantization: false
 
-model:
-  width: 300
-  height: 300
-  input_tensor: nhwc
-  input_pixel_format: bgr
-  model_type: ssd
+output_name: "{input_basename}"
+
+config:
+  mean_values: [[0, 0, 0]]
+  std_values: [[255, 255, 255]]
+  quant_img_rgb2bgr: true
 ```
+
+Explanation of the paramters:
+
+- `soc`: A list of all SoCs you want to build the rknn model for. If you don't specify this parameter, the script tries to find out your SoC and builds the rknn model for this one.
+- `quantization`: true: 8 bit integer (i8) quantization, false: 16 bit float (fp16). Default: false.
+- `output_name`: The output name of the model. The following variables are available:
+  - `quant`: "i8" or "fp16" depending on the config
+  - `input_basename`: the basename of the input model (e.g. "my_model" if the input model is calles "my_model.onnx")
+  - `soc`: the SoC this model was build for (e.g. "rk3588")
+  - `tk_version`: Version of `rknn-toolkit2` (e.g. "2.3.0")
+  - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
+- `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.0/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.0_EN.pdf).

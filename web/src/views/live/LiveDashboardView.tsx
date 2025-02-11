@@ -28,10 +28,16 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { LivePlayerError } from "@/types/live";
+import {
+  AudioState,
+  LivePlayerError,
+  StatsState,
+  VolumeState,
+} from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import LiveContextMenu from "@/components/menu/LiveContextMenu";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -184,8 +190,13 @@ export default function LiveDashboardView({
     };
   }, []);
 
-  const { preferredLiveModes, setPreferredLiveModes, resetPreferredLiveMode } =
-    useCameraLiveMode(cameras, windowVisible);
+  const {
+    preferredLiveModes,
+    setPreferredLiveModes,
+    resetPreferredLiveMode,
+    isRestreamedStates,
+    supportsAudioOutputStates,
+  } = useCameraLiveMode(cameras, windowVisible);
 
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {
@@ -221,9 +232,45 @@ export default function LiveDashboardView({
     [setPreferredLiveModes],
   );
 
+  // audio states
+
+  const [audioStates, setAudioStates] = useState<AudioState>({});
+  const [volumeStates, setVolumeStates] = useState<VolumeState>({});
+  const [statsStates, setStatsStates] = useState<StatsState>({});
+
+  const toggleStats = (cameraName: string): void => {
+    setStatsStates((prev) => ({
+      ...prev,
+      [cameraName]: !prev[cameraName],
+    }));
+  };
+
+  const toggleAudio = (cameraName: string): void => {
+    setAudioStates((prev) => ({
+      ...prev,
+      [cameraName]: !prev[cameraName],
+    }));
+  };
+
+  const muteAll = (): void => {
+    const updatedStates: Record<string, boolean> = {};
+    visibleCameras.forEach((cameraName) => {
+      updatedStates[cameraName] = false;
+    });
+    setAudioStates(updatedStates);
+  };
+
+  const unmuteAll = (): void => {
+    const updatedStates: Record<string, boolean> = {};
+    visibleCameras.forEach((cameraName) => {
+      updatedStates[cameraName] = true;
+    });
+    setAudioStates(updatedStates);
+  };
+
   return (
     <div
-      className="scrollbar-container size-full overflow-y-auto px-1 pt-2 md:p-2"
+      className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 md:p-2"
       ref={containerRef}
     >
       {isMobile && (
@@ -346,20 +393,56 @@ export default function LiveDashboardView({
                 grow = "aspect-video";
               }
               return (
-                <LivePlayer
-                  cameraRef={cameraRef}
+                <LiveContextMenu
+                  className={grow}
                   key={camera.name}
-                  className={`${grow} rounded-lg bg-black md:rounded-2xl`}
-                  windowVisible={
-                    windowVisible && visibleCameras.includes(camera.name)
-                  }
-                  cameraConfig={camera}
+                  camera={camera.name}
+                  cameraGroup={cameraGroup}
+                  streamName={Object.values(camera.live.streams)?.[0]}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                  autoLive={autoLiveView}
-                  onClick={() => onSelectCamera(camera.name)}
-                  onError={(e) => handleError(camera.name, e)}
-                  onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
-                />
+                  isRestreamed={isRestreamedStates[camera.name]}
+                  supportsAudio={
+                    supportsAudioOutputStates[
+                      Object.values(camera.live.streams)?.[0]
+                    ]?.supportsAudio ?? false
+                  }
+                  audioState={audioStates[camera.name]}
+                  toggleAudio={() => toggleAudio(camera.name)}
+                  statsState={statsStates[camera.name]}
+                  toggleStats={() => toggleStats(camera.name)}
+                  volumeState={volumeStates[camera.name] ?? 1}
+                  setVolumeState={(value) =>
+                    setVolumeStates({
+                      [camera.name]: value,
+                    })
+                  }
+                  muteAll={muteAll}
+                  unmuteAll={unmuteAll}
+                  resetPreferredLiveMode={() =>
+                    resetPreferredLiveMode(camera.name)
+                  }
+                >
+                  <LivePlayer
+                    cameraRef={cameraRef}
+                    key={camera.name}
+                    className={`${grow} rounded-lg bg-black md:rounded-2xl`}
+                    windowVisible={
+                      windowVisible && visibleCameras.includes(camera.name)
+                    }
+                    cameraConfig={camera}
+                    preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
+                    autoLive={autoLiveView}
+                    useWebGL={false}
+                    playInBackground={false}
+                    showStats={statsStates[camera.name]}
+                    streamName={Object.values(camera.live.streams)[0]}
+                    onClick={() => onSelectCamera(camera.name)}
+                    onError={(e) => handleError(camera.name, e)}
+                    onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
+                    playAudio={audioStates[camera.name] ?? false}
+                    volume={volumeStates[camera.name]}
+                  />
+                </LiveContextMenu>
               );
             })}
           </div>

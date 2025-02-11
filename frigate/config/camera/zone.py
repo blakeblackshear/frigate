@@ -1,12 +1,15 @@
 # this uses the base model because the color is an extra attribute
+import logging
 from typing import Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 from .objects import FilterConfig
 
 __all__ = ["ZoneConfig"]
+
+logger = logging.getLogger(__name__)
 
 
 class ZoneConfig(BaseModel):
@@ -15,6 +18,10 @@ class ZoneConfig(BaseModel):
     )
     coordinates: Union[str, list[str]] = Field(
         title="Coordinates polygon for the defined zone."
+    )
+    distances: Optional[Union[str, list[str]]] = Field(
+        default_factory=list,
+        title="Real-world distances for the sides of quadrilateral for the defined zone.",
     )
     inertia: int = Field(
         default=3,
@@ -25,6 +32,11 @@ class ZoneConfig(BaseModel):
         default=0,
         ge=0,
         title="Number of seconds that an object must loiter to be considered in the zone.",
+    )
+    speed_threshold: Optional[float] = Field(
+        default=None,
+        ge=0.1,
+        title="Minimum speed value for an object to be considered in the zone.",
     )
     objects: Union[str, list[str]] = Field(
         default_factory=list,
@@ -48,6 +60,34 @@ class ZoneConfig(BaseModel):
             return [v]
 
         return v
+
+    @field_validator("distances", mode="before")
+    @classmethod
+    def validate_distances(cls, v):
+        if v is None:
+            return None
+
+        if isinstance(v, str):
+            distances = list(map(str, map(float, v.split(","))))
+        elif isinstance(v, list):
+            distances = [str(float(val)) for val in v]
+        else:
+            raise ValueError("Invalid type for distances")
+
+        if len(distances) != 4:
+            raise ValueError("distances must have exactly 4 values")
+
+        return distances
+
+    @model_validator(mode="after")
+    def check_loitering_time_constraints(self):
+        if self.loitering_time > 0 and (
+            self.speed_threshold is not None or len(self.distances) > 0
+        ):
+            logger.warning(
+                "loitering_time should not be set on a zone if speed_threshold or distances is set."
+            )
+        return self
 
     def __init__(self, **config):
         super().__init__(**config)
@@ -85,7 +125,7 @@ class ZoneConfig(BaseModel):
             if explicit:
                 self.coordinates = ",".join(
                     [
-                        f'{round(int(p.split(",")[0]) / frame_shape[1], 3)},{round(int(p.split(",")[1]) / frame_shape[0], 3)}'
+                        f"{round(int(p.split(',')[0]) / frame_shape[1], 3)},{round(int(p.split(',')[1]) / frame_shape[0], 3)}"
                         for p in coordinates
                     ]
                 )
