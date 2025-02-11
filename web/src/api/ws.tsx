@@ -54,19 +54,13 @@ function useValue(): useValueReturn {
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
       const {
-
         record,
-
         detect,
-
         snapshots,
-
         audio,
         notifications,
         notifications_suspended,
-
         autotracking,
-     ,
         alerts,
         detections,
       } =
