@@ -459,37 +459,7 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if updated_review_topic:
                     camera_name = updated_review_topic.rpartition("/")[-1]
-                    old_alerts_enabled = self.config.cameras[
-                        camera_name
-                    ].review.alerts.enabled
-                    old_detections_enabled = self.config.cameras[
-                        camera_name
-                    ].review.detections.enabled
                     self.config.cameras[camera_name].review = updated_review_config
-
-                    # Check if alerts.enabled or detections.enabled has changed
-                    if (
-                        old_alerts_enabled
-                        != self.config.cameras[camera_name].review.alerts.enabled
-                        or old_detections_enabled
-                        != self.config.cameras[camera_name].review.detections.enabled
-                    ):
-                        segment = self.active_review_segments.get(camera_name)
-                        if segment:
-                            if (
-                                not self.config.cameras[
-                                    camera_name
-                                ].review.alerts.enabled
-                                and segment.severity == SeverityEnum.alert
-                            ):
-                                self.end_segment(camera_name)
-                            elif (
-                                not self.config.cameras[
-                                    camera_name
-                                ].review.detections.enabled
-                                and segment.severity == SeverityEnum.detection
-                            ):
-                                self.end_segment(camera_name)
 
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 

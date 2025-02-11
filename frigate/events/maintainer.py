@@ -202,9 +202,7 @@ class EventProcessor(threading.Thread):
                 Event.end_time: end_time,
                 Event.zones: list(event_data["entered_zones"]),
                 Event.thumbnail: event_data["thumbnail"],
-                Event.has_clip: event_data["has_clip"]
-                if event_data.get("max_severity")
-                else False,
+                Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.model_hash: first_detector.model.model_hash,
                 Event.model_type: first_detector.model.model_type,
