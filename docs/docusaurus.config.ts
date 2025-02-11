@@ -17,6 +17,7 @@ const config: Config = {
     "@docusaurus/theme-mermaid",
     "docusaurus-theme-openapi-docs",
     "@inkeep/docusaurus/chatButton",
+    "@inkeep/docusaurus/searchBar",
   ],
   markdown: {
     mermaid: true,
