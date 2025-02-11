@@ -132,7 +132,7 @@ export default function Settings() {
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
     }
-    return true;
+    return false;
   });
 
   useEffect(() => {
