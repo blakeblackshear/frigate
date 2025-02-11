@@ -320,9 +320,7 @@ export default function LiveDashboardView({
         },
       };
 
-      if (cameraGroup != "default") {
-        setAllGroupsStreamingSettings?.(updatedSettings);
-      }
+      setAllGroupsStreamingSettings?.(updatedSettings);
     },
     [cameraGroup, allGroupsStreamingSettings, setAllGroupsStreamingSettings],
   );
