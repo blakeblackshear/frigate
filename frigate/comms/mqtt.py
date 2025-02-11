@@ -107,6 +107,16 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 ),
                 retain=True,
             )
+            self.publish(
+                f"{camera_name}/review_alerts/state",
+                "ON" if camera.review.alerts.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/review_detections/state",
+                "ON" if camera.review.detections.enabled_in_config else "OFF",
+                retain=True,
+            )
 
         if self.config.notifications.enabled_in_config:
             self.publish(

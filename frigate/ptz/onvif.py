@@ -145,7 +145,7 @@ class OnvifController:
         ):
             request = ptz.create_type("GetConfigurationOptions")
             request.ConfigurationToken = profile.PTZConfiguration.token
-            ptz_config = ptz.GetConfigurationOptions(request)
+            ptz_config = await ptz.GetConfigurationOptions(request)
             logger.debug(f"Onvif config for {camera_name}: {ptz_config}")
 
             service_capabilities_request = ptz.create_type("GetServiceCapabilities")
@@ -169,7 +169,7 @@ class OnvifController:
             status_request.ProfileToken = profile.token
             self.cams[camera_name]["status_request"] = status_request
             try:
-                status = ptz.GetStatus(status_request)
+                status = await ptz.GetStatus(status_request)
                 logger.debug(f"Onvif status config for {camera_name}: {status}")
             except Exception as e:
                 logger.warning(f"Unable to get status from camera: {camera_name}: {e}")

@@ -409,8 +409,6 @@ def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()
     if cameras != "all":
         query = query.where(Recordings.camera << cameras.split(","))
 
-    print(query)
-
     recording_days = query.namedtuples()
     days = {day.day: True for day in recording_days}
 
