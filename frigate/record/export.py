@@ -19,6 +19,7 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     EXPORT_DIR,
+    FFMPEG_HVC1_ARGS,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
 )
@@ -219,7 +220,7 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
@@ -227,10 +228,15 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.ffmpeg.hwaccel_args,
                     f"-an {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
+
+        if self.config.ffmpeg.apple_compatibility:
+            ffmpeg_cmd += FFMPEG_HVC1_ARGS
+
+        ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
 
@@ -327,7 +333,14 @@ class RecordingExporter(threading.Thread):
             self.user_provided_name
             or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
-        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
+        filename_start_datetime = datetime.datetime.fromtimestamp(
+            self.start_time
+        ).strftime("%Y%m%d_%H%M%S")
+        filename_end_datetime = datetime.datetime.fromtimestamp(self.end_time).strftime(
+            "%Y%m%d_%H%M%S"
+        )
+        cleaned_export_id = self.export_id.split("_")[-1]
+        video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
         thumb_path = self.save_thumbnail(self.export_id)
 
         Export.insert(

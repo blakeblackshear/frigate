@@ -46,6 +46,11 @@ mqtt:
   tls_insecure: false
   # Optional: interval in seconds for publishing stats (default: shown below)
   stats_interval: 60
+  # Optional: QoS level for subscriptions and publishing (default: shown below)
+  # 0 = at most once
+  # 1 = at least once
+  # 2 = exactly once
+  qos: 0
 
 # Optional: Detectors configuration. Defaults to a single CPU detector
 detectors:
@@ -244,6 +249,8 @@ ffmpeg:
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
   # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
   retry_interval: 10
+  # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
+  apple_compatibility: false
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
@@ -310,9 +317,11 @@ objects:
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
-      # Optional: minimum width*height of the bounding box for the detected object (default: 0)
+      # Optional: minimum size of the bounding box for the detected object (default: 0).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       min_area: 5000
-      # Optional: maximum width*height of the bounding box for the detected object (default: 24000000)
+      # Optional: maximum size of the bounding box for the detected object (default: 24000000).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       max_area: 100000
       # Optional: minimum width/height of the bounding box for the detected object (default: 0)
       min_ratio: 0.5
@@ -400,6 +409,7 @@ motion:
   mqtt_off_delay: 30
 
 # Optional: Notification Configuration
+# NOTE: Can be overridden at the camera level (except email)
 notifications:
   # Optional: Enable notification service (default: shown below)
   enabled: False
@@ -524,6 +534,14 @@ semantic_search:
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
 
+# Optional: Configuration for face recognition capability
+face_recognition:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
+  # Optional: Set the model size used for embeddings. (default: shown below)
+  # NOTE: small model runs on CPU and large model runs on GPU
+  model_size: "small"
+
 # Optional: Configuration for AI generated tracked object descriptions
 # NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
@@ -548,15 +566,19 @@ genai:
 
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
+# NOTE: The default go2rtc API port (1984) must be used,
+#       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:
 
 # Optional: Live stream configuration for WebUI.
 # NOTE: Can be overridden at the camera level
 live:
-  # Optional: Set the name of the stream configured in go2rtc
+  # Optional: Set the streams configured in go2rtc
   # that should be used for live view in frigate WebUI. (default: name of camera)
   # NOTE: In most cases this should be set at the camera level only.
-  stream_name: camera_name
+  streams:
+    main_stream: main_stream_name
+    sub_stream: sub_stream_name
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
@@ -641,7 +663,10 @@ cameras:
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
-        coordinates: 0.284,0.997,0.389,0.869,0.410,0.745
+        coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
+        # Optional: The real-world distances of a 4-sided zone used for zones with speed estimation enabled (default: none)
+        # List distances in order of the zone points coordinates and use the unit system defined in the ui config
+        distances: 10,15,12,11
         # Optional: Number of consecutive frames required for object to be considered present in the zone (default: shown below).
         inertia: 3
         # Optional: Number of seconds that an object must loiter to be considered in the zone (default: shown below)
@@ -792,6 +817,9 @@ ui:
   # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
   # possible values are shown above (default: not set)
   strftime_fmt: "%Y/%m/%d %H:%M"
+  # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
+  # Used in the UI and in MQTT topics
+  unit_system: metric
 
 # Optional: Telemetry configuration
 telemetry:
@@ -805,11 +833,13 @@ telemetry:
     - lo
   # Optional: Configure system stats
   stats:
-    # Enable AMD GPU stats (default: shown below)
+    # Optional: Enable AMD GPU stats (default: shown below)
     amd_gpu_stats: True
-    # Enable Intel GPU stats (default: shown below)
+    # Optional: Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
-    # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    # Optional: Treat GPU as SR-IOV to fix GPU stats (default: shown below)
+    sriov: False
+    # Optional: Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)

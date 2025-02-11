@@ -71,9 +71,11 @@ export default function SearchFilterDialog({
       currentFilter &&
       (currentFilter.time_range ||
         (currentFilter.min_score ?? 0) > 0.5 ||
+        (currentFilter.min_speed ?? 1) > 1 ||
         (currentFilter.has_snapshot ?? 0) === 1 ||
         (currentFilter.has_clip ?? 0) === 1 ||
         (currentFilter.max_score ?? 1) < 1 ||
+        (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0),
     [currentFilter],
@@ -122,6 +124,14 @@ export default function SearchFilterDialog({
         maxScore={currentFilter.max_score}
         setScoreRange={(min, max) =>
           setCurrentFilter({ ...currentFilter, min_score: min, max_score: max })
+        }
+      />
+      <SpeedFilterContent
+        config={config}
+        minSpeed={currentFilter.min_speed}
+        maxSpeed={currentFilter.max_speed}
+        setSpeedRange={(min, max) =>
+          setCurrentFilter({ ...currentFilter, min_speed: min, max_speed: max })
         }
       />
       <SnapshotClipFilterContent
@@ -178,6 +188,8 @@ export default function SearchFilterDialog({
               search_type: undefined,
               min_score: undefined,
               max_score: undefined,
+              min_speed: undefined,
+              max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
             }));
@@ -513,6 +525,62 @@ export function ScoreFilterContent({
 
             if (value) {
               setScoreRange(minScore ?? 0.5, parseInt(value) / 100.0);
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+type SpeedFilterContentProps = {
+  config?: FrigateConfig;
+  minSpeed: number | undefined;
+  maxSpeed: number | undefined;
+  setSpeedRange: (min: number | undefined, max: number | undefined) => void;
+};
+export function SpeedFilterContent({
+  config,
+  minSpeed,
+  maxSpeed,
+  setSpeedRange,
+}: SpeedFilterContentProps) {
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">
+        Estimated Speed ({config?.ui.unit_system == "metric" ? "kph" : "mph"})
+      </div>
+      <div className="flex items-center gap-1">
+        <Input
+          className="w-14 text-center"
+          inputMode="numeric"
+          value={minSpeed ?? 1}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setSpeedRange(parseInt(value), maxSpeed ?? 1.0);
+            }
+          }}
+        />
+        <DualThumbSlider
+          className="mx-2 w-full"
+          min={1}
+          max={150}
+          step={1}
+          value={[minSpeed ?? 1, maxSpeed ?? 150]}
+          onValueChange={([min, max]) => setSpeedRange(min, max)}
+        />
+        <Input
+          className="w-14 text-center"
+          inputMode="numeric"
+          value={maxSpeed ?? 150}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setSpeedRange(minSpeed ?? 1, parseInt(value));
             }
           }}
         />

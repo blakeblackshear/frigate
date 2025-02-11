@@ -40,6 +40,7 @@ type ZoneEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  setActiveLine: React.Dispatch<React.SetStateAction<number | undefined>>;
 };
 
 export default function ZoneEditPane({
@@ -52,6 +53,7 @@ export default function ZoneEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  setActiveLine,
 }: ZoneEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -80,69 +82,144 @@ export default function ZoneEditPane({
     }
   }, [polygon, config]);
 
-  const formSchema = z.object({
-    name: z
-      .string()
-      .min(2, {
-        message: "Zone name must be at least 2 characters.",
-      })
-      .transform((val: string) => val.trim().replace(/\s+/g, "_"))
-      .refine(
-        (value: string) => {
-          return !cameras.map((cam) => cam.name).includes(value);
-        },
-        {
-          message: "Zone name must not be the name of a camera.",
-        },
-      )
-      .refine(
-        (value: string) => {
-          const otherPolygonNames =
-            polygons
-              ?.filter((_, index) => index !== activePolygonIndex)
-              .map((polygon) => polygon.name) || [];
+  const [lineA, lineB, lineC, lineD] = useMemo(() => {
+    const distances =
+      polygon?.camera &&
+      polygon?.name &&
+      config?.cameras[polygon.camera]?.zones[polygon.name]?.distances;
 
-          return !otherPolygonNames.includes(value);
-        },
-        {
-          message: "Zone name already exists on this camera.",
-        },
-      )
-      .refine(
-        (value: string) => {
-          return !value.includes(".");
-        },
-        {
-          message: "Zone name must not contain a period.",
-        },
-      )
-      .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-        message: "Zone name has an illegal character.",
+    return Array.isArray(distances)
+      ? distances.map((value) => parseFloat(value) || 0)
+      : [undefined, undefined, undefined, undefined];
+  }, [polygon, config]);
+
+  const formSchema = z
+    .object({
+      name: z
+        .string()
+        .min(2, {
+          message: "Zone name must be at least 2 characters.",
+        })
+        .transform((val: string) => val.trim().replace(/\s+/g, "_"))
+        .refine(
+          (value: string) => {
+            return !cameras.map((cam) => cam.name).includes(value);
+          },
+          {
+            message: "Zone name must not be the name of a camera.",
+          },
+        )
+        .refine(
+          (value: string) => {
+            const otherPolygonNames =
+              polygons
+                ?.filter((_, index) => index !== activePolygonIndex)
+                .map((polygon) => polygon.name) || [];
+
+            return !otherPolygonNames.includes(value);
+          },
+          {
+            message: "Zone name already exists on this camera.",
+          },
+        )
+        .refine(
+          (value: string) => {
+            return !value.includes(".");
+          },
+          {
+            message: "Zone name must not contain a period.",
+          },
+        )
+        .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
+          message: "Zone name has an illegal character.",
+        }),
+      inertia: z.coerce
+        .number()
+        .min(1, {
+          message: "Inertia must be above 0.",
+        })
+        .or(z.literal("")),
+      loitering_time: z.coerce
+        .number()
+        .min(0, {
+          message: "Loitering time must be greater than or equal to 0.",
+        })
+        .optional()
+        .or(z.literal("")),
+      isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+        message: "The polygon drawing must be finished before saving.",
       }),
-    inertia: z.coerce
-      .number()
-      .min(1, {
-        message: "Inertia must be above 0.",
-      })
-      .or(z.literal("")),
-    loitering_time: z.coerce
-      .number()
-      .min(0, {
-        message: "Loitering time must be greater than or equal to 0.",
-      })
-      .optional()
-      .or(z.literal("")),
-    isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
-    }),
-    objects: z.array(z.string()).optional(),
-    review_alerts: z.boolean().default(false).optional(),
-    review_detections: z.boolean().default(false).optional(),
-  });
+      objects: z.array(z.string()).optional(),
+      review_alerts: z.boolean().default(false).optional(),
+      review_detections: z.boolean().default(false).optional(),
+      speedEstimation: z.boolean().default(false),
+      lineA: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineB: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineC: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      lineD: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Distance must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+      speed_threshold: z.coerce
+        .number()
+        .min(0.1, {
+          message: "Speed threshold must be greater than or equal to 0.1",
+        })
+        .optional()
+        .or(z.literal("")),
+    })
+    .refine(
+      (data) => {
+        if (data.speedEstimation) {
+          return !!data.lineA && !!data.lineB && !!data.lineC && !!data.lineD;
+        }
+        return true;
+      },
+      {
+        message: "All distance fields must be filled to use speed estimation.",
+        path: ["speedEstimation"],
+      },
+    )
+    .refine(
+      (data) => {
+        // Prevent speed estimation when loitering_time is greater than 0
+        return !(
+          data.speedEstimation &&
+          data.loitering_time &&
+          data.loitering_time > 0
+        );
+      },
+      {
+        message:
+          "Zones with loitering times greater than 0 should not be used with speed estimation.",
+        path: ["loitering_time"],
+      },
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       name: polygon?.name ?? "",
       inertia:
@@ -155,8 +232,30 @@ export default function ZoneEditPane({
         config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
+      speedEstimation: !!(lineA || lineB || lineC || lineD),
+      lineA,
+      lineB,
+      lineC,
+      lineD,
+      speed_threshold:
+        polygon?.camera &&
+        polygon?.name &&
+        config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold,
     },
   });
+
+  useEffect(() => {
+    if (
+      form.watch("speedEstimation") &&
+      polygon &&
+      polygon.points.length !== 4
+    ) {
+      toast.error(
+        "Speed estimation has been disabled for this zone. Zones with speed estimation must have exactly 4 points.",
+      );
+      form.setValue("speedEstimation", false);
+    }
+  }, [polygon, form]);
 
   const saveToConfig = useCallback(
     async (
@@ -165,6 +264,12 @@ export default function ZoneEditPane({
         inertia,
         loitering_time,
         objects: form_objects,
+        speedEstimation,
+        lineA,
+        lineB,
+        lineC,
+        lineD,
+        speed_threshold,
       }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
@@ -261,9 +366,32 @@ export default function ZoneEditPane({
         loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
       }
 
+      let distancesQuery = "";
+      const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
+      if (speedEstimation) {
+        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
+      } else {
+        if (distances != "") {
+          distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+        }
+      }
+
+      let speedThresholdQuery = "";
+      if (speed_threshold >= 0 && speedEstimation) {
+        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold=${speed_threshold}`;
+      } else {
+        if (
+          polygon?.camera &&
+          polygon?.name &&
+          config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold
+        ) {
+          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold`;
+        }
+      }
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
           { requires_restart: 0 },
         )
         .then((res) => {
@@ -456,6 +584,183 @@ export default function ZoneEditPane({
             />
           </FormItem>
 
+          <Separator className="my-2 flex bg-secondary" />
+          <FormField
+            control={form.control}
+            name="speedEstimation"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center space-x-2">
+                  <FormControl>
+                    <div className="my-2.5 flex w-full items-center justify-between">
+                      <FormLabel
+                        className="cursor-pointer text-primary"
+                        htmlFor="allLabels"
+                      >
+                        Speed Estimation
+                      </FormLabel>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          if (
+                            checked &&
+                            polygons &&
+                            activePolygonIndex &&
+                            polygons[activePolygonIndex].points.length !== 4
+                          ) {
+                            toast.error(
+                              "Zones with speed estimation must have exactly 4 points.",
+                            );
+                            return;
+                          }
+                          const loiteringTime =
+                            form.getValues("loitering_time");
+
+                          if (checked && loiteringTime && loiteringTime > 0) {
+                            toast.error(
+                              "Zones with loitering times greater than 0 should not be used with speed estimation.",
+                            );
+                          }
+                          field.onChange(checked);
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Enable speed estimation for objects in this zone. The zone
+                  must have exactly 4 points.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch("speedEstimation") &&
+            polygons &&
+            activePolygonIndex &&
+            polygons[activePolygonIndex].points.length === 4 && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="lineA"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Line A distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                          onFocus={() => setActiveLine(1)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lineB"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Line B distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                          onFocus={() => setActiveLine(2)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lineC"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Line C distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                          onFocus={() => setActiveLine(3)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lineD"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Line D distance (
+                        {config?.ui.unit_system == "imperial"
+                          ? "feet"
+                          : "meters"}
+                        )
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                          onFocus={() => setActiveLine(4)}
+                          onBlur={() => setActiveLine(undefined)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Separator className="my-2 flex bg-secondary" />
+                <FormField
+                  control={form.control}
+                  name="speed_threshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Speed Threshold (
+                        {config?.ui.unit_system == "imperial" ? "mph" : "kph"})
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Specifies a minimum speed for objects to be considered
+                        in this zone.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
           <FormField
             control={form.control}
             name="isFinished"
@@ -557,7 +862,9 @@ export function ZoneObjectSelector({
 
   useEffect(() => {
     updateLabelFilter(currentLabels);
-  }, [currentLabels, updateLabelFilter]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLabels]);
 
   return (
     <>

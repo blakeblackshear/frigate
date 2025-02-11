@@ -19,7 +19,7 @@ env:
 
 jobs:
   amd64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Build
     steps:
       - name: Check out code
@@ -42,7 +42,7 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: ARM Build
     steps:
       - name: Check out code
@@ -66,8 +66,9 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rpi
           files: docker/rpi/rpi.hcl
@@ -76,7 +77,8 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
   jetson_jp4_build:
-    runs-on: ubuntu-latest
+    if: false
+    runs-on: ubuntu-22.04
     name: Jetson Jetpack 4
     steps:
       - name: Check out code
@@ -94,8 +96,9 @@ jobs:
           BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
           SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
           TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -104,7 +107,8 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
-    runs-on: ubuntu-latest
+    if: false
+    runs-on: ubuntu-22.04
     name: Jetson Jetpack 5
     steps:
       - name: Check out code
@@ -122,8 +126,9 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -132,7 +137,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   amd64_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Extra Build
     needs:
       - amd64_build
@@ -149,8 +154,9 @@ jobs:
       - name: Build and push TensorRT (x86 GPU)
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -158,8 +164,21 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+      - name: AMD/ROCm general build
+        env:
+          AMDGPU: gfx
+          HSA_OVERRIDE: 0
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-from=type=gha
   arm64_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: ARM Extra Build
     needs:
       - arm64_build
@@ -174,8 +193,9 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Rockchip build
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rk
           files: docker/rockchip/rk.hcl
@@ -183,7 +203,7 @@ jobs:
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
   combined_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Combined Extra Builds
     needs:
       - amd64_build
@@ -199,8 +219,9 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: h8l
           files: docker/hailo8l/h8l.hcl
@@ -208,22 +229,10 @@ jobs:
             h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
-      - name: AMD/ROCm general build
-        env:
-          AMDGPU: gfx
-          HSA_OVERRIDE: 0
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
-            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Assemble and push default build
     needs:
       - amd64_build

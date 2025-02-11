@@ -25,6 +25,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
+  FaArrowRight,
   FaCheckCircle,
   FaChevronDown,
   FaDownload,
@@ -85,6 +86,7 @@ type SearchDetailDialogProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function SearchDetailDialog({
   search,
@@ -92,6 +94,7 @@ export default function SearchDetailDialog({
   setSearch,
   setSearchPage,
   setSimilarity,
+  setInputFocused,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -232,6 +235,7 @@ export default function SearchDetailDialog({
             config={config}
             setSearch={setSearch}
             setSimilarity={setSimilarity}
+            setInputFocused={setInputFocused}
           />
         )}
         {page == "snapshot" && (
@@ -266,12 +270,14 @@ type ObjectDetailsTabProps = {
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
   setSimilarity,
+  setInputFocused,
 }: ObjectDetailsTabProps) {
   const apiHost = useApiHost();
 
@@ -282,6 +288,14 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+
+  const handleDescriptionFocus = useCallback(() => {
+    setInputFocused(true);
+  }, [setInputFocused]);
+
+  const handleDescriptionBlur = useCallback(() => {
+    setInputFocused(false);
+  }, [setInputFocused]);
 
   // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.data.description ?? ""), [search]);
@@ -311,6 +325,30 @@ function ObjectDetailsTab({
 
     if (search.sub_label && search.data?.sub_label_score) {
       return Math.round((search.data?.sub_label_score ?? 0) * 100);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
+  const averageEstimatedSpeed = useMemo(() => {
+    if (!search || !search.data?.average_estimated_speed) {
+      return undefined;
+    }
+
+    if (search.data?.average_estimated_speed != 0) {
+      return search.data?.average_estimated_speed.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
+  const velocityAngle = useMemo(() => {
+    if (!search || !search.data?.velocity_angle) {
+      return undefined;
+    }
+
+    if (search.data?.velocity_angle != 0) {
+      return search.data?.velocity_angle.toFixed(1);
     } else {
       return undefined;
     }
@@ -427,6 +465,29 @@ function ObjectDetailsTab({
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
+          {averageEstimatedSpeed && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">Estimated Speed</div>
+              <div className="flex flex-col space-y-0.5 text-sm">
+                {averageEstimatedSpeed && (
+                  <div className="flex flex-row items-center gap-2">
+                    {averageEstimatedSpeed}{" "}
+                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    {velocityAngle != undefined && (
+                      <span className="text-primary/40">
+                        <FaArrowRight
+                          size={10}
+                          style={{
+                            transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
+                          }}
+                        />
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">Camera</div>
             <div className="text-sm capitalize">
@@ -499,6 +560,8 @@ function ObjectDetailsTab({
               placeholder="Description of the tracked object"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
+              onFocus={handleDescriptionFocus}
+              onBlur={handleDescriptionBlur}
             />
           </>
         )}
@@ -543,16 +606,16 @@ function ObjectDetailsTab({
               )}
             </div>
           )}
-          {(config?.cameras[search.camera].genai.enabled && search.end_time) ||
-            (!config?.cameras[search.camera].genai.enabled && (
-              <Button
-                variant="select"
-                aria-label="Save"
-                onClick={updateDescription}
-              >
-                Save
-              </Button>
-            ))}
+          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
+            !config?.cameras[search.camera].genai.enabled) && (
+            <Button
+              variant="select"
+              aria-label="Save"
+              onClick={updateDescription}
+            >
+              Save
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -658,7 +721,8 @@ export function ObjectSnapshotTab({
             </TransformComponent>
             {search.data.type == "object" &&
               search.plus_id !== "not_enabled" &&
-              search.end_time && (
+              search.end_time &&
+              search.label != "on_demand" && (
                 <Card className="p-1 text-sm md:p-2">
                   <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
                     <div className={cn("flex flex-col space-y-3")}>

@@ -235,6 +235,9 @@ export function ExportContent({
           now.setHours(now.getHours() - 24);
           start = now.getTime() / 1000;
           break;
+        case "custom":
+          start = latestTime - 3600;
+          break;
       }
 
       setRange({

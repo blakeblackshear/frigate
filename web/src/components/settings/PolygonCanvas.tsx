@@ -17,6 +17,7 @@ type PolygonCanvasProps = {
   activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
   selectedZoneMask: PolygonType[] | undefined;
+  activeLine?: number;
 };
 
 export function PolygonCanvas({
@@ -29,6 +30,7 @@ export function PolygonCanvas({
   activePolygonIndex,
   hoveredPolygonIndex,
   selectedZoneMask,
+  activeLine,
 }: PolygonCanvasProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [image, setImage] = useState<HTMLImageElement | undefined>();
@@ -281,12 +283,14 @@ export function PolygonCanvas({
                 stageRef={stageRef}
                 key={index}
                 points={polygon.points}
+                distances={polygon.distances}
                 isActive={index === activePolygonIndex}
                 isHovered={index === hoveredPolygonIndex}
                 isFinished={polygon.isFinished}
                 color={polygon.color}
                 handlePointDragMove={handlePointDragMove}
                 handleGroupDragEnd={handleGroupDragEnd}
+                activeLine={activeLine}
               />
             ),
         )}
@@ -298,12 +302,14 @@ export function PolygonCanvas({
               stageRef={stageRef}
               key={activePolygonIndex}
               points={polygons[activePolygonIndex].points}
+              distances={polygons[activePolygonIndex].distances}
               isActive={true}
               isHovered={activePolygonIndex === hoveredPolygonIndex}
               isFinished={polygons[activePolygonIndex].isFinished}
               color={polygons[activePolygonIndex].color}
               handlePointDragMove={handlePointDragMove}
               handleGroupDragEnd={handleGroupDragEnd}
+              activeLine={activeLine}
             />
           )}
       </Layer>

@@ -25,6 +25,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
+    MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -133,6 +134,15 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
+    mime_type = extension
+
+    if extension == "png":
+        quality_params = None
+    elif extension == "webp":
+        quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
+    else:
+        quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -173,13 +183,16 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-        )
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            media_type=f"image/{mime_type}",
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
@@ -192,13 +205,16 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-        )
+        _, img = cv2.imencode(f".{extension}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension}",
-            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+            media_type=f"image/{mime_type}",
+            headers={
+                "Content-Type": f"image/{mime_type}",
+                "Cache-Control": "no-store"
+                if not params.store
+                else "private, max-age=60",
+            },
         )
     else:
         return JSONResponse(
@@ -241,6 +257,7 @@ def get_snapshot_from_recording(
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
+        mime_type = "png" if format == "png" else "jpeg"
         config: FrigateConfig = request.app.frigate_config
 
         image_data = get_image_from_recording(
@@ -257,7 +274,7 @@ def get_snapshot_from_recording(
                 ),
                 status_code=404,
             )
-        return Response(image_data, headers={"Content-Type": f"image/{format}"})
+        return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
     except DoesNotExist:
         return JSONResponse(
             content={
@@ -354,6 +371,48 @@ def get_recordings_storage_usage(request: Request):
             ) * 100
 
     return JSONResponse(content=camera_usages)
+
+
+@router.get("/recordings/summary")
+def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()):
+    """Returns true/false by day indicating if recordings exist"""
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
+
+    cameras = params.cameras
+
+    query = (
+        Recordings.select(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            ).alias("day")
+        )
+        .group_by(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    Recordings.start_time + seconds_offset,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            )
+        )
+        .order_by(Recordings.start_time.desc())
+    )
+
+    if cameras != "all":
+        query = query.where(Recordings.camera << cameras.split(","))
+
+    recording_days = query.namedtuples()
+    days = {day.day: True for day in recording_days}
+
+    return JSONResponse(content=days)
 
 
 @router.get("/{camera_name}/recordings/summary")

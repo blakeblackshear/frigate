@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.15-1"
+CURRENT_CONFIG_VERSION = "0.16-0"
 DEFAULT_CONFIG_FILE = "/config/config.yml"
 
 
@@ -83,6 +83,13 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.15-1"
+
+    if previous_version < "0.16-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
+        new_config = migrate_016_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.16-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -289,6 +296,29 @@ def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     return new_config
 
 
+def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.16-0"""
+    new_config = config.copy()
+
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, any]] = camera.copy()
+
+        live_config = camera_config.get("live", {})
+        if "stream_name" in live_config:
+            # Migrate from live -> stream_name to live -> streams -> dict
+            stream_name = live_config["stream_name"]
+            live_config["streams"] = {stream_name: stream_name}
+
+            del live_config["stream_name"]
+
+            camera_config["live"] = live_config
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.16-0"
+    return new_config
+
+
 def get_relative_coordinates(
     mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
 ) -> Union[str, list]:
@@ -314,7 +344,7 @@ def get_relative_coordinates(
                             continue
 
                         rel_points.append(
-                            f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
+                            f"{round(x / frame_shape[1], 3)},{round(y / frame_shape[0], 3)}"
                         )
 
                     relative_masks.append(",".join(rel_points))
@@ -337,7 +367,7 @@ def get_relative_coordinates(
                     return []
 
                 rel_points.append(
-                    f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
+                    f"{round(x / frame_shape[1], 3)},{round(y / frame_shape[0], 3)}"
                 )
 
             mask = ",".join(rel_points)
@@ -345,6 +375,36 @@ def get_relative_coordinates(
         return mask
 
     return mask
+
+
+def convert_area_to_pixels(
+    area_value: Union[int, float], frame_shape: tuple[int, int]
+) -> int:
+    """
+    Convert area specification to pixels.
+
+    Args:
+        area_value: Area value (pixels or percentage)
+        frame_shape: Tuple of (height, width) for the frame
+
+    Returns:
+        Area in pixels
+    """
+    # If already an integer, assume it's in pixels
+    if isinstance(area_value, int):
+        return area_value
+
+    # Check if it's a percentage
+    if isinstance(area_value, float):
+        if 0.000001 <= area_value <= 0.99:
+            frame_area = frame_shape[0] * frame_shape[1]
+            return max(1, int(frame_area * area_value))
+        else:
+            raise ValueError(
+                f"Percentage must be between 0.000001 and 0.99, got {area_value}"
+            )
+
+    raise TypeError(f"Unexpected type for area: {type(area_value)}")
 
 
 class StreamInfoRetriever:
