@@ -6,6 +6,7 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { snapPointToLines } from "@/utils/canvasUtil";
 
 type PolygonCanvasProps = {
   containerRef: RefObject<HTMLDivElement>;
@@ -18,6 +19,7 @@ type PolygonCanvasProps = {
   hoveredPolygonIndex: number | null;
   selectedZoneMask: PolygonType[] | undefined;
   activeLine?: number;
+  snapPoints: boolean;
 };
 
 export function PolygonCanvas({
@@ -31,6 +33,7 @@ export function PolygonCanvas({
   hoveredPolygonIndex,
   selectedZoneMask,
   activeLine,
+  snapPoints,
 }: PolygonCanvasProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [image, setImage] = useState<HTMLImageElement | undefined>();
@@ -156,9 +159,23 @@ export function PolygonCanvas({
           intersection?.getClassName() !== "Circle") ||
         (activePolygon.isFinished && intersection?.name() == "unfilled-line")
       ) {
+        let newPoint = [mousePos.x, mousePos.y];
+
+        if (snapPoints) {
+          // Snap to other polygons' edges
+          const otherPolygons = polygons.filter(
+            (_, i) => i !== activePolygonIndex,
+          );
+          const snappedPos = snapPointToLines(newPoint, otherPolygons, 10);
+
+          if (snappedPos) {
+            newPoint = snappedPos;
+          }
+        }
+
         const { updatedPoints, updatedPointsOrder } = addPointToPolygon(
           activePolygon,
-          [mousePos.x, mousePos.y],
+          newPoint,
         );
 
         updatedPolygons[activePolygonIndex] = {
@@ -184,11 +201,24 @@ export function PolygonCanvas({
     if (stage) {
       // we add an unfilled line for adding points when finished
       const index = e.target.index - (activePolygon.isFinished ? 2 : 1);
-      const pos = [e.target._lastPos!.x, e.target._lastPos!.y];
-      if (pos[0] < 0) pos[0] = 0;
-      if (pos[1] < 0) pos[1] = 0;
-      if (pos[0] > stage.width()) pos[0] = stage.width();
-      if (pos[1] > stage.height()) pos[1] = stage.height();
+      let pos = [e.target._lastPos!.x, e.target._lastPos!.y];
+
+      if (snapPoints) {
+        // Snap to other polygons' edges
+        const otherPolygons = polygons.filter(
+          (_, i) => i !== activePolygonIndex,
+        );
+        const snappedPos = snapPointToLines(pos, otherPolygons, 10); // 10 is the snap threshold
+
+        if (snappedPos) {
+          pos = snappedPos;
+        }
+      }
+
+      // Constrain to stage boundaries
+      pos[0] = Math.max(0, Math.min(pos[0], stage.width()));
+      pos[1] = Math.max(0, Math.min(pos[1], stage.height()));
+
       updatedPolygons[activePolygonIndex] = {
         ...activePolygon,
         points: [
@@ -291,6 +321,16 @@ export function PolygonCanvas({
                 handlePointDragMove={handlePointDragMove}
                 handleGroupDragEnd={handleGroupDragEnd}
                 activeLine={activeLine}
+                snapPoints={snapPoints}
+                snapToLines={(point) =>
+                  snapPoints
+                    ? snapPointToLines(
+                        point,
+                        polygons.filter((_, i) => i !== index),
+                        10,
+                      )
+                    : null
+                }
               />
             ),
         )}
@@ -310,6 +350,16 @@ export function PolygonCanvas({
               handlePointDragMove={handlePointDragMove}
               handleGroupDragEnd={handleGroupDragEnd}
               activeLine={activeLine}
+              snapPoints={snapPoints}
+              snapToLines={(point) =>
+                snapPoints
+                  ? snapPointToLines(
+                      point,
+                      polygons.filter((_, i) => i !== activePolygonIndex),
+                      10,
+                    )
+                  : null
+              }
             />
           )}
       </Layer>

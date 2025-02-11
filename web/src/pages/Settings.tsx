@@ -124,7 +124,7 @@ export default function Settings() {
     if (allSettingsViews.includes(page as SettingsType)) {
       setPage(page as SettingsType);
     }
-    return true;
+    return false;
   });
 
   useSearchEffect("camera", (camera: string) => {
@@ -132,7 +132,7 @@ export default function Settings() {
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
     }
-    return true;
+    return false;
   });
 
   useEffect(() => {

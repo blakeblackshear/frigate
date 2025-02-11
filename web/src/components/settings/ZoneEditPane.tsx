@@ -41,6 +41,8 @@ type ZoneEditPaneProps = {
   onSave?: () => void;
   onCancel?: () => void;
   setActiveLine: React.Dispatch<React.SetStateAction<number | undefined>>;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ZoneEditPane({
@@ -54,6 +56,8 @@ export default function ZoneEditPane({
   onSave,
   onCancel,
   setActiveLine,
+  snapPoints,
+  setSnapPoints,
 }: ZoneEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -483,6 +487,8 @@ export default function ZoneEditPane({
             polygons={polygons}
             setPolygons={setPolygons}
             activePolygonIndex={activePolygonIndex}
+            snapPoints={snapPoints}
+            setSnapPoints={setSnapPoints}
           />
         </div>
       )}
