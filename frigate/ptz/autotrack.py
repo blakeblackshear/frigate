@@ -1,5 +1,6 @@
 """Automatically pan, tilt, and zoom on detected objects via onvif."""
 
+import asyncio
 import copy
 import logging
 import queue
@@ -253,7 +254,7 @@ class PtzAutoTracker:
             return
 
         if not self.onvif.cams[camera]["init"]:
-            if not self.onvif._init_onvif(camera):
+            if not asyncio.run(self.onvif._init_onvif(camera)):
                 logger.warning(
                     f"Disabling autotracking for {camera}: Unable to initialize onvif"
                 )
