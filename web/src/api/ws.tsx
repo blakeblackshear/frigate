@@ -61,6 +61,8 @@ function useValue(): useValueReturn {
         notifications,
         notifications_suspended,
         autotracking,
+        alerts,
+        detections,
       } =
         // @ts-expect-error we know this is correct
         state["config"];
@@ -74,6 +76,10 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/notifications/suspended`] =
         notifications_suspended || 0;
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_alerts/state`] = alerts ? "ON" : "OFF";
+      cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
     });
@@ -210,6 +216,31 @@ export function useAutotrackingState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/ptz_autotracker/state`, `${camera}/ptz_autotracker/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useAlertsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/review_alerts/state`, `${camera}/review_alerts/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useDetectionsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review_detections/state`,
+    `${camera}/review_detections/set`,
+  );
   return { payload: payload as ToggleableSetting, send };
 }
 

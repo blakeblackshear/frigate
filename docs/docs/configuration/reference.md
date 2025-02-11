@@ -340,6 +340,8 @@ objects:
 review:
   # Optional: alerts configuration
   alerts:
+    # Optional: enables alerts for the camera (default: shown below)
+    enabled: True
     # Optional: labels that qualify as an alert (default: shown below)
     labels:
       - car
@@ -352,6 +354,8 @@ review:
       - driveway
   # Optional: detections configuration
   detections:
+    # Optional: enables detections for the camera (default: shown below)
+    enabled: True
     # Optional: labels that qualify as a detection (default: all labels that are tracked / listened to)
     labels:
       - car
