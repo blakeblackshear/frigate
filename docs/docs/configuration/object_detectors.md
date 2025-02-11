@@ -201,7 +201,7 @@ This detector also supports YOLOX. Frigate does not come with any YOLOX models p
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas) for more information on downloading the YOLO-NAS model for use in Frigate.
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
@@ -445,7 +445,7 @@ There is no default model provided, the following formats are supported:
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas) for more information on downloading the YOLO-NAS model for use in Frigate.
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
@@ -507,7 +507,7 @@ There is no default model provided, the following formats are supported:
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas) for more information on downloading the YOLO-NAS model for use in Frigate.
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
