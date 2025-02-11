@@ -54,3 +54,16 @@ pywebpush == 2.0.*
 pyclipper == 1.3.*
 shapely == 2.0.*
 prometheus-client == 0.21.*
+# HailoRT Wheels
+appdirs==1.4.*
+argcomplete==2.0.*
+contextlib2==0.6.*
+distlib==0.3.*
+filelock==3.8.*
+future==0.18.*
+importlib-metadata==5.1.*
+importlib-resources==5.1.*
+netaddr==0.8.*
+netifaces==0.10.*
+verboselogs==1.7.*
+virtualenv==20.17.*
