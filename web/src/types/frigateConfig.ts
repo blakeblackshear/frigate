@@ -8,6 +8,7 @@ export interface UiConfig {
   strftime_fmt?: string;
   dashboard: boolean;
   order: number;
+  unit_system?: "metric" | "imperial";
 }
 
 export interface BirdseyeConfig {
@@ -110,6 +111,11 @@ export interface CameraConfig {
     timestamp: boolean;
   };
   name: string;
+  notifications: {
+    enabled: boolean;
+    email?: string;
+    enabled_in_config: boolean;
+  };
   objects: {
     filters: {
       [objectName: string]: {
@@ -223,9 +229,11 @@ export interface CameraConfig {
   zones: {
     [zoneName: string]: {
       coordinates: string;
+      distances: string[];
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;
+      speed_threshold: number;
       objects: string[];
       color: number[];
     };
@@ -390,6 +398,7 @@ export interface FrigateConfig {
   notifications: {
     enabled: boolean;
     email?: string;
+    enabled_in_config: boolean;
   };
 
   objects: {

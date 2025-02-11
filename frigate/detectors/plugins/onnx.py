@@ -9,7 +9,7 @@ from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
 )
-from frigate.util.model import get_ort_providers
+from frigate.util.model import get_ort_providers, post_process_yolov9
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,9 @@ class ONNXDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
+        elif self.onnx_model_type == ModelTypeEnum.yolov9:
+            predictions: np.ndarray = tensor_output[0]
+            return post_process_yolov9(predictions, self.w, self.h)
         else:
             raise Exception(
                 f"{self.onnx_model_type} is currently not supported for rocm. See the docs for more info on supported models."

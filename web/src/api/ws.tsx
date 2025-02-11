@@ -53,13 +53,26 @@ function useValue(): useValueReturn {
     const cameraStates: WsState = {};
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
-      const { record, detect, snapshots, audio, autotracking } =
+      const {
+        record,
+        detect,
+        snapshots,
+        audio,
+        notifications,
+        notifications_suspended,
+        autotracking,
+      } =
         // @ts-expect-error we know this is correct
         state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/notifications/state`] = notifications
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/notifications/suspended`] =
+        notifications_suspended || 0;
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
         ? "ON"
         : "OFF";
@@ -412,4 +425,40 @@ export function useTrackedObjectUpdate(): { payload: string } {
     value: { payload },
   } = useWs("tracked_object_update", "");
   return useDeepMemo(JSON.parse(payload as string));
+}
+
+export function useNotifications(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/notifications/state`, `${camera}/notifications/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useNotificationSuspend(camera: string): {
+  payload: string;
+  send: (payload: number, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/notifications/suspended`,
+    `${camera}/notifications/suspend`,
+  );
+  return { payload: payload as string, send };
+}
+
+export function useNotificationTest(): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs("notification_test", "notification_test");
+  return { payload: payload as string, send };
 }

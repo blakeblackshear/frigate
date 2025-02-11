@@ -450,7 +450,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
 
 :::info
 
@@ -514,6 +514,33 @@ model:
   input_pixel_format: bgr
   input_tensor: nchw
   path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### YOLOv9
+
+[YOLOv9](https://github.com/MultimediaTechLab/YOLO) models are supported, but not included by default.
+
+:::tip
+
+The YOLOv9 detector has been designed to support YOLOv9 models, but may support other YOLO model architectures as well.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolov9
+  width: 640 # <--- should match the imgsize set during model export
+  height: 640 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolov9-t.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 

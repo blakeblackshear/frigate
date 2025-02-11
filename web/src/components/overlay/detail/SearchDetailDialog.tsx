@@ -25,6 +25,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
+  FaArrowRight,
   FaCheckCircle,
   FaChevronDown,
   FaDownload,
@@ -329,6 +330,30 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
+  const averageEstimatedSpeed = useMemo(() => {
+    if (!search || !search.data?.average_estimated_speed) {
+      return undefined;
+    }
+
+    if (search.data?.average_estimated_speed != 0) {
+      return search.data?.average_estimated_speed.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
+  const velocityAngle = useMemo(() => {
+    if (!search || !search.data?.velocity_angle) {
+      return undefined;
+    }
+
+    if (search.data?.velocity_angle != 0) {
+      return search.data?.velocity_angle.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
   const updateDescription = useCallback(() => {
     if (!search) {
       return;
@@ -440,6 +465,29 @@ function ObjectDetailsTab({
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
+          {averageEstimatedSpeed && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">Estimated Speed</div>
+              <div className="flex flex-col space-y-0.5 text-sm">
+                {averageEstimatedSpeed && (
+                  <div className="flex flex-row items-center gap-2">
+                    {averageEstimatedSpeed}{" "}
+                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    {velocityAngle != undefined && (
+                      <span className="text-primary/40">
+                        <FaArrowRight
+                          size={10}
+                          style={{
+                            transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
+                          }}
+                        />
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">Camera</div>
             <div className="text-sm capitalize">

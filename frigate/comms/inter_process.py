@@ -7,7 +7,7 @@ from typing import Callable
 
 import zmq
 
-from frigate.comms.dispatcher import Communicator
+from frigate.comms.base_communicator import Communicator
 
 SOCKET_REP_REQ = "ipc:///tmp/cache/comms"
 
