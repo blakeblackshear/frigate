@@ -341,3 +341,19 @@ the camera to be removed from the view._
 ### `frigate/<camera_name>/birdseye_mode/state`
 
 Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+
+### `frigate/<camera_name>/notifications/set`
+
+Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/state`
+
+Topic with current state of notifications. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/suspend`
+
+Topic to suspend notifications for a certain number of minutes. Expected value is an integer.
+
+### `frigate/<camera_name>/notifications/suspended`
+
+Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if notifications are not suspended.

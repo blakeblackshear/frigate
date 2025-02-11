@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from .base import FrigateBaseModel
+from ..base import FrigateBaseModel
 
 __all__ = ["NotificationConfig"]
 

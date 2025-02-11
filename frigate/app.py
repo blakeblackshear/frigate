@@ -17,8 +17,9 @@ import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
-from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
@@ -314,8 +315,14 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        if self.config.notifications.enabled_in_config:
-            comms.append(WebPushClient(self.config))
+        notification_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.notifications.enabled_in_config
+        ]
+
+        if notification_cameras:
+            comms.append(WebPushClient(self.config, self.stop_event))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)

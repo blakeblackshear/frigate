@@ -5,7 +5,7 @@ from typing import Any, Callable
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-from frigate.comms.dispatcher import Communicator
+from frigate.comms.base_communicator import Communicator
 from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)

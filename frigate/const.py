@@ -104,6 +104,7 @@ UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 UPDATE_EVENT_DESCRIPTION = "update_event_description"
 UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
+NOTIFICATION_TEST = "notification_test"
 
 # Stats Values
 
