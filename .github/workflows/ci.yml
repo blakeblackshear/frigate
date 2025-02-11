@@ -202,33 +202,6 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
-  combined_extra_builds:
-    runs-on: ubuntu-22.04
-    name: Combined Extra Builds
-    needs:
-      - amd64_build
-      - arm64_build
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Set up QEMU and Buildx
-        id: setup
-        uses: ./.github/actions/setup
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v6
-        with:
-          source: .
-          push: true
-          targets: h8l
-          files: docker/hailo8l/h8l.hcl
-          set: |
-            h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
