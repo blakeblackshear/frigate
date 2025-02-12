@@ -85,9 +85,7 @@ export default function LiveContextMenu({
     if (cameraGroup && cameraGroup != "default") {
       setGroupStreamingSettings(allGroupsStreamingSettings[cameraGroup]);
     }
-    // set individual group when all groups changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allGroupsStreamingSettings]);
+  }, [allGroupsStreamingSettings, cameraGroup]);
 
   const onSave = useCallback(
     (settings: GroupStreamingSettings) => {
