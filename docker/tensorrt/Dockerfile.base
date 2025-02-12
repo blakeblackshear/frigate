@@ -11,7 +11,7 @@ FROM ${TRT_BASE} AS trt-deps
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
-    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
+    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvonnxparsers-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
     /tensorrt_libyolo.sh

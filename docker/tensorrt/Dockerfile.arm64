@@ -10,29 +10,16 @@ ARG DEBIAN_FRONTEND
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
-    python3.9 python3.9-dev \
     wget build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
-
-# Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-
-RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip"
 
 
 FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 
-# python-tensorrt build deps are 3.4 GB!
-RUN apt-get update \
-    && apt-get install -y ccache cuda-cudart-dev-* cuda-nvcc-* libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev \
-    && ([ -e /usr/local/cuda ] || ln -s /usr/local/cuda-* /usr/local/cuda) \
-    && rm -rf /var/lib/apt/lists/*;
-
 # Determine version of tensorrt already installed in base image, e.g. "Version: 8.4.1-1+cuda11.4"
-RUN NVINFER_VER=$(dpkg -s libnvinfer8 | grep -Po "Version: \K.*") \
+RUN NVINFER_VER=$(dpkg -s libnvinfer10 | grep -Po "Version: \K.*") \
     && echo $NVINFER_VER | grep -Po "^\d+\.\d+\.\d+" > /etc/TENSORRT_VER
 
 RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,target=/deps/build_python_tensorrt.sh \
@@ -41,11 +28,12 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
     && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
-ADD https://nvidia.box.com/shared/static/psl23iw3bh7hlgku0mjo1xekxpego3e3.whl /tmp/onnxruntime_gpu-1.15.1-cp311-cp311-linux_aarch64.whl
+# See https://elinux.org/Jetson_Zoo#ONNX_Runtime
+ADD https://nvidia.box.com/shared/static/6l0u97rj80ifwkk8rqbzj1try89fk26z.whl /tmp/onnxruntime_gpu-1.19.0-cp310-cp310-linux_aarch64.whl
 
 RUN pip3 uninstall -y onnxruntime-openvino \
     && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt \
-    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.15.1-cp311-cp311-linux_aarch64.whl
+    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.19.0-cp310-cp310-linux_aarch64.whl
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
@@ -67,7 +55,7 @@ RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
-    && apt-get install -y python-is-python3 libprotobuf17  \
+    && apt-get install -y python-is-python3 libprotobuf23  \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/

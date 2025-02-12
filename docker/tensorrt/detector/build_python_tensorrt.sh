@@ -6,23 +6,10 @@ mkdir -p /trt-wheels
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
 
-  # NVIDIA supplies python-tensorrt for python3.8, but frigate uses python3.9,
-  # so we must build python-tensorrt ourselves.
-
-  # Get python-tensorrt source
-  mkdir /workspace
-  cd /workspace
-  git clone -b ${TENSORRT_VER} https://github.com/NVIDIA/TensorRT.git --depth=1
-
-  # Collect dependencies
-  EXT_PATH=/workspace/external && mkdir -p $EXT_PATH
-  pip3 install pybind11 && ln -s /usr/local/lib/python3.9/dist-packages/pybind11 $EXT_PATH/pybind11
-  ln -s /usr/include/python3.9 $EXT_PATH/python3.9
-  ln -s /usr/include/aarch64-linux-gnu/NvOnnxParser.h /workspace/TensorRT/parsers/onnx/
-
-  # Build wheel
-  cd /workspace/TensorRT/python
-  EXT_PATH=$EXT_PATH PYTHON_MAJOR_VERSION=3 PYTHON_MINOR_VERSION=9 TARGET_ARCHITECTURE=aarch64 /bin/bash ./build.sh
-  mv build/dist/*.whl /trt-wheels/
+  wget -q https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/10.3.0/tars/TensorRT-10.3.0.26.l4t.aarch64-gnu.cuda-12.6.tar.gz -O TensorRT.tar.gz
+  tar -zxf TensorRT.tar.gz
+  mv TensorRT-10.3.0.26/python/tensorrt-10.3.0-cp310-none-linux_aarch64.whl /trt-wheels/
+  rm -rf TensorRT-10.3.0.26
+  rm -rf TensorRT.tar.gz
 
 fi

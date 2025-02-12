@@ -7,6 +7,9 @@ SCRIPT_DIR="/usr/local/src/tensorrt_demos"
 # Clone tensorrt_demos repo
 git clone --depth 1 https://github.com/NateMeyer/tensorrt_demos.git -b conditional_download
 
+# remove -lnvparsers
+sed -i 's/-lnvparsers//g' ./tensorrt_demos/plugins/Makefile
+
 # Build libyolo
 if [ ! -e /usr/local/cuda ]; then
     ln -s /usr/local/cuda-* /usr/local/cuda
