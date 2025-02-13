@@ -66,8 +66,16 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         title="License plate confidence score required to be added to the object as a sub label.",
     )
     min_area: int = Field(
-        default=500,
-        title="Min area of license plate to consider running license plate recognition.",
+        default=1000,
+        title="Minimum area of license plate to consider running license plate recognition.",
+    )
+    min_plate_length: int = Field(
+        default=4,
+        title="Minimum number of characters a license plate must have to be added to the object as a sub label.",
+    )
+    match_distance: int = Field(
+        default=1,
+        title="Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate.",
     )
     known_plates: Optional[Dict[str, List[str]]] = Field(
         default={}, title="Known plates to track."
