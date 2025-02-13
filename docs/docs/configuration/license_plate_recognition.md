@@ -24,14 +24,20 @@ lpr:
 
 ## Advanced Configuration
 
-Several options are available to fine-tune the LPR feature. For example, you can adjust the `min_area` setting, which defines the minimum size in pixels a license plate must be before LPR runs. The default is 500 pixels.
+Several options are available to fine-tune the LPR feature. For example, you can adjust the `min_area` setting, which defines the minimum size in pixels a license plate must be before LPR runs. The default is 1000 pixels.
+
+The `min_plate_length` field specifies the minimum number of characters a license plate must have to be added to the object as a sub label.
+
+If you want to allow a number of number of missing/incorrect characters to still cause a detected plate to match a known plate, set the `match_distance` field. For example, setting `match_distance` to 1 would cause a detected plate of ABCDE to match ABCBE or ABCD.
 
 Additionally, you can define `known_plates` as strings or regular expressions, allowing Frigate to label tracked vehicles with custom sub_labels when a recognized plate is detected. This information is then accessible in the UI, filters, and notifications.
 
 ```yaml
 lpr:
   enabled: true
-  min_area: 500
+  min_area: 1500
+  min_plate_length: 4
+  match_distance: 1
   known_plates:
     Wife's Car:
       - "ABC-1234"
