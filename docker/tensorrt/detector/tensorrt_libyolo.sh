@@ -7,8 +7,9 @@ SCRIPT_DIR="/usr/local/src/tensorrt_demos"
 # Clone tensorrt_demos repo
 git clone --depth 1 https://github.com/NateMeyer/tensorrt_demos.git -b conditional_download
 
-# remove -lnvparsers
-sed -i 's/-lnvparsers//g' ./tensorrt_demos/plugins/Makefile
+# Should probably upstream this patch or fork the repo
+# See: https://developer.nvidia.com/docs/drive/drive-os/6.0.8/public/drive-os-tensorrt/api-reference/docs/python/infer/Core/BuilderConfig.html#tensorrt.BuilderFlag
+git apply --directory tensorrt_demos /0001-fix-for-tensorrt-v10.3.0.patch
 
 # Build libyolo
 if [ ! -e /usr/local/cuda ]; then

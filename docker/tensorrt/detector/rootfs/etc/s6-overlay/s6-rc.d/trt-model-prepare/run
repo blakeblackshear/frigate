@@ -62,15 +62,14 @@ fi
 # container which should not be present in the image - if they are, TRT model generation will
 # fail or produce invalid models. Thus we must request the user to install them on the host in
 # order to run libyolo here.
-# On Jetpack 5.0, these libraries are not mounted by the runtime and are supplied by the image.
+# On Jetpack 5.0+, these libraries are not mounted by the runtime and are supplied by the image.
 if [[ "$(arch)" == "aarch64" ]]; then
-    if [[ ! -e /usr/lib/aarch64-linux-gnu/tegra ]]; then
+    if [[ ! -e /usr/lib/aarch64-linux-gnu/tegra && ! -e /usr/lib/aarch64-linux-gnu/tegra-egl ]]; then
         echo "ERROR: Container must be launched with nvidia runtime"
         exit 1
-    elif [[ ! -e /usr/lib/aarch64-linux-gnu/libnvinfer.so.8 ||
-            ! -e /usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so.8 ||
-            ! -e /usr/lib/aarch64-linux-gnu/libnvparsers.so.8 ||
-            ! -e /usr/lib/aarch64-linux-gnu/libnvonnxparser.so.8 ]]; then
+    elif [[ ! -e /usr/lib/aarch64-linux-gnu/libnvinfer.so ||
+            ! -e /usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so ||
+            ! -e /usr/lib/aarch64-linux-gnu/libnvonnxparser.so ]]; then
         echo "ERROR: Please run the following on the HOST:"
         echo "  sudo apt install libnvinfer8 libnvinfer-plugin8 libnvparsers8 libnvonnxparsers8 nvidia-container"
         exit 1

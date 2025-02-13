@@ -61,6 +61,12 @@ RUN apt-get update \
 RUN rm -rf /usr/lib/btbn-ffmpeg/
 COPY --from=jetson-ffmpeg /rootfs /
 
+# ffmpeg runtime dependencies
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+    libx264-163 libx265-199 libegl1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     --mount=type=bind,from=trt-model-wheels,source=/trt-model-wheels,target=/deps/trt-model-wheels \
