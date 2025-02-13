@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 import requests
+from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
@@ -23,7 +24,6 @@ from .api import RealTimeProcessorApi
 
 logger = logging.getLogger(__name__)
 
-MIN_PLATE_LENGTH = 3
 WRITE_DEBUG_IMAGES = False
 
 
@@ -275,7 +275,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                     save_image = cv2.cvtColor(
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
                     )
-                    filename = f"/config/plate_{original_idx}_{plate}_{area}.jpg"
+                    filename = f"debug/frames/plate_{original_idx}_{plate}_{area}.jpg"
                     cv2.imwrite(filename, save_image)
 
                 license_plates[original_idx] = plate
@@ -290,7 +290,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                     for plate, conf, area in zip(
                         license_plates, average_confidences, areas
                     )
-                    if len(plate) >= MIN_PLATE_LENGTH
+                    if len(plate) >= self.lpr_config.min_plate_length
                 ],
                 key=lambda x: (x[2], len(x[0]), x[1]),
                 reverse=True,
@@ -684,7 +684,11 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = (resized_image.astype("float32") / 255.0 - 0.5) / 0.5
 
-        padded_image = np.zeros((input_shape[0], input_h, input_w), dtype=np.float32)
+        # Compute mean pixel value of the resized image (per channel)
+        mean_pixel = np.mean(resized_image, axis=(1, 2), keepdims=True)
+        padded_image = np.full(
+            (input_shape[0], input_h, input_w), mean_pixel, dtype=np.float32
+        )
         padded_image[:, :, :resized_w] = resized_image
 
         return padded_image
@@ -736,6 +740,9 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         return image
 
     def __update_metrics(self, duration: float) -> None:
+        """
+        Update inference metrics.
+        """
         self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
@@ -770,8 +777,21 @@ class LicensePlateProcessor(RealTimeProcessorApi):
 
         # Return the top scoring bounding box if found
         if top_box is not None:
-            logger.debug("Found license plate: {}".format(top_box.astype(int)))
-            return tuple(top_box.astype(int))
+            # expand box by 15% to help with OCR
+            expansion = (top_box[2:] - top_box[:2]) * 0.1
+
+            # Expand box
+            expanded_box = np.array(
+                [
+                    top_box[0] - expansion[0],  # x1
+                    top_box[1] - expansion[1],  # y1
+                    top_box[2] + expansion[0],  # x2
+                    top_box[3] + expansion[1],  # y2
+                ]
+            ).clip(0, [input.shape[1], input.shape[0]] * 2)
+
+            logger.debug(f"Found license plate: {expanded_box.astype(int)}")
+            return tuple(expanded_box.astype(int))
         else:
             return None  # No detection above the threshold
 
@@ -903,13 +923,16 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                     car,
                 )
 
+            yolov9_start = datetime.datetime.now().timestamp()
             license_plate = self._detect_license_plate(car)
+            logger.debug(
+                f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+            )
 
             if not license_plate:
                 logger.debug("Detected no license plates for car object.")
                 return
 
-            # double the size of the license plate for better OCR
             license_plate_area = max(
                 0,
                 (license_plate[2] - license_plate[0])
@@ -917,7 +940,8 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             )
 
             # check that license plate is valid
-            if license_plate_area < self.config.lpr.min_area:
+            # double the value because we've doubled the size of the car
+            if license_plate_area < self.config.lpr.min_area * 2:
                 logger.debug("License plate is less than min_area")
                 return
 
@@ -960,14 +984,14 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 license_plate_box[0] : license_plate_box[2],
             ]
 
-            # double the size of the license plate frame for better OCR
-            license_plate_frame = cv2.resize(
-                license_plate_frame,
-                (
-                    int(2 * license_plate_frame.shape[1]),
-                    int(2 * license_plate_frame.shape[0]),
-                ),
-            )
+        # double the size of the license plate frame for better OCR
+        license_plate_frame = cv2.resize(
+            license_plate_frame,
+            (
+                int(2 * license_plate_frame.shape[1]),
+                int(2 * license_plate_frame.shape[0]),
+            ),
+        )
 
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
@@ -1031,7 +1055,11 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             (
                 label
                 for label, plates in self.lpr_config.known_plates.items()
-                if any(re.match(f"^{plate}$", top_plate) for plate in plates)
+                if any(
+                    re.match(f"^{plate}$", top_plate)
+                    or distance(plate, top_plate) <= self.lpr_config.match_distance
+                    for plate in plates
+                )
             ),
             top_plate,
         )
