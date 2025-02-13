@@ -11,8 +11,8 @@ apt-get -qq install --no-install-recommends -y \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3 \
-    python3-pip \
+    python3.11 \
+    python3.11-dev \
     curl \
     lsof \
     jq \
@@ -20,6 +20,12 @@ apt-get -qq install --no-install-recommends -y \
     libgl1 \
     libglib2.0-0 \
     libusb-1.0.0
+
+# Ensure python3 defaults to python3.11
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip"
 
 mkdir -p -m 600 /root/.gnupg
 
