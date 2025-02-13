@@ -8,9 +8,23 @@ ARG SLIM_BASE=debian:12-slim
 
 FROM ${BASE_IMAGE} AS base
 
+# Ensure python 3.11 is available in ubuntu-based image
+RUN if [ -e /etc/lsb-release ]; then \
+        apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository ppa:deadsnakes/ppa; \
+    fi
+
 FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
 
 FROM ${SLIM_BASE} AS slim-base
+
+# Ensure python 3.11 is available in ubuntu-based image
+RUN if [ -e /etc/lsb-release ]; then \
+        apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository ppa:deadsnakes/ppa; \
+    fi
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
