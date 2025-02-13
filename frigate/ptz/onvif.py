@@ -6,6 +6,9 @@ from enum import Enum
 from importlib.util import find_spec
 from pathlib import Path
 
+from threading import Thread
+from time import sleep
+
 import numpy
 from onvif import ONVIFCamera, ONVIFError, ONVIFService
 from zeep.exceptions import Fault, TransportError
@@ -41,32 +44,52 @@ class OnvifController:
         self.cams: dict[str, ONVIFCamera] = {}
         self.config = config
         self.ptz_metrics = ptz_metrics
+        self.failed_cams = set()
 
         for cam_name, cam in config.cameras.items():
             if not cam.enabled:
                 continue
 
             if cam.onvif.host:
-                try:
-                    self.cams[cam_name] = {
-                        "onvif": ONVIFCamera(
-                            cam.onvif.host,
-                            cam.onvif.port,
-                            cam.onvif.user,
-                            cam.onvif.password,
-                            wsdl_dir=str(
-                                Path(find_spec("onvif").origin).parent / "wsdl"
-                            ),
-                            adjust_time=cam.onvif.ignore_time_mismatch,
-                            encrypt=not cam.onvif.tls_insecure,
-                        ),
-                        "init": False,
-                        "active": False,
-                        "features": [],
-                        "presets": {},
-                    }
-                except ONVIFError as e:
-                    logger.error(f"Onvif connection to {cam.name} failed: {e}")
+                if not self._setup_onvif(cam_name):
+                    self.failed_cams.add(cam_name)
+
+        # Start a background thread to retry failed camera initializations
+        self.retry_thread = Thread(target=self._retry_failed_cams, daemon=True)
+        self.retry_thread.start()
+
+    def _retry_failed_cams(self):
+        while True:
+            for cam_name in list(self.failed_cams):
+                if self._setup_onvif(cam_name):
+                    self.failed_cams.remove(cam_name)
+            sleep(60)
+
+
+    def _setup_onvif(self, camera_name: str) -> bool:
+        try:
+            onvif: ONVIFCamera = ONVIFCamera(
+                self.config.cameras[camera_name].onvif.host,
+                self.config.cameras[camera_name].onvif.port,
+                self.config.cameras[camera_name].onvif.user,
+                self.config.cameras[camera_name].onvif.password,
+                wsdl_dir=str(
+                    Path(find_spec("onvif").origin).parent / "wsdl"
+                ),
+                adjust_time=self.config.cameras[camera_name].onvif.ignore_time_mismatch,
+                encrypt=not self.config.cameras[camera_name].onvif.tls_insecure,
+            )
+            self.cams[camera_name] = {
+                "onvif": onvif,
+                "init": False,
+                "active": False,
+                "features": [],
+                "presets": {},
+            }
+            return True
+        except ONVIFError as e:
+            logger.error(f"Onvif connection to {camera_name} failed: {e}")
+            return False
 
     async def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
