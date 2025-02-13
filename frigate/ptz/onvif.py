@@ -65,7 +65,6 @@ class OnvifController:
                     self.failed_cams.remove(cam_name)
             sleep(60)
 
-
     def _setup_onvif(self, camera_name: str) -> bool:
         try:
             onvif: ONVIFCamera = ONVIFCamera(
@@ -73,9 +72,7 @@ class OnvifController:
                 self.config.cameras[camera_name].onvif.port,
                 self.config.cameras[camera_name].onvif.user,
                 self.config.cameras[camera_name].onvif.password,
-                wsdl_dir=str(
-                    Path(find_spec("onvif").origin).parent / "wsdl"
-                ),
+                wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
                 adjust_time=self.config.cameras[camera_name].onvif.ignore_time_mismatch,
                 encrypt=not self.config.cameras[camera_name].onvif.tls_insecure,
             )
