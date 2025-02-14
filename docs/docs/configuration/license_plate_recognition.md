@@ -67,7 +67,7 @@ lpr:
       - "ABC-1234"
       - "ABC-I234" # Accounts for potential confusion between the number one (1) and capital letter I
     Johnny:
-      - "J*N-*234" # Allows variations like JHN-1234 and JMN-1234
+      - "J*N-*234" # Matches JHN-1234 and JMN-I234, but also note that "*" matches any number of characters
     Sally:
       - "[S5]LL-1234" # Matches both SLL-1234 and 5LL-1234
 ```
