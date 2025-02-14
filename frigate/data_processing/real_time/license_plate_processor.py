@@ -282,16 +282,27 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 average_confidences[original_idx] = average_confidence
                 areas[original_idx] = area
 
-            # Filter out plates that have a length of less than 3 characters
+            # Filter out plates that have a length of less than min_plate_length characters
+            # or that don't match the expected format (if defined)
             # Sort by area, then by plate length, then by confidence all desc
-            sorted_data = sorted(
-                [
-                    (plate, conf, area)
-                    for plate, conf, area in zip(
-                        license_plates, average_confidences, areas
+            filtered_data = []
+            for plate, conf, area in zip(license_plates, average_confidences, areas):
+                if len(plate) < self.lpr_config.min_plate_length:
+                    logger.debug(
+                        f"Filtered out '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
                     )
-                    if len(plate) >= self.lpr_config.min_plate_length
-                ],
+                    continue
+
+                if self.lpr_config.format and not re.fullmatch(
+                    self.lpr_config.format, plate
+                ):
+                    logger.debug(f"Filtered out '{plate}' due to format mismatch")
+                    continue
+
+                filtered_data.append((plate, conf, area))
+
+            sorted_data = sorted(
+                filtered_data,
                 key=lambda x: (x[2], len(x[0]), x[1]),
                 reverse=True,
             )
@@ -753,7 +764,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         """
         predictions = self.yolov9_detection_model(input)
 
-        confidence_threshold = self.lpr_config.threshold
+        confidence_threshold = self.lpr_config.detection_threshold
 
         top_score = -1
         top_box = None
@@ -968,6 +979,12 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             if not license_plate:
                 return
 
+            if license_plate.get("score") < self.lpr_config.detection_threshold:
+                logger.debug(
+                    f"Plate detection score is less than the threshold ({license_plate['score']:0.2f} < {self.lpr_config.detection_threshold})"
+                )
+                return
+
             license_plate_box = license_plate.get("box")
 
             # check that license plate is valid
@@ -1043,7 +1060,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 return
 
         # Check against minimum confidence threshold
-        if avg_confidence < self.lpr_config.threshold:
+        if avg_confidence < self.lpr_config.recognition_threshold:
             logger.debug(
                 f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
             )

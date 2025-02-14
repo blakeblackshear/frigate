@@ -546,6 +546,25 @@ face_recognition:
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
 
+# Optional: Configuration for license plate recognition capability
+lpr:
+  # Optional: Enable license plate recognition (default: shown below)
+  enabled: False
+  # Optional: License plate object confidence score required to begin running recognition (default: shown below)
+  detection_threshold: 0.7
+  # Optional: Minimum area of license plate to begin running recognition (default: shown below)
+  min_area: 1000
+  # Optional: Recognition confidence score required to add the plate to the object as a sub label (default: shown below)
+  recognition_threshold: 0.9
+  # Optional: Minimum number of characters a license plate must have to be added to the object as a sub label (default: shown below)
+  min_plate_length: 4
+  # Optional: Regular expression for the expected format of a license plate (default: shown below)
+  format: None
+  # Optional: Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate
+  match_distance: 1
+  # Optional: Known plates to track (strings or regular expressions) (default: shown below)
+  known_plates: {}
+
 # Optional: Configuration for AI generated tracked object descriptions
 # NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
