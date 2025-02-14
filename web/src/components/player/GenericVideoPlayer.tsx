@@ -27,7 +27,7 @@ export function GenericVideoPlayer({
         const response = await fetch(url, { method: "HEAD" });
         // nginx vod module returns 502 for non existent media
         // https://github.com/kaltura/nginx-vod-module/issues/468
-        setSourceExists(response.status !== 502);
+        setSourceExists(response.status !== 502 && response.status !== 404);
       } catch (error) {
         setSourceExists(false);
       }
