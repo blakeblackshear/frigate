@@ -61,22 +61,35 @@ class FaceRecognitionConfig(FrigateBaseModel):
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    threshold: float = Field(
-        default=0.9,
-        title="License plate confidence score required to be added to the object as a sub label.",
+    detection_threshold: float = Field(
+        default=0.7,
+        title="License plate object confidence score required to begin running recognition.",
+        gt=0.0,
+        le=1.0,
     )
     min_area: int = Field(
         default=1000,
-        title="Minimum area of license plate to consider running license plate recognition.",
+        title="Minimum area of license plate to begin running recognition.",
+    )
+    recognition_threshold: float = Field(
+        default=0.9,
+        title="Recognition confidence score required to add the plate to the object as a sub label.",
+        gt=0.0,
+        le=1.0,
     )
     min_plate_length: int = Field(
         default=4,
         title="Minimum number of characters a license plate must have to be added to the object as a sub label.",
     )
+    format: Optional[str] = Field(
+        default=None,
+        title="Regular expression for the expected format of license plate.",
+    )
     match_distance: int = Field(
         default=1,
         title="Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate.",
+        ge=0,
     )
     known_plates: Optional[Dict[str, List[str]]] = Field(
-        default={}, title="Known plates to track."
+        default={}, title="Known plates to track (strings or regular expressions)."
     )
