@@ -41,7 +41,7 @@ export function GenericVideoPlayer({
       <div className="relative flex flex-grow items-center justify-center">
         {!sourceExists ? (
           <div className="flex aspect-video w-full items-center justify-center bg-background_alt text-lg text-primary">
-            Video not found
+            Video not available
           </div>
         ) : (
           <>
