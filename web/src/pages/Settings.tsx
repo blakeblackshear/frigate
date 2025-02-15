@@ -38,6 +38,7 @@ import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useSearchParams } from "react-router-dom";
 
 const allSettingsViews = [
   "UI settings",
@@ -57,6 +58,8 @@ export default function Settings() {
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const [searchParams] = useSearchParams();
 
   // available settings views
 
@@ -124,7 +127,8 @@ export default function Settings() {
     if (allSettingsViews.includes(page as SettingsType)) {
       setPage(page as SettingsType);
     }
-    return false;
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
   });
 
   useSearchEffect("camera", (camera: string) => {
@@ -132,7 +136,8 @@ export default function Settings() {
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
     }
-    return false;
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
   });
 
   useEffect(() => {

@@ -1062,7 +1062,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         # Check against minimum confidence threshold
         if avg_confidence < self.lpr_config.recognition_threshold:
             logger.debug(
-                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
+                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
             )
             return
 
