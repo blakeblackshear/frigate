@@ -55,6 +55,7 @@ def mjpeg_feed(
 ):
     draw_options = {
         "bounding_boxes": params.bbox,
+        "motion_paths": params.motion_paths,
         "timestamp": params.timestamp,
         "zones": params.zones,
         "mask": params.mask,
@@ -127,6 +128,7 @@ def latest_frame(
     frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
     draw_options = {
         "bounding_boxes": params.bbox,
+        "motion_paths": params.motion_paths,
         "timestamp": params.timestamp,
         "zones": params.zones,
         "mask": params.mask,

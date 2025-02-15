@@ -46,6 +46,7 @@ from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig
 from .camera.motion import MotionConfig
+from .camera.motion_path import MotionPathConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
 from .camera.record import RecordConfig, RetainModeEnum
@@ -387,6 +388,9 @@ class FrigateConfig(FrigateBaseModel):
     )
     motion: Optional[MotionConfig] = Field(
         default=None, title="Global motion detection configuration."
+    )
+    motion_paths: Optional[MotionPathConfig] = Field(
+        default=None, title="Global motion path tracking configuration."
     )
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Global object configuration."

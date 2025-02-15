@@ -103,6 +103,16 @@ function DebugSettings({ handleSetOption, options }: DebugSettingsProps) {
       </div>
       <div className="flex items-center space-x-2">
         <Switch
+          id="motion_paths"
+          checked={options["motion_paths"]}
+          onCheckedChange={(isChecked) => {
+            handleSetOption("motion_paths", isChecked);
+          }}
+        />
+        <Label htmlFor="motion_paths">Motion Paths</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Switch
           id="timestamp"
           checked={options["timestamp"]}
           onCheckedChange={(isChecked) => {
