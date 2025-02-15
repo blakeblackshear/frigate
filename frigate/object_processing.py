@@ -230,7 +230,7 @@ class CameraState:
                 position=self.camera_config.timestamp_style.position,
             )
 
-        if draw_options.get("motion_paths", True):  # Enable by default
+        if draw_options.get("motion_paths"):
             # Update and draw paths for non-stationary objects
             active_objects = [
                 obj_id for obj_id, obj in tracked_objects.items() 
@@ -244,7 +244,7 @@ class CameraState:
                     int((obj["box"][0] + obj["box"][2]) / 2),  # x center
                     int((obj["box"][1] + obj["box"][3]) / 2)   # y center
                 )
-                self.path_visualizer.update_position(obj_id, centroid)
+                self.path_visualizer.update_position(obj_id, centroid, frame_copy.shape[:2])
             
             # Draw paths
             self.path_visualizer.draw_paths(frame_copy, active_objects)
