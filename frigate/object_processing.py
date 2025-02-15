@@ -33,6 +33,7 @@ from frigate.util.image import (
     is_better_thumbnail,
     is_label_printable,
 )
+from frigate.motion.path_visualizer import PathVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class CameraState:
         self.previous_frame_id = None
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.path_visualizer = PathVisualizer()
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -227,6 +229,28 @@ class CameraState:
                 font_color=(color.blue, color.green, color.red),
                 position=self.camera_config.timestamp_style.position,
             )
+
+        if draw_options.get("motion_paths", True):  # Enable by default
+            # Update and draw paths for non-stationary objects
+            active_objects = [
+                obj_id for obj_id, obj in tracked_objects.items() 
+                if not obj["stationary"] and obj["frame_time"] == frame_time
+            ]
+            
+            # Update positions for active objects
+            for obj_id in active_objects:
+                obj = tracked_objects[obj_id]
+                centroid = (
+                    int((obj["box"][0] + obj["box"][2]) / 2),  # x center
+                    int((obj["box"][1] + obj["box"][3]) / 2)   # y center
+                )
+                self.path_visualizer.update_position(obj_id, centroid)
+            
+            # Draw paths
+            self.path_visualizer.draw_paths(frame_copy, active_objects)
+            
+            # Cleanup inactive objects
+            self.path_visualizer.cleanup_inactive(active_objects)
 
         return frame_copy
 
