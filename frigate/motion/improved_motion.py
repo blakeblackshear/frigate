@@ -131,7 +131,7 @@ class ImprovedMotionDetector(MotionDetector):
         if self.save_images:
             blurred_saved = resized_frame.copy()
 
-        if self.save_images or self.calibrating:
+        if self.save_images:
             self.frame_counter += 1
         # compare to average
         frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
@@ -211,6 +211,7 @@ class ImprovedMotionDetector(MotionDetector):
                 cv2.cvtColor(resized_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(contrasted_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(blurred_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(cv2.convertScaleAbs(self.avg_frame), cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(frameDelta, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR),
                 thresh_dilated,
