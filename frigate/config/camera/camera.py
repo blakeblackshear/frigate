@@ -24,6 +24,7 @@ from .ffmpeg import CameraFfmpegConfig, CameraInput
 from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
+from .motion_path import MotionPathConfig
 from .mqtt import CameraMqttConfig
 from .notification import NotificationConfig
 from .objects import ObjectConfig
@@ -61,6 +62,9 @@ class CameraConfig(FrigateBaseModel):
     )
     motion: Optional[MotionConfig] = Field(
         None, title="Motion detection configuration."
+    )
+    motion_paths: Optional[MotionPathConfig] = Field(
+        None, title="Enable motion paths."
     )
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
