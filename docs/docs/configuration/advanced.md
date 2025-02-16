@@ -32,7 +32,7 @@ Examples of available modules are:
 
 #### Go2RTC Logging
 
-See [the go2rtc docs](for logging configuration)
+See [the go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#module-log) for logging configuration
 
 ```yaml
 go2rtc:
