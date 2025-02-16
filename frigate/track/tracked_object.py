@@ -24,6 +24,7 @@ from frigate.util.image import (
 )
 from frigate.util.object import box_inside
 from frigate.util.velocity import calculate_real_world_speed
+from frigate.motion.path_visualizer import PathVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class TrackedObject:
         ui_config: UIConfig,
         frame_cache,
         obj_data: dict[str, any],
+        path_history,
     ):
         # set the score history then remove as it is not part of object state
         self.score_history = obj_data["score_history"]
@@ -67,6 +69,8 @@ class TrackedObject:
         self.average_estimated_speed = 0
         self.velocity_angle = 0
         self.previous = self.to_dict()
+        self.path_visualizer = PathVisualizer()
+        self.path_history = path_history
 
     @property
     def max_severity(self) -> Optional[str]:
@@ -391,7 +395,7 @@ class TrackedObject:
             return None
 
     def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
+        self, timestamp=False, bounding_box=False, motion_paths=False, crop=False, height=None, quality=70
     ):
         if self.thumbnail_data is None:
             return None
@@ -444,6 +448,23 @@ class TrackedObject:
                     thickness=thickness,
                     color=color,
                 )
+
+        if motion_paths:
+            # Draw historical path data
+            positions = self.path_history[self.camera_config.name][self.obj_data["id"]]
+            if len(positions) > 1:
+                # Draw lines connecting positions
+                for i in range(1, len(positions)):
+                    start_pos = positions[i-1]
+                    end_pos = positions[i]
+                    # Color transitions from blue to green (past to present)
+                    alpha = i / len(positions)
+                    color = (
+                        int(255 * (1-alpha)),  # Blue
+                        int(255 * alpha),      # Green
+                        0                      # Red
+                    )
+                    cv2.line(best_frame, start_pos, end_pos, color, 2, cv2.LINE_AA)
 
         if crop:
             box = self.thumbnail_data["box"]

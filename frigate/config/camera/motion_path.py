@@ -8,32 +8,15 @@ __all__ = ["MotionPathConfig"]
 
 
 class MotionPathConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="Enable motion path tracking on all cameras.")
-    threshold: int = Field(
-        default=30,
-        title="Motion detection threshold (1-255).",
-        ge=1,
-        le=255,
+    enabled: bool = Field(default=True, title="Enable motion path tracking.")
+    max_history: int = Field(
+        default=10,
+        title="Number of positions to maintain in motion path history.",
+        ge=2,  # Minimum of 2 positions needed to draw a path
+        le=100,  # Reasonable upper limit
     )
-    lightning_threshold: float = Field(
-        default=0.8, title="Lightning detection threshold (0.3-1.0).", ge=0.3, le=1.0
-    )
-    improve_contrast: bool = Field(default=True, title="Improve Contrast")
-    contour_area: Optional[int] = Field(default=10, title="Contour Area")
-    delta_alpha: float = Field(default=0.2, title="Delta Alpha")
-    frame_alpha: float = Field(default=0.01, title="Frame Alpha")
-    frame_height: Optional[int] = Field(default=100, title="Frame Height")
-    mask: Union[str, list[str]] = Field(
-        default="", title="Coordinates polygon for the motion mask."
-    )
-    mqtt_off_delay: int = Field(
-        default=30,
-        title="Delay for updating MQTT with no motion detected.",
-    )
-    enabled_in_config: Optional[bool] = Field(
-        default=None, title="Keep track of original state of motion detection."
-    )
-    raw_mask: Union[str, list[str]] = ""
+    mask: Optional[Any] = Field(default=None)
+    raw_mask: Optional[Any] = Field(default=None)
 
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):

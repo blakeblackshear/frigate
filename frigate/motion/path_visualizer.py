@@ -42,7 +42,7 @@ class PathVisualizer:
         
         self.kalman_filters[object_id] = kf
             
-    def update_position(self, object_id: str, centroid: Tuple[int, int], frame_shape: Tuple[int, int]):
+    def update_position(self, object_id: str, centroid: Tuple[int, int]):
         """Update position history and Kalman filter for an object"""
         if object_id not in self.position_history:
             self.position_history[object_id] = []
