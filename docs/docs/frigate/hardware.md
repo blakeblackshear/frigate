@@ -55,21 +55,22 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 
 | Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | Notes                                  |
 | -------------------- | -------------------------- | ------------------------- | -------------------------------------- |
-| Intel Celeron J4105  | ~ 25 ms                    |                           | Can only run one detector instance     |
-| Intel Celeron N3060  | 130 - 150 ms               |                           | Can only run one detector instance     |
-| Intel Celeron N3205U | ~ 120 ms                   |                           | Can only run one detector instance     |
-| Intel Celeron N4020  | 50 - 200 ms                |                           | Inference speed depends on other loads |
-| Intel i3 6100T       | 15 - 35 ms                 |                           | Can only run one detector instance     |
-| Intel i3 8100        | ~ 15 ms                    |                           |                                        |
-| Intel i5 4590        | ~ 20 ms                    |                           |                                        |
-| Intel i5 6500        | ~ 15 ms                    |                           |                                        |
-| Intel i5 7200u       | 15 - 25 ms                 |                           |                                        |
-| Intel i5 7500        | ~ 15 ms                    |                           |                                        |
-| Intel i5 1135G7      | 10 - 15 ms                 |                           |                                        |
-| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                                        |
-| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                                        |
-| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                                        |
-| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                                        |
+| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                                        |
+| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                                        |
+| Intel Ultra 5 125H   |                            | 320: ~ 10 ms 640: ~ 22 ms |                                        |
+| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                                        |
+| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                                        |
+| Intel i5 1135G7      | 10 - 15 ms                 |                           |                                        |
+| Intel i5 7500        | ~ 15 ms                    |                           |                                        |
+| Intel i5 7200u       | 15 - 25 ms                 |                           |                                        |
+| Intel i5 6500        | ~ 15 ms                    |                           |                                        |
+| Intel i5 4590        | ~ 20 ms                    |                           |                                        |
+| Intel i3 8100        | ~ 15 ms                    |                           |                                        |
+| Intel i3 6100T       | 15 - 35 ms                 |                           | Can only run one detector instance     |
+| Intel Celeron N4020  | 50 - 200 ms                |                           | Inference speed depends on other loads |
+| Intel Celeron N3205U | ~ 120 ms                   |                           | Can only run one detector instance     |
+| Intel Celeron N3060  | 130 - 150 ms               |                           | Can only run one detector instance     |
+| Intel Celeron J4105  | ~ 25 ms                    |                           | Can only run one                       |
 
 ### TensorRT - Nvidia GPU
 
@@ -80,13 +81,13 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 | Name            | YoloV7 Inference Time | YOLO-NAS Inference Time   |
 | --------------- | --------------------- | ------------------------- |
-| GTX 1060 6GB    | ~ 7 ms                |                           |
-| GTX 1070        | ~ 6 ms                |                           |
-| GTX 1660 SUPER  | ~ 4 ms                |                           |
-| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
-| RTX 3070 Mobile | ~ 5 ms                |                           |
-| Quadro P400 2GB | 20 - 25 ms            |                           |
-| Quadro P2000    | ~ 12 ms               |                           |
+| Quadro P2000    | ~ 12 ms               |                           |
+| Quadro P400 2GB | 20 - 25 ms            |                           |
+| RTX 3070 Mobile | ~ 5 ms                |                           |
+| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
+| GTX 1660 SUPER  | ~ 4 ms                |                           |
+| GTX 1070        | ~ 6 ms                |                           |
+| GTX 1060 6GB    | ~ 7 ms                |                           |
 
 ### AMD GPUs
 
