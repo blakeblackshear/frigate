@@ -16,15 +16,15 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
-    FrigateConfig,
-    MqttConfig,
     CameraMqttConfig,
+    FrigateConfig,
     RecordConfig,
     SnapshotsConfig,
     ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
+from frigate.motion.path_visualizer import PathVisualizer
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
@@ -34,7 +34,6 @@ from frigate.util.image import (
     is_better_thumbnail,
     is_label_printable,
 )
-from frigate.motion.path_visualizer import PathVisualizer
 
 logger = logging.getLogger(__name__)
 
@@ -250,10 +249,8 @@ class CameraState:
                 )
                 self.path_visualizer.update_position(obj_id, centroid)
 
-            # Draw paths
             self.path_visualizer.draw_paths(frame_copy, active_objects)
 
-            # Cleanup inactive objects
             self.path_visualizer.cleanup_inactive(active_objects)
 
         return frame_copy

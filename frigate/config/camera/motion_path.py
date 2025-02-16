@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import Field, field_serializer, validator
 
@@ -12,8 +12,8 @@ class MotionPathConfig(FrigateBaseModel):
     max_history: int = Field(
         default=10,
         title="Number of positions to maintain in motion path history.",
-        ge=2,  # Minimum of 2 positions needed to draw a path
-        le=100,  # Reasonable upper limit
+        ge=2,
+        le=100,
     )
     mask: Optional[Any] = Field(default=None)
     raw_mask: Optional[Any] = Field(default=None)

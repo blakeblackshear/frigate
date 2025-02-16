@@ -1,6 +1,7 @@
+from typing import Dict, List, Tuple
+
 import cv2
 import numpy as np
-from typing import Dict, List, Tuple
 from filterpy.kalman import KalmanFilter
 
 
@@ -120,7 +121,6 @@ class PathVisualizer:
                 start_pos = positions[i - 1]
                 end_pos = positions[i]
 
-                # Draw line with anti-aliasing
                 cv2.line(frame, start_pos, end_pos, color, 2, cv2.LINE_AA)
 
             # Draw predicted path
@@ -133,7 +133,6 @@ class PathVisualizer:
                 start_pos = predictions[i - 1]
                 end_pos = predictions[i]
 
-                # Create overlay for alpha blending
                 overlay = frame.copy()
                 cv2.line(overlay, start_pos, end_pos, color, 2, cv2.LINE_AA)
                 cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
