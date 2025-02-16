@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from pydantic import Field, field_serializer
+from pydantic import Field, field_serializer, validator
 
 from ..base import FrigateBaseModel
 
@@ -25,3 +25,11 @@ class MotionPathConfig(FrigateBaseModel):
     @field_serializer("raw_mask", when_used="json")
     def serialize_raw_mask(self, value: Any, info):
         return None
+
+    @validator('max_history')
+    def max_history_range(cls, v):
+        if v < 2:
+            raise ValueError('max_history must be >= 2')
+        if v > 100:
+            raise ValueError('max_history must be <= 100')
+        return v
