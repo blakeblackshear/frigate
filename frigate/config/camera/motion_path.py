@@ -26,10 +26,10 @@ class MotionPathConfig(FrigateBaseModel):
     def serialize_raw_mask(self, value: Any, info):
         return None
 
-    @validator('max_history')
+    @validator("max_history")
     def max_history_range(cls, v):
         if v < 2:
-            raise ValueError('max_history must be >= 2')
+            raise ValueError("max_history must be >= 2")
         if v > 100:
-            raise ValueError('max_history must be <= 100')
+            raise ValueError("max_history must be <= 100")
         return v

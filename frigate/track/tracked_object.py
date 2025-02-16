@@ -395,7 +395,13 @@ class TrackedObject:
             return None
 
     def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, motion_paths=False, crop=False, height=None, quality=70
+        self,
+        timestamp=False,
+        bounding_box=False,
+        motion_paths=False,
+        crop=False,
+        height=None,
+        quality=70,
     ):
         if self.thumbnail_data is None:
             return None
@@ -455,14 +461,14 @@ class TrackedObject:
             if len(positions) > 1:
                 # Draw lines connecting positions
                 for i in range(1, len(positions)):
-                    start_pos = positions[i-1]
+                    start_pos = positions[i - 1]
                     end_pos = positions[i]
                     # Color transitions from blue to green (past to present)
                     alpha = i / len(positions)
                     color = (
-                        int(255 * (1-alpha)),  # Blue
-                        int(255 * alpha),      # Green
-                        0                      # Red
+                        int(255 * (1 - alpha)),  # Blue
+                        int(255 * alpha),  # Green
+                        0,  # Red
                     )
                     cv2.line(best_frame, start_pos, end_pos, color, 2, cv2.LINE_AA)
 

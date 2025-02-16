@@ -63,9 +63,7 @@ class CameraConfig(FrigateBaseModel):
     motion: Optional[MotionConfig] = Field(
         None, title="Motion detection configuration."
     )
-    motion_paths: Optional[MotionPathConfig] = Field(
-        None, title="Enable motion paths."
-    )
+    motion_paths: Optional[MotionPathConfig] = Field(None, title="Enable motion paths.")
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
     )
