@@ -66,29 +66,32 @@ elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
 # ensure there is a default webrtc config
-if not go2rtc_config.get("webrtc"):
+if go2rtc_config.get("webrtc") is None:
     go2rtc_config["webrtc"] = {}
 
 # go2rtc should listen on 8555 tcp & udp by default
-if not go2rtc_config["webrtc"].get("listen"):
+if go2rtc_config["webrtc"].get("listen") is None:
     go2rtc_config["webrtc"]["listen"] = ":8555"
 
-if not go2rtc_config["webrtc"].get("candidates", []):
+if go2rtc_config["webrtc"].get("candidates") is None:
     default_candidates = []
     # use internal candidate if it was discovered when running through the add-on
-    internal_candidate = os.environ.get(
-        "FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL", None
-    )
+    internal_candidate = os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL")
     if internal_candidate is not None:
         default_candidates.append(internal_candidate)
     # should set default stun server so webrtc can work
     default_candidates.append("stun:8555")
 
-    go2rtc_config["webrtc"] = {"candidates": default_candidates}
-else:
-    print(
-        "[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually",
-    )
+    go2rtc_config["webrtc"]["candidates"] = default_candidates
+
+# This prevents WebRTC from attempting to establish a connection to the internal
+# docker IPs which are not accessible from outside the container itself and just
+# wastes time during negotiation. Note that this is only necessary because
+# Frigate container doesn't run in host network mode.
+if go2rtc_config["webrtc"].get("filter") is None:
+    go2rtc_config["webrtc"]["filter"] = {"candidates": []}
+elif go2rtc_config["webrtc"]["filter"].get("candidates") is None:
+    go2rtc_config["webrtc"]["filter"]["candidates"] = []
 
 # sets default RTSP response to be equivalent to ?video=h264,h265&audio=aac
 # this means user does not need to specify audio codec when using restream
