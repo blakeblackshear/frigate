@@ -47,6 +47,10 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.suspended_cameras: dict[str, int] = {
             c.name: 0 for c in self.config.cameras.values()
         }
+        self.last_camera_notification_time: dict[str, float] = {
+            c.name: 0 for c in self.config.cameras.values()
+        }
+        self.last_notification_time: float = 0
         self.notification_queue: queue.Queue[PushNotification] = queue.Queue()
         self.notification_thread = threading.Thread(
             target=self._process_notifications, daemon=True
@@ -264,6 +268,29 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         ):
             return
 
+        camera: str = payload["after"]["camera"]
+        current_time = datetime.datetime.now().timestamp()
+
+        # Check global cooldown period
+        if (
+            current_time - self.last_notification_time
+            < self.config.notifications.cooldown
+        ):
+            logger.debug(
+                f"Skipping notification for {camera} - in global cooldown period"
+            )
+            return
+
+        # Check camera-specific cooldown period
+        if (
+            current_time - self.last_camera_notification_time[camera]
+            < self.config.cameras[camera].notifications.cooldown
+        ):
+            logger.debug(
+                f"Skipping notification for {camera} - in camera-specific cooldown period"
+            )
+            return
+
         self.check_registrations()
 
         state = payload["type"]
@@ -278,6 +305,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         ):
             return
 
+        self.last_camera_notification_time[camera] = current_time
+        self.last_notification_time = current_time
+
         reviewId = payload["after"]["id"]
         sorted_objects: set[str] = set()
 
@@ -287,7 +317,6 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        camera: str = payload["after"]["camera"]
         title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
         message = f"Detected on {camera.replace('_', ' ').title()}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"

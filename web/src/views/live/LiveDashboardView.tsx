@@ -507,6 +507,7 @@ export default function LiveDashboardView({
                   resetPreferredLiveMode={() =>
                     resetPreferredLiveMode(camera.name)
                   }
+                  config={config}
                 >
                   <LivePlayer
                     cameraRef={cameraRef}
