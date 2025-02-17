@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import os
 import queue
 import threading
 from collections import defaultdict
@@ -22,7 +21,7 @@ from frigate.config import (
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import THUMB_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.const import UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
