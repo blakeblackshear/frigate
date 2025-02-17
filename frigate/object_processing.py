@@ -16,13 +16,13 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
+    CameraMqttConfig,
     FrigateConfig,
-    MqttConfig,
     RecordConfig,
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.const import THUMB_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
@@ -491,41 +491,15 @@ class TrackedObjectProcessor(threading.Thread):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
 
+            # write thumbnail to disk
+            directory = os.path.join(THUMB_DIR, camera)
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
             # write the snapshot to disk
             if obj.has_snapshot:
-                snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
-                jpg_bytes = obj.get_jpg_bytes(
-                    timestamp=snapshot_config.timestamp,
-                    bounding_box=snapshot_config.bounding_box,
-                    crop=snapshot_config.crop,
-                    height=snapshot_config.height,
-                    quality=snapshot_config.quality,
-                )
-                if jpg_bytes is None:
-                    logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
-                else:
-                    with open(
-                        os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"),
-                        "wb",
-                    ) as j:
-                        j.write(jpg_bytes)
-
-                # write clean snapshot if enabled
-                if snapshot_config.clean_copy:
-                    png_bytes = obj.get_clean_png()
-                    if png_bytes is None:
-                        logger.warning(
-                            f"Unable to save clean snapshot for {obj.obj_data['id']}."
-                        )
-                    else:
-                        with open(
-                            os.path.join(
-                                CLIPS_DIR,
-                                f"{camera}-{obj.obj_data['id']}-clean.png",
-                            ),
-                            "wb",
-                        ) as p:
-                            p.write(png_bytes)
+                obj.write_snapshot_to_disk()
 
             if not obj.false_positive:
                 message = {
@@ -547,7 +521,7 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
         def snapshot(camera, obj: TrackedObject, frame_name: str):
-            mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
+            mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=mqtt_config.timestamp,

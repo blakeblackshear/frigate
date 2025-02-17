@@ -1,8 +1,8 @@
 """Object attribute."""
 
-import base64
 import logging
 import math
+import os
 from collections import defaultdict
 from statistics import median
 from typing import Optional
@@ -13,8 +13,10 @@ import numpy as np
 from frigate.config import (
     CameraConfig,
     ModelConfig,
+    SnapshotsConfig,
     UIConfig,
 )
+from frigate.const import CLIPS_DIR
 from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
@@ -507,6 +509,43 @@ class TrackedObject:
             return jpg.tobytes()
         else:
             return None
+
+    def write_snapshot_to_disk(self) -> None:
+        snapshot_config: SnapshotsConfig = self.camera_config.snapshots
+        jpg_bytes = self.get_jpg_bytes(
+            timestamp=snapshot_config.timestamp,
+            bounding_box=snapshot_config.bounding_box,
+            crop=snapshot_config.crop,
+            height=snapshot_config.height,
+            quality=snapshot_config.quality,
+        )
+        if jpg_bytes is None:
+            logger.warning(f"Unable to save snapshot for {self.obj_data['id']}.")
+        else:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, f"{self.camera_config.name}-{self.obj_data['id']}.jpg"
+                ),
+                "wb",
+            ) as j:
+                j.write(jpg_bytes)
+
+        # write clean snapshot if enabled
+        if snapshot_config.clean_copy:
+            png_bytes = self.get_clean_png()
+            if png_bytes is None:
+                logger.warning(
+                    f"Unable to save clean snapshot for {self.obj_data['id']}."
+                )
+            else:
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.png",
+                    ),
+                    "wb",
+                ) as p:
+                    p.write(png_bytes)
 
 
 def zone_filtered(obj: TrackedObject, object_config):
