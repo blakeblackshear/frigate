@@ -1,18 +1,13 @@
-import json
-import re
-import time
-import sys
 import logging
-import os
-from urllib.request import urlopen
-from urllib import error
+import re
+
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from prometheus_client.core import (
+    REGISTRY,
+    CounterMetricFamily,
     GaugeMetricFamily,
     InfoMetricFamily,
-    CounterMetricFamily,
-    REGISTRY,
 )
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 
 class CustomCollector(object):

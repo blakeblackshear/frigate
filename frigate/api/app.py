@@ -20,7 +20,6 @@ from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
 from peewee import operator
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import ValidationError
 
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
@@ -28,6 +27,7 @@ from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.models import Event, Timeline
+from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     get_tz_modifiers,
@@ -42,7 +42,6 @@ from frigate.util.services import (
     vainfo_hwaccel,
 )
 from frigate.version import VERSION
-from frigate.stats.prometheus import update_metrics, get_metrics
 
 logger = logging.getLogger(__name__)
 
