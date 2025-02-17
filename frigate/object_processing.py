@@ -492,10 +492,7 @@ class TrackedObjectProcessor(threading.Thread):
             obj.has_clip = self.should_retain_recording(camera, obj)
 
             # write thumbnail to disk
-            directory = os.path.join(THUMB_DIR, camera)
-
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+            obj.write_thumbnail_to_disk()
 
             # write the snapshot to disk
             if obj.has_snapshot:
@@ -523,7 +520,8 @@ class TrackedObjectProcessor(threading.Thread):
         def snapshot(camera, obj: TrackedObject, frame_name: str):
             mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
-                jpg_bytes = obj.get_jpg_bytes(
+                jpg_bytes = obj.get_img_bytes(
+                    ext="jpg",
                     timestamp=mqtt_config.timestamp,
                     bounding_box=mqtt_config.bounding_box,
                     crop=mqtt_config.crop,

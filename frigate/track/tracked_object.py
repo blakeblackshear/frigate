@@ -16,7 +16,7 @@ from frigate.config import (
     SnapshotsConfig,
     UIConfig,
 )
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
@@ -378,22 +378,16 @@ class TrackedObject:
             > self.camera_config.detect.stationary.threshold
         )
 
-    def get_thumbnail(self):
-        if (
-            self.thumbnail_data is None
-            or self.thumbnail_data["frame_time"] not in self.frame_cache
-        ):
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-
-        jpg_bytes = self.get_jpg_bytes(
-            timestamp=False, bounding_box=False, crop=True, height=175
+    def get_thumbnail(self, ext: str):
+        img_bytes = self.get_img_bytes(
+            ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
 
-        if jpg_bytes:
-            return jpg_bytes
+        if img_bytes:
+            return img_bytes
         else:
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-            return jpg.tobytes()
+            _, img = cv2.imencode(f".{ext}", np.zeros((175, 175, 3), np.uint8))
+            return img.tobytes()
 
     def get_clean_png(self):
         if self.thumbnail_data is None:
@@ -416,8 +410,14 @@ class TrackedObject:
         else:
             return None
 
-    def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
+    def get_img_bytes(
+        self,
+        ext: str,
+        timestamp=False,
+        bounding_box=False,
+        crop=False,
+        height: int | None = None,
+        quality: int | None = None,
     ):
         if self.thumbnail_data is None:
             return None
@@ -502,9 +502,15 @@ class TrackedObject:
                 position=self.camera_config.timestamp_style.position,
             )
 
-        ret, jpg = cv2.imencode(
-            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        )
+        quality_params = None
+
+        if ext == "jpg":
+            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
+        elif ext == "webp":
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 90]
+
+        ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
+
         if ret:
             return jpg.tobytes()
         else:
@@ -512,7 +518,8 @@ class TrackedObject:
 
     def write_snapshot_to_disk(self) -> None:
         snapshot_config: SnapshotsConfig = self.camera_config.snapshots
-        jpg_bytes = self.get_jpg_bytes(
+        jpg_bytes = self.get_img_bytes(
+            ext="jpg",
             timestamp=snapshot_config.timestamp,
             bounding_box=snapshot_config.bounding_box,
             crop=snapshot_config.crop,
@@ -546,6 +553,17 @@ class TrackedObject:
                     "wb",
                 ) as p:
                     p.write(png_bytes)
+
+    def write_thumbnail_to_disk(self) -> None:
+        directory = os.path.join(THUMB_DIR, self.camera_config.name)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        thumb_bytes = self.get_thumbnail("webp")
+
+        with open(os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb") as f:
+            f.write(thumb_bytes)
 
 
 def zone_filtered(obj: TrackedObject, object_config):

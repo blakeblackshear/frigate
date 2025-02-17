@@ -202,7 +202,7 @@ class EventProcessor(threading.Thread):
                 Event.start_time: start_time,
                 Event.end_time: end_time,
                 Event.zones: list(event_data["entered_zones"]),
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.model_hash: first_detector.model.model_hash,

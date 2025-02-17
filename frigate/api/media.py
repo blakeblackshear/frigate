@@ -828,7 +828,7 @@ def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail()
+                        thumbnail_bytes = tracked_obj.get_thumbnail("jpg")
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Event not found"},
