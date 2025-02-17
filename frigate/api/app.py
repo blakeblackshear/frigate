@@ -42,6 +42,7 @@ from frigate.util.services import (
     vainfo_hwaccel,
 )
 from frigate.version import VERSION
+from frigate.stats.prometheus import update_metrics, get_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +114,13 @@ def stats_history(request: Request, keys: str = None):
 
 
 @router.get("/metrics")
-def metrics():
-    """Expose Prometheus metrics endpoint"""
-    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+def metrics(request: Request):
+    """Expose Prometheus metrics endpoint and update metrics with latest stats"""
+    # Retrieve the latest statistics and update the Prometheus metrics
+    stats = request.app.stats_emitter.get_latest_stats()
+    update_metrics(stats)
+    content, content_type = get_metrics()
+    return Response(content=content, media_type=content_type)
 
 
 @router.get("/config")
