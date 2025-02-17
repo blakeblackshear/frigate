@@ -207,11 +207,15 @@ export default function ObjectLifecycle({
   // final object path with timeline points included
   const pathPoints = useMemo(() => {
     // don't display a path if we don't have any saved path points
-    if (savedPathPoints.length === 0) return [];
+    if (
+      savedPathPoints.length === 0 ||
+      config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config
+    )
+      return [];
     return [...savedPathPoints, ...eventSequencePoints].sort(
       (a, b) => a.timestamp - b.timestamp,
     );
-  }, [savedPathPoints, eventSequencePoints]);
+  }, [savedPathPoints, eventSequencePoints, config, event]);
 
   const [timeIndex, setTimeIndex] = useState(0);
 
@@ -503,6 +507,11 @@ export default function ObjectLifecycle({
           {current + 1} of {eventSequence.length}
         </div>
       </div>
+      {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
+        <div className="-mt-2 mb-2 text-sm text-danger">
+          Bounding box positions will be inaccurate for autotracking cameras.
+        </div>
+      )}
       {showControls && (
         <AnnotationSettingsPane
           event={event}
