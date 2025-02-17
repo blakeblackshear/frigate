@@ -68,3 +68,4 @@ netaddr==0.8.*
 netifaces==0.10.*
 verboselogs==1.7.*
 virtualenv==20.17.*
+prometheus-client == 0.21.*
