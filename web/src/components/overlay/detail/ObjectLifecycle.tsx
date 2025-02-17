@@ -874,7 +874,9 @@ function ObjectPath({
               fill={getPointColor(color, pos.lifecycle_item?.class_type)}
               stroke="white"
               strokeWidth={width / 2}
-              onClick={() => onPointClick && onPointClick(index)}
+              onClick={() =>
+                pos.lifecycle_item && onPointClick && onPointClick(index)
+              }
               style={{ cursor: pos.lifecycle_item ? "pointer" : "default" }}
             />
           </TooltipTrigger>
