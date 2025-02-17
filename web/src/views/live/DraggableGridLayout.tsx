@@ -584,6 +584,7 @@ export default function DraggableGridLayout({
                   resetPreferredLiveMode={() =>
                     resetPreferredLiveMode(camera.name)
                   }
+                  config={config}
                 >
                   <LivePlayer
                     key={camera.name}
@@ -790,6 +791,7 @@ type GridLiveContextMenuProps = {
   muteAll: () => void;
   unmuteAll: () => void;
   resetPreferredLiveMode: () => void;
+  config?: FrigateConfig;
 };
 
 const GridLiveContextMenu = React.forwardRef<
@@ -819,6 +821,7 @@ const GridLiveContextMenu = React.forwardRef<
       muteAll,
       unmuteAll,
       resetPreferredLiveMode,
+      config,
       ...props
     },
     ref,
@@ -849,6 +852,7 @@ const GridLiveContextMenu = React.forwardRef<
           muteAll={muteAll}
           unmuteAll={unmuteAll}
           resetPreferredLiveMode={resetPreferredLiveMode}
+          config={config}
         >
           {children}
         </LiveContextMenu>

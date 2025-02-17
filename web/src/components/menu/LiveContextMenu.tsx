@@ -11,6 +11,9 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import {
@@ -24,12 +27,19 @@ import { VolumeSlider } from "@/components/ui/slider";
 import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 import {
   AllGroupsStreamingSettings,
+  FrigateConfig,
   GroupStreamingSettings,
 } from "@/types/frigateConfig";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
-import { IoIosWarning } from "react-icons/io";
+import {
+  IoIosNotifications,
+  IoIosNotificationsOff,
+  IoIosWarning,
+} from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useNotifications, useNotificationSuspend } from "@/api/ws";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -48,6 +58,7 @@ type LiveContextMenuProps = {
   statsState: boolean;
   toggleStats: () => void;
   resetPreferredLiveMode: () => void;
+  config?: FrigateConfig;
   children?: ReactNode;
 };
 export default function LiveContextMenu({
@@ -67,6 +78,7 @@ export default function LiveContextMenu({
   statsState,
   toggleStats,
   resetPreferredLiveMode,
+  config,
   children,
 }: LiveContextMenuProps) {
   const [showSettings, setShowSettings] = useState(false);
@@ -185,6 +197,44 @@ export default function LiveContextMenu({
 
   const navigate = useNavigate();
 
+  // notifications
+
+  const notificationsEnabledInConfig =
+    config?.cameras[camera].notifications.enabled_in_config;
+
+  const { payload: notificationState, send: sendNotification } =
+    useNotifications(camera);
+  const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
+    useNotificationSuspend(camera);
+  const [isSuspended, setIsSuspended] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (notificationSuspendUntil) {
+      setIsSuspended(
+        notificationSuspendUntil !== "0" || notificationState === "OFF",
+      );
+    }
+  }, [notificationSuspendUntil, notificationState]);
+
+  const handleSuspend = (duration: string) => {
+    if (duration === "off") {
+      sendNotification("OFF");
+    } else {
+      sendNotificationSuspend(Number.parseInt(duration));
+    }
+  };
+
+  const formatSuspendedUntil = (timestamp: string) => {
+    if (timestamp === "0") return "Frigate restarts.";
+
+    return formatUnixTimestampToDateTime(Number.parseInt(timestamp), {
+      time_style: "medium",
+      date_style: "medium",
+      timezone: config?.ui.timezone,
+      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
+    });
+  };
+
   return (
     <div className={cn("w-full", className)}>
       <ContextMenu key={camera} onOpenChange={handleOpenChange}>
@@ -286,6 +336,115 @@ export default function LiveContextMenu({
                   <div className="text-primary">Reset</div>
                 </div>
               </ContextMenuItem>
+            </>
+          )}
+          {notificationsEnabledInConfig && (
+            <>
+              <ContextMenuSeparator />
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                  <div className="flex items-center gap-2">
+                    <span>Notifications</span>
+                  </div>
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent>
+                  <div className="flex flex-col gap-0.5 px-2 py-1.5 text-sm font-medium">
+                    <div className="flex w-full items-center gap-1">
+                      {notificationState === "ON" ? (
+                        <>
+                          {isSuspended ? (
+                            <>
+                              <IoIosNotificationsOff className="size-5 text-muted-foreground" />
+                              <span>Suspended</span>
+                            </>
+                          ) : (
+                            <>
+                              <IoIosNotifications className="size-5 text-muted-foreground" />
+                              <span>Enabled</span>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <IoIosNotificationsOff className="size-5 text-danger" />
+                          <span>Disabled</span>
+                        </>
+                      )}
+                    </div>
+                    {isSuspended && (
+                      <span className="text-xs text-primary-variant">
+                        Until {formatSuspendedUntil(notificationSuspendUntil)}
+                      </span>
+                    )}
+                  </div>
+
+                  {isSuspended ? (
+                    <>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        onClick={() => {
+                          sendNotification("ON");
+                          sendNotificationSuspend(0);
+                        }}
+                      >
+                        <div className="flex w-full flex-col gap-2">
+                          {notificationState === "ON" ? (
+                            <span>Unsuspend</span>
+                          ) : (
+                            <span>Enable</span>
+                          )}
+                        </div>
+                      </ContextMenuItem>
+                    </>
+                  ) : (
+                    notificationState === "ON" && (
+                      <>
+                        <ContextMenuSeparator />
+                        <div className="px-2 py-1.5">
+                          <p className="mb-2 text-sm font-medium text-muted-foreground">
+                            Suspend for:
+                          </p>
+                          <div className="space-y-1">
+                            <ContextMenuItem onClick={() => handleSuspend("5")}>
+                              5 minutes
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("10")}
+                            >
+                              10 minutes
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("30")}
+                            >
+                              30 minutes
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("60")}
+                            >
+                              1 hour
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("840")}
+                            >
+                              12 hours
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("1440")}
+                            >
+                              24 hours
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleSuspend("off")}
+                            >
+                              Until restart
+                            </ContextMenuItem>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  )}
+                </ContextMenuSubContent>
+              </ContextMenuSub>
             </>
           )}
         </ContextMenuContent>
