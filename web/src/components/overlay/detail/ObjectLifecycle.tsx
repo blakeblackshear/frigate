@@ -176,22 +176,21 @@ export default function ObjectLifecycle({
     );
   }, [config, event.camera]);
 
-  const savedPathPoints: Position[] =
-    event.data.path_data?.map(([coords, timestamp]: [number[], number]) => {
-      return {
+  const savedPathPoints = useMemo(() => {
+    return (
+      event.data.path_data?.map(([coords, timestamp]: [number[], number]) => ({
         x: coords[0],
         y: coords[1],
-        timestamp: timestamp,
+        timestamp,
         lifecycle_item: undefined,
-      };
-    }) || [];
+      })) || []
+    );
+  }, [event.data.path_data]);
 
-  const eventSequencePoints: Position[] =
-    (eventSequence &&
+  const eventSequencePoints = useMemo(() => {
+    return (
       eventSequence
-        // Filter for events that have a box
-        .filter((event) => event.data.box !== undefined)
-        // Convert box coordinates to bottom center point
+        ?.filter((event) => event.data.box !== undefined)
         .map((event) => {
           const [left, top, width, height] = event.data.box!;
 
@@ -201,14 +200,18 @@ export default function ObjectLifecycle({
             timestamp: event.timestamp,
             lifecycle_item: event,
           };
-        })) ||
-    [];
+        }) || []
+    );
+  }, [eventSequence]);
 
   // final object path with timeline points included
-  const pathPoints: Position[] = [
-    ...savedPathPoints,
-    ...eventSequencePoints,
-  ].sort((a, b) => a.timestamp - b.timestamp);
+  const pathPoints = useMemo(() => {
+    // don't display a path if we don't have any saved path points
+    if (savedPathPoints.length === 0) return [];
+    return [...savedPathPoints, ...eventSequencePoints].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+  }, [savedPathPoints, eventSequencePoints]);
 
   const [timeIndex, setTimeIndex] = useState(0);
 
