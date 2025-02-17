@@ -831,10 +831,7 @@ def event_thumbnail(
                 ) as f:
                     thumbnail_bytes = f.read()
             except FileNotFoundError:
-                return JSONResponse(
-                    content={"success": False, "message": "Event thumb not found"},
-                    status_code=404,
-                )
+                raise DoesNotExist()
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -843,7 +840,7 @@ def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail("jpg")
+                        thumbnail_bytes = tracked_obj.get_thumbnail(extension)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Event not found"},
