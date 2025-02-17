@@ -1,3 +1,15 @@
+export enum ClassType {
+  VISIBLE = "visible",
+  GONE = "gone",
+  ENTERED_ZONE = "entered_zone",
+  ATTRIBUTE = "attribute",
+  ACTIVE = "active",
+  STATIONARY = "stationary",
+  HEARD = "heard",
+  EXTERNAL = "external",
+  PATH_POINT = "path_point",
+}
+
 export type ObjectLifecycleSequence = {
   camera: string;
   timestamp: number;
@@ -10,15 +22,7 @@ export type ObjectLifecycleSequence = {
     attribute: string;
     zones: string[];
   };
-  class_type:
-    | "visible"
-    | "gone"
-    | "entered_zone"
-    | "attribute"
-    | "active"
-    | "stationary"
-    | "heard"
-    | "external";
+  class_type: ClassType;
   source_id: string;
   source: string;
 };

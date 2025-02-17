@@ -2,6 +2,7 @@
 
 import base64
 import logging
+import math
 from collections import defaultdict
 from statistics import median
 from typing import Optional
@@ -66,6 +67,7 @@ class TrackedObject:
         self.current_estimated_speed = 0
         self.average_estimated_speed = 0
         self.velocity_angle = 0
+        self.path_data = []
         self.previous = self.to_dict()
 
     @property
@@ -148,6 +150,7 @@ class TrackedObject:
                     "attributes": obj_data["attributes"],
                     "current_estimated_speed": self.current_estimated_speed,
                     "velocity_angle": self.velocity_angle,
+                    "path_data": self.path_data,
                 }
                 thumb_update = True
 
@@ -300,6 +303,29 @@ class TrackedObject:
             if self.obj_data["frame_time"] - self.previous["frame_time"] >= (1 / 3):
                 autotracker_update = True
 
+            # update path
+            width = self.camera_config.detect.width
+            height = self.camera_config.detect.height
+            bottom_center = (
+                round(obj_data["centroid"][0] / width, 4),
+                round(obj_data["box"][3] / height, 4),
+            )
+
+            # calculate a reasonable movement threshold (e.g., 5% of the frame diagonal)
+            threshold = 0.05 * math.sqrt(width**2 + height**2) / max(width, height)
+
+            if not self.path_data:
+                self.path_data.append((bottom_center, obj_data["frame_time"]))
+            elif (
+                math.dist(self.path_data[-1][0], bottom_center) >= threshold
+                or len(self.path_data) == 1
+            ):
+                # check Euclidean distance before appending
+                self.path_data.append((bottom_center, obj_data["frame_time"]))
+                logger.debug(
+                    f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
+                )
+
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
         return (thumb_update, significant_change, autotracker_update)
@@ -336,6 +362,7 @@ class TrackedObject:
             "current_estimated_speed": self.current_estimated_speed,
             "average_estimated_speed": self.average_estimated_speed,
             "velocity_angle": self.velocity_angle,
+            "path_data": self.path_data,
         }
 
         if include_thumbnail:
