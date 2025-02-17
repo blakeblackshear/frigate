@@ -44,6 +44,7 @@ codeproject
 colormap
 colorspace
 comms
+cooldown
 coro
 ctypeslib
 CUDA
