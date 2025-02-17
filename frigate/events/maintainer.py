@@ -23,7 +23,6 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
         if (
             prev_event["top_score"] != current_event["top_score"]
             or prev_event["entered_zones"] != current_event["entered_zones"]
-            or prev_event["thumbnail"] != current_event["thumbnail"]
             or prev_event["end_time"] != current_event["end_time"]
             or prev_event["average_estimated_speed"]
             != current_event["average_estimated_speed"]

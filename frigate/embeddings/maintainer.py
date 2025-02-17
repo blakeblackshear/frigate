@@ -23,6 +23,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
+    THUMB_DIR,
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
@@ -215,7 +216,9 @@ class EmbeddingMaintainer(threading.Thread):
                     continue
 
                 # Extract valid thumbnail
-                thumbnail = base64.b64decode(event.thumbnail)
+                thumbnail = cv2.imread(
+                    os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
+                )
 
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
@@ -390,7 +393,12 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        thumbnail = base64.b64decode(event.thumbnail)
+        if event.thumbnail:
+            thumbnail = base64.b64decode(event.thumbnail)
+        else:
+            thumbnail = cv2.imread(
+                os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
+            )
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

@@ -6,6 +6,7 @@ import logging
 import os
 import time
 
+import cv2
 from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
@@ -13,6 +14,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
+    THUMB_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -302,7 +304,14 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                batch_thumbs[event.id] = base64.b64decode(event.thumbnail)
+                if event.thumbnail:
+                    thumbnail = base64.b64decode(event.thumbnail)
+                else:
+                    thumbnail = cv2.imread(
+                        os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
+                    )
+
+                batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
 
                 if description := event.data.get("description", "").strip():
