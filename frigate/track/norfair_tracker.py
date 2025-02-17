@@ -263,12 +263,12 @@ class NorfairTracker(ObjectTracker):
 
         # Get the correct tracker for this object's label
         tracker = self.get_tracker(obj["label"])
-        obj["score_history"] = [
-            p.data["score"]
-            for p in next(
-                (o for o in tracker.tracked_objects if o.global_id == track_id)
-            ).past_detections
-        ]
+        obj_match = next(
+            (o for o in tracker.tracked_objects if o.global_id == track_id), None
+        )
+        obj["score_history"] = (
+            [p.data["score"] for p in obj_match.past_detections] if obj_match else []
+        )
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
         self.positions[id] = {
