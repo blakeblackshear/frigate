@@ -24,20 +24,18 @@ apt-get -qq install --no-install-recommends -y \
 mkdir -p -m 600 /root/.gnupg
 
 # install coral runtime
-wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.0-1/libedgetpu1-max_16.0tf2.17.0-1.bookworm_${TARGETARCH}.deb"
+wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.1-1/libedgetpu1-max_16.0tf2.17.1-1.bookworm_${TARGETARCH}.deb"
 unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
 # install python3 & tflite runtime
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    pip3 install --break-system-packages https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_x86_64.whl
-    pip3 install --break-system-packages https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_x86_64.whl
+    pip3 install --break-system-packages https://github.com/frigate-nvr/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
-    pip3 install --break-system-packages https://github.com/feranick/TFlite-builds/releases/download/v2.17.0/tflite_runtime-2.17.0-cp311-cp311-linux_aarch64.whl
-    pip3 install --break-system-packages https://github.com/feranick/pycoral/releases/download/2.0.2TF2.17.0/pycoral-2.0.2-cp311-cp311-linux_aarch64.whl
+    pip3 install --break-system-packages https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl
 fi
 
 # btbn-ffmpeg -> amd64
