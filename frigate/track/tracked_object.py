@@ -14,6 +14,7 @@ from frigate.config import (
     ModelConfig,
     UIConfig,
 )
+from frigate.motion.path_visualizer import PathVisualizer
 from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
@@ -24,7 +25,6 @@ from frigate.util.image import (
 )
 from frigate.util.object import box_inside
 from frigate.util.velocity import calculate_real_world_speed
-from frigate.motion.path_visualizer import PathVisualizer
 
 logger = logging.getLogger(__name__)
 
