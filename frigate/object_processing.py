@@ -245,7 +245,7 @@ class CameraState:
                 obj = tracked_objects[obj_id]
                 centroid = (
                     int((obj["box"][0] + obj["box"][2]) / 2),  # x center
-                    int((obj["box"][1] + obj["box"][3]) / 2),  # y center
+                    obj["box"][3],  # y bottom
                 )
                 self.path_visualizer.update_position(obj_id, centroid)
 
