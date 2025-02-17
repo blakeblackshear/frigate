@@ -257,7 +257,7 @@ class EventProcessor(threading.Thread):
                 Event.camera: event_data["camera"],
                 Event.start_time: event_data["start_time"],
                 Event.end_time: event_data["end_time"],
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],

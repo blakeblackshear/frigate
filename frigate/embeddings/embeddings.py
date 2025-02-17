@@ -268,10 +268,7 @@ class Embeddings:
         # Get total count of events to process
         total_events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
+            .where((Event.has_clip == True | Event.has_snapshot == True))
             .count()
         )
 
@@ -291,10 +288,7 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
+            .where((Event.has_clip == True | Event.has_snapshot == True))
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
@@ -307,9 +301,15 @@ class Embeddings:
                 if event.thumbnail:
                     thumbnail = base64.b64decode(event.thumbnail)
                 else:
-                    thumbnail = cv2.imread(
-                        os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
-                    )
+                    try:
+                        thumbnail = cv2.imread(
+                            os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
+                        )
+                    except Exception:
+                        thumbnail = None
+
+                if thumbnail is None:
+                    continue
 
                 batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
@@ -350,10 +350,7 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
+                .where((Event.has_clip == True | Event.has_snapshot == True))
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )
