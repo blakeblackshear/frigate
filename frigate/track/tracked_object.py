@@ -330,7 +330,7 @@ class TrackedObject:
         self.current_zones = current_zones
         return (thumb_update, significant_change, autotracker_update)
 
-    def to_dict(self, include_thumbnail: bool = False):
+    def to_dict(self):
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera_config.name,
@@ -364,9 +364,6 @@ class TrackedObject:
             "velocity_angle": self.velocity_angle,
             "path_data": self.path_data,
         }
-
-        if include_thumbnail:
-            event["thumbnail"] = base64.b64encode(self.get_thumbnail()).decode("utf-8")
 
         return event
 

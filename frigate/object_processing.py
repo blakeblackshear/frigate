@@ -479,7 +479,7 @@ class TrackedObjectProcessor(threading.Thread):
                     EventStateEnum.update,
                     camera,
                     frame_name,
-                    obj.to_dict(include_thumbnail=True),
+                    obj.to_dict(),
                 )
             )
 
@@ -542,7 +542,7 @@ class TrackedObjectProcessor(threading.Thread):
                     EventStateEnum.end,
                     camera,
                     frame_name,
-                    obj.to_dict(include_thumbnail=True),
+                    obj.to_dict(),
                 )
             )
 
