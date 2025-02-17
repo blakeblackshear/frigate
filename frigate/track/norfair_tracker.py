@@ -266,6 +266,7 @@ class NorfairTracker(ObjectTracker):
         obj_match = next(
             (o for o in tracker.tracked_objects if o.global_id == track_id), None
         )
+        # if we don't have a match, we have a new object
         obj["score_history"] = (
             [p.data["score"] for p in obj_match.past_detections] if obj_match else []
         )
