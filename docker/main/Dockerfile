@@ -3,14 +3,27 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Globally set pip break-system-packages option to avoid having to specify it every time
+ARG PIP_BREAK_SYSTEM_PACKAGES=1
+
 ARG BASE_IMAGE=debian:12
 ARG SLIM_BASE=debian:12-slim
 
+# A hook that allows us to inject commands right after the base images
+ARG BASE_HOOK=
+
 FROM ${BASE_IMAGE} AS base
+ARG PIP_BREAK_SYSTEM_PACKAGES
+
+RUN ${BASE_HOOK}
 
 FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 FROM ${SLIM_BASE} AS slim-base
+ARG PIP_BREAK_SYSTEM_PACKAGES
+
+RUN ${BASE_HOOK}
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -142,8 +155,8 @@ RUN apt-get -qq update \
     apt-transport-https wget \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3 \
-    python3-dev \
+    python3.11 \
+    python3.11-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -156,6 +169,8 @@ RUN apt-get -qq update \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip" --break-system-packages
@@ -174,6 +189,14 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
     /deps/install_hailort.sh
 
+# install pycoral & tflite runtime
+RUN { test "${TARGETARCH}" = "amd64" && \
+        wget https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl -O /wheels/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl; \
+    } \
+    || \
+    { test "${TARGETARCH}" = "arm64" && \
+        wget https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl -O /wheels/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl; \
+    }
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/

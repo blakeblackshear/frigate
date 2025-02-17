@@ -13,13 +13,24 @@ variable "TRT_BASE" {
 variable "COMPUTE_LEVEL" {
   default = ""
 }
+variable "BASE_HOOK" {
+  # Ensure an up-to-date python 3.11 is available in tensorrt/jetson image
+  default = <<EOT
+if grep -iq \"ubuntu\" /etc/os-release; then
+  apt-get update &&
+  apt-get install -y software-properties-common &&
+  add-apt-repository ppa:deadsnakes/ppa;
+fi
+EOT
+}
 
 target "_build_args" {
   args = {
     BASE_IMAGE = BASE_IMAGE,
     SLIM_BASE = SLIM_BASE,
     TRT_BASE = TRT_BASE,
-    COMPUTE_LEVEL = COMPUTE_LEVEL
+    COMPUTE_LEVEL = COMPUTE_LEVEL,
+    BASE_HOOK = BASE_HOOK
   }
   platforms = ["linux/${ARCH}"]
 }
