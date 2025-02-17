@@ -507,7 +507,7 @@ class TrackedObject:
         if ext == "jpg":
             quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
         elif ext == "webp":
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 90]
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
 
         ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
 

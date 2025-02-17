@@ -872,7 +872,7 @@ def event_thumbnail(
         if extension == "jpg" or extension == "jpeg":
             quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
         elif extension == "webp":
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 90]
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
         _, img = cv2.imencode(f".{img}", thumbnail, quality_params)
         thumbnail_bytes = img.tobytes()
