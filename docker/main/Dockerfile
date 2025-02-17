@@ -79,8 +79,8 @@ COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip" --break-system-packages \
-    && pip install --break-system-packages -r /requirements-ov.txt
+    && python3 get-pip.py "pip" \
+    && pip install -r /requirements-ov.txt
 
 # Get OpenVino Model
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
@@ -173,10 +173,10 @@ RUN apt-get -qq update \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip" --break-system-packages
+    && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt --break-system-packages
+RUN pip3 install -r /requirements.txt
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
@@ -238,8 +238,8 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    python3 -m pip install --upgrade pip --break-system-packages && \
-    pip3 install -U /deps/wheels/*.whl --break-system-packages
+    python3 -m pip install --upgrade pip && \
+    pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
 
@@ -286,7 +286,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
-    pip3 install -r requirements-dev.txt --break-system-packages
+    pip3 install -r requirements-dev.txt
 
 HEALTHCHECK NONE
 
