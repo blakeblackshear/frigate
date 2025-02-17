@@ -2,32 +2,15 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
 ARG BASE_IMAGE=debian:12
 ARG SLIM_BASE=debian:12-slim
 
 FROM ${BASE_IMAGE} AS base
-ARG PIP_BREAK_SYSTEM_PACKAGES
-
-# Ensure python 3.11 is available in ubuntu-based image
-RUN if grep -iq "ubuntu" /etc/os-release; then \
-        apt-get update && \
-        apt-get install -y software-properties-common && \
-        add-apt-repository ppa:deadsnakes/ppa; \
-    fi
 
 FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
 
 FROM ${SLIM_BASE} AS slim-base
-ARG PIP_BREAK_SYSTEM_PACKAGES
-
-# Ensure python 3.11 is available in ubuntu-based image
-RUN if grep -iq "ubuntu" /etc/os-release; then \
-        apt-get update && \
-        apt-get install -y software-properties-common && \
-        add-apt-repository ppa:deadsnakes/ppa; \
-    fi
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -159,8 +142,8 @@ RUN apt-get -qq update \
     apt-transport-https wget \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.11 \
-    python3.11-dev \
+    python3 \
+    python3-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -173,9 +156,6 @@ RUN apt-get -qq update \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
-
-# Ensure python3 defaults to python3.11
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip" --break-system-packages

@@ -7,6 +7,12 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS build-wheels
 ARG DEBIAN_FRONTEND
 
+# Add deadsnakes PPA for python3.11
+RUN apt-get -qq update && \
+        apt-get -qq install -y --no-install-recommends \
+        software-properties-common \
+        && add-apt-repository ppa:deadsnakes/ppa
+
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
