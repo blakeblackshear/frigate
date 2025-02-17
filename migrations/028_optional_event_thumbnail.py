@@ -33,4 +33,4 @@ def migrate(migrator, database, fake=False, **kwargs):
 
 
 def rollback(migrator, database, fake=False, **kwargs):
-     migrator.add_not_null(Event, "thumbnail")
+    migrator.add_not_null(Event, "thumbnail")
