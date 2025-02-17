@@ -138,7 +138,7 @@ export default function ObjectLifecycle({
 
       return zonePoints
         .split(",")
-        .map(parseFloat)
+        .map(Number.parseFloat)
         .reduce((acc, value, index) => {
           const isXCoordinate = index % 2 === 0;
           const coordinate = isXCoordinate
@@ -307,6 +307,21 @@ export default function ObjectLifecycle({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainApi, thumbnailApi]);
 
+  const handlePathPointClick = useCallback(
+    (index: number) => {
+      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      const sequenceIndex = eventSequence.findIndex(
+        (item) => item.timestamp === pathPoints[index].timestamp,
+      );
+      if (sequenceIndex !== -1) {
+        mainApi.scrollTo(sequenceIndex);
+        thumbnailApi.scrollTo(sequenceIndex);
+        setCurrent(sequenceIndex);
+      }
+    },
+    [mainApi, thumbnailApi, eventSequence, pathPoints],
+  );
+
   if (!event.id || !eventSequence || !config || !timeIndex) {
     return <ActivityIndicator />;
   }
@@ -430,6 +445,7 @@ export default function ObjectLifecycle({
                       color={getObjectColor(event.label)}
                       width={2}
                       imgRef={imgRef}
+                      onPointClick={handlePathPointClick}
                     />
                   </svg>
                 </div>
@@ -778,6 +794,7 @@ type ObjectPathProps = {
   width?: number;
   pointRadius?: number;
   imgRef: React.RefObject<HTMLImageElement>;
+  onPointClick?: (index: number) => void;
 };
 
 const typeColorMap: Partial<Record<ClassType, [number, number, number]>> = {
@@ -797,6 +814,7 @@ function ObjectPath({
   width = 2,
   pointRadius = 4,
   imgRef,
+  onPointClick,
 }: ObjectPathProps) {
   const getAbsolutePositions = useCallback(() => {
     if (!imgRef.current || !positions) return [];
@@ -829,7 +847,7 @@ function ObjectPath({
     return `rgb(${baseColor.map((c) => Math.max(0, c - 10)).join(",")})`;
   };
 
-  if (!imgRef.current) return [];
+  if (!imgRef.current) return null;
   const absolutePositions = getAbsolutePositions();
   const lineColor = `rgb(${color.join(",")})`;
 
@@ -853,6 +871,8 @@ function ObjectPath({
               fill={getPointColor(color, pos.lifecycle_item?.class_type)}
               stroke="white"
               strokeWidth={width / 2}
+              onClick={() => onPointClick && onPointClick(index)}
+              style={{ cursor: pos.lifecycle_item ? "pointer" : "default" }}
             />
           </TooltipTrigger>
           <TooltipPortal>
