@@ -509,7 +509,7 @@ export default function ObjectLifecycle({
       </div>
       {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
         <div className="-mt-2 mb-2 text-sm text-danger">
-          Bounding box positions will be inaccurate for autotracking cameras.{" "}
+          Bounding box positions will be inaccurate for autotracking cameras.
         </div>
       )}
       {showControls && (
