@@ -14,7 +14,7 @@ apt-get -qq install -y --no-install-recommends libx264-dev libx265-dev
 pushd /tmp
 
 # Install libnvmpi to enable nvmpi decoders (h264_nvmpi, hevc_nvmpi)
-if [ -e /usr/local/cuda-12.6 ]; then
+if [ -e /usr/local/cuda-12 ]; then
     # assume Jetpack 6.2
     apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
     echo "deb https://repo.download.nvidia.com/jetson/common r36.4 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list

@@ -152,9 +152,9 @@ jobs:
       - name: Build and push TensorRT (Jetson, Jetpack 6)
         env:
           ARCH: arm64
-          BASE_IMAGE: nvcr.io/nvidia/tensorrt:24.08-py3-igpu
-          SLIM_BASE: nvcr.io/nvidia/tensorrt:24.08-py3-igpu
-          TRT_BASE: nvcr.io/nvidia/tensorrt:24.08-py3-igpu
+          BASE_IMAGE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          SLIM_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          TRT_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
         uses: docker/bake-action@v6
         with:
           source: .

@@ -24,8 +24,14 @@ FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 
+# python-tensorrt build deps are 3.4 GB!
+RUN apt-get update \
+    && apt-get install -y ccache cuda-cudart-dev-* cuda-nvcc-* libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev \
+    && ([ -e /usr/local/cuda ] || ln -s /usr/local/cuda-* /usr/local/cuda) \
+    && rm -rf /var/lib/apt/lists/*;
+
 # Determine version of tensorrt already installed in base image, e.g. "Version: 8.4.1-1+cuda11.4"
-RUN NVINFER_VER=$(dpkg -s libnvinfer10 | grep -Po "Version: \K.*") \
+RUN NVINFER_VER=$(dpkg -s libnvinfer8 | grep -Po "Version: \K.*") \
     && echo $NVINFER_VER | grep -Po "^\d+\.\d+\.\d+" > /etc/TENSORRT_VER
 
 RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,target=/deps/build_python_tensorrt.sh \
@@ -81,3 +87,6 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Fixes "Error importing detector runtime: /usr/lib/aarch64-linux-gnu/libstdc++.so.6: cannot allocate memory in static TLS block"
+ENV LD_PRELOAD /usr/lib/aarch64-linux-gnu/libstdc++.so.6

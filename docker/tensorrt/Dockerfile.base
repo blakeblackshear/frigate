@@ -11,10 +11,9 @@ FROM ${TRT_BASE} AS trt-deps
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
-    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvonnxparsers-dev \
+    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
-    --mount=type=bind,source=docker/tensorrt/detector/0001-fix-for-tensorrt-v10.3.0.patch,target=/0001-fix-for-tensorrt-v10.3.0.patch \
     /tensorrt_libyolo.sh
 
 # Frigate w/ TensorRT Support as separate image
