@@ -117,7 +117,7 @@ For other installations, follow these steps for installation:
 
 #### Setup
 
-To set up Frigate, follow the default installation instructions, but use a Docker image with the `-h8l` suffix, for example: `ghcr.io/blakeblackshear/frigate:stable-h8l`
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 

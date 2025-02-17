@@ -14,7 +14,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import {
+  AllGroupsStreamingSettings,
+  CameraConfig,
+  FrigateConfig,
+} from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -38,6 +42,7 @@ import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
+import { useStreamingSettings } from "@/context/streaming-settings-provider";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -135,8 +140,6 @@ export default function LiveDashboardView({
 
   // camera live views
 
-  const [autoLiveView] = usePersistence("autoLiveView", true);
-
   const [{ height: containerHeight }] = useResizeObserver(containerRef);
 
   const hasScrollbar = useMemo(() => {
@@ -198,6 +201,17 @@ export default function LiveDashboardView({
     supportsAudioOutputStates,
   } = useCameraLiveMode(cameras, windowVisible);
 
+  const [globalAutoLive] = usePersistence("autoLiveView", true);
+
+  const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
+    useStreamingSettings();
+
+  const currentGroupStreamingSettings = useMemo(() => {
+    if (cameraGroup && cameraGroup != "default" && allGroupsStreamingSettings) {
+      return allGroupsStreamingSettings[cameraGroup];
+    }
+  }, [allGroupsStreamingSettings, cameraGroup]);
+
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {
       if (!visibleCameraObserver.current) {
@@ -245,6 +259,25 @@ export default function LiveDashboardView({
     }));
   };
 
+  useEffect(() => {
+    if (!allGroupsStreamingSettings) {
+      return;
+    }
+
+    const initialAudioStates: AudioState = {};
+    const initialVolumeStates: VolumeState = {};
+
+    Object.entries(allGroupsStreamingSettings).forEach(([_, groupSettings]) => {
+      Object.entries(groupSettings).forEach(([camera, cameraSettings]) => {
+        initialAudioStates[camera] = cameraSettings.playAudio ?? false;
+        initialVolumeStates[camera] = cameraSettings.volume ?? 1;
+      });
+    });
+
+    setAudioStates(initialAudioStates);
+    setVolumeStates(initialVolumeStates);
+  }, [allGroupsStreamingSettings]);
+
   const toggleAudio = (cameraName: string): void => {
     setAudioStates((prev) => ({
       ...prev,
@@ -252,12 +285,53 @@ export default function LiveDashboardView({
     }));
   };
 
+  const onSaveMuting = useCallback(
+    (playAudio: boolean) => {
+      if (
+        !cameraGroup ||
+        !allGroupsStreamingSettings ||
+        cameraGroup == "default"
+      ) {
+        return;
+      }
+
+      const existingGroupSettings =
+        allGroupsStreamingSettings[cameraGroup] || {};
+
+      const updatedSettings: AllGroupsStreamingSettings = {
+        ...Object.fromEntries(
+          Object.entries(allGroupsStreamingSettings || {}).filter(
+            ([key]) => key !== cameraGroup,
+          ),
+        ),
+        [cameraGroup]: {
+          ...existingGroupSettings,
+          ...Object.fromEntries(
+            Object.entries(existingGroupSettings).map(
+              ([cameraName, settings]) => [
+                cameraName,
+                {
+                  ...settings,
+                  playAudio: playAudio,
+                },
+              ],
+            ),
+          ),
+        },
+      };
+
+      setAllGroupsStreamingSettings?.(updatedSettings);
+    },
+    [cameraGroup, allGroupsStreamingSettings, setAllGroupsStreamingSettings],
+  );
+
   const muteAll = (): void => {
     const updatedStates: Record<string, boolean> = {};
     visibleCameras.forEach((cameraName) => {
       updatedStates[cameraName] = false;
     });
     setAudioStates(updatedStates);
+    onSaveMuting(false);
   };
 
   const unmuteAll = (): void => {
@@ -266,6 +340,7 @@ export default function LiveDashboardView({
       updatedStates[cameraName] = true;
     });
     setAudioStates(updatedStates);
+    onSaveMuting(true);
   };
 
   return (
@@ -392,19 +467,30 @@ export default function LiveDashboardView({
               } else {
                 grow = "aspect-video";
               }
+              const streamName =
+                currentGroupStreamingSettings?.[camera.name]?.streamName ||
+                Object.values(camera.live.streams)?.[0];
+              const autoLive =
+                currentGroupStreamingSettings?.[camera.name]?.streamType !==
+                "no-streaming";
+              const showStillWithoutActivity =
+                currentGroupStreamingSettings?.[camera.name]?.streamType !==
+                "continuous";
+              const useWebGL =
+                currentGroupStreamingSettings?.[camera.name]
+                  ?.compatibilityMode || false;
               return (
                 <LiveContextMenu
                   className={grow}
                   key={camera.name}
                   camera={camera.name}
                   cameraGroup={cameraGroup}
-                  streamName={Object.values(camera.live.streams)?.[0]}
+                  streamName={streamName}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   isRestreamed={isRestreamedStates[camera.name]}
                   supportsAudio={
-                    supportsAudioOutputStates[
-                      Object.values(camera.live.streams)?.[0]
-                    ]?.supportsAudio ?? false
+                    supportsAudioOutputStates[streamName]?.supportsAudio ??
+                    false
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
@@ -431,11 +517,12 @@ export default function LiveDashboardView({
                     }
                     cameraConfig={camera}
                     preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                    autoLive={autoLiveView}
-                    useWebGL={false}
+                    autoLive={autoLive ?? globalAutoLive}
+                    showStillWithoutActivity={showStillWithoutActivity ?? true}
+                    useWebGL={useWebGL}
                     playInBackground={false}
                     showStats={statsStates[camera.name]}
-                    streamName={Object.values(camera.live.streams)[0]}
+                    streamName={streamName}
                     onClick={() => onSelectCamera(camera.name)}
                     onError={(e) => handleError(camera.name, e)}
                     onResetLiveMode={() => resetPreferredLiveMode(camera.name)}

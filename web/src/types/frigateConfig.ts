@@ -179,6 +179,7 @@ export interface CameraConfig {
   };
   review: {
     alerts: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
       retain: {
@@ -187,6 +188,7 @@ export interface CameraConfig {
       };
     };
     detections: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
       retain: {

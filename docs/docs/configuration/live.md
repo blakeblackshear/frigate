@@ -57,7 +57,7 @@ You can configure Frigate to allow manual selection of the stream you want to vi
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
 
-::: note
+:::note
 
 Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` when playing live streams from your cameras.
 

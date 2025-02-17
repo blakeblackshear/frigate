@@ -170,6 +170,9 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
+# Install HailoRT & Wheels
+RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
+    /deps/install_hailort.sh
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
@@ -180,6 +183,7 @@ COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
+COPY --from=wheels /rootfs/ /
 COPY docker/main/rootfs/ /
 
 

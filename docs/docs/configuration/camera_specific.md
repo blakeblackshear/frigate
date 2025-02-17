@@ -22,7 +22,7 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
 ```yaml
 go2rtc:
   streams:
-    mjpeg_cam: "ffmpeg:{your_mjpeg_stream_url}#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
+    mjpeg_cam: "ffmpeg:http://your_mjpeg_stream_url#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
 
 cameras:
   ...
@@ -85,7 +85,7 @@ This camera is H.265 only. To be able to play clips on some devices (like MacOs 
 cameras:
   annkec800: # <------ Name the camera
     ffmpeg:
-      apple_compatibility: true  # <- Adds compatibility with MacOS and iPhone
+      apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
       output_args:
         record: preset-record-generic-audio-aac
 

@@ -484,7 +484,7 @@ export default function NotificationView({
                       }
                     }}
                   >
-                    {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
+                    {`${registration != null ? "Unregister" : "Register"} this device`}
                   </Button>
                   {registration != null && registration.active && (
                     <Button

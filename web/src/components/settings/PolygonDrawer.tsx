@@ -28,6 +28,8 @@ type PolygonDrawerProps = {
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   activeLine?: number;
+  snapToLines: (point: number[]) => number[] | null;
+  snapPoints: boolean;
 };
 
 export default function PolygonDrawer({
@@ -41,6 +43,8 @@ export default function PolygonDrawer({
   handlePointDragMove,
   handleGroupDragEnd,
   activeLine,
+  snapToLines,
+  snapPoints,
 }: PolygonDrawerProps) {
   const vertexRadius = 6;
   const flattenedPoints = useMemo(() => flattenPoints(points), [points]);
@@ -218,15 +222,32 @@ export default function PolygonDrawer({
             onMouseOver={handleMouseOverPoint}
             onMouseOut={handleMouseOutPoint}
             draggable={isActive}
-            onDragMove={isActive ? handlePointDragMove : undefined}
+            onDragMove={(e) => {
+              if (isActive) {
+                if (snapPoints) {
+                  const snappedPos = snapToLines([e.target.x(), e.target.y()]);
+                  if (snappedPos) {
+                    e.target.position({ x: snappedPos[0], y: snappedPos[1] });
+                  }
+                }
+                handlePointDragMove(e);
+              }
+            }}
             dragBoundFunc={(pos) => {
               if (stageRef.current) {
-                return dragBoundFunc(
+                const boundPos = dragBoundFunc(
                   stageRef.current.width(),
                   stageRef.current.height(),
                   vertexRadius,
                   pos,
                 );
+                if (snapPoints) {
+                  const snappedPos = snapToLines([boundPos.x, boundPos.y]);
+                  return snappedPos
+                    ? { x: snappedPos[0], y: snappedPos[1] }
+                    : boundPos;
+                }
+                return boundPos;
               } else {
                 return pos;
               }

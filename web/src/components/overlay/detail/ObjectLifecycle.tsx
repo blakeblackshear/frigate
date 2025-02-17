@@ -45,6 +45,13 @@ import {
 } from "@/components/ui/tooltip";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useNavigate } from "react-router-dom";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -68,6 +75,7 @@ export default function ObjectLifecycle({
 
   const { data: config } = useSWR<FrigateConfig>("config");
   const apiHost = useApiHost();
+  const navigate = useNavigate();
 
   const [imgLoaded, setImgLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -293,62 +301,83 @@ export default function ObjectLifecycle({
             imgLoaded ? "visible" : "invisible",
           )}
         >
-          <img
-            key={event.id}
-            ref={imgRef}
-            className={cn(
-              "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
-            )}
-            loading={isSafari ? "eager" : "lazy"}
-            style={
-              isIOS
-                ? {
-                    WebkitUserSelect: "none",
-                    WebkitTouchCallout: "none",
-                  }
-                : undefined
-            }
-            draggable={false}
-            src={src}
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setHasError(true)}
-          />
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <img
+                key={event.id}
+                ref={imgRef}
+                className={cn(
+                  "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
+                )}
+                loading={isSafari ? "eager" : "lazy"}
+                style={
+                  isIOS
+                    ? {
+                        WebkitUserSelect: "none",
+                        WebkitTouchCallout: "none",
+                      }
+                    : undefined
+                }
+                draggable={false}
+                src={src}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setHasError(true)}
+              />
 
-          {showZones &&
-            lifecycleZones?.map((zone) => (
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  width: imgRef.current?.clientWidth,
-                  height: imgRef.current?.clientHeight,
-                }}
-                key={zone}
-              >
-                <svg
-                  viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                  className="absolute inset-0"
-                >
-                  <polygon
-                    points={getZonePolygon(zone)}
-                    className="fill-none stroke-2"
+              {showZones &&
+                lifecycleZones?.map((zone) => (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
                     style={{
-                      stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
-                      fill:
-                        selectedZone == zone
-                          ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
-                          : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
-                      strokeWidth: selectedZone == zone ? 4 : 2,
+                      width: imgRef.current?.clientWidth,
+                      height: imgRef.current?.clientHeight,
                     }}
-                  />
-                </svg>
-              </div>
-            ))}
+                    key={zone}
+                  >
+                    <svg
+                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                      className="absolute inset-0"
+                    >
+                      <polygon
+                        points={getZonePolygon(zone)}
+                        className="fill-none stroke-2"
+                        style={{
+                          stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
+                          fill:
+                            selectedZone == zone
+                              ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
+                              : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
+                          strokeWidth: selectedZone == zone ? 4 : 2,
+                        }}
+                      />
+                    </svg>
+                  </div>
+                ))}
 
-          {boxStyle && (
-            <div className="absolute border-2 border-red-600" style={boxStyle}>
-              <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
-            </div>
-          )}
+              {boxStyle && (
+                <div
+                  className="absolute border-2 border-red-600"
+                  style={boxStyle}
+                >
+                  <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
+                </div>
+              )}
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem>
+                <div
+                  className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
+                  onClick={() =>
+                    navigate(
+                      `/settings?page=masks%20/%20zones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
+                    )
+                  }
+                >
+                  <div className="text-primary">Create Object Mask</div>
+                </div>
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </div>
       </div>
 
