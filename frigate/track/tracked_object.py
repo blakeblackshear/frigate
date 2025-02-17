@@ -323,7 +323,7 @@ class TrackedObject:
                 # check Euclidean distance before appending
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
                 logger.debug(
-                    f"{obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
+                    f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
                 )
 
         self.obj_data.update(obj_data)
