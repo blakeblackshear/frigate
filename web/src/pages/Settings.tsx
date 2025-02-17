@@ -61,19 +61,6 @@ export default function Settings() {
 
   const [searchParams] = useSearchParams();
 
-  // available settings views
-
-  const settingsViews = useMemo(() => {
-    const views = [...allSettingsViews];
-
-    if (!("Notification" in window) || !window.isSecureContext) {
-      const index = views.indexOf("notifications");
-      views.splice(index, 1);
-    }
-
-    return views;
-  }, []);
-
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
@@ -160,7 +147,7 @@ export default function Settings() {
                 }
               }}
             >
-              {Object.values(settingsViews).map((item) => (
+              {Object.values(allSettingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
                   className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}

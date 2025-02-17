@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { LuAlertCircle, LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -161,6 +162,9 @@ export default function NotificationView({
     useState<ServiceWorkerRegistration | null>();
 
   useEffect(() => {
+    if (!("Notification" in window) || !window.isSecureContext) {
+      return;
+    }
     navigator.serviceWorker
       .getRegistration(NOTIFICATION_SERVICE_WORKER)
       .then((worker) => {
@@ -277,6 +281,60 @@ export default function NotificationView({
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     saveToConfig(values as NotificationSettingsValueType);
+  }
+
+  if (!("Notification" in window) || !window.isSecureContext) {
+    return (
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="col-span-1">
+            <Heading as="h3" className="my-2">
+              Notification Settings
+            </Heading>
+            <div className="max-w-6xl">
+              <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+                <p>
+                  Frigate can natively send push notifications to your device
+                  when it is running in the browser or installed as a PWA.
+                </p>
+                <div className="flex items-center text-primary">
+                  <Link
+                    to="https://docs.frigate.video/configuration/notifications"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    Read the Documentation{" "}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <Alert variant="destructive">
+              <LuAlertCircle className="size-5" />
+              <AlertTitle>Notifications Unavailable</AlertTitle>
+
+              <AlertDescription>
+                Web push notifications require a secure context (
+                <code>https://...</code>). This is a browser limitation. Access
+                Frigate securely to use notifications.
+                <div className="mt-3 flex items-center">
+                  <Link
+                    to="https://docs.frigate.video/configuration/authentication"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    Read the Documentation{" "}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
