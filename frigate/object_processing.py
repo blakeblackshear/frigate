@@ -412,6 +412,11 @@ class CameraState:
 
             self.previous_frame_id = frame_name
 
+    def shutdown(self) -> None:
+        for obj in self.tracked_objects.values():
+            if not obj.obj_data.get("end_time"):
+                obj.write_thumbnail_to_disk()
+
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(
@@ -721,6 +726,10 @@ class TrackedObjectProcessor(threading.Thread):
 
                 event_id, camera, _ = update
                 self.camera_states[camera].finished(event_id)
+
+        # shut down camera states
+        for state in self.camera_states.values():
+            state.shutdown()
 
         self.requestor.stop()
         self.detection_publisher.stop()
