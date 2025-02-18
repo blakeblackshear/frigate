@@ -264,11 +264,7 @@ class Embeddings:
         st = time.time()
 
         # Get total count of events to process
-        total_events = (
-            Event.select()
-            .where((Event.has_clip == True | Event.has_snapshot == True))
-            .count()
-        )
+        total_events = Event.select().count()
 
         batch_size = 32
         current_page = 1
