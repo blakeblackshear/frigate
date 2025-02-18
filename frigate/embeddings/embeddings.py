@@ -288,7 +288,6 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where((Event.has_clip == True | Event.has_snapshot == True))
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
@@ -350,7 +349,6 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where((Event.has_clip == True | Event.has_snapshot == True))
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )
