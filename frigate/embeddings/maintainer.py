@@ -23,7 +23,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
-    THUMB_DIR,
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
