@@ -1,8 +1,9 @@
-import shutil
 from enum import Enum
 from typing import Union
 
 from pydantic import Field, field_validator
+
+from frigate.const import INCLUDED_FFMPEG_VERSIONS
 
 from ..base import FrigateBaseModel
 from ..env import EnvString
@@ -68,15 +69,21 @@ class FfmpegConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_path(self) -> str:
-        if shutil.which("ffmpeg") is None:
-            raise FileNotFoundError("ffmpeg not found in PATH.")
-        return "ffmpeg"
+        if self.path == "default":
+            return "ffmpeg"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
+        else:
+            return f"{self.path}/bin/ffmpeg"
 
     @property
     def ffprobe_path(self) -> str:
-        if shutil.which("ffprobe") is None:
-            raise FileNotFoundError("ffprobe not found in PATH.")
-        return "ffprobe"
+        if self.path == "default":
+            return "ffprobe"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
+        else:
+            return f"{self.path}/bin/ffprobe"
 
 
 class CameraRoleEnum(str, Enum):
