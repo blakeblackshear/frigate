@@ -448,7 +448,7 @@ export default function ObjectLifecycle({
                       className="absolute inset-0"
                     >
                       <ObjectPath
-                        positions={pathPoints} // Use any of the example paths
+                        positions={pathPoints}
                         color={getObjectColor(event.label)}
                         width={2}
                         imgRef={imgRef}
