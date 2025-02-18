@@ -1,5 +1,11 @@
 ## Proposed change
 <!--
+  Thank you!
+
+  If you are putting up a new feature or large refactor of existing functionality
+  then we encourage first creating a discussion to lay out your idea so that we
+  can make sure it aligns with Frigate's development.
+
   Describe what this pull request does and how it will benefit users of Frigate.
   Please describe in detail any considerations, breaking changes, etc. that are 
   made in this pull request.
