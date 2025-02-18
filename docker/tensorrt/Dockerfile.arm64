@@ -7,19 +7,24 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS build-wheels
 ARG DEBIAN_FRONTEND
 
+# Add deadsnakes PPA for python3.11
+RUN apt-get -qq update && \
+        apt-get -qq install -y --no-install-recommends \
+        software-properties-common \
+        && add-apt-repository ppa:deadsnakes/ppa
+
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
-    python3.9 python3.9-dev \
+    python3.11 python3.11-dev \
     wget build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+# Ensure python3 defaults to python3.11
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
-
 
 FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
@@ -41,11 +46,12 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
     && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
-ADD https://nvidia.box.com/shared/static/psl23iw3bh7hlgku0mjo1xekxpego3e3.whl /tmp/onnxruntime_gpu-1.15.1-cp311-cp311-linux_aarch64.whl
+# See https://elinux.org/Jetson_Zoo#ONNX_Runtime
+ADD https://nvidia.box.com/shared/static/9yvw05k6u343qfnkhdv2x6xhygze0aq1.whl /tmp/onnxruntime_gpu-1.19.0-cp311-cp311-linux_aarch64.whl
 
 RUN pip3 uninstall -y onnxruntime-openvino \
     && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt \
-    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.15.1-cp311-cp311-linux_aarch64.whl
+    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.19.0-cp311-cp311-linux_aarch64.whl
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
@@ -67,11 +73,17 @@ RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
-    && apt-get install -y python-is-python3 libprotobuf17  \
+    && apt-get install -y python-is-python3 libprotobuf23  \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/
 COPY --from=jetson-ffmpeg /rootfs /
+
+# ffmpeg runtime dependencies
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+    libx264-163 libx265-199 libegl1 \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
@@ -81,3 +93,6 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Fixes "Error importing detector runtime: /usr/lib/aarch64-linux-gnu/libstdc++.so.6: cannot allocate memory in static TLS block"
+ENV LD_PRELOAD /usr/lib/aarch64-linux-gnu/libstdc++.so.6
