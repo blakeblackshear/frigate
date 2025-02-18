@@ -217,9 +217,7 @@ class EmbeddingMaintainer(threading.Thread):
                     continue
 
                 # Extract valid thumbnail
-                thumbnail = cv2.imread(
-                    os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
-                )
+                thumbnail = get_event_thumbnail_bytes(event)
 
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
