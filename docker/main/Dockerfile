@@ -189,14 +189,6 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
     /deps/install_hailort.sh
 
-# install pycoral & tflite runtime
-RUN { test "${TARGETARCH}" = "amd64" && \
-        wget https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl -O /wheels/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl; \
-    } \
-    || \
-    { test "${TARGETARCH}" = "arm64" && \
-        wget https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl -O /wheels/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl; \
-    }
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
