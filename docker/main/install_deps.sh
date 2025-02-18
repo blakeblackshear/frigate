@@ -42,7 +42,7 @@ else
 fi
 
 mkdir -p /usr/lib/ffmpeg/5.0
-wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linu${ffmpeg_arch}-gpl-5.1.tar.xz"
+wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux${ffmpeg_arch}-gpl-5.1.tar.xz"
 tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
 rm -rf ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
 mkdir -p /usr/lib/ffmpeg/7.0
