@@ -1,8 +1,8 @@
 """Object attribute."""
 
-import base64
 import logging
 import math
+import os
 from collections import defaultdict
 from statistics import median
 from typing import Optional
@@ -13,8 +13,10 @@ import numpy as np
 from frigate.config import (
     CameraConfig,
     ModelConfig,
+    SnapshotsConfig,
     UIConfig,
 )
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
@@ -330,7 +332,7 @@ class TrackedObject:
         self.current_zones = current_zones
         return (thumb_update, significant_change, autotracker_update)
 
-    def to_dict(self, include_thumbnail: bool = False):
+    def to_dict(self):
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera_config.name,
@@ -365,9 +367,6 @@ class TrackedObject:
             "path_data": self.path_data,
         }
 
-        if include_thumbnail:
-            event["thumbnail"] = base64.b64encode(self.get_thumbnail()).decode("utf-8")
-
         return event
 
     def is_active(self):
@@ -379,22 +378,16 @@ class TrackedObject:
             > self.camera_config.detect.stationary.threshold
         )
 
-    def get_thumbnail(self):
-        if (
-            self.thumbnail_data is None
-            or self.thumbnail_data["frame_time"] not in self.frame_cache
-        ):
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-
-        jpg_bytes = self.get_jpg_bytes(
-            timestamp=False, bounding_box=False, crop=True, height=175
+    def get_thumbnail(self, ext: str):
+        img_bytes = self.get_img_bytes(
+            ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
 
-        if jpg_bytes:
-            return jpg_bytes
+        if img_bytes:
+            return img_bytes
         else:
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-            return jpg.tobytes()
+            _, img = cv2.imencode(f".{ext}", np.zeros((175, 175, 3), np.uint8))
+            return img.tobytes()
 
     def get_clean_png(self):
         if self.thumbnail_data is None:
@@ -417,8 +410,14 @@ class TrackedObject:
         else:
             return None
 
-    def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
+    def get_img_bytes(
+        self,
+        ext: str,
+        timestamp=False,
+        bounding_box=False,
+        crop=False,
+        height: int | None = None,
+        quality: int | None = None,
     ):
         if self.thumbnail_data is None:
             return None
@@ -503,13 +502,68 @@ class TrackedObject:
                 position=self.camera_config.timestamp_style.position,
             )
 
-        ret, jpg = cv2.imencode(
-            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        )
+        quality_params = None
+
+        if ext == "jpg":
+            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
+        elif ext == "webp":
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
+
+        ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
+
         if ret:
             return jpg.tobytes()
         else:
             return None
+
+    def write_snapshot_to_disk(self) -> None:
+        snapshot_config: SnapshotsConfig = self.camera_config.snapshots
+        jpg_bytes = self.get_img_bytes(
+            ext="jpg",
+            timestamp=snapshot_config.timestamp,
+            bounding_box=snapshot_config.bounding_box,
+            crop=snapshot_config.crop,
+            height=snapshot_config.height,
+            quality=snapshot_config.quality,
+        )
+        if jpg_bytes is None:
+            logger.warning(f"Unable to save snapshot for {self.obj_data['id']}.")
+        else:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, f"{self.camera_config.name}-{self.obj_data['id']}.jpg"
+                ),
+                "wb",
+            ) as j:
+                j.write(jpg_bytes)
+
+        # write clean snapshot if enabled
+        if snapshot_config.clean_copy:
+            png_bytes = self.get_clean_png()
+            if png_bytes is None:
+                logger.warning(
+                    f"Unable to save clean snapshot for {self.obj_data['id']}."
+                )
+            else:
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.png",
+                    ),
+                    "wb",
+                ) as p:
+                    p.write(png_bytes)
+
+    def write_thumbnail_to_disk(self) -> None:
+        directory = os.path.join(THUMB_DIR, self.camera_config.name)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        thumb_bytes = self.get_thumbnail("webp")
+
+        with open(os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb") as f:
+            f.write(thumb_bytes)
 
 
 def zone_filtered(obj: TrackedObject, object_config):

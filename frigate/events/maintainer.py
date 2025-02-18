@@ -23,7 +23,6 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
         if (
             prev_event["top_score"] != current_event["top_score"]
             or prev_event["entered_zones"] != current_event["entered_zones"]
-            or prev_event["thumbnail"] != current_event["thumbnail"]
             or prev_event["end_time"] != current_event["end_time"]
             or prev_event["average_estimated_speed"]
             != current_event["average_estimated_speed"]
@@ -202,7 +201,7 @@ class EventProcessor(threading.Thread):
                 Event.start_time: start_time,
                 Event.end_time: end_time,
                 Event.zones: list(event_data["entered_zones"]),
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.model_hash: first_detector.model.model_hash,
@@ -258,7 +257,7 @@ class EventProcessor(threading.Thread):
                 Event.camera: event_data["camera"],
                 Event.start_time: event_data["start_time"],
                 Event.end_time: event_data["end_time"],
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],

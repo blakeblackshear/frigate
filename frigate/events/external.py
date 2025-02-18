@@ -1,6 +1,5 @@
 """Handle external events created by the user."""
 
-import base64
 import datetime
 import logging
 import os
@@ -15,7 +14,7 @@ from numpy import ndarray
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.events_updater import EventUpdatePublisher
 from frigate.config import CameraConfig, FrigateConfig
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.util.image import draw_box_with_label
 
@@ -55,9 +54,7 @@ class ExternalEventProcessor:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         event_id = f"{now}-{rand_id}"
 
-        thumbnail = self._write_images(
-            camera_config, label, event_id, draw, snapshot_frame
-        )
+        self._write_images(camera_config, label, event_id, draw, snapshot_frame)
         end = now + duration if duration is not None else None
 
         self.event_sender.publish(
@@ -74,7 +71,6 @@ class ExternalEventProcessor:
                     "camera": camera,
                     "start_time": now - camera_config.record.event_pre_capture,
                     "end_time": end,
-                    "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
                     "type": source_type,
@@ -134,9 +130,9 @@ class ExternalEventProcessor:
         event_id: str,
         draw: dict[str, any],
         img_frame: Optional[ndarray],
-    ) -> Optional[str]:
+    ) -> None:
         if img_frame is None:
-            return None
+            return
 
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
@@ -182,8 +178,9 @@ class ExternalEventProcessor:
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
-        ret, jpg = cv2.imencode(".jpg", thumb)
-        return base64.b64encode(jpg.tobytes()).decode("utf-8")
+        cv2.imwrite(
+            os.path.join(THUMB_DIR, camera_config.name, f"{event_id}.webp"), thumb
+        )
 
     def stop(self):
         self.event_sender.stop()
