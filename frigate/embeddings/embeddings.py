@@ -20,7 +20,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
-from frigate.util.path import get_event_thumbnail_path
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
@@ -295,7 +295,7 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                thumbnail = get_event_thumbnail_path(event)
+                thumbnail = get_event_thumbnail_bytes(event)
 
                 if thumbnail is None:
                     continue

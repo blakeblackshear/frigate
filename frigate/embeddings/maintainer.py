@@ -39,7 +39,7 @@ from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
-from frigate.util.path import get_event_thumbnail_path
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 
@@ -394,7 +394,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        thumbnail = get_event_thumbnail_path(event)
+        thumbnail = get_event_thumbnail_bytes(event)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

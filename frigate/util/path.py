@@ -8,7 +8,7 @@ from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.models import Event
 
 
-def get_event_thumbnail_path(event: Event) -> bytes | None:
+def get_event_thumbnail_bytes(event: Event) -> bytes | None:
     if event.thumbnail:
         return base64.b64decode(event.thumbnail)
     else:
