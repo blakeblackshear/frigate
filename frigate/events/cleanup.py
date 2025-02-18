@@ -83,6 +83,7 @@ class EventCleanup(threading.Thread):
                 Event.select(
                     Event.id,
                     Event.camera,
+                    Event.thumbnail,
                 )
                 .where(
                     Event.camera.not_in(self.camera_keys),
@@ -158,6 +159,7 @@ class EventCleanup(threading.Thread):
                     Event.select(
                         Event.id,
                         Event.camera,
+                        Event.thumbnail,
                     )
                     .where(
                         Event.camera == name,
