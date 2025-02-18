@@ -1,4 +1,4 @@
-export enum ClassType {
+export enum LifecycleClassType {
   VISIBLE = "visible",
   GONE = "gone",
   ENTERED_ZONE = "entered_zone",
@@ -22,7 +22,7 @@ export type ObjectLifecycleSequence = {
     attribute: string;
     zones: string[];
   };
-  class_type: ClassType;
+  class_type: LifecycleClassType;
   source_id: string;
   source: string;
 };
@@ -32,3 +32,10 @@ export type TimeRange = { before: number; after: number };
 export type TimelineType = "timeline" | "events";
 
 export type TimelineScrubMode = "auto" | "drag" | "hover" | "compat";
+
+export type Position = {
+  x: number;
+  y: number;
+  timestamp: number;
+  lifecycle_item?: ObjectLifecycleSequence;
+};
