@@ -490,8 +490,9 @@ class TrackedObjectProcessor(threading.Thread):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
 
-            # write thumbnail to disk
-            obj.write_thumbnail_to_disk()
+            # write thumbnail to disk if it will be saved as an event
+            if obj.has_snapshot or obj.has_clip:
+                obj.write_thumbnail_to_disk()
 
             # write the snapshot to disk
             if obj.has_snapshot:
