@@ -22,7 +22,7 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
 ```yaml
 go2rtc:
   streams:
-    mjpeg_cam: "ffmpeg:{your_mjpeg_stream_url}#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
+    mjpeg_cam: "ffmpeg:http://your_mjpeg_stream_url#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
 
 cameras:
   ...
@@ -65,19 +65,32 @@ ffmpeg:
 
 ## Model/vendor specific setup
 
+### Amcrest & Dahua
+
+Amcrest & Dahua cameras should be connected to via RTSP using the following format:
+
+```
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=0 # this is the main stream
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=1 # this is the sub stream, typically supporting low resolutions only
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=2 # higher end cameras support a third stream with a mid resolution (1280x720, 1920x1080)
+rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=3 # new higher end cameras support a fourth stream with another mid resolution (1280x720, 1920x1080)
+
+```
+
 ### Annke C800
 
-This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
+This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be adjusted using the `apple_compatibility` config.
 
 ```yaml
 cameras:
   annkec800: # <------ Name the camera
     ffmpeg:
+      apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
       output_args:
-        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
+        record: preset-record-generic-audio-aac
 
       inputs:
-        - path: rtsp://user:password@camera-ip:554/H264/ch1/main/av_stream # <----- Update for your camera
+        - path: rtsp://USERNAME:PASSWORD@CAMERA-IP/H264/ch1/main/av_stream # <----- Update for your camera
           roles:
             - detect
             - record
@@ -94,6 +107,29 @@ You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
 ffmpeg:
   input_args: preset-rtsp-blue-iris
 ```
+
+### Hikvision Cameras
+
+Hikvision cameras should be connected to via RTSP using the following format:
+
+```
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/101 # this is the main stream
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/102 # this is the sub stream, typically supporting low resolutions only
+rtsp://USERNAME:PASSWORD@CAMERA-IP/streaming/channels/103 # higher end cameras support a third stream with a mid resolution (1280x720, 1920x1080)
+```
+
+:::note
+
+[Some users have reported](https://www.reddit.com/r/frigate_nvr/comments/1hg4ze7/hikvision_security_settings) that newer Hikvision cameras require adjustments to the security settings:
+
+```
+RTSP Authentication - digest/basic
+RTSP Digest Algorithm - MD5
+WEB Authentication - digest/basic
+WEB Digest Algorithm  - MD5
+```
+
+:::
 
 ### Reolink Cameras
 

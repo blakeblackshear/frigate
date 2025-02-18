@@ -21,13 +21,24 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
+from frigate.const import (
+    CLIPS_DIR,
+    UPDATE_EVENT_DESCRIPTION,
+)
+from frigate.data_processing.real_time.api import RealTimeProcessorApi
+from frigate.data_processing.real_time.bird_processor import BirdProcessor
+from frigate.data_processing.real_time.face_processor import FaceProcessor
+from frigate.data_processing.real_time.license_plate_processor import (
+    LicensePlateProcessor,
+)
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 
@@ -43,11 +54,13 @@ class EmbeddingMaintainer(threading.Thread):
         self,
         db: SqliteQueueDatabase,
         config: FrigateConfig,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
-        self.embeddings = Embeddings(config.semantic_search, db)
+        self.metrics = metrics
+        self.embeddings = Embeddings(config, db, metrics)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -60,10 +73,21 @@ class EmbeddingMaintainer(threading.Thread):
         )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
+        self.processors: list[RealTimeProcessorApi] = []
+
+        if self.config.face_recognition.enabled:
+            self.processors.append(FaceProcessor(self.config, metrics))
+
+        if self.config.classification.bird.enabled:
+            self.processors.append(BirdProcessor(self.config, metrics))
+
+        if self.config.lpr.enabled:
+            self.processors.append(LicensePlateProcessor(self.config, metrics))
+
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
         self.stop_event = stop_event
-        self.tracked_events = {}
+        self.tracked_events: dict[str, list[any]] = {}
         self.genai_client = get_genai_client(config)
 
     def run(self) -> None:
@@ -84,7 +108,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def _handle_request(topic: str, data: str) -> str:
+        def _handle_request(topic: str, data: dict[str, any]) -> str:
             try:
                 if topic == EmbeddingsRequestEnum.embed_description.value:
                     return serialize(
@@ -101,8 +125,15 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 elif topic == EmbeddingsRequestEnum.generate_search.value:
                     return serialize(
-                        self.embeddings.text_embedding([data])[0], pack=False
+                        self.embeddings.embed_description("", data, upsert=False),
+                        pack=False,
                     )
+                else:
+                    for processor in self.processors:
+                        resp = processor.handle_request(topic, data)
+
+                        if resp is not None:
+                            return resp
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 
@@ -110,7 +141,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_updates(self) -> None:
         """Process event updates"""
-        update = self.event_subscriber.check_for_update(timeout=0.1)
+        update = self.event_subscriber.check_for_update(timeout=0.01)
 
         if update is None:
             return
@@ -121,48 +152,58 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         camera_config = self.config.cameras[camera]
-        # no need to save our own thumbnails if genai is not enabled
-        # or if the object has become stationary
-        if (
-            not camera_config.genai.enabled
-            or self.genai_client is None
-            or data["stationary"]
-        ):
-            return
 
-        if data["id"] not in self.tracked_events:
-            self.tracked_events[data["id"]] = []
+        # no need to process updated objects if face recognition, lpr, genai are disabled
+        if not camera_config.genai.enabled and len(self.processors) == 0:
+            return
 
         # Create our own thumbnail based on the bounding box and the frame time
         try:
             yuv_frame = self.frame_manager.get(
                 frame_name, camera_config.frame_shape_yuv
             )
-
-            if yuv_frame is not None:
-                data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
-
-                # Limit the number of thumbnails saved
-                if len(self.tracked_events[data["id"]]) >= MAX_THUMBNAILS:
-                    # Always keep the first thumbnail for the event
-                    self.tracked_events[data["id"]].pop(1)
-
-                self.tracked_events[data["id"]].append(data)
-
-                self.frame_manager.close(frame_name)
         except FileNotFoundError:
             pass
+
+        if yuv_frame is None:
+            logger.debug(
+                "Unable to process object update because frame is unavailable."
+            )
+            return
+
+        for processor in self.processors:
+            processor.process_frame(data, yuv_frame)
+
+        # no need to save our own thumbnails if genai is not enabled
+        # or if the object has become stationary
+        if self.genai_client is not None and not data["stationary"]:
+            if data["id"] not in self.tracked_events:
+                self.tracked_events[data["id"]] = []
+
+            data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
+
+            # Limit the number of thumbnails saved
+            if len(self.tracked_events[data["id"]]) >= MAX_THUMBNAILS:
+                # Always keep the first thumbnail for the event
+                self.tracked_events[data["id"]].pop(1)
+
+            self.tracked_events[data["id"]].append(data)
+
+        self.frame_manager.close(frame_name)
 
     def _process_finalized(self) -> None:
         """Process the end of an event."""
         while True:
-            ended = self.event_end_subscriber.check_for_update(timeout=0.1)
+            ended = self.event_end_subscriber.check_for_update(timeout=0.01)
 
             if ended == None:
                 break
 
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
+
+            for processor in self.processors:
+                processor.expire_object(event_id)
 
             if updated_db:
                 try:
@@ -175,7 +216,7 @@ class EmbeddingMaintainer(threading.Thread):
                     continue
 
                 # Extract valid thumbnail
-                thumbnail = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
 
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
@@ -277,7 +318,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
-            timeout=0.1
+            timeout=0.01
         )
 
         if topic is None:
@@ -350,7 +391,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        thumbnail = base64.b64decode(event.thumbnail)
+        thumbnail = get_event_thumbnail_bytes(event)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

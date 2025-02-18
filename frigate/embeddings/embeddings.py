@@ -1,6 +1,6 @@
 """SQLite-vec embeddings database."""
 
-import base64
+import datetime
 import logging
 import os
 import time
@@ -9,16 +9,18 @@ from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import SemanticSearchConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
@@ -60,10 +62,14 @@ class Embeddings:
     """SQLite-vec embeddings database."""
 
     def __init__(
-        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
+        self,
+        config: FrigateConfig,
+        db: SqliteVecQueueDatabase,
+        metrics: DataProcessorMetrics,
     ) -> None:
         self.config = config
         self.db = db
+        self.metrics = metrics
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
@@ -73,9 +79,13 @@ class Embeddings:
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.model_size == "large"
+            if config.semantic_search.model_size == "large"
             else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
+            "facenet-facenet.onnx",
+            "paddleocr-onnx-detection.onnx",
+            "paddleocr-onnx-classification.onnx",
+            "paddleocr-onnx-recognition.onnx",
         ]
 
         for model in models:
@@ -94,7 +104,7 @@ class Embeddings:
             download_urls={
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
@@ -102,7 +112,7 @@ class Embeddings:
 
         model_file = (
             "vision_model_fp16.onnx"
-            if self.config.model_size == "large"
+            if self.config.semantic_search.model_size == "large"
             else "vision_model_quantized.onnx"
         )
 
@@ -115,10 +125,10 @@ class Embeddings:
             model_name="jinaai/jina-clip-v1",
             model_file=model_file,
             download_urls=download_urls,
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
-            device="GPU" if config.model_size == "large" else "CPU",
+            device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
 
     def embed_thumbnail(
@@ -130,6 +140,7 @@ class Embeddings:
         @param: thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
         # Convert thumbnail bytes to PIL Image
         embedding = self.vision_embedding([thumbnail])[0]
 
@@ -142,6 +153,11 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.image_embeddings_fps.value = (
+            self.metrics.image_embeddings_fps.value * 9 + duration
+        ) / 10
+
         return embedding
 
     def batch_embed_thumbnail(
@@ -152,6 +168,7 @@ class Embeddings:
         @param: event_thumbs Map of Event IDs in DB to thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
         ids = list(event_thumbs.keys())
         embeddings = self.vision_embedding(list(event_thumbs.values()))
 
@@ -170,11 +187,17 @@ class Embeddings:
                 items,
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
+
         return embeddings
 
     def embed_description(
         self, event_id: str, description: str, upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         embedding = self.text_embedding([description])[0]
 
         if upsert:
@@ -186,11 +209,17 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + duration
+        ) / 10
+
         return embedding
 
     def batch_embed_description(
         self, event_descriptions: dict[str, str], upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         # upsert embeddings one by one to avoid token limit
         embeddings = []
 
@@ -213,6 +242,11 @@ class Embeddings:
                 items,
             )
 
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
+
         return embeddings
 
     def reindex(self) -> None:
@@ -230,14 +264,7 @@ class Embeddings:
         st = time.time()
 
         # Get total count of events to process
-        total_events = (
-            Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
-            .count()
-        )
+        total_events = Event.select().count()
 
         batch_size = 32
         current_page = 1
@@ -255,10 +282,6 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
@@ -268,7 +291,12 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                batch_thumbs[event.id] = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                if thumbnail is None:
+                    continue
+
+                batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
 
                 if description := event.data.get("description", "").strip():
@@ -307,10 +335,6 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )

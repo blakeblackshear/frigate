@@ -13,20 +13,19 @@ Many users have reported various issues with Reolink cameras, so I do not recomm
 
 Here are some of the camera's I recommend:
 
-- <a href="https://amzn.to/3uFLtxB" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) T5442TM-AS-LED</a> (affiliate link)
-- <a href="https://amzn.to/3isJ3gU" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T5442TM-AS</a> (affiliate link)
-- <a href="https://amzn.to/2ZWNWIA" target="_blank" rel="nofollow noopener sponsored">Amcrest IP5M-T1179EW-28MM</a> (affiliate link)
+- <a href="https://amzn.to/4fwoNWA" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T549M-ALED-S3</a> (affiliate link)
+- <a href="https://amzn.to/3YXpcMw" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T54IR-AS</a> (affiliate link)
+- <a href="https://amzn.to/3AvBHoY" target="_blank" rel="nofollow noopener sponsored">Amcrest IP5M-T1179EW-AI-V3</a> (affiliate link)
 
 I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
 ## Server
 
-My current favorite is the Beelink EQ12 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Beelink EQ12 (<a href="https://amzn.to/3OlTMJY" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Intel NUC (<a href="https://amzn.to/3psFlHi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)    | 5-10ms                | USB                 | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion. Requires extra parts. |
+| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
 
 ## Detectors
 
@@ -52,24 +51,25 @@ The OpenVINO detector type is able to run on:
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 
-Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known examples are below:
+Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
 
-| Name                 | MobileNetV2 Inference Speed | YOLO-NAS Inference Speed  | Notes                                  |
-| -------------------- | --------------------------- | ------------------------- | -------------------------------------- |
-| Intel Celeron J4105  | ~ 25 ms                     |                           | Can only run one detector instance     |
-| Intel Celeron N3060  | 130 - 150 ms                |                           | Can only run one detector instance     |
-| Intel Celeron N3205U | ~ 120 ms                    |                           | Can only run one detector instance     |
-| Intel Celeron N4020  | 50 - 200 ms                 |                           | Inference speed depends on other loads |
-| Intel i3 6100T       | 15 - 35 ms                  |                           | Can only run one detector instance     |
-| Intel i3 8100        | ~ 15 ms                     |                           |                                        |
-| Intel i5 4590        | ~ 20 ms                     |                           |                                        |
-| Intel i5 6500        | ~ 15 ms                     |                           |                                        |
-| Intel i5 7200u       | 15 - 25 ms                  |                           |                                        |
-| Intel i5 7500        | ~ 15 ms                     |                           |                                        |
-| Intel i5 1135G7      | 10 - 15 ms                  |                           |                                        |
-| Intel i5 12600K      | ~ 15 ms                     | 320: ~ 20 ms 640: ~ 46 ms |                                        |
-| Intel Arc A380       | ~ 6 ms                      | 320: ~ 10 ms              |                                        |
-| Intel Arc A750       | ~ 4 ms                      | 320: ~ 8 ms               |                                        |
+| Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | Notes                                  |
+| -------------------- | -------------------------- | ------------------------- | -------------------------------------- |
+| Intel Celeron J4105  | ~ 25 ms                    |                           | Can only run one detector instance     |
+| Intel Celeron N3060  | 130 - 150 ms               |                           | Can only run one detector instance     |
+| Intel Celeron N3205U | ~ 120 ms                   |                           | Can only run one detector instance     |
+| Intel Celeron N4020  | 50 - 200 ms                |                           | Inference speed depends on other loads |
+| Intel i3 6100T       | 15 - 35 ms                 |                           | Can only run one detector instance     |
+| Intel i3 8100        | ~ 15 ms                    |                           |                                        |
+| Intel i5 4590        | ~ 20 ms                    |                           |                                        |
+| Intel i5 6500        | ~ 15 ms                    |                           |                                        |
+| Intel i5 7200u       | 15 - 25 ms                 |                           |                                        |
+| Intel i5 7500        | ~ 15 ms                    |                           |                                        |
+| Intel i5 1135G7      | 10 - 15 ms                 |                           |                                        |
+| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                                        |
+| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                                        |
+| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                                        |
+| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                                        |
 
 ### TensorRT - Nvidia GPU
 
@@ -78,15 +78,15 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YoloV7 Inference Speed | YOLO-NAS Inference Speed  |
-| --------------- | ---------------------- | ------------------------- |
-| GTX 1060 6GB    | ~ 7 ms                 |                           |
-| GTX 1070        | ~ 6 ms                 |                           |
-| GTX 1660 SUPER  | ~ 4 ms                 |                           |
-| RTX 3050        | 5 - 7 ms               | 320: ~ 10 ms 640: ~ 16 ms |
-| RTX 3070 Mobile | ~ 5 ms                 |                           |
-| Quadro P400 2GB | 20 - 25 ms             |                           |
-| Quadro P2000    | ~ 12 ms                |                           |
+| Name            | YoloV7 Inference Time | YOLO-NAS Inference Time   |
+| --------------- | --------------------- | ------------------------- |
+| GTX 1060 6GB    | ~ 7 ms                |                           |
+| GTX 1070        | ~ 6 ms                |                           |
+| GTX 1660 SUPER  | ~ 4 ms                |                           |
+| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
+| RTX 3070 Mobile | ~ 5 ms                |                           |
+| Quadro P400 2GB | 20 - 25 ms            |                           |
+| Quadro P2000    | ~ 12 ms               |                           |
 
 ### AMD GPUs
 

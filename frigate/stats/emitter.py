@@ -11,6 +11,7 @@ from typing import Optional
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import FREQUENCY_STATS_POINTS
+from frigate.stats.prometheus import update_metrics
 from frigate.stats.util import stats_snapshot
 from frigate.types import StatsTrackingTypes
 
@@ -66,6 +67,16 @@ class StatsEmitter(threading.Thread):
             selected_stats.append(selected)
 
         return selected_stats
+
+    def stats_init(config, camera_metrics, detectors, processes):
+        stats = {
+            "cameras": camera_metrics,
+            "detectors": detectors,
+            "processes": processes,
+        }
+        # Update Prometheus metrics with initial stats
+        update_metrics(stats)
+        return stats
 
     def run(self) -> None:
         time.sleep(10)

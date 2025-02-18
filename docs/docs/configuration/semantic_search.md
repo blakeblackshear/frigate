@@ -1,6 +1,6 @@
 ---
 id: semantic_search
-title: Using Semantic Search
+title: Semantic Search
 ---
 
 Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.

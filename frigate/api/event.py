@@ -92,6 +92,8 @@ def events(params: EventsQueryParams = Depends()):
     favorites = params.favorites
     min_score = params.min_score
     max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     is_submitted = params.is_submitted
     min_length = params.min_length
     max_length = params.max_length
@@ -226,6 +228,12 @@ def events(params: EventsQueryParams = Depends()):
     if min_score is not None:
         clauses.append((Event.data["score"] >= min_score))
 
+    if max_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] <= max_speed))
+
+    if min_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] >= min_speed))
+
     if min_length is not None:
         clauses.append(((Event.end_time - Event.start_time) >= min_length))
 
@@ -249,6 +257,10 @@ def events(params: EventsQueryParams = Depends()):
             order_by = Event.data["score"].asc()
         elif sort == "score_desc":
             order_by = Event.data["score"].desc()
+        elif sort == "speed_asc":
+            order_by = Event.data["average_estimated_speed"].asc()
+        elif sort == "speed_desc":
+            order_by = Event.data["average_estimated_speed"].desc()
         elif sort == "date_asc":
             order_by = Event.start_time.asc()
         elif sort == "date_desc":
@@ -316,7 +328,16 @@ def events_explore(limit: int = 10):
                     k: v
                     for k, v in event.data.items()
                     if k
-                    in ["type", "score", "top_score", "description", "sub_label_score"]
+                    in [
+                        "type",
+                        "score",
+                        "top_score",
+                        "description",
+                        "sub_label_score",
+                        "average_estimated_speed",
+                        "velocity_angle",
+                        "path_data",
+                    ]
                 },
                 "event_count": label_counts[event.label],
             }
@@ -367,6 +388,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     before = params.before
     min_score = params.min_score
     max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     time_range = params.time_range
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
@@ -465,6 +488,16 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             event_filters.append((Event.data["score"] >= min_score))
         if max_score is not None:
             event_filters.append((Event.data["score"] <= max_score))
+
+    if min_speed is not None and max_speed is not None:
+        event_filters.append(
+            (Event.data["average_estimated_speed"].between(min_speed, max_speed))
+        )
+    else:
+        if min_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] >= min_speed))
+        if max_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] <= max_speed))
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -581,7 +614,17 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         processed_event["data"] = {
             k: v
             for k, v in event["data"].items()
-            if k in ["type", "score", "top_score", "description"]
+            if k
+            in [
+                "type",
+                "score",
+                "top_score",
+                "description",
+                "sub_label_score",
+                "average_estimated_speed",
+                "velocity_angle",
+                "path_data",
+            ]
         }
 
         if event["id"] in search_results:
@@ -596,6 +639,10 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         processed_events.sort(key=lambda x: x["score"])
     elif min_score is not None and max_score is not None and sort == "score_desc":
         processed_events.sort(key=lambda x: x["score"], reverse=True)
+    elif min_speed is not None and max_speed is not None and sort == "speed_asc":
+        processed_events.sort(key=lambda x: x["average_estimated_speed"])
+    elif min_speed is not None and max_speed is not None and sort == "speed_desc":
+        processed_events.sort(key=lambda x: x["average_estimated_speed"], reverse=True)
     elif sort == "date_asc":
         processed_events.sort(key=lambda x: x["start_time"])
     else:
@@ -909,38 +956,59 @@ def set_sub_label(
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
+        if not body.camera:
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Event "
+                        + event_id
+                        + " not found and camera is not provided.",
+                    }
+                ),
+                status_code=404,
+            )
+
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = (
+            request.app.detected_frames_processor.camera_states[
+                event.camera if event else body.camera
+            ].tracked_objects.get(event_id)
+        )
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
         return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
             status_code=404,
         )
 
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
-    if not event.end_time:
-        # update tracked object
-        tracked_obj: TrackedObject = (
-            request.app.detected_frames_processor.camera_states[
-                event.camera
-            ].tracked_objects.get(event.id)
-        )
-
-        if tracked_obj:
-            tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+    if tracked_obj:
+        tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
 
         # update timeline items
         Timeline.update(
             data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
         ).where(Timeline.source_id == event_id).execute()
 
-    event.sub_label = new_sub_label
+    if event:
+        event.sub_label = new_sub_label
 
-    if new_score:
-        data = event.data
-        data["sub_label_score"] = new_score
-        event.data = data
+        if new_score:
+            data = event.data
+            data["sub_label_score"] = new_score
+            event.data = data
 
-    event.save()
+        event.save()
+
     return JSONResponse(
         content=(
             {

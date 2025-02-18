@@ -3,14 +3,27 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG BASE_IMAGE=debian:11
-ARG SLIM_BASE=debian:11-slim
+# Globally set pip break-system-packages option to avoid having to specify it every time
+ARG PIP_BREAK_SYSTEM_PACKAGES=1
+
+ARG BASE_IMAGE=debian:12
+ARG SLIM_BASE=debian:12-slim
+
+# A hook that allows us to inject commands right after the base images
+ARG BASE_HOOK=
 
 FROM ${BASE_IMAGE} AS base
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
-FROM --platform=${BUILDPLATFORM} debian:11 AS base_host
+RUN ${BASE_HOOK}
+
+FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 FROM ${SLIM_BASE} AS slim-base
+ARG PIP_BREAK_SYSTEM_PACKAGES
+
+RUN ${BASE_HOOK}
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -139,24 +152,17 @@ ARG TARGETARCH
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    apt-transport-https \
-    gnupg \
-    wget \
-    # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
-    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA4285295FC7B1A81600062A9605C66F00D6C9793" | \
-    gpg --dearmor > /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-bullseye-stable.gpg] http://deb.debian.org/debian bullseye main contrib non-free" | \
-    tee /etc/apt/sources.list.d/debian-bullseye-nonfree.list \
+    apt-transport-https wget \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.9 \
-    python3.9-dev \
+    python3.11 \
+    python3.11-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev libssl-dev\
-    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libtbbmalloc2 libtbb-dev libdc1394-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # sqlite3 dependencies
     tclsh \
@@ -164,8 +170,7 @@ RUN apt-get -qq update \
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
@@ -180,6 +185,9 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
+# Install HailoRT & Wheels
+RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
+    /deps/install_hailort.sh
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
@@ -190,6 +198,7 @@ COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
+COPY --from=wheels /rootfs/ /
 COPY docker/main/rootfs/ /
 
 
