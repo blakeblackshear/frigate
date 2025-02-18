@@ -1,6 +1,5 @@
 """Image and video apis."""
 
-import base64
 import glob
 import logging
 import os
@@ -35,7 +34,6 @@ from frigate.const import (
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
     RECORD_DIR,
-    THUMB_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.object_processing import TrackedObjectProcessor
