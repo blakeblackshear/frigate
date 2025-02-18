@@ -36,8 +36,7 @@ See [the go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#modul
 
 ```yaml
 go2rtc:
-  streams:
-    ...
+  streams: ...
   log:
     exec: trace
 ```
@@ -176,15 +175,12 @@ listen [::]:5000 ipv6only=off;
 
 ### Custom ffmpeg build
 
-Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to /config and used.
+Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to `/config/custom-ffmpeg/bin` and used.
 
 To do this:
 
-1. Download your ffmpeg build and uncompress to the Frigate config folder.
-2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
-3. Restart Frigate and the custom version will be used if the mapping was done correctly.
-
-NOTE: The folder that is set for the config needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then the `ffmpeg -> path` field should be `/config/custom-ffmpeg/bin`.
+1. Download your ffmpeg build and uncompress it to the `/config/custom-ffmpeg/bin` folder. Verify that the ffmpeg binary is located at `/config/custom-ffmpeg/bin/ffmpeg`.
+2. Restart Frigate and the custom version will be used if the mapping was done correctly.
 
 ### Custom go2rtc version
 

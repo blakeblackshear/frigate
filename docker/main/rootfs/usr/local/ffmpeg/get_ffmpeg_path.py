@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import sys
 
 from ruamel.yaml import YAML
@@ -34,12 +33,7 @@ except FileNotFoundError:
     config: dict[str, any] = {}
 
 path = config.get("ffmpeg", {}).get("path", "default")
-if path == "default":
-    if shutil.which("ffmpeg") is None:
-        print(f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg")
-    else:
-        print("ffmpeg")
-elif path in INCLUDED_FFMPEG_VERSIONS:
-    print(f"/usr/lib/ffmpeg/{path}/bin/ffmpeg")
+if path is not DEFAULT_FFMPEG_VERSION and path in INCLUDED_FFMPEG_VERSIONS:
+    print(f"/usr/lib/ffmpeg/{path}")
 else:
-    print(f"{path}/bin/ffmpeg")
+    print(path)

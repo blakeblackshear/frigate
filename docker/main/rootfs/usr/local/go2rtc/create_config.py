@@ -2,7 +2,6 @@
 
 import json
 import os
-import shutil
 import sys
 from pathlib import Path
 
@@ -11,8 +10,6 @@ from ruamel.yaml import YAML
 sys.path.insert(0, "/opt/frigate")
 from frigate.const import (
     BIRDSEYE_PIPE,
-    DEFAULT_FFMPEG_VERSION,
-    INCLUDED_FFMPEG_VERSIONS,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 
@@ -112,32 +109,13 @@ else:
             **FRIGATE_ENV_VARS
         )
 
-# ensure ffmpeg path is set correctly
-path = config.get("ffmpeg", {}).get("path", "default")
-if path == "default":
-    if shutil.which("ffmpeg") is None:
-        ffmpeg_path = f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-    else:
-        ffmpeg_path = "ffmpeg"
-elif path in INCLUDED_FFMPEG_VERSIONS:
-    ffmpeg_path = f"/usr/lib/ffmpeg/{path}/bin/ffmpeg"
-else:
-    ffmpeg_path = f"{path}/bin/ffmpeg"
-
-if go2rtc_config.get("ffmpeg") is None:
-    go2rtc_config["ffmpeg"] = {"bin": ffmpeg_path}
-elif go2rtc_config["ffmpeg"].get("bin") is None:
-    go2rtc_config["ffmpeg"]["bin"] = ffmpeg_path
-
 # need to replace ffmpeg command when using ffmpeg4
 if int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") < 59:
-    if go2rtc_config["ffmpeg"].get("rtsp") is None:
-        go2rtc_config["ffmpeg"]["rtsp"] = (
-            "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-        )
-else:
+    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
     if go2rtc_config.get("ffmpeg") is None:
-        go2rtc_config["ffmpeg"] = {"path": ""}
+        go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
+    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
+        go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
 
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]
@@ -168,7 +146,7 @@ if config.get("birdseye", {}).get("restream", False):
     birdseye: dict[str, any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
-    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args', ''), input, '-rtsp_transport tcp -f rtsp {output}')}"
+    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode('ffmpeg', config.get('ffmpeg', {}).get('hwaccel_args', ''), input, '-rtsp_transport tcp -f rtsp {output}')}"
 
     if go2rtc_config.get("streams"):
         go2rtc_config["streams"]["birdseye"] = ffmpeg_cmd

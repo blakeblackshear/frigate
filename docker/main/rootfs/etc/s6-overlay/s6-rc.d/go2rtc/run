@@ -43,10 +43,16 @@ function get_ip_and_port_from_supervisor() {
     export FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL="${ip_address}:${webrtc_port}"
 }
 
-function set_libva_version() {
-    local ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
-    export LIBAVFORMAT_VERSION_MAJOR=$($ffmpeg_path -version | grep -Po "libavformat\W+\K\d+")
-}
+echo "[INFO] Preparing ffmpeg..."
+ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+if [[ -n "${ffmpeg_path}" ]]; then
+    ln -svf "${ffmpeg_path}" /usr/lib/ffmpeg/default
+fi
+ffmpeg_version=$(ffmpeg -version)
+echo "[INFO] ffmpeg -version"
+echo "${ffmpeg_version}"
+export LIBAVFORMAT_VERSION_MAJOR=$(echo "${ffmpeg_version}" | grep -Po "libavformat\W+\K\d+")
+unset ffmpeg_path ffmpeg_version
 
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
     echo "[INFO] Removing stale config from last run..."
@@ -65,8 +71,6 @@ if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
 else
     echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
 fi
-
-set_libva_version
 
 readonly config_path="/config"
 

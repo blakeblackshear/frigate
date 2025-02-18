@@ -31,29 +31,27 @@ unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
-# btbn-ffmpeg -> amd64
+# ffmpeg
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    mkdir -p /usr/lib/ffmpeg/5.0
-    mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+    ffmpeg_arch="x64"
+elif [[ "${TARGETARCH}" == "arm64" ]]; then
+    ffmpeg_arch="arm64"
+else
+    echo "Unsupported architecture: ${TARGETARCH}" >&2
+    exit 1
 fi
 
-# ffmpeg -> arm64
-if [[ "${TARGETARCH}" == "arm64" ]]; then
-    mkdir -p /usr/lib/ffmpeg/5.0
-    mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
-fi
+mkdir -p /usr/lib/ffmpeg/5.0
+wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linu${ffmpeg_arch}-gpl-5.1.tar.xz"
+tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
+rm -rf ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
+mkdir -p /usr/lib/ffmpeg/7.0
+wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux${ffmpeg_arch}-gpl-7.0.tar.xz"
+tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
+rm -rf ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+
+# set the default ffmpeg version
+ln -svf /usr/lib/ffmpeg/7.0 /usr/lib/ffmpeg/default
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then

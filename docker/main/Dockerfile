@@ -223,7 +223,7 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
-ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
+ENV PATH="/config/custom-ffmpeg/bin:/usr/lib/ffmpeg/default/bin:/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
