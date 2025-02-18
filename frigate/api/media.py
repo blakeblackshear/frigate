@@ -41,6 +41,7 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 from frigate.util.image import get_image_from_recording
+from frigate.util.path import get_event_thumbnail_path
 
 logger = logging.getLogger(__name__)
 
@@ -822,16 +823,7 @@ def event_thumbnail(
         if event.end_time is not None:
             event_complete = True
 
-        if event.thumbnail:
-            thumbnail_bytes = base64.b64decode(event.thumbnail)
-        else:
-            try:
-                with open(
-                    os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp"), "rb"
-                ) as f:
-                    thumbnail_bytes = f.read()
-            except FileNotFoundError:
-                raise DoesNotExist()
+        thumbnail_bytes = get_event_thumbnail_path(event)
     except DoesNotExist:
         # see if the object is currently being tracked
         try:

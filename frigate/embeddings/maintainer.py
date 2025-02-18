@@ -39,6 +39,7 @@ from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
+from frigate.util.path import get_event_thumbnail_path
 
 from .embeddings import Embeddings
 
@@ -393,12 +394,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        if event.thumbnail:
-            thumbnail = base64.b64decode(event.thumbnail)
-        else:
-            thumbnail = cv2.imread(
-                os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
-            )
+        thumbnail = get_event_thumbnail_path(event)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

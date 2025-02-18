@@ -1,12 +1,10 @@
 """SQLite-vec embeddings database."""
 
-import base64
 import datetime
 import logging
 import os
 import time
 
-import cv2
 from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
@@ -14,7 +12,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
-    THUMB_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -23,6 +20,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
+from frigate.util.path import get_event_thumbnail_path
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
@@ -297,15 +295,7 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                if event.thumbnail:
-                    thumbnail = base64.b64decode(event.thumbnail)
-                else:
-                    try:
-                        thumbnail = cv2.imread(
-                            os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp")
-                        )
-                    except Exception:
-                        thumbnail = None
+                thumbnail = get_event_thumbnail_path(event)
 
                 if thumbnail is None:
                     continue
