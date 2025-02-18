@@ -76,36 +76,6 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-  jetson_jp4_build:
-    if: false
-    runs-on: ubuntu-22.04
-    name: Jetson Jetpack 4
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Set up QEMU and Buildx
-        id: setup
-        uses: ./.github/actions/setup
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push TensorRT (Jetson, Jetpack 4)
-        env:
-          ARCH: arm64
-          BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
-          SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-          TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v6
-        with:
-          source: .
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
     if: false
     runs-on: ubuntu-22.04
