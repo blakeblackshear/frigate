@@ -823,6 +823,9 @@ def event_thumbnail(
 
         thumbnail_bytes = get_event_thumbnail_bytes(event)
     except DoesNotExist:
+        thumbnail_bytes = None
+
+    if thumbnail_bytes is None:
         # see if the object is currently being tracked
         try:
             camera_states = request.app.detected_frames_processor.camera_states.values()
