@@ -33,7 +33,7 @@ class ImprovedMotionDetector(MotionDetector):
             config.frame_height,
             config.frame_height * frame_shape[1] // frame_shape[0],
         )
-        self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
+        self.avg_frame = None
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
@@ -134,6 +134,9 @@ class ImprovedMotionDetector(MotionDetector):
         if self.save_images:
             self.frame_counter += 1
         # compare to average
+        if self.avg_frame is None:
+            # initialize the average frame to the first frame read.
+            self.avg_frame = resized_frame.astype(np.float32)
         frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
 
         # compute the threshold image for the current frame
