@@ -27,6 +27,9 @@ class SnapshotsConfig(FrigateBaseModel):
     bounding_box: bool = Field(
         default=True, title="Add a bounding box overlay on the snapshot."
     )
+    motion_paths: bool = Field(
+        default=True, title="Add a motion path overlay on the snapshot."
+    )
     crop: bool = Field(default=False, title="Crop the snapshot to the detected object.")
     required_zones: list[str] = Field(
         default_factory=list,

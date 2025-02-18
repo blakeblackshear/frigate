@@ -9,6 +9,7 @@ class CameraMqttConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Send image over MQTT.")
     timestamp: bool = Field(default=True, title="Add timestamp to MQTT image.")
     bounding_box: bool = Field(default=True, title="Add bounding box to MQTT image.")
+    motion_paths: bool = Field(default=True, title="Add motion paths to MQTT image.")
     crop: bool = Field(default=True, title="Crop MQTT image to detected object.")
     height: int = Field(default=270, title="MQTT image height.")
     required_zones: list[str] = Field(

@@ -73,6 +73,11 @@ export default function ObjectSettingsView({
       ),
     },
     {
+      param: "motion_paths",
+      title: "Motion Paths",
+      description: "Show motion paths of tracked objects",
+    },
+    {
       param: "timestamp",
       title: "Timestamp",
       description: "Overlay a timestamp on the image",

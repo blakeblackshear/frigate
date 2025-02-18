@@ -16,14 +16,15 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
+    CameraMqttConfig,
     FrigateConfig,
-    MqttConfig,
     RecordConfig,
     SnapshotsConfig,
     ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
+from frigate.motion.path_visualizer import PathVisualizer
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
@@ -45,6 +46,7 @@ class CameraState:
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
         ptz_autotracker_thread: PtzAutoTrackerThread,
+        path_history,
     ):
         self.name = name
         self.config = config
@@ -62,6 +64,8 @@ class CameraState:
         self.previous_frame_id = None
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.path_visualizer = PathVisualizer()
+        self.path_history = path_history
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -228,6 +232,27 @@ class CameraState:
                 position=self.camera_config.timestamp_style.position,
             )
 
+        if draw_options.get("motion_paths"):
+            # Update and draw paths for non-stationary objects
+            active_objects = [
+                obj_id
+                for obj_id, obj in tracked_objects.items()
+                if not obj["stationary"] and obj["frame_time"] == frame_time
+            ]
+
+            # Update positions for active objects
+            for obj_id in active_objects:
+                obj = tracked_objects[obj_id]
+                centroid = (
+                    int((obj["box"][0] + obj["box"][2]) / 2),  # x center
+                    obj["box"][3],  # y bottom
+                )
+                self.path_visualizer.update_position(obj_id, centroid)
+
+            self.path_visualizer.draw_paths(frame_copy, active_objects)
+
+            self.path_visualizer.cleanup_inactive(active_objects)
+
         return frame_copy
 
     def finished(self, obj_id):
@@ -262,6 +287,7 @@ class CameraState:
                 self.config.ui,
                 self.frame_cache,
                 current_detections[id],
+                self.path_history,
             )
 
             # call event handlers
@@ -273,6 +299,8 @@ class CameraState:
             thumb_update, significant_update, autotracker_update = updated_obj.update(
                 frame_time, current_detections[id], current_frame is not None
             )
+
+            self.update_paths(id, updated_obj)
 
             if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
@@ -413,6 +441,40 @@ class CameraState:
 
             self.previous_frame_id = frame_name
 
+    def update_paths(self, id: str, obj: TrackedObject):
+        """Store motion path data globally if movement exceeds motion threshold."""
+        motion_paths_config = (
+            self.camera_config.motion_paths or self.config.motion_paths
+        )
+        if motion_paths_config is None:
+            return
+
+        motion_threshold = self.camera_config.motion.threshold
+        max_path_length = motion_paths_config.max_history
+
+        current_box = obj.obj_data["box"]
+        current_centroid = (
+            int((current_box[0] + current_box[2]) / 2),
+            int((current_box[1] + current_box[3]) / 2),
+        )
+
+        history = self.path_history[self.name][id]
+        if history and len(history) > 0:
+            prev_pos = history[-1]
+            # Calculate motion delta
+            delta = abs(current_centroid[0] - prev_pos[0]) + abs(
+                current_centroid[1] - prev_pos[1]
+            )
+            if delta > motion_threshold:
+                history.append(current_centroid)
+        else:
+            # Always record first position
+            history.append(current_centroid)
+
+        # Keep last N positions based on config
+        if len(history) > max_path_length:
+            history.pop(0)
+
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(
@@ -450,6 +512,8 @@ class TrackedObjectProcessor(threading.Thread):
         # }
         self.zone_data = defaultdict(lambda: defaultdict(dict))
         self.active_zone_data = defaultdict(lambda: defaultdict(dict))
+
+        self.path_history = defaultdict(lambda: defaultdict(list))
 
         def start(camera: str, obj: TrackedObject, frame_name: str):
             self.event_sender.publish(
@@ -497,6 +561,7 @@ class TrackedObjectProcessor(threading.Thread):
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=snapshot_config.timestamp,
                     bounding_box=snapshot_config.bounding_box,
+                    motion_paths=snapshot_config.motion_paths,
                     crop=snapshot_config.crop,
                     height=snapshot_config.height,
                     quality=snapshot_config.quality,
@@ -547,11 +612,12 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
         def snapshot(camera, obj: TrackedObject, frame_name: str):
-            mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
+            mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=mqtt_config.timestamp,
                     bounding_box=mqtt_config.bounding_box,
+                    motion_paths=mqtt_config.motion_paths,
                     crop=mqtt_config.crop,
                     height=mqtt_config.height,
                     quality=mqtt_config.quality,
@@ -577,7 +643,11 @@ class TrackedObjectProcessor(threading.Thread):
 
         for camera in self.config.cameras.keys():
             camera_state = CameraState(
-                camera, self.config, self.frame_manager, self.ptz_autotracker_thread
+                camera,
+                self.config,
+                self.frame_manager,
+                self.ptz_autotracker_thread,
+                self.path_history,
             )
             camera_state.on("start", start)
             camera_state.on("autotrack", autotrack)
