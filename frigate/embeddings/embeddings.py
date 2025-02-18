@@ -1,6 +1,5 @@
 """SQLite-vec embeddings database."""
 
-import base64
 import datetime
 import logging
 import os
@@ -21,6 +20,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
@@ -264,14 +264,7 @@ class Embeddings:
         st = time.time()
 
         # Get total count of events to process
-        total_events = (
-            Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
-            .count()
-        )
+        total_events = Event.select().count()
 
         batch_size = 32
         current_page = 1
@@ -289,10 +282,6 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
@@ -302,7 +291,12 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                batch_thumbs[event.id] = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                if thumbnail is None:
+                    continue
+
+                batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
 
                 if description := event.data.get("description", "").strip():
@@ -341,10 +335,6 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )

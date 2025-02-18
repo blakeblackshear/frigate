@@ -511,7 +511,7 @@ function ObjectDetailsTab({
                 : undefined
             }
             draggable={false}
-            src={`${apiHost}api/events/${search.id}/thumbnail.jpg`}
+            src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
           />
           {config?.semantic_search.enabled && search.data.type == "object" && (
             <Button

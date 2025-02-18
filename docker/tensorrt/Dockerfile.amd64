@@ -17,7 +17,7 @@ FROM tensorrt-base AS frigate-tensorrt
 ENV TRT_VER=8.6.1
 RUN python3 -m pip config set global.break-system-packages true
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl --break-system-packages && \
+    pip3 install -U /deps/trt-wheels/*.whl && \
     ldconfig
 
 WORKDIR /opt/frigate/
@@ -32,4 +32,4 @@ COPY --from=trt-deps /usr/local/cuda-12.1 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl --break-system-packages
+    pip3 install -U /deps/trt-wheels/*.whl

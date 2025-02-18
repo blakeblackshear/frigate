@@ -52,6 +52,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useNavigate } from "react-router-dom";
+import { ObjectPath } from "./ObjectPath";
+import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -108,6 +110,17 @@ export default function ObjectLifecycle({
     [config, event],
   );
 
+  const getObjectColor = useCallback(
+    (label: string) => {
+      const objectColor = config?.model?.colormap[label];
+      if (objectColor) {
+        const reversed = [...objectColor].reverse();
+        return reversed;
+      }
+    },
+    [config],
+  );
+
   const getZonePolygon = useCallback(
     (zoneName: string) => {
       if (!imgRef.current || !config) {
@@ -120,7 +133,7 @@ export default function ObjectLifecycle({
 
       return zonePoints
         .split(",")
-        .map(parseFloat)
+        .map(Number.parseFloat)
         .reduce((acc, value, index) => {
           const isXCoordinate = index % 2 === 0;
           const coordinate = isXCoordinate
@@ -158,6 +171,47 @@ export default function ObjectLifecycle({
     );
   }, [config, event.camera]);
 
+  const savedPathPoints = useMemo(() => {
+    return (
+      event.data.path_data?.map(([coords, timestamp]: [number[], number]) => ({
+        x: coords[0],
+        y: coords[1],
+        timestamp,
+        lifecycle_item: undefined,
+      })) || []
+    );
+  }, [event.data.path_data]);
+
+  const eventSequencePoints = useMemo(() => {
+    return (
+      eventSequence
+        ?.filter((event) => event.data.box !== undefined)
+        .map((event) => {
+          const [left, top, width, height] = event.data.box!;
+
+          return {
+            x: left + width / 2, // Center x-coordinate
+            y: top + height, // Bottom y-coordinate
+            timestamp: event.timestamp,
+            lifecycle_item: event,
+          };
+        }) || []
+    );
+  }, [eventSequence]);
+
+  // final object path with timeline points included
+  const pathPoints = useMemo(() => {
+    // don't display a path if we don't have any saved path points
+    if (
+      savedPathPoints.length === 0 ||
+      config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config
+    )
+      return [];
+    return [...savedPathPoints, ...eventSequencePoints].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+  }, [savedPathPoints, eventSequencePoints, config, event]);
+
   const [timeIndex, setTimeIndex] = useState(0);
 
   const handleSetBox = useCallback(
@@ -171,12 +225,13 @@ export default function ObjectLifecycle({
           top: `${box[1] * imgRect.height}px`,
           width: `${box[2] * imgRect.width}px`,
           height: `${box[3] * imgRect.height}px`,
+          borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
         };
 
         setBoxStyle(style);
       }
     },
-    [imgRef],
+    [imgRef, event, getObjectColor],
   );
 
   // image
@@ -254,6 +309,21 @@ export default function ObjectLifecycle({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainApi, thumbnailApi]);
 
+  const handlePathPointClick = useCallback(
+    (index: number) => {
+      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      const sequenceIndex = eventSequence.findIndex(
+        (item) => item.timestamp === pathPoints[index].timestamp,
+      );
+      if (sequenceIndex !== -1) {
+        mainApi.scrollTo(sequenceIndex);
+        thumbnailApi.scrollTo(sequenceIndex);
+        setCurrent(sequenceIndex);
+      }
+    },
+    [mainApi, thumbnailApi, eventSequence, pathPoints],
+  );
+
   if (!event.id || !eventSequence || !config || !timeIndex) {
     return <ActivityIndicator />;
   }
@@ -325,6 +395,8 @@ export default function ObjectLifecycle({
               />
 
               {showZones &&
+                imgRef.current?.width &&
+                imgRef.current?.height &&
                 lifecycleZones?.map((zone) => (
                   <div
                     className="absolute inset-0 flex items-center justify-center"
@@ -355,13 +427,36 @@ export default function ObjectLifecycle({
                 ))}
 
               {boxStyle && (
-                <div
-                  className="absolute border-2 border-red-600"
-                  style={boxStyle}
-                >
+                <div className="absolute border-2" style={boxStyle}>
                   <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
                 </div>
               )}
+              {imgRef.current?.width &&
+                imgRef.current?.height &&
+                pathPoints &&
+                pathPoints.length > 0 && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                      width: imgRef.current?.clientWidth,
+                      height: imgRef.current?.clientHeight,
+                    }}
+                    key="path"
+                  >
+                    <svg
+                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                      className="absolute inset-0"
+                    >
+                      <ObjectPath
+                        positions={pathPoints}
+                        color={getObjectColor(event.label)}
+                        width={2}
+                        imgRef={imgRef}
+                        onPointClick={handlePathPointClick}
+                      />
+                    </svg>
+                  </div>
+                )}
             </ContextMenuTrigger>
             <ContextMenuContent>
               <ContextMenuItem>
@@ -412,6 +507,11 @@ export default function ObjectLifecycle({
           {current + 1} of {eventSequence.length}
         </div>
       </div>
+      {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
+        <div className="-mt-2 mb-2 text-sm text-danger">
+          Bounding box positions will be inaccurate for autotracking cameras.
+        </div>
+      )}
       {showControls && (
         <AnnotationSettingsPane
           event={event}
@@ -653,49 +753,5 @@ export function LifecycleIcon({
       return <LuCircleDot className={cn(className)} />;
     default:
       return null;
-  }
-}
-
-function getLifecycleItemDescription(lifecycleItem: ObjectLifecycleSequence) {
-  const label = (
-    (Array.isArray(lifecycleItem.data.sub_label)
-      ? lifecycleItem.data.sub_label[0]
-      : lifecycleItem.data.sub_label) || lifecycleItem.data.label
-  ).replaceAll("_", " ");
-
-  switch (lifecycleItem.class_type) {
-    case "visible":
-      return `${label} detected`;
-    case "entered_zone":
-      return `${label} entered ${lifecycleItem.data.zones
-        .join(" and ")
-        .replaceAll("_", " ")}`;
-    case "active":
-      return `${label} became active`;
-    case "stationary":
-      return `${label} became stationary`;
-    case "attribute": {
-      let title = "";
-      if (
-        lifecycleItem.data.attribute == "face" ||
-        lifecycleItem.data.attribute == "license_plate"
-      ) {
-        title = `${lifecycleItem.data.attribute.replaceAll(
-          "_",
-          " ",
-        )} detected for ${label}`;
-      } else {
-        title = `${
-          lifecycleItem.data.label
-        } recognized as ${lifecycleItem.data.attribute.replaceAll("_", " ")}`;
-      }
-      return title;
-    }
-    case "gone":
-      return `${label} left`;
-    case "heard":
-      return `${label} heard`;
-    case "external":
-      return `${label} detected`;
   }
 }

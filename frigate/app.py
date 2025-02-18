@@ -39,6 +39,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
     SHM_FRAMES_VAR,
+    THUMB_DIR,
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
@@ -105,6 +106,7 @@ class FrigateApp:
         dirs = [
             CONFIG_DIR,
             RECORD_DIR,
+            THUMB_DIR,
             f"{CLIPS_DIR}/cache",
             CACHE_DIR,
             MODEL_CACHE_DIR,

@@ -1,6 +1,5 @@
 """Image and video apis."""
 
-import base64
 import glob
 import logging
 import os
@@ -40,6 +39,7 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 from frigate.util.image import get_image_from_recording
+from frigate.util.path import get_event_thumbnail_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -804,10 +804,11 @@ def event_snapshot(
     )
 
 
-@router.get("/events/{event_id}/thumbnail.jpg")
+@router.get("/events/{event_id}/thumbnail.{extension}")
 def event_thumbnail(
     request: Request,
     event_id: str,
+    extension: str,
     max_cache_age: int = Query(
         2592000, description="Max cache age in seconds. Default 30 days in seconds."
     ),
@@ -816,11 +817,15 @@ def event_thumbnail(
     thumbnail_bytes = None
     event_complete = False
     try:
-        event = Event.get(Event.id == event_id)
+        event: Event = Event.get(Event.id == event_id)
         if event.end_time is not None:
             event_complete = True
-        thumbnail_bytes = base64.b64decode(event.thumbnail)
+
+        thumbnail_bytes = get_event_thumbnail_bytes(event)
     except DoesNotExist:
+        thumbnail_bytes = None
+
+    if thumbnail_bytes is None:
         # see if the object is currently being tracked
         try:
             camera_states = request.app.detected_frames_processor.camera_states.values()
@@ -828,7 +833,7 @@ def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail()
+                        thumbnail_bytes = tracked_obj.get_thumbnail(extension)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Event not found"},
@@ -843,8 +848,8 @@ def event_thumbnail(
 
     # android notifications prefer a 2:1 ratio
     if format == "android":
-        jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
-        img = cv2.imdecode(jpg_as_np, flags=1)
+        img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+        img = cv2.imdecode(img_as_np, flags=1)
         thumbnail = cv2.copyMakeBorder(
             img,
             0,
@@ -854,17 +859,25 @@ def event_thumbnail(
             cv2.BORDER_CONSTANT,
             (0, 0, 0),
         )
-        ret, jpg = cv2.imencode(".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-        thumbnail_bytes = jpg.tobytes()
+
+        quality_params = None
+
+        if extension == "jpg" or extension == "jpeg":
+            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+        elif extension == "webp":
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+
+        _, img = cv2.imencode(f".{img}", thumbnail, quality_params)
+        thumbnail_bytes = img.tobytes()
 
     return Response(
         thumbnail_bytes,
-        media_type="image/jpeg",
+        media_type=f"image/{extension}",
         headers={
             "Cache-Control": f"private, max-age={max_cache_age}"
             if event_complete
             else "no-store",
-            "Content-Type": "image/jpeg",
+            "Content-Type": f"image/{extension}",
         },
     )
 

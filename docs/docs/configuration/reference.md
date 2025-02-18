@@ -420,6 +420,8 @@ notifications:
   # Optional: Email for push service to reach out to
   # NOTE: This is required to use notifications
   email: "admin@example.com"
+  # Optional: Cooldown time for notifications in seconds (default: shown below)
+  cooldown: 0
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level

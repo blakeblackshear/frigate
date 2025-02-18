@@ -112,6 +112,12 @@ export default function ExportDialog({
       });
   }, [camera, name, range, setRange, setName, setMode]);
 
+  const handleCancel = useCallback(() => {
+    setName("");
+    setMode("none");
+    setRange(undefined);
+  }, [setMode, setRange]);
+
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
   const Content = isDesktop ? DialogContent : DrawerContent;
@@ -129,7 +135,7 @@ export default function ExportDialog({
         show={mode == "timeline"}
         onPreview={() => setShowPreview(true)}
         onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        onCancel={handleCancel}
       />
       <Overlay
         open={mode == "select"}
@@ -176,7 +182,7 @@ export default function ExportDialog({
             setName={setName}
             setRange={setRange}
             setMode={setMode}
-            onCancel={() => setMode("none")}
+            onCancel={handleCancel}
           />
         </Content>
       </Overlay>
