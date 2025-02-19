@@ -3,6 +3,9 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Globally set pip break-system-packages option to avoid having to specify it every time
+ARG PIP_BREAK_SYSTEM_PACKAGES=1
+
 FROM wheels as rk-wheels
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
