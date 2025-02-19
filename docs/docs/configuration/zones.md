@@ -140,12 +140,12 @@ cameras:
     zones:
       street:
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
-        distances: 10,12,11,13.5
+        distances: 10,12,11,13.5 # in meters or feet
 ```
 
 Each number in the `distance` field represents the real-world distance between the points in the `coordinates` list. So in the example above, the distance between the first two points ([0.033,0.306] and [0.324,0.138]) is 10. The distance between the second and third set of points ([0.324,0.138] and [0.439,0.185]) is 12, and so on. The fastest and most accurate way to configure this is through the Zone Editor in the Frigate UI.
 
-The `distance` values are measured in meters or feet, depending on how `unit_system` is configured in your `ui` config:
+The `distance` values are measured in meters (metric) or feet (imperial), depending on how `unit_system` is configured in your `ui` config:
 
 ```yaml
 ui:
@@ -153,7 +153,9 @@ ui:
   unit_system: metric
 ```
 
-The average speed of your object as it moved through your zone is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label (see the caveats below). Current estimated speed, average estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents). These speed values are output as a number in miles per hour (mph) or kilometers per hour (kph), depending on how `unit_system` is configured in your `ui` config.
+The average speed of your object as it moved through your zone is saved in Frigate's database and can be seen in the UI in the Tracked Object Details pane in Explore. Current estimated speed can also be seen on the debug view as the third value in the object label (see the caveats below). Current estimated speed, average estimated speed, and velocity angle (the angle of the direction the object is moving relative to the frame) of tracked objects is also sent through the `events` MQTT topic. See the [MQTT docs](../integrations/mqtt.md#frigateevents).
+
+These speed values are output as a number in miles per hour (mph) or kilometers per hour (kph). For miles per hour, set `unit_system` to `imperial`. For kilometers per hour, set `unit_system` to `metric`.
 
 #### Best practices and caveats
 
