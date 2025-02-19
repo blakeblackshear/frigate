@@ -64,7 +64,7 @@ fi
 # order to run libyolo here.
 # On Jetpack 5.0, these libraries are not mounted by the runtime and are supplied by the image.
 if [[ "$(arch)" == "aarch64" ]]; then
-    if [[ ! -e /usr/lib/aarch64-linux-gnu/tegra ]]; then
+    if [[ ! -e /usr/lib/aarch64-linux-gnu/tegra && ! -e /usr/lib/aarch64-linux-gnu/tegra-egl ]]; then
         echo "ERROR: Container must be launched with nvidia runtime"
         exit 1
     elif [[ ! -e /usr/lib/aarch64-linux-gnu/libnvinfer.so.8 ||
