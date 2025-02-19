@@ -10,7 +10,8 @@ LPR works best when the license plate is clearly visible to the camera. For movi
 When a plate is recognized, the detected characters or recognized name is:
 
 - Added as a `sub_label` to the `car` tracked object.
-- Viewable in the Tracked Object Details pane and filterable through the More Filters menu in Explore
+- Viewable in the Review Item Details pane and the Tracked Object Details pane in Explore.
+- Filterable through the More Filters menu in Explore.
 - Published via the `frigate/events` MQTT topic as a `sub_label` for the tracked object.
 
 ## Model Requirements
