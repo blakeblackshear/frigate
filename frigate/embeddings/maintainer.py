@@ -20,6 +20,10 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.recordings_updater import (
+    RecordingsDataSubscriber,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
@@ -71,6 +75,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
+        self.recordings_subscriber = RecordingsDataSubscriber(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
         self.processors: list[RealTimeProcessorApi] = []
@@ -90,6 +97,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.tracked_events: dict[str, list[any]] = {}
         self.genai_client = get_genai_client(config)
 
+        # recordings data
+        self.recordings_available_through: dict[str, float] = {}
+
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
@@ -100,6 +110,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
+        self.recordings_subscriber.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
         self.requestor.stop()
@@ -314,6 +325,24 @@ class EmbeddingMaintainer(threading.Thread):
             # Delete tracked events based on the event_id
             if event_id in self.tracked_events:
                 del self.tracked_events[event_id]
+
+    def _process_recordings_updates(self) -> None:
+        """Process recordings updates."""
+        while True:
+            recordings_data = self.recordings_subscriber.check_for_update(timeout=0.01)
+
+            if recordings_data == None:
+                break
+
+            camera, recordings_available_through_timestamp = recordings_data
+
+            self.recordings_available_through[camera] = (
+                recordings_available_through_timestamp
+            )
+
+            logger.debug(
+                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+            )
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
