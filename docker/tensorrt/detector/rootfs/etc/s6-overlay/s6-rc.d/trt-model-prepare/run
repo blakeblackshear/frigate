@@ -20,7 +20,7 @@ FIRST_MODEL=true
 MODEL_DOWNLOAD=""
 MODEL_CONVERT=""
 
-if [ -z "$YOLO_MODELS"]; then
+if [ -z "$YOLO_MODELS" ]; then
     echo "tensorrt model preparation disabled"
     exit 0
 fi
