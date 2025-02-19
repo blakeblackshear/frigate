@@ -15,6 +15,7 @@ type ObjectPathProps = {
   pointRadius?: number;
   imgRef: React.RefObject<HTMLImageElement>;
   onPointClick?: (index: number) => void;
+  visible?: boolean;
 };
 
 const typeColorMap: Partial<
@@ -37,6 +38,7 @@ export function ObjectPath({
   pointRadius = 4,
   imgRef,
   onPointClick,
+  visible = true,
 }: ObjectPathProps) {
   const getAbsolutePositions = useCallback(() => {
     if (!imgRef.current || !positions) return [];
@@ -69,7 +71,7 @@ export function ObjectPath({
     return `rgb(${baseColor.map((c) => Math.max(0, c - 10)).join(",")})`;
   };
 
-  if (!imgRef.current) return null;
+  if (!imgRef.current || !visible) return null;
   const absolutePositions = getAbsolutePositions();
   const lineColor = `rgb(${color.join(",")})`;
 
