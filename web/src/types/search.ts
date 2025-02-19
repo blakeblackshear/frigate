@@ -57,6 +57,7 @@ export type SearchResult = {
     description?: string;
     average_estimated_speed: number;
     velocity_angle: number;
+    path_data: [number[], number][];
   };
 };
 
