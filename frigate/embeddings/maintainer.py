@@ -42,7 +42,7 @@ from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
-from frigate.data_processing.types import DataProcessorMetrics
+from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
@@ -129,6 +129,7 @@ class EmbeddingMaintainer(threading.Thread):
         while not self.stop_event.is_set():
             self._process_requests()
             self._process_updates()
+            self._process_recordings_updates()
             self._process_finalized()
             self._process_event_metadata()
 
@@ -237,6 +238,26 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
+            # call any defined post processors
+            for processor in self.post_processors:
+                if isinstance(processor, LicensePlatePostProcessor):
+                    recordings_available = self.recordings_available_through.get(camera)
+                    if recordings_available is not None:
+                        # and event_id is an event in detected_license_plates
+                        processor.process_data(
+                            {
+                                "event_id": event_id,
+                                "camera": camera,
+                                "recordings_available": self.recordings_available_through[
+                                    camera
+                                ],
+                            },
+                            PostProcessDataEnum.recording,
+                        )
+                else:
+                    processor.process_data(event_id, PostProcessDataEnum.event_id)
+
+            # expire in realtime processors
             for processor in self.realtime_processors:
                 processor.expire_object(event_id)
 
