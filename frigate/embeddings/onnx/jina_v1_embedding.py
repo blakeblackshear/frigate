@@ -151,15 +151,16 @@ class JinaV1ImageEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
+        model_file = (
+            "vision_model_fp16.onnx"
+            if model_size == "large"
+            else "vision_model_quantized.onnx"
+        )
         super().__init__(
             "jinaai/jina-clip-v1",
-            (
-                "vision_model_fp16.onnx"
-                if model_size == "large"
-                else "vision_model_quantized.onnx"
-            ),
+            model_file,
             {
-                self.model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{self.model_file}",
+                model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
                 "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
             },
         )

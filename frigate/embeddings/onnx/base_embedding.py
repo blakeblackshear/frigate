@@ -31,7 +31,6 @@ class BaseEmbedding(ABC):
         self.download_urls = download_urls
         self.downloader: ModelDownloader = None
 
-    @abstractmethod
     def _download_model(self, path: str):
         try:
             file_name = os.path.basename(path)
