@@ -30,11 +30,15 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.common.license_plate_model import LicensePlateModelRunner
+from frigate.data_processing.post.api import PostProcessorApi
+from frigate.data_processing.post.license_plate import (
+    LicensePlatePostProcessor,
+)
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
-from frigate.data_processing.real_time.bird_processor import BirdProcessor
-from frigate.data_processing.real_time.face_processor import FaceProcessor
-from frigate.data_processing.real_time.license_plate_processor import (
-    LicensePlateProcessor,
+from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.face import FaceRealTimeProcessor
+from frigate.data_processing.real_time.license_plate import (
+    LicensePlateRealTimeProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.events.types import EventTypeEnum
@@ -84,18 +88,31 @@ class EmbeddingMaintainer(threading.Thread):
         )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
-        self.processors: list[RealTimeProcessorApi] = []
 
-        if self.config.face_recognition.enabled:
-            self.processors.append(FaceProcessor(self.config, metrics))
-
-        if self.config.classification.bird.enabled:
-            self.processors.append(BirdProcessor(self.config, metrics))
-
+        # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
             lpr_model_runner = LicensePlateModelRunner(self.requestor)
-            self.processors.append(
-                LicensePlateProcessor(self.config, metrics, lpr_model_runner)
+
+        # realtime processors
+        self.realtime_processors: list[RealTimeProcessorApi] = []
+
+        if self.config.face_recognition.enabled:
+            self.realtime_processors.append(FaceRealTimeProcessor(self.config, metrics))
+
+        if self.config.classification.bird.enabled:
+            self.realtime_processors.append(BirdRealTimeProcessor(self.config, metrics))
+
+        if self.config.lpr.enabled:
+            self.realtime_processors.append(
+                LicensePlateRealTimeProcessor(self.config, metrics, lpr_model_runner)
+            )
+
+        # post processors
+        self.post_processors: list[PostProcessorApi] = []
+
+        if self.config.lpr.enabled:
+            self.post_processors.append(
+                LicensePlatePostProcessor(self.config, metrics, lpr_model_runner)
             )
 
         self.stop_event = stop_event
@@ -170,7 +187,7 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[camera]
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
-        if not camera_config.genai.enabled and len(self.processors) == 0:
+        if not camera_config.genai.enabled and len(self.realtime_processors) == 0:
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -187,7 +204,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        for processor in self.processors:
+        for processor in self.realtime_processors:
             processor.process_frame(data, yuv_frame)
 
         # no need to save our own thumbnails if genai is not enabled
@@ -218,7 +235,7 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            for processor in self.processors:
+            for processor in self.realtime_processors:
                 processor.expire_object(event_id)
 
             if updated_db:

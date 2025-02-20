@@ -17,7 +17,7 @@ from .api import RealTimeProcessorApi
 logger = logging.getLogger(__name__)
 
 
-class LicensePlateProcessor(LicensePlateProcessingMixin, RealTimeProcessorApi):
+class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,

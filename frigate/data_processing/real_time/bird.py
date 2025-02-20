@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-class BirdProcessor(RealTimeProcessorApi):
+class BirdRealTimeProcessor(RealTimeProcessorApi):
     def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
         super().__init__(config, metrics)
         self.interpreter: Interpreter = None
