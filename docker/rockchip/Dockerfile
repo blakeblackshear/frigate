@@ -16,6 +16,7 @@ RUN rm -rf /rk-wheels/opencv_python-*
 
 FROM deps AS rk-frigate
 ARG TARGETARCH
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
     pip3 install --no-deps -U /deps/rk-wheels/*.whl
