@@ -1,6 +1,7 @@
 """Base class for onnx embedding implementations."""
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from enum import Enum
 from io import BytesIO
@@ -8,6 +9,10 @@ from io import BytesIO
 import numpy as np
 import requests
 from PIL import Image
+
+from frigate.const import UPDATE_MODEL_STATE
+from frigate.types import ModelStatusTypesEnum
+from frigate.util.downloader import ModelDownloader
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +25,35 @@ class EmbeddingTypeEnum(str, Enum):
 class BaseEmbedding(ABC):
     """Base embedding class."""
 
+    def __init__(self, model_name: str, model_file: str, download_urls: dict[str, str]):
+        self.model_name = model_name
+        self.model_file = model_file
+        self.download_urls = download_urls
+        self.downloader: ModelDownloader = None
+
     @abstractmethod
     def _download_model(self, path: str):
-        pass
+        try:
+            file_name = os.path.basename(path)
+
+            if file_name in self.download_urls:
+                ModelDownloader.download_from_url(self.download_urls[file_name], path)
+
+            self.downloader.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{self.model_name}-{file_name}",
+                    "state": ModelStatusTypesEnum.downloaded,
+                },
+            )
+        except Exception:
+            self.downloader.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{self.model_name}-{file_name}",
+                    "state": ModelStatusTypesEnum.error,
+                },
+            )
 
     @abstractmethod
     def _load_model_and_utils(self):

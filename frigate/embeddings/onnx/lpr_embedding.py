@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.const import MODEL_CACHE_DIR
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
@@ -31,12 +31,14 @@ class PlateDetectionEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "paddleocr-onnx"
-        self.model_file = "detection.onnx"
+        super().__init__(
+            "paddleocr-onnx",
+            "detection.onnx",
+            {
+                "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
+            },
+        )
         self.requestor = requestor
-        self.download_urls = {
-            "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -63,29 +65,6 @@ class PlateDetectionEmbedding(BaseEmbedding):
             )
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
-
-    def _download_model(self, path: str):
-        try:
-            file_name = os.path.basename(path)
-
-            if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
-
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
-        except Exception:
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.error,
-                },
-            )
 
     def _load_model_and_utils(self):
         if self.runner is None:
@@ -112,12 +91,14 @@ class PlateClassificationEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "paddleocr-onnx"
-        self.model_file = "classification.onnx"
+        super().__init__(
+            "paddleocr-onnx",
+            "classification.onnx",
+            {
+                "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
+            },
+        )
         self.requestor = requestor
-        self.download_urls = {
-            "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -144,29 +125,6 @@ class PlateClassificationEmbedding(BaseEmbedding):
             )
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
-
-    def _download_model(self, path: str):
-        try:
-            file_name = os.path.basename(path)
-
-            if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
-
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
-        except Exception:
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.error,
-                },
-            )
 
     def _load_model_and_utils(self):
         if self.runner is None:
@@ -193,12 +151,14 @@ class PlateRecognitionEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "paddleocr-onnx"
-        self.model_file = "recognition.onnx"
+        super().__init__(
+            "paddleocr-onnx",
+            "recognition.onnx",
+            {
+                "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+            },
+        )
         self.requestor = requestor
-        self.download_urls = {
-            "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -225,29 +185,6 @@ class PlateRecognitionEmbedding(BaseEmbedding):
             )
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
-
-    def _download_model(self, path: str):
-        try:
-            file_name = os.path.basename(path)
-
-            if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
-
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
-        except Exception:
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.error,
-                },
-            )
 
     def _load_model_and_utils(self):
         if self.runner is None:
@@ -274,12 +211,15 @@ class LicensePlateDetector(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "yolov9_license_plate"
-        self.model_file = "yolov9-256-license-plates.onnx"
+        super().__init__(
+            "yolov9_license_plate",
+            "yolov9-256-license-plates.onnx",
+            {
+                "yolov9-256-license-plates.onnx": "https://github.com/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
+            },
+        )
+
         self.requestor = requestor
-        self.download_urls = {
-            "yolov9-256-license-plates.onnx": "https://github.com/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -306,29 +246,6 @@ class LicensePlateDetector(BaseEmbedding):
             )
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
-
-    def _download_model(self, path: str):
-        try:
-            file_name = os.path.basename(path)
-
-            if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
-
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
-        except Exception:
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.error,
-                },
-            )
 
     def _load_model_and_utils(self):
         if self.runner is None:

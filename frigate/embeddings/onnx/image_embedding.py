@@ -9,7 +9,7 @@ from transformers import AutoFeatureExtractor
 from transformers.utils.logging import disable_progress_bar
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.const import MODEL_CACHE_DIR
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
@@ -34,17 +34,19 @@ class ImageEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "jinaai/jina-clip-v1"
-        self.model_file = (
-            "vision_model_fp16.onnx"
-            if model_size == "large"
-            else "vision_model_quantized.onnx"
+        super().__init__(
+            "jinaai/jina-clip-v1",
+            (
+                "vision_model_fp16.onnx"
+                if model_size == "large"
+                else "vision_model_quantized.onnx"
+            ),
+            {
+                self.model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{self.model_file}",
+                "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
+            },
         )
         self.requestor = requestor
-        self.download_urls = {
-            self.model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{self.model_file}",
-            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -72,29 +74,6 @@ class ImageEmbedding(BaseEmbedding):
             )
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
-
-    def _download_model(self, path: str):
-        try:
-            file_name = os.path.basename(path)
-
-            if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
-
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
-        except Exception:
-            self.downloader.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.error,
-                },
-            )
 
     def _load_model_and_utils(self):
         if self.runner is None:

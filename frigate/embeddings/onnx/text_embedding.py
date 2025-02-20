@@ -34,13 +34,15 @@ class TextEmbedding(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
-        self.model_name = "jinaai/jina-clip-v1"
-        self.model_file = "text_model_fp16.onnx"
+        super().__init__(
+            "jinaai/jina-clip-v1",
+            "text_model_fp16.onnx",
+            {
+                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
+            },
+        )
         self.tokenizer_file = "tokenizer"
         self.requestor = requestor
-        self.download_urls = {
-            "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
-        }
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
