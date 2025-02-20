@@ -43,8 +43,10 @@ function migrate_db_path() {
 }
 
 function set_libva_version() {
-    local ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
-    export LIBAVFORMAT_VERSION_MAJOR=$($ffmpeg_path -version | grep -Po "libavformat\W+\K\d+")
+    local ffmpeg_path
+    ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+    LIBAVFORMAT_VERSION_MAJOR=$("$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
+    export LIBAVFORMAT_VERSION_MAJOR
 }
 
 echo "[INFO] Preparing Frigate..."

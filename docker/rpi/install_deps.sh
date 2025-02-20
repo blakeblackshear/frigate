@@ -28,4 +28,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] https://archive.raspberrypi.org/debian/ bookworm main" | tee /etc/apt/sources.list.d/raspi.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
+    mkdir -p /usr/lib/ffmpeg/rpi/bin
+    ln -svf /usr/bin/ffmpeg /usr/lib/ffmpeg/rpi/bin/ffmpeg
+    ln -svf /usr/bin/ffprobe /usr/lib/ffmpeg/rpi/bin/ffprobe
 fi
