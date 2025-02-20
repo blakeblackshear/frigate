@@ -23,6 +23,7 @@ from frigate.util.builtin import serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from .onnx.text_embedding import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -97,15 +98,8 @@ class Embeddings:
                 },
             )
 
-        self.text_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file="text_model_fp16.onnx",
-            tokenizer_file="tokenizer",
-            download_urls={
-                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
-            },
+        self.text_embedding = TextEmbedding(
             model_size=config.semantic_search.model_size,
-            model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
         )

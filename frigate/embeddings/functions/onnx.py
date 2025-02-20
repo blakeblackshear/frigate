@@ -13,14 +13,14 @@ from PIL import Image
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
-from transformers import AutoFeatureExtractor, AutoTokenizer
-from transformers.utils.logging import disable_progress_bar
+from transformers import AutoFeatureExtractor
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.model import ONNXModelRunner
+
+from ..onnx.runner import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -28,8 +28,6 @@ warnings.filterwarnings(
     message="The class CLIPFeatureExtractor is deprecated",
 )
 
-# disables the progress bar for downloading tokenizers and feature extractors
-disable_progress_bar()
 logger = logging.getLogger(__name__)
 
 FACE_EMBEDDING_SIZE = 160
@@ -104,20 +102,6 @@ class GenericONNXEmbedding:
 
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
-            elif (
-                file_name == self.tokenizer_file
-                and self.model_type == ModelTypeEnum.text
-            ):
-                if not os.path.exists(path + "/" + self.model_name):
-                    logger.info(f"Downloading {self.model_name} tokenizer")
-
-                tokenizer = AutoTokenizer.from_pretrained(
-                    self.model_name,
-                    trust_remote_code=True,
-                    cache_dir=f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer",
-                    clean_up_tokenization_spaces=True,
-                )
-                tokenizer.save_pretrained(path)
 
             self.downloader.requestor.send_data(
                 UPDATE_MODEL_STATE,
@@ -139,9 +123,7 @@ class GenericONNXEmbedding:
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
-            if self.model_type == ModelTypeEnum.text:
-                self.tokenizer = self._load_tokenizer()
-            elif self.model_type == ModelTypeEnum.vision:
+            if self.model_type == ModelTypeEnum.vision:
                 self.feature_extractor = self._load_feature_extractor()
             elif self.model_type == ModelTypeEnum.face:
                 self.feature_extractor = []
@@ -160,34 +142,8 @@ class GenericONNXEmbedding:
                 self.model_size,
             )
 
-    def _load_tokenizer(self):
-        tokenizer_path = os.path.join(f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer")
-        return AutoTokenizer.from_pretrained(
-            self.model_name,
-            cache_dir=tokenizer_path,
-            trust_remote_code=True,
-            clean_up_tokenization_spaces=True,
-        )
-
-    def _load_feature_extractor(self):
-        return AutoFeatureExtractor.from_pretrained(
-            f"{MODEL_CACHE_DIR}/{self.model_name}",
-        )
-
     def _preprocess_inputs(self, raw_inputs: any) -> any:
-        if self.model_type == ModelTypeEnum.text:
-            max_length = max(len(self.tokenizer.encode(text)) for text in raw_inputs)
-            return [
-                self.tokenizer(
-                    text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=max_length,
-                    return_tensors="np",
-                )
-                for text in raw_inputs
-            ]
-        elif self.model_type == ModelTypeEnum.vision:
+        if self.model_type == ModelTypeEnum.vision:
             processed_images = [self._process_image(img) for img in raw_inputs]
             return [
                 self.feature_extractor(images=image, return_tensors="np")
@@ -283,6 +239,11 @@ class GenericONNXEmbedding:
             return [{"images": frame}]
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
+
+    def _load_feature_extractor(self):
+        return AutoFeatureExtractor.from_pretrained(
+            f"{MODEL_CACHE_DIR}/{self.model_name}",
+        )
 
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):

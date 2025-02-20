@@ -27,7 +27,6 @@ class BaseEmbedding(ABC):
     def run_inference(self, inputs: any) -> list[ndarray]:
         pass
 
-    @abstractmethod
     def __call__(
         self, inputs: list[str] | list[Image.Image] | list[str]
     ) -> list[ndarray]:
