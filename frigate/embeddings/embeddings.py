@@ -22,8 +22,7 @@ from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
-from .onnx.image_embedding import ImageEmbedding
-from .onnx.text_embedding import TextEmbedding
+from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -98,13 +97,13 @@ class Embeddings:
                 },
             )
 
-        self.text_embedding = TextEmbedding(
+        self.text_embedding = JinaV1TextEmbedding(
             model_size=config.semantic_search.model_size,
             requestor=self.requestor,
             device="CPU",
         )
 
-        self.vision_embedding = ImageEmbedding(
+        self.vision_embedding = JinaV1ImageEmbedding(
             model_size=config.semantic_search.model_size,
             requestor=self.requestor,
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
