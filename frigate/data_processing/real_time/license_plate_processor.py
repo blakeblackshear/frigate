@@ -869,6 +869,124 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         # 5. Return True if we should keep the previous plate (i.e., if it scores higher)
         return prev_score > curr_score
 
+    def process_keyframe_lpr(self, obj_data: dict[str, any]) -> None:
+        """
+        Runs LPR on an enlarged region of the latest keyframe for the given object.
+        Called after the main process_frame as a backup check.
+        Args:
+            obj_data: Object data dictionary containing camera, id, and box coordinates
+        """
+        if (
+            obj_data.get("label") != "car"
+            or obj_data.get("stationary") == True
+            or (
+                obj_data.get("sub_label")
+                and obj_data["id"] not in self.detected_license_plates
+            )
+            or obj_data.get("is_keyframe_check")
+        ):
+            return
+
+        camera = obj_data.get("camera")
+        if not camera:
+            return
+
+        yuv_height, yuv_width = self.config.cameras[camera].frame_shape_yuv
+        detect_width = self.config.cameras[camera].detect.width
+        detect_height = self.config.cameras[camera].detect.height
+
+        result = get_latest_keyframe_yuv420(camera)
+        if result is None:
+            logger.debug(f"No keyframe available for camera {camera}")
+            return
+
+        keyframe, timestamp = result
+
+        # Resize keyframe to match frame_shape_yuv dimensions
+        keyframe_resized = cv2.resize(keyframe, (yuv_width, yuv_height))
+
+        # Scale the boxes based on detect dimensions
+        scale_x = detect_width / keyframe.shape[1]
+        scale_y = detect_height / keyframe.shape[0]
+
+        # Determine which box to enlarge based on detection mode
+        if self.requires_license_plate_detection:
+            # Scale and enlarge the car box
+            box = obj_data.get("box")
+            if not box:
+                return
+
+            # Scale original box to detection dimensions
+            left = int(box[0] * scale_x)
+            top = int(box[1] * scale_y)
+            right = int(box[2] * scale_x)
+            bottom = int(box[3] * scale_y)
+            box = [left, top, right, bottom]
+        else:
+            # Get the license plate box from attributes
+            if not obj_data.get("current_attributes"):
+                return
+
+            license_plate = None
+            for attr in obj_data["current_attributes"]:
+                if attr.get("label") != "license_plate":
+                    continue
+                if license_plate is None or attr.get("score", 0.0) > license_plate.get(
+                    "score", 0.0
+                ):
+                    license_plate = attr
+
+            if not license_plate or not license_plate.get("box"):
+                return
+
+            # Scale license plate box to detection dimensions
+            orig_box = license_plate["box"]
+            left = int(orig_box[0] * scale_x)
+            top = int(orig_box[1] * scale_y)
+            right = int(orig_box[2] * scale_x)
+            bottom = int(orig_box[3] * scale_y)
+            box = [left, top, right, bottom]
+
+        width_box = right - left
+        height_box = bottom - top
+
+        # Enlarge box by 30%
+        enlarge_factor = 0.3
+        new_left = max(0, int(left - (width_box * enlarge_factor / 2)))
+        new_top = max(0, int(top - (height_box * enlarge_factor / 2)))
+        new_right = min(detect_width, int(right + (width_box * enlarge_factor / 2)))
+        new_bottom = min(detect_height, int(bottom + (height_box * enlarge_factor / 2)))
+
+        keyframe_obj_data = obj_data.copy()
+        if self.requires_license_plate_detection:
+            keyframe_obj_data["box"] = [new_left, new_top, new_right, new_bottom]
+        else:
+            # Update the license plate box in the attributes
+            new_attributes = []
+            for attr in obj_data["current_attributes"]:
+                if attr.get("label") == "license_plate":
+                    new_attr = attr.copy()
+                    new_attr["box"] = [new_left, new_top, new_right, new_bottom]
+                    new_attributes.append(new_attr)
+                else:
+                    new_attributes.append(attr)
+            keyframe_obj_data["current_attributes"] = new_attributes
+
+        keyframe_obj_data["frame_time"] = timestamp
+
+        # Add a flag to prevent infinite recursion
+        keyframe_obj_data["is_keyframe_check"] = True
+
+        if WRITE_DEBUG_IMAGES:
+            current_time = int(datetime.datetime.now().timestamp())
+            rgb = cv2.cvtColor(keyframe_resized, cv2.COLOR_YUV2BGR_I420)
+            cv2.imwrite(
+                f"debug/frames/keyframe_resized_{current_time}.jpg",
+                rgb,
+            )
+
+        self.process_frame(keyframe_obj_data, keyframe_resized)
+
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image."""
         start = datetime.datetime.now().timestamp()
@@ -1078,6 +1196,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 "plate": top_plate,
                 "char_confidences": top_char_confidences,
                 "area": top_area,
+                "frame_time": obj_data["frame_time"],
             }
 
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
