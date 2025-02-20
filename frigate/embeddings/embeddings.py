@@ -22,7 +22,7 @@ from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
-from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from .onnx.image_embedding import ImageEmbedding
 from .onnx.text_embedding import TextEmbedding
 
 logger = logging.getLogger(__name__)
@@ -104,23 +104,8 @@ class Embeddings:
             device="CPU",
         )
 
-        model_file = (
-            "vision_model_fp16.onnx"
-            if self.config.semantic_search.model_size == "large"
-            else "vision_model_quantized.onnx"
-        )
-
-        download_urls = {
-            model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
-            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
-        }
-
-        self.vision_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file=model_file,
-            download_urls=download_urls,
+        self.vision_embedding = ImageEmbedding(
             model_size=config.semantic_search.model_size,
-            model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )

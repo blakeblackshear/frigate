@@ -10,11 +10,6 @@ import numpy as np
 import requests
 from PIL import Image
 
-# importing this without pytorch or others causes a warning
-# https://github.com/huggingface/transformers/issues/27214
-# suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
-from transformers import AutoFeatureExtractor
-
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
@@ -67,8 +62,6 @@ class GenericONNXEmbedding:
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
-        self.tokenizer = None
-        self.feature_extractor = None
         self.runner = None
         files_names = list(self.download_urls.keys()) + (
             [self.tokenizer_file] if self.tokenizer_file else []
@@ -123,9 +116,8 @@ class GenericONNXEmbedding:
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
-            if self.model_type == ModelTypeEnum.vision:
-                self.feature_extractor = self._load_feature_extractor()
-            elif self.model_type == ModelTypeEnum.face:
+
+            if self.model_type == ModelTypeEnum.face:
                 self.feature_extractor = []
             elif self.model_type == ModelTypeEnum.lpr_detect:
                 self.feature_extractor = []
@@ -143,13 +135,7 @@ class GenericONNXEmbedding:
             )
 
     def _preprocess_inputs(self, raw_inputs: any) -> any:
-        if self.model_type == ModelTypeEnum.vision:
-            processed_images = [self._process_image(img) for img in raw_inputs]
-            return [
-                self.feature_extractor(images=image, return_tensors="np")
-                for image in processed_images
-            ]
-        elif self.model_type == ModelTypeEnum.face:
+        if self.model_type == ModelTypeEnum.face:
             if isinstance(raw_inputs, list):
                 raise ValueError("Face embedding does not support batch inputs.")
 
@@ -239,11 +225,6 @@ class GenericONNXEmbedding:
             return [{"images": frame}]
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
-
-    def _load_feature_extractor(self):
-        return AutoFeatureExtractor.from_pretrained(
-            f"{MODEL_CACHE_DIR}/{self.model_name}",
-        )
 
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):

@@ -5,7 +5,7 @@ import warnings
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
-from transformers import AutoTokenizer
+from transformers import AutoFeatureExtractor
 from transformers.utils.logging import disable_progress_bar
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -13,8 +13,8 @@ from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
+from ..onnx.runner import ONNXModelRunner
 from .base_embedding import BaseEmbedding
-from .runner import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -27,7 +27,7 @@ disable_progress_bar()
 logger = logging.getLogger(__name__)
 
 
-class TextEmbedding(BaseEmbedding):
+class ImageEmbedding(BaseEmbedding):
     def __init__(
         self,
         model_size: str,
@@ -35,11 +35,15 @@ class TextEmbedding(BaseEmbedding):
         device: str = "AUTO",
     ):
         self.model_name = "jinaai/jina-clip-v1"
-        self.model_file = "text_model_fp16.onnx"
-        self.tokenizer_file = "tokenizer"
+        self.model_file = (
+            "vision_model_fp16.onnx"
+            if model_size == "large"
+            else "vision_model_quantized.onnx"
+        )
         self.requestor = requestor
         self.download_urls = {
-            "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
+            self.model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{self.model_file}",
+            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
         }
         self.model_size = model_size
         self.device = device
@@ -47,8 +51,7 @@ class TextEmbedding(BaseEmbedding):
         self.tokenizer = None
         self.feature_extractor = None
         self.runner = None
-        files_names = list(self.download_urls.keys()) + [self.tokenizer_file]
-
+        files_names = list(self.download_urls.keys())
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
         ):
@@ -77,17 +80,6 @@ class TextEmbedding(BaseEmbedding):
 
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
-            elif file_name == self.tokenizer_file:
-                if not os.path.exists(path + "/" + self.model_name):
-                    logger.info(f"Downloading {self.model_name} tokenizer")
-
-                tokenizer = AutoTokenizer.from_pretrained(
-                    self.model_name,
-                    trust_remote_code=True,
-                    cache_dir=f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer",
-                    clean_up_tokenization_spaces=True,
-                )
-                tokenizer.save_pretrained(path)
 
             self.downloader.requestor.send_data(
                 UPDATE_MODEL_STATE,
@@ -110,14 +102,8 @@ class TextEmbedding(BaseEmbedding):
             if self.downloader:
                 self.downloader.wait_for_download()
 
-            tokenizer_path = os.path.join(
-                f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer"
-            )
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                cache_dir=tokenizer_path,
-                trust_remote_code=True,
-                clean_up_tokenization_spaces=True,
+            self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+                f"{MODEL_CACHE_DIR}/{self.model_name}",
             )
 
             self.runner = ONNXModelRunner(
@@ -127,14 +113,8 @@ class TextEmbedding(BaseEmbedding):
             )
 
     def _preprocess_inputs(self, raw_inputs):
-        max_length = max(len(self.tokenizer.encode(text)) for text in raw_inputs)
+        processed_images = [self._process_image(img) for img in raw_inputs]
         return [
-            self.tokenizer(
-                text,
-                padding="max_length",
-                truncation=True,
-                max_length=max_length,
-                return_tensors="np",
-            )
-            for text in raw_inputs
+            self.feature_extractor(images=image, return_tensors="np")
+            for image in processed_images
         ]
