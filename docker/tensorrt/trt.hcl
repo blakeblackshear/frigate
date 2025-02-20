@@ -14,16 +14,18 @@ variable "COMPUTE_LEVEL" {
   default = ""
 }
 variable "BASE_HOOK" {
-  # Ensure an up-to-date python 3.11 is available in tensorrt/jetson image
+  # Ensure an up-to-date python 3.11 is available in jetson images
   default = <<EOT
-. /etc/os-release
+if grep -iq \"ubuntu\" /etc/os-release; then
+  . /etc/os-release
 
-# Add the deadsnakes PPA repository
-echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu $VERSION_CODENAME main" >> /etc/apt/sources.list.d/deadsnakes.list
-echo "deb-src https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu $VERSION_CODENAME main" >> /etc/apt/sources.list.d/deadsnakes.list
+  # Add the deadsnakes PPA repository
+  echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu $VERSION_CODENAME main" >> /etc/apt/sources.list.d/deadsnakes.list
+  echo "deb-src https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu $VERSION_CODENAME main" >> /etc/apt/sources.list.d/deadsnakes.list
 
-# Add deadsnakes signing key
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+  # Add deadsnakes signing key
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776
+fi
 EOT
 }
 
