@@ -29,6 +29,7 @@ from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
 )
+from frigate.data_processing.common.license_plate_model import LicensePlateModelRunner
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird_processor import BirdProcessor
 from frigate.data_processing.real_time.face_processor import FaceProcessor
@@ -70,6 +71,9 @@ class EmbeddingMaintainer(threading.Thread):
         if config.semantic_search.reindex:
             self.embeddings.reindex()
 
+        # create communication for updating event descriptions
+        self.requestor = InterProcessRequestor()
+
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
@@ -89,10 +93,11 @@ class EmbeddingMaintainer(threading.Thread):
             self.processors.append(BirdProcessor(self.config, metrics))
 
         if self.config.lpr.enabled:
-            self.processors.append(LicensePlateProcessor(self.config, metrics))
+            lpr_model_runner = LicensePlateModelRunner(self.requestor)
+            self.processors.append(
+                LicensePlateProcessor(self.config, metrics, lpr_model_runner)
+            )
 
-        # create communication for updating event descriptions
-        self.requestor = InterProcessRequestor()
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[any]] = {}
         self.genai_client = get_genai_client(config)
