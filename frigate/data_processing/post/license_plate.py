@@ -1,4 +1,4 @@
-"""Handle processing images for face detection and recognition."""
+"""Handle post processing for license plate recognition."""
 
 import datetime
 import logging

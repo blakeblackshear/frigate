@@ -220,7 +220,7 @@ class RecordingMaintainer(threading.Thread):
                 [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
             )
 
-            # TODO: this is not correct
+            # publish most recently available recording time
             self.recordings_publisher.publish(
                 (camera, recordings[0]["start_time"].timestamp())
             )
