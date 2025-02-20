@@ -539,7 +539,7 @@ def process_frames(
     exit_on_empty: bool = False,
 ):
     next_region_update = get_tomorrow_at_time(2)
-    config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}")
+    config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}", True)
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
