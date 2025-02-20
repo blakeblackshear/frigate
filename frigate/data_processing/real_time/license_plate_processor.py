@@ -16,7 +16,12 @@ from shapely.geometry import Polygon
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import FRIGATE_LOCALHOST
-from frigate.embeddings.functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from frigate.embeddings.onnx.lpr_embedding import (
+    LicensePlateDetector,
+    PaddleOCRClassification,
+    PaddleOCRDetection,
+    PaddleOCRRecognition,
+)
 from frigate.util.image import area
 
 from ..types import DataProcessorMetrics
@@ -52,49 +57,26 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         self.lpr_recognition_model = None
 
         if self.config.lpr.enabled:
-            self.detection_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="detection.onnx",
-                download_urls={
-                    "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
-                },
+            self.detection_model = PaddleOCRDetection(
                 model_size="large",
-                model_type=ModelTypeEnum.lpr_detect,
                 requestor=self.requestor,
                 device="CPU",
             )
 
-            self.classification_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="classification.onnx",
-                download_urls={
-                    "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
-                },
+            self.classification_model = PaddleOCRClassification(
                 model_size="large",
-                model_type=ModelTypeEnum.lpr_classify,
                 requestor=self.requestor,
                 device="CPU",
             )
 
-            self.recognition_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="recognition.onnx",
-                download_urls={
-                    "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
-                },
+            self.recognition_model = PaddleOCRRecognition(
                 model_size="large",
-                model_type=ModelTypeEnum.lpr_recognize,
                 requestor=self.requestor,
                 device="CPU",
             )
-            self.yolov9_detection_model = GenericONNXEmbedding(
-                model_name="yolov9_license_plate",
-                model_file="yolov9-256-license-plates.onnx",
-                download_urls={
-                    "yolov9-256-license-plates.onnx": "https://github.com/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
-                },
+
+            self.yolov9_detection_model = LicensePlateDetector(
                 model_size="large",
-                model_type=ModelTypeEnum.yolov9_lpr_detect,
                 requestor=self.requestor,
                 device="CPU",
             )
