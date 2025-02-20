@@ -37,9 +37,9 @@ class JinaV1TextEmbedding(BaseEmbedding):
         device: str = "AUTO",
     ):
         super().__init__(
-            "jinaai/jina-clip-v1",
-            "text_model_fp16.onnx",
-            {
+            model_name="jinaai/jina-clip-v1",
+            model_file="text_model_fp16.onnx",
+            download_urls={
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
         )
@@ -157,9 +157,9 @@ class JinaV1ImageEmbedding(BaseEmbedding):
             else "vision_model_quantized.onnx"
         )
         super().__init__(
-            "jinaai/jina-clip-v1",
-            model_file,
-            {
+            model_name="jinaai/jina-clip-v1",
+            model_file=model_file,
+            download_urls={
                 model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
                 "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
             },

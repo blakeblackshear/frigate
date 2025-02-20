@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 LPR_EMBEDDING_SIZE = 256
 
 
-class PlateDetectionEmbedding(BaseEmbedding):
+class PaddleOCRDetection(BaseEmbedding):
     def __init__(
         self,
         model_size: str,
@@ -32,9 +32,9 @@ class PlateDetectionEmbedding(BaseEmbedding):
         device: str = "AUTO",
     ):
         super().__init__(
-            "paddleocr-onnx",
-            "detection.onnx",
-            {
+            model_name="paddleocr-onnx",
+            model_file="detection.onnx",
+            download_urls={
                 "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
             },
         )
@@ -84,7 +84,7 @@ class PlateDetectionEmbedding(BaseEmbedding):
         return [{"x": preprocessed[0]}]
 
 
-class PlateClassificationEmbedding(BaseEmbedding):
+class PaddleOCRClassification(BaseEmbedding):
     def __init__(
         self,
         model_size: str,
@@ -92,9 +92,9 @@ class PlateClassificationEmbedding(BaseEmbedding):
         device: str = "AUTO",
     ):
         super().__init__(
-            "paddleocr-onnx",
-            "classification.onnx",
-            {
+            model_name="paddleocr-onnx",
+            model_file="classification.onnx",
+            download_urls={
                 "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
             },
         )
@@ -144,7 +144,7 @@ class PlateClassificationEmbedding(BaseEmbedding):
         return processed
 
 
-class PlateRecognitionEmbedding(BaseEmbedding):
+class PaddleOCRRecognition(BaseEmbedding):
     def __init__(
         self,
         model_size: str,
@@ -152,9 +152,9 @@ class PlateRecognitionEmbedding(BaseEmbedding):
         device: str = "AUTO",
     ):
         super().__init__(
-            "paddleocr-onnx",
-            "recognition.onnx",
-            {
+            model_name="paddleocr-onnx",
+            model_file="recognition.onnx",
+            download_urls={
                 "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
             },
         )
@@ -212,9 +212,9 @@ class LicensePlateDetector(BaseEmbedding):
         device: str = "AUTO",
     ):
         super().__init__(
-            "yolov9_license_plate",
-            "yolov9-256-license-plates.onnx",
-            {
+            model_name="yolov9_license_plate",
+            model_file="yolov9-256-license-plates.onnx",
+            download_urls={
                 "yolov9-256-license-plates.onnx": "https://github.com/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
             },
         )

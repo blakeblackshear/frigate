@@ -18,9 +18,9 @@ from frigate.config import FrigateConfig
 from frigate.const import FRIGATE_LOCALHOST
 from frigate.embeddings.onnx.lpr_embedding import (
     LicensePlateDetector,
-    PlateClassificationEmbedding,
-    PlateDetectionEmbedding,
-    PlateRecognitionEmbedding,
+    PaddleOCRClassification,
+    PaddleOCRDetection,
+    PaddleOCRRecognition,
 )
 from frigate.util.image import area
 
@@ -57,19 +57,19 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         self.lpr_recognition_model = None
 
         if self.config.lpr.enabled:
-            self.detection_model = PlateDetectionEmbedding(
+            self.detection_model = PaddleOCRDetection(
                 model_size="large",
                 requestor=self.requestor,
                 device="CPU",
             )
 
-            self.classification_model = PlateClassificationEmbedding(
+            self.classification_model = PaddleOCRClassification(
                 model_size="large",
                 requestor=self.requestor,
                 device="CPU",
             )
 
-            self.recognition_model = PlateRecognitionEmbedding(
+            self.recognition_model = PaddleOCRRecognition(
                 model_size="large",
                 requestor=self.requestor,
                 device="CPU",
