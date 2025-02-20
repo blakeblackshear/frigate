@@ -29,7 +29,9 @@ from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
 )
-from frigate.data_processing.common.license_plate_model import LicensePlateModelRunner
+from frigate.data_processing.common.license_plate.model import (
+    LicensePlateModelRunner,
+)
 from frigate.data_processing.post.api import PostProcessorApi
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,

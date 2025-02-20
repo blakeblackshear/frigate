@@ -4,10 +4,12 @@ import datetime
 import logging
 
 from frigate.config import FrigateConfig
-from frigate.data_processing.common.license_plate import (
+from frigate.data_processing.common.license_plate.mixin import (
     LicensePlateProcessingMixin,
 )
-from frigate.data_processing.common.license_plate_model import LicensePlateModelRunner
+from frigate.data_processing.common.license_plate.model import (
+    LicensePlateModelRunner,
+)
 from frigate.data_processing.types import PostProcessDataEnum
 
 from ..types import DataProcessorMetrics

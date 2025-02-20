@@ -5,7 +5,7 @@ from frigate.embeddings.onnx.lpr_embedding import (
     PaddleOCRRecognition,
 )
 
-from ..types import DataProcessorModelRunner
+from ...types import DataProcessorModelRunner
 
 
 class LicensePlateModelRunner(DataProcessorModelRunner):
