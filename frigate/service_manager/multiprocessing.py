@@ -2,6 +2,7 @@ import asyncio
 import faulthandler
 import logging
 import multiprocessing as mp
+import os
 import signal
 import sys
 import threading
@@ -16,12 +17,10 @@ import frigate.log
 from .multiprocessing_waiter import wait as mp_wait
 from .service import Service, ServiceManager
 
-DEFAULT_STOP_TIMEOUT = 10  # seconds
+DEFAULT_STOP_TIMEOUT = 10
 
 
 class BaseServiceProcess(Service, ABC):
-    """A Service the manages a multiprocessing.Process."""
-
     _process: Optional[mp.Process]
 
     def __init__(
@@ -31,24 +30,20 @@ class BaseServiceProcess(Service, ABC):
         manager: Optional[ServiceManager] = None,
     ) -> None:
         super().__init__(name=name, manager=manager)
-
         self._process = None
 
     async def on_start(self) -> None:
-        if self._process is not None:
-            if self._process.is_alive():
-                return  # Already started.
-            else:
-                self._process.close()
+        if self._process and self._process.is_alive():
+            return
 
-        # At this point, the process is either stopped or dead, so we can recreate it.
-        self._process = mp.Process(target=self._run)
+        if self._process:
+            self._process.close()
+
+        self._process = mp.Process(target=self._run, daemon=True)
         self._process.name = self.name
-        self._process.daemon = True
         self.before_start()
         self._process.start()
         self.after_start()
-
         self.manager.logger.info(f"Started {self.name} (pid: {self._process.pid})")
 
     async def on_stop(
@@ -57,31 +52,35 @@ class BaseServiceProcess(Service, ABC):
         force: bool = False,
         timeout: Optional[float] = None,
     ) -> None:
-        if timeout is None:
-            timeout = DEFAULT_STOP_TIMEOUT
+        timeout = timeout or DEFAULT_STOP_TIMEOUT
+        if not self._process:
+            return
 
-        if self._process is None:
-            return  # Already stopped.
+        if force:
+            self._kill_process()
+            return
 
-        running = True
+        self._terminate_process(timeout)
 
-        if not force:
-            self._process.terminate()
-            try:
-                await asyncio.wait_for(mp_wait(self._process), timeout)
-                running = False
-            except TimeoutError:
-                self.manager.logger.warning(
-                    f"{self.name} is still running after {timeout} seconds. Killing."
-                )
+    def _terminate_process(self, timeout: float) -> None:
+        self._process.terminate()
+        try:
+            asyncio.run(asyncio.wait_for(mp_wait(self._process), timeout))
+        except TimeoutError:
+            self.manager.logger.warning(
+                f"{self.name} is still running after {timeout} seconds. Killing."
+            )
+            self._kill_process()
 
-        if running:
-            self._process.kill()
-            await mp_wait(self._process)
+    def _kill_process(self) -> None:
+        self._process.kill()
+        asyncio.run(mp_wait(self._process))
+        self.manager.logger.info(f"{self.name} killed")
+        self._cleanup_process()
 
+    def _cleanup_process(self) -> None:
         self._process.close()
         self._process = None
-
         self.manager.logger.info(f"{self.name} stopped")
 
     @property
@@ -89,9 +88,14 @@ class BaseServiceProcess(Service, ABC):
         return self._process.pid if self._process else None
 
     def _run(self) -> None:
-        self.before_run()
-        self.run()
-        self.after_run()
+        try:
+            self.before_run()
+            self.run()
+        except Exception:
+            logging.exception(f"Exception in {self.name} process.")
+            raise
+        finally:
+            self.after_run()
 
     def before_start(self) -> None:
         pass
@@ -110,28 +114,26 @@ class BaseServiceProcess(Service, ABC):
         pass
 
     def __getstate__(self) -> dict:
-        return {
-            k: v
-            for k, v in self.__dict__.items()
-            if not (k.startswith("_Service__") or k == "_process")
-        }
+        state = self.__dict__.copy()
+        state["_process"] = None
+        return state
 
 
 class ServiceProcess(BaseServiceProcess):
     logger: logging.Logger
 
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        manager: Optional[ServiceManager] = None,
+    ) -> None:
+        super().__init__(name=name, manager=manager)
+        self._stop_event = threading.Event()
+
     @property
     def stop_event(self) -> threading.Event:
-        # Lazily create the stop_event. This allows the signal handler to tell if anyone is
-        # monitoring the stop event, and to raise a SystemExit if not.
-        if "stop_event" not in self.__dict__:
-            stop_event = threading.Event()
-            self.__dict__["stop_event"] = stop_event
-        else:
-            stop_event = self.__dict__["stop_event"]
-            assert isinstance(stop_event, threading.Event)
-
-        return stop_event
+        return self._stop_event
 
     def before_start(self) -> None:
         if frigate.log.log_listener is None:
@@ -140,24 +142,53 @@ class ServiceProcess(BaseServiceProcess):
 
     def before_run(self) -> None:
         super().before_run()
-
         faulthandler.enable()
 
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            # Get the stop_event through the dict to bypass lazy initialization.
-            stop_event = self.__dict__.get("stop_event")
-            if stop_event is not None:
-                # Someone is monitoring stop_event. We should set it.
-                stop_event.set()
-            else:
-                # Nobody is monitoring stop_event. We should raise SystemExit.
-                sys.exit()
+            self.stop_event.set()
+            sys.exit()
 
         signal.signal(signal.SIGTERM, receiveSignal)
         signal.signal(signal.SIGINT, receiveSignal)
 
         self.logger = logging.getLogger(self.name)
+        logging.basicConfig(handlers=[], level=logging.INFO, force=True)
+        queue_handler = QueueHandler(self.__log_queue)
+        self.logger.addHandler(queue_handler)
 
-        logging.basicConfig(handlers=[], force=True)
-        logging.getLogger().addHandler(QueueHandler(self.__log_queue))
-        del self.__log_queue
+        self._setup_process_security()
+
+    def _setup_process_security(self) -> None:
+        try:
+            os.nice(10)
+        except OSError:
+            self.logger.warn("Failed to set process niceness.")
+
+        try:
+            os.setrlimit(
+                resource.RLIMIT_NOFILE, (1024, resource.RLIM_HARD_INFINITY)
+            )  # type: ignore[attr-defined]
+        except Exception:
+            self.logger.warn("Failed to increase file descriptor limit.")
+
+        try:
+            os.umask(0o077)
+        except OSError:
+            self.logger.warn("Failed to set umask.")
+
+        try:
+            if os.getuid() == 0:
+                try:
+                    import grp  # pylint: disable=import-outside-toplevel
+
+                    group = grp.getgrnam("nogroup")
+                    os.setgid(group.gr_gid)
+                except Exception:
+                    self.logger.warn("Failed to drop group privileges.")
+
+                try:
+                    os.setuid(65534)
+                except Exception:
+                    self.logger.warn("Failed to drop user privileges.")
+        except Exception:
+            self.logger.warn("Not running as root, skipping privilege dropping.")
