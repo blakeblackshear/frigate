@@ -6,13 +6,13 @@ apt-get -qq update
 
 apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
+    ca-certificates \
     gnupg \
     wget \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
     python3.11 \
-    python3-pip \
     curl \
     lsof \
     jq \
