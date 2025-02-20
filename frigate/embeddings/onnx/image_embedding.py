@@ -48,9 +48,8 @@ class ImageEmbedding(BaseEmbedding):
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
-        self.tokenizer = None
         self.feature_extractor = None
-        self.runner = None
+        self.runner: ONNXModelRunner | None = None
         files_names = list(self.download_urls.keys())
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names

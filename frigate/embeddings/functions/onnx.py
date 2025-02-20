@@ -5,7 +5,6 @@ from enum import Enum
 from io import BytesIO
 from typing import Dict, List, Optional, Union
 
-import cv2
 import numpy as np
 import requests
 from PIL import Image
@@ -26,17 +25,10 @@ warnings.filterwarnings(
 logger = logging.getLogger(__name__)
 
 FACE_EMBEDDING_SIZE = 160
-LPR_EMBEDDING_SIZE = 256
 
 
 class ModelTypeEnum(str, Enum):
     face = "face"
-    vision = "vision"
-    text = "text"
-    lpr_detect = "lpr_detect"
-    lpr_classify = "lpr_classify"
-    lpr_recognize = "lpr_recognize"
-    yolov9_lpr_detect = "yolov9_lpr_detect"
 
 
 class GenericONNXEmbedding:
@@ -169,60 +161,6 @@ class GenericONNXEmbedding:
             frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
             frame = np.expand_dims(frame, axis=0)
             return [{"input_2": frame}]
-        elif self.model_type == ModelTypeEnum.lpr_detect:
-            preprocessed = []
-            for x in raw_inputs:
-                preprocessed.append(x)
-            return [{"x": preprocessed[0]}]
-        elif self.model_type == ModelTypeEnum.lpr_classify:
-            processed = []
-            for img in raw_inputs:
-                processed.append({"x": img})
-            return processed
-        elif self.model_type == ModelTypeEnum.lpr_recognize:
-            processed = []
-            for img in raw_inputs:
-                processed.append({"x": img})
-            return processed
-        elif self.model_type == ModelTypeEnum.yolov9_lpr_detect:
-            if isinstance(raw_inputs, list):
-                raise ValueError(
-                    "License plate embedding does not support batch inputs."
-                )
-            # Get image as numpy array
-            img = self._process_image(raw_inputs)
-            height, width, channels = img.shape
-
-            # Resize maintaining aspect ratio
-            if width > height:
-                new_height = int(((height / width) * LPR_EMBEDDING_SIZE) // 4 * 4)
-                img = cv2.resize(img, (LPR_EMBEDDING_SIZE, new_height))
-            else:
-                new_width = int(((width / height) * LPR_EMBEDDING_SIZE) // 4 * 4)
-                img = cv2.resize(img, (new_width, LPR_EMBEDDING_SIZE))
-
-            # Get new dimensions after resize
-            og_h, og_w, channels = img.shape
-
-            # Create black square frame
-            frame = np.full(
-                (LPR_EMBEDDING_SIZE, LPR_EMBEDDING_SIZE, channels),
-                (0, 0, 0),
-                dtype=np.float32,
-            )
-
-            # Center the resized image in the square frame
-            x_center = (LPR_EMBEDDING_SIZE - og_w) // 2
-            y_center = (LPR_EMBEDDING_SIZE - og_h) // 2
-            frame[y_center : y_center + og_h, x_center : x_center + og_w] = img
-
-            # Normalize to 0-1
-            frame = frame / 255.0
-
-            # Convert from HWC to CHW format and add batch dimension
-            frame = np.transpose(frame, (2, 0, 1))
-            frame = np.expand_dims(frame, axis=0)
-            return [{"images": frame}]
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
 
