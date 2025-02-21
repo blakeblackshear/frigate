@@ -7,7 +7,7 @@ import numpy as np
 
 from frigate.config import FrigateConfig
 
-from ..types import DataProcessorMetrics, DataProcessorModelRunner
+from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +18,9 @@ class RealTimeProcessorApi(ABC):
         self,
         config: FrigateConfig,
         metrics: DataProcessorMetrics,
-        model_runner: DataProcessorModelRunner,
     ) -> None:
         self.config = config
         self.metrics = metrics
-        self.model_runner = model_runner
         pass
 
     @abstractmethod
