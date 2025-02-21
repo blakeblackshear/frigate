@@ -18,7 +18,7 @@ from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
 
-WRITE_DEBUG_IMAGES = True
+WRITE_DEBUG_IMAGES = False
 
 
 class LicensePlateProcessingMixin:
@@ -717,8 +717,8 @@ class LicensePlateProcessingMixin:
 
         # Return the top scoring bounding box if found
         if top_box is not None:
-            # expand box by 15% to help with OCR
-            expansion = (top_box[2:] - top_box[:2]) * 0.1
+            # expand box by 30% to help with OCR
+            expansion = (top_box[2:] - top_box[:2]) * 0.30
 
             # Expand box
             expanded_box = np.array(
