@@ -76,8 +76,9 @@ RUN apt-get update \
     && apt-get install -y python-is-python3 libprotobuf23  \
     && rm -rf /var/lib/apt/lists/*
 
-RUN rm -rf /usr/lib/btbn-ffmpeg/
 COPY --from=jetson-ffmpeg /rootfs /
+ENV DEFAULT_FFMPEG_VERSION="jetson"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:${INCLUDED_FFMPEG_VERSIONS}"
 
 # ffmpeg runtime dependencies
 RUN apt-get -qq update \

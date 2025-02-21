@@ -31,28 +31,28 @@ unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
-# btbn-ffmpeg -> amd64
+# ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     mkdir -p /usr/lib/ffmpeg/5.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
+    rm -rf ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
+    rm -rf ffmpeg.tar.xz
 fi
 
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     mkdir -p /usr/lib/ffmpeg/5.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
+    rm -f ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
+    rm -f ffmpeg.tar.xz
 fi
 
 # arch specific packages

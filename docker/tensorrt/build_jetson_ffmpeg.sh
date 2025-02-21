@@ -5,7 +5,7 @@
 
 set -euxo pipefail
 
-INSTALL_PREFIX=/rootfs/usr/local
+INSTALL_PREFIX=/rootfs/usr/lib/ffmpeg/jetson
 
 apt-get -qq update
 apt-get -qq install -y --no-install-recommends build-essential ccache clang cmake pkg-config

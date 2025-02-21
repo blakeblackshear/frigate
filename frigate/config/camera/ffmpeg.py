@@ -1,4 +1,3 @@
-import shutil
 from enum import Enum
 from typing import Union
 
@@ -71,10 +70,7 @@ class FfmpegConfig(FrigateBaseModel):
     @property
     def ffmpeg_path(self) -> str:
         if self.path == "default":
-            if shutil.which("ffmpeg") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-            else:
-                return "ffmpeg"
+            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
         elif self.path in INCLUDED_FFMPEG_VERSIONS:
             return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
         else:
@@ -83,10 +79,7 @@ class FfmpegConfig(FrigateBaseModel):
     @property
     def ffprobe_path(self) -> str:
         if self.path == "default":
-            if shutil.which("ffprobe") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
-            else:
-                return "ffprobe"
+            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
         elif self.path in INCLUDED_FFMPEG_VERSIONS:
             return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
         else:

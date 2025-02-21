@@ -28,8 +28,7 @@ COPY docker/rockchip/conv2rknn.py /opt/conv2rknn.py
 
 ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.0/librknnrt.so /usr/lib/
 
-RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
-RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
 ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-7/ffmpeg /usr/lib/ffmpeg/6.0/bin/
 ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-7/ffprobe /usr/lib/ffmpeg/6.0/bin/
-ENV PATH="/usr/lib/ffmpeg/6.0/bin/:${PATH}"
+ENV DEFAULT_FFMPEG_VERSION="6.0"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:${INCLUDED_FFMPEG_VERSIONS}"
