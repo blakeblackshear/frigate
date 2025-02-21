@@ -36,7 +36,8 @@ See [the go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#modul
 
 ```yaml
 go2rtc:
-  streams: ...
+  streams:
+    # ...
   log:
     exec: trace
 ```
