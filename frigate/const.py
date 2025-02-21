@@ -62,8 +62,9 @@ MAX_WAL_SIZE = 10  # MB
 
 # Ffmpeg constants
 
-DEFAULT_FFMPEG_VERSION = str(os.environ.get("DEFAULT_FFMPEG_VERSION"))
-INCLUDED_FFMPEG_VERSIONS = str(os.environ.get("INCLUDED_FFMPEG_VERSIONS")).split(":")
+DEFAULT_FFMPEG_VERSION = os.environ.get("DEFAULT_FFMPEG_VERSION", "")
+INCLUDED_FFMPEG_VERSIONS = os.environ.get("INCLUDED_FFMPEG_VERSIONS", "").split(":")
+LIBAVFORMAT_VERSION_MAJOR = int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59"))
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"

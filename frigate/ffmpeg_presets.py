@@ -10,6 +10,7 @@ from frigate.const import (
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
+    LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
@@ -51,9 +52,8 @@ class LibvaGpuSelector:
         return ""
 
 
-LIBAV_VERSION = int(os.getenv("LIBAVFORMAT_VERSION_MAJOR"))
-FPS_VFR_PARAM = "-fps_mode vfr" if LIBAV_VERSION >= 59 else "-vsync 2"
-TIMEOUT_PARAM = "-timeout" if LIBAV_VERSION >= 59 else "-stimeout"
+FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
+TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
