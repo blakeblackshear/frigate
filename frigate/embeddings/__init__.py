@@ -17,7 +17,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR, FACE_DIR
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.models import Event
+from frigate.models import Event, Recordings
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
@@ -55,7 +55,7 @@ def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> N
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
         load_vec_extension=True,
     )
-    models = [Event]
+    models = [Event, Recordings]
     db.bind(models)
 
     maintainer = EmbeddingMaintainer(
@@ -233,4 +233,9 @@ class EmbeddingsContext:
         self.requestor.send_data(
             EmbeddingsRequestEnum.embed_description.value,
             {"id": event_id, "description": description},
+        )
+
+    def reprocess_plate(self, event: dict[str, any]) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.reprocess_plate.value, {"event": event}
         )

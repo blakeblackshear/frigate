@@ -41,6 +41,8 @@ lpr:
 
 Ensure that your camera is configured to detect objects of type `car`, and that a car is actually being detected by Frigate. Otherwise, LPR will not run.
 
+Like the other real-time processors in Frigate, license plate recognition runs on the camera stream defined by the `detect` role in your config. To ensure optimal performance, select a suitable resolution for this stream in your camera's firmware that fits your specific scene and requirements.
+
 ## Advanced Configuration
 
 Fine-tune the LPR feature using these optional parameters:
@@ -52,7 +54,7 @@ Fine-tune the LPR feature using these optional parameters:
   - Note: If you are using a Frigate+ model and you set the `threshold` in your objects config for `license_plate` higher than this value, recognition will never run. It's best to ensure these values match, or this `detection_threshold` is lower than your object config `threshold`.
 - **`min_area`**: Defines the minimum size (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels.
-  - Depending on the resolution of your cameras, you can increase this value to ignore small or distant plates.
+  - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 
 ### Recognition
 
@@ -114,7 +116,7 @@ lpr:
 Ensure that:
 
 - Your camera has a clear, well-lit view of the plate.
-- The plate is large enough in the image (try adjusting `min_area`).
+- The plate is large enough in the image (try adjusting `min_area`) or increasing the resolution of your camera's stream.
 - A `car` is detected first, as LPR only runs on recognized vehicles.
 
 If you are using a Frigate+ model or a custom model that detects license plates, ensure that `license_plate` is added to your list of objects to track.
@@ -143,7 +145,7 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 - View MQTT messages for `frigate/events` to verify detected plates.
 - Adjust `detection_threshold` and `recognition_threshold` settings.
 - If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car`.
-- Enable debug logs for LPR by adding `frigate.data_processing.real_time.license_plate_processor: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
+- Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
 
 ### Will LPR slow down my system?
 

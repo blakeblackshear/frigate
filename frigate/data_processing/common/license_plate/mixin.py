@@ -13,34 +13,21 @@ from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
-from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import FrigateConfig
 from frigate.const import FRIGATE_LOCALHOST
-from frigate.embeddings.onnx.lpr_embedding import (
-    LicensePlateDetector,
-    PaddleOCRClassification,
-    PaddleOCRDetection,
-    PaddleOCRRecognition,
-)
 from frigate.util.image import area
-
-from ..types import DataProcessorMetrics
-from .api import RealTimeProcessorApi
 
 logger = logging.getLogger(__name__)
 
 WRITE_DEBUG_IMAGES = False
 
 
-class LicensePlateProcessor(RealTimeProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
-        super().__init__(config, metrics)
-        self.requestor = InterProcessRequestor()
-        self.lpr_config = config.lpr
+class LicensePlateProcessingMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.requires_license_plate_detection = (
             "license_plate" not in self.config.objects.all_objects
         )
-        self.detected_license_plates: dict[str, dict[str, any]] = {}
 
         self.ctc_decoder = CTCDecoder()
 
@@ -51,42 +38,6 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         self.max_size = 960
         self.box_thresh = 0.8
         self.mask_thresh = 0.8
-
-        self.lpr_detection_model = None
-        self.lpr_classification_model = None
-        self.lpr_recognition_model = None
-
-        if self.config.lpr.enabled:
-            self.detection_model = PaddleOCRDetection(
-                model_size="large",
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-            self.classification_model = PaddleOCRClassification(
-                model_size="large",
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-            self.recognition_model = PaddleOCRRecognition(
-                model_size="large",
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-            self.yolov9_detection_model = LicensePlateDetector(
-                model_size="large",
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-        if self.lpr_config.enabled:
-            # all models need to be loaded to run LPR
-            self.detection_model._load_model_and_utils()
-            self.classification_model._load_model_and_utils()
-            self.recognition_model._load_model_and_utils()
-            self.yolov9_detection_model._load_model_and_utils()
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -114,7 +65,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 resized_image,
             )
 
-        outputs = self.detection_model([normalized_image])[0]
+        outputs = self.model_runner.detection_model([normalized_image])[0]
         outputs = outputs[0, :, :]
 
         boxes, _ = self._boxes_from_bitmap(outputs, outputs > self.mask_thresh, w, h)
@@ -143,7 +94,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 norm_img = norm_img[np.newaxis, :]
                 norm_images.append(norm_img)
 
-        outputs = self.classification_model(norm_images)
+        outputs = self.model_runner.classification_model(norm_images)
 
         return self._process_classification_output(images, outputs)
 
@@ -183,7 +134,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
 
-        outputs = self.recognition_model(norm_images)
+        outputs = self.model_runner.recognition_model(norm_images)
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
@@ -199,9 +150,9 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             Tuple[List[str], List[float], List[int]]: Detected license plate texts, confidence scores, and areas of the plates.
         """
         if (
-            self.detection_model.runner is None
-            or self.classification_model.runner is None
-            or self.recognition_model.runner is None
+            self.model_runner.detection_model.runner is None
+            or self.model_runner.classification_model.runner is None
+            or self.model_runner.recognition_model.runner is None
         ):
             # we might still be downloading the models
             logger.debug("Model runners not loaded")
@@ -665,7 +616,9 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         input_w = int(input_h * max_wh_ratio)
 
         # check for model-specific input width
-        model_input_w = self.recognition_model.runner.ort.get_inputs()[0].shape[3]
+        model_input_w = self.model_runner.recognition_model.runner.ort.get_inputs()[
+            0
+        ].shape[3]
         if isinstance(model_input_w, int) and model_input_w > 0:
             input_w = model_input_w
 
@@ -732,19 +685,13 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             image = np.rot90(image, k=3)
         return image
 
-    def __update_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
-
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
         """
         Use a lightweight YOLOv9 model to detect license plates for users without Frigate+
 
         Return the dimensions of the detected plate as [x1, y1, x2, y2].
         """
-        predictions = self.yolov9_detection_model(input)
+        predictions = self.model_runner.yolov9_detection_model(input)
 
         confidence_threshold = self.lpr_config.detection_threshold
 
@@ -770,8 +717,8 @@ class LicensePlateProcessor(RealTimeProcessorApi):
 
         # Return the top scoring bounding box if found
         if top_box is not None:
-            # expand box by 15% to help with OCR
-            expansion = (top_box[2:] - top_box[:2]) * 0.1
+            # expand box by 30% to help with OCR
+            expansion = (top_box[2:] - top_box[:2]) * 0.30
 
             # Expand box
             expanded_box = np.array(
@@ -869,9 +816,8 @@ class LicensePlateProcessor(RealTimeProcessorApi):
         # 5. Return True if we should keep the previous plate (i.e., if it scores higher)
         return prev_score > curr_score
 
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
+    def lpr_process(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image."""
-        start = datetime.datetime.now().timestamp()
 
         id = obj_data["id"]
 
@@ -934,7 +880,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
 
             # check that license plate is valid
             # double the value because we've doubled the size of the car
-            if license_plate_area < self.config.lpr.min_area * 2:
+            if license_plate_area < self.lpr_config.min_area * 2:
                 logger.debug("License plate is less than min_area")
                 return
 
@@ -972,7 +918,7 @@ class LicensePlateProcessor(RealTimeProcessorApi):
             # check that license plate is valid
             if (
                 not license_plate_box
-                or area(license_plate_box) < self.config.lpr.min_area
+                or area(license_plate_box) < self.lpr_config.min_area
             ):
                 logger.debug(f"Invalid license plate box {license_plate}")
                 return
@@ -1078,9 +1024,8 @@ class LicensePlateProcessor(RealTimeProcessorApi):
                 "plate": top_plate,
                 "char_confidences": top_char_confidences,
                 "area": top_area,
+                "obj_data": obj_data,
             }
-
-        self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
