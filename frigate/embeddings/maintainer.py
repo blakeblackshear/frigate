@@ -171,13 +171,15 @@ class EmbeddingMaintainer(threading.Thread):
                         pack=False,
                     )
                 else:
-                    for processor in self.processors:
-                        resp = processor.handle_request(topic, data)
+                    processors = [self.realtime_processors, self.post_processors]
+                    for processor_list in processors:
+                        for processor in processor_list:
+                            resp = processor.handle_request(topic, data)
 
                         if resp is not None:
                             return resp
             except Exception as e:
-                logger.error(f"Unable to handle embeddings request {e}")
+                logger.error(f"Unable to handle embeddings request {e}", exc_info=True)
 
         self.embeddings_responder.check_for_request(_handle_request)
 
