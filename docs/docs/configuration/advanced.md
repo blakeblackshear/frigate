@@ -175,13 +175,13 @@ listen [::]:5000 ipv6only=off;
 
 ### Custom ffmpeg build
 
-Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to `/config/custom-ffmpeg/bin` and used.
+Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built `ffmpeg` and `ffprobe` binaries can be placed in `/config/custom-ffmpeg/bin` for Frigate to use.
 
 To do this:
 
-1. Download your ffmpeg build and uncompress it to the `/config/custom-ffmpeg` folder. Verify that the ffmpeg binary is located at `/config/custom-ffmpeg/bin/ffmpeg`.
+1. Download your ffmpeg build and uncompress it to the `/config/custom-ffmpeg` folder. Verify that both the `ffmpeg` and `ffprobe` binaries are located in `/config/custom-ffmpeg/bin`.
 2. Update the `ffmpeg.path` in your Frigate config to `/config/custom-ffmpeg`.
-3. Restart Frigate and the custom version will be used if the mapping was done correctly.
+3. Restart Frigate and the custom version will be used if the steps above were done correctly.
 
 ### Custom go2rtc version
 
