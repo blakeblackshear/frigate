@@ -78,19 +78,31 @@ class TestMotion(unittest.TestCase):
 
         return cap, improved_motion_detector
 
-    def verify_motion_frames(self, test_clip: TestMotionVideo, motion_frames):
+    def verify_motion_frames(
+        self, test_clip: TestMotionVideo, motion_frames, total_frame_count
+    ):
         success = True
+        expectedMotionFrameCount = 0
+        detectedMotionFrameCount = 0
         for expected_motion_range in test_clip.motion_ranges:
-            if not any(
-                x >= expected_motion_range[0]
-                and x <= (expected_motion_range[1] + self.motion_range_threshold)
+            detectedMotionFrameCount += sum(
+                x >= expected_motion_range[0] and x <= expected_motion_range[1]
                 for x in motion_frames
-            ):
+            )
+            expectedMotionFrameCount += (
+                expected_motion_range[1] - expected_motion_range[0]
+            )
+            if detectedMotionFrameCount == 0:
                 success = False
                 logging.error(
                     f"{test_clip.file_name} No motion detected in range {expected_motion_range[0]}-{expected_motion_range[1]}"
                 )
+        logging.debug(
+            f"{detectedMotionFrameCount} out of {expectedMotionFrameCount} motion frames detected ({100 if expectedMotionFrameCount == 0 else round(detectedMotionFrameCount / expectedMotionFrameCount * 100, 2)}%)"
+        )
 
+        falsePositiveFrameCount = 0
+        # For the benefit of readability, a similar calculation is done twice.
         for motion_frame in motion_frames:
             if not any(
                 motion_frame >= x[0]
@@ -101,6 +113,15 @@ class TestMotion(unittest.TestCase):
                 logging.error(
                     f"{test_clip.file_name} Invalid motion detected at frame {motion_frame}"
                 )
+            # When calculating accuracy, we take the exact expected motion ranges. For passing the test, we allow for motion to linger a few frames.
+            if not any(
+                motion_frame >= x[0] and x[1] >= motion_frame
+                for x in test_clip.motion_ranges
+            ):
+                falsePositiveFrameCount += 1
+        logging.debug(
+            f"{falsePositiveFrameCount} invalid motion frames detected ({round((total_frame_count - expectedMotionFrameCount - falsePositiveFrameCount) / (total_frame_count - expectedMotionFrameCount) * 100, 2)}%)"
+        )
 
         return success
 
@@ -130,7 +151,7 @@ class TestMotion(unittest.TestCase):
 
         cap.release()
 
-        assert self.verify_motion_frames(test_clip, motion_frames)
+        assert self.verify_motion_frames(test_clip, motion_frames, frame_counter)
 
     def test_motions(self):
         profile = cProfile.Profile()
