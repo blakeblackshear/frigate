@@ -49,7 +49,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
-        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}")
+        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}", True)
         self.ptz_metrics = ptz_metrics
         self.last_stop_time = None
 

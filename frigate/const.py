@@ -1,3 +1,4 @@
+import os
 import re
 
 CONFIG_DIR = "/config"
@@ -61,8 +62,9 @@ MAX_WAL_SIZE = 10  # MB
 
 # Ffmpeg constants
 
-DEFAULT_FFMPEG_VERSION = "7.0"
-INCLUDED_FFMPEG_VERSIONS = ["7.0", "5.0"]
+DEFAULT_FFMPEG_VERSION = os.environ.get("DEFAULT_FFMPEG_VERSION", "")
+INCLUDED_FFMPEG_VERSIONS = os.environ.get("INCLUDED_FFMPEG_VERSIONS", "").split(":")
+LIBAVFORMAT_VERSION_MAJOR = int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59"))
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
