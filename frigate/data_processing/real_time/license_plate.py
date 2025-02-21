@@ -31,7 +31,7 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.model_runner = model_runner
         self.lpr_config = config.lpr
         self.config = config
-        super().__init__(config, metrics, model_runner)
+        super().__init__(config, metrics)
 
     def __update_metrics(self, duration: float) -> None:
         """
