@@ -234,7 +234,7 @@ TP-Link VIGI cameras need some adjustments to the main stream settings on the ca
 
 ## USB Cameras (aka Webcams)
 
-In some scenarios one may desire using a USB Camera (i.e. webcam) with Frigate. The example instructions below walk through setting one up with go2rtc's [FFmpeg Device](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg-device) support:
+To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's [FFmpeg Device](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg-device) support:
 
 - Preparation outside of Frigate:
   - Get USB camera path. Run `v4l2-ctl --list-devices` to get a listing of locally-connected cameras available. (You may need to install `v4l-utils` in a way appropriate for your Linux distribution). In the sample configuration below, we use `video=0` to correlate with a detected device path of `/dev/video0`
@@ -264,7 +264,5 @@ cameras:
       width: 1024
       height: 576
 ```
-
-There may be additional ffmpeg device arguments depending on your camera, you may want to check out issues [1184](https://github.com/blakeblackshear/frigate/issues/1184), [3213](https://github.com/blakeblackshear/frigate/issues/3213), and [4062](https://github.com/blakeblackshear/frigate/issues/4062) for more information. Note that these discussions may contain instructions before go2rtc support was added to Frigate and will differ in configuration setup.
 
 
