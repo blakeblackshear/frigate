@@ -220,9 +220,14 @@ class RecordingMaintainer(threading.Thread):
                 [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
             )
 
-            # publish most recently available recording time
+            # publish most recently available recording time and None if disabled
             self.recordings_publisher.publish(
-                (camera, recordings[0]["start_time"].timestamp())
+                (
+                    camera,
+                    recordings[0]["start_time"].timestamp()
+                    if self.config.cameras[camera].record.enabled
+                    else None,
+                )
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
