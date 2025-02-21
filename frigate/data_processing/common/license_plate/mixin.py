@@ -18,7 +18,7 @@ from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
 
-WRITE_DEBUG_IMAGES = False
+WRITE_DEBUG_IMAGES = True
 
 
 class LicensePlateProcessingMixin:
@@ -28,7 +28,6 @@ class LicensePlateProcessingMixin:
         self.requires_license_plate_detection = (
             "license_plate" not in self.config.objects.all_objects
         )
-        self.detected_license_plates: dict[str, dict[str, any]] = {}
 
         self.ctc_decoder = CTCDecoder()
 
@@ -1025,7 +1024,7 @@ class LicensePlateProcessingMixin:
                 "plate": top_plate,
                 "char_confidences": top_char_confidences,
                 "area": top_area,
-                "frame_time": obj_data["frame_time"],
+                "obj_data": obj_data,
             }
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:

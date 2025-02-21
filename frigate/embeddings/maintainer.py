@@ -91,6 +91,8 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
+        self.detected_license_plates: dict[str, dict[str, any]] = {}
+
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
             lpr_model_runner = LicensePlateModelRunner(self.requestor)
@@ -106,7 +108,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         if self.config.lpr.enabled:
             self.realtime_processors.append(
-                LicensePlateRealTimeProcessor(self.config, metrics, lpr_model_runner)
+                LicensePlateRealTimeProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
             )
 
         # post processors
@@ -114,7 +118,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         if self.config.lpr.enabled:
             self.post_processors.append(
-                LicensePlatePostProcessor(self.config, metrics, lpr_model_runner)
+                LicensePlatePostProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
             )
 
         self.stop_event = stop_event
@@ -242,14 +248,19 @@ class EmbeddingMaintainer(threading.Thread):
             for processor in self.post_processors:
                 if isinstance(processor, LicensePlatePostProcessor):
                     recordings_available = self.recordings_available_through.get(camera)
-                    if recordings_available is not None:
-                        # and event_id is an event in detected_license_plates
+                    if (
+                        recordings_available is not None
+                        and event_id in self.detected_license_plates
+                    ):
                         processor.process_data(
                             {
                                 "event_id": event_id,
                                 "camera": camera,
                                 "recordings_available": self.recordings_available_through[
                                     camera
+                                ],
+                                "obj_data": self.detected_license_plates[event_id][
+                                    "obj_data"
                                 ],
                             },
                             PostProcessDataEnum.recording,

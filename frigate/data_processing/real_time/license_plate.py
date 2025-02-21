@@ -25,7 +25,9 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         config: FrigateConfig,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
+        detected_license_plates: dict[str, dict[str, any]],
     ):
+        self.detected_license_plates = detected_license_plates
         self.model_runner = model_runner
         self.lpr_config = config.lpr
         self.config = config
