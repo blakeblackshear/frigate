@@ -115,7 +115,8 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
 
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
 
-            cv2.imwrite(f"debug/frames/lpr_post_{frame_time}.jpg", image)
+            if False:
+                cv2.imwrite(f"debug/frames/lpr_post_{frame_time}.jpg", image)
 
             frame = cv2.cvtColor(image, cv2.COLOR_BGR2YUV_I420)
 
