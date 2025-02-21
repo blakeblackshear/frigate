@@ -234,3 +234,8 @@ class EmbeddingsContext:
             EmbeddingsRequestEnum.embed_description.value,
             {"id": event_id, "description": description},
         )
+
+    def reprocess_plate(self, event: dict[str, any]) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.reprocess_plate.value, {"event": event}
+        )

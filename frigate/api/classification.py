@@ -9,10 +9,13 @@ import string
 from fastapi import APIRouter, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pathvalidate import sanitize_filename
+from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.tags import Tags
 from frigate.const import FACE_DIR
 from frigate.embeddings import EmbeddingsContext
+from frigate.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -174,5 +177,38 @@ def deregister_faces(request: Request, name: str, body: dict = None):
     )
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )
+
+
+@router.put("/lpr/reprocess")
+def reprocess_license_plate(request: Request, event_id: str):
+    if not request.app.frigate_config.lpr.enabled:
+        message = "License plate recognition is not enabled."
+        logger.error(message)
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": message,
+                }
+            ),
+            status_code=400,
+        )
+
+    try:
+        event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        message = f"Event {event_id} not found"
+        logger.error(message)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=404
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    response = context.reprocess_plate(model_to_dict(event))
+
+    return JSONResponse(
+        content=response,
         status_code=200,
     )
