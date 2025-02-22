@@ -14,6 +14,7 @@ In order to use notifications the following requirements must be met:
 - Frigate must be accessed via a secure `https` connection ([see the authorization docs](/configuration/authentication)).
 - A supported browser must be used. Currently Chrome, Firefox, and Safari are known to be supported.
 - In order for notifications to be usable externally, Frigate must be accessible externally.
+- For iOS devices, some users have also indicated that the Notifications switch needs to be enabled in iOS Settings --> Apps --> Safari --> Advanced --> Features.
 
 ### Configuration
 
