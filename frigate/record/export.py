@@ -363,10 +363,13 @@ class RecordingExporter(threading.Thread):
             }
         ).execute()
 
-        if self.playback_source == PlaybackSourceEnum.recordings:
-            ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
-        else:
-            ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
+        try:
+            if self.playback_source == PlaybackSourceEnum.recordings:
+                ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
+            else:
+                ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
+        except DoesNotExist:
+            return
 
         p = sp.run(
             ffmpeg_cmd,
