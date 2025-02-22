@@ -7,22 +7,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { FaDownload, FaImage, FaPlay, FaVideo, FaRegListAlt } from "react-icons/fa";
-import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
+import { FaImage, FaRegListAlt } from "react-icons/fa";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { isDesktop, isIOS, isMobile, isSafari } from "react-device-detect";
+import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
-import { GenericVideoPlayer } from "@/components/player/GenericVideoPlayer";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
-import Chip from "@/components/indicators/Chip";
 import {
   MobilePage,
   MobilePageContent,
