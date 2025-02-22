@@ -44,9 +44,13 @@ function get_ip_and_port_from_supervisor() {
 }
 
 function set_libva_version() {
-    local ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
-    export LIBAVFORMAT_VERSION_MAJOR=$($ffmpeg_path -version | grep -Po "libavformat\W+\K\d+")
+    local ffmpeg_path
+    ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+    LIBAVFORMAT_VERSION_MAJOR=$("$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
+    export LIBAVFORMAT_VERSION_MAJOR
 }
+
+set_libva_version
 
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
     echo "[INFO] Removing stale config from last run..."
@@ -65,8 +69,6 @@ if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
 else
     echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
 fi
-
-set_libva_version
 
 readonly config_path="/config"
 

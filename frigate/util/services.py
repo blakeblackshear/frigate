@@ -8,7 +8,8 @@ import re
 import signal
 import subprocess as sp
 import traceback
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional, Tuple
 
 import cv2
 import psutil
@@ -635,3 +636,54 @@ async def get_video_properties(
         result["fourcc"] = fourcc
 
     return result
+
+
+def process_logs(
+    contents: str,
+    service: Optional[str] = None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+) -> Tuple[int, List[str]]:
+    log_lines = []
+    last_message = None
+    last_timestamp = None
+    repeat_count = 0
+
+    for raw_line in contents.splitlines():
+        clean_line = raw_line.strip()
+
+        if len(clean_line) < 10:
+            continue
+
+        # Handle cases where S6 does not include date in log line
+        if "  " not in clean_line:
+            clean_line = f"{datetime.now()}  {clean_line}"
+
+        # Find the position of the first double space to extract timestamp and message
+        date_end = clean_line.index("  ")
+        timestamp = clean_line[:date_end]
+        message_part = clean_line[date_end:].strip()
+
+        if message_part == last_message:
+            repeat_count += 1
+            continue
+        else:
+            if repeat_count > 0:
+                # Insert a deduplication message formatted the same way as logs
+                dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                log_lines.append(dedup_message)
+                repeat_count = 0
+
+            log_lines.append(clean_line)
+            last_timestamp = timestamp
+
+        last_message = message_part
+
+    # If there were repeated messages at the end, log the count
+    if repeat_count > 0:
+        dedup_message = (
+            f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+        )
+        log_lines.append(dedup_message)
+
+    return len(log_lines), log_lines[start:end]

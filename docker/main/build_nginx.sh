@@ -8,9 +8,16 @@ SECURE_TOKEN_MODULE_VERSION="1.5"
 SET_MISC_MODULE_VERSION="v0.33"
 NGX_DEVEL_KIT_VERSION="v0.3.3"
 
-sed -i '/^Types:/s/deb/& deb-src/' /etc/apt/sources.list.d/debian.sources
-apt-get update
+source /etc/os-release
 
+if [[ "$VERSION_ID" == "12" ]]; then
+    sed -i '/^Types:/s/deb/& deb-src/' /etc/apt/sources.list.d/debian.sources
+else
+    cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
+    sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list
+fi
+
+apt-get update
 apt-get -yqq build-dep nginx
 
 apt-get -yqq install --no-install-recommends ca-certificates wget

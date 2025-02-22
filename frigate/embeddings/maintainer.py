@@ -1,10 +1,8 @@
 """Maintain embeddings in SQLite-vec."""
 
 import base64
-import datetime
 import logging
 import os
-import re
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
@@ -12,7 +10,6 @@ from typing import Optional
 
 import cv2
 import numpy as np
-import requests
 from peewee import DoesNotExist
 from playhouse.sqliteq import SqliteQueueDatabase
 
@@ -23,23 +20,36 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.recordings_updater import (
+    RecordingsDataSubscriber,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
-    FRIGATE_LOCALHOST,
     UPDATE_EVENT_DESCRIPTION,
 )
+from frigate.data_processing.common.license_plate.model import (
+    LicensePlateModelRunner,
+)
+from frigate.data_processing.post.api import PostProcessorApi
+from frigate.data_processing.post.license_plate import (
+    LicensePlatePostProcessor,
+)
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
-from frigate.data_processing.real_time.bird_processor import BirdProcessor
-from frigate.data_processing.real_time.face_processor import FaceProcessor
-from frigate.data_processing.types import DataProcessorMetrics
-from frigate.embeddings.lpr.lpr import LicensePlateRecognition
+from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.face import FaceRealTimeProcessor
+from frigate.data_processing.real_time.license_plate import (
+    LicensePlateRealTimeProcessor,
+)
+from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
-from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
+from frigate.util.image import SharedMemoryFrameManager, calculate_region
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 
@@ -67,49 +77,71 @@ class EmbeddingMaintainer(threading.Thread):
         if config.semantic_search.reindex:
             self.embeddings.reindex()
 
+        # create communication for updating event descriptions
+        self.requestor = InterProcessRequestor()
+
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
+        self.recordings_subscriber = RecordingsDataSubscriber(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
-        self.processors: list[RealTimeProcessorApi] = []
+
+        self.detected_license_plates: dict[str, dict[str, any]] = {}
+
+        # model runners to share between realtime and post processors
+        if self.config.lpr.enabled:
+            lpr_model_runner = LicensePlateModelRunner(self.requestor)
+
+        # realtime processors
+        self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.processors.append(FaceProcessor(self.config, metrics))
+            self.realtime_processors.append(FaceRealTimeProcessor(self.config, metrics))
 
         if self.config.classification.bird.enabled:
-            self.processors.append(BirdProcessor(self.config, metrics))
+            self.realtime_processors.append(BirdRealTimeProcessor(self.config, metrics))
 
-        # create communication for updating event descriptions
-        self.requestor = InterProcessRequestor()
+        if self.config.lpr.enabled:
+            self.realtime_processors.append(
+                LicensePlateRealTimeProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
+            )
+
+        # post processors
+        self.post_processors: list[PostProcessorApi] = []
+
+        if self.config.lpr.enabled:
+            self.post_processors.append(
+                LicensePlatePostProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
+            )
+
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[any]] = {}
         self.genai_client = get_genai_client(config)
 
-        # set license plate recognition conditions
-        self.lpr_config = self.config.lpr
-        self.requires_license_plate_detection = (
-            "license_plate" not in self.config.objects.all_objects
-        )
-        self.detected_license_plates: dict[str, dict[str, any]] = {}
-
-        if self.lpr_config.enabled:
-            self.license_plate_recognition = LicensePlateRecognition(
-                self.lpr_config, self.requestor, self.embeddings
-            )
+        # recordings data
+        self.recordings_available_through: dict[str, float] = {}
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
             self._process_requests()
             self._process_updates()
+            self._process_recordings_updates()
             self._process_finalized()
             self._process_event_metadata()
 
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
+        self.recordings_subscriber.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
         self.requestor.stop()
@@ -139,13 +171,15 @@ class EmbeddingMaintainer(threading.Thread):
                         pack=False,
                     )
                 else:
-                    for processor in self.processors:
-                        resp = processor.handle_request(topic, data)
+                    processors = [self.realtime_processors, self.post_processors]
+                    for processor_list in processors:
+                        for processor in processor_list:
+                            resp = processor.handle_request(topic, data)
 
                         if resp is not None:
                             return resp
             except Exception as e:
-                logger.error(f"Unable to handle embeddings request {e}")
+                logger.error(f"Unable to handle embeddings request {e}", exc_info=True)
 
         self.embeddings_responder.check_for_request(_handle_request)
 
@@ -164,11 +198,7 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[camera]
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
-        if (
-            not camera_config.genai.enabled
-            and not self.lpr_config.enabled
-            and len(self.processors) == 0
-        ):
+        if not camera_config.genai.enabled and len(self.realtime_processors) == 0:
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -185,18 +215,8 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        for processor in self.processors:
+        for processor in self.realtime_processors:
             processor.process_frame(data, yuv_frame)
-
-        if self.lpr_config.enabled:
-            start = datetime.datetime.now().timestamp()
-            processed = self._process_license_plate(data, yuv_frame)
-
-            if processed:
-                duration = datetime.datetime.now().timestamp() - start
-                self.metrics.alpr_pps.value = (
-                    self.metrics.alpr_pps.value * 9 + duration
-                ) / 10
 
         # no need to save our own thumbnails if genai is not enabled
         # or if the object has become stationary
@@ -226,11 +246,33 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            for processor in self.processors:
-                processor.expire_object(event_id)
+            # call any defined post processors
+            for processor in self.post_processors:
+                if isinstance(processor, LicensePlatePostProcessor):
+                    recordings_available = self.recordings_available_through.get(camera)
+                    if (
+                        recordings_available is not None
+                        and event_id in self.detected_license_plates
+                    ):
+                        processor.process_data(
+                            {
+                                "event_id": event_id,
+                                "camera": camera,
+                                "recordings_available": self.recordings_available_through[
+                                    camera
+                                ],
+                                "obj_data": self.detected_license_plates[event_id][
+                                    "obj_data"
+                                ],
+                            },
+                            PostProcessDataEnum.recording,
+                        )
+                else:
+                    processor.process_data(event_id, PostProcessDataEnum.event_id)
 
-            if event_id in self.detected_license_plates:
-                self.detected_license_plates.pop(event_id)
+            # expire in realtime processors
+            for processor in self.realtime_processors:
+                processor.expire_object(event_id)
 
             if updated_db:
                 try:
@@ -243,7 +285,7 @@ class EmbeddingMaintainer(threading.Thread):
                     continue
 
                 # Extract valid thumbnail
-                thumbnail = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
 
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
@@ -342,6 +384,24 @@ class EmbeddingMaintainer(threading.Thread):
             if event_id in self.tracked_events:
                 del self.tracked_events[event_id]
 
+    def _process_recordings_updates(self) -> None:
+        """Process recordings updates."""
+        while True:
+            recordings_data = self.recordings_subscriber.check_for_update(timeout=0.01)
+
+            if recordings_data == None:
+                break
+
+            camera, recordings_available_through_timestamp = recordings_data
+
+            self.recordings_available_through[camera] = (
+                recordings_available_through_timestamp
+            )
+
+            logger.debug(
+                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+            )
+
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
@@ -353,199 +413,6 @@ class EmbeddingMaintainer(threading.Thread):
 
         if event_id:
             self.handle_regenerate_description(event_id, source)
-
-    def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
-        """Return the dimensions of the input image as [x, y, width, height]."""
-        height, width = input.shape[:2]
-        return (0, 0, width, height)
-
-    def _process_license_plate(
-        self, obj_data: dict[str, any], frame: np.ndarray
-    ) -> bool:
-        """Look for license plates in image."""
-        id = obj_data["id"]
-
-        # don't run for non car objects
-        if obj_data.get("label") != "car":
-            logger.debug("Not a processing license plate for non car object.")
-            return False
-
-        # don't run for stationary car objects
-        if obj_data.get("stationary") == True:
-            logger.debug("Not a processing license plate for a stationary car object.")
-            return False
-
-        # don't overwrite sub label for objects that have a sub label
-        # that is not a license plate
-        if obj_data.get("sub_label") and id not in self.detected_license_plates:
-            logger.debug(
-                f"Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
-            )
-            return False
-
-        license_plate: Optional[dict[str, any]] = None
-
-        if self.requires_license_plate_detection:
-            logger.debug("Running manual license_plate detection.")
-            car_box = obj_data.get("box")
-
-            if not car_box:
-                return False
-
-            rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
-            left, top, right, bottom = car_box
-            car = rgb[top:bottom, left:right]
-            license_plate = self._detect_license_plate(car)
-
-            if not license_plate:
-                logger.debug("Detected no license plates for car object.")
-                return False
-
-            license_plate_frame = car[
-                license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
-            ]
-            license_plate_frame = cv2.cvtColor(license_plate_frame, cv2.COLOR_RGB2BGR)
-        else:
-            # don't run for object without attributes
-            if not obj_data.get("current_attributes"):
-                logger.debug("No attributes to parse.")
-                return False
-
-            attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
-            for attr in attributes:
-                if attr.get("label") != "license_plate":
-                    continue
-
-                if license_plate is None or attr.get("score", 0.0) > license_plate.get(
-                    "score", 0.0
-                ):
-                    license_plate = attr
-
-            # no license plates detected in this frame
-            if not license_plate:
-                return False
-
-            license_plate_box = license_plate.get("box")
-
-            # check that license plate is valid
-            if (
-                not license_plate_box
-                or area(license_plate_box) < self.config.lpr.min_area
-            ):
-                logger.debug(f"Invalid license plate box {license_plate}")
-                return False
-
-            license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-            license_plate_frame = license_plate_frame[
-                license_plate_box[1] : license_plate_box[3],
-                license_plate_box[0] : license_plate_box[2],
-            ]
-
-        # run detection, returns results sorted by confidence, best first
-        license_plates, confidences, areas = (
-            self.license_plate_recognition.process_license_plate(license_plate_frame, id)
-        )
-
-        logger.debug(f"Text boxes: {license_plates}")
-        logger.debug(f"Confidences: {confidences}")
-        logger.debug(f"Areas: {areas}")
-
-        if license_plates:
-            for plate, confidence, text_area in zip(license_plates, confidences, areas):
-                avg_confidence = (
-                    (sum(confidence) / len(confidence)) if confidence else 0
-                )
-
-                logger.debug(
-                    f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
-                )
-        else:
-            # no plates found
-            logger.debug("No text detected")
-            return True
-
-        top_plate, top_char_confidences, top_area = (
-            license_plates[0],
-            confidences[0],
-            areas[0],
-        )
-        avg_confidence = (
-            (sum(top_char_confidences) / len(top_char_confidences))
-            if top_char_confidences
-            else 0
-        )
-
-        # Check if we have a previously detected plate for this ID
-        if id in self.detected_license_plates:
-            prev_plate = self.detected_license_plates[id]["plate"]
-            prev_char_confidences = self.detected_license_plates[id]["char_confidences"]
-            prev_area = self.detected_license_plates[id]["area"]
-            prev_avg_confidence = (
-                (sum(prev_char_confidences) / len(prev_char_confidences))
-                if prev_char_confidences
-                else 0
-            )
-
-            # Define conditions for keeping the previous plate
-            shorter_than_previous = len(top_plate) < len(prev_plate)
-            lower_avg_confidence = avg_confidence <= prev_avg_confidence
-            smaller_area = top_area < prev_area
-
-            # Compare character-by-character confidence where possible
-            min_length = min(len(top_plate), len(prev_plate))
-            char_confidence_comparison = sum(
-                1
-                for i in range(min_length)
-                if top_char_confidences[i] <= prev_char_confidences[i]
-            )
-            worse_char_confidences = char_confidence_comparison >= min_length / 2
-
-            if (shorter_than_previous or smaller_area) and (
-                lower_avg_confidence and worse_char_confidences
-            ):
-                logger.debug(
-                    f"Keeping previous plate. New plate stats: "
-                    f"length={len(top_plate)}, avg_conf={avg_confidence:.2f}, area={top_area} "
-                    f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}, area={prev_area}"
-                )
-                return True
-
-        # Check against minimum confidence threshold
-        if avg_confidence < self.lpr_config.threshold:
-            logger.debug(
-                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
-            )
-            return True
-
-        # Determine subLabel based on known plates, use regex matching
-        # Default to the detected plate, use label name if there's a match
-        sub_label = next(
-            (
-                label
-                for label, plates in self.lpr_config.known_plates.items()
-                if any(re.match(f"^{plate}$", top_plate) for plate in plates)
-            ),
-            top_plate,
-        )
-
-        # Send the result to the API
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": sub_label,
-                "subLabelScore": avg_confidence,
-            },
-        )
-
-        if resp.status_code == 200:
-            self.detected_license_plates[id] = {
-                "plate": top_plate,
-                "char_confidences": top_char_confidences,
-                "area": top_area,
-            }
-
-        return True
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""
@@ -611,7 +478,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        thumbnail = base64.b64decode(event.thumbnail)
+        thumbnail = get_event_thumbnail_bytes(event)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

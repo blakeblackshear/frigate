@@ -14,6 +14,8 @@ class EmbeddingsRequestEnum(Enum):
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
     register_face = "register_face"
+    reprocess_face = "reprocess_face"
+    reprocess_plate = "reprocess_plate"
 
 
 class EmbeddingsResponder:

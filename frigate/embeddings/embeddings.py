@@ -1,6 +1,5 @@
 """SQLite-vec embeddings database."""
 
-import base64
 import datetime
 import logging
 import os
@@ -21,8 +20,9 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
+from frigate.util.path import get_event_thumbnail_bytes
 
-from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -97,80 +97,17 @@ class Embeddings:
                 },
             )
 
-        self.text_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file="text_model_fp16.onnx",
-            tokenizer_file="tokenizer",
-            download_urls={
-                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
-            },
+        self.text_embedding = JinaV1TextEmbedding(
             model_size=config.semantic_search.model_size,
-            model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
         )
 
-        model_file = (
-            "vision_model_fp16.onnx"
-            if self.config.semantic_search.model_size == "large"
-            else "vision_model_quantized.onnx"
-        )
-
-        download_urls = {
-            model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
-            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
-        }
-
-        self.vision_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file=model_file,
-            download_urls=download_urls,
+        self.vision_embedding = JinaV1ImageEmbedding(
             model_size=config.semantic_search.model_size,
-            model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
             device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
-
-        self.lpr_detection_model = None
-        self.lpr_classification_model = None
-        self.lpr_recognition_model = None
-
-        if self.config.lpr.enabled:
-            self.lpr_detection_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="detection.onnx",
-                download_urls={
-                    "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
-                },
-                model_size="large",
-                model_type=ModelTypeEnum.lpr_detect,
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-            self.lpr_classification_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="classification.onnx",
-                download_urls={
-                    "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
-                },
-                model_size="large",
-                model_type=ModelTypeEnum.lpr_classify,
-                requestor=self.requestor,
-                device="CPU",
-            )
-
-            self.lpr_recognition_model = GenericONNXEmbedding(
-                model_name="paddleocr-onnx",
-                model_file="recognition.onnx",
-                download_urls={
-                    "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
-                },
-                model_size="large",
-                model_type=ModelTypeEnum.lpr_recognize,
-                requestor=self.requestor,
-                device="CPU",
-            )
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
@@ -305,14 +242,7 @@ class Embeddings:
         st = time.time()
 
         # Get total count of events to process
-        total_events = (
-            Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
-            .count()
-        )
+        total_events = Event.select().count()
 
         batch_size = 32
         current_page = 1
@@ -330,10 +260,6 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
@@ -343,7 +269,12 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                batch_thumbs[event.id] = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                if thumbnail is None:
+                    continue
+
+                batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
 
                 if description := event.data.get("description", "").strip():
@@ -382,10 +313,6 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )

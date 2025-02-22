@@ -1,7 +1,8 @@
 """Object attribute."""
 
-import base64
 import logging
+import math
+import os
 from collections import defaultdict
 from statistics import median
 from typing import Optional
@@ -12,7 +13,10 @@ import numpy as np
 from frigate.config import (
     CameraConfig,
     ModelConfig,
+    SnapshotsConfig,
+    UIConfig,
 )
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     area,
@@ -22,6 +26,7 @@ from frigate.util.image import (
     is_better_thumbnail,
 )
 from frigate.util.object import box_inside
+from frigate.util.velocity import calculate_real_world_speed
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +36,7 @@ class TrackedObject:
         self,
         model_config: ModelConfig,
         camera_config: CameraConfig,
+        ui_config: UIConfig,
         frame_cache,
         obj_data: dict[str, any],
     ):
@@ -42,6 +48,7 @@ class TrackedObject:
         self.colormap = model_config.colormap
         self.logos = model_config.all_attribute_logos
         self.camera_config = camera_config
+        self.ui_config = ui_config
         self.frame_cache = frame_cache
         self.zone_presence: dict[str, int] = {}
         self.zone_loitering: dict[str, int] = {}
@@ -58,24 +65,38 @@ class TrackedObject:
         self.frame = None
         self.active = True
         self.pending_loitering = False
+        self.speed_history = []
+        self.current_estimated_speed = 0
+        self.average_estimated_speed = 0
+        self.velocity_angle = 0
+        self.path_data = []
         self.previous = self.to_dict()
 
     @property
     def max_severity(self) -> Optional[str]:
         review_config = self.camera_config.review
 
-        if self.obj_data["label"] in review_config.alerts.labels and (
-            not review_config.alerts.required_zones
-            or set(self.entered_zones) & set(review_config.alerts.required_zones)
+        if (
+            self.camera_config.review.alerts.enabled
+            and self.obj_data["label"] in review_config.alerts.labels
+            and (
+                not review_config.alerts.required_zones
+                or set(self.entered_zones) & set(review_config.alerts.required_zones)
+            )
         ):
             return SeverityEnum.alert
 
         if (
-            not review_config.detections.labels
-            or self.obj_data["label"] in review_config.detections.labels
-        ) and (
-            not review_config.detections.required_zones
-            or set(self.entered_zones) & set(review_config.detections.required_zones)
+            self.camera_config.review.detections.enabled
+            and (
+                not review_config.detections.labels
+                or self.obj_data["label"] in review_config.detections.labels
+            )
+            and (
+                not review_config.detections.required_zones
+                or set(self.entered_zones)
+                & set(review_config.detections.required_zones)
+            )
         ):
             return SeverityEnum.detection
 
@@ -129,6 +150,9 @@ class TrackedObject:
                     "region": obj_data["region"],
                     "score": obj_data["score"],
                     "attributes": obj_data["attributes"],
+                    "current_estimated_speed": self.current_estimated_speed,
+                    "velocity_angle": self.velocity_angle,
+                    "path_data": self.path_data,
                 }
                 thumb_update = True
 
@@ -136,6 +160,7 @@ class TrackedObject:
         current_zones = []
         bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
         in_loitering_zone = False
+        in_speed_zone = False
 
         # check each zone
         for name, zone in self.camera_config.zones.items():
@@ -144,12 +169,66 @@ class TrackedObject:
                 continue
             contour = zone.contour
             zone_score = self.zone_presence.get(name, 0) + 1
+
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
-                    # an object is only considered present in a zone if it has a zone inertia of 3+
+                    # Calculate speed first if this is a speed zone
+                    if (
+                        zone.distances
+                        and obj_data["frame_time"] == current_frame_time
+                        and self.active
+                    ):
+                        speed_magnitude, self.velocity_angle = (
+                            calculate_real_world_speed(
+                                zone.contour,
+                                zone.distances,
+                                self.obj_data["estimate_velocity"],
+                                bottom_center,
+                                self.camera_config.detect.fps,
+                            )
+                        )
+
+                        if self.ui_config.unit_system == "metric":
+                            self.current_estimated_speed = (
+                                speed_magnitude * 3.6
+                            )  # m/s to km/h
+                        else:
+                            self.current_estimated_speed = (
+                                speed_magnitude * 0.681818
+                            )  # ft/s to mph
+
+                        self.speed_history.append(self.current_estimated_speed)
+                        if len(self.speed_history) > 10:
+                            self.speed_history = self.speed_history[-10:]
+
+                        self.average_estimated_speed = sum(self.speed_history) / len(
+                            self.speed_history
+                        )
+
+                        # we've exceeded the speed threshold on the zone
+                        # or we don't have a speed threshold set
+                        if (
+                            zone.speed_threshold is None
+                            or self.average_estimated_speed > zone.speed_threshold
+                        ):
+                            in_speed_zone = True
+
+                        logger.debug(
+                            f"Camera: {self.camera_config.name}, tracked object ID: {self.obj_data['id']}, "
+                            f"zone: {name}, pixel velocity: {str(tuple(np.round(self.obj_data['estimate_velocity']).flatten().astype(int)))}, "
+                            f"speed magnitude: {speed_magnitude}, velocity angle: {self.velocity_angle}, "
+                            f"estimated speed: {self.current_estimated_speed:.1f}, "
+                            f"average speed: {self.average_estimated_speed:.1f}, "
+                            f"length: {len(self.speed_history)}"
+                        )
+
+                    # Check zone entry conditions - for speed zones, require both inertia and speed
                     if zone_score >= zone.inertia:
+                        if zone.distances and not in_speed_zone:
+                            continue  # Skip zone entry for speed zones until speed threshold met
+
                         # if the zone has loitering time, update loitering status
                         if zone.loitering_time > 0:
                             in_loitering_zone = True
@@ -173,6 +252,10 @@ class TrackedObject:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
+
+            # Reset speed if not in speed zone
+            if zone.distances and name not in current_zones:
+                self.current_estimated_speed = 0
 
         # update loitering status
         self.pending_loitering = in_loitering_zone
@@ -222,11 +305,34 @@ class TrackedObject:
             if self.obj_data["frame_time"] - self.previous["frame_time"] >= (1 / 3):
                 autotracker_update = True
 
+            # update path
+            width = self.camera_config.detect.width
+            height = self.camera_config.detect.height
+            bottom_center = (
+                round(obj_data["centroid"][0] / width, 4),
+                round(obj_data["box"][3] / height, 4),
+            )
+
+            # calculate a reasonable movement threshold (e.g., 5% of the frame diagonal)
+            threshold = 0.05 * math.sqrt(width**2 + height**2) / max(width, height)
+
+            if not self.path_data:
+                self.path_data.append((bottom_center, obj_data["frame_time"]))
+            elif (
+                math.dist(self.path_data[-1][0], bottom_center) >= threshold
+                or len(self.path_data) == 1
+            ):
+                # check Euclidean distance before appending
+                self.path_data.append((bottom_center, obj_data["frame_time"]))
+                logger.debug(
+                    f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
+                )
+
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
         return (thumb_update, significant_change, autotracker_update)
 
-    def to_dict(self, include_thumbnail: bool = False):
+    def to_dict(self):
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera_config.name,
@@ -255,10 +361,11 @@ class TrackedObject:
             "current_attributes": self.obj_data["attributes"],
             "pending_loitering": self.pending_loitering,
             "max_severity": self.max_severity,
+            "current_estimated_speed": self.current_estimated_speed,
+            "average_estimated_speed": self.average_estimated_speed,
+            "velocity_angle": self.velocity_angle,
+            "path_data": self.path_data,
         }
-
-        if include_thumbnail:
-            event["thumbnail"] = base64.b64encode(self.get_thumbnail()).decode("utf-8")
 
         return event
 
@@ -271,22 +378,16 @@ class TrackedObject:
             > self.camera_config.detect.stationary.threshold
         )
 
-    def get_thumbnail(self):
-        if (
-            self.thumbnail_data is None
-            or self.thumbnail_data["frame_time"] not in self.frame_cache
-        ):
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-
-        jpg_bytes = self.get_jpg_bytes(
-            timestamp=False, bounding_box=False, crop=True, height=175
+    def get_thumbnail(self, ext: str):
+        img_bytes = self.get_img_bytes(
+            ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
 
-        if jpg_bytes:
-            return jpg_bytes
+        if img_bytes:
+            return img_bytes
         else:
-            ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
-            return jpg.tobytes()
+            _, img = cv2.imencode(f".{ext}", np.zeros((175, 175, 3), np.uint8))
+            return img.tobytes()
 
     def get_clean_png(self):
         if self.thumbnail_data is None:
@@ -309,8 +410,14 @@ class TrackedObject:
         else:
             return None
 
-    def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
+    def get_img_bytes(
+        self,
+        ext: str,
+        timestamp=False,
+        bounding_box=False,
+        crop=False,
+        height: int | None = None,
+        quality: int | None = None,
     ):
         if self.thumbnail_data is None:
             return None
@@ -339,7 +446,12 @@ class TrackedObject:
                 box[2],
                 box[3],
                 self.obj_data["label"],
-                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}",
+                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}"
+                + (
+                    f" {self.thumbnail_data['current_estimated_speed']:.1f}"
+                    if self.thumbnail_data["current_estimated_speed"] != 0
+                    else ""
+                ),
                 thickness=thickness,
                 color=color,
             )
@@ -390,13 +502,68 @@ class TrackedObject:
                 position=self.camera_config.timestamp_style.position,
             )
 
-        ret, jpg = cv2.imencode(
-            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        )
+        quality_params = None
+
+        if ext == "jpg":
+            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
+        elif ext == "webp":
+            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
+
+        ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
+
         if ret:
             return jpg.tobytes()
         else:
             return None
+
+    def write_snapshot_to_disk(self) -> None:
+        snapshot_config: SnapshotsConfig = self.camera_config.snapshots
+        jpg_bytes = self.get_img_bytes(
+            ext="jpg",
+            timestamp=snapshot_config.timestamp,
+            bounding_box=snapshot_config.bounding_box,
+            crop=snapshot_config.crop,
+            height=snapshot_config.height,
+            quality=snapshot_config.quality,
+        )
+        if jpg_bytes is None:
+            logger.warning(f"Unable to save snapshot for {self.obj_data['id']}.")
+        else:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, f"{self.camera_config.name}-{self.obj_data['id']}.jpg"
+                ),
+                "wb",
+            ) as j:
+                j.write(jpg_bytes)
+
+        # write clean snapshot if enabled
+        if snapshot_config.clean_copy:
+            png_bytes = self.get_clean_png()
+            if png_bytes is None:
+                logger.warning(
+                    f"Unable to save clean snapshot for {self.obj_data['id']}."
+                )
+            else:
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.png",
+                    ),
+                    "wb",
+                ) as p:
+                    p.write(png_bytes)
+
+    def write_thumbnail_to_disk(self) -> None:
+        directory = os.path.join(THUMB_DIR, self.camera_config.name)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        thumb_bytes = self.get_thumbnail("webp")
+
+        with open(os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb") as f:
+            f.write(thumb_bytes)
 
 
 def zone_filtered(obj: TrackedObject, object_config):

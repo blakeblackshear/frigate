@@ -33,7 +33,11 @@ class CameraActivityManager:
                     self.zone_active_object_counts[zone] = Counter()
                     self.all_zone_labels[zone] = set()
 
-                self.all_zone_labels[zone].update(zone_config.objects)
+                self.all_zone_labels[zone].update(
+                    zone_config.objects
+                    if zone_config.objects
+                    else camera_config.objects.track
+                )
 
     def update_activity(self, new_activity: dict[str, dict[str, any]]) -> None:
         all_objects: list[dict[str, any]] = []
@@ -103,7 +107,7 @@ class CameraActivityManager:
 
         # run through each object and check what topics need to be updated
         for label in self.config.cameras[camera].objects.track:
-            if label in self.config.model.all_attributes:
+            if label in self.config.model.non_logo_attributes:
                 continue
 
             new_count = all_objects[label]

@@ -29,6 +29,7 @@ from frigate.util.builtin import (
 )
 from frigate.util.config import (
     StreamInfoRetriever,
+    convert_area_to_pixels,
     find_config_file,
     get_relative_coordinates,
     migrate_frigate_config,
@@ -45,6 +46,7 @@ from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig
 from .camera.motion import MotionConfig
+from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
 from .camera.record import RecordConfig, RetainModeEnum
 from .camera.review import ReviewConfig
@@ -61,7 +63,6 @@ from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
-from .notification import NotificationConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
@@ -148,6 +149,13 @@ class RuntimeFilterConfig(FilterConfig):
         if mask is not None:
             config["mask"] = create_mask(frame_shape, mask)
 
+        # Convert min_area and max_area to pixels if they're percentages
+        if "min_area" in config:
+            config["min_area"] = convert_area_to_pixels(config["min_area"], frame_shape)
+
+        if "max_area" in config:
+            config["max_area"] = convert_area_to_pixels(config["max_area"], frame_shape)
+
         super().__init__(**config)
 
     def dict(self, **kwargs):
@@ -191,17 +199,18 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         )
 
 
-def verify_valid_live_stream_name(
+def verify_valid_live_stream_names(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
-    if (
-        camera_config.live.stream_name
-        not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
-    ):
-        return ValueError(
-            f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
-        )
+    for _, stream_name in camera_config.live.streams.items():
+        if (
+            stream_name
+            not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
+        ):
+            return ValueError(
+                f"No restream with name {stream_name} exists for camera {camera_config.name}."
+            )
 
 
 def verify_recording_retention(camera_config: CameraConfig) -> None:
@@ -323,7 +332,7 @@ class FrigateConfig(FrigateBaseModel):
     )
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     notifications: NotificationConfig = Field(
-        default_factory=NotificationConfig, title="Notification configuration."
+        default_factory=NotificationConfig, title="Global notification configuration."
     )
     proxy: ProxyConfig = Field(
         default_factory=ProxyConfig, title="Proxy configuration."
@@ -443,6 +452,7 @@ class FrigateConfig(FrigateBaseModel):
                 "review": ...,
                 "genai": ...,
                 "motion": ...,
+                "notifications": ...,
                 "detect": ...,
                 "ffmpeg": ...,
                 "timestamp_style": ...,
@@ -518,8 +528,17 @@ class FrigateConfig(FrigateBaseModel):
             # set config pre-value
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
             camera_config.record.enabled_in_config = camera_config.record.enabled
+            camera_config.notifications.enabled_in_config = (
+                camera_config.notifications.enabled
+            )
             camera_config.onvif.autotracking.enabled_in_config = (
                 camera_config.onvif.autotracking.enabled
+            )
+            camera_config.review.alerts.enabled_in_config = (
+                camera_config.review.alerts.enabled
+            )
+            camera_config.review.detections.enabled_in_config = (
+                camera_config.review.detections.enabled
             )
 
             # Add default filters
@@ -578,15 +597,15 @@ class FrigateConfig(FrigateBaseModel):
                     zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
-            if not camera_config.live.stream_name:
-                camera_config.live.stream_name = name
+            if not camera_config.live.streams:
+                camera_config.live.streams = {name: name}
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             self.cameras[name] = camera_config
 
             verify_config_roles(camera_config)
-            verify_valid_live_stream_name(self, camera_config)
+            verify_valid_live_stream_names(self, camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)

@@ -41,3 +41,8 @@ class MediaMjpegFeedQueryParams(BaseModel):
     mask: Optional[int] = None
     motion: Optional[int] = None
     regions: Optional[int] = None
+
+
+class MediaRecordingsSummaryQueryParams(BaseModel):
+    timezone: str = "utc"
+    cameras: Optional[str] = "all"

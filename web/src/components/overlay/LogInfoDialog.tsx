@@ -66,7 +66,14 @@ export default function LogInfoDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">Message</div>
-              <div className="text-sm">{logLine.content}</div>
+              <div className="text-sm">
+                {logLine.content.split("\n").map((line) => (
+                  <>
+                    {line}
+                    <br />
+                  </>
+                ))}
+              </div>
             </div>
             {helpfulLinks.length > 0 && (
               <div className="flex flex-col gap-1.5">

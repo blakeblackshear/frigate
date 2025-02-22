@@ -55,6 +55,9 @@ export type SearchResult = {
     ratio: number;
     type: "object" | "audio" | "manual";
     description?: string;
+    average_estimated_speed: number;
+    velocity_angle: number;
+    path_data: [number[], number][];
   };
 };
 
@@ -68,6 +71,8 @@ export type SearchFilter = {
   after?: number;
   min_score?: number;
   max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
   has_snapshot?: number;
   has_clip?: number;
   is_submitted?: number;
@@ -89,6 +94,8 @@ export type SearchQueryParams = {
   after?: string;
   min_score?: number;
   max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
   search_type?: string;
   limit?: number;
   in_progress?: number;

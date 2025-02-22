@@ -52,7 +52,9 @@ Message published for each changed tracked object. The first message is publishe
     "attributes": {
       "face": 0.64
     }, // attributes with top score that have been identified on the object at any point
-    "current_attributes": [] // detailed data about the current attributes in this frame
+    "current_attributes": [], // detailed data about the current attributes in this frame
+    "current_estimated_speed": 0.71, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -89,7 +91,9 @@ Message published for each changed tracked object. The first message is publishe
         "box": [442, 506, 534, 524],
         "score": 0.86
       }
-    ]
+    ],
+    "current_estimated_speed": 0.77, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
   }
 }
 ```
@@ -312,6 +316,22 @@ Topic with current state of the PTZ autotracker for a camera. Published values a
 
 Topic to determine if PTZ autotracker is actively tracking an object. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/review_alerts/set`
+
+Topic to turn review alerts for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_alerts/state`
+
+Topic with current state of review alerts for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_detections/set`
+
+Topic to turn review detections for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_detections/state`
+
+Topic with current state of review detections for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/birdseye/set`
 
 Topic to turn Birdseye for a camera on and off. Expected values are `ON` and `OFF`. Birdseye mode
@@ -337,3 +357,19 @@ the camera to be removed from the view._
 ### `frigate/<camera_name>/birdseye_mode/state`
 
 Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+
+### `frigate/<camera_name>/notifications/set`
+
+Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/state`
+
+Topic with current state of notifications. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/suspend`
+
+Topic to suspend notifications for a certain number of minutes. Expected value is an integer.
+
+### `frigate/<camera_name>/notifications/suspended`
+
+Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if notifications are not suspended.

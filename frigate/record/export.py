@@ -80,8 +80,8 @@ class RecordingExporter(threading.Thread):
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
-        """Convenience fun to get a simple date time from timestamp."""
-        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y/%m/%d %H:%M")
+        # return in iso format
+        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
@@ -236,6 +236,10 @@ class RecordingExporter(threading.Thread):
         if self.config.ffmpeg.apple_compatibility:
             ffmpeg_cmd += FFMPEG_HVC1_ARGS
 
+        # add metadata
+        title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
+        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+
         ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
@@ -323,6 +327,10 @@ class RecordingExporter(threading.Thread):
                 )
             ).split(" ")
 
+        # add metadata
+        title = f"Frigate Preview for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
+        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+
         return ffmpeg_cmd, playlist_lines
 
     def run(self) -> None:
@@ -333,7 +341,14 @@ class RecordingExporter(threading.Thread):
             self.user_provided_name
             or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
-        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
+        filename_start_datetime = datetime.datetime.fromtimestamp(
+            self.start_time
+        ).strftime("%Y%m%d_%H%M%S")
+        filename_end_datetime = datetime.datetime.fromtimestamp(self.end_time).strftime(
+            "%Y%m%d_%H%M%S"
+        )
+        cleaned_export_id = self.export_id.split("_")[-1]
+        video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
         thumb_path = self.save_thumbnail(self.export_id)
 
         Export.insert(

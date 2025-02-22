@@ -111,13 +111,13 @@ For Raspberry Pi 5 users with the AI Kit, installation is straightforward. Simpl
 For other installations, follow these steps for installation:
 
 1. Install the driver from the [Hailo GitHub repository](https://github.com/hailo-ai/hailort-drivers). A convenient script for Linux is available to clone the repository, build the driver, and install it.
-2. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/41c9b13d2fffce508b32dfc971fa529b49295fbd/docker/hailo8l/user_installation.sh).
+2. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/hailo8l/user_installation.sh).
 3. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
 4. Run the script with `./user_installation.sh`
 
 #### Setup
 
-To set up Frigate, follow the default installation instructions, but use a Docker image with the `-h8l` suffix, for example: `ghcr.io/blakeblackshear/frigate:stable-h8l`
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 
@@ -250,7 +250,7 @@ The official docker image tags for the current stable version are:
 The community supported docker image tags for the current stable version are:
 
 - `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
-- `stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
+- `stable-tensorrt-jp6` - Frigate build optimized for nvidia Jetson devices running Jetpack 6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
 - `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
   - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat

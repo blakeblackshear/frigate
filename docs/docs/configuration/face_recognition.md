@@ -5,11 +5,7 @@ title: Face Recognition
 
 Face recognition allows people to be assigned names and when their face is recognized Frigate will assign the person's name as a sub label. This information is included in the UI, filters, as well as in notifications.
 
-Frigate has support for FaceNet to create face embeddings, which runs locally. Embeddings are then saved to Frigate's database.
-
-## Minimum System Requirements
-
-Face recognition works by running a large AI model locally on your system. Systems without a GPU will not run Face Recognition reliably or at all.
+Frigate has support for CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally. A lightweight face landmark detection model is also used to align faces before running them through the face recognizer.
 
 ## Configuration
 
@@ -54,6 +50,6 @@ When first enabling face recognition it is important to build a foundation of st
 
 Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle. Once a person starts to be consistently recognized correctly on images that are straight-on, it is time to move on to the next step.
 
-# Step 2 - Expanding The Dataset
+### Step 2 - Expanding The Dataset
 
 Once straight-on images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.

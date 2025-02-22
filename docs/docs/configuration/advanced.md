@@ -4,7 +4,9 @@ title: Advanced Options
 sidebar_label: Advanced Options
 ---
 
-### `logger`
+### Logging
+
+#### Frigate `logger`
 
 Change the default log level for troubleshooting purposes.
 
@@ -27,6 +29,18 @@ Examples of available modules are:
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
+
+#### Go2RTC Logging
+
+See [the go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#module-log) for logging configuration
+
+```yaml
+go2rtc:
+  streams:
+    # ...
+  log:
+    exec: trace
+```
 
 ### `environment_vars`
 
@@ -162,15 +176,13 @@ listen [::]:5000 ipv6only=off;
 
 ### Custom ffmpeg build
 
-Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to /config and used.
+Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built `ffmpeg` and `ffprobe` binaries can be placed in `/config/custom-ffmpeg/bin` for Frigate to use.
 
 To do this:
 
-1. Download your ffmpeg build and uncompress to the Frigate config folder.
-2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
-3. Restart Frigate and the custom version will be used if the mapping was done correctly.
-
-NOTE: The folder that is set for the config needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then the `ffmpeg -> path` field should be `/config/custom-ffmpeg/bin`.
+1. Download your ffmpeg build and uncompress it to the `/config/custom-ffmpeg` folder. Verify that both the `ffmpeg` and `ffprobe` binaries are located in `/config/custom-ffmpeg/bin`.
+2. Update the `ffmpeg.path` in your Frigate config to `/config/custom-ffmpeg`.
+3. Restart Frigate and the custom version will be used if the steps above were done correctly.
 
 ### Custom go2rtc version
 
@@ -178,7 +190,7 @@ Frigate currently includes go2rtc v1.9.2, there may be certain cases where you w
 
 To do this:
 
-1. Download the go2rtc build to the /config folder.
+1. Download the go2rtc build to the `/config` folder.
 2. Rename the build to `go2rtc`.
 3. Give `go2rtc` execute permission.
 4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
@@ -189,16 +201,16 @@ When frigate starts up, it checks whether your config file is valid, and if it i
 
 ### Via API
 
-Frigate can accept a new configuration file as JSON at the `/config/save` endpoint. When updating the config this way, Frigate will validate the config before saving it, and return a `400` if the config is not valid.
+Frigate can accept a new configuration file as JSON at the `/api/config/save` endpoint. When updating the config this way, Frigate will validate the config before saving it, and return a `400` if the config is not valid.
 
 ```bash
-curl -X POST http://frigate_host:5000/config/save -d @config.json
+curl -X POST http://frigate_host:5000/api/config/save -d @config.json
 ```
 
 if you'd like you can use your yaml config directly by using [`yq`](https://github.com/mikefarah/yq) to convert it to json:
 
 ```bash
-yq r -j config.yml | curl -X POST http://frigate_host:5000/config/save -d @-
+yq r -j config.yml | curl -X POST http://frigate_host:5000/api/config/save -d @-
 ```
 
 ### Via Command Line
