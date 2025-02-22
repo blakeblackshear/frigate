@@ -219,7 +219,6 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
       <LPRDetailDialog
         open={showDialog}
         setOpen={setShowDialog}
-        event={event}
         config={config}
         lprImage={attempt}
         rawImage={`raw_${attempt.split("_").slice(2).join("_").replace(".jpg", "")}.jpg`}
