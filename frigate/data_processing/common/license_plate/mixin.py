@@ -13,12 +13,12 @@ from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
-from frigate.const import FRIGATE_LOCALHOST
+from frigate.const import FRIGATE_LOCALHOST, CLIPS_DIR
 from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
 
-WRITE_DEBUG_IMAGES = False
+WRITE_DEBUG_IMAGES = True
 
 
 class LicensePlateProcessingMixin:
@@ -38,6 +38,10 @@ class LicensePlateProcessingMixin:
         self.max_size = 960
         self.box_thresh = 0.8
         self.mask_thresh = 0.8
+
+        # Create debug directory
+        self.debug_dir = os.path.join(CLIPS_DIR, "lpr")
+        os.makedirs(self.debug_dir, exist_ok=True)
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -60,8 +64,9 @@ class LicensePlateProcessingMixin:
 
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
+            filename = f"license_plate_resized_{current_time}.jpg"
             cv2.imwrite(
-                f"debug/frames/license_plate_resized_{current_time}.jpg",
+                os.path.join(self.debug_dir, filename),
                 resized_image,
             )
 
@@ -171,13 +176,15 @@ class LicensePlateProcessingMixin:
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
             for i, img in enumerate(plate_images):
+                filename = f"license_plate_rotated_{current_time}_{i + 1}.jpg"
                 cv2.imwrite(
-                    f"debug/frames/license_plate_rotated_{current_time}_{i + 1}.jpg",
+                    os.path.join(self.debug_dir, filename),
                     img,
                 )
             for i, img in enumerate(rotated_images):
+                filename = f"license_plate_classified_{current_time}_{i + 1}.jpg"
                 cv2.imwrite(
-                    f"debug/frames/license_plate_classified_{current_time}_{i + 1}.jpg",
+                    os.path.join(self.debug_dir, filename),
                     img,
                 )
 
@@ -204,12 +211,13 @@ class LicensePlateProcessingMixin:
                 average_confidence = conf
 
                 # set to True to write each cropped image for debugging
-                if False:
+                if WRITE_DEBUG_IMAGES:
+                    current_time = int(datetime.datetime.now().timestamp())
                     save_image = cv2.cvtColor(
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
                     )
-                    filename = f"debug/frames/plate_{original_idx}_{plate}_{area}.jpg"
-                    cv2.imwrite(filename, save_image)
+                    filename = f"plate_{original_idx}_{plate}_{average_confidence}_{area}_{current_time}.jpg"
+                    cv2.imwrite(os.path.join(self.debug_dir, filename, save_image)
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
@@ -857,8 +865,9 @@ class LicensePlateProcessingMixin:
 
             if WRITE_DEBUG_IMAGES:
                 current_time = int(datetime.datetime.now().timestamp())
+                filename = f"car_frame_{current_time}.jpg"
                 cv2.imwrite(
-                    f"debug/frames/car_frame_{current_time}.jpg",
+                    os.path.join(self.debug_dir, filename),
                     car,
                 )
 
@@ -940,8 +949,9 @@ class LicensePlateProcessingMixin:
 
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
+            filename = f"license_plate_frame_{current_time}.jpg",
             cv2.imwrite(
-                f"debug/frames/license_plate_frame_{current_time}.jpg",
+                os.path.join(self.debug_dir, filename),
                 license_plate_frame,
             )
 
