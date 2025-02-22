@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<string>("time_desc");
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   // Set document title
   useEffect(() => {
@@ -33,65 +34,51 @@ export default function LPRDebug() {
   // Fetch LPR data
   const { data: lprData, mutate: refreshLPR } = useSWR("lpr/debug");
 
-  const lprAttempts = useMemo(() => {
-    if (!lprData) return [];
-
-    const attempts = Object.keys(lprData).filter((attempt) => attempt !== "train");
-    
-    // Create maps for scores
-    const eventScores = new Map<string, number>();
-    
-    attempts.forEach((attempt) => {
-      const parts = attempt.split("_");
-      
-      // Extract score from filename where available
-      let score = 0;
-      if (attempt.startsWith("plate_") && parts.length >= 6) {
-        score = parseFloat(parts[3]) || 0;
-      }
-      eventScores.set(attempt, score);
-    });
-
-    // Categorize attempts
-    const categorizedAttempts: Record<string, string[]> = {
+  const { categorizedAttempts, plateCounts } = useMemo(() => {
+    const attempts = Object.keys(lprData || {}).filter(attempt => attempt !== "train");
+    const plateMap = new Map<string, string[]>();
+    const categorized: Record<string, string[]> = {
       car_frame: [],
       license_plate_frame: [],
       license_plate_classified: [],
       license_plate_rotated: [],
       license_plate_resized: [],
+      other: [] // For unrecognized filenames
     };
 
-    attempts.forEach((attempt) => {
-      const parts = attempt.split("_");
+    // First pass: Categorize plates and count occurrences
+    attempts.forEach(attempt => {
+      const parts = attempt.split('_');
+      
+      // Handle plate files specially
+      if (attempt.startsWith("plate_") && parts.length >= 6) {
+        const plate = parts[2];
+        if (!plateMap.has(plate)) {
+          plateMap.set(plate, []);
+        }
+        plateMap.get(plate)?.push(attempt);
+        return;
+      }
+
+      // Regular categorization
       const type = parts[0];
-      if (categorizedAttempts[type]) {
-        categorizedAttempts[type].push(attempt);
+      if (categorized[type]) {
+        categorized[type].push(attempt);
+      } else {
+        categorized.other.push(attempt);
       }
     });
 
-    // Flatten and sort
-    return Object.values(categorizedAttempts)
-      .flat()
-      .sort((a, b) => {
-        const scoreA = eventScores.get(a) || 0;
-        const scoreB = eventScores.get(b) || 0;
-        const aTime = getTimestamp(a);
-        const bTime = getTimestamp(b);
+    // Second pass: Move plates to categorized buckets
+    plateMap.forEach((attempts, plate) => {
+      categorized[plate] = attempts; // Create tab for multi-occurrence plates
+    });
 
-        switch (sortBy) {
-          case "score_desc":
-            return scoreB - scoreA;
-          case "score_asc":
-            return scoreA - scoreB;
-          case "time_desc":
-            return bTime - aTime;
-          case "time_asc":
-            return aTime - bTime;
-          default:
-            return 0;
-        }
-      });
-  }, [lprData, sortBy]);
+    return {
+      categorizedAttempts: categorized,
+      plateCounts: Object.fromEntries(plateMap)
+    };
+  }, [lprData]);
 
   // Function to extract timestamp from filename
   const getTimestamp = (attempt: string) => {
@@ -99,6 +86,29 @@ export default function LPRDebug() {
     const timePart = parts[parts.length - 1].split(".")[0];
     return parseInt(timePart, 10) || 0;
   };
+
+  const sortedAttempts = useMemo(() => {
+    const attemptsToSort = categorizedAttempts[activeTab] || [];
+    return attemptsToSort.sort((a, b) => {
+      const scoreA = eventScores.get(a) || 0;
+      const scoreB = eventScores.get(b) || 0;
+      const aTime = getTimestamp(a);
+      const bTime = getTimestamp(b);
+
+      switch (sortBy) {
+        case "score_desc":
+          return scoreB - scoreA;
+        case "score_asc":
+          return scoreA - scoreB;
+        case "time_desc":
+          return bTime - aTime;
+        case "time_asc":
+          return aTime - bTime;
+        default:
+          return 0;
+      }
+    });
+  }, [categorizedAttempts, activeTab, sortBy]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -110,37 +120,53 @@ export default function LPRDebug() {
       <div className="relative mb-2 flex h-11 w-full items-center justify-between overflow-x-auto">
         <ScrollArea className="w-full whitespace-nowrap">
           <ScrollBar />
-          <div className="flex flex-row">
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="flex gap-2" variant={sortBy !== "time_desc" ? "select" : "default"}>
-                    <LuArrowDownUp className="size-5" />
-                    Sort
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
-                    Ascending Score
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
-                    Descending Score
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
-                    Most Recent
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy("time_asc")} className={sortBy === "time_asc" ? "bg-accent" : ""}>
-                    Oldest First
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          <div className="flex flex-row gap-2">
+            {/* Sorting Dropdown (Restored) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex gap-2" variant={sortBy !== "time_desc" ? "select" : "default"}>
+                  <LuArrowDownUp className="size-5" />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
+                  Ascending Score
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
+                  Descending Score
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
+                  Most Recent
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("time_asc")} className={sortBy === "time_asc" ? "bg-accent" : ""}>
+                  Oldest First
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Category Tabs */}
+            {Object.keys(categorizedAttempts)
+              .filter(k => categorizedAttempts[k].length > 0)
+              .map((key) => (
+                <Button 
+                  key={key} 
+                  className={cn("flex gap-2", activeTab === key && "bg-selected")}
+                  onClick={() => setActiveTab(key)}
+                >
+                  {key.replace(/_/g, ' ')}
+                  {plateCounts[key]?.length > 1 && ` (${plateCounts[key].length})`}
+                </Button>
+              ))}
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
+
+      {/* Grid Display */}
       <div className="scrollbar-container grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 overflow-y-auto">
-        {lprAttempts.map((attempt: string) => (
+        {sortedAttempts.map((attempt: string) => (
           <LPRAttempt 
             key={attempt} 
             attempt={attempt} 
