@@ -950,7 +950,7 @@ class LicensePlateProcessingMixin:
 
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
-            filename = f"license_plate_frame_{current_time}.jpg",
+            filename = f"license_plate_frame_{current_time}.jpg"
             cv2.imwrite(
                 os.path.join(self.debug_dir, filename),
                 license_plate_frame,
