@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<string>("time_desc");
-  const [selectedCameras, setSelectedCameras] = useState<string[] | undefined>();
 
   // Set document title
   useEffect(() => {
@@ -39,9 +38,8 @@ export default function LPRDebug() {
 
     const attempts = Object.keys(lprData).filter((attempt) => attempt !== "train");
     
-    // Create maps for scores and cameras
+    // Create maps for scores
     const eventScores = new Map<string, number>();
-    const eventCameras = new Map<string, string>();
     
     attempts.forEach((attempt) => {
       const parts = attempt.split("_");
@@ -52,17 +50,10 @@ export default function LPRDebug() {
         score = parseFloat(parts[3]) || 0;
       }
       eventScores.set(attempt, score);
-
-      // Extract camera info from lprData if available
-      const eventId = parts[0] === 'plate' ? parts[1] : null;
-      const event = eventId ? lprData[eventId] : null;
-      if (event?.camera) {
-        eventCameras.set(attempt, event.camera);
-      }
     });
 
     // Categorize attempts
-    const categorizedAttempts = {
+    const categorizedAttempts: Record<string, string[]> = {
       car_frame: [],
       license_plate_frame: [],
       license_plate_classified: [],
