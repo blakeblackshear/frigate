@@ -217,7 +217,7 @@ class LicensePlateProcessingMixin:
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
                     )
                     filename = f"plate_{original_idx}_{plate}_{average_confidence}_{area}_{current_time}.jpg"
-                    cv2.imwrite(os.path.join(self.debug_dir, filename, save_image)
+                    cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
