@@ -13,18 +13,20 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import useSWR from "swr";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function LPRDebug() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [sortBy, setSortBy] = useState<string>("time_desc");
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("other");
+  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   // Set document title
   useEffect(() => {
@@ -121,51 +123,65 @@ export default function LPRDebug() {
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
-      <div className="relative mb-2 flex h-11 w-full items-center justify-between overflow-x-auto">
+      <div className="relative mb-2 flex h-11 w-full items-center justify-between">
         <ScrollArea className="w-full whitespace-nowrap">
-          <ScrollBar />
-          <div className="flex flex-row gap-2">
-            {/* Sorting Dropdown (Restored) */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="flex gap-2" variant={sortBy !== "time_desc" ? "select" : "default"}>
-                  <LuArrowDownUp className="size-5" />
-                  Sort
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
-                  Ascending Score
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
-                  Descending Score
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
-                  Most Recent
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("time_asc")} className={sortBy === "time_asc" ? "bg-accent" : ""}>
-                  Oldest First
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Category Tabs */}
-            {Object.keys(categorizedAttempts)
-              .filter(k => categorizedAttempts[k].length > 0)
-              .map((key) => (
-                <Button 
-                  key={key} 
-                  className={cn("flex gap-2", activeTab === key && "bg-selected")}
-                  onClick={() => setActiveTab(key)}
-                >
-                  {key.replace(/_/g, ' ')}
-                  {plateCounts[key]?.length > 1 && ` (${plateCounts[key].length})`}
-                </Button>
-              ))}
+          <div ref={tabsRef} className="flex flex-row">
+            <ToggleGroup
+              className="*:rounded-md *:px-3 *:py-4"
+              type="single"
+              size="sm"
+              value={activeTab}
+              onValueChange={(value: string) => {
+                if (value) {
+                  setActiveTab(value);
+                }
+              }}
+            >
+              {Object.keys(categorizedAttempts)
+                .filter(k => categorizedAttempts[k].length > 0)
+                .map((key) => (
+                  <ToggleGroupItem
+                    key={key}
+                    value={key}
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${activeTab === key ? "" : "*:text-muted-foreground"}`}
+                    data-nav-item={key}
+                    aria-label={`Select ${key}`}
+                  >
+                    <div className="capitalize">
+                      {key.replace(/_/g, ' ')}
+                      {plateCounts[key]?.length > 1 && ` (${plateCounts[key].length})`}
+                    </div>
+                  </ToggleGroupItem>
+                ))}
+            </ToggleGroup>
+            <ScrollBar orientation="horizontal" className="h-0" />
           </div>
-          <ScrollBar orientation="horizontal" />
         </ScrollArea>
+        <div className="flex items-center justify-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="flex gap-2" variant={sortBy !== "time_desc" ? "select" : "default"}>
+                <LuArrowDownUp className="size-5" />
+                Sort
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setSortBy("score_desc")} className={sortBy === "score_desc" ? "bg-accent" : ""}>
+                Ascending Score
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("score_asc")} className={sortBy === "score_asc" ? "bg-accent" : ""}>
+                Descending Score
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("time_desc")} className={sortBy === "time_desc" ? "bg-accent" : ""}>
+                Most Recent
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("time_asc")} className={sortBy === "time_asc" ? "bg-accent" : ""}>
+                Oldest First
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Grid Display */}
