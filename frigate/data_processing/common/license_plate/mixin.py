@@ -13,6 +13,7 @@ import requests
 from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
+import threading
 
 from frigate.const import FRIGATE_LOCALHOST, CLIPS_DIR
 from frigate.util.image import area
@@ -44,6 +45,17 @@ class LicensePlateProcessingMixin:
         self.debug_dir = os.path.join(CLIPS_DIR, "lpr")
         os.makedirs(self.debug_dir, exist_ok=True)
 
+    def _save_debug_image_async(self, path: str, image: np.ndarray) -> None:
+        """Save debug image asynchronously using a thread."""
+        def _save():
+            try:
+                cv2.imwrite(path, image)
+                logger.debug(f"Saved debug image to: {path}")
+            except Exception as e:
+                logger.warning(f"Failed to save debug image: {e}")
+
+        threading.Thread(target=_save, daemon=True).start()
+
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Detect possible license plates in the input image by first resizing and normalizing it,
@@ -66,7 +78,7 @@ class LicensePlateProcessingMixin:
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
             filename = f"license_plate_resized_{current_time}.jpg"
-            cv2.imwrite(
+            self._save_debug_image_async(
                 os.path.join(self.debug_dir, filename),
                 resized_image,
             )
@@ -178,13 +190,13 @@ class LicensePlateProcessingMixin:
             current_time = int(datetime.datetime.now().timestamp())
             for i, img in enumerate(plate_images):
                 filename = f"license_plate_rotated_{current_time}_{i + 1}.jpg"
-                cv2.imwrite(
+                self._save_debug_image_async(
                     os.path.join(self.debug_dir, filename),
                     img,
                 )
             for i, img in enumerate(rotated_images):
                 filename = f"license_plate_classified_{current_time}_{i + 1}.jpg"
-                cv2.imwrite(
+                self._save_debug_image_async(
                     os.path.join(self.debug_dir, filename),
                     img,
                 )
@@ -218,7 +230,7 @@ class LicensePlateProcessingMixin:
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
                     )
                     filename = f"plate_{original_idx}_{plate}_{average_confidence}_{area}_{current_time}.jpg"
-                    cv2.imwrite(os.path.join(self.debug_dir, filename), save_image)
+                    self._save_debug_image_async(os.path.join(self.debug_dir, filename), save_image)
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
@@ -867,7 +879,7 @@ class LicensePlateProcessingMixin:
             if WRITE_DEBUG_IMAGES:
                 current_time = int(datetime.datetime.now().timestamp())
                 filename = f"car_frame_{current_time}.jpg"
-                cv2.imwrite(
+                self._save_debug_image_async(
                     os.path.join(self.debug_dir, filename),
                     car,
                 )
@@ -951,7 +963,7 @@ class LicensePlateProcessingMixin:
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
             filename = f"license_plate_frame_{current_time}.jpg"
-            cv2.imwrite(
+            self._save_debug_image_async(
                 os.path.join(self.debug_dir, filename),
                 license_plate_frame,
             )
