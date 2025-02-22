@@ -46,6 +46,8 @@ export default function LPRDebug() {
       other: [] // For unrecognized filenames
     };
 
+    const eventScores = new Map<string, number>(); // Declare eventScores here
+
     // First pass: Categorize plates and count occurrences
     attempts.forEach(attempt => {
       const parts = attempt.split('_');
@@ -67,6 +69,13 @@ export default function LPRDebug() {
       } else {
         categorized.other.push(attempt);
       }
+
+      // Extract score from filename where available
+      let score = 0;
+      if (attempt.startsWith("plate_") && parts.length >= 6) {
+        score = parseFloat(parts[3]) || 0; // Assuming score is at index 3
+      }
+      eventScores.set(attempt, score); // Populate eventScores
     });
 
     // Second pass: Move plates to categorized buckets
