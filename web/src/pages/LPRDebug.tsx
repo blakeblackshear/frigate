@@ -34,7 +34,7 @@ export default function LPRDebug() {
   // Fetch LPR data
   const { data: lprData, mutate: refreshLPR } = useSWR("lpr/debug");
 
-  const { categorizedAttempts, plateCounts } = useMemo(() => {
+  const { categorizedAttempts, plateCounts, eventScores } = useMemo(() => {
     const attempts = Object.keys(lprData || {}).filter(attempt => attempt !== "train");
     const plateMap = new Map<string, string[]>();
     const categorized: Record<string, string[]> = {
@@ -46,7 +46,7 @@ export default function LPRDebug() {
       other: [] // For unrecognized filenames
     };
 
-    const eventScores = new Map<string, number>(); // Declare eventScores here
+    const scores = new Map<string, number>();
 
     // First pass: Categorize plates and count occurrences
     attempts.forEach(attempt => {
@@ -59,6 +59,7 @@ export default function LPRDebug() {
           plateMap.set(plate, []);
         }
         plateMap.get(plate)?.push(attempt);
+        scores.set(attempt, parseFloat(parts[3]) || 0);
         return;
       }
 
@@ -69,13 +70,6 @@ export default function LPRDebug() {
       } else {
         categorized.other.push(attempt);
       }
-
-      // Extract score from filename where available
-      let score = 0;
-      if (attempt.startsWith("plate_") && parts.length >= 6) {
-        score = parseFloat(parts[3]) || 0; // Assuming score is at index 3
-      }
-      eventScores.set(attempt, score); // Populate eventScores
     });
 
     // Second pass: Move plates to categorized buckets
@@ -85,7 +79,8 @@ export default function LPRDebug() {
 
     return {
       categorizedAttempts: categorized,
-      plateCounts: Object.fromEntries(plateMap)
+      plateCounts: Object.fromEntries(plateMap),
+      eventScores: scores
     };
   }, [lprData]);
 
@@ -117,7 +112,7 @@ export default function LPRDebug() {
           return 0;
       }
     });
-  }, [categorizedAttempts, activeTab, sortBy]);
+  }, [categorizedAttempts, activeTab, sortBy, eventScores]);
 
   if (!config) {
     return <ActivityIndicator />;
