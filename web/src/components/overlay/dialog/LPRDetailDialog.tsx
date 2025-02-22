@@ -347,6 +347,15 @@ type PlateTabProps = {
 
 function PlateTab({ lprImage }: PlateTabProps) {
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const parts = lprImage.split("_");
+  const timePart = parts[parts.length - 1].split(".")[0];
+  const filenameTimestamp = parseInt(timePart, 10) || 0;
+
+  const timestamp = useFormattedTimestamp(
+    filenameTimestamp,
+    "%b %-d %Y, %H:%M", // Default to 24h format since we don't have config here
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   return (
     <div className="relative size-full">
@@ -396,6 +405,9 @@ function PlateTab({ lprImage }: PlateTabProps) {
                 </div>
               </div>
             </TransformComponent>
+            <div className="absolute left-2 top-2 text-xs text-muted-foreground">
+              {timestamp}
+            </div>
           </div>
         </TransformWrapper>
       </div>
