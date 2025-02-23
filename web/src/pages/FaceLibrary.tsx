@@ -186,10 +186,12 @@ export default function FaceLibrary() {
     return <ActivityIndicator />;
   }
 
-  // Calculate the current items to display based on pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentFaceImages = faceImages.slice(indexOfFirstItem, indexOfLastItem);
+  // Ensure that faceImages is correctly populated based on the selected pageToggle
+  const currentFaceImages = useMemo<string[]>(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return faceImages.slice(indexOfFirstItem, indexOfLastItem);
+  }, [currentPage, faceImages, itemsPerPage]);
 
   // Calculate total pages
   const totalPages = Math.ceil(faceImages.length / itemsPerPage);
