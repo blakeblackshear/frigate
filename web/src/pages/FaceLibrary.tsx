@@ -163,13 +163,12 @@ export default function FaceLibrary() {
             position: "top-center",
           });
           refreshFaces();
-          // Check if the current tab is empty and reset to default tab if necessary
           if (faceImages.length === 0) {
-            setPageToggle("train"); // Reset to default tab
+            setPageToggle("train");
           }
         }
       })
-      .catch((error: AxiosError) => {
+      .catch((error: AxiosError<{ message: string }>) => {
         if (error.response?.data?.message) {
           toast.error(`Failed to delete: ${error.response.data.message}`, {
             position: "top-center",

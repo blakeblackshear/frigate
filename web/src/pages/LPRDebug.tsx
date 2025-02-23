@@ -139,7 +139,7 @@ export default function LPRDebug() {
 
   // Move handleDeleteAll below the currentItems declaration
   const handleDeleteAll = useCallback(() => {
-    const attemptsToDelete = currentItems; // Only delete current page items
+    const attemptsToDelete = currentItems;
     axios
       .post(`/lpr/debug/delete`, { ids: attemptsToDelete })
       .then((resp: AxiosResponse) => {
@@ -154,7 +154,7 @@ export default function LPRDebug() {
           }
         }
       })
-      .catch((error: AxiosError) => {
+      .catch((error: AxiosError<{ message: string }>) => {
         if (error.response?.data?.message) {
           toast.error(`Failed to delete: ${error.response.data.message}`, {
             position: "top-center",
