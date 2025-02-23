@@ -71,6 +71,8 @@ import {
 } from "@/components/ui/popover";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { FaPencilAlt } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
 
 const SEARCH_TABS = [
   "details",
@@ -288,6 +290,8 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+  const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
+  const [newSubLabel, setNewSubLabel] = useState(search?.sub_label || "");
 
   const handleDescriptionFocus = useCallback(() => {
     setInputFocused(true);
@@ -430,6 +434,58 @@ function ObjectDetailsTab({
     [search, config],
   );
 
+  const updateSubLabel = useCallback(async () => {
+    if (!search) return;
+
+    try {
+      const response = await axios.post(
+        `${apiHost}api/events/${search.id}/sub_label`,
+        {
+          camera: search.camera,
+          subLabel: newSubLabel,
+          subLabelScore: search.data?.sub_label_score || 0.5, // Default score if none exists
+        },
+      );
+
+      if (response.status === 200) {
+        toast.success("Successfully updated sub label.", {
+          position: "top-center",
+        });
+
+        // Update the search object optimistically
+        mutate(
+          (key) =>
+            typeof key === "string" &&
+            (key.includes("events") ||
+              key.includes("events/search") ||
+              key.includes("events/explore")),
+          (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+            if (!currentData) return currentData;
+            return currentData
+              .flat()
+              .map((event) =>
+                event.id === search.id
+                  ? { ...event, sub_label: newSubLabel }
+                  : event,
+              );
+          },
+          {
+            optimisticData: true,
+            rollbackOnError: true,
+            revalidate: false,
+          },
+        );
+
+        setSearch({ ...search, sub_label: newSubLabel });
+        setIsSubLabelDialogOpen(false);
+      }
+    } catch (error) {
+      toast.error("Failed to update sub label.", {
+        position: "top-center",
+      });
+    }
+  }, [search, newSubLabel, apiHost, mutate, setSearch]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -440,6 +496,22 @@ function ObjectDetailsTab({
               {getIconForLabel(search.label, "size-4 text-primary")}
               {search.label}
               {search.sub_label && ` (${search.sub_label})`}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <FaPencilAlt
+                      className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                      onClick={() => {
+                        setNewSubLabel(search.sub_label || "");
+                        setIsSubLabelDialogOpen(true);
+                      }}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Edit sub label</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -616,6 +688,35 @@ function ObjectDetailsTab({
               Save
             </Button>
           )}
+          <Dialog
+            open={isSubLabelDialogOpen}
+            onOpenChange={setIsSubLabelDialogOpen}
+          >
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Edit Sub Label</DialogTitle>
+                <DialogDescription>
+                  Enter a new sub label for this{" "}
+                  {search.label ?? "tracked object"}.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Input
+                  value={newSubLabel}
+                  onChange={(e) => setNewSubLabel(e.target.value)}
+                  placeholder="Enter sub label"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button onClick={() => setIsSubLabelDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="select" onClick={updateSubLabel}>
+                  Save
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
