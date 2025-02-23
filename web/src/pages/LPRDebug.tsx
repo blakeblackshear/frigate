@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import useSWR from "swr";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { LuArrowDownUp, LuTrash2, LuArrowLeft, LuArrowRight } from "react-icons/lu";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -154,7 +154,7 @@ export default function LPRDebug() {
           }
         }
       })
-      .catch((error: AxiosResponse) => {
+      .catch((error: AxiosError) => {
         if (error.response?.data?.message) {
           toast.error(`Failed to delete: ${error.response.data.message}`, {
             position: "top-center",

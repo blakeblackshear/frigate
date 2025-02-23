@@ -22,7 +22,7 @@ import {
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2, LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import { toast } from "sonner";
@@ -169,7 +169,7 @@ export default function FaceLibrary() {
           }
         }
       })
-      .catch((error: AxiosResponse) => {
+      .catch((error: AxiosError) => {
         if (error.response?.data?.message) {
           toast.error(`Failed to delete: ${error.response.data.message}`, {
             position: "top-center",
