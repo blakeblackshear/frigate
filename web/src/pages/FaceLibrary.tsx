@@ -64,6 +64,25 @@ export default function FaceLibrary() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 100; // Define items per page
 
+  // Calculate total pages based on active content
+  const totalPages = useMemo(() => {
+    const totalItems = pageToggle === "train" ? trainImages.length : faceImages.length;
+    return Math.ceil(totalItems / itemsPerPage);
+  }, [pageToggle, trainImages, faceImages, itemsPerPage]);
+
+  // Get current items for both grids
+  const currentFaceImages = useMemo<string[]>(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return faceImages.slice(indexOfFirstItem, indexOfLastItem);
+  }, [currentPage, faceImages, itemsPerPage]);
+
+  const currentTrainImages = useMemo<string[]>(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return trainImages.slice(indexOfFirstItem, indexOfLastItem);
+  }, [currentPage, trainImages, itemsPerPage]);
+
   useEffect(() => {
     if (!pageToggle) {
       if (trainImages.length > 0) {
@@ -186,16 +205,6 @@ export default function FaceLibrary() {
     return <ActivityIndicator />;
   }
 
-  // Ensure that faceImages is correctly populated based on the selected pageToggle
-  const currentFaceImages = useMemo<string[]>(() => {
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return faceImages.slice(indexOfFirstItem, indexOfLastItem);
-  }, [currentPage, faceImages, itemsPerPage]);
-
-  // Calculate total pages
-  const totalPages = Math.ceil(faceImages.length / itemsPerPage);
-
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
@@ -279,7 +288,7 @@ export default function FaceLibrary() {
         (pageToggle == "train" ? (
           <TrainingGrid
             config={config}
-            attemptImages={trainImages}
+            attemptImages={currentTrainImages}
             faceNames={faces}
             onRefresh={refreshFaces}
           />
