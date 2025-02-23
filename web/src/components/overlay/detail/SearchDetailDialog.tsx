@@ -72,7 +72,7 @@ import {
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 
 const SEARCH_TABS = [
   "details",
@@ -291,7 +291,6 @@ function ObjectDetailsTab({
 
   const [desc, setDesc] = useState(search?.data.description);
   const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
-  const [newSubLabel, setNewSubLabel] = useState(search?.sub_label || "");
 
   const handleDescriptionFocus = useCallback(() => {
     setInputFocused(true);
@@ -434,57 +433,73 @@ function ObjectDetailsTab({
     [search, config],
   );
 
-  const updateSubLabel = useCallback(async () => {
-    if (!search) return;
+  const handleSubLabelSave = useCallback(
+    (text: string) => {
+      if (!search) return;
 
-    try {
-      const response = await axios.post(
-        `${apiHost}api/events/${search.id}/sub_label`,
-        {
+      // set score to 1.0 if we're manually entering a sub label
+      const subLabelScore =
+        text === "" ? undefined : search.data?.sub_label_score || 1.0;
+
+      axios
+        .post(`${apiHost}api/events/${search.id}/sub_label`, {
           camera: search.camera,
-          subLabel: newSubLabel,
-          subLabelScore: search.data?.sub_label_score || 0.5, // Default score if none exists
-        },
-      );
+          subLabel: text,
+          subLabelScore: subLabelScore,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Successfully updated sub-label", {
+              position: "top-center",
+            });
 
-      if (response.status === 200) {
-        toast.success("Successfully updated sub label.", {
-          position: "top-center",
+            mutate(
+              (key) =>
+                typeof key === "string" &&
+                (key.includes("events") ||
+                  key.includes("events/search") ||
+                  key.includes("events/explore")),
+              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+                if (!currentData) return currentData;
+                return currentData.flat().map((event) =>
+                  event.id === search.id
+                    ? {
+                        ...event,
+                        sub_label: text,
+                        data: {
+                          ...event.data,
+                          sub_label_score: subLabelScore,
+                        },
+                      }
+                    : event,
+                );
+              },
+              {
+                optimisticData: true,
+                rollbackOnError: true,
+                revalidate: false,
+              },
+            );
+
+            setSearch({
+              ...search,
+              sub_label: text,
+              data: {
+                ...search.data,
+                sub_label_score: subLabelScore,
+              },
+            });
+            setIsSubLabelDialogOpen(false);
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to update sub-label", {
+            position: "top-center",
+          });
         });
-
-        // Update the search object optimistically
-        mutate(
-          (key) =>
-            typeof key === "string" &&
-            (key.includes("events") ||
-              key.includes("events/search") ||
-              key.includes("events/explore")),
-          (currentData: SearchResult[][] | SearchResult[] | undefined) => {
-            if (!currentData) return currentData;
-            return currentData
-              .flat()
-              .map((event) =>
-                event.id === search.id
-                  ? { ...event, sub_label: newSubLabel }
-                  : event,
-              );
-          },
-          {
-            optimisticData: true,
-            rollbackOnError: true,
-            revalidate: false,
-          },
-        );
-
-        setSearch({ ...search, sub_label: newSubLabel });
-        setIsSubLabelDialogOpen(false);
-      }
-    } catch (error) {
-      toast.error("Failed to update sub label.", {
-        position: "top-center",
-      });
-    }
-  }, [search, newSubLabel, apiHost, mutate, setSearch]);
+    },
+    [search, apiHost, mutate, setSearch],
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -502,7 +517,6 @@ function ObjectDetailsTab({
                     <FaPencilAlt
                       className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
                       onClick={() => {
-                        setNewSubLabel(search.sub_label || "");
                         setIsSubLabelDialogOpen(true);
                       }}
                     />
@@ -688,35 +702,15 @@ function ObjectDetailsTab({
               Save
             </Button>
           )}
-          <Dialog
+          <TextEntryDialog
             open={isSubLabelDialogOpen}
-            onOpenChange={setIsSubLabelDialogOpen}
-          >
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit Sub Label</DialogTitle>
-                <DialogDescription>
-                  Enter a new sub label for this{" "}
-                  {search.label ?? "tracked object"}.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Input
-                  value={newSubLabel}
-                  onChange={(e) => setNewSubLabel(e.target.value)}
-                  placeholder="Enter sub label"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button onClick={() => setIsSubLabelDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button variant="select" onClick={updateSubLabel}>
-                  Save
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+            setOpen={setIsSubLabelDialogOpen}
+            title="Edit Sub Label"
+            description={`Enter a new sub label for this ${search.label ?? "tracked object"}.`}
+            onSave={handleSubLabelSave}
+            defaultValue={search?.sub_label || ""}
+            allowEmpty={true}
+          />
         </div>
       </div>
     </div>
