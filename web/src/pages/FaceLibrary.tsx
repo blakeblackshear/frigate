@@ -22,9 +22,9 @@ import {
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
+import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2, LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -157,15 +157,19 @@ export default function FaceLibrary() {
     
     axios
       .post(`/faces/${pageToggle}/delete`, { ids: imagesToDelete })
-      .then((resp) => {
+      .then((resp: AxiosResponse) => {
         if (resp.status === 200) {
-          toast.success(`Successfully deleted all images in ${pageToggle}.`, {
+          toast.success(`Successfully deleted all images on this page.`, {
             position: "top-center",
           });
           refreshFaces();
+          // Check if the current tab is empty and reset to default tab if necessary
+          if (faceImages.length === 0) {
+            setPageToggle("train"); // Reset to default tab
+          }
         }
       })
-      .catch((error) => {
+      .catch((error: AxiosResponse) => {
         if (error.response?.data?.message) {
           toast.error(`Failed to delete: ${error.response.data.message}`, {
             position: "top-center",
@@ -286,20 +290,26 @@ export default function FaceLibrary() {
         ))}
 
       {/* Pagination Controls */}
-      <div className="flex justify-between mt-4">
-        <button 
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>Page {currentPage} of {totalPages}</span>
-        <button 
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex items-center">
+          <button 
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+            disabled={currentPage === 1}
+            className="p-2"
+          >
+            <LuArrowLeft className="text-gray-600" />
+          </button>
+          <button 
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+            disabled={currentPage === totalPages}
+            className="p-2"
+          >
+            <LuArrowRight className="text-gray-600" />
+          </button>
+        </div>
       </div>
     </div>
   );

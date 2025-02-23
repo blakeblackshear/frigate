@@ -16,8 +16,8 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import useSWR from "swr";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { LuArrowDownUp, LuTrash2 } from "react-icons/lu";
-import axios from "axios";
+import { LuArrowDownUp, LuTrash2, LuArrowLeft, LuArrowRight } from "react-icons/lu";
+import axios, { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -47,7 +47,8 @@ export default function LPRDebug() {
       license_plate_classified: [],
       license_plate_rotated: [],
       license_plate_resized: [],
-      other: [] // For unrecognized filenames
+      lpr_post: [],
+      other: []
     };
 
     const scores = new Map<string, number>();
@@ -79,6 +80,8 @@ export default function LPRDebug() {
         categorized_type = 'license_plate_rotated';
       } else if (attempt.startsWith('license_plate_resized')) {
         categorized_type = 'license_plate_resized';
+      } else if (attempt.startsWith('lpr_post')) {
+        categorized_type = 'lpr_post';
       }
       
       categorized[categorized_type].push(attempt);
@@ -102,31 +105,6 @@ export default function LPRDebug() {
     const timePart = parts[parts.length - 1].split(".")[0];
     return parseInt(timePart, 10) || 0;
   };
-
-  const handleDeleteAll = useCallback(() => {
-    const attemptsToDelete = categorizedAttempts[activeTab] || [];
-    axios
-      .post(`/lpr/debug/delete`, { ids: attemptsToDelete })
-      .then((resp) => {
-        if (resp.status === 200) {
-          toast.success(`Successfully deleted all images in ${activeTab}.`, {
-            position: "top-center",
-          });
-          refreshLPR();
-        }
-      })
-      .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(`Failed to delete: ${error.response.data.message}`, {
-            position: "top-center",
-          });
-        } else {
-          toast.error(`Failed to delete: ${error.message}`, {
-            position: "top-center",
-          });
-        }
-      });
-  }, [activeTab, refreshLPR, categorizedAttempts]);
 
   const sortedAttempts = useMemo(() => {
     const attemptsToSort = categorizedAttempts[activeTab] || [];
@@ -159,6 +137,36 @@ export default function LPRDebug() {
   // Calculate total pages
   const totalPages = Math.ceil(sortedAttempts.length / itemsPerPage);
 
+  // Move handleDeleteAll below the currentItems declaration
+  const handleDeleteAll = useCallback(() => {
+    const attemptsToDelete = currentItems; // Only delete current page items
+    axios
+      .post(`/lpr/debug/delete`, { ids: attemptsToDelete })
+      .then((resp: AxiosResponse) => {
+        if (resp.status === 200) {
+          toast.success(`Successfully deleted all images on this page.`, {
+            position: "top-center",
+          });
+          refreshLPR();
+          // Check if the current tab is empty and reset to default tab if necessary
+          if (categorizedAttempts[activeTab].length === 0) {
+            setActiveTab("other"); // Reset to default tab
+          }
+        }
+      })
+      .catch((error: AxiosResponse) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to delete: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to delete: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [activeTab, refreshLPR, categorizedAttempts, currentItems]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -167,9 +175,6 @@ export default function LPRDebug() {
     <div className="flex size-full flex-col p-2">
       <Toaster />
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
-        <Button onClick={handleDeleteAll} variant="destructive">
-          Delete All
-        </Button>
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -230,6 +235,13 @@ export default function LPRDebug() {
         </div>
       </div>
 
+      {/* Move Delete All Button below the tabs */}
+      <div className="mb-2">
+        <Button onClick={handleDeleteAll} variant="destructive">
+          Delete All
+        </Button>
+      </div>
+
       {/* Grid Display */}
       <div className="scrollbar-container grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 overflow-y-auto">
         {currentItems.map((attempt: string) => (
@@ -243,20 +255,26 @@ export default function LPRDebug() {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-between mt-4">
-        <button 
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>Page {currentPage} of {totalPages}</span>
-        <button 
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        <div className="flex items-center">
+          <button 
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+            disabled={currentPage === 1}
+            className="p-2"
+          >
+            <LuArrowLeft className="text-gray-600" />
+          </button>
+          <button 
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+            disabled={currentPage === totalPages}
+            className="p-2"
+          >
+            <LuArrowRight className="text-gray-600" />
+          </button>
+        </div>
       </div>
     </div>
   );
