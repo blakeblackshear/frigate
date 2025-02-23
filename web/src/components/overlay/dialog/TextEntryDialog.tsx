@@ -43,6 +43,8 @@ export default function TextEntryDialog({
   });
   const fileRef = form.register("text");
 
+  // upload handler
+
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
       if (!allowEmpty && !data["text"]) {
