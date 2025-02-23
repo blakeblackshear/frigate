@@ -449,7 +449,7 @@ function ObjectDetailsTab({
         })
         .then((response) => {
           if (response.status === 200) {
-            toast.success("Successfully updated sub-label", {
+            toast.success("Successfully updated sub label.", {
               position: "top-center",
             });
 
@@ -493,7 +493,7 @@ function ObjectDetailsTab({
           }
         })
         .catch(() => {
-          toast.error("Failed to update sub-label", {
+          toast.error("Failed to update sub label.", {
             position: "top-center",
           });
         });
