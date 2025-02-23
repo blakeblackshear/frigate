@@ -60,6 +60,10 @@ export default function FaceLibrary() {
     [faceData],
   );
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 50; // Define items per page
+
   useEffect(() => {
     if (!pageToggle) {
       if (trainImages.length > 0) {
@@ -147,9 +151,44 @@ export default function FaceLibrary() {
     [refreshFaces],
   );
 
+  // Add handleDeleteAll callback
+  const handleDeleteAll = useCallback(() => {
+    const imagesToDelete = pageToggle === "train" ? trainImages : faceImages;
+    
+    axios
+      .post(`/faces/${pageToggle}/delete`, { ids: imagesToDelete })
+      .then((resp) => {
+        if (resp.status === 200) {
+          toast.success(`Successfully deleted all images in ${pageToggle}.`, {
+            position: "top-center",
+          });
+          refreshFaces();
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to delete: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to delete: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [pageToggle, trainImages, faceImages, refreshFaces]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
+
+  // Calculate the current items to display based on pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentFaceImages = faceImages.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(faceImages.length / itemsPerPage);
 
   return (
     <div className="flex size-full flex-col p-2">
@@ -172,6 +211,9 @@ export default function FaceLibrary() {
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
+        <Button onClick={handleDeleteAll} variant="destructive">
+          Delete All
+        </Button>
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -237,11 +279,28 @@ export default function FaceLibrary() {
           />
         ) : (
           <FaceGrid
-            faceImages={faceImages}
+            faceImages={currentFaceImages}
             pageToggle={pageToggle}
             onRefresh={refreshFaces}
           />
         ))}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between mt-4">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
