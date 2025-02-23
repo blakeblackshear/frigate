@@ -84,8 +84,8 @@ You can calculate the **minimum** shm size for each camera with the following fo
 $ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 20 + 270480) / 1048576))'
 
 # Example for 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576)) + 40'
-46.63MB
+$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576 + 40))'
+66.63MB
 
 # Example for eight cameras detecting at 1280x720, including logs
 $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 20 + 270480) / 1048576) * 8 + 40))'
