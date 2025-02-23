@@ -62,7 +62,7 @@ export default function FaceLibrary() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 50; // Define items per page
+  const itemsPerPage = 100; // Define items per page
 
   useEffect(() => {
     if (!pageToggle) {

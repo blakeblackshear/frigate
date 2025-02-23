@@ -28,7 +28,7 @@ export default function LPRDebug() {
   const [activeTab, setActiveTab] = useState<string>("other");
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 50;
+  const itemsPerPage = 100;
 
   // Set document title
   useEffect(() => {
