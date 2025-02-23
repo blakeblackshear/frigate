@@ -46,7 +46,7 @@ function useValue(): useValueReturn {
 
     const cameraActivity: { [key: string]: object } = JSON.parse(activityValue);
 
-    if (!cameraActivity) {
+    if (Object.keys(cameraActivity).length === 0) {
       return;
     }
 
