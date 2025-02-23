@@ -173,7 +173,7 @@ export default function FaceLibrary() {
 
   // Add handleDeleteAll callback
   const handleDeleteAll = useCallback(() => {
-    const imagesToDelete = pageToggle === "train" ? trainImages : faceImages;
+    const imagesToDelete = pageToggle === "train" ? currentTrainImages : currentFaceImages;
     
     axios
       .post(`/faces/${pageToggle}/delete`, { ids: imagesToDelete })
@@ -199,7 +199,7 @@ export default function FaceLibrary() {
           });
         }
       });
-  }, [pageToggle, trainImages, faceImages, refreshFaces]);
+  }, [pageToggle, currentTrainImages, currentFaceImages, refreshFaces, faceImages]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -226,9 +226,6 @@ export default function FaceLibrary() {
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
-        <Button onClick={handleDeleteAll} variant="destructive">
-          Delete All
-        </Button>
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -284,6 +281,14 @@ export default function FaceLibrary() {
           </Button>
         </div>
       </div>
+
+      {/* Move Delete All Button below the tabs */}
+      <div className="mb-2">
+        <Button onClick={handleDeleteAll} variant="destructive">
+          Delete All
+        </Button>
+      </div>
+
       {pageToggle &&
         (pageToggle == "train" ? (
           <TrainingGrid

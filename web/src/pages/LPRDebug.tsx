@@ -196,8 +196,26 @@ export default function LPRDebug() {
                 }
               }}
             >
+              {/* Show Other tab first if it has items */}
+              {categorizedAttempts['other']?.length > 0 && (
+                <>
+                  <ToggleGroupItem
+                    value="other"
+                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${activeTab === "other" ? "" : "*:text-muted-foreground"}`}
+                    data-nav-item="other"
+                    aria-label="Select other"
+                  >
+                    <div className="capitalize">
+                      Other ({categorizedAttempts['other'].length})
+                    </div>
+                  </ToggleGroupItem>
+                  <div>|</div>
+                </>
+              )}
+
+              {/* Show remaining tabs */}
               {Object.keys(categorizedAttempts)
-                .filter(k => categorizedAttempts[k].length > 0)
+                .filter(k => k !== 'other' && categorizedAttempts[k].length > 0)
                 .map((key) => (
                   <ToggleGroupItem
                     key={key}
