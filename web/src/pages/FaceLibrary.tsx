@@ -74,9 +74,10 @@ export default function FaceLibrary() {
     } else if (pageToggle == "train" && trainImages.length == 0) {
       setPageToggle(faces[0]);
     }
-    // we need to listen on the value of the faces list
+    // Reset current page when switching tabs
+    setCurrentPage(1); // Reset to page 1 when changing tabs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trainImages, faces]);
+  }, [trainImages, faces, pageToggle]);
 
   // upload
 
@@ -289,26 +290,24 @@ export default function FaceLibrary() {
         ))}
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between mt-4">
-        <span className="text-sm text-gray-700">
+      <div className="flex items-center justify-center mt-4">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+          disabled={currentPage === 1}
+          className={`p-2 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <LuArrowLeft className="text-gray-600" />
+        </button>
+        <span className="text-sm text-gray-700 mx-2">
           Page {currentPage} of {totalPages}
         </span>
-        <div className="flex items-center">
-          <button 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-            disabled={currentPage === 1}
-            className="p-2"
-          >
-            <LuArrowLeft className="text-gray-600" />
-          </button>
-          <button 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-            disabled={currentPage === totalPages}
-            className="p-2"
-          >
-            <LuArrowRight className="text-gray-600" />
-          </button>
-        </div>
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+          disabled={currentPage === totalPages}
+          className={`p-2 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <LuArrowRight className="text-gray-600" />
+        </button>
       </div>
     </div>
   );

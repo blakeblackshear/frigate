@@ -147,11 +147,14 @@ export default function LPRDebug() {
           toast.success(`Successfully deleted all images on this page.`, {
             position: "top-center",
           });
-          refreshLPR();
-          // Check if the current tab is empty and reset to default tab if necessary
-          if (categorizedAttempts[activeTab].length === 0) {
-            setActiveTab("other"); // Reset to default tab
-          }
+          refreshLPR(); // Refresh the data
+
+          // Use a callback to check the categorized attempts after refresh
+          setTimeout(() => {
+            if (categorizedAttempts[activeTab].length === 0) {
+              setActiveTab("other"); // Reset to default tab
+            }
+          }, 0);
         }
       })
       .catch((error: AxiosError<{ message: string }>) => {
@@ -166,6 +169,11 @@ export default function LPRDebug() {
         }
       });
   }, [activeTab, refreshLPR, categorizedAttempts, currentItems]);
+
+  // Reset current page when switching tabs
+  useEffect(() => {
+    setCurrentPage(1); // Reset to page 1 when changing tabs
+  }, [activeTab]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -255,26 +263,24 @@ export default function LPRDebug() {
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between mt-4">
-        <span className="text-sm text-gray-700">
+      <div className="flex items-center justify-center mt-4">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+          disabled={currentPage === 1}
+          className={`p-2 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <LuArrowLeft className="text-gray-600" />
+        </button>
+        <span className="text-sm text-gray-700 mx-2">
           Page {currentPage} of {totalPages}
         </span>
-        <div className="flex items-center">
-          <button 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-            disabled={currentPage === 1}
-            className="p-2"
-          >
-            <LuArrowLeft className="text-gray-600" />
-          </button>
-          <button 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-            disabled={currentPage === totalPages}
-            className="p-2"
-          >
-            <LuArrowRight className="text-gray-600" />
-          </button>
-        </div>
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+          disabled={currentPage === totalPages}
+          className={`p-2 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <LuArrowRight className="text-gray-600" />
+        </button>
       </div>
     </div>
   );
