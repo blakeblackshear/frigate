@@ -27,6 +27,8 @@ export default function LPRDebug() {
   const [sortBy, setSortBy] = useState<string>("time_desc");
   const [activeTab, setActiveTab] = useState<string>("other");
   const tabsRef = useRef<HTMLDivElement | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 50;
 
   // Set document title
   useEffect(() => {
@@ -93,6 +95,31 @@ export default function LPRDebug() {
     return parseInt(timePart, 10) || 0;
   };
 
+  const handleDeleteAll = useCallback(() => {
+    const attemptsToDelete = categorizedAttempts[activeTab] || [];
+    axios
+      .post(`/lpr/debug/delete`, { ids: attemptsToDelete })
+      .then((resp) => {
+        if (resp.status === 200) {
+          toast.success(`Successfully deleted all images in ${activeTab}.`, {
+            position: "top-center",
+          });
+          refreshLPR();
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(`Failed to delete: ${error.response.data.message}`, {
+            position: "top-center",
+          });
+        } else {
+          toast.error(`Failed to delete: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [activeTab, refreshLPR, categorizedAttempts]);
+
   const sortedAttempts = useMemo(() => {
     const attemptsToSort = categorizedAttempts[activeTab] || [];
     return attemptsToSort.sort((a, b) => {
@@ -116,6 +143,14 @@ export default function LPRDebug() {
     });
   }, [categorizedAttempts, activeTab, sortBy, eventScores]);
 
+  // Calculate the current items to display based on pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedAttempts.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(sortedAttempts.length / itemsPerPage);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -124,6 +159,9 @@ export default function LPRDebug() {
     <div className="flex size-full flex-col p-2">
       <Toaster />
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
+        <Button onClick={handleDeleteAll} variant="destructive">
+          Delete All
+        </Button>
         <ScrollArea className="w-full whitespace-nowrap">
           <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
@@ -186,7 +224,7 @@ export default function LPRDebug() {
 
       {/* Grid Display */}
       <div className="scrollbar-container grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 overflow-y-auto">
-        {sortedAttempts.map((attempt: string) => (
+        {currentItems.map((attempt: string) => (
           <LPRAttempt 
             key={attempt} 
             attempt={attempt} 
@@ -194,6 +232,23 @@ export default function LPRDebug() {
             onRefresh={refreshLPR}
           />
         ))}
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between mt-4">
+        <button 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
