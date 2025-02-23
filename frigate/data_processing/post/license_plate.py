@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import os
 
 import cv2
 import numpy as np
@@ -19,6 +20,7 @@ from frigate.data_processing.common.license_plate.model import (
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.models import Recordings
 from frigate.util.image import get_image_from_recording
+from frigate.const import CLIPS_DIR
 
 from ..types import DataProcessorMetrics
 from .api import PostProcessorApi
@@ -38,6 +40,8 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.model_runner = model_runner
         self.lpr_config = config.lpr
         self.config = config
+        self.debug_dir = os.path.join(CLIPS_DIR, "lpr")  # Use same debug directory as mixin
+        os.makedirs(self.debug_dir, exist_ok=True)
         super().__init__(config, metrics, model_runner)
 
     def __update_metrics(self, duration: float) -> None:
@@ -128,7 +132,11 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
             return
 
         if WRITE_DEBUG_IMAGES:
-            cv2.imwrite(f"debug/frames/lpr_post_{start}.jpg", image)
+            filename = f"lpr_post_{start}.jpg"
+            self._save_debug_image_async(
+                os.path.join(self.debug_dir, filename),
+                image
+            )
 
         # convert to yuv for processing
         frame = cv2.cvtColor(image, cv2.COLOR_BGR2YUV_I420)
