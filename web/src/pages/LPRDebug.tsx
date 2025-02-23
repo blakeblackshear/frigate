@@ -67,13 +67,21 @@ export default function LPRDebug() {
         return;
       }
 
-      // Regular categorization
-      const type = parts[0];
-      if (categorized[type]) {
-        categorized[type].push(attempt);
-      } else {
-        categorized.other.push(attempt);
+      // Regular categorization based on prefixes
+      let categorized_type = 'other';
+      if (attempt.startsWith('car_frame')) {
+        categorized_type = 'car_frame';
+      } else if (attempt.startsWith('license_plate_frame')) {
+        categorized_type = 'license_plate_frame';
+      } else if (attempt.startsWith('license_plate_classified')) {
+        categorized_type = 'license_plate_classified';
+      } else if (attempt.startsWith('license_plate_rotated')) {
+        categorized_type = 'license_plate_rotated';
+      } else if (attempt.startsWith('license_plate_resized')) {
+        categorized_type = 'license_plate_resized';
       }
+      
+      categorized[categorized_type].push(attempt);
     });
 
     // Second pass: Move plates to categorized buckets
