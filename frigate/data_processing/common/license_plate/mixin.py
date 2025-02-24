@@ -876,7 +876,7 @@ class LicensePlateProcessingMixin:
             # double the size of the car for better box detection
             car = cv2.resize(car, (int(2 * car.shape[1]), int(2 * car.shape[0])))
 
-            if WRITE_DEBUG_IMAGES:
+            if False:
                 current_time = int(datetime.datetime.now().timestamp())
                 filename = f"car_frame_{current_time}.jpg"
                 self._save_debug_image_async(
