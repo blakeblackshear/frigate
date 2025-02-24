@@ -417,7 +417,7 @@ When using docker compose:
 ```yaml
 services:
   frigate:
----
+
 environment:
   HSA_OVERRIDE_GFX_VERSION: "9.0.0"
 ```
