@@ -9,7 +9,11 @@ from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
 )
-from frigate.util.model import get_ort_providers, post_process_yolov9
+from frigate.util.model import (
+    get_ort_providers,
+    post_process_dfine,
+    post_process_yolov9,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +45,7 @@ class ONNXDetector(DetectionApi):
         providers, options = get_ort_providers(
             detector_config.device == "CPU", detector_config.device
         )
+
         self.model = ort.InferenceSession(
             path, providers=providers, provider_options=options
         )
@@ -55,6 +60,16 @@ class ONNXDetector(DetectionApi):
         logger.info(f"ONNX: {path} loaded")
 
     def detect_raw(self, tensor_input: np.ndarray):
+        if self.onnx_model_type == ModelTypeEnum.dfine:
+            tensor_output = self.model.run(
+                None,
+                {
+                    "images": tensor_input,
+                    "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64),
+                },
+            )
+            return post_process_dfine(tensor_output, self.w, self.h)
+
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
 

@@ -991,6 +991,10 @@ def set_sub_label(
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
+    if new_sub_label == "":
+        new_sub_label = None
+        new_score = None
+
     if tracked_obj:
         tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
 
@@ -1001,21 +1005,19 @@ def set_sub_label(
 
     if event:
         event.sub_label = new_sub_label
-
-        if new_score:
-            data = event.data
+        data = event.data
+        if new_sub_label is None:
+            data["sub_label_score"] = None
+        elif new_score is not None:
             data["sub_label_score"] = new_score
-            event.data = data
-
+        event.data = data
         event.save()
 
     return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Event " + event_id + " sub label set to " + new_sub_label,
-            }
-        ),
+        content={
+            "success": True,
+            "message": f"Event {event_id} sub label set to {new_sub_label if new_sub_label is not None else 'None'}",
+        },
         status_code=200,
     )
 
