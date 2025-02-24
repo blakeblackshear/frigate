@@ -13,6 +13,10 @@ Please use your own knowledge to assess and vet them before you install anything
 
 :::
 
+## [Advanced Camera Card (formerly known as Frigate Card](https://card.camera/#/README)
+
+The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant dashboard card with deep Frigate integration.
+
 ## [Double Take](https://github.com/skrashevich/double-take)
 
 [Double Take](https://github.com/skrashevich/double-take) provides an unified UI and API for processing and training images for facial recognition.
