@@ -14,6 +14,8 @@ from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import deque
 
 from frigate.const import FRIGATE_LOCALHOST, CLIPS_DIR
 from frigate.util.image import area
@@ -44,6 +46,12 @@ class LicensePlateProcessingMixin:
         # Create debug directory
         self.debug_dir = os.path.join(CLIPS_DIR, "lpr")
         os.makedirs(self.debug_dir, exist_ok=True)
+
+        # Add these new instance variables
+        self.executor = ThreadPoolExecutor(max_workers=4)  # Adjust based on CPU cores
+        self.pending_tasks = deque(maxlen=100)  # Prevent memory overflow
+        self.processing_lock = threading.Lock()
+        self.active_tasks = {}
 
     def _save_debug_image_async(self, path: str, image: np.ndarray) -> None:
         """Save debug image asynchronously using a thread."""
@@ -838,8 +846,7 @@ class LicensePlateProcessingMixin:
         return prev_score > curr_score
 
     def lpr_process(self, obj_data: dict[str, any], frame: np.ndarray):
-        """Look for license plates in image."""
-
+        """Look for license plates in image (async version)."""
         id = obj_data["id"]
 
         # don't run for non car objects
@@ -860,202 +867,245 @@ class LicensePlateProcessingMixin:
             )
             return
 
-        license_plate: Optional[dict[str, any]] = None
+        # Submit task to thread pool
+        with self.processing_lock:
+            if id not in self.active_tasks:
+                future = self.executor.submit(
+                    self._async_process_license_plate, 
+                    obj_data.copy(), 
+                    frame.copy(),
+                    datetime.datetime.now().timestamp()
+                )
+                self.active_tasks[id] = future
+                self.pending_tasks.append(future)
 
-        if self.requires_license_plate_detection:
-            logger.debug("Running manual license_plate detection.")
-            car_box = obj_data.get("box")
+        # Clean up completed tasks
+        self._cleanup_tasks()
 
-            if not car_box:
-                return
+    def _cleanup_tasks(self):
+        """Remove completed tasks from tracking"""
+        with self.processing_lock:
+            completed = [id for id, future in self.active_tasks.items() if future.done()]
+            for id in completed:
+                del self.active_tasks[id]
 
-            rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-            left, top, right, bottom = car_box
-            car = rgb[top:bottom, left:right]
+    def _async_process_license_plate(self, obj_data, frame, timestamp):
+        """Actual processing in a thread"""
+        try:
+            id = obj_data["id"]
+            logger.debug(f"Starting async LPR processing for {id}")
 
-            # double the size of the car for better box detection
-            car = cv2.resize(car, (int(2 * car.shape[1]), int(2 * car.shape[0])))
+            # Original processing logic from lpr_process goes here
+            # Replace all code from line:
+            #   license_plate: Optional[dict[str, any]] = None
+            # To line:
+            #   resp = requests.post(...)
+            
+            # Existing license plate detection logic
+            license_plate = None
+            if self.requires_license_plate_detection:
+                logger.debug("Running manual license_plate detection.")
+                car_box = obj_data.get("box")
 
-            if False:
+                if not car_box:
+                    return
+
+                rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+                left, top, right, bottom = car_box
+                car = rgb[top:bottom, left:right]
+
+                # double the size of the car for better box detection
+                car = cv2.resize(car, (int(2 * car.shape[1]), int(2 * car.shape[0])))
+
+                if False:
+                    current_time = int(datetime.datetime.now().timestamp())
+                    filename = f"car_frame_{current_time}.jpg"
+                    self._save_debug_image_async(
+                        os.path.join(self.debug_dir, filename),
+                        car,
+                    )
+
+                yolov9_start = datetime.datetime.now().timestamp()
+                license_plate = self._detect_license_plate(car)
+                logger.debug(
+                    f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+                )
+
+                if not license_plate:
+                    logger.debug("Detected no license plates for car object.")
+                    return
+
+                license_plate_area = max(
+                    0,
+                    (license_plate[2] - license_plate[0])
+                    * (license_plate[3] - license_plate[1]),
+                )
+
+                # check that license plate is valid
+                # double the value because we've doubled the size of the car
+                if license_plate_area < self.lpr_config.min_area * 2:
+                    logger.debug("License plate is less than min_area")
+                    return
+
+                license_plate_frame = car[
+                    license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
+                ]
+            else:
+                # don't run for object without attributes
+                if not obj_data.get("current_attributes"):
+                    logger.debug("No attributes to parse.")
+                    return
+
+                attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
+                for attr in attributes:
+                    if attr.get("label") != "license_plate":
+                        continue
+
+                    if license_plate is None or attr.get("score", 0.0) > license_plate.get(
+                        "score", 0.0
+                    ):
+                        license_plate = attr
+
+                # no license plates detected in this frame
+                if not license_plate:
+                    return
+
+                if license_plate.get("score") < self.lpr_config.detection_threshold:
+                    logger.debug(
+                        f"Plate detection score is less than the threshold ({license_plate['score']:0.2f} < {self.lpr_config.detection_threshold})"
+                    )
+                    return
+
+                license_plate_box = license_plate.get("box")
+
+                # check that license plate is valid
+                if (
+                    not license_plate_box
+                    or area(license_plate_box) < self.lpr_config.min_area
+                ):
+                    logger.debug(f"Invalid license plate box {license_plate}")
+                    return
+
+                license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+                license_plate_frame = license_plate_frame[
+                    license_plate_box[1] : license_plate_box[3],
+                    license_plate_box[0] : license_plate_box[2],
+                ]
+
+            # double the size of the license plate frame for better OCR
+            license_plate_frame = cv2.resize(
+                license_plate_frame,
+                (
+                    int(2 * license_plate_frame.shape[1]),
+                    int(2 * license_plate_frame.shape[0]),
+                ),
+            )
+
+            if WRITE_DEBUG_IMAGES:
                 current_time = int(datetime.datetime.now().timestamp())
-                filename = f"car_frame_{current_time}.jpg"
+                filename = f"license_plate_frame_{current_time}.jpg"
                 self._save_debug_image_async(
                     os.path.join(self.debug_dir, filename),
-                    car,
+                    license_plate_frame,
                 )
 
-            yolov9_start = datetime.datetime.now().timestamp()
-            license_plate = self._detect_license_plate(car)
-            logger.debug(
-                f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+            # run detection, returns results sorted by confidence, best first
+            license_plates, confidences, areas = self._process_license_plate(
+                license_plate_frame
             )
 
-            if not license_plate:
-                logger.debug("Detected no license plates for car object.")
+            logger.debug(f"Text boxes: {license_plates}")
+            logger.debug(f"Confidences: {confidences}")
+            logger.debug(f"Areas: {areas}")
+
+            if license_plates:
+                for plate, confidence, text_area in zip(license_plates, confidences, areas):
+                    avg_confidence = (
+                        (sum(confidence) / len(confidence)) if confidence else 0
+                    )
+
+                    logger.debug(
+                        f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
+                    )
+            else:
+                # no plates found
+                logger.debug("No text detected")
                 return
 
-            license_plate_area = max(
-                0,
-                (license_plate[2] - license_plate[0])
-                * (license_plate[3] - license_plate[1]),
+            top_plate, top_char_confidences, top_area = (
+                license_plates[0],
+                confidences[0],
+                areas[0],
+            )
+            avg_confidence = (
+                (sum(top_char_confidences) / len(top_char_confidences))
+                if top_char_confidences
+                else 0
             )
 
-            # check that license plate is valid
-            # double the value because we've doubled the size of the car
-            if license_plate_area < self.lpr_config.min_area * 2:
-                logger.debug("License plate is less than min_area")
-                return
-
-            license_plate_frame = car[
-                license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
-            ]
-        else:
-            # don't run for object without attributes
-            if not obj_data.get("current_attributes"):
-                logger.debug("No attributes to parse.")
-                return
-
-            attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
-            for attr in attributes:
-                if attr.get("label") != "license_plate":
-                    continue
-
-                if license_plate is None or attr.get("score", 0.0) > license_plate.get(
-                    "score", 0.0
+            # Check if we have a previously detected plate for this ID
+            if id in self.detected_license_plates:
+                if self._should_keep_previous_plate(
+                    id, top_plate, top_char_confidences, top_area, avg_confidence
                 ):
-                    license_plate = attr
+                    logger.debug("Keeping previous plate")
+                    return
 
-            # no license plates detected in this frame
-            if not license_plate:
-                return
-
-            if license_plate.get("score") < self.lpr_config.detection_threshold:
+            # Check against minimum confidence threshold
+            if avg_confidence < self.lpr_config.recognition_threshold:
                 logger.debug(
-                    f"Plate detection score is less than the threshold ({license_plate['score']:0.2f} < {self.lpr_config.detection_threshold})"
+                    f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
                 )
                 return
 
-            license_plate_box = license_plate.get("box")
-
-            # check that license plate is valid
-            if (
-                not license_plate_box
-                or area(license_plate_box) < self.lpr_config.min_area
-            ):
-                logger.debug(f"Invalid license plate box {license_plate}")
-                return
-
-            license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-            license_plate_frame = license_plate_frame[
-                license_plate_box[1] : license_plate_box[3],
-                license_plate_box[0] : license_plate_box[2],
-            ]
-
-        # double the size of the license plate frame for better OCR
-        license_plate_frame = cv2.resize(
-            license_plate_frame,
-            (
-                int(2 * license_plate_frame.shape[1]),
-                int(2 * license_plate_frame.shape[0]),
-            ),
-        )
-
-        if WRITE_DEBUG_IMAGES:
-            current_time = int(datetime.datetime.now().timestamp())
-            filename = f"license_plate_frame_{current_time}.jpg"
-            self._save_debug_image_async(
-                os.path.join(self.debug_dir, filename),
-                license_plate_frame,
+            # Determine subLabel based on known plates, use regex matching
+            # Default to the detected plate, use label name if there's a match
+            sub_label = next(
+                (
+                    label
+                    for label, plates in self.lpr_config.known_plates.items()
+                    if any(
+                        re.match(f"^{plate}$", top_plate)
+                        or distance(plate, top_plate) <= self.lpr_config.match_distance
+                        for plate in plates
+                    )
+                ),
+                top_plate,
             )
 
-        # run detection, returns results sorted by confidence, best first
-        license_plates, confidences, areas = self._process_license_plate(
-            license_plate_frame
-        )
-
-        logger.debug(f"Text boxes: {license_plates}")
-        logger.debug(f"Confidences: {confidences}")
-        logger.debug(f"Areas: {areas}")
-
-        if license_plates:
-            for plate, confidence, text_area in zip(license_plates, confidences, areas):
-                avg_confidence = (
-                    (sum(confidence) / len(confidence)) if confidence else 0
-                )
-
-                logger.debug(
-                    f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
-                )
-        else:
-            # no plates found
-            logger.debug("No text detected")
-            return
-
-        top_plate, top_char_confidences, top_area = (
-            license_plates[0],
-            confidences[0],
-            areas[0],
-        )
-        avg_confidence = (
-            (sum(top_char_confidences) / len(top_char_confidences))
-            if top_char_confidences
-            else 0
-        )
-
-        # Check if we have a previously detected plate for this ID
-        if id in self.detected_license_plates:
-            if self._should_keep_previous_plate(
-                id, top_plate, top_char_confidences, top_area, avg_confidence
-            ):
-                logger.debug("Keeping previous plate")
-                return
-
-        # Check against minimum confidence threshold
-        if avg_confidence < self.lpr_config.recognition_threshold:
-            logger.debug(
-                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
+            # Send the result to the API
+            resp = requests.post(
+                f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
+                json={
+                    "camera": obj_data.get("camera"),
+                    "subLabel": sub_label,
+                    "subLabelScore": avg_confidence,
+                },
             )
-            return
 
-        # Determine subLabel based on known plates, use regex matching
-        # Default to the detected plate, use label name if there's a match
-        sub_label = next(
-            (
-                label
-                for label, plates in self.lpr_config.known_plates.items()
-                if any(
-                    re.match(f"^{plate}$", top_plate)
-                    or distance(plate, top_plate) <= self.lpr_config.match_distance
-                    for plate in plates
-                )
-            ),
-            top_plate,
-        )
+            if resp.status_code == 200:
+                with self.processing_lock:
+                    self.detected_license_plates[id] = {
+                        "plate": top_plate,
+                        "char_confidences": top_char_confidences,
+                        "area": top_area,
+                        "obj_data": obj_data,
+                    }
 
-        # Send the result to the API
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": sub_label,
-                "subLabelScore": avg_confidence,
-            },
-        )
-
-        if resp.status_code == 200:
-            self.detected_license_plates[id] = {
-                "plate": top_plate,
-                "char_confidences": top_char_confidences,
-                "area": top_area,
-                "obj_data": obj_data,
-            }
+        except Exception as e:
+            logger.error(f"Error in async LPR processing: {str(e)}")
+        finally:
+            logger.debug(f"Completed async processing for {id}")
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
 
     def expire_object(self, object_id: str):
-        if object_id in self.detected_license_plates:
-            self.detected_license_plates.pop(object_id)
+        with self.processing_lock:  # Add lock
+            if object_id in self.detected_license_plates:
+                self.detected_license_plates.pop(object_id)
+            if object_id in self.active_tasks:
+                self.active_tasks[object_id].cancel()
 
 
 class CTCDecoder:
