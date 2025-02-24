@@ -9,7 +9,34 @@ import onnxruntime as ort
 
 logger = logging.getLogger(__name__)
 
+
 ### Post Processing
+def post_process_dfine(tensor_output: np.ndarray, width, height) -> np.ndarray:
+    class_ids = tensor_output[0][tensor_output[2] > 0.4]
+    boxes = tensor_output[1][tensor_output[2] > 0.4]
+    scores = tensor_output[2][tensor_output[2] > 0.4]
+
+    input_shape = np.array([height, width, height, width])
+    boxes = np.divide(boxes, input_shape, dtype=np.float32)
+    indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
+    detections = np.zeros((20, 6), np.float32)
+
+    for i, (bbox, confidence, class_id) in enumerate(
+        zip(boxes[indices], scores[indices], class_ids[indices])
+    ):
+        if i == 20:
+            break
+
+        detections[i] = [
+            class_id,
+            confidence,
+            bbox[1],
+            bbox[0],
+            bbox[3],
+            bbox[2],
+        ]
+
+    return detections
 
 
 def post_process_yolov9(predictions: np.ndarray, width, height) -> np.ndarray:
