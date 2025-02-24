@@ -86,7 +86,9 @@ export default function TextEntryDialog({
               )}
             />
             <DialogFooter className="pt-4">
-              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="button" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
               <Button variant="select" type="submit">
                 Save
               </Button>
