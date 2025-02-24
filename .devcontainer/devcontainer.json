@@ -8,7 +8,7 @@
   "overrideCommand": false,
   "remoteUser": "vscode",
   "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {}
     // Uncomment the following lines to use ONNX Runtime with CUDA support
     // "ghcr.io/devcontainers/features/nvidia-cuda:1": {
     //   "installCudnn": true,
