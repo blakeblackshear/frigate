@@ -16,6 +16,7 @@ from shapely.geometry import Polygon
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import deque
+import weakref
 
 from frigate.const import FRIGATE_LOCALHOST, CLIPS_DIR
 from frigate.util.image import area
@@ -52,6 +53,21 @@ class LicensePlateProcessingMixin:
         self.pending_tasks = deque(maxlen=100)  # Prevent memory overflow
         self.processing_lock = threading.Lock()
         self.active_tasks = {}
+
+        # Add shutdown flag
+        self._shutdown = False
+        # Use weakref finalizer for cleanup
+        self._finalizer = weakref.finalize(
+            self, 
+            self._shutdown_executor
+        )
+
+    def _shutdown_executor(self):
+        """Gracefully shutdown the thread pool"""
+        if not self._shutdown:
+            self._shutdown = True
+            self.executor.shutdown(wait=False)
+            logger.debug("ThreadPoolExecutor shutdown complete")
 
     def _save_debug_image_async(self, path: str, image: np.ndarray) -> None:
         """Save debug image asynchronously using a thread."""
@@ -847,6 +863,10 @@ class LicensePlateProcessingMixin:
 
     def lpr_process(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image (async version)."""
+        # Early return if shutting down
+        if self._shutdown:
+            return
+
         id = obj_data["id"]
 
         # don't run for non car objects
@@ -869,15 +889,21 @@ class LicensePlateProcessingMixin:
 
         # Submit task to thread pool
         with self.processing_lock:
-            if id not in self.active_tasks:
-                future = self.executor.submit(
-                    self._async_process_license_plate, 
-                    obj_data.copy(), 
-                    frame.copy(),
-                    datetime.datetime.now().timestamp()
-                )
-                self.active_tasks[id] = future
-                self.pending_tasks.append(future)
+            if id not in self.active_tasks and not self._shutdown:
+                try:
+                    future = self.executor.submit(
+                        self._async_process_license_plate, 
+                        obj_data.copy(), 
+                        frame.copy(),
+                        datetime.datetime.now().timestamp()
+                    )
+                    self.active_tasks[id] = future
+                    self.pending_tasks.append(future)
+                except RuntimeError as e:
+                    if "interpreter shutdown" in str(e):
+                        logger.debug("Skipping task submission during shutdown")
+                    else:
+                        raise
 
         # Clean up completed tasks
         self._cleanup_tasks()
@@ -1101,11 +1127,17 @@ class LicensePlateProcessingMixin:
         return
 
     def expire_object(self, object_id: str):
-        with self.processing_lock:  # Add lock
+        with self.processing_lock:
             if object_id in self.detected_license_plates:
                 self.detected_license_plates.pop(object_id)
             if object_id in self.active_tasks:
-                self.active_tasks[object_id].cancel()
+                try:
+                    self.active_tasks[object_id].cancel()
+                except RuntimeError as e:
+                    if "interpreter shutdown" in str(e):
+                        logger.debug("Skipping cancellation during shutdown")
+                    else:
+                        raise
 
 
 class CTCDecoder:
