@@ -10,7 +10,7 @@ import {
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -20,13 +20,18 @@ type TextEntryDialogProps = {
   description?: string;
   setOpen: (open: boolean) => void;
   onSave: (text: string) => void;
+  defaultValue?: string;
+  allowEmpty?: boolean;
 };
+
 export default function TextEntryDialog({
   open,
   title,
   description,
   setOpen,
   onSave,
+  defaultValue = "",
+  allowEmpty = false,
 }: TextEntryDialogProps) {
   const formSchema = z.object({
     text: z.string(),
@@ -34,6 +39,7 @@ export default function TextEntryDialog({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: { text: defaultValue },
   });
   const fileRef = form.register("text");
 
@@ -41,14 +47,19 @@ export default function TextEntryDialog({
 
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
-      if (!data["text"]) {
+      if (!allowEmpty && !data["text"]) {
         return;
       }
-
       onSave(data["text"]);
     },
-    [onSave],
+    [onSave, allowEmpty],
   );
+
+  useEffect(() => {
+    if (open) {
+      form.reset({ text: defaultValue });
+    }
+  }, [open, defaultValue, form]);
 
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
