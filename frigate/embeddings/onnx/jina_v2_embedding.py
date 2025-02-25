@@ -154,8 +154,9 @@ class JinaV2Embedding(BaseEmbedding):
         elif self.embedding_type == "vision":
             for img in raw_inputs:
                 processed_image = self._process_image(img)
-                pixel_values = self.image_processor([processed_image])["pixel_values"]
-                pixel_values = np.array(pixel_values, dtype=np.float32)
+                pixel_values = self.image_processor(
+                    [processed_image], return_tensors="np"
+                )["pixel_values"]
                 # Create dummy input_ids for this single image
                 input_ids = np.random.randint(0, 10, (1, 16))
 
@@ -192,4 +193,4 @@ class JinaV2Embedding(BaseEmbedding):
         if outputs.shape[-1] > truncate_dim:
             outputs = outputs[..., :truncate_dim]
 
-        return outputs.tolist()
+        return outputs
