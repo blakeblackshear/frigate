@@ -62,6 +62,9 @@ class LicensePlateProcessingMixin:
             self._shutdown_executor
         )
 
+        # Add this line in the __init__ method of LicensePlateProcessingMixin
+        self.model_lock = threading.Lock()
+
     def _shutdown_executor(self):
         """Gracefully shutdown the thread pool"""
         if not self._shutdown:
@@ -107,8 +110,9 @@ class LicensePlateProcessingMixin:
                 resized_image,
             )
 
-        outputs = self.model_runner.detection_model([normalized_image])[0]
-        outputs = outputs[0, :, :]
+        with self.model_lock:
+            outputs = self.model_runner.detection_model([normalized_image])[0]
+            outputs = outputs[0, :, :]
 
         boxes, _ = self._boxes_from_bitmap(outputs, outputs > self.mask_thresh, w, h)
         return self._filter_polygon(boxes, (h, w))
@@ -136,7 +140,8 @@ class LicensePlateProcessingMixin:
                 norm_img = norm_img[np.newaxis, :]
                 norm_images.append(norm_img)
 
-        outputs = self.model_runner.classification_model(norm_images)
+        with self.model_lock:
+            outputs = self.model_runner.classification_model(norm_images)
 
         return self._process_classification_output(images, outputs)
 
@@ -176,7 +181,8 @@ class LicensePlateProcessingMixin:
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
 
-        outputs = self.model_runner.recognition_model(norm_images)
+        with self.model_lock:
+            outputs = self.model_runner.recognition_model(norm_images)
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
@@ -231,7 +237,8 @@ class LicensePlateProcessingMixin:
             idx: original_idx for original_idx, idx in enumerate(sorted_indices)
         }
 
-        results, confidences = self._recognize(rotated_images)
+        with self.model_lock:
+            results, confidences = self._recognize(rotated_images)
 
         if results:
             license_plates = [""] * len(rotated_images)
@@ -736,7 +743,8 @@ class LicensePlateProcessingMixin:
 
         Return the dimensions of the detected plate as [x1, y1, x2, y2].
         """
-        predictions = self.model_runner.yolov9_detection_model(input)
+        with self.model_lock:
+            predictions = self.model_runner.yolov9_detection_model(input)
 
         confidence_threshold = self.lpr_config.detection_threshold
 
@@ -921,14 +929,7 @@ class LicensePlateProcessingMixin:
             id = obj_data["id"]
             logger.debug(f"Starting async LPR processing for {id}")
 
-            # Original processing logic from lpr_process goes here
-            # Replace all code from line:
-            #   license_plate: Optional[dict[str, any]] = None
-            # To line:
-            #   resp = requests.post(...)
-            
-            # Existing license plate detection logic
-            license_plate = None
+            license_plate: Optional[dict[str, any]] = None
             if self.requires_license_plate_detection:
                 logger.debug("Running manual license_plate detection.")
                 car_box = obj_data.get("box")
