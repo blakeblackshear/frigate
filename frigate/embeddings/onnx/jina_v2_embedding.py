@@ -180,35 +180,16 @@ class JinaV2Embedding(BaseEmbedding):
 
     def _postprocess_outputs(self, outputs):
         """
-        Process ONNX model outputs, truncating embeddings to truncate_dim.
-        - outputs: Raw output from self.runner.run()
+        Process ONNX model outputs, truncating each embedding in the array to truncate_dim.
+        - outputs: NumPy array of embeddings.
         - Returns: List of truncated embeddings.
         """
+        # size of vector in database
         truncate_dim = 768
 
-        # Case 1: outputs is a single ndarray (most likely embeddings)
-        if isinstance(outputs, np.ndarray):
-            if outputs.shape[-1] > truncate_dim:
-                outputs = outputs[..., :truncate_dim]
-            return [embedding for embedding in outputs]
+        # jina v2 defaults to 1024 and uses Matryoshka representation, so
+        # truncating only causes an extremely minor decrease in retrieval accuracy
+        if outputs.shape[-1] > truncate_dim:
+            outputs = outputs[..., :truncate_dim]
 
-        # Case 2: outputs is a tuple/list with structure [_, _, text_embeddings, image_embeddings]
-        elif isinstance(outputs, (list, tuple)) and len(outputs) >= 4:
-            _, _, text_embeddings, image_embeddings = outputs[:4]
-
-            if text_embeddings.shape[-1] > truncate_dim:
-                text_embeddings = text_embeddings[..., :truncate_dim]
-            if image_embeddings.shape[-1] > truncate_dim:
-                image_embeddings = image_embeddings[..., :truncate_dim]
-
-            if self.embedding_type == "text":
-                embeddings = text_embeddings
-            elif self.embedding_type == "vision":
-                embeddings = image_embeddings
-            else:
-                raise ValueError(f"Invalid embedding_type: {self.embedding_type}")
-
-            return [embedding for embedding in embeddings]
-
-        else:
-            raise ValueError(f"Unexpected output format from model: {outputs}")
+        return outputs.tolist()
