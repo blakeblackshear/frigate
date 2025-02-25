@@ -54,6 +54,10 @@ The most common reason for the PCIe Coral not being detected is that the driver 
 - In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
 - For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
 
+## Attempting to load TPU as pci & Fatal Python error: Illegal instruction
+
+This is an issue due to outdated gasket driver when being used with new linux kernels. Installing an updated driver from https://github.com/jnicolson/gasket-builder has been reported to fix the issue.
+
 ### Not detected on Raspberry Pi5
 
 A kernel update to the RPi5 means an upate to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)

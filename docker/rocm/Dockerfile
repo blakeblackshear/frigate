@@ -34,7 +34,7 @@ RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
 RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 
 #######################################################################
-FROM --platform=linux/amd64 debian:11 as debian-base
+FROM --platform=linux/amd64 debian:12 as debian-base
 
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get -y install --no-install-recommends libelf1 libdrm2 libdrm-amdgpu1 libnuma1 kmod
@@ -51,7 +51,7 @@ COPY --from=rocm /opt/rocm-$ROCM /opt/rocm-$ROCM
 RUN ln -s /opt/rocm-$ROCM /opt/rocm
 
 RUN apt-get -y install g++ cmake
-RUN apt-get -y install python3-pybind11 python3.9-distutils python3-dev
+RUN apt-get -y install python3-pybind11 python3-distutils python3-dev
 
 WORKDIR /opt/build
 
@@ -70,10 +70,11 @@ RUN apt-get -y install libnuma1
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
-RUN python3 -m pip install --upgrade pip \
-    && pip3 uninstall -y onnxruntime-openvino \
-    && pip3 install -r /requirements.txt
+# Temporarily disabled to see if a new wheel can be built to support py3.11
+#COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
+#RUN python3 -m pip install --upgrade pip \
+#    && pip3 uninstall -y onnxruntime-openvino \
+#    && pip3 install -r /requirements.txt
 
 #######################################################################
 FROM scratch AS rocm-dist
@@ -86,12 +87,12 @@ COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
-COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
+COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-311-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
-
-ENV HSA_ENABLE_SDMA=0
+\
+    ENV HSA_ENABLE_SDMA=0
 
 COPY --from=rocm-dist / /
 

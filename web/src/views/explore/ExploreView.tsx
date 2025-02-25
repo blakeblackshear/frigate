@@ -262,7 +262,7 @@ function ExploreThumbnailImage({
           }
           loading={isSafari ? "eager" : "lazy"}
           draggable={false}
-          src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
+          src={`${apiHost}api/events/${event.id}/thumbnail.webp`}
           onClick={() => setSearchDetail(event)}
           onLoad={onImgLoad}
           alt={`${event.label} thumbnail`}

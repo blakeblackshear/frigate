@@ -108,7 +108,7 @@ class Rknn(DetectionApi):
                     model_props["model_type"] = model_type
 
             if model_matched:
-                model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
+                model_props["filename"] = model_path + f"-{soc}-v2.3.0-1.rknn"
 
                 model_props["path"] = model_cache_dir + model_props["filename"]
 
@@ -129,7 +129,7 @@ class Rknn(DetectionApi):
             os.mkdir(model_cache_dir)
 
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/{filename}",
+            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.0/{filename}",
             model_cache_dir + filename,
         )
 

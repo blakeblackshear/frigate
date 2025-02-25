@@ -1,36 +1,73 @@
 import { Button } from "../ui/button";
-import { FaFilter } from "react-icons/fa";
+import { FaCog } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { LogSeverity } from "@/types/log";
+import { LogSettingsType, LogSeverity } from "@/types/log";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import FilterSwitch from "./FilterSwitch";
 
-type LogLevelFilterButtonProps = {
+type LogSettingsButtonProps = {
   selectedLabels?: LogSeverity[];
   updateLabelFilter: (labels: LogSeverity[] | undefined) => void;
+  logSettings?: LogSettingsType;
+  setLogSettings: (logSettings: LogSettingsType) => void;
 };
-export function LogLevelFilterButton({
+export function LogSettingsButton({
   selectedLabels,
   updateLabelFilter,
-}: LogLevelFilterButtonProps) {
+  logSettings,
+  setLogSettings,
+}: LogSettingsButtonProps) {
   const trigger = (
     <Button
       size="sm"
       className="flex items-center gap-2"
       aria-label="Filter log level"
     >
-      <FaFilter className="text-secondary-foreground" />
-      <div className="hidden text-primary md:block">Filter</div>
+      <FaCog className="text-secondary-foreground" />
+      <div className="hidden text-primary md:block">Settings</div>
     </Button>
   );
   const content = (
-    <GeneralFilterContent
-      selectedLabels={selectedLabels}
-      updateLabelFilter={updateLabelFilter}
-    />
+    <div className={cn("my-3 space-y-3 py-3 md:mt-0 md:py-0")}>
+      <div className="space-y-4">
+        <div className="space-y-0.5">
+          <div className="text-md">Filter</div>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            Filter logs by severity.
+          </div>
+        </div>
+        <GeneralFilterContent
+          selectedLabels={selectedLabels}
+          updateLabelFilter={updateLabelFilter}
+        />
+      </div>
+      <DropdownMenuSeparator />
+      <div className="space-y-4">
+        <div className="space-y-0.5">
+          <div className="text-md">Loading</div>
+          <div className="mt-2.5 flex flex-col gap-2.5">
+            <div className="space-y-1 text-xs text-muted-foreground">
+              When the log pane is scrolled to the bottom, new logs
+              automatically stream as they are added.
+            </div>
+            <FilterSwitch
+              label="Disable log streaming"
+              isChecked={logSettings?.disableStreaming ?? false}
+              onCheckedChange={(isChecked) => {
+                setLogSettings({
+                  disableStreaming: isChecked,
+                });
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   if (isMobile) {
@@ -63,7 +100,7 @@ export function GeneralFilterContent({
   return (
     <>
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
-        <div className="my-2.5 flex items-center justify-between">
+        <div className="mb-5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
@@ -81,10 +118,9 @@ export function GeneralFilterContent({
             }}
           />
         </div>
-        <DropdownMenuSeparator />
         <div className="my-2.5 flex flex-col gap-2.5">
           {["debug", "info", "warning", "error"].map((item) => (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" key={item}>
               <Label
                 className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}

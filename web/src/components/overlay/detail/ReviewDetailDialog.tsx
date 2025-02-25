@@ -385,7 +385,7 @@ function EventItem({
           src={
             event.has_snapshot
               ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-              : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+              : `${apiHost}api/events/${event.id}/thumbnail.webp`
           }
         />
         {hovered && (
@@ -400,7 +400,7 @@ function EventItem({
                     href={
                       event.has_snapshot
                         ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-                        : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                        : `${apiHost}api/events/${event.id}/thumbnail.webp`
                     }
                   >
                     <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">

@@ -275,7 +275,7 @@ class TestHttp(unittest.TestCase):
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
-            assert event["sub_label"] == ""
+            assert event["sub_label"] == None
 
     def test_sub_label_list(self):
         app = create_fastapi_app(

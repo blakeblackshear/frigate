@@ -17,8 +17,9 @@ import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
-from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
@@ -34,10 +35,13 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     EXPORT_DIR,
+    FACE_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
     SHM_FRAMES_VAR,
+    THUMB_DIR,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
@@ -88,6 +92,9 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.embeddings_metrics: DataProcessorMetrics | None = (
+            DataProcessorMetrics() if config.semantic_search.enabled else None
+        )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
@@ -96,14 +103,20 @@ class FrigateApp:
         self.config = config
 
     def ensure_dirs(self) -> None:
-        for d in [
+        dirs = [
             CONFIG_DIR,
             RECORD_DIR,
+            THUMB_DIR,
             f"{CLIPS_DIR}/cache",
             CACHE_DIR,
             MODEL_CACHE_DIR,
             EXPORT_DIR,
-        ]:
+        ]
+
+        if self.config.face_recognition.enabled:
+            dirs.append(FACE_DIR)
+
+        for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -229,7 +242,10 @@ class FrigateApp:
         embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
-            args=(self.config,),
+            args=(
+                self.config,
+                self.embeddings_metrics,
+            ),
         )
         embedding_process.daemon = True
         self.embedding_process = embedding_process
@@ -301,8 +317,14 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        if self.config.notifications.enabled_in_config:
-            comms.append(WebPushClient(self.config))
+        notification_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.notifications.enabled_in_config
+        ]
+
+        if notification_cameras:
+            comms.append(WebPushClient(self.config, self.stop_event))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)
@@ -491,7 +513,11 @@ class FrigateApp:
         self.stats_emitter = StatsEmitter(
             self.config,
             stats_init(
-                self.config, self.camera_metrics, self.detectors, self.processes
+                self.config,
+                self.camera_metrics,
+                self.embeddings_metrics,
+                self.detectors,
+                self.processes,
             ),
             self.stop_event,
         )

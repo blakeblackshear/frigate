@@ -1,12 +1,12 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { isDesktop, isMobile } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
 import StorageMetrics from "@/views/system/StorageMetrics";
-import { LuActivity, LuHardDrive } from "react-icons/lu";
+import { LuActivity, LuHardDrive, LuSearchCode } from "react-icons/lu";
 import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -14,11 +14,28 @@ import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { Toaster } from "@/components/ui/sonner";
+import { FrigateConfig } from "@/types/frigateConfig";
+import FeatureMetrics from "@/views/system/FeatureMetrics";
 
-const metrics = ["general", "storage", "cameras"] as const;
-type SystemMetric = (typeof metrics)[number];
+const allMetrics = ["general", "features", "storage", "cameras"] as const;
+type SystemMetric = (typeof allMetrics)[number];
 
 function System() {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const metrics = useMemo(() => {
+    const metrics = [...allMetrics];
+
+    if (!config?.semantic_search.enabled) {
+      const index = metrics.indexOf("features");
+      metrics.splice(index, 1);
+    }
+
+    return metrics;
+  }, [config]);
+
   // stats page
 
   const [page, setPage] = useHashState<SystemMetric>();
@@ -67,6 +84,7 @@ function System() {
               aria-label={`Select ${item}`}
             >
               {item == "general" && <LuActivity className="size-4" />}
+              {item == "features" && <LuSearchCode className="size-4" />}
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && <div className="capitalize">{item}</div>}
@@ -92,6 +110,12 @@ function System() {
       </div>
       {page == "general" && (
         <GeneralMetrics
+          lastUpdated={lastUpdated}
+          setLastUpdated={setLastUpdated}
+        />
+      )}
+      {page == "features" && (
+        <FeatureMetrics
           lastUpdated={lastUpdated}
           setLastUpdated={setLastUpdated}
         />

@@ -172,7 +172,9 @@ class PreviewRecorder:
 
         # create communication for finished previews
         self.requestor = InterProcessRequestor()
-        self.config_subscriber = ConfigSubscriber(f"config/record/{self.config.name}")
+        self.config_subscriber = ConfigSubscriber(
+            f"config/record/{self.config.name}", True
+        )
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,

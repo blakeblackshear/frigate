@@ -949,3 +949,13 @@ def get_image_from_recording(
         return process.stdout
     else:
         return None
+
+
+def get_histogram(image, x_min, y_min, x_max, y_max):
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
+    image_bgr = image_bgr[y_min:y_max, x_min:x_max]
+
+    hist = cv2.calcHist(
+        [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]
+    )
+    return cv2.normalize(hist, hist).flatten()

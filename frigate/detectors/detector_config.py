@@ -35,7 +35,9 @@ class InputDTypeEnum(str, Enum):
 class ModelTypeEnum(str, Enum):
     ssd = "ssd"
     yolox = "yolox"
+    yolov9 = "yolov9"
     yolonas = "yolonas"
+    dfine = "dfine"
 
 
 class ModelConfig(BaseModel):
@@ -79,6 +81,10 @@ class ModelConfig(BaseModel):
         return self._colormap
 
     @property
+    def non_logo_attributes(self) -> list[str]:
+        return ["face", "license_plate"]
+
+    @property
     def all_attributes(self) -> list[str]:
         return self._all_attributes
 
@@ -107,7 +113,7 @@ class ModelConfig(BaseModel):
 
         self._all_attributes = list(unique_attributes)
         self._all_attribute_logos = list(
-            unique_attributes - set(["face", "license_plate"])
+            unique_attributes - set(self.non_logo_attributes)
         )
 
     def check_and_load_plus_model(

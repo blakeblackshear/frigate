@@ -1,4 +1,5 @@
 import { Vector2d } from "konva/lib/types";
+import { Polygon } from "@/types/canvas";
 
 export const getAveragePoint = (points: number[]): Vector2d => {
   let totalX = 0;
@@ -100,3 +101,72 @@ export const masksAreIdentical = (arr1: string[], arr2: string[]): boolean => {
   }
   return true;
 };
+
+export function snapPointToLines(
+  point: number[],
+  polygons: Polygon[],
+  threshold: number,
+): number[] | null {
+  for (const polygon of polygons) {
+    if (!polygon.isFinished) continue;
+
+    for (let i = 0; i < polygon.points.length; i++) {
+      const start = polygon.points[i];
+      const end = polygon.points[(i + 1) % polygon.points.length];
+
+      const snappedPoint = snapPointToLine(point, start, end, threshold);
+      if (snappedPoint) {
+        return snappedPoint;
+      }
+    }
+  }
+
+  return null;
+}
+
+function snapPointToLine(
+  point: number[],
+  lineStart: number[],
+  lineEnd: number[],
+  threshold: number,
+): number[] | null {
+  const [x, y] = point;
+  const [x1, y1] = lineStart;
+  const [x2, y2] = lineEnd;
+
+  const A = x - x1;
+  const B = y - y1;
+  const C = x2 - x1;
+  const D = y2 - y1;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+
+  if (lenSq !== 0) {
+    param = dot / lenSq;
+  }
+
+  let xx, yy;
+
+  if (param < 0) {
+    xx = x1;
+    yy = y1;
+  } else if (param > 1) {
+    xx = x2;
+    yy = y2;
+  } else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+
+  const dx = x - xx;
+  const dy = y - yy;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance <= threshold) {
+    return [xx, yy];
+  }
+
+  return null;
+}
