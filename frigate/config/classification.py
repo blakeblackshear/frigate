@@ -1,4 +1,5 @@
-from typing import Dict, Enum, List, Optional
+from enum import Enum
+from typing import Dict, List, Optional
 
 from pydantic import Field
 
