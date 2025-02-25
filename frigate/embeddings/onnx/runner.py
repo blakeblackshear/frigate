@@ -66,14 +66,9 @@ class ONNXModelRunner:
     def run(self, input: dict[str, Any]) -> Any:
         if self.type == "ov":
             infer_request = self.interpreter.create_infer_request()
-            input_tensor = list(input.values())
 
-            if len(input_tensor) == 1:
-                input_tensor = ov.Tensor(array=input_tensor[0])
-            else:
-                input_tensor = ov.Tensor(array=input_tensor)
+            outputs = infer_request.infer(input)
 
-            infer_request.infer(input_tensor)
-            return [infer_request.get_output_tensor().data]
+            return outputs
         elif self.type == "ort":
             return self.ort.run(None, input)
