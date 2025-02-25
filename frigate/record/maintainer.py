@@ -19,6 +19,10 @@ import psutil
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.recordings_updater import (
+    RecordingsDataPublisher,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
     CACHE_DIR,
@@ -70,6 +74,9 @@ class RecordingMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber("config/record/")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.recordings_publisher = RecordingsDataPublisher(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
 
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
@@ -211,6 +218,16 @@ class RecordingMaintainer(threading.Thread):
 
             tasks.extend(
                 [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
+            )
+
+            # publish most recently available recording time and None if disabled
+            self.recordings_publisher.publish(
+                (
+                    camera,
+                    recordings[0]["start_time"].timestamp()
+                    if self.config.cameras[camera].record.enabled
+                    else None,
+                )
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
@@ -582,4 +599,5 @@ class RecordingMaintainer(threading.Thread):
         self.requestor.stop()
         self.config_subscriber.stop()
         self.detection_subscriber.stop()
+        self.recordings_publisher.stop()
         logger.info("Exiting recording maintenance...")

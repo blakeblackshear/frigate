@@ -10,25 +10,31 @@ title: Object Detectors
 Frigate supports multiple different detectors that work on different types of hardware:
 
 **Most Hardware**
+
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 
 **AMD**
+
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
 
 **Intel**
+
 - [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
 - [ONNX](#onnx): OpenVINO will automatically be detected and used as a detector in the default Frigate image when a supported ONNX model is configured.
 
 **Nvidia**
+
 - [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs and Jetson devices, using one of many default models.
 - [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp(4/5)` Frigate images when a supported ONNX model is configured.
 
 **Rockchip**
+
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
 **For Testing**
+
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
 
 :::
@@ -146,7 +152,6 @@ model:
   model_type: ssd
   path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 ```
-
 
 ## OpenVINO Detector
 
@@ -412,7 +417,7 @@ When using docker compose:
 ```yaml
 services:
   frigate:
-...
+
 environment:
   HSA_OVERRIDE_GFX_VERSION: "9.0.0"
 ```
@@ -550,6 +555,50 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+#### D-FINE
+
+[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default.
+
+To export as ONNX:
+
+1. Clone: https://github.com/Peterande/D-FINE and install all dependencies.
+2. Select and download a checkpoint from the [readme](https://github.com/Peterande/D-FINE).
+3. Modify line 58 of `tools/deployment/export_onnx.py` and change batch size to 1: `data = torch.rand(1, 3, 640, 640)`
+4. Run the export, making sure you select the right config, for your checkpoint.
+
+Example:
+
+```
+python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml -r output/dfine_m_obj2coco.pth
+```
+
+:::tip
+
+Model export has only been tested on Linux (or WSL2). Not all dependencies are in `requirements.txt`. Some live in the deployment folder, and some are still missing entirely and must be installed manually.
+
+Make sure you change the batch size to 1 before exporting.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/dfine_m_obj2coco.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -704,7 +753,7 @@ To convert a onnx model to the rknn format using the [rknn-toolkit2](https://git
 This is an example configuration file that you need to adjust to your specific onnx model:
 
 ```yaml
-soc: ["rk3562","rk3566", "rk3568", "rk3576", "rk3588"]
+soc: ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 quantization: false
 
 output_name: "{input_basename}"

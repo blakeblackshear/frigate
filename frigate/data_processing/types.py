@@ -18,6 +18,13 @@ class DataProcessorMetrics:
         self.alpr_pps = mp.Value("d", 0.01)
 
 
+class DataProcessorModelRunner:
+    def __init__(self, requestor, device: str = "CPU", model_size: str = "large"):
+        self.requestor = requestor
+        self.device = device
+        self.model_size = model_size
+
+
 class PostProcessDataEnum(str, Enum):
     recording = "recording"
     review = "review"

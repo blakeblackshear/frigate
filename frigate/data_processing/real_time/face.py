@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 MIN_MATCHING_FACES = 2
 
 
-class FaceProcessor(RealTimeProcessorApi):
+class FaceRealTimeProcessor(RealTimeProcessorApi):
     def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
         super().__init__(config, metrics)
         self.face_config = config.face_recognition

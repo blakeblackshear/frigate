@@ -71,6 +71,8 @@ import {
 } from "@/components/ui/popover";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { FaPencilAlt } from "react-icons/fa";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 
 const SEARCH_TABS = [
   "details",
@@ -288,6 +290,7 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+  const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
 
   const handleDescriptionFocus = useCallback(() => {
     setInputFocused(true);
@@ -430,6 +433,74 @@ function ObjectDetailsTab({
     [search, config],
   );
 
+  const handleSubLabelSave = useCallback(
+    (text: string) => {
+      if (!search) return;
+
+      // set score to 1.0 if we're manually entering a sub label
+      const subLabelScore =
+        text === "" ? undefined : search.data?.sub_label_score || 1.0;
+
+      axios
+        .post(`${apiHost}api/events/${search.id}/sub_label`, {
+          camera: search.camera,
+          subLabel: text,
+          subLabelScore: subLabelScore,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Successfully updated sub label.", {
+              position: "top-center",
+            });
+
+            mutate(
+              (key) =>
+                typeof key === "string" &&
+                (key.includes("events") ||
+                  key.includes("events/search") ||
+                  key.includes("events/explore")),
+              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+                if (!currentData) return currentData;
+                return currentData.flat().map((event) =>
+                  event.id === search.id
+                    ? {
+                        ...event,
+                        sub_label: text,
+                        data: {
+                          ...event.data,
+                          sub_label_score: subLabelScore,
+                        },
+                      }
+                    : event,
+                );
+              },
+              {
+                optimisticData: true,
+                rollbackOnError: true,
+                revalidate: false,
+              },
+            );
+
+            setSearch({
+              ...search,
+              sub_label: text,
+              data: {
+                ...search.data,
+                sub_label_score: subLabelScore,
+              },
+            });
+            setIsSubLabelDialogOpen(false);
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to update sub label.", {
+            position: "top-center",
+          });
+        });
+    },
+    [search, apiHost, mutate, setSearch],
+  );
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -440,6 +511,21 @@ function ObjectDetailsTab({
               {getIconForLabel(search.label, "size-4 text-primary")}
               {search.label}
               {search.sub_label && ` (${search.sub_label})`}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <FaPencilAlt
+                      className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                      onClick={() => {
+                        setIsSubLabelDialogOpen(true);
+                      }}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Edit sub label</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -616,6 +702,15 @@ function ObjectDetailsTab({
               Save
             </Button>
           )}
+          <TextEntryDialog
+            open={isSubLabelDialogOpen}
+            setOpen={setIsSubLabelDialogOpen}
+            title="Edit Sub Label"
+            description={`Enter a new sub label for this ${search.label ?? "tracked object"}.`}
+            onSave={handleSubLabelSave}
+            defaultValue={search?.sub_label || ""}
+            allowEmpty={true}
+          />
         </div>
       </div>
     </div>
