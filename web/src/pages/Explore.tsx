@@ -267,8 +267,8 @@ export default function Explore() {
 
   // model states
 
-  const modelVersion = config?.semantic_search.model || "jinav1"; // Default to jinav1
-  const modelSize = config?.semantic_search.model_size || "large"; // Default to large
+  const modelVersion = config?.semantic_search.model || "jinav1";
+  const modelSize = config?.semantic_search.model_size || "small";
 
   // Text model state
   const { payload: textModelState } = useModelState(
