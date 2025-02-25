@@ -129,7 +129,7 @@ class JinaV2Embedding(BaseEmbedding):
 
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
-                "GPU",
+                self.device,
                 self.model_size,
             )
 
