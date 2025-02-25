@@ -51,6 +51,9 @@ class TestMotion(unittest.TestCase):
                 default_motion_config,
                 [[190, 307]],
             ),
+            TestMotionVideo(
+                "testdata/test_motion_video-3.mp4", default_mask, default_motion_config
+            ),
         ]
 
     def get_motion_detector(self, test_clip):

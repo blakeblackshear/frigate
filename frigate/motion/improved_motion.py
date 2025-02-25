@@ -121,12 +121,12 @@ class ImprovedMotionDetector(MotionDetector):
         if self.save_images:
             contrasted_saved = resized_frame.copy()
 
+        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
+
         # mask frame
-        # this has to come after contrast improvement
+        # this has to come after contrast improvement and masking to avoid the mask bleeding into non-masked area.
         # Setting masked pixels to zero, to match the average frame at startup
         resized_frame[self.mask] = [0]
-
-        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
 
         if self.save_images:
             blurred_saved = resized_frame.copy()
@@ -194,10 +194,11 @@ class ImprovedMotionDetector(MotionDetector):
 
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
         if pct_motion < 0.05 and len(motion_boxes) <= 4:
+            motion_boxes = []  # ignore small movements
             self.calibrating = False
 
         # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
-        if self.calibrating or pct_motion > self.config.lightning_threshold:
+        if not self.calibrating and pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
         if self.save_images:
