@@ -108,7 +108,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   jetson_jp6_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm
     name: Jetson Jetpack 6
     steps:
       - name: Check out code
