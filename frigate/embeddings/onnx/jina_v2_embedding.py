@@ -1,11 +1,12 @@
 """JinaV2 Embeddings."""
 
+import io
 import logging
 import os
 
 import numpy as np
 from PIL import Image
-from transformers import AutoImageProcessor, AutoTokenizer
+from transformers import AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -113,12 +114,6 @@ class JinaV2Embedding(BaseEmbedding):
             if self.downloader:
                 self.downloader.wait_for_download()
 
-            self.image_processor = AutoImageProcessor.from_pretrained(
-                f"{MODEL_CACHE_DIR}/{self.model_name}",
-                cache_dir=f"{MODEL_CACHE_DIR}/{self.model_name}/",
-                trust_remote_code=True,
-            )
-
             tokenizer_path = os.path.join(
                 f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer"
             )
@@ -135,6 +130,26 @@ class JinaV2Embedding(BaseEmbedding):
                 self.model_size,
             )
 
+    def _preprocess_image(self, image_data: bytes | Image.Image) -> np.ndarray:
+        """
+        Manually preprocess a single image from bytes or PIL.Image to (3, 512, 512).
+        """
+        if isinstance(image_data, bytes):
+            image = Image.open(io.BytesIO(image_data))
+        else:
+            image = image_data
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        image = image.resize((512, 512), Image.Resampling.LANCZOS)
+
+        # Convert to numpy array, normalize to [0, 1], and transpose to (channels, height, width)
+        image_array = np.array(image, dtype=np.float32) / 255.0
+        image_array = np.transpose(image_array, (2, 0, 1))  # (H, W, C) -> (C, H, W)
+
+        return image_array
+
     def _preprocess_inputs(self, raw_inputs):
         """
         Preprocess inputs into a list of real input tensors (no dummies).
@@ -145,29 +160,36 @@ class JinaV2Embedding(BaseEmbedding):
             raw_inputs = [raw_inputs]
 
         processed = []
-
         if self.embedding_type == "text":
             for text in raw_inputs:
                 input_ids = self.tokenizer([text], return_tensors="np")["input_ids"]
                 processed.append(input_ids)
         elif self.embedding_type == "vision":
             for img in raw_inputs:
-                processed_image = self._process_image(img)
-                pixel_values = self.image_processor(
-                    [processed_image], return_tensors="np"
-                )["pixel_values"]
-                processed.append(pixel_values)
+                pixel_values = self._preprocess_image(img)
+                processed.append(
+                    pixel_values[np.newaxis, ...]
+                )  # Add batch dim: (1, 3, 512, 512)
         else:
             raise ValueError(
                 f"Invalid embedding_type: {self.embedding_type}. Must be 'text' or 'vision'."
             )
-
         return processed
 
     def _postprocess_outputs(self, outputs):
+        """
+        Process ONNX model outputs, truncating each embedding in the array to truncate_dim.
+        - outputs: NumPy array of embeddings.
+        - Returns: List of truncated embeddings.
+        """
+        # size of vector in database
         truncate_dim = 768
+
+        # jina v2 defaults to 1024 and uses Matryoshka representation, so
+        # truncating only causes an extremely minor decrease in retrieval accuracy
         if outputs.shape[-1] > truncate_dim:
             outputs = outputs[..., :truncate_dim]
+
         return outputs
 
     def __call__(
