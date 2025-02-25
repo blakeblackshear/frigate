@@ -4,6 +4,7 @@ import logging
 import os
 
 import numpy as np
+from PIL import Image
 from transformers import AutoImageProcessor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 
@@ -79,18 +80,19 @@ class JinaV2Embedding(BaseEmbedding):
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
             elif file_name == self.tokenizer_file:
-                if not os.path.exists(path + "/" + self.model_name):
+                if not os.path.exists(os.path.join(path, self.model_name)):
                     logger.info(f"Downloading {self.model_name} tokenizer")
 
                 tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
                     trust_remote_code=True,
-                    cache_dir=f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer",
+                    cache_dir=os.path.join(
+                        MODEL_CACHE_DIR, self.model_name, "tokenizer"
+                    ),
                     clean_up_tokenization_spaces=True,
                 )
                 tokenizer.save_pretrained(path)
-
-            self.downloader.requestor.send_data(
+            self.requestor.send_data(
                 UPDATE_MODEL_STATE,
                 {
                     "model": f"{self.model_name}-{file_name}",
@@ -98,7 +100,7 @@ class JinaV2Embedding(BaseEmbedding):
                 },
             )
         except Exception:
-            self.downloader.requestor.send_data(
+            self.requestor.send_data(
                 UPDATE_MODEL_STATE,
                 {
                     "model": f"{self.model_name}-{file_name}",
@@ -135,9 +137,9 @@ class JinaV2Embedding(BaseEmbedding):
 
     def _preprocess_inputs(self, raw_inputs):
         """
-        Preprocess inputs into a list of dicts, each with input_ids and pixel_values.
-        - For text: Real input_ids per input, dummy pixel_values.
-        - For image: Dummy input_ids, real pixel_values per input.
+        Preprocess inputs into a list of real input tensors (no dummies).
+        - For text: Returns list of input_ids.
+        - For vision: Returns list of pixel_values.
         """
         if not isinstance(raw_inputs, list):
             raw_inputs = [raw_inputs]
@@ -147,21 +149,14 @@ class JinaV2Embedding(BaseEmbedding):
         if self.embedding_type == "text":
             for text in raw_inputs:
                 input_ids = self.tokenizer([text], return_tensors="np")["input_ids"]
-                # Create dummy pixel_values with matching batch size (1 per text)
-                pixel_values = np.zeros((1, 3, 512, 512), dtype=np.float32)
-                processed.append({"input_ids": input_ids, "pixel_values": pixel_values})
-
+                processed.append(input_ids)
         elif self.embedding_type == "vision":
             for img in raw_inputs:
                 processed_image = self._process_image(img)
                 pixel_values = self.image_processor(
                     [processed_image], return_tensors="np"
                 )["pixel_values"]
-                # Create dummy input_ids for this single image
-                input_ids = np.random.randint(0, 10, (1, 16))
-
-                processed.append({"input_ids": input_ids, "pixel_values": pixel_values})
-
+                processed.append(pixel_values)
         else:
             raise ValueError(
                 f"Invalid embedding_type: {self.embedding_type}. Must be 'text' or 'vision'."
@@ -169,28 +164,46 @@ class JinaV2Embedding(BaseEmbedding):
 
         return processed
 
-    def __call__(self, inputs, embedding_type=None):
-        """Override to handle dynamic embedding_type."""
-        effective_type = embedding_type or self.embedding_type
-        if not effective_type:
+    def _postprocess_outputs(self, outputs):
+        truncate_dim = 768
+        if outputs.shape[-1] > truncate_dim:
+            outputs = outputs[..., :truncate_dim]
+        return outputs
+
+    def __call__(
+        self, inputs: list[str] | list[Image.Image] | list[str], embedding_type=None
+    ) -> list[np.ndarray]:
+        self.embedding_type = embedding_type
+        if not self.embedding_type:
             raise ValueError(
                 "embedding_type must be specified either in __init__ or __call__"
             )
-        self.embedding_type = effective_type
-        return super().__call__(inputs)
 
-    def _postprocess_outputs(self, outputs):
-        """
-        Process ONNX model outputs, truncating each embedding in the array to truncate_dim.
-        - outputs: NumPy array of embeddings.
-        - Returns: List of truncated embeddings.
-        """
-        # size of vector in database
-        truncate_dim = 768
+        self._load_model_and_utils()
+        processed = self._preprocess_inputs(inputs)
+        batch_size = len(processed)
 
-        # jina v2 defaults to 1024 and uses Matryoshka representation, so
-        # truncating only causes an extremely minor decrease in retrieval accuracy
-        if outputs.shape[-1] > truncate_dim:
-            outputs = outputs[..., :truncate_dim]
+        # Prepare ONNX inputs with matching batch sizes
+        onnx_inputs = {}
+        if self.embedding_type == "text":
+            onnx_inputs["input_ids"] = np.stack([x[0] for x in processed])
+            onnx_inputs["pixel_values"] = np.zeros(
+                (batch_size, 3, 512, 512), dtype=np.float32
+            )
+        elif self.embedding_type == "vision":
+            onnx_inputs["input_ids"] = np.zeros((batch_size, 16), dtype=np.int64)
+            onnx_inputs["pixel_values"] = np.stack([x[0] for x in processed])
+        else:
+            raise ValueError("Invalid embedding type")
 
-        return outputs
+        # Run inference
+        outputs = self.runner.run(onnx_inputs)
+        if self.embedding_type == "text":
+            embeddings = outputs[2]  # text embeddings
+        elif self.embedding_type == "vision":
+            embeddings = outputs[3]  # image embeddings
+        else:
+            raise ValueError("Invalid embedding type")
+
+        embeddings = self._postprocess_outputs(embeddings)
+        return [embedding for embedding in embeddings]
