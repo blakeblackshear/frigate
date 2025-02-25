@@ -197,7 +197,7 @@ class ImprovedMotionDetector(MotionDetector):
             motion_boxes = []  # ignore small movements
             self.calibrating = False
 
-        # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
+        # if the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
         if not self.calibrating and pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
