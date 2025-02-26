@@ -72,6 +72,9 @@ class BaseEmbedding(ABC):
 
         return image
 
+    def _postprocess_outputs(self, outputs: any) -> any:
+        return outputs
+
     def __call__(
         self, inputs: list[str] | list[Image.Image] | list[str]
     ) -> list[np.ndarray]:
@@ -91,5 +94,7 @@ class BaseEmbedding(ABC):
             else:
                 logger.warning(f"Expected input '{key}' not found in onnx_inputs")
 
-        embeddings = self.runner.run(onnx_inputs)[0]
+        outputs = self.runner.run(onnx_inputs)[0]
+        embeddings = self._postprocess_outputs(outputs)
+
         return [embedding for embedding in embeddings]
