@@ -22,9 +22,14 @@ FROM deps AS tensorrt-base
 #Disable S6 Global timeout
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
+# COPY TensorRT Model Generation Deps
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY --from=trt-deps /usr/local/cuda-12.* /usr/local/cuda
+
+# COPY Individual CUDA deps
+COPY --from=trt-deps /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda/
+COPY --from=trt-deps /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda/
+
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS=""
 
