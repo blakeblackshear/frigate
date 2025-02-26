@@ -1,6 +1,5 @@
 """Handle processing images for face detection and recognition."""
 
-import datetime
 import logging
 
 import numpy as np
@@ -33,17 +32,9 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.config = config
         super().__init__(config, metrics)
 
-    def __update_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
-
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image."""
-        start = datetime.datetime.now().timestamp()
         self.lpr_process(obj_data, frame)
-        self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
