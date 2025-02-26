@@ -10,6 +10,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
 from frigate.const import (
     CONFIG_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -23,6 +24,7 @@ from frigate.util.builtin import serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
+from .onnx.jina_v2_embedding import JinaV2Embedding
 
 logger = logging.getLogger(__name__)
 
@@ -75,18 +77,7 @@ class Embeddings:
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
 
-        models = [
-            "jinaai/jina-clip-v1-text_model_fp16.onnx",
-            "jinaai/jina-clip-v1-tokenizer",
-            "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.semantic_search.model_size == "large"
-            else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
-            "jinaai/jina-clip-v1-preprocessor_config.json",
-            "facenet-facenet.onnx",
-            "paddleocr-onnx-detection.onnx",
-            "paddleocr-onnx-classification.onnx",
-            "paddleocr-onnx-recognition.onnx",
-        ]
+        models = self.get_model_definitions()
 
         for model in models:
             self.requestor.send_data(
@@ -97,17 +88,64 @@ class Embeddings:
                 },
             )
 
-        self.text_embedding = JinaV1TextEmbedding(
-            model_size=config.semantic_search.model_size,
-            requestor=self.requestor,
-            device="CPU",
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            # Single JinaV2Embedding instance for both text and vision
+            self.embedding = JinaV2Embedding(
+                model_size=self.config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU"
+                if self.config.semantic_search.model_size == "large"
+                else "CPU",
+            )
+            self.text_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="text"
+            )
+            self.vision_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="vision"
+            )
+        else:  # Default to jinav1
+            self.text_embedding = JinaV1TextEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="CPU",
+            )
+            self.vision_embedding = JinaV1ImageEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU" if config.semantic_search.model_size == "large" else "CPU",
+            )
+
+    def get_model_definitions(self):
+        # Version-specific models
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            models = [
+                "jinaai/jina-clip-v2-tokenizer",
+                "jinaai/jina-clip-v2-model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v2-model_quantized.onnx",
+                "jinaai/jina-clip-v2-preprocessor_config.json",
+            ]
+        else:  # Default to jinav1
+            models = [
+                "jinaai/jina-clip-v1-text_model_fp16.onnx",
+                "jinaai/jina-clip-v1-tokenizer",
+                "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
+                "jinaai/jina-clip-v1-preprocessor_config.json",
+            ]
+
+        # Add common models
+        models.extend(
+            [
+                "facenet-facenet.onnx",
+                "paddleocr-onnx-detection.onnx",
+                "paddleocr-onnx-classification.onnx",
+                "paddleocr-onnx-recognition.onnx",
+            ]
         )
 
-        self.vision_embedding = JinaV1ImageEmbedding(
-            model_size=config.semantic_search.model_size,
-            requestor=self.requestor,
-            device="GPU" if config.semantic_search.model_size == "large" else "CPU",
-        )
+        return models
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
@@ -244,7 +282,11 @@ class Embeddings:
         # Get total count of events to process
         total_events = Event.select().count()
 
-        batch_size = 32
+        batch_size = (
+            4
+            if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2
+            else 32
+        )
         current_page = 1
 
         totals = {
