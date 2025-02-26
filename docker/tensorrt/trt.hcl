@@ -95,7 +95,6 @@ target "tensorrt" {
     wget = "target:wget",
     tensorrt-base = "target:tensorrt-base",
     rootfs = "target:rootfs"
-    wheels = "target:wheels"
   }
   target = "frigate-tensorrt"
   inherits = ["_build_args"]
