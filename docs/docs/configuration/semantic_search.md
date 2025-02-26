@@ -68,7 +68,7 @@ semantic_search:
   model_size: large
 ```
 
-For most users, the V1 model remains the recommended choice.
+For most users, especially native English speakers, the V1 model remains the recommended choice.
 
 :::note
 
