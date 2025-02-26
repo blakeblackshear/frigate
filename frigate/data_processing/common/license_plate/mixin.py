@@ -816,6 +816,20 @@ class LicensePlateProcessingMixin:
         # 5. Return True if we should keep the previous plate (i.e., if it scores higher)
         return prev_score > curr_score
 
+    def __update_yolov9_metrics(self, duration: float) -> None:
+        """
+        Update inference metrics.
+        """
+        self.metrics.yolov9_lpr_fps.value = (
+            self.metrics.yolov9_lpr_fps.value * 9 + duration
+        ) / 10
+
+    def __update_lpr_metrics(self, duration: float) -> None:
+        """
+        Update inference metrics.
+        """
+        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
+
     def lpr_process(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image."""
 
@@ -843,6 +857,7 @@ class LicensePlateProcessingMixin:
 
         if self.requires_license_plate_detection:
             logger.debug("Running manual license_plate detection.")
+
             car_box = obj_data.get("box")
 
             if not car_box:
@@ -866,6 +881,9 @@ class LicensePlateProcessingMixin:
             license_plate = self._detect_license_plate(car)
             logger.debug(
                 f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+            )
+            self.__update_yolov9_metrics(
+                datetime.datetime.now().timestamp() - yolov9_start
             )
 
             if not license_plate:
@@ -945,10 +963,14 @@ class LicensePlateProcessingMixin:
                 license_plate_frame,
             )
 
+        start = datetime.datetime.now().timestamp()
+
         # run detection, returns results sorted by confidence, best first
         license_plates, confidences, areas = self._process_license_plate(
             license_plate_frame
         )
+
+        self.__update_lpr_metrics(datetime.datetime.now().timestamp() - start)
 
         logger.debug(f"Text boxes: {license_plates}")
         logger.debug(f"Confidences: {confidences}")

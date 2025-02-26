@@ -40,12 +40,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.config = config
         super().__init__(config, metrics, model_runner)
 
-    def __update_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
-
     def process_data(
         self, data: dict[str, any], data_type: PostProcessDataEnum
     ) -> None:
@@ -57,8 +51,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         Returns:
             None.
         """
-        start = datetime.datetime.now().timestamp()
-
         event_id = data["event_id"]
         camera_name = data["camera"]
 
@@ -128,7 +120,10 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
             return
 
         if WRITE_DEBUG_IMAGES:
-            cv2.imwrite(f"debug/frames/lpr_post_{start}.jpg", image)
+            cv2.imwrite(
+                f"debug/frames/lpr_post_{datetime.datetime.now().timestamp()}.jpg",
+                image,
+            )
 
         # convert to yuv for processing
         frame = cv2.cvtColor(image, cv2.COLOR_BGR2YUV_I420)
@@ -209,8 +204,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         # run the frame through lpr processing
         logger.debug(f"Post processing plate: {event_id}, {frame_time}")
         self.lpr_process(keyframe_obj_data, frame)
-
-        self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         if topic == EmbeddingsRequestEnum.reprocess_plate.value:
