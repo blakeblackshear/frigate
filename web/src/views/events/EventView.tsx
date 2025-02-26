@@ -622,6 +622,16 @@ function DetectionReview({
   // existing review item
 
   useEffect(() => {
+    if (loading || currentItems == null || itemsToReview == undefined) {
+      return;
+    }
+
+    if (currentItems.length == 0 && itemsToReview > 0) {
+      pullLatestData();
+    }
+  }, [loading, currentItems, itemsToReview, pullLatestData]);
+
+  useEffect(() => {
     if (!startTime || !currentItems || currentItems.length == 0) {
       return;
     }
