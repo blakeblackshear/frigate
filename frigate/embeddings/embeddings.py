@@ -282,7 +282,11 @@ class Embeddings:
         # Get total count of events to process
         total_events = Event.select().count()
 
-        batch_size = 4
+        batch_size = (
+            4
+            if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2
+            else 32
+        )
         current_page = 1
 
         totals = {
