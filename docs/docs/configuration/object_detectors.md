@@ -11,7 +11,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Most Hardware**
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
-- [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 
 **AMD**
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
@@ -124,13 +124,35 @@ detectors:
     device: pci
 ```
 
-## Hailo-8l
+## Hailo-8
 
-This detector is available for use with Hailo-8 AI Acceleration Module.
+This detector is available for use with Hailo-8 and Hailo-8L AI Acceleration Module.
 
 See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
 
 ### Configuration
+
+#### YOLO (Recommended)
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: hailoyolo
+  # The detector will automatically use the appropriate model:
+  # - YOLOv8s for Hailo-8L hardware
+  # - YOLOv8m for Hailo-8 hardware
+```
+
+#### SSD
 
 ```yaml
 detectors:
@@ -147,6 +169,33 @@ model:
   path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 ```
 
+
+### Custom Models
+
+The Hailo-8l detector supports all YOLO models that have been compiled for the Hailo hardware and include post-processing. The detector automatically detects your hardware type (Hailo-8 or Hailo-8L) and uses the appropriate model.
+
+#### Using a Custom URL
+
+You can specify a custom URL to download a model directly:
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+    url: https://custom-model-url.com/path/to/model.hef
+
+model:
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: hailoyolo
+```
+
+The detector will automatically handle different output formats from all supported YOLO variants. It's important to match the `model_type` with the actual model architecture for proper processing.
+* Tsted custom models : yolov5 , yolov8 , yolov9 , yolov11
 
 ## OpenVINO Detector
 

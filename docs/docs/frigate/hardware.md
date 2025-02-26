@@ -92,11 +92,37 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-### Hailo-8l PCIe
+### Hailo-8
 
-Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
+Frigate supports the Hailo8 and Hailo-8L AI Acceleration Module on compatible hardware platforms, including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo accelerator provides dedicated hardware for efficiently running neural network inference.
 
-The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
+The inference time for the Hailo-8L chip is around 17-21 ms for the SSD MobileNet Version 1 model and 15-18 ms for YOLOv8s models. For the more powerful Hailo-8 chip, the YOLOv8m model has an inference time of approximately 12-15 ms.
+
+In real-world testing with 8 cameras running simultaneously, each camera maintained a detection rate of approximately 20-25 FPS, demonstrating the Hailo accelerator's capability to handle multiple video streams efficiently.
+
+Testing on x86 platforms has also been conducted with excellent results. The x86 implementation benefits from having two PCIe lanes available instead of one, resulting in improved FPS , throughput and lower latency compared to the Raspberry Pi setup.
+
+#### Supported Models
+
+The Hailo-8L detector supports all YOLO variants that have been compiled for Hailo hardware with post-processing, including:
+
+- YOLOv5
+- YOLOv8
+- any Yolo variant with HailoRT Post-process
+- SSD mobilnet v1
+
+
+| Model Type | Hardware | Inference Time | Resolution |
+|------------|----------|----------------|------------|
+| SSD MobileNet V1 | Hailo-8L (RPi) | 17-21 ms | 300×300 |
+| SSD MobileNet V1 | Hailo-8L (x86) | 12-15 ms | 300×300 |
+| SSD MobileNet V1 | Hailo-8 (rpi) | 13-16 ms | 300×300 |
+| YOLOv8s | Hailo-8L (RPi) | 15-18 ms | 640×640 |
+| YOLOv8s | Hailo-8L (x86) | 10-13 ms | 640×640 |
+| YOLOv8m | Hailo-8 (RPi) | 12-15 ms | 640×640 |
+| YOLOv8m | Hailo-8 (x86) | 8-11 ms | 640×640 |
+
+The detector automatically detects your hardware type (Hailo-8 or Hailo-8L) and downloads the appropriate model. The Hailo detector optimizes inference by maintaining a persistent pipeline between detection calls, reducing overhead and providing fast, consistent performance with multiple cameras.
 
 ## Community Supported Detectors
 
