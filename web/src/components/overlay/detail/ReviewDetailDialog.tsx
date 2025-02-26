@@ -41,6 +41,7 @@ import { useOverlayState } from "@/hooks/use-overlay-state";
 import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -132,6 +133,14 @@ export default function ReviewDetailDialog({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [review]);
+
+  // keyboard listener
+
+  useKeyboardListener(["Esc"], (key, modifiers) => {
+    if (key == "Esc" && modifiers.down && !modifiers.repeat) {
+      setIsOpen(false);
+    }
+  });
 
   const Overlay = isDesktop ? Sheet : MobilePage;
   const Content = isDesktop ? SheetContent : MobilePageContent;
