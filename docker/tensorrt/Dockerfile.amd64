@@ -6,21 +6,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Globally set pip break-system-packages option to avoid having to specify it every time
 ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
-# Make this a separate target so it can be built/cached optionally
-FROM wheels as trt-wheels
-ARG DEBIAN_FRONTEND
-ARG TARGETARCH
-RUN python3 -m pip config set global.break-system-packages true
-
-# Add TensorRT wheels to another folder
-COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
-RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
-
 FROM tensorrt-base AS frigate-tensorrt
 ARG PIP_BREAK_SYSTEM_PACKAGES
 ENV TRT_VER=8.6.1
 
-# Install TensorRT
+# Install TensorRT wheels
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN pip3 install -U -r /requirements-tensorrt.txt && ldconfig
 
