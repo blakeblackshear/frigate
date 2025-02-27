@@ -51,11 +51,11 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
      ```bash
      docker logs frigate
      ```
-   - Visit the Frigate Web UI (default: `http://<your-ip>:8971`) to confirm the new version is running. The version number is displayed in the bottom-right corner of the UI.
+   - Visit the Frigate Web UI (default: `http://<your-ip>:5000`) to confirm the new version is running. The version number is displayed in the bottom-right corner of the UI.
 
 ### Notes
 
-- If you’ve customized your `shm-size` or other settings, ensure they’re still appropriate after the update. Refer to [Calculating required shm-size](#calculating-required-shm-size) if needed.
+- If you’ve customized other settings, ensure they’re still appropriate after the update.
 - Docker will automatically use the updated image when you restart the container, as long as you pulled the latest version.
 
 ## Updating the Home Assistant Addon
