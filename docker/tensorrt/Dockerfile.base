@@ -28,6 +28,11 @@ COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_laye
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
 
 # COPY Individual CUDA deps
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda/ && \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda/ ; \
+    fi
+
 COPY --from=trt-deps /usr/local/cuda-12.3/targets/${TARGETARCH}-linux/lib/libcurand.so.* /usr/local/cuda/
 COPY --from=trt-deps /usr/local/cuda-12.3/targets/${TARGETARCH}-linux/lib/libnvrtc.so.* /usr/local/cuda/
 
