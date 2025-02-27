@@ -16,8 +16,16 @@ RUN apt-get update \
 RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
     /tensorrt_libyolo.sh
 
+# COPY required individual CUDA deps
+RUN mkdir -p /usr/local/cuda-deps
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda-deps/ && \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda-deps/ ; \
+    fi
+
 # Frigate w/ TensorRT Support as separate image
 FROM deps AS tensorrt-base
+ARG TARGETARCH
 
 #Disable S6 Global timeout
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
@@ -26,9 +34,8 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
 
-# COPY Individual CUDA deps
-COPY --from=trt-deps /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda/
-COPY --from=trt-deps /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda/
+# COPY Individual CUDA deps folder
+COPY --from=trt-deps /usr/local/cuda-deps /usr/local/cuda
 
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS=""
