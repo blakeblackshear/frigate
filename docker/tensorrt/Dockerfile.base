@@ -18,6 +18,7 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target
 
 # Frigate w/ TensorRT Support as separate image
 FROM deps AS tensorrt-base
+ARG TARGETARCH
 
 #Disable S6 Global timeout
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
