@@ -11,9 +11,9 @@ Keeping Frigate up to date ensures you benefit from the latest features, perform
 
 ## Before You Begin
 
+- **Stop Frigate**: For most methods, you’ll need to stop the running Frigate instance before backing up and updating.
 - **Backup Your Configuration**: Always back up your `/config` directory (e.g., `config.yml` and `frigate.db`, the SQLite database) before updating. This ensures you can roll back if something goes wrong.
 - **Check Release Notes**: Carefully review the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases) for breaking changes or configuration updates that might affect your setup.
-- **Stop Frigate**: For most methods, you’ll need to stop the running Frigate instance before updating.
 
 ## Updating with Docker
 
