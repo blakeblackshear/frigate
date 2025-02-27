@@ -33,9 +33,6 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
       cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda/ ; \
     fi
 
-COPY --from=trt-deps /usr/local/cuda-12.3/targets/${TARGETARCH}-linux/lib/libcurand.so.* /usr/local/cuda/
-COPY --from=trt-deps /usr/local/cuda-12.3/targets/${TARGETARCH}-linux/lib/libnvrtc.so.* /usr/local/cuda/
-
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS=""
 
