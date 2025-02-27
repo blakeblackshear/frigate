@@ -1,0 +1,104 @@
+---
+id: updating
+title: Updating
+---
+
+# Updating Frigate
+
+The current stable version of Frigate is **0.15**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.15.0).
+
+Keeping Frigate up to date ensures you benefit from the latest features, performance improvements, and bug fixes. The update process varies slightly depending on your installation method (Docker, Home Assistant Addon, etc.). Below are instructions for the most common setups.
+
+## Before You Begin
+
+- **Backup Your Configuration**: Always back up your `/config` directory (e.g., `config.yml` and the SQLite database) before updating. This ensures you can roll back if something goes wrong.
+- **Check Release Notes**: Carefully review the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases) for breaking changes or configuration updates that might affect your setup.
+- **Stop Frigate**: For most methods, you’ll need to stop the running Frigate instance before updating.
+
+## Updating with Docker
+
+If you’re running Frigate via Docker (recommended method), follow these steps:
+
+1. **Stop the Container**:
+
+   - If using Docker Compose:
+     ```bash
+     docker compose down frigate
+     ```
+   - If using `docker run`:
+     ```bash
+     docker stop frigate
+     ```
+
+2. **Pull the Latest Image**:
+
+   - Use the appropriate image tag for your setup (e.g., `stable`, `stable-tensorrt`, etc.). For example:
+     ```bash
+     docker pull ghcr.io/blakeblackshear/frigate:stable
+     ```
+   - This downloads the latest version of the specified tag. The `stable` tag always points to the most recent stable release.
+
+3. **Start the Container**:
+
+   - If using Docker Compose:
+     ```bash
+     docker compose  up -d
+     ```
+   - If using `docker run`, re-run your original command (e.g., from the [Installation](#docker) section) with the updated image.
+
+4. **Verify the Update**:
+   - Check the container logs to ensure Frigate starts successfully:
+     ```bash
+     docker logs frigate
+     ```
+   - Visit the Frigate Web UI (default: `http://<your-ip>:8971`) to confirm the new version is running. The version number is displayed in the bottom-right corner of the UI.
+
+### Notes
+
+- If you’ve customized your `shm-size` or other settings, ensure they’re still appropriate after the update. Refer to [Calculating required shm-size](#calculating-required-shm-size) if needed.
+- Docker will automatically use the updated image when you restart the container, as long as you pulled the latest version.
+
+## Updating the Home Assistant Addon
+
+For users running Frigate as a Home Assistant Addon:
+
+1. **Check for Updates**:
+
+   - Navigate to **Settings > Add-ons** in Home Assistant.
+   - Find your installed Frigate addon (e.g., "Frigate NVR" or "Frigate NVR (Full Access)").
+   - If an update is available, you’ll see an "Update" button.
+
+2. **Update the Addon**:
+
+   - Click the "Update" button next to the Frigate addon.
+   - Wait for the process to complete. Home Assistant will handle downloading and installing the new version.
+
+3. **Restart the Addon**:
+
+   - After updating, go to the addon’s page and click "Restart" to apply the changes.
+
+4. **Verify the Update**:
+   - Check the addon logs (under the "Log" tab) to ensure Frigate starts without errors.
+   - Access the Frigate Web UI to confirm the new version is running.
+
+### Notes
+
+- Ensure your `/config/frigate.yml` is compatible with the new version by reviewing the [release notes](https://github.com/blakeblackshear/frigate/releases).
+- If using custom hardware (e.g., Coral or GPU), verify that configurations still work, as addon updates don’t modify your hardware settings.
+
+## Rolling Back
+
+If an update causes issues:
+
+1. Stop Frigate.
+2. Restore your backed-up config file and database.
+3. Revert to the previous image version:
+   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.14.1`) and restart.
+   - For Home Assistant: Reinstall the previous addon version manually via the repository if needed.
+4. Restart and verify.
+
+## Troubleshooting
+
+- **Container Fails to Start**: Check logs (`docker logs frigate`) for errors.
+- **UI Not Loading**: Ensure ports (e.g., 5000, 8971) are still mapped correctly and the service is running.
+- **Hardware Issues**: Revisit hardware-specific setup (e.g., Coral, GPU) if detection or decoding fails post-update.
