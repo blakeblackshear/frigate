@@ -30,21 +30,33 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
      docker stop frigate
      ```
 
-2. **Pull the Latest Image**:
+2. **Update and Pull the Latest Image**:
 
-   - Use the appropriate image tag for your setup (e.g., `0.15.0`, `0.15.0-tensorrt`, etc.). For example:
-     ```bash
-     docker pull ghcr.io/blakeblackshear/frigate:0.15.0
-     ```
-   - This downloads the specified version from the container repository.
+   - If using Docker Compose:
+     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.15.0` instead of `0.14.1`). For example:
+       ```yaml
+       services:
+         frigate:
+           image: ghcr.io/blakeblackshear/frigate:0.15.0
+       ```
+     - Then pull the image:
+       ```bash
+       docker pull ghcr.io/blakeblackshear/frigate:0.15.0
+       ```
+     - **Note for `stable` Tag Users**: If your `docker-compose.yml` uses the `stable` tag (e.g., `ghcr.io/blakeblackshear/frigate:stable`), you don’t need to update the tag manually. The `stable` tag always points to the latest stable release after pulling.
+   - If using `docker run`:
+     - Pull the image with the appropriate tag (e.g., `0.15.0`, `0.15.0-tensorrt`, or `stable`):
+       ```bash
+       docker pull ghcr.io/blakeblackshear/frigate:0.15.0
+       ```
 
 3. **Start the Container**:
 
    - If using Docker Compose:
      ```bash
-     docker compose  up -d
+     docker compose up -d
      ```
-   - If using `docker run`, re-run your original command (e.g., from the [Installation](#docker) section) with the updated image.
+   - If using `docker run`, re-run your original command (e.g., from the [Installation](#docker) section) with the updated image tag.
 
 4. **Verify the Update**:
    - Check the container logs to ensure Frigate starts successfully:
@@ -55,8 +67,8 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
 
 ### Notes
 
-- If you’ve customized other settings, ensure they’re still appropriate after the update.
-- Docker will automatically use the updated image when you restart the container, as long as you pulled the latest version.
+- If you’ve customized other settings (e.g., `shm-size`), ensure they’re still appropriate after the update.
+- Docker will automatically use the updated image when you restart the container, as long as you pulled the correct version.
 
 ## Updating the Home Assistant Addon
 
@@ -83,7 +95,7 @@ For users running Frigate as a Home Assistant Addon:
 
 ### Notes
 
-- Ensure your `/config/frigate.yml` is compatible with the new version by reviewing the [release notes](https://github.com/blakeblackshear/frigate/releases).
+- Ensure your `/config/frigate.yml` is compatible with the new version by reviewing the [Release notes](https://github.com/blakeblackshear/frigate/releases).
 - If using custom hardware (e.g., Coral or GPU), verify that configurations still work, as addon updates don’t modify your hardware settings.
 
 ## Rolling Back
@@ -93,9 +105,10 @@ If an update causes issues:
 1. Stop Frigate.
 2. Restore your backed-up config file and database.
 3. Revert to the previous image version:
-   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.14.1`) and restart.
-   - For Home Assistant: Reinstall the previous addon version manually via the repository if needed.
-4. Restart and verify.
+   - For Docker: Specify an older tag (e.g., `ghcr.io/blakeblackshear/frigate:0.14.1`) in your `docker run` command.
+   - For Docker Compose: Edit your `docker-compose.yml`, specify the older version tag (e.g., `ghcr.io/blakeblackshear/frigate:0.14.1`), and re-run `docker compose up -d`.
+   - For Home Assistant: Reinstall the previous addon version manually via the repository if needed and restart the addon.
+4. Verify the old version is running again.
 
 ## Troubleshooting
 
