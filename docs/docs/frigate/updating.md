@@ -5,7 +5,7 @@ title: Updating
 
 # Updating Frigate
 
-The current stable version of Frigate is **0.15**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.15.0).
+The current stable version of Frigate is **0.15.0**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.15.0).
 
 Keeping Frigate up to date ensures you benefit from the latest features, performance improvements, and bug fixes. The update process varies slightly depending on your installation method (Docker, Home Assistant Addon, etc.). Below are instructions for the most common setups.
 
@@ -32,11 +32,11 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
 
 2. **Pull the Latest Image**:
 
-   - Use the appropriate image tag for your setup (e.g., `stable`, `stable-tensorrt`, etc.). For example:
+   - Use the appropriate image tag for your setup (e.g., `0.15.0`, `0.15.0-tensorrt`, etc.). For example:
      ```bash
-     docker pull ghcr.io/blakeblackshear/frigate:stable
+     docker pull ghcr.io/blakeblackshear/frigate:0.15.0
      ```
-   - This downloads the latest version of the specified tag. The `stable` tag always points to the most recent stable release.
+   - This downloads the specified version from the container repository.
 
 3. **Start the Container**:
 
