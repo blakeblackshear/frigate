@@ -8,6 +8,7 @@ const sidebars: SidebarsConfig = {
       'frigate/index',
       'frigate/hardware',
       'frigate/installation',
+      'frigate/updating',
       'frigate/camera_setup',
       'frigate/video_pipeline',
       'frigate/glossary',
