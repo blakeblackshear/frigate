@@ -473,7 +473,7 @@ class RecordingMaintainer(threading.Thread):
                     # get the segment size of the cache file
                     # file without faststart is same size
                     segment_size = round(
-                        float(os.path.getsize(cache_path)) / pow(2, 20), 1
+                        float(os.path.getsize(cache_path)) / pow(2, 20), 2
                     )
                 except OSError:
                     segment_size = 0
