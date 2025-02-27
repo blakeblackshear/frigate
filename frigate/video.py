@@ -102,6 +102,7 @@ def capture_frames(
     skipped_fps: mp.Value,
     current_frame: mp.Value,
     stop_event: mp.Event,
+    enabled: mp.Value,
 ):
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
@@ -110,6 +111,10 @@ def capture_frames(
     skipped_eps.start()
 
     while True:
+        if not enabled.value:
+            logger.info(f"Stopping capture thread for disabled {config.name}")
+            break
+
         fps.value = frame_rate.eps()
         skipped_fps.value = skipped_eps.eps()
         current_frame.value = datetime.datetime.now().timestamp()
@@ -157,6 +162,7 @@ class CameraWatchdog(threading.Thread):
         skipped_fps,
         ffmpeg_pid,
         stop_event,
+        enabled: mp.Value,
     ):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
@@ -177,27 +183,47 @@ class CameraWatchdog(threading.Thread):
         self.frame_index = 0
         self.stop_event = stop_event
         self.sleeptime = self.config.ffmpeg.retry_interval
+        self.enabled = enabled
+        self.was_enabled = self.enabled.value
 
     def run(self):
-        self.start_ffmpeg_detect()
-
-        for c in self.config.ffmpeg_cmds:
-            if "detect" in c["roles"]:
-                continue
-            logpipe = LogPipe(
-                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
-            )
-            self.ffmpeg_other_processes.append(
-                {
-                    "cmd": c["cmd"],
-                    "roles": c["roles"],
-                    "logpipe": logpipe,
-                    "process": start_or_restart_ffmpeg(c["cmd"], self.logger, logpipe),
-                }
-            )
+        if self.enabled.value:
+            self.start_ffmpeg_detect()
 
         time.sleep(self.sleeptime)
         while not self.stop_event.wait(self.sleeptime):
+            enabled = self.enabled.value
+            if enabled != self.was_enabled:
+                if enabled:
+                    self.logger.info(f"Enabling camera {self.camera_name}")
+                    # Reinitialize logpipe when enabling
+                    self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
+                    self.start_ffmpeg_detect()
+                    for c in self.config.ffmpeg_cmds:
+                        if "detect" in c["roles"]:
+                            continue
+                        logpipe = LogPipe(
+                            f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
+                        )
+                        self.ffmpeg_other_processes.append(
+                            {
+                                "cmd": c["cmd"],
+                                "roles": c["roles"],
+                                "logpipe": logpipe,
+                                "process": start_or_restart_ffmpeg(
+                                    c["cmd"], self.logger, logpipe
+                                ),
+                            }
+                        )
+                else:
+                    self.logger.info(f"Disabling camera {self.camera_name}")
+                    self.stop_all_ffmpeg()
+                self.was_enabled = enabled
+                continue
+
+            if not enabled:
+                continue
+
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
@@ -209,6 +235,8 @@ class CameraWatchdog(threading.Thread):
                     "The following ffmpeg logs include the last 100 lines prior to exit."
                 )
                 self.logpipe.dump()
+                # reinitialize logpipe on restart after crash
+                self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
                 self.camera_fps.value = 0
@@ -279,11 +307,7 @@ class CameraWatchdog(threading.Thread):
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
 
-        stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
-        for p in self.ffmpeg_other_processes:
-            stop_ffmpeg(p["process"], self.logger)
-            p["logpipe"].close()
-        self.logpipe.close()
+        self.stop_all_ffmpeg()
 
     def start_ffmpeg_detect(self):
         ffmpeg_cmd = [
@@ -303,8 +327,26 @@ class CameraWatchdog(threading.Thread):
             self.camera_fps,
             self.skipped_fps,
             self.stop_event,
+            self.enabled,
         )
         self.capture_thread.start()
+
+    def stop_all_ffmpeg(self):
+        if self.capture_thread is not None and self.capture_thread.is_alive():
+            self.capture_thread.join(timeout=5)
+            if self.capture_thread.is_alive():
+                self.logger.warning(
+                    f"Capture thread for {self.camera_name} did not stop gracefully."
+                )
+        if self.ffmpeg_detect_process is not None:
+            stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
+            self.ffmpeg_detect_process = None
+        for p in self.ffmpeg_other_processes[:]:
+            if p["process"] is not None:
+                stop_ffmpeg(p["process"], self.logger)
+            p["logpipe"].close()
+        self.ffmpeg_other_processes.clear()
+        self.logpipe.close()
 
     def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
         """Checks if ffmpeg is still writing recording segments to cache."""
@@ -344,6 +386,7 @@ class CameraCapture(threading.Thread):
         fps,
         skipped_fps,
         stop_event,
+        enabled,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{config.name}"
@@ -359,6 +402,7 @@ class CameraCapture(threading.Thread):
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value("d", 0.0)
         self.last_frame = 0
+        self.enabled = enabled
 
     def run(self):
         capture_frames(
@@ -373,6 +417,7 @@ class CameraCapture(threading.Thread):
             self.skipped_fps,
             self.current_frame,
             self.stop_event,
+            self.enabled,
         )
 
 
@@ -390,6 +435,9 @@ def capture_camera(
     threading.current_thread().name = f"capture:{name}"
     setproctitle(f"frigate.capture:{name}")
 
+    # Sync enabled state with config (optional, since app.py sets it)
+    camera_metrics.enabled.value = config.enabled
+
     camera_watchdog = CameraWatchdog(
         name,
         config,
@@ -399,6 +447,7 @@ def capture_camera(
         camera_metrics.skipped_fps,
         camera_metrics.ffmpeg_pid,
         stop_event,
+        camera_metrics.enabled,
     )
     camera_watchdog.start()
     camera_watchdog.join()
