@@ -2,6 +2,7 @@ import {
   useAudioState,
   useAutotrackingState,
   useDetectState,
+  useEnabledState,
   usePtzCommand,
   useRecordingsState,
   useSnapshotsState,
@@ -82,6 +83,8 @@ import {
   LuHistory,
   LuInfo,
   LuPictureInPicture,
+  LuPower,
+  LuPowerOff,
   LuVideo,
   LuVideoOff,
   LuX,
@@ -935,6 +938,9 @@ function FrigateCameraFeatures({
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
   );
+  const { payload: enabledState, send: sendEnabled } = useEnabledState(
+    camera.name,
+  );
   const { payload: recordState, send: sendRecord } = useRecordingsState(
     camera.name,
   );
@@ -1043,6 +1049,22 @@ function FrigateCameraFeatures({
   if (isDesktop || isTablet) {
     return (
       <>
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={enabledState == "ON" ? LuPower : LuPowerOff}
+          isActive={enabledState == "ON"}
+          title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
+          onClick={() => sendEnabled("ON")}
+        />
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={LuPowerOff}
+          isActive={enabledState == "OFF"}
+          title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
+          onClick={() => sendEnabled("OFF")}
+        />
         <CameraFeatureToggle
           className="p-2 md:p-0"
           variant={fullscreen ? "overlay" : "primary"}
