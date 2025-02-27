@@ -102,3 +102,5 @@ If an update causes issues:
 - **Container Fails to Start**: Check logs (`docker logs frigate`) for errors.
 - **UI Not Loading**: Ensure ports (e.g., 5000, 8971) are still mapped correctly and the service is running.
 - **Hardware Issues**: Revisit hardware-specific setup (e.g., Coral, GPU) if detection or decoding fails post-update.
+
+Common questions are often answered in the [FAQ](https://github.com/blakeblackshear/frigate/discussions), pinned at the top of the support discussions.
