@@ -282,16 +282,24 @@ def stats_snapshot(
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
-    if config.semantic_search.enabled:
-        embeddings_metrics = stats_tracking["embeddings_metrics"]
-        stats["embeddings"] = {
-            "image_embedding_speed": round(
-                embeddings_metrics.image_embeddings_fps.value * 1000, 2
-            ),
-            "text_embedding_speed": round(
-                embeddings_metrics.text_embeddings_sps.value * 1000, 2
-            ),
-        }
+    stats["embeddings"] = {}
+
+    # Get metrics if available
+    embeddings_metrics = stats_tracking.get("embeddings_metrics")
+
+    if embeddings_metrics:
+        # Add metrics based on what's enabled
+        if config.semantic_search.enabled:
+            stats["embeddings"].update(
+                {
+                    "image_embedding_speed": round(
+                        embeddings_metrics.image_embeddings_fps.value * 1000, 2
+                    ),
+                    "text_embedding_speed": round(
+                        embeddings_metrics.text_embeddings_sps.value * 1000, 2
+                    ),
+                }
+            )
 
         if config.face_recognition.enabled:
             stats["embeddings"]["face_recognition_speed"] = round(
@@ -302,6 +310,7 @@ def stats_snapshot(
             stats["embeddings"]["plate_recognition_speed"] = round(
                 embeddings_metrics.alpr_pps.value * 1000, 2
             )
+
             if "license_plate" not in config.objects.all_objects:
                 stats["embeddings"]["yolov9_plate_detection_speed"] = round(
                     embeddings_metrics.yolov9_lpr_fps.value * 1000, 2

@@ -28,8 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
-    # Only initialize embeddings if semantic search is enabled
-    if not config.semantic_search.enabled:
+    # Only initialize embeddings if semantic search or lpr or face rec is enabled
+    if (
+        not config.semantic_search.enabled
+        and not config.lpr.enabled
+        and not config.face_recognition.enabled
+    ):
         return
 
     stop_event = mp.Event()

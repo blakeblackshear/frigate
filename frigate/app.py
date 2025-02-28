@@ -93,7 +93,13 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
         self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics() if config.semantic_search.enabled else None
+            DataProcessorMetrics()
+            if (
+                config.semantic_search.enabled
+                or config.lpr.enabled
+                or config.face_recognition.enabled
+            )
+            else None
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
@@ -236,7 +242,11 @@ class FrigateApp:
         logger.info(f"Review process started: {review_segment_process.pid}")
 
     def init_embeddings_manager(self) -> None:
-        if not self.config.semantic_search.enabled:
+        if (
+            not self.config.semantic_search.enabled
+            and not self.config.lpr.enabled
+            and not self.config.face_recognition.enabled
+        ):
             return
 
         embedding_process = util.Process(
@@ -293,7 +303,11 @@ class FrigateApp:
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_embeddings_client(self) -> None:
-        if self.config.semantic_search.enabled:
+        if (
+            self.config.semantic_search.enabled
+            or self.config.lpr.enabled
+            or self.config.face_recognition.enabled
+        ):
             # Create a client for other processes to use
             self.embeddings = EmbeddingsContext(self.db)
 

@@ -71,7 +71,9 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
-        self.embeddings = Embeddings(config, db, metrics)
+
+        if config.semantic_search.enabled:
+            self.embeddings = Embeddings(config, db, metrics)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -143,7 +145,8 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
         self.event_metadata_subscriber.stop()
-        self.embeddings_responder.stop()
+        if self.config.semantic_search.enabled:
+            self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
 
@@ -432,6 +435,9 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _embed_thumbnail(self, event_id: str, thumbnail: bytes) -> None:
         """Embed the thumbnail for an event."""
+        if not self.config.semantic_search.enabled:
+            return
+
         self.embeddings.embed_thumbnail(event_id, thumbnail)
 
     def _embed_description(self, event: Event, thumbnails: list[bytes]) -> None:
@@ -457,7 +463,8 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         # Embed the description
-        self.embeddings.embed_description(event.id, description)
+        if self.config.semantic_search.enabled:
+            self.embeddings.embed_description(event.id, description)
 
         logger.debug(
             "Generated description for %s (%d images): %s",
