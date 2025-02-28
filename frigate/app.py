@@ -403,7 +403,7 @@ class FrigateApp:
         output_processor = util.Process(
             target=output_frames,
             name="output_processor",
-            args=(self.config,),
+            args=(self.config, self.camera_metrics),
         )
         output_processor.daemon = True
         self.output_processor = output_processor
