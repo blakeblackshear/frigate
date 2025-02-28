@@ -308,9 +308,14 @@ class FrigateApp:
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_embeddings_client(self) -> None:
+        genai_cameras = [
+            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
+        ]
+
         if (
             self.config.semantic_search.enabled
             or self.config.lpr.enabled
+            or genai_cameras
             or self.config.face_recognition.enabled
         ):
             # Create a client for other processes to use
