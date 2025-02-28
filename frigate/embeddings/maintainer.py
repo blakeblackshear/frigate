@@ -75,9 +75,9 @@ class EmbeddingMaintainer(threading.Thread):
         if config.semantic_search.enabled:
             self.embeddings = Embeddings(config, db, metrics)
 
-        # Check if we need to re-index events
-        if config.semantic_search.reindex:
-            self.embeddings.reindex()
+            # Check if we need to re-index events
+            if config.semantic_search.reindex:
+                self.embeddings.reindex()
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -145,8 +145,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
         self.event_metadata_subscriber.stop()
-        if self.config.semantic_search.enabled:
-            self.embeddings_responder.stop()
+        self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
 
@@ -155,30 +154,30 @@ class EmbeddingMaintainer(threading.Thread):
 
         def _handle_request(topic: str, data: dict[str, any]) -> str:
             try:
-                if topic == EmbeddingsRequestEnum.embed_description.value:
-                    return serialize(
-                        self.embeddings.embed_description(
-                            data["id"], data["description"]
-                        ),
-                        pack=False,
-                    )
-                elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
-                    thumbnail = base64.b64decode(data["thumbnail"])
-                    return serialize(
-                        self.embeddings.embed_thumbnail(data["id"], thumbnail),
-                        pack=False,
-                    )
-                elif topic == EmbeddingsRequestEnum.generate_search.value:
-                    return serialize(
-                        self.embeddings.embed_description("", data, upsert=False),
-                        pack=False,
-                    )
-                else:
-                    processors = [self.realtime_processors, self.post_processors]
-                    for processor_list in processors:
-                        for processor in processor_list:
-                            resp = processor.handle_request(topic, data)
-
+                # First handle the embedding-specific topics when semantic search is enabled
+                if self.config.semantic_search.enabled:
+                    if topic == EmbeddingsRequestEnum.embed_description.value:
+                        return serialize(
+                            self.embeddings.embed_description(
+                                data["id"], data["description"]
+                            ),
+                            pack=False,
+                        )
+                    elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                        thumbnail = base64.b64decode(data["thumbnail"])
+                        return serialize(
+                            self.embeddings.embed_thumbnail(data["id"], thumbnail),
+                            pack=False,
+                        )
+                    elif topic == EmbeddingsRequestEnum.generate_search.value:
+                        return serialize(
+                            self.embeddings.embed_description("", data, upsert=False),
+                            pack=False,
+                        )
+                processors = [self.realtime_processors, self.post_processors]
+                for processor_list in processors:
+                    for processor in processor_list:
+                        resp = processor.handle_request(topic, data)
                         if resp is not None:
                             return resp
             except Exception as e:
