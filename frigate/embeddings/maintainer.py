@@ -71,6 +71,7 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
+        self.embeddings = None
 
         if config.semantic_search.enabled:
             self.embeddings = Embeddings(config, db, metrics)

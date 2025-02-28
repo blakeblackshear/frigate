@@ -242,8 +242,13 @@ class FrigateApp:
         logger.info(f"Review process started: {review_segment_process.pid}")
 
     def init_embeddings_manager(self) -> None:
+        genai_cameras = [
+            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
+        ]
+
         if (
             not self.config.semantic_search.enabled
+            and not genai_cameras
             and not self.config.lpr.enabled
             and not self.config.face_recognition.enabled
         ):
