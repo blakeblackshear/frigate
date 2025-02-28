@@ -8,6 +8,7 @@ ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.12-py3
 # Build TensorRT-specific library
 FROM ${TRT_BASE} AS trt-deps
 
+ARG TARGETARCH
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
@@ -25,7 +26,6 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 
 # Frigate w/ TensorRT Support as separate image
 FROM deps AS tensorrt-base
-ARG TARGETARCH
 
 #Disable S6 Global timeout
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
