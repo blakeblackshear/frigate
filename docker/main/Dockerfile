@@ -305,8 +305,12 @@ RUN npm run build \
     && mv dist/BASE_PATH/monacoeditorwork/* dist/assets/ \
     && rm -rf dist/BASE_PATH
 
+# Add dummy scratch stage to prevent image updates on every build
+FROM scratch AS scratch-rootfs
+CMD ["echo", "Dummy scratch stage"]
+
 # Collect final files in a single layer
-FROM scratch AS rootfs
+FROM scratch-rootfs AS rootfs
 
 WORKDIR /opt/frigate/
 COPY frigate frigate/
