@@ -196,8 +196,6 @@ class CameraWatchdog(threading.Thread):
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.info(f"Enabling camera {self.camera_name}")
-                    # Reinitialize logpipe when enabling
-                    self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
                     self.start_ffmpeg_detect()
                     for c in self.config.ffmpeg_cmds:
                         if "detect" in c["roles"]:
@@ -235,8 +233,6 @@ class CameraWatchdog(threading.Thread):
                     "The following ffmpeg logs include the last 100 lines prior to exit."
                 )
                 self.logpipe.dump()
-                # reinitialize logpipe on restart after crash
-                self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
                 self.camera_fps.value = 0
@@ -308,6 +304,7 @@ class CameraWatchdog(threading.Thread):
                 )
 
         self.stop_all_ffmpeg()
+        self.logpipe.close()
 
     def start_ffmpeg_detect(self):
         ffmpeg_cmd = [
@@ -346,7 +343,6 @@ class CameraWatchdog(threading.Thread):
                 stop_ffmpeg(p["process"], self.logger)
             p["logpipe"].close()
         self.ffmpeg_other_processes.clear()
-        self.logpipe.close()
 
     def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
         """Checks if ffmpeg is still writing recording segments to cache."""
