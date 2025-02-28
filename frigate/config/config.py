@@ -172,16 +172,6 @@ class RestreamConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-def verify_semantic_search_dependent_configs(config: FrigateConfig) -> None:
-    """Verify that semantic search is enabled if required features are enabled."""
-    if not config.semantic_search.enabled:
-        if config.genai.enabled:
-            raise ValueError("Genai requires semantic search to be enabled.")
-
-        if config.face_recognition.enabled:
-            raise ValueError("Face recognition requires semantic to be enabled.")
-
-
 def verify_config_roles(camera_config: CameraConfig) -> None:
     """Verify that roles are setup in the config correctly."""
     assigned_roles = list(
@@ -647,7 +637,6 @@ class FrigateConfig(FrigateBaseModel):
             detector_config.model = model
             self.detectors[key] = detector_config
 
-        verify_semantic_search_dependent_configs(self)
         return self
 
     @field_validator("cameras")
