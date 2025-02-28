@@ -363,6 +363,10 @@ export interface FrigateConfig {
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
 
+  lpr: {
+    enabled: boolean;
+  };
+
   logger: {
     default: string;
     logs: Record<string, string>;
