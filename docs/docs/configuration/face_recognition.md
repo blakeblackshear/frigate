@@ -9,7 +9,7 @@ Frigate has support for CV2 Local Binary Pattern Face Recognizer to recognize fa
 
 ## Configuration
 
-Face recognition is disabled by default and requires semantic search to be enabled, face recognition must be enabled in your config file before it can be used. Semantic Search and face recognition are global configuration settings.
+Face recognition is disabled by default, face recognition must be enabled in your config file before it can be used. Face recognition is a global configuration setting.
 
 ```yaml
 face_recognition:
@@ -36,6 +36,7 @@ The accuracy of face recognition is heavily dependent on the quality of data giv
 :::tip
 
 When choosing images to include in the face training set it is recommended to always follow these recommendations:
+
 - If it is difficult to make out details in a persons face it will not be helpful in training.
 - Avoid images with under/over-exposure.
 - Avoid blurry / pixelated images.

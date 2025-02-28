@@ -1083,10 +1083,7 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if (
-        request.app.frigate_config.semantic_search.enabled
-        and camera_config.genai.enabled
-    ):
+    if camera_config.genai.enabled:
         request.app.event_metadata_updater.publish((event.id, params.source))
 
         return JSONResponse(

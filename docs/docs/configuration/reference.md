@@ -570,7 +570,6 @@ lpr:
   known_plates: {}
 
 # Optional: Configuration for AI generated tracked object descriptions
-# NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
 # to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
 # the camera level (enabled: False) to enhance privacy for indoor cameras.
