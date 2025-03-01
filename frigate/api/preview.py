@@ -9,7 +9,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from frigate.api.defs.tags import Tags
-from frigate.const import CACHE_DIR, PREVIEW_FRAME_TYPE
+from frigate.const import BASE_DIR, CACHE_DIR, PREVIEW_FRAME_TYPE
 from frigate.models import Previews
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def preview_ts(camera_name: str, start_ts: float, end_ts: float):
         clips.append(
             {
                 "camera": preview["camera"],
-                "src": preview["path"].replace("/media/frigate", ""),
+                "src": preview["path"].replace(BASE_DIR, ""),
                 "type": "video/mp4",
                 "start": preview["start_time"],
                 "end": preview["end_time"],
