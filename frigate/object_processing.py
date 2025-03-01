@@ -61,6 +61,7 @@ class CameraState:
         self.previous_frame_id = None
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.prev_enabled = self.camera_config.enabled
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -425,6 +426,7 @@ class TrackedObjectProcessor(threading.Thread):
         dispatcher: Dispatcher,
         tracked_objects_queue,
         ptz_autotracker_thread,
+        camera_metrics,
         stop_event,
     ):
         super().__init__(name="detected_frames_processor")
@@ -436,6 +438,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.camera_metrics = camera_metrics
 
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
@@ -681,6 +684,37 @@ class TrackedObjectProcessor(threading.Thread):
 
     def run(self):
         while not self.stop_event.is_set():
+            for camera, config in self.config.cameras.items():
+                if not config.enabled_in_config:
+                    continue
+
+                current_enabled = self.camera_metrics[camera].enabled.value
+                camera_state = self.camera_states[camera]
+
+                if camera_state.prev_enabled and not current_enabled:
+                    logger.info(f"Not processing objects for disabled camera {camera}")
+                    last_frame_name = camera_state.previous_frame_id
+                    for obj_id, obj in list(camera_state.tracked_objects.items()):
+                        if "end_time" not in obj.obj_data:
+                            logger.info(
+                                f"Camera {camera} disabled, ending active events"
+                            )
+                            obj.obj_data["end_time"] = (
+                                datetime.datetime.now().timestamp()
+                            )
+                            # end callbacks
+                            for callback in camera_state.callbacks["end"]:
+                                callback(camera, obj, last_frame_name)
+
+                            # camera activity callbacks
+                            for callback in camera_state.callbacks["camera_activity"]:
+                                callback(camera, {"motion": 0, "objects": []})
+
+                camera_state.prev_enabled = current_enabled
+
+                if not current_enabled:
+                    continue
+
             try:
                 (
                     camera,
@@ -691,6 +725,10 @@ class TrackedObjectProcessor(threading.Thread):
                     regions,
                 ) = self.tracked_objects_queue.get(True, 1)
             except queue.Empty:
+                continue
+
+            if not self.camera_metrics[camera].enabled.value:
+                logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
             camera_state = self.camera_states[camera]

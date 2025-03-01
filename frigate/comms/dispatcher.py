@@ -296,13 +296,14 @@ class Dispatcher:
             if not self.camera_metrics[camera_name].enabled.value:
                 logger.info(f"Turning on camera {camera_name}")
                 self.camera_metrics[camera_name].enabled.value = True
-                # camera_settings.enabled = True
+                camera_settings.enabled = True
         elif payload == "OFF":
             if self.camera_metrics[camera_name].enabled.value:
                 logger.info(f"Turning off camera {camera_name}")
                 self.camera_metrics[camera_name].enabled.value = False
-                # camera_settings.enabled = False
+                camera_settings.enabled = False
 
+        self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)
         self.publish(f"{camera_name}/camera/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:

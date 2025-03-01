@@ -594,7 +594,37 @@ def process_frames(
 
     region_min_size = get_min_region_size(model_config)
 
+    prev_enabled = camera_metrics.enabled.value
+
     while not stop_event.is_set():
+        current_enabled = camera_metrics.enabled.value
+
+        if prev_enabled and not current_enabled and camera_metrics.frame_queue.empty():
+            logger.debug(f"Camera {camera_name} disabled, clearing tracked objects")
+
+            # Clear norfair's dictionaries
+            object_tracker.tracked_objects.clear()
+            object_tracker.disappeared.clear()
+            object_tracker.stationary_box_history.clear()
+            object_tracker.positions.clear()
+            object_tracker.track_id_map.clear()
+
+            # Clear internal norfair states
+            for trackers_by_type in object_tracker.trackers.values():
+                for tracker in trackers_by_type.values():
+                    tracker.tracked_objects = []
+            for tracker in object_tracker.default_tracker.values():
+                tracker.tracked_objects = []
+
+            # Notify downstream to clear objects
+            detected_objects_queue.put((camera_name, None, 0.0, {}, [], []))
+
+        prev_enabled = current_enabled
+
+        if not current_enabled:
+            time.sleep(0.1)
+            continue
+
         # check for updated detect config
         _, updated_detect_config = config_subscriber.check_for_update()
 

@@ -395,6 +395,7 @@ class FrigateApp:
             self.dispatcher,
             self.detected_frames_queue,
             self.ptz_autotracker_thread,
+            self.camera_metrics,
             self.stop_event,
         )
         self.detected_frames_processor.start()
