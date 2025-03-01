@@ -562,30 +562,15 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 #### D-FINE
 
-[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default.
+[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
-To export as ONNX:
+:::warning
 
-1. Clone: https://github.com/Peterande/D-FINE and install all dependencies.
-2. Select and download a checkpoint from the [readme](https://github.com/Peterande/D-FINE).
-3. Modify line 58 of `tools/deployment/export_onnx.py` and change batch size to 1: `data = torch.rand(1, 3, 640, 640)`
-4. Run the export, making sure you select the right config, for your checkpoint.
-
-Example:
-
-```
-python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml -r output/dfine_m_obj2coco.pth
-```
-
-:::tip
-
-Model export has only been tested on Linux (or WSL2). Not all dependencies are in `requirements.txt`. Some live in the deployment folder, and some are still missing entirely and must be installed manually.
-
-Make sure you change the batch size to 1 before exporting.
+D-FINE is currently not supported on OpenVINO
 
 :::
 
-After placing the downloaded onnx model in your config folder, you can use the following configuration:
+After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 
 ```yaml
 detectors:
@@ -783,6 +768,29 @@ Some model types are not included in Frigate by default.
 ## Downloading Models
 
 Here are some tips for getting different model types
+
+### Downloading D-FINE Model
+
+To export as ONNX:
+
+1. Clone: https://github.com/Peterande/D-FINE and install all dependencies.
+2. Select and download a checkpoint from the [readme](https://github.com/Peterande/D-FINE).
+3. Modify line 58 of `tools/deployment/export_onnx.py` and change batch size to 1: `data = torch.rand(1, 3, 640, 640)`
+4. Run the export, making sure you select the right config, for your checkpoint.
+
+Example:
+
+```
+python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml -r output/dfine_m_obj2coco.pth
+```
+
+:::tip
+
+Model export has only been tested on Linux (or WSL2). Not all dependencies are in `requirements.txt`. Some live in the deployment folder, and some are still missing entirely and must be installed manually.
+
+Make sure you change the batch size to 1 before exporting.
+
+:::
 
 ### Downloading YOLO-NAS Model
 
