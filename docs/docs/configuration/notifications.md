@@ -11,13 +11,37 @@ Frigate offers native notifications using the [WebPush Protocol](https://web.dev
 
 In order to use notifications the following requirements must be met:
 
-- Frigate must be accessed via a secure https connection
+- Frigate must be accessed via a secure `https` connection ([see the authorization docs](/configuration/authentication)).
 - A supported browser must be used. Currently Chrome, Firefox, and Safari are known to be supported.
-- In order for notifications to be usable externally, Frigate must be accessible externally
+- In order for notifications to be usable externally, Frigate must be accessible externally.
+- For iOS devices, some users have also indicated that the Notifications switch needs to be enabled in iOS Settings --> Apps --> Safari --> Advanced --> Features.
 
 ### Configuration
 
 To configure notifications, go to the Frigate WebUI -> Settings -> Notifications and enable, then fill out the fields and save.
+
+Optionally, you can change the default cooldown period for notifications through the `cooldown` parameter in your config file. This parameter can also be overridden at the camera level.
+
+Notifications will be prevented if either:
+
+- The global cooldown period hasn't elapsed since any camera's last notification
+- The camera-specific cooldown period hasn't elapsed for the specific camera
+
+```yaml
+notifications:
+  enabled: True
+  email: "johndoe@gmail.com"
+  cooldown: 10 # wait 10 seconds before sending another notification from any camera
+```
+
+```yaml
+cameras:
+  doorbell:
+    ...
+    notifications:
+      enabled: True
+      cooldown: 30 # wait 30 seconds before sending another notification from the doorbell camera
+```
 
 ### Registration
 

@@ -49,6 +49,8 @@ type ObjectMaskEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ObjectMaskEditPane({
@@ -61,6 +63,8 @@ export default function ObjectMaskEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  snapPoints,
+  setSnapPoints,
 }: ObjectMaskEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -272,6 +276,8 @@ export default function ObjectMaskEditPane({
             polygons={polygons}
             setPolygons={setPolygons}
             activePolygonIndex={activePolygonIndex}
+            snapPoints={snapPoints}
+            setSnapPoints={setSnapPoints}
           />
         </div>
       )}

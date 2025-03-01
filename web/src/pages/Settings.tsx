@@ -37,6 +37,8 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useSearchParams } from "react-router-dom";
 
 const allSettingsViews = [
   "UI settings",
@@ -57,18 +59,7 @@ export default function Settings() {
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // available settings views
-
-  const settingsViews = useMemo(() => {
-    const views = [...allSettingsViews];
-
-    if (!("Notification" in window) || !window.isSecureContext) {
-      const index = views.indexOf("notifications");
-      views.splice(index, 1);
-    }
-
-    return views;
-  }, []);
+  const [searchParams] = useSearchParams();
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -119,6 +110,23 @@ export default function Settings() {
     }
   }, [tabsRef, pageToggle]);
 
+  useSearchEffect("page", (page: string) => {
+    if (allSettingsViews.includes(page as SettingsType)) {
+      setPage(page as SettingsType);
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
+
+  useSearchEffect("camera", (camera: string) => {
+    const cameraNames = cameras.map((c) => c.name);
+    if (cameraNames.includes(camera)) {
+      setSelectedCamera(camera);
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
+
   useEffect(() => {
     document.title = "Settings - Frigate";
   }, []);
@@ -139,7 +147,7 @@ export default function Settings() {
                 }
               }}
             >
-              {Object.values(settingsViews).map((item) => (
+              {Object.values(allSettingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
                   className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}

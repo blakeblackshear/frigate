@@ -1,5 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
-import { LivePlayerError, VideoResolutionType } from "@/types/live";
+import {
+  LivePlayerError,
+  PlayerStatsType,
+  VideoResolutionType,
+} from "@/types/live";
 import {
   SetStateAction,
   useCallback,
@@ -15,7 +19,11 @@ type MSEPlayerProps = {
   className?: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  volume?: number;
+  playInBackground?: boolean;
   pip?: boolean;
+  getStats?: boolean;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -26,7 +34,11 @@ function MSEPlayer({
   className,
   playbackEnabled = true,
   audioEnabled = false,
+  volume,
+  playInBackground = false,
   pip = false,
+  getStats = false,
+  setStats,
   onPlaying,
   setFullResolution,
   onError,
@@ -57,6 +69,7 @@ function MSEPlayer({
   const [connectTS, setConnectTS] = useState<number>(0);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
   const [errorCount, setErrorCount] = useState<number>(0);
+  const totalBytesLoaded = useRef(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -316,6 +329,8 @@ function MSEPlayer({
       let bufLen = 0;
 
       ondataRef.current = (data) => {
+        totalBytesLoaded.current += data.byteLength;
+
         if (sb?.updating || bufLen > 0) {
           const b = new Uint8Array(data);
           buf.set(b, bufLen);
@@ -508,12 +523,22 @@ function MSEPlayer({
       }
     };
 
-    document.addEventListener("visibilitychange", listener);
+    if (!playInBackground) {
+      document.addEventListener("visibilitychange", listener);
+    }
 
     return () => {
-      document.removeEventListener("visibilitychange", listener);
+      if (!playInBackground) {
+        document.removeEventListener("visibilitychange", listener);
+      }
     };
-  }, [playbackEnabled, visibilityCheck, onConnect, onDisconnect]);
+  }, [
+    playbackEnabled,
+    visibilityCheck,
+    playInBackground,
+    onConnect,
+    onDisconnect,
+  ]);
 
   // control pip
 
@@ -524,6 +549,16 @@ function MSEPlayer({
 
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
+
+  // control volume
+
+  useEffect(() => {
+    if (!videoRef.current || volume == undefined) {
+      return;
+    }
+
+    videoRef.current.volume = volume;
+  }, [volume, videoRef]);
 
   // ensure we disconnect for slower connections
 
@@ -541,6 +576,68 @@ function MSEPlayer({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackEnabled]);
+
+  // stats
+
+  useEffect(() => {
+    const video = videoRef.current;
+    let lastLoadedBytes = totalBytesLoaded.current;
+    let lastTimestamp = Date.now();
+
+    if (!getStats) return;
+
+    const updateStats = () => {
+      if (video) {
+        const now = Date.now();
+        const bytesLoaded = totalBytesLoaded.current;
+        const timeElapsed = (now - lastTimestamp) / 1000; // seconds
+        const bandwidth = (bytesLoaded - lastLoadedBytes) / timeElapsed / 1024; // kbps
+
+        lastLoadedBytes = bytesLoaded;
+        lastTimestamp = now;
+
+        const latency =
+          video.seekable.length > 0
+            ? Math.max(
+                0,
+                video.seekable.end(video.seekable.length - 1) -
+                  video.currentTime,
+              )
+            : 0;
+
+        const videoQuality = video.getVideoPlaybackQuality();
+        const { totalVideoFrames, droppedVideoFrames } = videoQuality;
+        const droppedFrameRate = totalVideoFrames
+          ? (droppedVideoFrames / totalVideoFrames) * 100
+          : 0;
+
+        setStats?.({
+          streamType: "MSE",
+          bandwidth,
+          latency,
+          totalFrames: totalVideoFrames,
+          droppedFrames: droppedVideoFrames || undefined,
+          decodedFrames: totalVideoFrames - droppedVideoFrames,
+          droppedFrameRate,
+        });
+      }
+    };
+
+    const interval = setInterval(updateStats, 1000); // Update every second
+
+    return () => {
+      clearInterval(interval);
+      setStats?.({
+        streamType: "-",
+        bandwidth: 0,
+        latency: undefined,
+        totalFrames: 0,
+        droppedFrames: undefined,
+        decodedFrames: 0,
+        droppedFrameRate: 0,
+      });
+    };
+  }, [setStats, getStats]);
 
   return (
     <video

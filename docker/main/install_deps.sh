@@ -6,81 +6,65 @@ apt-get -qq update
 
 apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
+    ca-certificates \
     gnupg \
     wget \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3.9 \
-    python3-pip \
+    python3.11 \
     curl \
     lsof \
     jq \
-    nethogs
+    nethogs \
+    libgl1 \
+    libglib2.0-0 \
+    libusb-1.0.0
 
-# ensure python3 defaults to python3.9
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 mkdir -p -m 600 /root/.gnupg
 
-# add coral repo
-curl -fsSLo - https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-    gpg --dearmor -o /etc/apt/trusted.gpg.d/google-cloud-packages-archive-keyring.gpg
-echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
-echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
+# install coral runtime
+wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.1-1/libedgetpu1-max_16.0tf2.17.1-1.bookworm_${TARGETARCH}.deb"
+unset DEBIAN_FRONTEND
+yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
+rm /tmp/libedgetpu1-max.deb
 
-# enable non-free repo in Debian
-if grep -q "Debian" /etc/issue; then
-    sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
-fi
-
-# coral drivers
-apt-get -qq update
-apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libedgetpu1-max python3-tflite-runtime python3-pycoral
-
-# btbn-ffmpeg -> amd64
+# ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     mkdir -p /usr/lib/ffmpeg/5.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
+    rm -rf ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
+    rm -rf ffmpeg.tar.xz
 fi
 
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     mkdir -p /usr/lib/ffmpeg/5.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
+    rm -f ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
-    tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
-    rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
+    rm -f ffmpeg.tar.xz
 fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    # use debian bookworm for amd / intel-i965 driver packages
-    echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
-    apt-get -qq update
+    # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver intel-gpu-tools onevpl-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 
-    # something about this dependency requires it to be installed in a separate call rather than in the line above
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        i965-va-driver-shaders
-
     # intel packages use zst compression so we need to update dpkg
     apt-get install -y dpkg
-
-    rm -f /etc/apt/sources.list.d/debian-bookworm.list
 
     # use intel apt intel packages
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg

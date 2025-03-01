@@ -1,6 +1,8 @@
 import useDraggableElement from "@/hooks/use-draggable-element";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
+import { cn } from "@/lib/utils";
 import { DraggableElement } from "@/types/draggable-element";
+import { TimelineZoomDirection } from "@/types/review";
 import {
   ReactNode,
   RefObject,
@@ -30,7 +32,11 @@ export type ReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   timelineCollapsed?: boolean;
   dense: boolean;
-  children: ReactNode[];
+  segments: number[];
+  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
+  isZooming: boolean;
+  zoomDirection: TimelineZoomDirection;
+  children: ReactNode;
 };
 
 export function ReviewTimeline({
@@ -51,6 +57,10 @@ export function ReviewTimeline({
   setExportEndTime,
   timelineCollapsed = false,
   dense,
+  segments,
+  scrollToSegment,
+  isZooming,
+  zoomDirection,
   children,
 }: ReviewTimelineProps) {
   const [isDraggingHandlebar, setIsDraggingHandlebar] = useState(false);
@@ -116,7 +126,8 @@ export function ReviewTimeline({
     setIsDragging: setIsDraggingHandlebar,
     draggableElementTimeRef: handlebarTimeRef,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const {
@@ -140,7 +151,8 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportStartTimeRef,
     setDraggableElementPosition: setExportStartPosition,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const {
@@ -164,7 +176,8 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportEndTimeRef,
     setDraggableElementPosition: setExportEndPosition,
     dense,
-    timelineSegments: children,
+    segments,
+    scrollToSegment,
   });
 
   const handleHandlebar = useCallback(
@@ -316,18 +329,21 @@ export function ReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`no-scrollbar relative h-full select-none overflow-y-auto bg-secondary ${
+      className={cn(
+        "no-scrollbar relative h-full select-none overflow-y-auto bg-secondary transition-all duration-500 ease-in-out",
+        isZooming && zoomDirection === "in" && "animate-timeline-zoom-in",
+        isZooming && zoomDirection === "out" && "animate-timeline-zoom-out",
         isDragging && (showHandlebar || showExportHandles)
           ? "cursor-grabbing"
-          : "cursor-auto"
-      }`}
+          : "cursor-auto",
+      )}
     >
       <div ref={segmentsRef} className="relative flex flex-col">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
         {children}
       </div>
-      {children.length > 0 && (
+      {children && (
         <>
           {showHandlebar && (
             <div

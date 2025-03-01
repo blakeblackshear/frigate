@@ -27,6 +27,9 @@ import { LuExternalLink } from "react-icons/lu";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { MdCircle } from "react-icons/md";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useAlertsState, useDetectionsState } from "@/api/ws";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -104,6 +107,11 @@ export default function CameraSettingsView({
 
   const watchedAlertsZones = form.watch("alerts_zones");
   const watchedDetectionsZones = form.watch("detections_zones");
+
+  const { payload: alertsState, send: sendAlerts } =
+    useAlertsState(selectedCamera);
+  const { payload: detectionsState, send: sendDetections } =
+    useDetectionsState(selectedCamera);
 
   const handleCheckedChange = useCallback(
     (isChecked: boolean) => {
@@ -241,6 +249,47 @@ export default function CameraSettingsView({
           <Heading as="h3" className="my-2">
             Camera Settings
           </Heading>
+
+          <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            Review
+          </Heading>
+
+          <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 space-y-3 text-sm text-primary-variant">
+            <div className="flex flex-row items-center">
+              <Switch
+                id="alerts-enabled"
+                className="mr-3"
+                checked={alertsState == "ON"}
+                onCheckedChange={(isChecked) => {
+                  sendAlerts(isChecked ? "ON" : "OFF");
+                }}
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="alerts-enabled">Alerts</Label>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <div className="flex flex-row items-center">
+                <Switch
+                  id="detections-enabled"
+                  className="mr-3"
+                  checked={detectionsState == "ON"}
+                  onCheckedChange={(isChecked) => {
+                    sendDetections(isChecked ? "ON" : "OFF");
+                  }}
+                />
+                <div className="space-y-0.5">
+                  <Label htmlFor="detections-enabled">Detections</Label>
+                </div>
+              </div>
+              <div className="mt-3 text-sm text-muted-foreground">
+                Enable/disable alerts and detections for this camera. When
+                disabled, no new review items will be generated.
+              </div>
+            </div>
+          </div>
 
           <Separator className="my-2 flex bg-secondary" />
 

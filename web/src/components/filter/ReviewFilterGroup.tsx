@@ -3,7 +3,12 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
-import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
+import {
+  RecordingsSummary,
+  ReviewFilter,
+  ReviewSeverity,
+  ReviewSummary,
+} from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -39,6 +44,7 @@ type ReviewFilterGroupProps = {
   filters?: ReviewFilters[];
   currentSeverity?: ReviewSeverity;
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   filter?: ReviewFilter;
   motionOnly: boolean;
   filterList?: FilterList;
@@ -52,6 +58,7 @@ export default function ReviewFilterGroup({
   filters = DEFAULT_REVIEW_FILTERS,
   currentSeverity,
   reviewSummary,
+  recordingsSummary,
   filter,
   motionOnly,
   filterList,
@@ -192,6 +199,7 @@ export default function ReviewFilterGroup({
       {isDesktop && filters.includes("date") && (
         <CalendarFilterButton
           reviewSummary={reviewSummary}
+          recordingsSummary={recordingsSummary}
           day={
             filter?.after == undefined
               ? undefined
@@ -225,6 +233,7 @@ export default function ReviewFilterGroup({
           filter={filter}
           currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}
+          recordingsSummary={recordingsSummary}
           allLabels={allLabels}
           allZones={allZones}
           onUpdateFilter={onUpdateFilter}
