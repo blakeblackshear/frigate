@@ -392,7 +392,7 @@ function LPRAttempt({ attempt, config, onRefresh }: LPRAttemptProps) {
             <div className="capitalize">{data.plate}</div>
             <div className={cn(
               "font-semibold",
-              Number(data.score) >= (config?.lpr?.threshold || 0.8) * 100
+              Number(data.score) >= 0.8) * 100
                 ? "text-success"
                 : "text-danger"
             )}>
