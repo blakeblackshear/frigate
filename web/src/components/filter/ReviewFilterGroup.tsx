@@ -23,6 +23,8 @@ import { FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -275,7 +277,7 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          Show Reviewed
+          <Trans>ui.reviewFilter.showReviewed</Trans>
         </Label>
       </div>
 
@@ -361,7 +363,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        Filter
+        <Trans>ui.filter</Trans>
       </div>
     </Button>
   );
@@ -442,7 +444,7 @@ export function GeneralFilterContent({
         {currentSeverity && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
-              label="Alerts"
+              label={t("ui.eventView.alerts")}
               disabled={currentSeverity == "alert"}
               isChecked={
                 currentSeverity == "alert" ? true : filter.showAll === true
@@ -452,7 +454,7 @@ export function GeneralFilterContent({
               }
             />
             <FilterSwitch
-              label="Detections"
+              label={t("ui.eventView.detections")}
               disabled={currentSeverity == "detection"}
               isChecked={
                 currentSeverity == "detection" ? true : filter.showAll === true
@@ -469,7 +471,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Labels
+            <Trans>ui.filter.allLabels</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -516,7 +518,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                <Trans>ui.filter.allZones</Trans>
               </Label>
               <Switch
                 className="ml-1"
@@ -572,10 +574,10 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button aria-label="Reset" onClick={onReset}>
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </>

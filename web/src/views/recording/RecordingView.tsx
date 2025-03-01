@@ -47,6 +47,7 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { Trans } from "react-i18next";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
@@ -398,7 +399,11 @@ export function RecordingView({
             onClick={() => navigate(-1)}
           >
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Back</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                <Trans>ui.back</Trans>
+              </div>
+            )}
           </Button>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
@@ -409,7 +414,11 @@ export function RecordingView({
             }}
           >
             <FaVideo className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Live</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                <Trans>ui.menu.live</Trans>
+              </div>
+            )}
           </Button>
         </div>
         <div className="flex items-center justify-end gap-2">
@@ -469,14 +478,18 @@ export function RecordingView({
                 value="timeline"
                 aria-label="Select timeline"
               >
-                <div className="">Timeline</div>
+                <div className="">
+                  <Trans>ui.review.timeline</Trans>
+                </div>
               </ToggleGroupItem>
               <ToggleGroupItem
                 className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
                 value="events"
                 aria-label="Select events"
               >
-                <div className="">Events</div>
+                <div className="">
+                  <Trans>ui.review.events</Trans>
+                </div>
               </ToggleGroupItem>
             </ToggleGroup>
           ) : (
@@ -783,7 +796,7 @@ function Timeline({
           >
             {mainCameraReviewItems.length === 0 ? (
               <div className="mt-5 text-center text-primary">
-                No events found for this time period.
+                <Trans>ui.review.events.noFoundForTimePeriod</Trans>
               </div>
             ) : (
               mainCameraReviewItems.map((review) => {

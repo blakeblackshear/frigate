@@ -42,6 +42,7 @@ import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { t } from "i18next";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -95,8 +96,8 @@ export default function ReviewDetailDialog({
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? "%b %-d %Y, %H:%M"
-      : "%b %-d %Y, %I:%M %p",
+      ? t("ui.time.formattedTimestampWithYear.24hour")
+      : t("ui.time.formattedTimestampWithYear"),
     config?.ui.timezone,
   );
 

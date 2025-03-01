@@ -24,6 +24,8 @@ import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -195,7 +197,9 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText={isMobile ? "Dates" : "All Dates"}
+          defaultText={
+            isMobile ? t("ui.filter.allDates.short") : t("ui.filter.allDates")
+          }
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
@@ -236,18 +240,18 @@ function GeneralFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return "Labels";
+      return t("ui.filter.allLabels.short");
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return "All Labels";
+      return t("ui.filter.allLabels");
     }
 
     if (selectedLabels.length == 1) {
-      return selectedLabels[0];
+      return t("object." + selectedLabels[0]);
     }
 
-    return `${selectedLabels.length} Labels`;
+    return t("ui.filter.countLabels", { count: selectedLabels.length });
   }, [selectedLabels]);
 
   // ui
@@ -331,7 +335,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Labels
+            <Trans>ui.filter.allLabels</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -348,7 +352,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={item.replaceAll("_", " ")}
+              label={t("object." + item)}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -383,7 +387,7 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -392,7 +396,7 @@ export function GeneralFilterContent({
             updateLabelFilter(undefined);
           }}
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </>
@@ -441,7 +445,7 @@ function SortTypeButton({
       <div
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-primary"}`}
       >
-        Sort
+        <Trans>ui.filter.sort</Trans>
       </div>
     </Button>
   );
@@ -497,15 +501,14 @@ export function SortTypeContent({
   onClose,
 }: SortTypeContentProps) {
   const sortLabels = {
-    date_asc: "Date (Ascending)",
-    date_desc: "Date (Descending)",
-    score_asc: "Object Score (Ascending)",
-    score_desc: "Object Score (Descending)",
+    date_asc: t("ui.filter.sort.dateAsc"),
+    date_desc: t("ui.filter.sort.dateDesc"),
+    score_asc: t("ui.filter.sort.scoreAsc"),
+    score_desc: t("ui.filter.sort.scoreDesc"),
     speed_asc: "Estimated Speed (Ascending)",
     speed_desc: "Estimated Speed (Descending)",
-    relevance: "Relevance",
+    relevance: t("ui.filter.sort.relevance"),
   };
-
   return (
     <>
       <div className="overflow-x-hidden">
@@ -558,7 +561,7 @@ export function SortTypeContent({
             onClose();
           }}
         >
-          Apply
+          <Trans>ui.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -567,7 +570,7 @@ export function SortTypeContent({
             updateSortType(undefined);
           }}
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </>

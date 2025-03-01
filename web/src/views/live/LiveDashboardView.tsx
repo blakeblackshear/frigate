@@ -41,6 +41,7 @@ import {
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { t } from "i18next";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 
@@ -469,7 +470,9 @@ export default function LiveDashboardView({
               }
               const streamName =
                 currentGroupStreamingSettings?.[camera.name]?.streamName ||
-                Object.values(camera.live.streams)?.[0];
+                camera?.live?.streams
+                  ? Object?.values(camera?.live?.streams)?.[0]
+                  : "";
               const autoLive =
                 currentGroupStreamingSettings?.[camera.name]?.streamType !==
                 "no-streaming";
@@ -558,7 +561,7 @@ export default function LiveDashboardView({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                  {fullscreen ? t("ui.exitFullscreen") : t("ui.fullscreen")}
                 </TooltipContent>
               </Tooltip>
             </div>

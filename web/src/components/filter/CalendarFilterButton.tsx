@@ -14,6 +14,8 @@ import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -46,7 +48,7 @@ export default function CalendarFilterButton({
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
-        {day == undefined ? "Last 24 Hours" : selectedDate}
+        {day == undefined ? t("ui.calendarFilter.last24Hours") : selectedDate}
       </div>
     </Button>
   );
@@ -66,7 +68,7 @@ export default function CalendarFilterButton({
             updateSelectedDay(undefined);
           }}
         >
-          Reset
+          <Trans>ui.reset</Trans>
         </Button>
       </div>
     </>

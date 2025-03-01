@@ -5,6 +5,7 @@ import {
 } from "@/context/statusbar-provider";
 import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
 import { useContext, useEffect, useMemo } from "react";
+import { Trans } from "react-i18next";
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
@@ -129,7 +130,7 @@ export default function Statusbar() {
         {Object.entries(messages).length === 0 ? (
           <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
-            System is healthy
+            <Trans>ui.stats.healthy</Trans>
           </div>
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (

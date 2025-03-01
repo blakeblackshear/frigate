@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -240,7 +242,9 @@ export default function ObjectMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Object Mask - Frigate";
+    document.title = t(
+      "ui.settingView.masksAndZonesSettings.objectMasks.documentTitle",
+    );
   }, []);
 
   if (!polygon) {
@@ -251,23 +255,24 @@ export default function ObjectMaskEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? "Edit" : "New"} Object Mask
+        {polygon.name.length
+          ? t("ui.settingView.masksAndZonesSettings.objectMasks.edit")
+          : t("ui.settingView.masksAndZonesSettings.objectMasks.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
-          Object filter masks are used to filter out false positives for a given
-          object type based on location.
+          <Trans>
+            ui.settingView.masksAndZonesSettings.objectMasks.context
+          </Trans>
         </p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {polygons[activePolygonIndex].points.length}{" "}
-            {polygons[activePolygonIndex].points.length > 1 ||
-            polygons[activePolygonIndex].points.length == 0
-              ? "points"
-              : "point"}
+            {t("ui.settingView.masksAndZonesSettings.objectMasks.point", {
+              count: polygons[activePolygonIndex].points.length,
+            })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
             )}
@@ -282,6 +287,9 @@ export default function ObjectMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
+        <Trans>
+          ui.settingView.masksAndZonesSettings.objectMasks.clickDrawPolygon
+        </Trans>
         Click to draw a polygon on the image.
       </div>
 
@@ -307,7 +315,11 @@ export default function ObjectMaskEditPane({
               name="objects"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Objects</FormLabel>
+                  <FormLabel>
+                    <Trans>
+                      ui.settingView.masksAndZonesSettings.objectMasks.objects
+                    </Trans>
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -323,7 +335,9 @@ export default function ObjectMaskEditPane({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    The object type that that applies to this object mask.
+                    <Trans>
+                      ui.settingView.masksAndZonesSettings.objectMasks.objects.desc
+                    </Trans>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -420,11 +434,15 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
   return (
     <>
       <SelectGroup>
-        <SelectItem value="all_labels">All object types</SelectItem>
+        <SelectItem value="all_labels">
+          <Trans>
+            ui.settingView.masksAndZonesSettings.objectMasks.objects.allObjectTypes
+          </Trans>
+        </SelectItem>
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (
           <SelectItem key={item} value={item}>
-            {item.replaceAll("_", " ").charAt(0).toUpperCase() + item.slice(1)}
+            {t("object." + item)}
           </SelectItem>
         ))}
       </SelectGroup>

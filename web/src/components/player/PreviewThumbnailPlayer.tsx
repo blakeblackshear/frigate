@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { baseUrl } from "@/api/baseUrl";
+import { t } from "i18next";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -167,7 +168,9 @@ export default function PreviewThumbnailPlayer({
 
   const formattedDate = useFormattedTimestamp(
     review.start_time,
-    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
+    config?.ui.time_format == "24hour"
+      ? t("ui.time.formattedTimestampExcludeSeconds.24hour")
+      : t("ui.time.formattedTimestampExcludeSeconds"),
     config?.ui?.timezone,
   );
 

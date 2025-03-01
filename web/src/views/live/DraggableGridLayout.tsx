@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { t } from "i18next";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 
@@ -692,7 +693,7 @@ export default function DraggableGridLayout({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                      {fullscreen ? t("ui.exitFullscreen") : t("ui.fullscreen")}
                     </TooltipContent>
                   </Tooltip>
                 </>
