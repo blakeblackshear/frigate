@@ -1,10 +1,12 @@
 """Convenience runner for onnx models."""
 
 import logging
+import os.path
 from typing import Any
 
 import onnxruntime as ort
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.util.model import get_ort_providers
 
 try:
@@ -32,7 +34,7 @@ class ONNXModelRunner:
                 self.type = "ov"
                 self.ov = ov.Core()
                 self.ov.set_property(
-                    {ov.properties.cache_dir: "/config/model_cache/openvino"}
+                    {ov.properties.cache_dir: os.path.join(MODEL_CACHE_DIR, "openvino")}
                 )
                 self.interpreter = self.ov.compile_model(
                     model=model_path, device_name=device

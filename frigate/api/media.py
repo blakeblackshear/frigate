@@ -31,6 +31,7 @@ from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
+    INSTALL_DIR,
     MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
     RECORD_DIR,
@@ -155,7 +156,9 @@ def latest_frame(
             frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             if request.app.camera_error_image is None:
-                error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
+                error_image = glob.glob(
+                    os.path.join(INSTALL_DIR, "frigate/images/camera-error.jpg")
+                )
 
                 if len(error_image) > 0:
                     request.app.camera_error_image = cv2.imread(
@@ -550,7 +553,7 @@ def recording_clip(
     )
 
     file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
-    file_path = f"/tmp/cache/{file_name}"
+    file_path = os.path.join(CACHE_DIR, file_name)
     with open(file_path, "w") as file:
         clip: Recordings
         for clip in recordings:

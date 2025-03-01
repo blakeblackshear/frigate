@@ -9,6 +9,7 @@ import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
@@ -116,7 +117,7 @@ class ROCmDetector(DetectionApi):
 
             logger.info(f"AMD/ROCm: saving parsed model into {mxr_path}")
 
-            os.makedirs("/config/model_cache/rocm", exist_ok=True)
+            os.makedirs(os.path.join(MODEL_CACHE_DIR, "rocm"), exist_ok=True)
             migraphx.save(self.model, mxr_path)
 
         logger.info("AMD/ROCm: model loaded")
