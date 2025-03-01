@@ -1,6 +1,7 @@
 import os
 import re
 
+INSTALL_DIR = "/opt/frigate"
 CONFIG_DIR = "/config"
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
