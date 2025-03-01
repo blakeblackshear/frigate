@@ -42,7 +42,7 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
     name: ARM Build
     steps:
       - name: Check out code
@@ -107,7 +107,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   jetson_jp6_build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
     name: Jetson Jetpack 6
     steps:
       - name: Check out code
@@ -177,7 +177,7 @@ jobs:
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-from=type=gha
   arm64_extra_builds:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
     name: ARM Extra Build
     needs:
       - arm64_build

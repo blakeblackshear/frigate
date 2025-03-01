@@ -7,12 +7,6 @@ Generative AI can be used to automatically generate descriptive text based on th
 
 Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle. Descriptions can also be regenerated manually via the Frigate UI.
 
-:::info
-
-Semantic Search must be enabled to use Generative AI.
-
-:::
-
 ## Configuration
 
 Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.

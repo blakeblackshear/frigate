@@ -536,6 +536,8 @@ semantic_search:
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
   reindex: False
+  # Optional: Set the model used for embeddings. (default: shown below)
+  model: "jinav1"
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
@@ -568,7 +570,6 @@ lpr:
   known_plates: {}
 
 # Optional: Configuration for AI generated tracked object descriptions
-# NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
 # to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
 # the camera level (enabled: False) to enhance privacy for indoor cameras.

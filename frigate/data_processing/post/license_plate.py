@@ -44,12 +44,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         os.makedirs(self.debug_dir, exist_ok=True)
         super().__init__(config, metrics, model_runner)
 
-    def __update_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
-
     def process_data(
         self, data: dict[str, any], data_type: PostProcessDataEnum
     ) -> None:
@@ -61,8 +55,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         Returns:
             None.
         """
-        start = datetime.datetime.now().timestamp()
-
         event_id = data["event_id"]
         camera_name = data["camera"]
 
@@ -132,7 +124,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
             return
 
         if WRITE_DEBUG_IMAGES:
-            filename = f"lpr_post_{start}.jpg"
+            filename = f"lpr_post_{datetime.datetime.now().timestamp()}.jpg"
             self._save_debug_image_async(
                 os.path.join(self.debug_dir, filename),
                 image
@@ -217,8 +209,6 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         # run the frame through lpr processing
         logger.debug(f"Post processing plate: {event_id}, {frame_time}")
         self.lpr_process(keyframe_obj_data, frame)
-
-        self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         if topic == EmbeddingsRequestEnum.reprocess_plate.value:
