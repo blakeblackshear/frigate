@@ -31,6 +31,7 @@ import useSWR from "swr";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
+import { Trans } from "react-i18next";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -177,10 +178,12 @@ export function CameraStreamingDialog({
       <div className="flex flex-col space-y-8">
         {!isRestreamed && (
           <div className="flex flex-col gap-2">
-            <Label>Stream</Label>
+            <Label></Label>
             <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
               <LuX className="size-4 text-danger" />
-              <div>Restreaming is not enabled for this camera.</div>
+              <div>
+                <Trans>ui.dialog.streaming.restreaming.disabled</Trans>
+              </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
@@ -189,8 +192,7 @@ export function CameraStreamingDialog({
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  Set up go2rtc for additional live view options and audio for
-                  this camera.
+                  <Trans>ui.dialog.streaming.restreaming.desc</Trans>
                   <div className="mt-2 flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/live"
@@ -198,7 +200,9 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      Read the documentation{" "}
+                      <Trans>
+                        ui.dialog.streaming.restreaming.readTheDocumentation
+                      </Trans>
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>

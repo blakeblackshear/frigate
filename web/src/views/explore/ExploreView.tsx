@@ -225,7 +225,7 @@ function ExploreThumbnailImage({
   };
 
   const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, false, "object lifecycle");
+    onSelectSearch(event, false, "object_lifecycle");
   };
 
   const handleShowSnapshot = () => {

@@ -22,7 +22,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
 import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
-import SearchSettings from "@/components/settings/SearchSettings";
+import ExploreSettings from "@/components/settings/SearchSettings";
 import {
   Tooltip,
   TooltipContent,
@@ -31,6 +31,7 @@ import {
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
+import { Trans } from "react-i18next";
 
 type SearchViewProps = {
   search: string;
@@ -484,7 +485,7 @@ export default function SearchView({
                     filter={searchFilter}
                     onUpdateFilter={onUpdateFilter}
                   />
-                  <SearchSettings
+                  <ExploreSettings
                     columns={columns}
                     setColumns={setColumns}
                     defaultView={defaultView}
@@ -520,7 +521,7 @@ export default function SearchView({
         {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
-            No Tracked Objects Found
+            <Trans>ui.searchView.noTrackedObjects</Trans>
           </div>
         )}
 
@@ -605,7 +606,7 @@ export default function SearchView({
                         }}
                         refreshResults={refresh}
                         showObjectLifecycle={() =>
-                          onSelectSearch(value, false, "object lifecycle")
+                          onSelectSearch(value, false, "object_lifecycle")
                         }
                         showSnapshot={() =>
                           onSelectSearch(value, false, "snapshot")

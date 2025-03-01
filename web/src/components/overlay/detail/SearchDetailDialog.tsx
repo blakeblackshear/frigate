@@ -73,12 +73,14 @@ import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 const SEARCH_TABS = [
   "details",
   "snapshot",
   "video",
-  "object lifecycle",
+  "object_lifecycle",
 ] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
@@ -152,7 +154,7 @@ export default function SearchDetailDialog({
     }
 
     if (search.data.type != "object" || !search.has_clip) {
-      const index = views.indexOf("object lifecycle");
+      const index = views.indexOf("object_lifecycle");
       views.splice(index, 1);
     }
 
@@ -192,8 +194,12 @@ export default function SearchDetailDialog({
         )}
       >
         <Header>
-          <Title>Tracked Object Details</Title>
-          <Description className="sr-only">Tracked object details</Description>
+          <Title>
+            <Trans>ui.exploreView.trackedObjectDetails</Trans>
+          </Title>
+          <Description className="sr-only">
+            <Trans>ui.exploreView.details</Trans>
+          </Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -221,10 +227,12 @@ export default function SearchDetailDialog({
                   {item == "details" && <FaRegListAlt className="size-4" />}
                   {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
-                  {item == "object lifecycle" && (
+                  {item == "object_lifecycle" && (
                     <FaRotate className="size-4" />
                   )}
-                  <div className="capitalize">{item}</div>
+                  <div className="capitalize">
+                    <Trans>ui.exploreView.type.{item}</Trans>
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -254,7 +262,7 @@ export default function SearchDetailDialog({
           />
         )}
         {page == "video" && <VideoTab search={search} />}
-        {page == "object lifecycle" && (
+        {page == "object_lifecycle" && (
           <ObjectLifecycle
             className="w-full overflow-x-hidden"
             event={search as unknown as Event}
@@ -306,8 +314,8 @@ function ObjectDetailsTab({
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? "%b %-d %Y, %H:%M"
-      : "%b %-d %Y, %I:%M %p",
+      ? t("ui.time.formattedTimestampWithYear.24hour")
+      : t("ui.time.formattedTimestampWithYear"),
     config?.ui.timezone,
   );
 
@@ -366,7 +374,7 @@ function ObjectDetailsTab({
       .post(`events/${search.id}/description`, { description: desc })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success("Successfully saved description", {
+          toast.success(t("ui.exploreView.details.tips.descriptionSaved"), {
             position: "top-center",
           });
         }
@@ -395,7 +403,7 @@ function ObjectDetailsTab({
         );
       })
       .catch(() => {
-        toast.error("Failed to update the description", {
+        toast.error(t("ui.exploreView.details.tips.saveDescriptionFailed"), {
           position: "top-center",
         });
         setDesc(search.data.description);
@@ -506,10 +514,12 @@ function ObjectDetailsTab({
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">Label</div>
+            <div className="text-sm text-primary/40">
+              <Trans>ui.exploreView.details.label</Trans>
+            </div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              {search.label}
+              <Trans>object.{search.label}</Trans>
               {search.sub_label && ` (${search.sub_label})`}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -523,7 +533,9 @@ function ObjectDetailsTab({
                   </span>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>Edit sub label</TooltipContent>
+                  <TooltipContent>
+                    <Trans>ui.exploreView.details.editSubLable</Trans>
+                  </TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             </div>
@@ -531,7 +543,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">
-                Top Score
+                <Trans>ui.exploreView.details.topScore</Trans>
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
@@ -540,9 +552,7 @@ function ObjectDetailsTab({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
-                    The top score is the highest median score for the tracked
-                    object, so this may differ from the score shown on the
-                    search result thumbnail.
+                    <Trans>ui.exploreView.details.topScore.info</Trans>
                   </PopoverContent>
                 </Popover>
               </div>
@@ -553,7 +563,9 @@ function ObjectDetailsTab({
           </div>
           {averageEstimatedSpeed && (
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Estimated Speed</div>
+              <div className="text-sm text-primary/40">
+                <Trans>ui.exploreView.details.estimatedSpeed</Trans>
+              </div>
               <div className="flex flex-col space-y-0.5 text-sm">
                 {averageEstimatedSpeed && (
                   <div className="flex flex-row items-center gap-2">
@@ -575,13 +587,17 @@ function ObjectDetailsTab({
             </div>
           )}
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">Camera</div>
+            <div className="text-sm text-primary/40">
+              <Trans>ui.exploreView.details.camera</Trans>
+            </div>
             <div className="text-sm capitalize">
               {search.camera.replaceAll("_", " ")}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">Timestamp</div>
+            <div className="text-sm text-primary/40">
+              <Trans>ui.exploreView.details.timestamp</Trans>
+            </div>
             <div className="text-sm">{formattedDate}</div>
           </div>
         </div>
@@ -633,17 +649,16 @@ function ObjectDetailsTab({
                 <ActivityIndicator />
               </div>
               <div className="flex">
-                Frigate will not request a description from your Generative AI
-                provider until the tracked object's lifecycle has ended.
+                <Trans>ui.exploreView.details.description.aiTips</Trans>
               </div>
             </div>
           </>
         ) : (
           <>
-            <div className="text-sm text-primary/40">Description</div>
+            <div className="text-sm text-primary/40"></div>
             <Textarea
               className="h-64"
-              placeholder="Description of the tracked object"
+              placeholder={t("ui.exploreView.details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onFocus={handleDescriptionFocus}
@@ -660,7 +675,7 @@ function ObjectDetailsTab({
                 aria-label="Regenerate tracked object description"
                 onClick={() => regenerateDescription("thumbnails")}
               >
-                Regenerate
+                <Trans>ui.exploreView.details.button.regenerate</Trans>
               </Button>
               {search.has_snapshot && (
                 <DropdownMenu>
@@ -678,14 +693,18 @@ function ObjectDetailsTab({
                       aria-label="Regenerate from snapshot"
                       onClick={() => regenerateDescription("snapshot")}
                     >
-                      Regenerate from Snapshot
+                      <Trans>
+                        ui.exploreView.details.regenerateFromSnapshot
+                      </Trans>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
                       aria-label="Regenerate from thumbnails"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
-                      Regenerate from Thumbnails
+                      <Trans>
+                        ui.exploreView.details.regenerateFromThumbnails
+                      </Trans>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -699,13 +718,13 @@ function ObjectDetailsTab({
               aria-label="Save"
               onClick={updateDescription}
             >
-              Save
+              <Trans>ui.save</Trans>
             </Button>
           )}
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title="Edit Sub Label"
+            title={t("ui.exploreView.details.editSubLable")}
             description={`Enter a new sub label for this ${search.label ?? "tracked object"}.`}
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
@@ -807,7 +826,9 @@ export function ObjectSnapshotTab({
                         </a>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent>Download</TooltipContent>
+                        <TooltipContent>
+                          <Trans>ui.download</Trans>
+                        </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </div>
