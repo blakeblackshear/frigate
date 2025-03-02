@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 class RealTimeProcessorApi(ABC):
     @abstractmethod
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        metrics: DataProcessorMetrics,
+    ) -> None:
         self.config = config
         self.metrics = metrics
         pass

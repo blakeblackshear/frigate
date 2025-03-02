@@ -41,6 +41,7 @@ import { useOverlayState } from "@/hooks/use-overlay-state";
 import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -132,6 +133,14 @@ export default function ReviewDetailDialog({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [review]);
+
+  // keyboard listener
+
+  useKeyboardListener(["Esc"], (key, modifiers) => {
+    if (key == "Esc" && modifiers.down && !modifiers.repeat) {
+      setIsOpen(false);
+    }
+  });
 
   const Overlay = isDesktop ? Sheet : MobilePage;
   const Content = isDesktop ? SheetContent : MobilePageContent;
@@ -385,7 +394,7 @@ function EventItem({
           src={
             event.has_snapshot
               ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-              : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+              : `${apiHost}api/events/${event.id}/thumbnail.webp`
           }
         />
         {hovered && (
@@ -400,7 +409,7 @@ function EventItem({
                     href={
                       event.has_snapshot
                         ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-                        : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                        : `${apiHost}api/events/${event.id}/thumbnail.webp`
                     }
                   >
                     <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">

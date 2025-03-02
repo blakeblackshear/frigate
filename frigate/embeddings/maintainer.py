@@ -20,24 +20,36 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.recordings_updater import (
+    RecordingsDataSubscriber,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig
 from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
 )
-from frigate.data_processing.real_time.api import RealTimeProcessorApi
-from frigate.data_processing.real_time.bird_processor import BirdProcessor
-from frigate.data_processing.real_time.face_processor import FaceProcessor
-from frigate.data_processing.real_time.license_plate_processor import (
-    LicensePlateProcessor,
+from frigate.data_processing.common.license_plate.model import (
+    LicensePlateModelRunner,
 )
-from frigate.data_processing.types import DataProcessorMetrics
+from frigate.data_processing.post.api import PostProcessorApi
+from frigate.data_processing.post.license_plate import (
+    LicensePlatePostProcessor,
+)
+from frigate.data_processing.real_time.api import RealTimeProcessorApi
+from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.face import FaceRealTimeProcessor
+from frigate.data_processing.real_time.license_plate import (
+    LicensePlateRealTimeProcessor,
+)
+from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
+from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 
@@ -59,46 +71,80 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
-        self.embeddings = Embeddings(config, db, metrics)
+        self.embeddings = None
 
-        # Check if we need to re-index events
-        if config.semantic_search.reindex:
-            self.embeddings.reindex()
+        if config.semantic_search.enabled:
+            self.embeddings = Embeddings(config, db, metrics)
+
+            # Check if we need to re-index events
+            if config.semantic_search.reindex:
+                self.embeddings.reindex()
+
+        # create communication for updating event descriptions
+        self.requestor = InterProcessRequestor()
 
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
+        self.recordings_subscriber = RecordingsDataSubscriber(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
-        self.processors: list[RealTimeProcessorApi] = []
+
+        self.detected_license_plates: dict[str, dict[str, any]] = {}
+
+        # model runners to share between realtime and post processors
+        if self.config.lpr.enabled:
+            lpr_model_runner = LicensePlateModelRunner(self.requestor)
+
+        # realtime processors
+        self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.processors.append(FaceProcessor(self.config, metrics))
+            self.realtime_processors.append(FaceRealTimeProcessor(self.config, metrics))
 
         if self.config.classification.bird.enabled:
-            self.processors.append(BirdProcessor(self.config, metrics))
+            self.realtime_processors.append(BirdRealTimeProcessor(self.config, metrics))
 
         if self.config.lpr.enabled:
-            self.processors.append(LicensePlateProcessor(self.config, metrics))
+            self.realtime_processors.append(
+                LicensePlateRealTimeProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
+            )
 
-        # create communication for updating event descriptions
-        self.requestor = InterProcessRequestor()
+        # post processors
+        self.post_processors: list[PostProcessorApi] = []
+
+        if self.config.lpr.enabled:
+            self.post_processors.append(
+                LicensePlatePostProcessor(
+                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                )
+            )
+
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[any]] = {}
         self.genai_client = get_genai_client(config)
+
+        # recordings data
+        self.recordings_available_through: dict[str, float] = {}
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
             self._process_requests()
             self._process_updates()
+            self._process_recordings_updates()
             self._process_finalized()
             self._process_event_metadata()
 
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
+        self.recordings_subscriber.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
         self.requestor.stop()
@@ -109,32 +155,34 @@ class EmbeddingMaintainer(threading.Thread):
 
         def _handle_request(topic: str, data: dict[str, any]) -> str:
             try:
-                if topic == EmbeddingsRequestEnum.embed_description.value:
-                    return serialize(
-                        self.embeddings.embed_description(
-                            data["id"], data["description"]
-                        ),
-                        pack=False,
-                    )
-                elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
-                    thumbnail = base64.b64decode(data["thumbnail"])
-                    return serialize(
-                        self.embeddings.embed_thumbnail(data["id"], thumbnail),
-                        pack=False,
-                    )
-                elif topic == EmbeddingsRequestEnum.generate_search.value:
-                    return serialize(
-                        self.embeddings.embed_description("", data, upsert=False),
-                        pack=False,
-                    )
-                else:
-                    for processor in self.processors:
+                # First handle the embedding-specific topics when semantic search is enabled
+                if self.config.semantic_search.enabled:
+                    if topic == EmbeddingsRequestEnum.embed_description.value:
+                        return serialize(
+                            self.embeddings.embed_description(
+                                data["id"], data["description"]
+                            ),
+                            pack=False,
+                        )
+                    elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                        thumbnail = base64.b64decode(data["thumbnail"])
+                        return serialize(
+                            self.embeddings.embed_thumbnail(data["id"], thumbnail),
+                            pack=False,
+                        )
+                    elif topic == EmbeddingsRequestEnum.generate_search.value:
+                        return serialize(
+                            self.embeddings.embed_description("", data, upsert=False),
+                            pack=False,
+                        )
+                processors = [self.realtime_processors, self.post_processors]
+                for processor_list in processors:
+                    for processor in processor_list:
                         resp = processor.handle_request(topic, data)
-
                         if resp is not None:
                             return resp
             except Exception as e:
-                logger.error(f"Unable to handle embeddings request {e}")
+                logger.error(f"Unable to handle embeddings request {e}", exc_info=True)
 
         self.embeddings_responder.check_for_request(_handle_request)
 
@@ -153,7 +201,7 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[camera]
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
-        if not camera_config.genai.enabled and len(self.processors) == 0:
+        if not camera_config.genai.enabled and len(self.realtime_processors) == 0:
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -170,7 +218,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        for processor in self.processors:
+        for processor in self.realtime_processors:
             processor.process_frame(data, yuv_frame)
 
         # no need to save our own thumbnails if genai is not enabled
@@ -201,7 +249,32 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            for processor in self.processors:
+            # call any defined post processors
+            for processor in self.post_processors:
+                if isinstance(processor, LicensePlatePostProcessor):
+                    recordings_available = self.recordings_available_through.get(camera)
+                    if (
+                        recordings_available is not None
+                        and event_id in self.detected_license_plates
+                    ):
+                        processor.process_data(
+                            {
+                                "event_id": event_id,
+                                "camera": camera,
+                                "recordings_available": self.recordings_available_through[
+                                    camera
+                                ],
+                                "obj_data": self.detected_license_plates[event_id][
+                                    "obj_data"
+                                ],
+                            },
+                            PostProcessDataEnum.recording,
+                        )
+                else:
+                    processor.process_data(event_id, PostProcessDataEnum.event_id)
+
+            # expire in realtime processors
+            for processor in self.realtime_processors:
                 processor.expire_object(event_id)
 
             if updated_db:
@@ -215,7 +288,7 @@ class EmbeddingMaintainer(threading.Thread):
                     continue
 
                 # Extract valid thumbnail
-                thumbnail = base64.b64decode(event.thumbnail)
+                thumbnail = get_event_thumbnail_bytes(event)
 
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
@@ -314,6 +387,24 @@ class EmbeddingMaintainer(threading.Thread):
             if event_id in self.tracked_events:
                 del self.tracked_events[event_id]
 
+    def _process_recordings_updates(self) -> None:
+        """Process recordings updates."""
+        while True:
+            recordings_data = self.recordings_subscriber.check_for_update(timeout=0.01)
+
+            if recordings_data == None:
+                break
+
+            camera, recordings_available_through_timestamp = recordings_data
+
+            self.recordings_available_through[camera] = (
+                recordings_available_through_timestamp
+            )
+
+            logger.debug(
+                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+            )
+
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
@@ -344,6 +435,9 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _embed_thumbnail(self, event_id: str, thumbnail: bytes) -> None:
         """Embed the thumbnail for an event."""
+        if not self.config.semantic_search.enabled:
+            return
+
         self.embeddings.embed_thumbnail(event_id, thumbnail)
 
     def _embed_description(self, event: Event, thumbnails: list[bytes]) -> None:
@@ -369,7 +463,8 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         # Embed the description
-        self.embeddings.embed_description(event.id, description)
+        if self.config.semantic_search.enabled:
+            self.embeddings.embed_description(event.id, description)
 
         logger.debug(
             "Generated description for %s (%d images): %s",
@@ -390,7 +485,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
-        thumbnail = base64.b64decode(event.thumbnail)
+        thumbnail = get_event_thumbnail_bytes(event)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"

@@ -2,21 +2,43 @@
 
 import logging
 import os
-from typing import Any
 
 import cv2
 import numpy as np
 import onnxruntime as ort
 
-try:
-    import openvino as ov
-except ImportError:
-    # openvino is not included
-    pass
+from frigate.const import MODEL_CACHE_DIR
 
 logger = logging.getLogger(__name__)
 
+
 ### Post Processing
+def post_process_dfine(tensor_output: np.ndarray, width, height) -> np.ndarray:
+    class_ids = tensor_output[0][tensor_output[2] > 0.4]
+    boxes = tensor_output[1][tensor_output[2] > 0.4]
+    scores = tensor_output[2][tensor_output[2] > 0.4]
+
+    input_shape = np.array([height, width, height, width])
+    boxes = np.divide(boxes, input_shape, dtype=np.float32)
+    indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
+    detections = np.zeros((20, 6), np.float32)
+
+    for i, (bbox, confidence, class_id) in enumerate(
+        zip(boxes[indices], scores[indices], class_ids[indices])
+    ):
+        if i == 20:
+            break
+
+        detections[i] = [
+            class_id,
+            confidence,
+            bbox[1],
+            bbox[0],
+            bbox[3],
+            bbox[2],
+        ]
+
+    return detections
 
 
 def post_process_yolov9(predictions: np.ndarray, width, height) -> np.ndarray:
@@ -85,7 +107,8 @@ def get_ort_providers(
             # so it is not enabled by default
             if device == "Tensorrt":
                 os.makedirs(
-                    "/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
+                    os.path.join(MODEL_CACHE_DIR, "tensorrt/ort/trt-engines"),
+                    exist_ok=True,
                 )
                 device_id = 0 if not device.isdigit() else int(device)
                 providers.append(provider)
@@ -96,19 +119,23 @@ def get_ort_providers(
                         and os.environ.get("USE_FP_16", "True") != "False",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
+                        "trt_timing_cache_path": os.path.join(
+                            MODEL_CACHE_DIR, "tensorrt/ort"
+                        ),
+                        "trt_engine_cache_path": os.path.join(
+                            MODEL_CACHE_DIR, "tensorrt/ort/trt-engines"
+                        ),
                     }
                 )
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
-            os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
+            os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True)
             providers.append(provider)
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
-                    "cache_dir": "/config/model_cache/openvino/ort",
+                    "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
                     "device_type": device,
                 }
             )
@@ -124,66 +151,3 @@ def get_ort_providers(
             options.append({})
 
     return (providers, options)
-
-
-class ONNXModelRunner:
-    """Run onnx models optimally based on available hardware."""
-
-    def __init__(self, model_path: str, device: str, requires_fp16: bool = False):
-        self.model_path = model_path
-        self.ort: ort.InferenceSession = None
-        self.ov: ov.Core = None
-        providers, options = get_ort_providers(device == "CPU", device, requires_fp16)
-        self.interpreter = None
-
-        if "OpenVINOExecutionProvider" in providers:
-            try:
-                # use OpenVINO directly
-                self.type = "ov"
-                self.ov = ov.Core()
-                self.ov.set_property(
-                    {ov.properties.cache_dir: "/config/model_cache/openvino"}
-                )
-                self.interpreter = self.ov.compile_model(
-                    model=model_path, device_name=device
-                )
-            except Exception as e:
-                logger.warning(
-                    f"OpenVINO failed to build model, using CPU instead: {e}"
-                )
-                self.interpreter = None
-
-        # Use ONNXRuntime
-        if self.interpreter is None:
-            self.type = "ort"
-            self.ort = ort.InferenceSession(
-                model_path,
-                providers=providers,
-                provider_options=options,
-            )
-
-    def get_input_names(self) -> list[str]:
-        if self.type == "ov":
-            input_names = []
-
-            for input in self.interpreter.inputs:
-                input_names.extend(input.names)
-
-            return input_names
-        elif self.type == "ort":
-            return [input.name for input in self.ort.get_inputs()]
-
-    def run(self, input: dict[str, Any]) -> Any:
-        if self.type == "ov":
-            infer_request = self.interpreter.create_infer_request()
-            input_tensor = list(input.values())
-
-            if len(input_tensor) == 1:
-                input_tensor = ov.Tensor(array=input_tensor[0])
-            else:
-                input_tensor = ov.Tensor(array=input_tensor)
-
-            infer_request.infer(input_tensor)
-            return [infer_request.get_output_tensor().data]
-        elif self.type == "ort":
-            return self.ort.run(None, input)

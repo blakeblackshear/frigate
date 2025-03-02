@@ -336,6 +336,7 @@ def events_explore(limit: int = 10):
                         "sub_label_score",
                         "average_estimated_speed",
                         "velocity_angle",
+                        "path_data",
                     ]
                 },
                 "event_count": label_counts[event.label],
@@ -622,6 +623,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 "sub_label_score",
                 "average_estimated_speed",
                 "velocity_angle",
+                "path_data",
             ]
         }
 
@@ -989,6 +991,10 @@ def set_sub_label(
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
+    if new_sub_label == "":
+        new_sub_label = None
+        new_score = None
+
     if tracked_obj:
         tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
 
@@ -999,21 +1005,19 @@ def set_sub_label(
 
     if event:
         event.sub_label = new_sub_label
-
-        if new_score:
-            data = event.data
+        data = event.data
+        if new_sub_label is None:
+            data["sub_label_score"] = None
+        elif new_score is not None:
             data["sub_label_score"] = new_score
-            event.data = data
-
+        event.data = data
         event.save()
 
     return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Event " + event_id + " sub label set to " + new_sub_label,
-            }
-        ),
+        content={
+            "success": True,
+            "message": f"Event {event_id} sub label set to {new_sub_label if new_sub_label is not None else 'None'}",
+        },
         status_code=200,
     )
 
@@ -1079,10 +1083,7 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if (
-        request.app.frigate_config.semantic_search.enabled
-        and camera_config.genai.enabled
-    ):
+    if camera_config.genai.enabled:
         request.app.event_metadata_updater.publish((event.id, params.source))
 
         return JSONResponse(

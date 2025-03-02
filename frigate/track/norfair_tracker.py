@@ -263,12 +263,13 @@ class NorfairTracker(ObjectTracker):
 
         # Get the correct tracker for this object's label
         tracker = self.get_tracker(obj["label"])
-        obj["score_history"] = [
-            p.data["score"]
-            for p in next(
-                (o for o in tracker.tracked_objects if o.global_id == track_id)
-            ).past_detections
-        ]
+        obj_match = next(
+            (o for o in tracker.tracked_objects if o.global_id == track_id), None
+        )
+        # if we don't have a match, we have a new object
+        obj["score_history"] = (
+            [p.data["score"] for p in obj_match.past_detections] if obj_match else []
+        )
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
         self.positions[id] = {
@@ -519,7 +520,11 @@ class NorfairTracker(ObjectTracker):
                 default_detections.extend(dets)
 
         # Update default tracker with untracked detections
-        mode = "ptz" if self.ptz_metrics.autotracker_enabled.value else "static"
+        mode = (
+            "ptz"
+            if self.camera_config.onvif.autotracking.enabled_in_config
+            else "static"
+        )
         tracked_objects = self.default_tracker[mode].update(
             detections=default_detections, coord_transformations=coord_transformations
         )

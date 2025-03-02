@@ -327,7 +327,7 @@ function FaceAttempt({
       .post(`/faces/reprocess`, { training_file: image })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success(`Successfully trained face.`, {
+          toast.success(`Successfully updated face score.`, {
             position: "top-center",
           });
           onRefresh();
@@ -335,11 +335,14 @@ function FaceAttempt({
       })
       .catch((error) => {
         if (error.response?.data?.message) {
-          toast.error(`Failed to train: ${error.response.data.message}`, {
-            position: "top-center",
-          });
+          toast.error(
+            `Failed to update score: ${error.response.data.message}`,
+            {
+              position: "top-center",
+            },
+          );
         } else {
-          toast.error(`Failed to train: ${error.message}`, {
+          toast.error(`Failed to update score: ${error.message}`, {
             position: "top-center",
           });
         }
@@ -419,7 +422,7 @@ function FaceAttempt({
                   onClick={() => onReprocess()}
                 />
               </TooltipTrigger>
-              <TooltipContent>Delete Face Attempt</TooltipContent>
+              <TooltipContent>Reprocess Face</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger>

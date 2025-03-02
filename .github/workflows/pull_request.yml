@@ -4,6 +4,7 @@ on:
   pull_request:
     paths-ignore:
       - "docs/**"
+      - ".github/**"
 
 env:
   DEFAULT_PYTHON: 3.11

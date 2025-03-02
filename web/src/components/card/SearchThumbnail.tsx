@@ -80,7 +80,7 @@ export default function SearchThumbnail({
               : undefined
           }
           draggable={false}
-          src={`${apiHost}api/events/${searchResult.id}/thumbnail.jpg`}
+          src={`${apiHost}api/events/${searchResult.id}/thumbnail.webp`}
           loading={isSafari ? "eager" : "lazy"}
           onLoad={() => {
             onImgLoad();

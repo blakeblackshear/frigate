@@ -659,25 +659,42 @@ def process_logs(
         if "  " not in clean_line:
             clean_line = f"{datetime.now()}  {clean_line}"
 
-        # Find the position of the first double space to extract timestamp and message
-        date_end = clean_line.index("  ")
-        timestamp = clean_line[:date_end]
-        message_part = clean_line[date_end:].strip()
+        try:
+            # Find the position of the first double space to extract timestamp and message
+            date_end = clean_line.index("  ")
+            timestamp = clean_line[:date_end]
+            full_message = clean_line[date_end:].strip()
 
-        if message_part == last_message:
-            repeat_count += 1
-            continue
-        else:
-            if repeat_count > 0:
-                # Insert a deduplication message formatted the same way as logs
-                dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
-                log_lines.append(dedup_message)
-                repeat_count = 0
+            # For frigate, remove the date part from message comparison
+            if service == "frigate":
+                # Skip the date at the start of the message if it exists
+                date_parts = full_message.split("]", 1)
+                if len(date_parts) > 1:
+                    message_part = date_parts[1].strip()
+                else:
+                    message_part = full_message
+            else:
+                message_part = full_message
 
+            if message_part == last_message:
+                repeat_count += 1
+                continue
+            else:
+                if repeat_count > 0:
+                    # Insert a deduplication message formatted the same way as logs
+                    dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                    log_lines.append(dedup_message)
+                    repeat_count = 0
+
+                log_lines.append(clean_line)
+                last_timestamp = timestamp
+
+                last_message = message_part
+
+        except ValueError:
+            # If we can't parse the line properly, just add it as is
             log_lines.append(clean_line)
-            last_timestamp = timestamp
-
-        last_message = message_part
+            continue
 
     # If there were repeated messages at the end, log the count
     if repeat_count > 0:

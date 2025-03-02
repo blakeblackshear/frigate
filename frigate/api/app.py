@@ -20,7 +20,6 @@ from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
 from peewee import operator
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import ValidationError
 
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
@@ -28,6 +27,7 @@ from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.models import Event, Timeline
+from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     get_tz_modifiers,
@@ -113,9 +113,13 @@ def stats_history(request: Request, keys: str = None):
 
 
 @router.get("/metrics")
-def metrics():
-    """Expose Prometheus metrics endpoint"""
-    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+def metrics(request: Request):
+    """Expose Prometheus metrics endpoint and update metrics with latest stats"""
+    # Retrieve the latest statistics and update the Prometheus metrics
+    stats = request.app.stats_emitter.get_latest_stats()
+    update_metrics(stats)
+    content, content_type = get_metrics()
+    return Response(content=content, media_type=content_type)
 
 
 @router.get("/config")
