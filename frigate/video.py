@@ -189,6 +189,22 @@ class CameraWatchdog(threading.Thread):
     def run(self):
         if self.enabled.value:
             self.start_ffmpeg_detect()
+            for c in self.config.ffmpeg_cmds:
+                if "detect" in c["roles"]:
+                    continue
+                logpipe = LogPipe(
+                    f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
+                )
+                self.ffmpeg_other_processes.append(
+                    {
+                        "cmd": c["cmd"],
+                        "roles": c["roles"],
+                        "logpipe": logpipe,
+                        "process": start_or_restart_ffmpeg(
+                            c["cmd"], self.logger, logpipe
+                        ),
+                    }
+                )
 
         time.sleep(self.sleeptime)
         while not self.stop_event.wait(self.sleeptime):
