@@ -218,7 +218,7 @@ export default function LivePlayer({
   }
 
   let player;
-  if (!autoLive || !streamName) {
+  if (!autoLive || !streamName || !cameraEnabled) {
     player = null;
   } else if (preferredLiveMode == "webrtc") {
     player = (

@@ -693,12 +693,12 @@ class TrackedObjectProcessor(threading.Thread):
                 camera_state = self.camera_states[camera]
 
                 if camera_state.prev_enabled and not current_enabled:
-                    logger.info(f"Not processing objects for disabled camera {camera}")
+                    logger.debug(f"Not processing objects for disabled camera {camera}")
                     last_frame_name = camera_state.previous_frame_id
                     for obj_id, obj in list(camera_state.tracked_objects.items()):
                         if "end_time" not in obj.obj_data:
-                            logger.info(
-                                f"Camera {camera} disabled, ending active events"
+                            logger.debug(
+                                f"Camera {camera} disabled, ending active event {obj_id}"
                             )
                             obj.obj_data["end_time"] = (
                                 datetime.datetime.now().timestamp()

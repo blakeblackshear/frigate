@@ -460,7 +460,6 @@ export default function LiveCameraView({
                   isActive={fullscreen}
                   title={fullscreen ? "Close" : "Fullscreen"}
                   onClick={toggleFullscreen}
-                  disabled={!cameraEnabled}
                 />
               )}
               {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (

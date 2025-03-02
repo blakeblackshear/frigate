@@ -195,7 +195,7 @@ class CameraWatchdog(threading.Thread):
             enabled = self.enabled.value
             if enabled != self.was_enabled:
                 if enabled:
-                    self.logger.info(f"Enabling camera {self.camera_name}")
+                    self.logger.debug(f"Enabling camera {self.camera_name}")
                     self.start_ffmpeg_detect()
                     for c in self.config.ffmpeg_cmds:
                         if "detect" in c["roles"]:
@@ -214,7 +214,7 @@ class CameraWatchdog(threading.Thread):
                             }
                         )
                 else:
-                    self.logger.info(f"Disabling camera {self.camera_name}")
+                    self.logger.debug(f"Disabling camera {self.camera_name}")
                     self.stop_all_ffmpeg()
                 self.was_enabled = enabled
                 continue
