@@ -225,6 +225,9 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
+# Set HailoRT to disable logging
+ENV HAILORT_LOGGER_PATH=NONE
+
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
