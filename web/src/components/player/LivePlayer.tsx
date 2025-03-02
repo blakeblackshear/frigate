@@ -23,6 +23,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
 import { useEnabledState } from "@/api/ws";
+import { LuVideoOff } from "react-icons/lu";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -395,13 +396,15 @@ export default function LivePlayer({
       )}
 
       {!cameraEnabled && (
-        <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background/50 p-5">
-            <p className="my-5 text-lg">
+        <div className="relative flex h-full w-full items-center justify-center">
+          <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
+            <LuVideoOff className="mb-2 size-8 md:size-10" />
+            <p className="mb-3 text-base md:text-lg">
               {capitalizeFirstLetter(cameraConfig.name)}
             </p>
-            <TbExclamationCircle className="mb-3 size-10" />
-            <p className="max-w-96 text-center">Camera is disabled</p>
+            <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
+              Camera is disabled
+            </p>
           </div>
         </div>
       )}
