@@ -1055,15 +1055,7 @@ function FrigateCameraFeatures({
           Icon={enabledState == "ON" ? LuPower : LuPowerOff}
           isActive={enabledState == "ON"}
           title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
-          onClick={() => sendEnabled("ON")}
-        />
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={LuPowerOff}
-          isActive={enabledState == "OFF"}
-          title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
-          onClick={() => sendEnabled("OFF")}
+          onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
         />
         <CameraFeatureToggle
           className="p-2 md:p-0"

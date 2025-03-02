@@ -311,6 +311,7 @@ class CameraState:
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
         camera_activity: dict[str, list[any]] = {
+            "enabled": True,
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }
@@ -708,7 +709,10 @@ class TrackedObjectProcessor(threading.Thread):
 
                             # camera activity callbacks
                             for callback in camera_state.callbacks["camera_activity"]:
-                                callback(camera, {"motion": 0, "objects": []})
+                                callback(
+                                    camera,
+                                    {"enabled": False, "motion": 0, "objects": []},
+                                )
 
                 camera_state.prev_enabled = current_enabled
 

@@ -284,7 +284,6 @@ class Dispatcher:
 
     def _on_enabled_command(self, camera_name: str, payload: str) -> None:
         """Callback for camera topic."""
-        # TODO: figure out what to do here so cameras don't disappear in the UI
         camera_settings = self.config.cameras[camera_name]
 
         if payload == "ON":
@@ -304,7 +303,7 @@ class Dispatcher:
                 camera_settings.enabled = False
 
         self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)
-        self.publish(f"{camera_name}/camera/state", payload, retain=True)
+        self.publish(f"{camera_name}/enabled/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
         """Callback for motion topic."""

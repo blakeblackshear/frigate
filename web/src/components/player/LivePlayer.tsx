@@ -22,6 +22,7 @@ import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
+import { useEnabledState } from "@/api/ws";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -83,6 +84,27 @@ export default function LivePlayer({
     decodedFrames: 0,
     droppedFrameRate: 0, // percentage
   });
+
+  // enabled state
+
+  const { payload: enabledState } = useEnabledState(cameraConfig.name);
+  const cameraEnabled = enabledState === "ON";
+
+  // Track previous cameraEnabled state
+  const prevCameraEnabledRef = useRef(cameraEnabled);
+
+  useEffect(() => {
+    if (!prevCameraEnabledRef.current && cameraEnabled) {
+      // Camera enabled
+      setLiveReady(false);
+      setKey((prevKey) => prevKey + 1);
+    } else if (prevCameraEnabledRef.current && !cameraEnabled) {
+      // Camera disabled
+      setLiveReady(false);
+      setKey((prevKey) => prevKey + 1);
+    }
+    prevCameraEnabledRef.current = cameraEnabled;
+  }, [cameraEnabled]);
 
   // camera activity
 
@@ -287,14 +309,15 @@ export default function LivePlayer({
         }
       }}
     >
-      {((showStillWithoutActivity && !liveReady) || liveReady) && (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
-        </>
-      )}
+      {cameraEnabled &&
+        ((showStillWithoutActivity && !liveReady) || liveReady) && (
+          <>
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+          </>
+        )}
       {player}
-      {!offline && !showStillWithoutActivity && !liveReady && (
+      {cameraEnabled && !offline && !showStillWithoutActivity && !liveReady && (
         <ActivityIndicator />
       )}
 
@@ -367,6 +390,18 @@ export default function LivePlayer({
               {capitalizeFirstLetter(cameraConfig.name)} <code>detect</code>{" "}
               stream, check error logs
             </p>
+          </div>
+        </div>
+      )}
+
+      {!cameraEnabled && (
+        <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background/50 p-5">
+            <p className="my-5 text-lg">
+              {capitalizeFirstLetter(cameraConfig.name)}
+            </p>
+            <TbExclamationCircle className="mb-3 size-10" />
+            <p className="max-w-96 text-center">Camera is disabled</p>
           </div>
         </div>
       )}
