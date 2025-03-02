@@ -2,7 +2,7 @@ variable "AMDGPU" {
   default = "gfx900"
 }
 variable "ROCM" {
-  default = "6.3.1"
+  default = "6.3.3"
 }
 variable "HSA_OVERRIDE_GFX_VERSION" {
   default = ""
