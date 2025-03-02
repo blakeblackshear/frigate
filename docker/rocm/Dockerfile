@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=6.3.1
+ARG ROCM=6.3.3
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -15,16 +15,16 @@ ARG AMDGPU
 
 RUN apt update && \
     apt install -y wget gpg && \
-    wget https://repo.radeon.com/amdgpu-install/6.3.1/ubuntu/jammy/amdgpu-install_6.3.60301-1_all.deb && \
-    apt install -y ./amdgpu-install_6.3.60301-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/$ROCM/ubuntu/jammy/amdgpu-install_6.3.60303-1_all.deb && \
+    apt install -y ./rocm.deb && \
     apt update && \
     apt install -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
-    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-6.3.1/lib/ && \
+    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
     mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
-    cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-6.3.1/lib/migraphx/lib
+    cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
