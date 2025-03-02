@@ -112,7 +112,7 @@ def capture_frames(
 
     while True:
         if not enabled.value:
-            logger.info(f"Stopping capture thread for disabled {config.name}")
+            logger.debug(f"Stopping capture thread for disabled {config.name}")
             break
 
         fps.value = frame_rate.eps()
