@@ -188,23 +188,7 @@ class CameraWatchdog(threading.Thread):
 
     def run(self):
         if self.enabled.value:
-            self.start_ffmpeg_detect()
-            for c in self.config.ffmpeg_cmds:
-                if "detect" in c["roles"]:
-                    continue
-                logpipe = LogPipe(
-                    f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
-                )
-                self.ffmpeg_other_processes.append(
-                    {
-                        "cmd": c["cmd"],
-                        "roles": c["roles"],
-                        "logpipe": logpipe,
-                        "process": start_or_restart_ffmpeg(
-                            c["cmd"], self.logger, logpipe
-                        ),
-                    }
-                )
+            self.start_all_ffmpeg()
 
         time.sleep(self.sleeptime)
         while not self.stop_event.wait(self.sleeptime):
@@ -212,23 +196,7 @@ class CameraWatchdog(threading.Thread):
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.debug(f"Enabling camera {self.camera_name}")
-                    self.start_ffmpeg_detect()
-                    for c in self.config.ffmpeg_cmds:
-                        if "detect" in c["roles"]:
-                            continue
-                        logpipe = LogPipe(
-                            f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
-                        )
-                        self.ffmpeg_other_processes.append(
-                            {
-                                "cmd": c["cmd"],
-                                "roles": c["roles"],
-                                "logpipe": logpipe,
-                                "process": start_or_restart_ffmpeg(
-                                    c["cmd"], self.logger, logpipe
-                                ),
-                            }
-                        )
+                    self.start_all_ffmpeg()
                 else:
                     self.logger.debug(f"Disabling camera {self.camera_name}")
                     self.stop_all_ffmpeg()
@@ -344,7 +312,26 @@ class CameraWatchdog(threading.Thread):
         )
         self.capture_thread.start()
 
+    def start_all_ffmpeg(self):
+        """Start all ffmpeg processes (detection and others)."""
+        self.start_ffmpeg_detect()
+        for c in self.config.ffmpeg_cmds:
+            if "detect" in c["roles"]:
+                continue
+            logpipe = LogPipe(
+                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
+            )
+            self.ffmpeg_other_processes.append(
+                {
+                    "cmd": c["cmd"],
+                    "roles": c["roles"],
+                    "logpipe": logpipe,
+                    "process": start_or_restart_ffmpeg(c["cmd"], self.logger, logpipe),
+                }
+            )
+
     def stop_all_ffmpeg(self):
+        """Stop all ffmpeg processes (detection and others)."""
         if self.capture_thread is not None and self.capture_thread.is_alive():
             self.capture_thread.join(timeout=5)
             if self.capture_thread.is_alive():
