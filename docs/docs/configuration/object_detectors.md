@@ -129,16 +129,21 @@ detectors:
     type: edgetpu
     device: pci
 ```
+---
 
-## Hailo-8
+## Hailo-8 / Hailo-8L Detector
 
-This detector is available for use with Hailo-8 and Hailo-8L AI Acceleration Module.
+This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
 
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the Hailo hardware.
 
 ### Configuration
 
 #### YOLO (Recommended)
+
+Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector checks for a cached model at `/config/model_cache/hailo` and automatically downloads the default model based on the detected hardware:
+- **Hailo-8 hardware:** Uses `yolov8s.hef`
+- **Hailo-8L hardware:** Uses `yolov6n.hef`
 
 ```yaml
 detectors:
@@ -153,12 +158,14 @@ model:
   input_pixel_format: rgb
   input_dtype: int
   model_type: hailoyolo
-  # The detector will automatically use the appropriate model:
-  # - YOLOv8s for Hailo-8L hardware
-  # - YOLOv8m for Hailo-8 hardware
+  # The detector automatically selects the default model based on your hardware:
+  # - For Hailo-8 hardware: YOLOv8s (default: yolov8s.hef)
+  # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
 ```
 
 #### SSD
+
+For SSD-based models, provide the model path (or URL) to your compiled SSD model:
 
 ```yaml
 detectors:
@@ -175,13 +182,9 @@ model:
   path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 ```
 
-### Custom Models
+#### Custom Models
 
-The Hailo-8l detector supports all YOLO models that have been compiled for the Hailo hardware and include post-processing. The detector automatically detects your hardware type (Hailo-8 or Hailo-8L) and uses the appropriate model.
-
-#### Using a Custom URL
-
-You can specify a custom URL to download a model directly:
+The Hailo detector supports all YOLO models compiled for Hailo hardware that include post-processing. You can specify a custom URL to download your model directly. If provided, the detector will use the custom model instead of the default one.
 
 ```yaml
 detectors:
@@ -199,8 +202,11 @@ model:
   model_type: hailoyolo
 ```
 
-The detector will automatically handle different output formats from all supported YOLO variants. It's important to match the `model_type` with the actual model architecture for proper processing.
-* Tsted custom models : yolov5 , yolov8 , yolov9 , yolov11
+> **Note:**  
+> If both a model path and URL are provided, the detector will first check the local model path. If the file is not found, it will download the model from the URL.  
+>  
+> *Tested custom models include: yolov5, yolov8, yolov9, yolov11.*
+
 
 ## OpenVINO Detector
 

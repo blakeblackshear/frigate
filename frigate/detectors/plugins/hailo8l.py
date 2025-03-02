@@ -204,7 +204,7 @@ class HailoDetector(DetectionApi):
     def __init__(self, detector_config: 'HailoDetectorConfig'):
         global ARCH
         ARCH = detect_hailo_arch()
-        self.cache_dir = "/config/model_cache/hailo"
+        self.cache_dir = MODEL_CACHE_DIR
         self.device_type = detector_config.device
         # Model attributes should be provided in detector_config.model
         self.model_path = detector_config.model.path if hasattr(detector_config.model, "path") else None
@@ -223,7 +223,7 @@ class HailoDetector(DetectionApi):
         self.input_queue = queue.Queue()
         self.output_queue = queue.Queue()
         try:
-            logging.info(f"[INIT] Loading HEF model from {self.working_model_path}")
+            logging.debug(f"[INIT] Loading HEF model from {self.working_model_path}")
             self.inference_engine = HailoAsyncInference(
                 self.working_model_path,
                 self.input_queue,
@@ -231,7 +231,7 @@ class HailoDetector(DetectionApi):
                 self.batch_size
             )
             self.input_shape = self.inference_engine.get_input_shape()
-            logging.info(f"[INIT] Model input shape: {self.input_shape}")
+            logging.debug(f"[INIT] Model input shape: {self.input_shape}")
         except Exception as e:
             logging.error(f"[INIT] Failed to initialize HailoAsyncInference: {e}")
             raise
@@ -296,11 +296,11 @@ class HailoDetector(DetectionApi):
         return model_path
 
     def detect_raw(self, tensor_input):
-        logging.info("[DETECT_RAW] Starting detection")
+        logging.debug("[DETECT_RAW] Starting detection")
         # Ensure tensor_input has a batch dimension
         if isinstance(tensor_input, np.ndarray) and len(tensor_input.shape) == 3:
             tensor_input = np.expand_dims(tensor_input, axis=0)
-            logging.info(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
+            logging.debug(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
 
         # Enqueue input and a sentinel value
         self.input_queue.put(tensor_input)
@@ -314,7 +314,7 @@ class HailoDetector(DetectionApi):
             return np.zeros((20, 6), dtype=np.float32)
 
         original_input, infer_results = result
-        logging.info("[DETECT_RAW] Inference completed.")
+        logging.debug("[DETECT_RAW] Inference completed.")
 
         # If infer_results is a single-element list, unwrap it.
         if isinstance(infer_results, list) and len(infer_results) == 1:
@@ -361,7 +361,7 @@ class HailoDetector(DetectionApi):
         elif detections_array.shape[0] > 20:
             detections_array = detections_array[:20, :]
 
-        logging.info(f"[DETECT_RAW] Processed detections: {detections_array}")
+        logging.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
         return detections_array
 
     # Preprocess method using inline utility
@@ -370,10 +370,10 @@ class HailoDetector(DetectionApi):
 
     # Close the Hailo device
     def close(self):
-        logging.info("[CLOSE] Closing HailoDetector")
+        logging.debug("[CLOSE] Closing HailoDetector")
         try:
             self.inference_engine.hef.close()
-            logging.info("Hailo device closed successfully")
+            logging.debug("Hailo device closed successfully")
         except Exception as e:
             logging.error(f"Failed to close Hailo device: {e}")
             raise

@@ -92,37 +92,31 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-### Hailo-8
+### Hailo-8 Detector
 
-Frigate supports the Hailo8 and Hailo-8L AI Acceleration Module on compatible hardware platforms, including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo accelerator provides dedicated hardware for efficiently running neural network inference.
+Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
 
-The inference time for the Hailo-8L chip is around 17-21 ms for the SSD MobileNet Version 1 model and 15-18 ms for YOLOv8s models. For the more powerful Hailo-8 chip, the YOLOv8m model has an inference time of approximately 12-15 ms.
+**Default Model Configuration:**
+- **Hailo-8L:** Default model is **YOLOv6n**.
+- **Hailo-8:** Default model is **YOLOv8s**.
 
-In real-world testing with 8 cameras running simultaneously, each camera maintained a detection rate of approximately 20-25 FPS, demonstrating the Hailo accelerator's capability to handle multiple video streams efficiently.
+Additionally, the heavier **YOLOv8m** model has been tested on Hailo-8 hardware for users who require higher accuracy despite increased inference time.
 
-Testing on x86 platforms has also been conducted with excellent results. The x86 implementation benefits from having two PCIe lanes available instead of one, resulting in improved FPS , throughput and lower latency compared to the Raspberry Pi setup.
+In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
 
-#### Supported Models
+#### Supported Models & Inference Times
 
-The Hailo-8L detector supports all YOLO variants that have been compiled for Hailo hardware with post-processing, including:
+| Model Type         | Hardware         | Inference Time (RPi) | Inference Time (x86) | Resolution |
+|--------------------|------------------|----------------------|----------------------|------------|
+| SSD MobileNet V1   | Hailo-8L         | 17–21 ms             | 12–15 ms             | 300×300    |
+| SSD MobileNet V1   | Hailo-8          | 10–13 ms             |  –                    | 300×300    |
+| YOLOv6n (Default)  | Hailo-8L         | 16–20 ms             | 10–13 ms             | 640×640    |
+| YOLOv8s (Default)  | Hailo-8          | 15–19 ms             | 12–18 ms             | 640×640    |
+| YOLOv8m (Tested)   | Hailo-8          | 18–25 ms             | 16–22 ms             | 640×640    |
 
-- YOLOv5
-- YOLOv8
-- any Yolo variant with HailoRT Post-process
-- SSD mobilnet v1
+*Note: Inference times may vary based on system configuration and operating conditions.*
 
-
-| Model Type | Hardware | Inference Time | Resolution |
-|------------|----------|----------------|------------|
-| SSD MobileNet V1 | Hailo-8L (RPi) | 17-21 ms | 300×300 |
-| SSD MobileNet V1 | Hailo-8L (x86) | 12-15 ms | 300×300 |
-| SSD MobileNet V1 | Hailo-8 (rpi) | 13-16 ms | 300×300 |
-| YOLOv8s | Hailo-8L (RPi) | 15-18 ms | 640×640 |
-| YOLOv8s | Hailo-8L (x86) | 10-13 ms | 640×640 |
-| YOLOv8m | Hailo-8 (RPi) | 12-15 ms | 640×640 |
-| YOLOv8m | Hailo-8 (x86) | 8-11 ms | 640×640 |
-
-The detector automatically detects your hardware type (Hailo-8 or Hailo-8L) and downloads the appropriate model. The Hailo detector optimizes inference by maintaining a persistent pipeline between detection calls, reducing overhead and providing fast, consistent performance with multiple cameras.
+This documentation is part of Frigate’s internal integration guide, ensuring that users get the optimal performance by automatically adapting to the available Hailo hardware.
 
 ## Community Supported Detectors
 
