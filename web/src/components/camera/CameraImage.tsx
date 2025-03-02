@@ -96,9 +96,7 @@ export default function CameraImage({
           loading="lazy"
         />
       ) : (
-        <div className="pt-6 text-center">
-          Camera is disabled in config, no stream or snapshot available!
-        </div>
+        <div className="pt-6 text-center">Camera is disabled.</div>
       )}
       {!imageLoaded && enabled ? (
         <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
