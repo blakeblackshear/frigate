@@ -97,3 +97,6 @@ COPY --from=rootfs / /
 
 # Fixes "Error importing detector runtime: /usr/lib/aarch64-linux-gnu/libstdc++.so.6: cannot allocate memory in static TLS block"
 ENV LD_PRELOAD /usr/lib/aarch64-linux-gnu/libstdc++.so.6
+
+# Fixes "Error loading shared libs"
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/ffmpeg/jetson/lib/
