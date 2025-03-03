@@ -102,16 +102,23 @@ def capture_frames(
     skipped_fps: mp.Value,
     current_frame: mp.Value,
     stop_event: mp.Event,
-    enabled: mp.Value,
 ):
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
+    config_subscriber = ConfigSubscriber(f"config/enabled/{config.name}", True)
 
-    while True:
-        if not enabled.value:
+    def get_enabled_state():
+        """Fetch the latest enabled state from ZMQ."""
+        _, config_data = config_subscriber.check_for_update()
+        if config_data:
+            return config_data.enabled
+        return config.enabled
+
+    while not stop_event.is_set():
+        if not get_enabled_state():
             logger.debug(f"Stopping capture thread for disabled {config.name}")
             break
 
@@ -162,7 +169,6 @@ class CameraWatchdog(threading.Thread):
         skipped_fps,
         ffmpeg_pid,
         stop_event,
-        enabled: mp.Value,
     ):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
@@ -183,16 +189,25 @@ class CameraWatchdog(threading.Thread):
         self.frame_index = 0
         self.stop_event = stop_event
         self.sleeptime = self.config.ffmpeg.retry_interval
-        self.enabled = enabled
-        self.was_enabled = self.enabled.value
+
+        self.config_subscriber = ConfigSubscriber(f"config/enabled/{camera_name}", True)
+        self.was_enabled = self.config.enabled
+
+    def _update_enabled_state(self):
+        """Fetch the latest config and update enabled state."""
+        _, config_data = self.config_subscriber.check_for_update()
+        if config_data:
+            enabled = config_data.enabled
+            return enabled
+        return self.was_enabled if self.was_enabled is not None else self.config.enabled
 
     def run(self):
-        if self.enabled.value:
+        if self._update_enabled_state():
             self.start_all_ffmpeg()
 
         time.sleep(self.sleeptime)
         while not self.stop_event.wait(self.sleeptime):
-            enabled = self.enabled.value
+            enabled = self._update_enabled_state()
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.debug(f"Enabling camera {self.camera_name}")
@@ -289,6 +304,7 @@ class CameraWatchdog(threading.Thread):
 
         self.stop_all_ffmpeg()
         self.logpipe.close()
+        self.config_subscriber.stop()
 
     def start_ffmpeg_detect(self):
         ffmpeg_cmd = [
@@ -308,12 +324,12 @@ class CameraWatchdog(threading.Thread):
             self.camera_fps,
             self.skipped_fps,
             self.stop_event,
-            self.enabled,
         )
         self.capture_thread.start()
 
     def start_all_ffmpeg(self):
         """Start all ffmpeg processes (detection and others)."""
+        logger.debug(f"Starting all ffmpeg processes for {self.camera_name}")
         self.start_ffmpeg_detect()
         for c in self.config.ffmpeg_cmds:
             if "detect" in c["roles"]:
@@ -332,6 +348,7 @@ class CameraWatchdog(threading.Thread):
 
     def stop_all_ffmpeg(self):
         """Stop all ffmpeg processes (detection and others)."""
+        logger.debug(f"Stopping all ffmpeg processes for {self.camera_name}")
         if self.capture_thread is not None and self.capture_thread.is_alive():
             self.capture_thread.join(timeout=5)
             if self.capture_thread.is_alive():
@@ -385,7 +402,6 @@ class CameraCapture(threading.Thread):
         fps,
         skipped_fps,
         stop_event,
-        enabled,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{config.name}"
@@ -401,7 +417,6 @@ class CameraCapture(threading.Thread):
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value("d", 0.0)
         self.last_frame = 0
-        self.enabled = enabled
 
     def run(self):
         capture_frames(
@@ -416,7 +431,6 @@ class CameraCapture(threading.Thread):
             self.skipped_fps,
             self.current_frame,
             self.stop_event,
-            self.enabled,
         )
 
 
@@ -434,9 +448,6 @@ def capture_camera(
     threading.current_thread().name = f"capture:{name}"
     setproctitle(f"frigate.capture:{name}")
 
-    # Sync enabled state with config (optional, since app.py sets it)
-    camera_metrics.enabled.value = config.enabled
-
     camera_watchdog = CameraWatchdog(
         name,
         config,
@@ -446,7 +457,6 @@ def capture_camera(
         camera_metrics.skipped_fps,
         camera_metrics.ffmpeg_pid,
         stop_event,
-        camera_metrics.enabled,
     )
     camera_watchdog.start()
     camera_watchdog.join()
@@ -587,7 +597,8 @@ def process_frames(
     exit_on_empty: bool = False,
 ):
     next_region_update = get_tomorrow_at_time(2)
-    config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}", True)
+    detect_config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}", True)
+    enabled_config_subscriber = ConfigSubscriber(f"config/enabled/{camera_name}", True)
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
@@ -597,10 +608,17 @@ def process_frames(
 
     region_min_size = get_min_region_size(model_config)
 
-    prev_enabled = camera_metrics.enabled.value
+    prev_enabled = None
 
     while not stop_event.is_set():
-        current_enabled = camera_metrics.enabled.value
+        _, enabled_config = enabled_config_subscriber.check_for_update()
+        current_enabled = (
+            enabled_config.enabled
+            if enabled_config
+            else (prev_enabled if prev_enabled is not None else True)
+        )
+        if prev_enabled is None:
+            prev_enabled = current_enabled
 
         if prev_enabled and not current_enabled and camera_metrics.frame_queue.empty():
             logger.debug(f"Camera {camera_name} disabled, clearing tracked objects")
@@ -619,9 +637,6 @@ def process_frames(
             for tracker in object_tracker.default_tracker.values():
                 tracker.tracked_objects = []
 
-            # Notify downstream to clear objects
-            detected_objects_queue.put((camera_name, None, 0.0, {}, [], []))
-
         prev_enabled = current_enabled
 
         if not current_enabled:
@@ -629,7 +644,7 @@ def process_frames(
             continue
 
         # check for updated detect config
-        _, updated_detect_config = config_subscriber.check_for_update()
+        _, updated_detect_config = detect_config_subscriber.check_for_update()
 
         if updated_detect_config:
             detect_config = updated_detect_config
@@ -923,4 +938,5 @@ def process_frames(
 
     motion_detector.stop()
     requestor.stop()
-    config_subscriber.stop()
+    detect_config_subscriber.stop()
+    enabled_config_subscriber.stop()

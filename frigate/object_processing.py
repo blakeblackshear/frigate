@@ -10,6 +10,7 @@ from typing import Callable, Optional
 import cv2
 import numpy as np
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
@@ -441,6 +442,11 @@ class TrackedObjectProcessor(threading.Thread):
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.camera_metrics = camera_metrics
 
+        self.enabled_subscribers = {
+            camera: ConfigSubscriber(f"config/enabled/{camera}", True)
+            for camera in config.cameras.keys()
+        }
+
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
         self.event_sender = EventUpdatePublisher()
@@ -683,36 +689,49 @@ class TrackedObjectProcessor(threading.Thread):
         """Returns the latest frame time for a given camera."""
         return self.camera_states[camera].current_frame_time
 
+    def force_end_all_events(self, camera: str, camera_state: CameraState):
+        """Ends all active events on camera when disabling."""
+        last_frame_name = camera_state.previous_frame_id
+        for obj_id, obj in list(camera_state.tracked_objects.items()):
+            if "end_time" not in obj.obj_data:
+                logger.debug(f"Camera {camera} disabled, ending active event {obj_id}")
+                obj.obj_data["end_time"] = datetime.datetime.now().timestamp()
+                # end callbacks
+                for callback in camera_state.callbacks["end"]:
+                    callback(camera, obj, last_frame_name)
+
+                # camera activity callbacks
+                for callback in camera_state.callbacks["camera_activity"]:
+                    callback(
+                        camera,
+                        {"enabled": False, "motion": 0, "objects": []},
+                    )
+
+    def _get_enabled_state(self, camera: str):
+        _, config_data = self.enabled_subscribers[camera].check_for_update()
+        if config_data:
+            enabled = config_data.enabled
+            if self.camera_states[camera].prev_enabled is None:
+                self.camera_states[camera].prev_enabled = enabled
+            return enabled
+        return (
+            self.camera_states[camera].prev_enabled
+            if self.camera_states[camera].prev_enabled is not None
+            else self.config.cameras[camera].enabled
+        )
+
     def run(self):
         while not self.stop_event.is_set():
             for camera, config in self.config.cameras.items():
                 if not config.enabled_in_config:
                     continue
 
-                current_enabled = self.camera_metrics[camera].enabled.value
+                current_enabled = self._get_enabled_state(camera)
                 camera_state = self.camera_states[camera]
 
                 if camera_state.prev_enabled and not current_enabled:
                     logger.debug(f"Not processing objects for disabled camera {camera}")
-                    last_frame_name = camera_state.previous_frame_id
-                    for obj_id, obj in list(camera_state.tracked_objects.items()):
-                        if "end_time" not in obj.obj_data:
-                            logger.debug(
-                                f"Camera {camera} disabled, ending active event {obj_id}"
-                            )
-                            obj.obj_data["end_time"] = (
-                                datetime.datetime.now().timestamp()
-                            )
-                            # end callbacks
-                            for callback in camera_state.callbacks["end"]:
-                                callback(camera, obj, last_frame_name)
-
-                            # camera activity callbacks
-                            for callback in camera_state.callbacks["camera_activity"]:
-                                callback(
-                                    camera,
-                                    {"enabled": False, "motion": 0, "objects": []},
-                                )
+                    self.force_end_all_events(camera, camera_state)
 
                 camera_state.prev_enabled = current_enabled
 
@@ -731,7 +750,7 @@ class TrackedObjectProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if not self.camera_metrics[camera].enabled.value:
+            if not self._get_enabled_state(camera):
                 logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
@@ -777,4 +796,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()
+        for subscriber in self.enabled_subscribers.values():
+            subscriber.stop()
+
         logger.info("Exiting object processor...")

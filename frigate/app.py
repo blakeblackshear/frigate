@@ -126,9 +126,7 @@ class FrigateApp:
     def init_camera_metrics(self) -> None:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            self.camera_metrics[camera_name] = CameraMetrics(
-                enabled=self.config.cameras[camera_name].enabled
-            )
+            self.camera_metrics[camera_name] = CameraMetrics()
             self.ptz_metrics[camera_name] = PTZMetrics(
                 autotracker_enabled=self.config.cameras[
                     camera_name
@@ -335,7 +333,6 @@ class FrigateApp:
             self.config,
             self.inter_config_updater,
             self.onvif_controller,
-            self.camera_metrics,
             self.ptz_metrics,
             comms,
         )

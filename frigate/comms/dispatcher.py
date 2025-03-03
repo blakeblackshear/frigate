@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Any, Callable, Optional
 
-from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import CameraActivityManager
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
@@ -40,14 +40,12 @@ class Dispatcher:
         config: FrigateConfig,
         config_updater: ConfigPublisher,
         onvif: OnvifController,
-        camera_metrics: dict[str, CameraMetrics],
         ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
     ) -> None:
         self.config = config
         self.config_updater = config_updater
         self.onvif = onvif
-        self.camera_metrics = camera_metrics
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
         self.camera_activity = CameraActivityManager(config, self.publish)
@@ -292,14 +290,12 @@ class Dispatcher:
                     "Camera must be enabled in the config to be turned on via MQTT."
                 )
                 return
-            if not self.camera_metrics[camera_name].enabled.value:
+            if not camera_settings.enabled:
                 logger.info(f"Turning on camera {camera_name}")
-                self.camera_metrics[camera_name].enabled.value = True
                 camera_settings.enabled = True
         elif payload == "OFF":
-            if self.camera_metrics[camera_name].enabled.value:
+            if camera_settings.enabled:
                 logger.info(f"Turning off camera {camera_name}")
-                self.camera_metrics[camera_name].enabled.value = False
                 camera_settings.enabled = False
 
         self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)

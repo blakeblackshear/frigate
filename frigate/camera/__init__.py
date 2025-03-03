@@ -14,14 +14,13 @@ class CameraMetrics:
     audio_rms: Synchronized
     audio_dBFS: Synchronized
 
-    enabled: Synchronized
     frame_queue: mp.Queue
 
     process: Optional[mp.Process]
     capture_process: Optional[mp.Process]
     ffmpeg_pid: Synchronized
 
-    def __init__(self, enabled: bool):
+    def __init__(self):
         self.camera_fps = mp.Value("d", 0)
         self.detection_fps = mp.Value("d", 0)
         self.detection_frame = mp.Value("d", 0)
@@ -31,7 +30,6 @@ class CameraMetrics:
         self.audio_rms = mp.Value("d", 0)
         self.audio_dBFS = mp.Value("d", 0)
 
-        self.enabled = mp.Value("i", enabled)
         self.frame_queue = mp.Queue(maxsize=2)
 
         self.process = None

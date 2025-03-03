@@ -285,6 +285,12 @@ class BirdsEyeFrameManager:
         self.inactivity_threshold = config.birdseye.inactivity_threshold
         self.camera_metrics = camera_metrics
 
+        self.enabled_subscribers = {
+            cam: ConfigSubscriber(f"config/enabled/{cam}", True)
+            for cam in config.cameras.keys()
+            if config.cameras[cam].enabled_in_config
+        }
+
         if config.birdseye.layout.max_cameras:
             self.last_refresh_time = 0
 
@@ -383,6 +389,13 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
+    def _get_enabled_state(self, camera: str):
+        """Fetch the latest enabled state for a camera from ZMQ."""
+        _, config_data = self.enabled_subscribers[camera].check_for_update()
+        if config_data:
+            return config_data.enabled
+        return self.config.cameras[camera].enabled
+
     def update_frame(self, frame: Optional[np.ndarray] = None) -> bool:
         """
         Update birdseye, optionally with a new frame.
@@ -395,7 +408,8 @@ class BirdsEyeFrameManager:
                 cam
                 for cam, cam_data in self.cameras.items()
                 if self.config.cameras[cam].birdseye.enabled
-                and self.camera_metrics[cam].enabled.value
+                and self.config.cameras[cam].enabled_in_config
+                and self._get_enabled_state(cam)
                 and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame_time"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
@@ -694,7 +708,7 @@ class BirdsEyeFrameManager:
         camera_config = self.config.cameras[camera].birdseye
 
         # disabling birdseye is a little tricky
-        if not camera_config.enabled or not self.camera_metrics[camera].enabled.value:
+        if not camera_config.enabled or not self._get_enabled_state(camera):
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
             if self.cameras[camera]["last_active_frame"] > 0:
@@ -727,6 +741,11 @@ class BirdsEyeFrameManager:
             self.last_output_time = now
             return True
         return False
+
+    def stop(self):
+        """Clean up subscribers when stopping."""
+        for subscriber in self.enabled_subscribers.values():
+            subscriber.stop()
 
 
 class Birdseye:
@@ -818,6 +837,7 @@ class Birdseye:
 
     def stop(self) -> None:
         self.config_subscriber.stop()
+        self.birdseye_manager.stop()
         self.converter.join()
         self.broadcaster.join()
         self.monitor_thread.join()

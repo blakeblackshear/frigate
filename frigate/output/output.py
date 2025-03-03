@@ -18,6 +18,7 @@ from ws4py.server.wsgirefserver import (
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from frigate.camera import CameraMetrics
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
@@ -61,6 +62,12 @@ def output_frames(
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
 
+    enabled_subscribers = {
+        camera: ConfigSubscriber(f"config/enabled/{camera}", True)
+        for camera in config.cameras.keys()
+        if config.cameras[camera].enabled_in_config
+    }
+
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
@@ -82,6 +89,13 @@ def output_frames(
 
     websocket_thread.start()
 
+    def get_enabled_state(camera: str):
+        _, config_data = enabled_subscribers[camera].check_for_update()
+        if config_data:
+            return config_data.enabled
+        # default
+        return config.cameras[camera].enabled
+
     while not stop_event.is_set():
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
 
@@ -97,7 +111,7 @@ def output_frames(
             _,
         ) = data
 
-        if not camera_metrics[camera].enabled.value:
+        if not get_enabled_state(camera):
             continue
 
         frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
@@ -188,6 +202,9 @@ def output_frames(
 
     if birdseye is not None:
         birdseye.stop()
+
+    for subscriber in enabled_subscribers.values():
+        subscriber.stop()
 
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
