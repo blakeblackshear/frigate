@@ -193,7 +193,7 @@ class CameraWatchdog(threading.Thread):
         self.config_subscriber = ConfigSubscriber(f"config/enabled/{camera_name}", True)
         self.was_enabled = self.config.enabled
 
-    def _update_enabled_state(self):
+    def _update_enabled_state(self) -> bool:
         """Fetch the latest config and update enabled state."""
         _, config_data = self.config_subscriber.check_for_update()
         if config_data:

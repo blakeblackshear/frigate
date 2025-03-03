@@ -9,7 +9,6 @@ import os
 import queue
 import subprocess as sp
 import threading
-import time
 import traceback
 from typing import Optional
 
@@ -386,7 +385,7 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
-    def _get_enabled_state(self, camera: str):
+    def _get_enabled_state(self, camera: str) -> bool:
         """Fetch the latest enabled state for a camera from ZMQ."""
         _, config_data = self.enabled_subscribers[camera].check_for_update()
         if config_data:
@@ -781,16 +780,6 @@ class Birdseye:
 
         self.converter.start()
         self.broadcaster.start()
-        self.monitor_thread = threading.Thread(
-            target=self.monitor_enabled_states, daemon=True
-        )
-        self.monitor_thread.start()
-
-    def monitor_enabled_states(self):
-        while not self.stop_event.is_set():
-            # Update layout with no frame when camera is disabled
-            self.birdseye_manager.update_frame()
-            time.sleep(1)
 
     def write_data(
         self,
@@ -836,4 +825,3 @@ class Birdseye:
         self.birdseye_manager.stop()
         self.converter.join()
         self.broadcaster.join()
-        self.monitor_thread.join()

@@ -705,7 +705,7 @@ class TrackedObjectProcessor(threading.Thread):
                         {"enabled": False, "motion": 0, "objects": []},
                     )
 
-    def _get_enabled_state(self, camera: str):
+    def _get_enabled_state(self, camera: str) -> bool:
         _, config_data = self.enabled_subscribers[camera].check_for_update()
         if config_data:
             enabled = config_data.enabled

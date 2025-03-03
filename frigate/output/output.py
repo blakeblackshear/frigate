@@ -87,7 +87,7 @@ def output_frames(
 
     websocket_thread.start()
 
-    def get_enabled_state(camera: str):
+    def get_enabled_state(camera: str) -> bool:
         _, config_data = enabled_subscribers[camera].check_for_update()
         if config_data:
             return config_data.enabled
