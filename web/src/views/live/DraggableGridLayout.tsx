@@ -396,10 +396,12 @@ export default function DraggableGridLayout({
     const initialVolumeStates: VolumeState = {};
 
     Object.entries(allGroupsStreamingSettings).forEach(([_, groupSettings]) => {
-      Object.entries(groupSettings).forEach(([camera, cameraSettings]) => {
-        initialAudioStates[camera] = cameraSettings.playAudio ?? false;
-        initialVolumeStates[camera] = cameraSettings.volume ?? 1;
-      });
+      if (groupSettings) {
+        Object.entries(groupSettings).forEach(([camera, cameraSettings]) => {
+          initialAudioStates[camera] = cameraSettings.playAudio ?? false;
+          initialVolumeStates[camera] = cameraSettings.volume ?? 1;
+        });
+      }
     });
 
     setAudioStates(initialAudioStates);

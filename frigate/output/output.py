@@ -1,12 +1,12 @@
 """Handle outputting raw frigate frames"""
 
+import datetime
 import logging
 import multiprocessing as mp
 import os
 import shutil
 import signal
 import threading
-from typing import Optional
 from wsgiref.simple_server import make_server
 
 from setproctitle import setproctitle
@@ -25,9 +25,41 @@ from frigate.const import CACHE_DIR, CLIPS_DIR
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
-from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.image import SharedMemoryFrameManager, get_blank_yuv_frame
 
 logger = logging.getLogger(__name__)
+
+
+def check_disabled_camera_update(
+    config: FrigateConfig,
+    birdseye: Birdseye | None,
+    previews: dict[str, PreviewRecorder],
+    write_times: dict[str, float],
+) -> None:
+    """Check if camera is disabled / offline and needs an update."""
+    now = datetime.datetime.now().timestamp()
+    has_enabled_camera = False
+
+    for camera, last_update in write_times.items():
+        if config.cameras[camera].enabled:
+            has_enabled_camera = True
+
+        if now - last_update > 1:
+            # last camera update was more than one second ago
+            # need to send empty data to updaters because current
+            # frame is now out of date
+            frame = get_blank_yuv_frame(
+                config.cameras[camera].detect.width,
+                config.cameras[camera].detect.height,
+            )
+
+            if birdseye:
+                birdseye.write_data(camera, [], [], now, frame)
+
+            previews[camera].write_data([], [], now, frame)
+
+    if not has_enabled_camera and birdseye:
+        birdseye.all_cameras_disabled()
 
 
 def output_frames(
@@ -67,10 +99,11 @@ def output_frames(
     }
 
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
-    birdseye: Optional[Birdseye] = None
+    birdseye: Birdseye | None = None
     preview_recorders: dict[str, PreviewRecorder] = {}
     preview_write_times: dict[str, float] = {}
     failed_frame_requests: dict[str, int] = {}
+    last_disabled_cam_check = datetime.datetime.now().timestamp()
 
     move_preview_frames("cache")
 
@@ -89,13 +122,23 @@ def output_frames(
 
     def get_enabled_state(camera: str) -> bool:
         _, config_data = enabled_subscribers[camera].check_for_update()
+
         if config_data:
+            config.cameras[camera].enabled = config_data.enabled
             return config_data.enabled
-        # default
+
         return config.cameras[camera].enabled
 
     while not stop_event.is_set():
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
+        now = datetime.datetime.now().timestamp()
+
+        if now - last_disabled_cam_check > 5:
+            # check disabled cameras every 5 seconds
+            last_disabled_cam_check = now
+            check_disabled_camera_update(
+                config, birdseye, preview_recorders, preview_write_times
+            )
 
         if not topic:
             continue
@@ -151,23 +194,10 @@ def output_frames(
             )
 
         # send frames for low fps recording
-        generated_preview = preview_recorders[camera].write_data(
+        preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
         preview_write_times[camera] = frame_time
-
-        # if another camera generated a preview,
-        # check for any cameras that are currently offline
-        # and need to generate a preview
-        if generated_preview:
-            logger.debug(
-                "Checking for offline cameras because another camera generated a preview."
-            )
-            for camera, time in preview_write_times.copy().items():
-                if time != 0 and frame_time - time > 10:
-                    preview_recorders[camera].flag_offline(frame_time)
-                    preview_write_times[camera] = frame_time
-
         frame_manager.close(frame_name)
 
     move_preview_frames("clips")
