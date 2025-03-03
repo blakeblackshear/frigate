@@ -76,14 +76,16 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def __build_detector(self) -> None:
         self.face_detector = cv2.FaceDetectorYN.create(
-            "/config/model_cache/facedet/facedet.onnx",
+            os.path.join(MODEL_CACHE_DIR, "facedet/facedet.onnx"),
             config="",
             input_size=(320, 320),
             score_threshold=0.8,
             nms_threshold=0.3,
         )
         self.landmark_detector = cv2.face.createFacemarkLBF()
-        self.landmark_detector.loadModel("/config/model_cache/facedet/landmarkdet.yaml")
+        self.landmark_detector.loadModel(
+            os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
+        )
 
     def __build_classifier(self) -> None:
         if not self.landmark_detector:

@@ -14,7 +14,7 @@ from frigate.util.services import get_video_properties
 logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.16-0"
-DEFAULT_CONFIG_FILE = "/config/config.yml"
+DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 
 def find_config_file() -> str:
