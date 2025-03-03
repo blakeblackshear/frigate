@@ -5,7 +5,7 @@ from typing import Any, Callable
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-from frigate.comms.dispatcher import Communicator
+from frigate.comms.base_communicator import Communicator
 from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,10 @@ class MqttClient(Communicator):  # type: ignore[misc]
             return
 
         self.client.publish(
-            f"{self.mqtt_config.topic_prefix}/{topic}", payload, retain=retain
+            f"{self.mqtt_config.topic_prefix}/{topic}",
+            payload,
+            qos=self.config.mqtt.qos,
+            retain=retain,
         )
 
     def stop(self) -> None:
@@ -104,6 +107,16 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 ),
                 retain=True,
             )
+            self.publish(
+                f"{camera_name}/review_alerts/state",
+                "ON" if camera.review.alerts.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/review_detections/state",
+                "ON" if camera.review.detections.enabled_in_config else "OFF",
+                retain=True,
+            )
 
         if self.config.notifications.enabled_in_config:
             self.publish(
@@ -151,7 +164,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         self.connected = True
         logger.debug("MQTT connected")
-        client.subscribe(f"{self.mqtt_config.topic_prefix}/#")
+        client.subscribe(f"{self.mqtt_config.topic_prefix}/#", qos=self.config.mqtt.qos)
         self._set_initial_topics()
 
     def _on_disconnect(

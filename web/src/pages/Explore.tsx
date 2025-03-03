@@ -112,6 +112,8 @@ export default function Explore() {
           search_type: searchSearchParams["search_type"],
           min_score: searchSearchParams["min_score"],
           max_score: searchSearchParams["max_score"],
+          min_speed: searchSearchParams["min_speed"],
+          max_speed: searchSearchParams["max_speed"],
           has_snapshot: searchSearchParams["has_snapshot"],
           is_submitted: searchSearchParams["is_submitted"],
           has_clip: searchSearchParams["has_clip"],
@@ -145,6 +147,8 @@ export default function Explore() {
         search_type: searchSearchParams["search_type"],
         min_score: searchSearchParams["min_score"],
         max_score: searchSearchParams["max_score"],
+        min_speed: searchSearchParams["min_speed"],
+        max_speed: searchSearchParams["max_speed"],
         has_snapshot: searchSearchParams["has_snapshot"],
         is_submitted: searchSearchParams["is_submitted"],
         has_clip: searchSearchParams["has_clip"],
@@ -263,20 +267,41 @@ export default function Explore() {
 
   // model states
 
-  const { payload: textModelState } = useModelState(
-    "jinaai/jina-clip-v1-text_model_fp16.onnx",
-  );
-  const { payload: textTokenizerState } = useModelState(
-    "jinaai/jina-clip-v1-tokenizer",
-  );
-  const modelFile =
-    config?.semantic_search.model_size === "large"
-      ? "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-      : "jinaai/jina-clip-v1-vision_model_quantized.onnx";
+  const modelVersion = config?.semantic_search.model || "jinav1";
+  const modelSize = config?.semantic_search.model_size || "small";
 
-  const { payload: visionModelState } = useModelState(modelFile);
+  // Text model state
+  const { payload: textModelState } = useModelState(
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-text_model_fp16.onnx"
+      : modelSize === "large"
+        ? "jinaai/jina-clip-v2-model_fp16.onnx"
+        : "jinaai/jina-clip-v2-model_quantized.onnx",
+  );
+
+  // Tokenizer state
+  const { payload: textTokenizerState } = useModelState(
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-tokenizer"
+      : "jinaai/jina-clip-v2-tokenizer",
+  );
+
+  // Vision model state (same as text model for jinav2)
+  const visionModelFile =
+    modelVersion === "jinav1"
+      ? modelSize === "large"
+        ? "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+        : "jinaai/jina-clip-v1-vision_model_quantized.onnx"
+      : modelSize === "large"
+        ? "jinaai/jina-clip-v2-model_fp16.onnx"
+        : "jinaai/jina-clip-v2-model_quantized.onnx";
+  const { payload: visionModelState } = useModelState(visionModelFile);
+
+  // Preprocessor/feature extractor state
   const { payload: visionFeatureExtractorState } = useModelState(
-    "jinaai/jina-clip-v1-preprocessor_config.json",
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-preprocessor_config.json"
+      : "jinaai/jina-clip-v2-preprocessor_config.json",
   );
 
   const allModelsLoaded = useMemo(() => {

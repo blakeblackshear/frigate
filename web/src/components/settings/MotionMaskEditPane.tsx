@@ -33,6 +33,8 @@ type MotionMaskEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function MotionMaskEditPane({
@@ -45,6 +47,8 @@ export default function MotionMaskEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  snapPoints,
+  setSnapPoints,
 }: MotionMaskEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -252,6 +256,8 @@ export default function MotionMaskEditPane({
             polygons={polygons}
             setPolygons={setPolygons}
             activePolygonIndex={activePolygonIndex}
+            snapPoints={snapPoints}
+            setSnapPoints={setSnapPoints}
           />
         </div>
       )}

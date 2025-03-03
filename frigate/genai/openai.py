@@ -26,23 +26,30 @@ class OpenAIClient(GenAIClient):
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
+        messages_content = []
+        for image in encoded_images:
+            messages_content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image}",
+                        "detail": "low",
+                    },
+                }
+            )
+        messages_content.append(
+            {
+                "type": "text",
+                "text": prompt,
+            }
+        )
         try:
             result = self.provider.chat.completions.create(
                 model=self.genai_config.model,
                 messages=[
                     {
                         "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image}",
-                                    "detail": "low",
-                                },
-                            }
-                            for image in encoded_images
-                        ]
-                        + [prompt],
+                        "content": messages_content,
                     },
                 ],
                 timeout=self.timeout,

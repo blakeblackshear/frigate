@@ -1,4 +1,9 @@
-import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
+import {
+  AllGroupsStreamingSettings,
+  CameraGroupConfig,
+  FrigateConfig,
+  GroupStreamingSettings,
+} from "@/types/frigateConfig";
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
@@ -43,7 +48,6 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import axios from "axios";
-import FilterSwitch from "./FilterSwitch";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import IconWrapper from "../ui/icon-wrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,6 +70,11 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "../mobile/MobilePage";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
+import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { useStreamingSettings } from "@/context/streaming-settings-provider";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -607,6 +616,16 @@ export function CameraGroupEdit({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
+  const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
+    useStreamingSettings();
+
+  const [groupStreamingSettings, setGroupStreamingSettings] =
+    useState<GroupStreamingSettings>(
+      allGroupsStreamingSettings[editingGroup?.[0] ?? ""],
+    );
+
+  const [openCamera, setOpenCamera] = useState<string | null>();
+
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   const formSchema = z.object({
@@ -656,6 +675,16 @@ export function CameraGroupEdit({
 
       setIsLoading(true);
 
+      // update streaming settings
+      const updatedSettings: AllGroupsStreamingSettings = {
+        ...Object.fromEntries(
+          Object.entries(allGroupsStreamingSettings || {}).filter(
+            ([key]) => key !== editingGroup?.[0],
+          ),
+        ),
+        [values.name]: groupStreamingSettings,
+      };
+
       let renamingQuery = "";
       if (editingGroup && editingGroup[0] !== values.name) {
         renamingQuery = `camera_groups.${editingGroup[0]}&`;
@@ -679,7 +708,7 @@ export function CameraGroupEdit({
             requires_restart: 0,
           },
         )
-        .then((res) => {
+        .then(async (res) => {
           if (res.status === 200) {
             toast.success(`Camera group (${values.name}) has been saved.`, {
               position: "top-center",
@@ -688,6 +717,7 @@ export function CameraGroupEdit({
             if (onSave) {
               onSave();
             }
+            setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
               position: "top-center",
@@ -704,7 +734,16 @@ export function CameraGroupEdit({
           setIsLoading(false);
         });
     },
-    [currentGroups, setIsLoading, onSave, updateConfig, editingGroup],
+    [
+      currentGroups,
+      setIsLoading,
+      onSave,
+      updateConfig,
+      editingGroup,
+      groupStreamingSettings,
+      allGroupsStreamingSettings,
+      setAllGroupsStreamingSettings,
+    ],
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -762,16 +801,66 @@ export function CameraGroupEdit({
                   ),
                 ].map((camera) => (
                   <FormControl key={camera}>
-                    <FilterSwitch
-                      isChecked={field.value && field.value.includes(camera)}
-                      label={camera.replaceAll("_", " ")}
-                      onCheckedChange={(checked) => {
-                        const updatedCameras = checked
-                          ? [...(field.value || []), camera]
-                          : (field.value || []).filter((c) => c !== camera);
-                        form.setValue("cameras", updatedCameras);
-                      }}
-                    />
+                    <div className="flex items-center justify-between gap-1">
+                      <Label
+                        className="mx-2 w-full cursor-pointer capitalize text-primary"
+                        htmlFor={camera.replaceAll("_", " ")}
+                      >
+                        {camera.replaceAll("_", " ")}
+                      </Label>
+
+                      <div className="flex items-center gap-x-2">
+                        {camera !== "birdseye" && (
+                          <Dialog
+                            open={openCamera === camera}
+                            onOpenChange={(isOpen) =>
+                              setOpenCamera(isOpen ? camera : null)
+                            }
+                          >
+                            <DialogTrigger asChild>
+                              <Button
+                                className="flex h-auto items-center gap-1"
+                                aria-label="Camera streaming settings"
+                                size="icon"
+                                variant="ghost"
+                                disabled={
+                                  !(field.value && field.value.includes(camera))
+                                }
+                              >
+                                <LuIcons.LuSettings
+                                  className={cn(
+                                    field.value && field.value.includes(camera)
+                                      ? "text-primary"
+                                      : "text-muted-foreground",
+                                    "size-5",
+                                  )}
+                                />
+                              </Button>
+                            </DialogTrigger>
+                            <CameraStreamingDialog
+                              camera={camera}
+                              groupStreamingSettings={groupStreamingSettings}
+                              setGroupStreamingSettings={
+                                setGroupStreamingSettings
+                              }
+                              setIsDialogOpen={(isOpen) =>
+                                setOpenCamera(isOpen ? camera : null)
+                              }
+                            />
+                          </Dialog>
+                        )}
+                        <Switch
+                          id={camera.replaceAll("_", " ")}
+                          checked={field.value && field.value.includes(camera)}
+                          onCheckedChange={(checked) => {
+                            const updatedCameras = checked
+                              ? [...(field.value || []), camera]
+                              : (field.value || []).filter((c) => c !== camera);
+                            form.setValue("cameras", updatedCameras);
+                          }}
+                        />
+                      </div>
+                    </div>
                   </FormControl>
                 ))}
               </FormItem>
