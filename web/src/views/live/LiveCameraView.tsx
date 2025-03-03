@@ -1400,6 +1400,13 @@ function FrigateCameraFeatures({
       <DrawerContent className="rounded-2xl px-2 py-4">
         <div className="mt-2 flex flex-col gap-2">
           <FilterSwitch
+            label="Camera Enabled"
+            isChecked={enabledState == "ON"}
+            onCheckedChange={() =>
+              sendEnabled(enabledState == "ON" ? "OFF" : "ON")
+            }
+          />
+          <FilterSwitch
             label="Object Detection"
             isChecked={detectState == "ON"}
             onCheckedChange={() =>
