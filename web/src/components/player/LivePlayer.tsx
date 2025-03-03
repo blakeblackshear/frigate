@@ -200,7 +200,7 @@ export default function LivePlayer({
   // enabled states
 
   const [isReEnabling, setIsReEnabling] = useState(false);
-  const prevCameraEnabledRef = useRef(cameraEnabled);
+  const prevCameraEnabledRef = useRef(cameraEnabled ?? true);
 
   useEffect(() => {
     if (!prevCameraEnabledRef.current && cameraEnabled) {
