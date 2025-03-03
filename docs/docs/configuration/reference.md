@@ -818,7 +818,7 @@ cameras:
         # At the end of the event
         event_end: True
         # Optional: After X many significant updates are received (default: none, only at event end)
-        after_significant_updates: 0
+        after_significant_updates: None
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
       debug_save_thumbnails: False
 
