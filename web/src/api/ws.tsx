@@ -56,6 +56,7 @@ function useValue(): useValueReturn {
       const {
         record,
         detect,
+        enabled,
         snapshots,
         audio,
         notifications,
@@ -67,6 +68,7 @@ function useValue(): useValueReturn {
         // @ts-expect-error we know this is correct
         state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
+      cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
@@ -162,6 +164,17 @@ export function useWs(watchTopic: string, publishTopic: string) {
   );
 
   return { value, send };
+}
+
+export function useEnabledState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/enabled/state`, `${camera}/enabled/set`);
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function useDetectState(camera: string): {

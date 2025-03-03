@@ -1,4 +1,5 @@
 import {
+  useEnabledState,
   useFrigateEvents,
   useInitialCameraState,
   useMotionActivity,
@@ -15,6 +16,7 @@ import useSWR from "swr";
 import { getAttributeLabels } from "@/utils/iconUtil";
 
 type useCameraActivityReturn = {
+  enabled: boolean;
   activeTracking: boolean;
   activeMotion: boolean;
   objects: ObjectType[];
@@ -56,6 +58,7 @@ export function useCameraActivity(
     [objects],
   );
 
+  const { payload: cameraEnabled } = useEnabledState(camera.name);
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
   const updatedEvent = useDeepMemo(event);
@@ -145,12 +148,17 @@ export function useCameraActivity(
     return cameras[camera.name].camera_fps == 0 && stats["service"].uptime > 60;
   }, [camera, stats]);
 
+  const isCameraEnabled = cameraEnabled === "ON";
+
   return {
-    activeTracking: hasActiveObjects,
-    activeMotion: detectingMotion
-      ? detectingMotion === "ON"
-      : updatedCameraState?.motion === true,
-    objects,
+    enabled: isCameraEnabled,
+    activeTracking: isCameraEnabled ? hasActiveObjects : false,
+    activeMotion: isCameraEnabled
+      ? detectingMotion
+        ? detectingMotion === "ON"
+        : updatedCameraState?.motion === true
+      : false,
+    objects: isCameraEnabled ? objects : [],
     offline,
   };
 }

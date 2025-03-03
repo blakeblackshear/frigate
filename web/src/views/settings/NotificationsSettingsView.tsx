@@ -80,7 +80,7 @@ export default function NotificationView({
     return Object.values(config.cameras)
       .filter(
         (conf) =>
-          conf.enabled &&
+          conf.enabled_in_config &&
           conf.notifications &&
           conf.notifications.enabled_in_config,
       )

@@ -39,7 +39,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { useNotifications, useNotificationSuspend } from "@/api/ws";
+import {
+  useEnabledState,
+  useNotifications,
+  useNotificationSuspend,
+} from "@/api/ws";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -82,6 +86,11 @@ export default function LiveContextMenu({
   children,
 }: LiveContextMenuProps) {
   const [showSettings, setShowSettings] = useState(false);
+
+  // camera enabled
+
+  const { payload: enabledState, send: sendEnabled } = useEnabledState(camera);
+  const isEnabled = enabledState === "ON";
 
   // streaming settings
 
@@ -263,7 +272,7 @@ export default function LiveContextMenu({
                       onClick={handleVolumeIconClick}
                     />
                     <VolumeSlider
-                      disabled={!audioState}
+                      disabled={!audioState || !isEnabled}
                       className="my-3 ml-0.5 rounded-lg bg-background/60"
                       value={[volumeState ?? 0]}
                       min={0}
@@ -280,34 +289,49 @@ export default function LiveContextMenu({
           <ContextMenuItem>
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
-              onClick={muteAll}
+              onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
+            >
+              <div className="text-primary">
+                {isEnabled ? "Disable" : "Enable"} Camera
+              </div>
+            </div>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem disabled={!isEnabled}>
+            <div
+              className="flex w-full cursor-pointer items-center justify-start gap-2"
+              onClick={isEnabled ? muteAll : undefined}
             >
               <div className="text-primary">Mute All Cameras</div>
             </div>
           </ContextMenuItem>
-          <ContextMenuItem>
+          <ContextMenuItem disabled={!isEnabled}>
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
-              onClick={unmuteAll}
+              onClick={isEnabled ? unmuteAll : undefined}
             >
               <div className="text-primary">Unmute All Cameras</div>
             </div>
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem>
+          <ContextMenuItem disabled={!isEnabled}>
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
-              onClick={toggleStats}
+              onClick={isEnabled ? toggleStats : undefined}
             >
               <div className="text-primary">
                 {statsState ? "Hide" : "Show"} Stream Stats
               </div>
             </div>
           </ContextMenuItem>
-          <ContextMenuItem>
+          <ContextMenuItem disabled={!isEnabled}>
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
-              onClick={() => navigate(`/settings?page=debug&camera=${camera}`)}
+              onClick={
+                isEnabled
+                  ? () => navigate(`/settings?page=debug&camera=${camera}`)
+                  : undefined
+              }
             >
               <div className="text-primary">Debug View</div>
             </div>
@@ -315,10 +339,10 @@ export default function LiveContextMenu({
           {cameraGroup && cameraGroup !== "default" && (
             <>
               <ContextMenuSeparator />
-              <ContextMenuItem>
+              <ContextMenuItem disabled={!isEnabled}>
                 <div
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
-                  onClick={() => setShowSettings(true)}
+                  onClick={isEnabled ? () => setShowSettings(true) : undefined}
                 >
                   <div className="text-primary">Streaming Settings</div>
                 </div>
@@ -328,10 +352,10 @@ export default function LiveContextMenu({
           {preferredLiveMode == "jsmpeg" && isRestreamed && (
             <>
               <ContextMenuSeparator />
-              <ContextMenuItem>
+              <ContextMenuItem disabled={!isEnabled}>
                 <div
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
-                  onClick={resetPreferredLiveMode}
+                  onClick={isEnabled ? resetPreferredLiveMode : undefined}
                 >
                   <div className="text-primary">Reset</div>
                 </div>
@@ -342,7 +366,7 @@ export default function LiveContextMenu({
             <>
               <ContextMenuSeparator />
               <ContextMenuSub>
-                <ContextMenuSubTrigger>
+                <ContextMenuSubTrigger disabled={!isEnabled}>
                   <div className="flex items-center gap-2">
                     <span>Notifications</span>
                   </div>
@@ -382,10 +406,15 @@ export default function LiveContextMenu({
                     <>
                       <ContextMenuSeparator />
                       <ContextMenuItem
-                        onClick={() => {
-                          sendNotification("ON");
-                          sendNotificationSuspend(0);
-                        }}
+                        disabled={!isEnabled}
+                        onClick={
+                          isEnabled
+                            ? () => {
+                                sendNotification("ON");
+                                sendNotificationSuspend(0);
+                              }
+                            : undefined
+                        }
                       >
                         <div className="flex w-full flex-col gap-2">
                           {notificationState === "ON" ? (
@@ -405,36 +434,71 @@ export default function LiveContextMenu({
                             Suspend for:
                           </p>
                           <div className="space-y-1">
-                            <ContextMenuItem onClick={() => handleSuspend("5")}>
+                            <ContextMenuItem
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled ? () => handleSuspend("5") : undefined
+                              }
+                            >
                               5 minutes
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("10")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("10")
+                                  : undefined
+                              }
                             >
                               10 minutes
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("30")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("30")
+                                  : undefined
+                              }
                             >
                               30 minutes
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("60")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("60")
+                                  : undefined
+                              }
                             >
                               1 hour
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("840")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("840")
+                                  : undefined
+                              }
                             >
                               12 hours
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("1440")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("1440")
+                                  : undefined
+                              }
                             >
                               24 hours
                             </ContextMenuItem>
                             <ContextMenuItem
-                              onClick={() => handleSuspend("off")}
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
+                                  ? () => handleSuspend("off")
+                                  : undefined
+                              }
                             >
                               Until restart
                             </ContextMenuItem>

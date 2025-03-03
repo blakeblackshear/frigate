@@ -222,6 +222,14 @@ Publishes the rms value for audio detected on this camera.
 
 **NOTE:** Requires audio detection to be enabled
 
+### `frigate/<camera_name>/enabled/set`
+
+Topic to turn Frigate's processing of a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/enabled/state`
+
+Topic with current state of processing for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/detect/set`
 
 Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`.
