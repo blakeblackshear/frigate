@@ -15,6 +15,13 @@ class GenAIProviderEnum(str, Enum):
     gemini = "gemini"
     ollama = "ollama"
 
+class GenAISendTriggersConfig(BaseModel):
+    event_end: bool = Field(default=True, title="Send once the event has ended.")
+    after_significant_updates: Optional[int] = Field(
+        default=None,
+        title="Send an early request to generative AI when X frames accumulated.",
+        ge=1,
+    )
 
 # uses BaseModel because some global attributes are not available at the camera level
 class GenAICameraConfig(BaseModel):
@@ -42,10 +49,8 @@ class GenAICameraConfig(BaseModel):
         default=False,
         title="Save thumbnails sent to generative AI for debugging purposes.",
     )
-    send_after_frames: Optional[int] = Field(
-        default=None,
-        title="Send an early request to generative AI when X frames accumulated.",
-        ge=1,
+    send_triggers: GenAISendTriggersConfig = Field(
+        default_factory=GenAISendTriggersConfig, title="What triggers to use to send frames to generative AI during an event."
     )
 
     @field_validator("required_zones", mode="before")
