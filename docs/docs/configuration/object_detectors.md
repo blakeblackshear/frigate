@@ -49,7 +49,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -367,7 +367,7 @@ model:
 
 ### Setup
 
-The `rocm` detector supports running YOLO-NAS models on AMD GPUs. Use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
+Support for AMD GPUs is provided using the [ONNX detector](#ONNX). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
 
 ### Docker settings for GPU access
 
@@ -446,29 +446,9 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 
 ### Supported Models
 
-There is no default model provided, the following formats are supported:
-
-#### YOLO-NAS
-
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
-
-After placing the downloaded onnx model in your config folder, you can use the following configuration:
-
-```yaml
-detectors:
-  rocm:
-    type: rocm
-
-model:
-  model_type: yolonas
-  width: 320 # <--- should match whatever was set in notebook
-  height: 320 # <--- should match whatever was set in notebook
-  input_pixel_format: bgr
-  path: /config/yolo_nas_s.onnx
-  labelmap_path: /labelmap/coco-80.txt
-```
-
-Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+See [ONNX supported models](#supported-models) for supported models, there are some caveats:
+- D-FINE models are not supported
+- YOLO-NAS models are known to not run well on integrated GPUs
 
 ## ONNX
 
