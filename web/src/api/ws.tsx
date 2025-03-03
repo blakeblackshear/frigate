@@ -174,7 +174,7 @@ export function useEnabledState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/enabled/state`, `${camera}/enabled/set`);
-  return { payload: payload as ToggleableSetting, send };
+  return { payload: (payload ?? "ON") as ToggleableSetting, send };
 }
 
 export function useDetectState(camera: string): {
