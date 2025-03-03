@@ -128,6 +128,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[any]] = {}
+        self.early_request_sent: dict[str, bool] = {}
         self.genai_client = get_genai_client(config)
 
         # recordings data
@@ -244,28 +245,32 @@ class EmbeddingMaintainer(threading.Thread):
             and camera_config.genai.send_triggers.after_significant_updates
         ):
             if (
-                len(self.tracked_events[data["id"]])
-                == camera_config.genai.send_triggers.after_significant_updates
+                len(self.tracked_events.get(data["id"], []))
+                >= camera_config.genai.send_triggers.after_significant_updates
+                and data["id"] not in self.early_request_sent
             ):
-                event: Event = Event.get(Event.id == data["id"])
+                if data["has_clip"] and data["has_snapshot"]:
+                    event: Event = Event.get(Event.id == data["id"])
 
-                if (
-                    not camera_config.genai.objects
-                    or event.label in camera_config.genai.objects
-                ):
-                    logger.debug(f"{camera} sending early request to GenAI")
-                    threading.Thread(
-                        target=self._genai_embed_description,
-                        name=f"_genai_embed_description_{event.id}",
-                        daemon=True,
-                        args=(
-                            event,
-                            [
-                                data["thumbnail"]
-                                for data in self.tracked_events[data["id"]]
-                            ],
-                        ),
-                    ).start()
+                    if (
+                        not camera_config.genai.objects
+                        or event.label in camera_config.genai.objects
+                    ):
+                        logger.debug(f"{camera} sending early request to GenAI")
+
+                        self.early_request_sent[data["id"]] = True
+                        threading.Thread(
+                            target=self._genai_embed_description,
+                            name=f"_genai_embed_description_{event.id}",
+                            daemon=True,
+                            args=(
+                                event,
+                                [
+                                    data["thumbnail"]
+                                    for data in self.tracked_events[data["id"]]
+                                ],
+                            ),
+                        ).start()
 
         self.frame_manager.close(frame_name)
 
