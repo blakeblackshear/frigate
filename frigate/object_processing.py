@@ -428,7 +428,6 @@ class TrackedObjectProcessor(threading.Thread):
         dispatcher: Dispatcher,
         tracked_objects_queue,
         ptz_autotracker_thread,
-        camera_metrics,
         stop_event,
     ):
         super().__init__(name="detected_frames_processor")
@@ -440,7 +439,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
-        self.camera_metrics = camera_metrics
 
         self.enabled_subscribers = {
             camera: ConfigSubscriber(f"config/enabled/{camera}", True)

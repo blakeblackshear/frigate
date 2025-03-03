@@ -392,7 +392,6 @@ class FrigateApp:
             self.dispatcher,
             self.detected_frames_queue,
             self.ptz_autotracker_thread,
-            self.camera_metrics,
             self.stop_event,
         )
         self.detected_frames_processor.start()
@@ -401,7 +400,7 @@ class FrigateApp:
         output_processor = util.Process(
             target=output_frames,
             name="output_processor",
-            args=(self.config, self.camera_metrics),
+            args=(self.config,),
         )
         output_processor.daemon = True
         self.output_processor = output_processor

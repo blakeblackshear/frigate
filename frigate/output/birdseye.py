@@ -16,7 +16,6 @@ from typing import Optional
 import cv2
 import numpy as np
 
-from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
@@ -272,7 +271,6 @@ class BirdsEyeFrameManager:
         self,
         config: FrigateConfig,
         stop_event: mp.Event,
-        camera_metrics: dict[str, CameraMetrics],
     ):
         self.config = config
         self.mode = config.birdseye.mode
@@ -283,7 +281,6 @@ class BirdsEyeFrameManager:
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
         self.inactivity_threshold = config.birdseye.inactivity_threshold
-        self.camera_metrics = camera_metrics
 
         self.enabled_subscribers = {
             cam: ConfigSubscriber(f"config/enabled/{cam}", True)
@@ -754,7 +751,6 @@ class Birdseye:
         config: FrigateConfig,
         stop_event: mp.Event,
         websocket_server,
-        camera_metrics: dict[str, CameraMetrics],
     ) -> None:
         self.config = config
         self.input = queue.Queue(maxsize=10)
@@ -772,7 +768,7 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        self.birdseye_manager = BirdsEyeFrameManager(config, stop_event, camera_metrics)
+        self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
         self.config_subscriber = ConfigSubscriber("config/birdseye/")
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
