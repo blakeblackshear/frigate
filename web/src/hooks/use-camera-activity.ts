@@ -16,7 +16,7 @@ import useSWR from "swr";
 import { getAttributeLabels } from "@/utils/iconUtil";
 
 type useCameraActivityReturn = {
-  enabled: boolean;
+  enabled?: boolean;
   activeTracking: boolean;
   activeMotion: boolean;
   objects: ObjectType[];
@@ -148,7 +148,7 @@ export function useCameraActivity(
     return cameras[camera.name].camera_fps == 0 && stats["service"].uptime > 60;
   }, [camera, stats]);
 
-  const isCameraEnabled = cameraEnabled === "ON";
+  const isCameraEnabled = cameraEnabled ? cameraEnabled === "ON" : undefined;
 
   return {
     enabled: isCameraEnabled,

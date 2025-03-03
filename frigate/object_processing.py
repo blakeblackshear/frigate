@@ -707,16 +707,14 @@ class TrackedObjectProcessor(threading.Thread):
 
     def _get_enabled_state(self, camera: str) -> bool:
         _, config_data = self.enabled_subscribers[camera].check_for_update()
+
         if config_data:
-            enabled = config_data.enabled
+            self.config.cameras[camera].enabled = config_data.enabled
+
             if self.camera_states[camera].prev_enabled is None:
-                self.camera_states[camera].prev_enabled = enabled
-            return enabled
-        return (
-            self.camera_states[camera].prev_enabled
-            if self.camera_states[camera].prev_enabled is not None
-            else self.config.cameras[camera].enabled
-        )
+                self.camera_states[camera].prev_enabled = config_data.enabled
+
+        return self.config.cameras[camera].enabled
 
     def run(self):
         while not self.stop_event.is_set():
