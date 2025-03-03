@@ -240,12 +240,16 @@ class EmbeddingMaintainer(threading.Thread):
         # we don't check required zones here - probably should, but does that run the risk in this simple logic
         # that the object doesn't get into the required zones until later in the event?
         if self.genai_client is not None and camera_config.genai.send_after_frames:
-            if len(self.tracked_events[data["id"]]) == camera_config.genai.send_after_frames:
-
+            if (
+                len(self.tracked_events[data["id"]]) 
+                == camera_config.genai.send_after_frames
+            ):
                 event: Event = Event.get(Event.id == data["id"])
 
-                if (not camera_config.genai.objects
-                        or event.label in camera_config.genai.objects):
+                if (
+                    not camera_config.genai.objects
+                    or event.label in camera_config.genai.objects
+                ):
                     logger.debug(f"{camera} sending early request to GenAI")
                     threading.Thread(
                         target=self._genai_embed_description,
@@ -253,7 +257,10 @@ class EmbeddingMaintainer(threading.Thread):
                         daemon=True,
                         args=(
                             event,
-                            [data["thumbnail"] for data in self.tracked_events[data["id"]]],
+                            [
+                                data["thumbnail"]
+                                for data in self.tracked_events[data["id"]]
+                            ],
                         ),
                     ).start()
 
