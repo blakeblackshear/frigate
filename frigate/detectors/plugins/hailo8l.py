@@ -324,30 +324,30 @@ class HailoDetector(DetectionApi):
         threshold = 0.4
         all_detections = []
 
-        # Loop over the output list (each element corresponds to one output stream)
-        for idx, detection_set in enumerate(infer_results):
-            # Skip empty arrays
+    # Use the outer loop index to determine the class
+        for class_id, detection_set in enumerate(infer_results):
             if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
                 continue
 
-            logging.debug(f"[DETECT_RAW] Processing detection set {idx} with shape {detection_set.shape}")
-            # For each detection row in the set:
+            logging.debug(f"[DETECT_RAW] Processing detection set {class_id} with shape {detection_set.shape}")
             for det in detection_set:
-                # Expecting at least 5 elements: [ymin, xmin, ymax, xmax, confidence]
+                # Expect at least 5 elements: [ymin, xmin, ymax, xmax, confidence]
                 if det.shape[0] < 5:
                     continue
                 score = float(det[4])
                 if score < threshold:
                     continue
-                # If there is a 6th element, assume it's a class id; otherwise use dummy class 0.
-                if det.shape[0] >= 6:
-                    cls = int(det[5])
+                # Instead of checking for a sixth element, use the outer index as the class
+                cls = class_id
+                if hasattr(self, "labels") and self.labels:
+                    logging.debug(f"[DETECT_RAW] Detected class id: {cls} -> {self.labels[cls]}")
+                    print(f"[DETECT_RAW] Detected class id: {cls} -> {self.labels[cls]}")
                 else:
-                    cls = 0
-                # Append in the order Frigate expects: [class_id, confidence, ymin, xmin, ymax, xmax]
+                    logging.debug(f"[DETECT_RAW] Detected class id: {cls}")
+                    print(f"[DETECT_RAW] Detected class id: {cls}")
+                # Append in the order: [class_id, confidence, ymin, xmin, ymax, xmax]
                 all_detections.append([cls, score, det[0], det[1], det[2], det[3]])
 
-        # If no valid detections were found, return a zero array.
         if len(all_detections) == 0:
             return np.zeros((20, 6), dtype=np.float32)
 
