@@ -355,6 +355,24 @@ export default function LiveCameraView({
     }
   }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
+  // On mobile devices that support it, orient screen to
+  // best fit the camera feed when in fullscreen
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const screenOrientation = screen.orientation as any;
+    if (screenOrientation.lock && screenOrientation.unlock) {
+      if (fullscreen) {
+        const orientationForBestFit =
+          cameraAspectRatio > 1 ? "landscape" : "portrait";
+        screenOrientation.lock(orientationForBestFit).catch(() => {});
+      } else {
+        screenOrientation.unlock();
+      }
+    }
+
+    return () => screen.orientation.unlock?.();
+  }, [fullscreen, cameraAspectRatio]);
+
   const handleError = useCallback(
     (e: LivePlayerError) => {
       if (e) {
