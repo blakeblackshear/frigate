@@ -104,19 +104,6 @@ Additionally, the heavier **YOLOv8m** model has been tested on Hailo-8 hardware 
 
 In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
 
-#### Supported Models & Inference Times
-
-| Model Type         | Hardware         | Inference Time (RPi) | Inference Time (x86) | Resolution |
-|--------------------|------------------|----------------------|----------------------|------------|
-| SSD MobileNet V1   | Hailo-8L         | 17–21 ms             | 12–15 ms             | 300×300    |
-| SSD MobileNet V1   | Hailo-8          | 10–13 ms             |  –                    | 300×300    |
-| YOLOv6n (Default)  | Hailo-8L         | 16–20 ms             | 10–13 ms             | 640×640    |
-| YOLOv8s (Default)  | Hailo-8          | 15–19 ms             | 12–18 ms             | 640×640    |
-| YOLOv8m (Tested)   | Hailo-8          | 18–25 ms             | 16–22 ms             | 640×640    |
-
-*Note: Inference times may vary based on system configuration and operating conditions.*
-
-This documentation is part of Frigate’s internal integration guide, ensuring that users get the optimal performance by automatically adapting to the available Hailo hardware.
 
 ## Community Supported Detectors
 
