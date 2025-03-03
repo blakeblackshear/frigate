@@ -28,11 +28,11 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 ## Supported detector types
 
-Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), and ROCm (`rocm`) detectors.
+Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), and ONNX (`onnx`) detectors.
 
 :::warning
 
-Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15 and later.
+Using Frigate+ models with `onnx` is only available with Frigate 0.15 and later.
 
 :::
 
@@ -42,7 +42,7 @@ Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15
 | [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector)                                             | `edgetpu`                 | `mobiledet`            |
 | [Intel](/configuration/object_detectors.md#openvino-detector)                                                                | `openvino`                | `yolonas`              |
 | [NVidia GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#onnx)\*                   | `onnx`                    | `yolonas`              |
-| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `rocm`                    | `yolonas`              |
+| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `onnx`                    | `yolonas`              |
 
 _\* Requires Frigate 0.15_
 
