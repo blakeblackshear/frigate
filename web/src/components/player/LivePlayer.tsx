@@ -22,7 +22,6 @@ import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
-import { useEnabledState } from "@/api/ws";
 import { LuVideoOff } from "react-icons/lu";
 
 type LivePlayerProps = {
@@ -86,31 +85,15 @@ export default function LivePlayer({
     droppedFrameRate: 0, // percentage
   });
 
-  // enabled state
-
-  const { payload: enabledState } = useEnabledState(cameraConfig.name);
-  const cameraEnabled = enabledState === "ON";
-
-  // Track previous cameraEnabled state
-  const prevCameraEnabledRef = useRef(cameraEnabled);
-
-  useEffect(() => {
-    if (!prevCameraEnabledRef.current && cameraEnabled) {
-      // Camera enabled
-      setLiveReady(false);
-      setKey((prevKey) => prevKey + 1);
-    } else if (prevCameraEnabledRef.current && !cameraEnabled) {
-      // Camera disabled
-      setLiveReady(false);
-      setKey((prevKey) => prevKey + 1);
-    }
-    prevCameraEnabledRef.current = cameraEnabled;
-  }, [cameraEnabled]);
-
   // camera activity
 
-  const { activeMotion, activeTracking, objects, offline } =
-    useCameraActivity(cameraConfig);
+  const {
+    enabled: cameraEnabled,
+    activeMotion,
+    activeTracking,
+    objects,
+    offline,
+  } = useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
     () =>
@@ -214,6 +197,31 @@ export default function LivePlayer({
     setLiveReady(true);
   }, []);
 
+  // enabled states
+
+  const [isReEnabling, setIsReEnabling] = useState(false);
+  const prevCameraEnabledRef = useRef(cameraEnabled);
+
+  useEffect(() => {
+    if (!prevCameraEnabledRef.current && cameraEnabled) {
+      // Camera enabled
+      setLiveReady(false);
+      setIsReEnabling(true);
+      setKey((prevKey) => prevKey + 1);
+    } else if (prevCameraEnabledRef.current && !cameraEnabled) {
+      // Camera disabled
+      setLiveReady(false);
+      setKey((prevKey) => prevKey + 1);
+    }
+    prevCameraEnabledRef.current = cameraEnabled;
+  }, [cameraEnabled]);
+
+  useEffect(() => {
+    if (liveReady && isReEnabling) {
+      setIsReEnabling(false);
+    }
+  }, [liveReady, isReEnabling]);
+
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
@@ -290,6 +298,22 @@ export default function LivePlayer({
     player = <ActivityIndicator />;
   }
 
+  // if (cameraConfig.name == "lpr")
+  //   console.log(
+  //     cameraConfig.name,
+  //     "enabled",
+  //     cameraEnabled,
+  //     "prev enabled",
+  //     prevCameraEnabledRef.current,
+  //     "offline",
+  //     offline,
+  //     "show still",
+  //     showStillWithoutActivity,
+  //     "live ready",
+  //     liveReady,
+  //     player,
+  //   );
+
   return (
     <div
       ref={cameraRef ?? internalContainerRef}
@@ -318,9 +342,10 @@ export default function LivePlayer({
           </>
         )}
       {player}
-      {cameraEnabled && !offline && !showStillWithoutActivity && !liveReady && (
-        <ActivityIndicator />
-      )}
+      {cameraEnabled &&
+        !offline &&
+        (!showStillWithoutActivity || isReEnabling) &&
+        !liveReady && <ActivityIndicator />}
 
       {((showStillWithoutActivity && !liveReady) || liveReady) &&
         objects.length > 0 && (
@@ -368,7 +393,9 @@ export default function LivePlayer({
       <div
         className={cn(
           "absolute inset-0 w-full",
-          showStillWithoutActivity && !liveReady ? "visible" : "invisible",
+          showStillWithoutActivity && !liveReady && !isReEnabling
+            ? "visible"
+            : "invisible",
         )}
       >
         <AutoUpdatingCameraImage
@@ -399,9 +426,6 @@ export default function LivePlayer({
         <div className="relative flex h-full w-full items-center justify-center">
           <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
             <LuVideoOff className="mb-2 size-8 md:size-10" />
-            <p className="mb-3 text-base md:text-lg">
-              {capitalizeFirstLetter(cameraConfig.name)}
-            </p>
             <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
               Camera is disabled
             </p>
@@ -416,7 +440,7 @@ export default function LivePlayer({
           ((showStillWithoutActivity && !liveReady) || liveReady) && (
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
-        {offline && showStillWithoutActivity && (
+        {((offline && showStillWithoutActivity) || !cameraEnabled) && (
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
