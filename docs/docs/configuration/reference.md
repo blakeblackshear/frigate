@@ -813,6 +813,12 @@ cameras:
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
       required_zones: []
+      # Optional: What triggers to use to send frames to generative AI during an event (default: shown below)
+      send_triggers:
+        # At the end of the event
+        event_end: True
+        # Optional: After X many significant updates are received (default: none, only at event end)
+        after_significant_updates: 0
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
       debug_save_thumbnails: False
 
