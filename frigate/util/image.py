@@ -632,6 +632,22 @@ def copy_yuv_to_position(
         )
 
 
+def get_blank_yuv_frame(width: int, height: int) -> np.ndarray:
+    """Creates a black YUV 4:2:0 frame."""
+    yuv_height = height * 3 // 2
+    yuv_frame = np.zeros((yuv_height, width), dtype=np.uint8)
+
+    uv_height = height // 2
+
+    # The U and V planes are stored after the Y plane.
+    u_start = height  # U plane starts right after Y plane
+    v_start = u_start + uv_height // 2  # V plane starts after U plane
+    yuv_frame[u_start : u_start + uv_height, :width] = 128
+    yuv_frame[v_start : v_start + uv_height, :width] = 128
+
+    return yuv_frame
+
+
 def yuv_region_2_yuv(frame, region):
     try:
         # TODO: does this copy the numpy array?

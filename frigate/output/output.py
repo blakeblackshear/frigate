@@ -9,7 +9,6 @@ import signal
 import threading
 from wsgiref.simple_server import make_server
 
-import numpy as np
 from setproctitle import setproctitle
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
@@ -26,7 +25,7 @@ from frigate.const import CACHE_DIR, CLIPS_DIR
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
-from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.image import SharedMemoryFrameManager, get_blank_yuv_frame
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +48,9 @@ def check_disabled_camera_update(
             # last camera update was more than one second ago
             # need to send empty data to updaters because current
             # frame is now out of date
-            frame = np.zeros(
-                (
-                    config.cameras[camera].detect.height * 3 // 2,
-                    config.cameras[camera].detect.width,
-                )
+            frame = get_blank_yuv_frame(
+                config.cameras[camera].detect.width,
+                config.cameras[camera].detect.height,
             )
 
             if birdseye:
