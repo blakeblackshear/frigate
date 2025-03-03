@@ -236,6 +236,37 @@ class EmbeddingMaintainer(threading.Thread):
 
             self.tracked_events[data["id"]].append(data)
 
+        # check if we're configured to send an early request after a minimum number of updates received
+        # we don't check required zones here - probably should, but does that run the risk in this simple logic
+        # that the object doesn't get into the required zones until later in the event?
+        if (
+            self.genai_client is not None
+            and camera_config.genai.send_triggers.after_significant_updates
+        ):
+            if (
+                len(self.tracked_events[data["id"]])
+                == camera_config.genai.send_triggers.after_significant_updates
+            ):
+                event: Event = Event.get(Event.id == data["id"])
+
+                if (
+                    not camera_config.genai.objects
+                    or event.label in camera_config.genai.objects
+                ):
+                    logger.debug(f"{camera} sending early request to GenAI")
+                    threading.Thread(
+                        target=self._genai_embed_description,
+                        name=f"_genai_embed_description_{event.id}",
+                        daemon=True,
+                        args=(
+                            event,
+                            [
+                                data["thumbnail"]
+                                for data in self.tracked_events[data["id"]]
+                            ],
+                        ),
+                    ).start()
+
         self.frame_manager.close(frame_name)
 
     def _process_finalized(self) -> None:
@@ -296,8 +327,8 @@ class EmbeddingMaintainer(threading.Thread):
                 # Run GenAI
                 if (
                     camera_config.genai.enabled
+                    and camera_config.genai.send_triggers.event_end
                     and self.genai_client is not None
-                    and event.data.get("description") is None
                     and (
                         not camera_config.genai.objects
                         or event.label in camera_config.genai.objects
