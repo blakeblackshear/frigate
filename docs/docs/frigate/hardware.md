@@ -92,11 +92,18 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-### Hailo-8l PCIe
+### Hailo-8 Detector
 
-Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
+Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
 
-The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
+**Default Model Configuration:**
+- **Hailo-8L:** Default model is **YOLOv6n**.
+- **Hailo-8:** Default model is **YOLOv8s**.
+
+Additionally, the heavier **YOLOv8m** model has been tested on Hailo-8 hardware for users who require higher accuracy despite increased inference time.
+
+In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
+
 
 ## Community Supported Detectors
 
