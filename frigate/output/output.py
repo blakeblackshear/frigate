@@ -17,7 +17,6 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
@@ -33,7 +32,6 @@ logger = logging.getLogger(__name__)
 
 def output_frames(
     config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetrics],
 ):
     threading.current_thread().name = "output"
     setproctitle("frigate.output")
@@ -85,7 +83,7 @@ def output_frames(
         preview_write_times[camera] = 0
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(config, stop_event, websocket_server, camera_metrics)
+        birdseye = Birdseye(config, stop_event, websocket_server)
 
     websocket_thread.start()
 
