@@ -725,7 +725,13 @@ function ObjectDetailsTab({
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
             title={t("ui.exploreView.details.editSubLable")}
-            description={`Enter a new sub label for this ${search.label ?? "tracked object"}.`}
+            description={
+              search.label
+                ? t("ui.exploreView.details.editSubLable.desc", {
+                    label: t(`object.${search.label}`),
+                  })
+                : t("ui.exploreView.details.editSubLable.desc.noLabel")
+            }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
             allowEmpty={true}

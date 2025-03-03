@@ -348,7 +348,9 @@ export default function EventView({
             ) : (
               <>
                 <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">Motion</div>
+                <div className="hidden md:block">
+                  <Trans>ui.eventView.motion</Trans>
+                </div>
               </>
             )}
           </ToggleGroupItem>
@@ -1050,7 +1052,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        No motion data found
+        <Trans>ui.eventView.empty.motion</Trans>
       </div>
     );
   }

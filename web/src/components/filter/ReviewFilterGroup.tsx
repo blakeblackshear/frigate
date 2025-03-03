@@ -610,7 +610,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          Motion only
+          <Trans>ui.eventView.motion.only</Trans>
         </Label>
       </div>
 

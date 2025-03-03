@@ -34,6 +34,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -558,7 +559,16 @@ export function SpeedFilterContent({
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">
-        Estimated Speed ({config?.ui.unit_system == "metric" ? "kph" : "mph"})
+        <Trans
+          values={{
+            unit:
+              config?.ui.unit_system == "metric"
+                ? t("ui.unit.speed.kph")
+                : t("ui.unit.speed.mph"),
+          }}
+        >
+          ui.filter.estimatedSpeed
+        </Trans>
       </div>
       <div className="flex items-center gap-1">
         <Input

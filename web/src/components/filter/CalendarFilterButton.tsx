@@ -100,7 +100,7 @@ export function CalendarRangeFilterButton({
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    "%b %-d",
+    t("ui.time.formattedTimestampOnlyMonthAndDay"),
   );
 
   const trigger = (

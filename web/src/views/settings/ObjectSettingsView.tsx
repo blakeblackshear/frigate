@@ -254,7 +254,9 @@ export default function ObjectSettingsView({
                             className="mb-0 cursor-pointer capitalize text-primary"
                             htmlFor="debugdraw"
                           >
-                            Object Shape Filter Drawing
+                            <Trans>
+                              ui.settingView.debug.objectShapeFilterDrawing
+                            </Trans>
                           </Label>
 
                           <Popover>
@@ -265,10 +267,9 @@ export default function ObjectSettingsView({
                               </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 text-sm">
-                              Enable this option to draw a rectangle on the
-                              camera image to show its area and ratio. These
-                              values can then be used to set object shape filter
-                              parameters in your config.
+                              <Trans>
+                                ui.settingView.debug.objectShapeFilterDrawing.tips
+                              </Trans>
                               <div className="mt-2 flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/object_filters#object-shape"
@@ -276,7 +277,9 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  Read the documentation{" "}
+                                  <Trans>
+                                    ui.settingView.debug.objectShapeFilterDrawing.document
+                                  </Trans>
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -284,8 +287,9 @@ export default function ObjectSettingsView({
                           </Popover>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
-                          Draw a rectangle on the image to view area and ratio
-                          details
+                          <Trans>
+                            ui.settingView.debug.objectShapeFilterDrawing.desc
+                          </Trans>
                         </div>
                       </div>
                       <Switch
