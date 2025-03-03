@@ -37,15 +37,16 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import { t } from "i18next";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 
 const allSettingsViews = [
-  "UI settings",
-  "explore settings",
-  "camera settings",
-  "masks / zones",
-  "motion tuner",
+  "uiSettings",
+  "exploreSettings",
+  "cameraSettings",
+  "masksAndZones",
+  "motionTuner",
   "debug",
   "users",
   "notifications",
@@ -53,7 +54,7 @@ const allSettingsViews = [
 type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
-  const [page, setPage] = useState<SettingsType>("UI settings");
+  const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
@@ -150,12 +151,14 @@ export default function Settings() {
               {Object.values(allSettingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "uiSettings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">{item}</div>
+                  <div className="capitalize">
+                    {t("ui.settingView.menu." + item)}
+                  </div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -163,11 +166,11 @@ export default function Settings() {
           </div>
         </ScrollArea>
         {(page == "debug" ||
-          page == "camera settings" ||
-          page == "masks / zones" ||
-          page == "motion tuner") && (
+          page == "cameraSettings" ||
+          page == "masksAndZones" ||
+          page == "motionTuner") && (
           <div className="ml-2 flex flex-shrink-0 items-center gap-2">
-            {page == "masks / zones" && (
+            {page == "masksAndZones" && (
               <ZoneMaskFilterButton
                 selectedZoneMask={filterZoneMask}
                 updateZoneMaskFilter={setFilterZoneMask}
@@ -182,27 +185,27 @@ export default function Settings() {
         )}
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "UI settings" && <UiSettingsView />}
-        {page == "explore settings" && (
+        {page == "uiSettings" && <UiSettingsView />}
+        {page == "exploreSettings" && (
           <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
         )}
-        {page == "camera settings" && (
+        {page == "cameraSettings" && (
           <CameraSettingsView
             selectedCamera={selectedCamera}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "masks / zones" && (
+        {page == "masksAndZones" && (
           <MasksAndZonesView
             selectedCamera={selectedCamera}
             selectedZoneMask={filterZoneMask}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "motion tuner" && (
+        {page == "motionTuner" && (
           <MotionTunerView
             selectedCamera={selectedCamera}
             setUnsavedChanges={setUnsavedChanges}
