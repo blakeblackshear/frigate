@@ -42,6 +42,10 @@ class GenAICameraConfig(BaseModel):
         default=False,
         title="Save thumbnails sent to generative AI for debugging purposes.",
     )
+    send_after_frames: Optional[int] = Field(
+        default=None, 
+        title="Send an early request to generative AI when X frames accumulated.",
+        ge=1,)
 
     @field_validator("required_zones", mode="before")
     @classmethod
