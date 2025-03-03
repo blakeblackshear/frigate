@@ -241,7 +241,7 @@ class EmbeddingMaintainer(threading.Thread):
         # that the object doesn't get into the required zones until later in the event?
         if self.genai_client is not None and camera_config.genai.send_after_frames:
             if (
-                len(self.tracked_events[data["id"]]) 
+                len(self.tracked_events[data["id"]])
                 == camera_config.genai.send_after_frames
             ):
                 event: Event = Event.get(Event.id == data["id"])
