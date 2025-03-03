@@ -390,8 +390,11 @@ class BirdsEyeFrameManager:
     def _get_enabled_state(self, camera: str) -> bool:
         """Fetch the latest enabled state for a camera from ZMQ."""
         _, config_data = self.enabled_subscribers[camera].check_for_update()
+
         if config_data:
+            self.config.cameras[camera].enabled = config_data.enabled
             return config_data.enabled
+
         return self.config.cameras[camera].enabled
 
     def update_frame(self, frame: Optional[np.ndarray] = None) -> bool:
@@ -704,15 +707,17 @@ class BirdsEyeFrameManager:
     ) -> bool:
         # don't process if birdseye is disabled for this camera
         camera_config = self.config.cameras[camera].birdseye
+        force_update = False
 
         # disabling birdseye is a little tricky
-        if not camera_config.enabled or not self._get_enabled_state(camera):
+        if not self._get_enabled_state(camera):
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
             if self.cameras[camera]["last_active_frame"] > 0:
                 self.cameras[camera]["last_active_frame"] = 0
-
-            return False
+                force_update = True
+            else:
+                return False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame.copy()
@@ -723,7 +728,7 @@ class BirdsEyeFrameManager:
         now = datetime.datetime.now().timestamp()
 
         # limit output to 10 fps
-        if (now - self.last_output_time) < 1 / 10:
+        if not force_update and (now - self.last_output_time) < 1 / 10:
             return False
 
         try:
@@ -735,7 +740,7 @@ class BirdsEyeFrameManager:
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
-        if updated_frame or (now - self.last_output_time) > 1:
+        if force_update or updated_frame or (now - self.last_output_time) > 1:
             self.last_output_time = now
             return True
         return False
@@ -783,6 +788,22 @@ class Birdseye:
         self.converter.start()
         self.broadcaster.start()
 
+    def __send_new_frame(self) -> None:
+        frame_bytes = self.birdseye_manager.frame.tobytes()
+
+        if self.config.birdseye.restream:
+            self.birdseye_buffer[:] = frame_bytes
+
+        try:
+            self.input.put_nowait(frame_bytes)
+        except queue.Full:
+            # drop frames if queue is full
+            pass
+
+    def all_cameras_disabled(self) -> None:
+        self.birdseye_manager.clear_frame()
+        self.__send_new_frame()
+
     def write_data(
         self,
         camera: str,
@@ -811,16 +832,7 @@ class Birdseye:
             frame_time,
             frame,
         ):
-            frame_bytes = self.birdseye_manager.frame.tobytes()
-
-            if self.config.birdseye.restream:
-                self.birdseye_buffer[:] = frame_bytes
-
-            try:
-                self.input.put_nowait(frame_bytes)
-            except queue.Full:
-                # drop frames if queue is full
-                pass
+            self.__send_new_frame()
 
     def stop(self) -> None:
         self.config_subscriber.stop()
