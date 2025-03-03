@@ -51,9 +51,7 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if detector_config:
-            self.input_transform = tensor_transform(
-                detector_config.model.input_tensor
-            )
+            self.input_transform = tensor_transform(detector_config.model.input_tensor)
 
             self.dtype = detector_config.model.input_dtype
         else:
