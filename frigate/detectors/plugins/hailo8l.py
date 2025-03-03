@@ -349,7 +349,6 @@ class HailoDetector(DetectionApi):
 
         # If no valid detections were found, return a zero array.
         if len(all_detections) == 0:
-            logging.warning("[DETECT_RAW] No valid detections found.")
             return np.zeros((20, 6), dtype=np.float32)
 
         detections_array = np.array(all_detections, dtype=np.float32)
@@ -377,14 +376,6 @@ class HailoDetector(DetectionApi):
         except Exception as e:
             logging.error(f"Failed to close Hailo device: {e}")
             raise
-
-    # Asynchronous detection wrapper
-    def async_detect(self, tensor_input, callback):
-        def detection_thread():
-            result = self.detect_raw(tensor_input)
-            callback(result)
-        thread = threading.Thread(target=detection_thread)
-        thread.start()
 
 # ----------------- Configuration Class ----------------- #
 class HailoDetectorConfig(BaseDetectorConfig):
