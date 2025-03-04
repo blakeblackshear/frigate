@@ -115,7 +115,7 @@ lpr:
 
 Ensure that:
 
-- Your camera has a clear, well-lit view of the plate.
+- Your camera has a clear, human-readable, well-lit view of the plate. If you can't read the plate, Frigate certainly won't be able to. This may require changing video size, quality, or frame rate settings on your camera, depending on your scene and how fast the vehicles are traveling.
 - The plate is large enough in the image (try adjusting `min_area`) or increasing the resolution of your camera's stream.
 - A `car` is detected first, as LPR only runs on recognized vehicles.
 
