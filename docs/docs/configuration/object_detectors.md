@@ -132,7 +132,7 @@ detectors:
 ---
 
 
-## Hailo-8 Detector
+## Hailo-8
 
 This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
 
@@ -143,10 +143,10 @@ See the [installation docs](../frigate/installation.md#hailo-8l) for information
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.  
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
 
-#### YOLO (Recommended)
+#### YOLO 
 
 Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
-- **Hailo-8 hardware:** Uses **YOLOv8s** (default: `yolov8s.hef`)
+- **Hailo-8 hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 - **Hailo-8L hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 
 ```yaml
@@ -163,16 +163,17 @@ model:
   input_dtype: int
   model_type: hailo-yolo
   # The detector automatically selects the default model based on your hardware:
-  # - For Hailo-8 hardware: YOLOv8s (default: yolov8s.hef)
+  # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
   # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
   #
   # Optionally, you can specify a local model path to override the default.
   # If a local path is provided and the file exists, it will be used instead of downloading.
   # Example:
-  # path: /config/model_cache/hailo/yolov8s.hef
+  # path: /config/model_cache/hailo/yolov6n.hef
   #
   # You can also override using a custom URL:
-  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov8s.hef
+  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/ssd_mobilenet_v2.hef
+  # just make sure to give it the write configuration based on the model
 ```
 
 #### SSD
@@ -189,7 +190,7 @@ model:
   width: 300
   height: 300
   input_tensor: nhwc
-  input_pixel_format: bgr
+  input_pixel_format: rgb
   model_type: ssd
   # Specify the local model path (if available) or URL for SSD MobileNet v1.
   # Example with a local path:
@@ -222,15 +223,15 @@ model:
   input_dtype: int
   model_type: hailo-yolo
 ```
+For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
+
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
 
 > **Note:**  
-> If both a model **path** and **URL** are provided, the detector will first check the local model path. If the file is not found, it will download the model from the URL.  
->  
-> *Tested custom models include: yolov5, yolov8, yolov9, yolov11.*
+> If both a model **path** and **URL** are provided, the detector will first check the local model path. If the file is not found, it will download the model from the URL.
 
 ---
 
-This guide now clearly explains how the model is chosen based on the presence of a local file path versus a URL, ensuring users know which model will be used by the integration.
 
 
 ## OpenVINO Detector

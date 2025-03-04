@@ -7,6 +7,7 @@ import queue
 import threading
 from functools import partial
 from typing import Dict, Optional, List, Tuple
+import cv2
 
 try:
     from hailo_platform import (
@@ -31,18 +32,46 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum, InputTensorEnum, PixelFormatEnum, InputDTypeEnum
 from PIL import Image, ImageDraw, ImageFont
 
+logger = logging.getLogger(__name__)
+
+
 # ----------------- Inline Utility Functions ----------------- #
-def preprocess_image(image: Image.Image, model_w: int, model_h: int) -> Image.Image:
+
+
+def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarray:
     """
-    Resize image with unchanged aspect ratio using padding.
+    Resize a NumPy array image with unchanged aspect ratio using padding.
+    Optimized for the case where the image is 320x320 and the target is 640x640.
+    Assumes the input image is of shape (H, W, 3).
     """
-    img_w, img_h = image.size
-    scale = min(model_w / img_w, model_h / img_h)
-    new_img_w, new_img_h = int(img_w * scale), int(img_h * scale)
-    image = image.resize((new_img_w, new_img_h), Image.Resampling.BICUBIC)
-    padded_image = Image.new('RGB', (model_w, model_h), (114, 114, 114))
-    padded_image.paste(image, ((model_w - new_img_w) // 2, (model_h - new_img_h) // 2))
+    # Remove batch dimension if present (assumes batch size of 1)
+    if image.ndim == 4 and image.shape[0] == 1:
+        image = image[0]
+
+    h, w = image.shape[:2]
+
+    # Fast path: if image is 320x320 and target is 640x640, simply double the size quickly.
+    if (w, h) == (320, 320) and (model_w, model_h) == (640, 640):
+        return cv2.resize(image, (model_w, model_h), interpolation=cv2.INTER_LINEAR)
+
+    # Standard processing: calculate scaling factor to maintain aspect ratio.
+    scale = min(model_w / w, model_h / h)
+    new_w, new_h = int(w * scale), int(h * scale)
+
+    # Resize with high-quality bicubic interpolation
+    resized_image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+
+    # Create a new image with the target size filled with the padding color 114
+    padded_image = np.full((model_h, model_w, 3), 114, dtype=image.dtype)
+
+    # Calculate the center position for the resized image
+    x_offset = (model_w - new_w) // 2
+    y_offset = (model_h - new_h) // 2
+    padded_image[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized_image
+
     return padded_image
+
+
 
 def extract_detections(input_data: list, threshold: float = 0.5) -> dict:
     """
@@ -72,16 +101,16 @@ def extract_detections(input_data: list, threshold: float = 0.5) -> dict:
 # Global constants and default URLs
 DETECTOR_KEY = "hailo8l"
 ARCH = None
-H8_DEFAULT_MODEL = "yolov8s.hef"
+H8_DEFAULT_MODEL = "yolov6n.hef"
 H8L_DEFAULT_MODEL = "yolov6n.hef"
-H8_DEFAULT_URL = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov8s.hef"
+H8_DEFAULT_URL = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef"
 H8L_DEFAULT_URL = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov6n.hef"
 
 def detect_hailo_arch():
     try:
         result = subprocess.run(['hailortcli', 'fw-control', 'identify'], capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"Error running hailortcli: {result.stderr}")
+            logger.error(f"Inference error: {result.stderr}")
             return None
         for line in result.stdout.split('\n'):
             if "Device Architecture" in line:
@@ -89,10 +118,10 @@ def detect_hailo_arch():
                     return "hailo8l"
                 elif "HAILO8" in line:
                     return "hailo8"
-        print("Could not determine Hailo architecture from device information.")
+        logger.error(f"Inference error: Could not determine Hailo architecture from device information.")
         return None
     except Exception as e:
-        print(f"An error occurred while detecting Hailo architecture: {e}")
+        logger.error(f"Inference error: {e}")
         return None
 
 # ----------------- Inline Asynchronous Inference Class ----------------- #
@@ -297,6 +326,11 @@ class HailoDetector(DetectionApi):
 
     def detect_raw(self, tensor_input):
         logging.debug("[DETECT_RAW] Starting detection")
+
+        # Pre process the input tensor
+        logger.debug(f"[DETECT_RAW] Starting pre processing")
+        tensor_input = self.preprocess(tensor_input)
+
         # Ensure tensor_input has a batch dimension
         if isinstance(tensor_input, np.ndarray) and len(tensor_input.shape) == 3:
             tensor_input = np.expand_dims(tensor_input, axis=0)
@@ -337,16 +371,13 @@ class HailoDetector(DetectionApi):
                 score = float(det[4])
                 if score < threshold:
                     continue
-                # Instead of checking for a sixth element, use the outer index as the class
-                cls = class_id
                 if hasattr(self, "labels") and self.labels:
-                    logging.debug(f"[DETECT_RAW] Detected class id: {cls} -> {self.labels[cls]}")
-                    print(f"[DETECT_RAW] Detected class id: {cls} -> {self.labels[cls]}")
+                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id} -> {self.labels[class_id]}")
                 else:
-                    logging.debug(f"[DETECT_RAW] Detected class id: {cls}")
-                    print(f"[DETECT_RAW] Detected class id: {cls}")
-                # Append in the order: [class_id, confidence, ymin, xmin, ymax, xmax]
-                all_detections.append([cls, score, det[0], det[1], det[2], det[3]])
+                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id}")
+
+                all_detections.append([class_id, score, det[0], det[1], det[2], det[3]])
+
 
         if len(all_detections) == 0:
             return np.zeros((20, 6), dtype=np.float32)
@@ -354,18 +385,25 @@ class HailoDetector(DetectionApi):
         detections_array = np.array(all_detections, dtype=np.float32)
 
         # Pad or truncate to exactly 20 rows
-        if detections_array.shape[0] < 20:
+        if detections_array.shape[0] > 20:
+            detections_array = detections_array[:20, :]
+        elif detections_array.shape[0] < 20:
             pad = np.zeros((20 - detections_array.shape[0], 6), dtype=np.float32)
             detections_array = np.vstack((detections_array, pad))
-        elif detections_array.shape[0] > 20:
-            detections_array = detections_array[:20, :]
+
 
         logging.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
         return detections_array
 
     # Preprocess method using inline utility
     def preprocess(self, image):
-        return preprocess_image(image, self.input_shape[1], self.input_shape[0])
+        if isinstance(image, np.ndarray):
+            # Process the tensor input and reintroduce the batch dimension.
+            processed = preprocess_tensor(image, self.input_shape[1], self.input_shape[0])
+            return np.expand_dims(processed, axis=0)
+        else:
+            raise ValueError("Unsupported image format for preprocessing")
+
 
     # Close the Hailo device
     def close(self):
