@@ -68,7 +68,7 @@ export default function ZoneEditPane({
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 

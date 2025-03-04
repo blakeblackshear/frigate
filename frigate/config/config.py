@@ -516,6 +516,7 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.detect.stationary.interval = stationary_threshold
 
             # set config pre-value
+            camera_config.enabled_in_config = camera_config.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
             camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.notifications.enabled_in_config = (
