@@ -355,22 +355,26 @@ export default function LiveCameraView({
     }
   }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
-  // On mobile devices that support it, orient screen to
-  // best fit the camera feed when in fullscreen
+  // On mobile devices that support it, try to orient screen
+  // to best fit the camera feed in fullscreen mode
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const screenOrientation = screen.orientation as any;
-    if (screenOrientation.lock && screenOrientation.unlock) {
-      if (fullscreen) {
-        const orientationForBestFit =
-          cameraAspectRatio > 1 ? "landscape" : "portrait";
-        screenOrientation.lock(orientationForBestFit).catch(() => {});
-      } else {
-        screenOrientation.unlock();
-      }
+    if (!screenOrientation.lock || !screenOrientation.unlock) {
+      // Browser does not support ScreenOrientation APIs that we need
+      return;
     }
 
-    return () => screen.orientation.unlock?.();
+    if (fullscreen) {
+      const orientationForBestFit =
+        cameraAspectRatio > 1 ? "landscape" : "portrait";
+
+      // If the current device doesn't support locking orientation,
+      // this promise will reject with an error that we can ignore
+      screenOrientation.lock(orientationForBestFit).catch(() => {});
+    }
+
+    return () => screenOrientation.unlock();
   }, [fullscreen, cameraAspectRatio]);
 
   const handleError = useCallback(
