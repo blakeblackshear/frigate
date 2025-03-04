@@ -11,6 +11,8 @@ import { IoClose } from "react-icons/io5";
 import Heading from "../ui/heading";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 export type IconName = keyof typeof LuIcons;
 
@@ -70,7 +72,7 @@ export default function IconPicker({
               className="mt-2 w-full text-muted-foreground"
               aria-label="Select an icon"
             >
-              Select an icon
+              <Trans>ui.iconPicker.selectIcon</Trans>
             </Button>
           ) : (
             <div className="hover:cursor-pointer">
@@ -101,7 +103,9 @@ export default function IconPicker({
           className="flex max-h-[50dvh] flex-col overflow-y-hidden md:max-h-[30dvh]"
         >
           <div className="mb-3 flex flex-row items-center justify-between">
-            <Heading as="h4">Select an icon</Heading>
+            <Heading as="h4">
+              <Trans>ui.iconPicker.selectIcon</Trans>
+            </Heading>
             <span tabIndex={0} className="sr-only" />
             <IoClose
               size={15}
@@ -113,7 +117,7 @@ export default function IconPicker({
           </div>
           <Input
             type="text"
-            placeholder="Search for an icon..."
+            placeholder={t("ui.iconPicker.search.placeholder")}
             className="text-md mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

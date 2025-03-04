@@ -22,6 +22,8 @@ import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -105,7 +107,7 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
+      message: t("ui.form.message.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -163,7 +165,16 @@ export default function MotionMaskEditPane({
       .then((res) => {
         if (res.status === 200) {
           toast.success(
-            `${polygon.name || "Motion Mask"} has been saved. Restart Frigate to apply changes.`,
+            polygon.name
+              ? t(
+                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success",
+                  {
+                    polygonName: polygon.name,
+                  },
+                )
+              : t(
+                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success.noName",
+                ),
             {
               position: "top-center",
             },
@@ -206,7 +217,9 @@ export default function MotionMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Motion Mask - Frigate";
+    document.title = t(
+      "ui.settingView.masksAndZonesSettings.motionMasks.documentTitle",
+    );
   }, []);
 
   if (!polygon) {
@@ -217,14 +230,15 @@ export default function MotionMaskEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? "Edit" : "New"} Motion Mask
+        {polygon.name.length
+          ? t("ui.settingView.masksAndZonesSettings.motionMasks.edit")
+          : t("ui.settingView.masksAndZonesSettings.motionMasks.add")}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
-          Motion masks are used to prevent unwanted types of motion from
-          triggering detection (example: tree branches, camera timestamps).
-          Motion masks should be used <em>very sparingly</em>, over-masking will
-          make it more difficult for objects to be tracked.
+          <Trans>
+            ui.settingView.masksAndZonesSettings.motionMasks.context
+          </Trans>
         </p>
 
         <div className="flex items-center text-primary">
@@ -234,7 +248,9 @@ export default function MotionMaskEditPane({
             rel="noopener noreferrer"
             className="inline"
           >
-            Read the documentation{" "}
+            <Trans>
+              ui.settingView.masksAndZonesSettings.motionMasks.context.documentation
+            </Trans>{" "}
             <LuExternalLink className="ml-2 inline-flex size-3" />
           </Link>
         </div>
@@ -243,11 +259,9 @@ export default function MotionMaskEditPane({
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {polygons[activePolygonIndex].points.length}{" "}
-            {polygons[activePolygonIndex].points.length > 1 ||
-            polygons[activePolygonIndex].points.length == 0
-              ? "points"
-              : "point"}
+            {t("ui.settingView.masksAndZonesSettings.motionMasks.point", {
+              count: polygons[activePolygonIndex].points.length,
+            })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
             )}
@@ -262,7 +276,9 @@ export default function MotionMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        Click to draw a polygon on the image.
+        <Trans>
+          ui.settingView.masksAndZonesSettings.motionMasks.clickDrawPolygon
+        </Trans>
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -270,19 +286,26 @@ export default function MotionMaskEditPane({
       {polygonArea && polygonArea >= 0.35 && (
         <>
           <div className="mb-3 text-sm text-danger">
-            The motion mask is covering {Math.round(polygonArea * 100)}% of the
-            camera frame. Large motion masks are not recommended.
+            {t(
+              "ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge",
+              {
+                polygonArea: Math.round(polygonArea * 100),
+              },
+            )}
           </div>
           <div className="mb-3 text-sm text-primary">
-            Motion masks do not prevent objects from being detected. You should
-            use a required zone instead.
+            <Trans>
+              ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.tips
+            </Trans>
             <Link
               to="https://github.com/blakeblackshear/frigate/discussions/13040"
               target="_blank"
               rel="noopener noreferrer"
               className="my-3 block"
             >
-              Read the documentation{" "}
+              <Trans>
+                ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.documentation
+              </Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -319,7 +342,7 @@ export default function MotionMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                Cancel
+                <Trans>ui.cancel</Trans>
               </Button>
               <Button
                 variant="select"
@@ -331,10 +354,12 @@ export default function MotionMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>Saving...</span>
+                    <span>
+                      <Trans>ui.saving</Trans>
+                    </span>
                   </div>
                 ) : (
-                  "Save"
+                  <Trans>ui.save</Trans>
                 )}
               </Button>
             </div>

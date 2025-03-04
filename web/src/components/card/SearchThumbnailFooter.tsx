@@ -6,6 +6,7 @@ import { SearchResult } from "@/types/search";
 import ActivityIndicator from "../indicators/activity-indicator";
 import SearchResultActions from "../menu/SearchResultActions";
 import { cn } from "@/lib/utils";
+import { t } from "i18next";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -29,7 +30,9 @@ export default function SearchThumbnailFooter({
   // date
   const formattedDate = useFormattedTimestamp(
     searchResult.start_time,
-    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
+    config?.ui.time_format == "24hour"
+      ? t("ui.time.formattedTimestampExcludeSeconds.24hour")
+      : t("ui.time.formattedTimestampExcludeSeconds"),
     config?.ui.timezone,
   );
 

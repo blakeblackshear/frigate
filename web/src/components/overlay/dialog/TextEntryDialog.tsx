@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { Trans } from "react-i18next";
 import { z } from "zod";
 
 type TextEntryDialogProps = {
@@ -87,10 +88,10 @@ export default function TextEntryDialog({
             />
             <DialogFooter className="pt-4">
               <Button type="button" onClick={() => setOpen(false)}>
-                Cancel
+                <Trans>ui.cancel</Trans>
               </Button>
               <Button variant="select" type="submit">
-                Save
+                <Trans>ui.save</Trans>
               </Button>
             </DialogFooter>
           </form>

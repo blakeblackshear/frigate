@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import useSWR from "swr";
 import { LuAlertCircle } from "react-icons/lu";
+import { Trans } from "react-i18next";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
@@ -75,11 +76,13 @@ export default function StorageMetrics({
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
-      <div className="text-sm font-medium text-muted-foreground">Overview</div>
+      <div className="text-sm font-medium text-muted-foreground">
+        <Trans>ui.system.storage.overview</Trans>
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">
-            Recordings
+            <Trans>ui.system.storage.recordings</Trans>
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -94,9 +97,7 @@ export default function StorageMetrics({
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-2">
-                  This value represents the total storage used by the recordings
-                  in Frigate's database. Frigate does not track storage usage
-                  for all files on your disk.
+                  <Trans>ui.system.storage.recordings.tips</Trans>
                 </div>
               </PopoverContent>
             </Popover>
@@ -135,7 +136,7 @@ export default function StorageMetrics({
         </div>
       </div>
       <div className="mt-4 text-sm font-medium text-muted-foreground">
-        Camera Storage
+        <Trans>ui.system.storage.cameraStorage</Trans>
       </div>
       <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
         <CombinedStorageGraph
