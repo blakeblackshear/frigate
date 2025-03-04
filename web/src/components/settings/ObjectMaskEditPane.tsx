@@ -109,7 +109,7 @@ export default function ObjectMaskEditPane({
       polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
+      message: t("ui.form.message.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -197,21 +197,37 @@ export default function ObjectMaskEditPane({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              `${polygon.name || "Object Mask"} has been saved. Restart Frigate to apply changes.`,
+              polygon.name
+                ? t(
+                    "ui.settingView.masksAndZonesSettings.objectMasks.toast.success",
+                    {
+                      polygonName: polygon.name,
+                    },
+                  )
+                : t(
+                    "ui.settingView.masksAndZonesSettings.objectMasks.toast.success.noName",
+                  ),
               {
                 position: "top-center",
               },
             );
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("ui.toast.save.error", {
+                errorMessage: res.statusText,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
           toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
+            t("ui.toast.save.error", {
+              errorMessage: error.response.data.message,
+            }),
             { position: "top-center" },
           );
         })
@@ -290,7 +306,6 @@ export default function ObjectMaskEditPane({
         <Trans>
           ui.settingView.masksAndZonesSettings.objectMasks.clickDrawPolygon
         </Trans>
-        Click to draw a polygon on the image.
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -360,7 +375,7 @@ export default function ObjectMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                Cancel
+                <Trans>ui.cancel</Trans>
               </Button>
               <Button
                 variant="select"
@@ -372,10 +387,12 @@ export default function ObjectMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>Saving...</span>
+                    <span>
+                      <Trans>ui.saving</Trans>
+                    </span>
                   </div>
                 ) : (
-                  "Save"
+                  <Trans>ui.save</Trans>
                 )}
               </Button>
             </div>

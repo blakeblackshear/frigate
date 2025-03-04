@@ -492,7 +492,7 @@ export default function MasksAndZonesView({
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
                               <Trans>
-                                ui.settingView.masksAndZonesSettings.zone
+                                ui.settingView.masksAndZonesSettings.zones
                               </Trans>
                             </div>
                           </HoverCardTrigger>
@@ -500,7 +500,7 @@ export default function MasksAndZonesView({
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
                                 <Trans>
-                                  ui.settingView.masksAndZonesSettings.zone.desc
+                                  ui.settingView.masksAndZonesSettings.zones.desc
                                 </Trans>
                               </p>
                               <div className="flex items-center text-primary">
@@ -511,7 +511,7 @@ export default function MasksAndZonesView({
                                   className="inline"
                                 >
                                   <Trans>
-                                    ui.settingView.masksAndZonesSettings.zone.desc.documentation
+                                    ui.settingView.masksAndZonesSettings.zones.desc.documentation
                                   </Trans>{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
@@ -535,7 +535,7 @@ export default function MasksAndZonesView({
                           </TooltipTrigger>
                           <TooltipContent>
                             <Trans>
-                              ui.settingView.masksAndZonesSettings.zone.add
+                              ui.settingView.masksAndZonesSettings.zones.add
                             </Trans>
                           </TooltipContent>
                         </Tooltip>

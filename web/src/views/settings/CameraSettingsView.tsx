@@ -31,7 +31,7 @@ import { Trans } from "react-i18next";
 import { t } from "i18next";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAlertsState, useDetectionsState } from "@/api/ws";
+import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -110,6 +110,8 @@ export default function CameraSettingsView({
   const watchedAlertsZones = form.watch("alerts_zones");
   const watchedDetectionsZones = form.watch("detections_zones");
 
+  const { payload: enabledState, send: sendEnabled } =
+    useEnabledState(selectedCamera);
   const { payload: alertsState, send: sendAlerts } =
     useAlertsState(selectedCamera);
   const { payload: detectionsState, send: sendDetections } =
@@ -158,21 +160,28 @@ export default function CameraSettingsView({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              `Review classification configuration has been saved. Restart Frigate to apply changes.`,
+              t(
+                "ui.settingView.cameraSettings.reviewClassification.toast.success",
+              ),
               {
                 position: "top-center",
               },
             );
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("ui.toast.save.error", { errorMessage: res.statusText }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
           toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
+            t("ui.toast.save.error", {
+              errorMessage: error.response.data.message,
+            }),
             { position: "top-center" },
           );
         })
@@ -253,6 +262,30 @@ export default function CameraSettingsView({
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            <Trans>ui.settingView.cameraSettings.streams</Trans>
+          </Heading>
+
+          <div className="flex flex-row items-center">
+            <Switch
+              id="camera-enabled"
+              className="mr-3"
+              checked={enabledState === "ON"}
+              onCheckedChange={(isChecked) => {
+                sendEnabled(isChecked ? "ON" : "OFF");
+              }}
+            />
+            <div className="space-y-0.5">
+              <Label htmlFor="camera-enabled">
+                <Trans>ui.enabled</Trans>
+              </Label>
+            </div>
+          </div>
+          <div className="mt-3 text-sm text-muted-foreground">
+            <Trans>ui.settingView.cameraSettings.streams.desc</Trans>
+          </div>
+          <Separator className="mb-2 mt-4 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
             <Trans>ui.settingView.cameraSettings.review</Trans>
@@ -349,7 +382,9 @@ export default function CameraSettingsView({
                         <>
                           <div className="mb-2">
                             <FormLabel className="flex flex-row items-center text-base">
-                              Alerts{" "}
+                              <Trans>
+                                ui.settingView.cameraSettings.review.alerts
+                              </Trans>
                               <MdCircle className="ml-3 size-2 text-severity_alert" />
                             </FormLabel>
                             <FormDescription>
@@ -452,12 +487,16 @@ export default function CameraSettingsView({
                         <>
                           <div className="mb-2">
                             <FormLabel className="flex flex-row items-center text-base">
-                              Detections{" "}
+                              <Trans>
+                                ui.settingView.cameraSettings.review.detections
+                              </Trans>
                               <MdCircle className="ml-3 size-2 text-severity_detection" />
                             </FormLabel>
                             {selectDetections && (
                               <FormDescription>
-                                Select zones for Detections
+                                <Trans>
+                                  ui.settingView.cameraSettings.reviewClassification.selectDetectionsZones
+                                </Trans>
                               </FormDescription>
                             )}
                           </div>
@@ -520,7 +559,9 @@ export default function CameraSettingsView({
                                 htmlFor="select-detections"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                Limit detections to specific zones
+                                <Trans>
+                                  ui.settingView.cameraSettings.reviewClassification.limitDetections
+                                </Trans>
                               </label>
                             </div>
                           </div>

@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -118,20 +119,28 @@ export default function MotionTunerView({
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Motion settings have been saved.", {
-            position: "top-center",
-          });
+          toast.success(
+            t("ui.settingView.motionDetectionTuner.toast.success"),
+            {
+              position: "top-center",
+            },
+          );
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(`Failed to save config changes: ${res.statusText}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("ui.toast.save.error", { errorMessage: res.statusText }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
         toast.error(
-          `Failed to save config changes: ${error.response.data.message}`,
+          t("ui.toast.save.error", {
+            errorMessage: error.response.data.message,
+          }),
           { position: "top-center" },
         );
       })

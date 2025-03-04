@@ -20,7 +20,7 @@ class CameraActivityManager:
         self.all_zone_labels: dict[str, set[str]] = {}
 
         for camera_config in config.cameras.values():
-            if not camera_config.enabled:
+            if not camera_config.enabled_in_config:
                 continue
 
             self.last_camera_activity[camera_config.name] = {}

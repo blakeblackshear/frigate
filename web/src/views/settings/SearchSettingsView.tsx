@@ -94,20 +94,25 @@ export default function ExploreSettingsView({
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Explore settings have been saved.", {
+          toast.success(t("ui.settingView.exploreSettings.toast.success"), {
             position: "top-center",
           });
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(`Failed to save config changes: ${res.statusText}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("ui.toast.save.error", { errorMessage: res.statusText }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
         toast.error(
-          `Failed to save config changes: ${error.response.data.message}`,
+          t("ui.toast.save.error", {
+            errorMessage: error.response.data.message,
+          }),
           { position: "top-center" },
         );
       })

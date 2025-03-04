@@ -7,6 +7,7 @@ import { PolygonType } from "@/types/canvas";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
+import { Trans } from "react-i18next";
 
 type ZoneMaskFilterButtonProps = {
   selectedZoneMask?: PolygonType[];
@@ -29,7 +30,7 @@ export function ZoneMaskFilterButton({
       <div
         className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        Filter
+        <Trans>ui.filter</Trans>
       </div>
     </Button>
   );
@@ -75,7 +76,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Masks and Zones
+            <Trans>ui.settingView.masksAndZonesSettings.filter.all</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -96,9 +97,12 @@ export function GeneralFilterContent({
                 className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                {item
-                  .replace(/_/g, " ")
-                  .replace(/\b\w/g, (char) => char.toUpperCase()) + "s"}
+                <Trans>
+                  ui.settingView.masksAndZonesSettings.
+                  {item.replace(/_([a-z])/g, (match, letter) =>
+                    letter.toUpperCase(),
+                  ) + "s"}
+                </Trans>
               </Label>
               <Switch
                 key={item}

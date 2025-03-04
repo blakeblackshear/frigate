@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { toast } from "sonner";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type SaveSearchDialogProps = {
   existingNames: string[];
@@ -32,9 +34,14 @@ export function SaveSearchDialog({
     if (searchName.trim()) {
       onSave(searchName.trim());
       setSearchName("");
-      toast.success(`Search (${searchName.trim()}) has been saved.`, {
-        position: "top-center",
-      });
+      toast.success(
+        t("ui.dialog.search.saveSearch.success", {
+          searchName: searchName.trim(),
+        }),
+        {
+          position: "top-center",
+        },
+      );
       onClose();
     }
   };
@@ -54,26 +61,29 @@ export function SaveSearchDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Save Search</DialogTitle>
+          <DialogTitle>
+            <Trans>ui.dialog.search.saveSearch</Trans>
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            Provide a name for this saved search.
+            <Trans>ui.dialog.search.saveSearch.desc</Trans>
           </DialogDescription>
         </DialogHeader>
         <Input
           value={searchName}
           className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
-          placeholder="Enter a name for your search"
+          placeholder={t("ui.dialog.search.saveSearch.placeholder")}
         />
         {overwrite && (
           <div className="ml-1 text-sm text-danger">
-            {searchName} already exists. Saving will overwrite the existing
-            value.
+            <Trans values={{ searchName }}>
+              ui.dialog.search.saveSearch.overwrite
+            </Trans>
           </div>
         )}
         <DialogFooter>
           <Button aria-label="Cancel" onClick={onClose}>
-            Cancel
+            <Trans>ui.cancel</Trans>
           </Button>
           <Button
             onClick={handleSave}
@@ -81,7 +91,7 @@ export function SaveSearchDialog({
             className="mb-2 md:mb-0"
             aria-label="Save this search"
           >
-            Save
+            <Trans>ui.save</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

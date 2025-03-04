@@ -107,7 +107,7 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
+      message: t("ui.form.message.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -165,7 +165,16 @@ export default function MotionMaskEditPane({
       .then((res) => {
         if (res.status === 200) {
           toast.success(
-            `${polygon.name || "Motion Mask"} has been saved. Restart Frigate to apply changes.`,
+            polygon.name
+              ? t(
+                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success",
+                  {
+                    polygonName: polygon.name,
+                  },
+                )
+              : t(
+                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success.noName",
+                ),
             {
               position: "top-center",
             },
