@@ -815,8 +815,8 @@ cameras:
       required_zones: []
       # Optional: What triggers to use to send frames to generative AI during an event (default: shown below)
       send_triggers:
-        # At the end of the event
-        event_end: True
+        # Once the object is no longer tracked
+        tracked_object_end: True
         # Optional: After X many significant updates are received (default: none, only at event end)
         after_significant_updates: None
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)

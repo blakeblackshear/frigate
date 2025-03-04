@@ -17,7 +17,9 @@ class GenAIProviderEnum(str, Enum):
 
 
 class GenAISendTriggersConfig(BaseModel):
-    event_end: bool = Field(default=True, title="Send once the event has ended.")
+    tracked_object_end: bool = Field(
+        default=True, title="Send once the object is no longer tracked."
+    )
     after_significant_updates: Optional[int] = Field(
         default=None,
         title="Send an early request to generative AI when X frames accumulated.",
@@ -53,7 +55,7 @@ class GenAICameraConfig(BaseModel):
     )
     send_triggers: GenAISendTriggersConfig = Field(
         default_factory=GenAISendTriggersConfig,
-        title="What triggers to use to send frames to generative AI during an event.",
+        title="What triggers to use to send frames to generative AI for a tracked object.",
     )
 
     @field_validator("required_zones", mode="before")

@@ -334,7 +334,7 @@ class EmbeddingMaintainer(threading.Thread):
                 # Run GenAI
                 if (
                     camera_config.genai.enabled
-                    and camera_config.genai.send_triggers.event_end
+                    and camera_config.genai.send_triggers.tracked_object_end
                     and self.genai_client is not None
                     and (
                         not camera_config.genai.objects
