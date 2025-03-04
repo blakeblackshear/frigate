@@ -12,6 +12,7 @@ from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
+from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
@@ -129,8 +130,8 @@ def export_recording(
     )
 
 
-@router.patch("/export/{event_id}/{new_name}")
-def export_rename(event_id: str, new_name: str):
+@router.patch("/export/{event_id}/rename")
+def export_rename(event_id: str, body: ExportRenameBody):
     try:
         export: Export = Export.get(Export.id == event_id)
     except DoesNotExist:
@@ -144,7 +145,7 @@ def export_rename(event_id: str, new_name: str):
             status_code=404,
         )
 
-    export.name = new_name
+    export.name = body.name
     export.save()
     return JSONResponse(
         content=(

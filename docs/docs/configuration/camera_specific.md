@@ -22,7 +22,7 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
 ```yaml
 go2rtc:
   streams:
-    mjpeg_cam: "ffmpeg:{your_mjpeg_stream_url}#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
+    mjpeg_cam: "ffmpeg:http://your_mjpeg_stream_url#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
 
 cameras:
   ...
@@ -79,14 +79,15 @@ rtsp://USERNAME:PASSWORD@CAMERA-IP/cam/realmonitor?channel=1&subtype=3 # new hig
 
 ### Annke C800
 
-This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
+This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be adjusted using the `apple_compatibility` config.
 
 ```yaml
 cameras:
   annkec800: # <------ Name the camera
     ffmpeg:
+      apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
       output_args:
-        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
+        record: preset-record-generic-audio-aac
 
       inputs:
         - path: rtsp://USERNAME:PASSWORD@CAMERA-IP/H264/ch1/main/av_stream # <----- Update for your camera

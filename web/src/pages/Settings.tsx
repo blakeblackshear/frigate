@@ -37,6 +37,9 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useSearchParams } from "react-router-dom";
+import { useInitialCameraState } from "@/api/ws";
 
 const allSettingsViews = [
   "UI settings",
@@ -57,18 +60,7 @@ export default function Settings() {
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // available settings views
-
-  const settingsViews = useMemo(() => {
-    const views = [...allSettingsViews];
-
-    if (!("Notification" in window) || !window.isSecureContext) {
-      const index = views.indexOf("notifications");
-      views.splice(index, 1);
-    }
-
-    return views;
-  }, []);
+  const [searchParams] = useSearchParams();
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -80,11 +72,32 @@ export default function Settings() {
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
   const [selectedCamera, setSelectedCamera] = useState<string>("");
+
+  const { payload: allCameraStates } = useInitialCameraState(
+    cameras.length > 0 ? cameras[0].name : "",
+    true,
+  );
+
+  const cameraEnabledStates = useMemo(() => {
+    const states: Record<string, boolean> = {};
+    if (allCameraStates) {
+      Object.entries(allCameraStates).forEach(([camName, state]) => {
+        states[camName] = state.config?.enabled ?? false;
+      });
+    }
+    // fallback to config if ws data isn’t available yet
+    cameras.forEach((cam) => {
+      if (!(cam.name in states)) {
+        states[cam.name] = cam.enabled;
+      }
+    });
+    return states;
+  }, [allCameraStates, cameras]);
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
@@ -100,10 +113,25 @@ export default function Settings() {
   );
 
   useEffect(() => {
-    if (cameras.length > 0 && selectedCamera === "") {
-      setSelectedCamera(cameras[0].name);
+    if (cameras.length > 0) {
+      if (!selectedCamera) {
+        // Set to first enabled camera initially if no selection
+        const firstEnabledCamera =
+          cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
+        setSelectedCamera(firstEnabledCamera.name);
+      } else if (
+        !cameraEnabledStates[selectedCamera] &&
+        page !== "camera settings"
+      ) {
+        // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
+        const firstEnabledCamera =
+          cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
+        if (firstEnabledCamera.name !== selectedCamera) {
+          setSelectedCamera(firstEnabledCamera.name);
+        }
+      }
     }
-  }, [cameras, selectedCamera]);
+  }, [cameras, selectedCamera, cameraEnabledStates, page]);
 
   useEffect(() => {
     if (tabsRef.current) {
@@ -118,6 +146,23 @@ export default function Settings() {
       }
     }
   }, [tabsRef, pageToggle]);
+
+  useSearchEffect("page", (page: string) => {
+    if (allSettingsViews.includes(page as SettingsType)) {
+      setPage(page as SettingsType);
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
+
+  useSearchEffect("camera", (camera: string) => {
+    const cameraNames = cameras.map((c) => c.name);
+    if (cameraNames.includes(camera)) {
+      setSelectedCamera(camera);
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
 
   useEffect(() => {
     document.title = "Settings - Frigate";
@@ -139,7 +184,7 @@ export default function Settings() {
                 }
               }}
             >
-              {Object.values(settingsViews).map((item) => (
+              {Object.values(allSettingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
                   className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
@@ -169,6 +214,8 @@ export default function Settings() {
               allCameras={cameras}
               selectedCamera={selectedCamera}
               setSelectedCamera={setSelectedCamera}
+              cameraEnabledStates={cameraEnabledStates}
+              currentPage={page}
             />
           </div>
         )}
@@ -236,17 +283,21 @@ type CameraSelectButtonProps = {
   allCameras: CameraConfig[];
   selectedCamera: string;
   setSelectedCamera: React.Dispatch<React.SetStateAction<string>>;
+  cameraEnabledStates: Record<string, boolean>;
+  currentPage: SettingsType;
 };
 
 function CameraSelectButton({
   allCameras,
   selectedCamera,
   setSelectedCamera,
+  cameraEnabledStates,
+  currentPage,
 }: CameraSelectButtonProps) {
   const [open, setOpen] = useState(false);
 
   if (!allCameras.length) {
-    return;
+    return null;
   }
 
   const trigger = (
@@ -275,19 +326,24 @@ function CameraSelectButton({
       )}
       <div className="scrollbar-container mb-5 h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4 md:mb-1">
         <div className="flex flex-col gap-2.5">
-          {allCameras.map((item) => (
-            <FilterSwitch
-              key={item.name}
-              isChecked={item.name === selectedCamera}
-              label={item.name.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  setSelectedCamera(item.name);
-                  setOpen(false);
-                }
-              }}
-            />
-          ))}
+          {allCameras.map((item) => {
+            const isEnabled = cameraEnabledStates[item.name];
+            const isCameraSettingsPage = currentPage === "camera settings";
+            return (
+              <FilterSwitch
+                key={item.name}
+                isChecked={item.name === selectedCamera}
+                label={item.name.replaceAll("_", " ")}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked && (isEnabled || isCameraSettingsPage)) {
+                    setSelectedCamera(item.name);
+                    setOpen(false);
+                  }
+                }}
+                disabled={!isEnabled && !isCameraSettingsPage}
+              />
+            );
+          })}
         </div>
       </div>
     </>

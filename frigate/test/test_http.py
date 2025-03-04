@@ -11,6 +11,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
+from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.models import Event, Recordings, Timeline
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -74,19 +75,19 @@ class TestHttp(unittest.TestCase):
                         "total": 67.1,
                         "used": 16.6,
                     },
-                    "/media/frigate/clips": {
+                    os.path.join(BASE_DIR, "clips"): {
                         "free": 42429.9,
                         "mount_type": "ext4",
                         "total": 244529.7,
                         "used": 189607.0,
                     },
-                    "/media/frigate/recordings": {
+                    os.path.join(BASE_DIR, "recordings"): {
                         "free": 0.2,
                         "mount_type": "ext4",
                         "total": 8.0,
                         "used": 7.8,
                     },
-                    "/tmp/cache": {
+                    CACHE_DIR: {
                         "free": 976.8,
                         "mount_type": "tmpfs",
                         "total": 1000.0,
@@ -275,7 +276,7 @@ class TestHttp(unittest.TestCase):
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
-            assert event["sub_label"] == ""
+            assert event["sub_label"] == None
 
     def test_sub_label_list(self):
         app = create_fastapi_app(

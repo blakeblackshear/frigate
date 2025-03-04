@@ -177,7 +177,7 @@ services:
   frigate:
     ...
     devices:
-      - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+      - /dev/dri/renderD128:/dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     ...
 ```
 

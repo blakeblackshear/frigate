@@ -5,7 +5,7 @@
 
 set -euxo pipefail
 
-INSTALL_PREFIX=/rootfs/usr/local
+INSTALL_PREFIX=/rootfs/usr/lib/ffmpeg/jetson
 
 apt-get -qq update
 apt-get -qq install -y --no-install-recommends build-essential ccache clang cmake pkg-config
@@ -14,14 +14,27 @@ apt-get -qq install -y --no-install-recommends libx264-dev libx265-dev
 pushd /tmp
 
 # Install libnvmpi to enable nvmpi decoders (h264_nvmpi, hevc_nvmpi)
-if [ -e /usr/local/cuda-10.2 ]; then
+if [ -e /usr/local/cuda-12 ]; then
+    # assume Jetpack 6.2
+    apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
+    echo "deb https://repo.download.nvidia.com/jetson/common r36.4 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+    echo "deb https://repo.download.nvidia.com/jetson/t234 r36.4 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+    echo "deb https://repo.download.nvidia.com/jetson/ffmpeg r36.4 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+
+    mkdir -p /opt/nvidia/l4t-packages/
+    touch /opt/nvidia/l4t-packages/.nv-l4t-disable-boot-fw-update-in-preinstall
+
+    apt-get update
+    apt-get -qq install -y --no-install-recommends -o Dpkg::Options::="--force-confold" nvidia-l4t-jetson-multimedia-api
+elif [ -e /usr/local/cuda-10.2 ]; then
     # assume Jetpack 4.X
     wget -q https://developer.nvidia.com/embedded/L4T/r32_Release_v5.0/T186/Jetson_Multimedia_API_R32.5.0_aarch64.tbz2 -O jetson_multimedia_api.tbz2
+    tar xaf jetson_multimedia_api.tbz2 -C / && rm jetson_multimedia_api.tbz2
 else
     # assume Jetpack 5.X
     wget -q https://developer.nvidia.com/downloads/embedded/l4t/r35_release_v3.1/release/jetson_multimedia_api_r35.3.1_aarch64.tbz2 -O jetson_multimedia_api.tbz2
+    tar xaf jetson_multimedia_api.tbz2 -C / && rm jetson_multimedia_api.tbz2
 fi
-tar xaf jetson_multimedia_api.tbz2 -C / && rm jetson_multimedia_api.tbz2
 
 wget -q https://github.com/AndBobsYourUncle/jetson-ffmpeg/archive/9c17b09.zip -O jetson-ffmpeg.zip
 unzip jetson-ffmpeg.zip && rm jetson-ffmpeg.zip && mv jetson-ffmpeg-* jetson-ffmpeg && cd jetson-ffmpeg

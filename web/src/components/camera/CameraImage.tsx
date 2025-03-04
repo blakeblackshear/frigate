@@ -5,6 +5,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isDesktop } from "react-device-detect";
 import { cn } from "@/lib/utils";
+import { useEnabledState } from "@/api/ws";
 
 type CameraImageProps = {
   className?: string;
@@ -26,7 +27,8 @@ export default function CameraImage({
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   const { name } = config ? config.cameras[camera] : "";
-  const enabled = config ? config.cameras[camera].enabled : "True";
+  const { payload: enabledState } = useEnabledState(camera);
+  const enabled = enabledState === "ON" || enabledState === undefined;
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
@@ -96,9 +98,7 @@ export default function CameraImage({
           loading="lazy"
         />
       ) : (
-        <div className="pt-6 text-center">
-          Camera is disabled in config, no stream or snapshot available!
-        </div>
+        <div className="size-full rounded-lg border-2 border-muted bg-background_alt text-center md:rounded-2xl" />
       )}
       {!imageLoaded && enabled ? (
         <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">

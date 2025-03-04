@@ -2,6 +2,7 @@ export interface FrigateStats {
   cameras: { [camera_name: string]: CameraStats };
   cpu_usages: { [pid: string]: CpuStats };
   detectors: { [detectorKey: string]: DetectorStats };
+  embeddings?: EmbeddingsStats;
   gpu_usages?: { [gpuKey: string]: GpuStats };
   processes: { [processKey: string]: ExtraProcessStats };
   service: ServiceStats;
@@ -32,6 +33,13 @@ export type DetectorStats = {
   detection_start: number;
   inference_speed: number;
   pid: number;
+};
+
+export type EmbeddingsStats = {
+  image_embedding_speed: number;
+  face_embedding_speed: number;
+  plate_recognition_speed: number;
+  text_embedding_speed: number;
 };
 
 export type ExtraProcessStats = {

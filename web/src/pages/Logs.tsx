@@ -1,35 +1,47 @@
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { LogData, LogLine, LogSeverity, LogType, logTypes } from "@/types/log";
+import {
+  LogLine,
+  LogSettingsType,
+  LogSeverity,
+  LogType,
+  logTypes,
+} from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import LogInfoDialog from "@/components/overlay/LogInfoDialog";
 import { LogChip } from "@/components/indicators/Chip";
-import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
-import { FaCopy } from "react-icons/fa6";
+import { LogSettingsButton } from "@/components/filter/LogSettingsButton";
+import { FaCopy, FaDownload } from "react-icons/fa";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import {
-  isDesktop,
-  isMobile,
-  isMobileOnly,
-  isTablet,
-} from "react-device-detect";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
-import { MdVerticalAlignBottom } from "react-icons/md";
 import { parseLogLines } from "@/utils/logUtil";
-import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
-import { FaDownload } from "react-icons/fa";
-
-type LogRange = { start: number; end: number };
+import { LazyLog } from "@melloware/react-logviewer";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import EnhancedScrollFollow from "@/components/dynamic/EnhancedScrollFollow";
+import { MdCircle } from "react-icons/md";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { debounce } from "lodash";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
   const tabsRef = useRef<HTMLDivElement | null>(null);
+  const lazyLogWrapperRef = useRef<HTMLDivElement>(null);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [filterSeverity, setFilterSeverity] = useState<LogSeverity[]>();
+  const [selectedLog, setSelectedLog] = useState<LogLine>();
+  const lazyLogRef = useRef<LazyLog>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const lastFetchedIndexRef = useRef(-1);
 
   useEffect(() => {
     document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
@@ -49,92 +61,233 @@ function Logs() {
     }
   }, [tabsRef, logService]);
 
-  // log data handling
+  // log settings
 
-  const logPageSize = useMemo(() => {
-    if (isMobileOnly) {
-      return 15;
-    }
+  const [logSettings, setLogSettings] = useState<LogSettingsType>({
+    disableStreaming: false,
+  });
 
-    if (isTablet) {
-      return 25;
-    }
+  // filter
 
-    return 40;
-  }, []);
+  const filterLines = useCallback(
+    (lines: string[]) => {
+      if (!filterSeverity?.length) return lines;
 
-  const [logRange, setLogRange] = useState<LogRange>({ start: 0, end: 0 });
-  const [logs, setLogs] = useState<string[]>([]);
-  const [logLines, setLogLines] = useState<LogLine[]>([]);
+      return lines.filter((line) => {
+        const parsedLine = parseLogLines(logService, [line])[0];
+        return filterSeverity.includes(parsedLine.severity);
+      });
+    },
+    [filterSeverity, logService],
+  );
 
-  useEffect(() => {
-    axios
-      .get(`logs/${logService}?start=-${logPageSize}`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          const data = resp.data as LogData;
-          setLogRange({
-            start: Math.max(0, data.totalLines - logPageSize),
-            end: data.totalLines,
-          });
-          setLogs(data.lines);
-          setLogLines(parseLogLines(logService, data.lines));
+  // fetchers
+
+  const fetchLogRange = useCallback(
+    async (start: number, end: number) => {
+      try {
+        const response = await axios.get(`logs/${logService}`, {
+          params: { start, end },
+        });
+        if (
+          response.status === 200 &&
+          response.data &&
+          Array.isArray(response.data.lines)
+        ) {
+          const filteredLines = filterLines(response.data.lines);
+          return filteredLines;
         }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "An unknown error occurred";
+        toast.error(`Error fetching logs: ${errorMessage}`, {
+          position: "top-center",
+        });
+      }
+      return [];
+    },
+    [logService, filterLines],
+  );
+
+  const fetchInitialLogs = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`logs/${logService}`, {
+        params: { start: filterSeverity ? 0 : -100 },
+      });
+      if (
+        response.status === 200 &&
+        response.data &&
+        Array.isArray(response.data.lines)
+      ) {
+        const filteredLines = filterLines(response.data.lines);
+        setLogs(filteredLines);
+        lastFetchedIndexRef.current =
+          response.data.totalLines - filteredLines.length;
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Error fetching logs: ${errorMessage}`, {
+        position: "top-center",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [logService, filterLines, filterSeverity]);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const fetchLogsStream = useCallback(() => {
+    // Cancel any existing stream
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    let buffer = "";
+    const decoder = new TextDecoder();
+
+    const processStreamChunk = (
+      reader: ReadableStreamDefaultReader<Uint8Array>,
+    ): Promise<void> => {
+      return reader.read().then(({ done, value }) => {
+        if (done) return;
+
+        // Decode the chunk and add it to our buffer
+        buffer += decoder.decode(value, { stream: true });
+
+        // Split on newlines, keeping any partial line in the buffer
+        const lines = buffer.split("\n");
+
+        // Keep the last partial line
+        buffer = lines.pop() || "";
+
+        // Filter and append complete lines
+        if (lines.length > 0) {
+          const filteredLines = filterSeverity?.length
+            ? lines.filter((line) => {
+                const parsedLine = parseLogLines(logService, [line])[0];
+                return filterSeverity.includes(parsedLine.severity);
+              })
+            : lines;
+          if (filteredLines.length > 0) {
+            lazyLogRef.current?.appendLines(filteredLines);
+          }
+        }
+        // Process next chunk
+        return processStreamChunk(reader);
+      });
+    };
+
+    fetch(`api/logs/${logService}?stream=true`, {
+      signal: abortController.signal,
+    })
+      .then((response): Promise<void> => {
+        if (!response.ok) {
+          throw new Error(
+            `Error while fetching log stream, status: ${response.status}`,
+          );
+        }
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("No reader available");
+        }
+        return processStreamChunk(reader);
       })
-      .catch(() => {});
-  }, [logPageSize, logService]);
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "An unknown error occurred";
+          toast.error(`Error while streaming logs: ${errorMessage}`);
+        }
+      });
+  }, [logService, filterSeverity]);
 
   useEffect(() => {
-    if (!logs || logs.length == 0) {
-      return;
-    }
-
-    const id = setTimeout(() => {
-      axios
-        .get(`logs/${logService}?start=${logRange.end}`)
-        .then((resp) => {
-          if (resp.status == 200) {
-            const data = resp.data as LogData;
-
-            if (data.lines.length > 0) {
-              setLogRange({
-                start: logRange.start,
-                end: data.totalLines,
-              });
-              setLogs([...logs, ...data.lines]);
-              setLogLines([
-                ...logLines,
-                ...parseLogLines(logService, data.lines),
-              ]);
-            }
-          }
-        })
-        .catch(() => {});
-    }, 5000);
+    setIsLoading(true);
+    setLogs([]);
+    lastFetchedIndexRef.current = -1;
+    fetchInitialLogs().then(() => {
+      // Start streaming after initial load
+      if (!logSettings.disableStreaming) {
+        fetchLogsStream();
+      }
+    });
 
     return () => {
-      if (id) {
-        clearTimeout(id);
-      }
+      abortControllerRef.current?.abort();
     };
-    // we need to listen on the current range of visible items
+    // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logLines, logService, logRange]);
+  }, [logService, filterSeverity]);
 
-  // convert to log data
+  // handlers
+
+  const prependLines = useCallback((newLines: string[]) => {
+    if (!lazyLogRef.current) return;
+
+    const newLinesArray = newLines.map(
+      (line) => new Uint8Array(new TextEncoder().encode(line + "\n")),
+    );
+
+    lazyLogRef.current.setState((prevState) => ({
+      ...prevState,
+      lines: prevState.lines.unshift(...newLinesArray),
+      count: prevState.count + newLines.length,
+    }));
+  }, []);
+
+  // debounced
+  const handleScroll = useMemo(
+    () =>
+      debounce(() => {
+        const scrollThreshold =
+          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 10;
+        const startIndex =
+          lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
+        const endIndex =
+          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
+        const pageSize = endIndex - startIndex;
+        if (
+          scrollThreshold < pageSize + pageSize / 2 &&
+          lastFetchedIndexRef.current > 0 &&
+          !isLoading
+        ) {
+          const nextEnd = lastFetchedIndexRef.current;
+          const nextStart = Math.max(0, nextEnd - (pageSize || 100));
+          setIsLoading(true);
+
+          fetchLogRange(nextStart, nextEnd).then((newLines) => {
+            if (newLines.length > 0) {
+              prependLines(newLines);
+              lastFetchedIndexRef.current = nextStart;
+
+              lazyLogRef.current?.listRef.current?.scrollTo(
+                newLines.length *
+                  lazyLogRef.current?.listRef.current?.getItemSize(1),
+              );
+            }
+          });
+
+          setIsLoading(false);
+        }
+      }, 50),
+    [fetchLogRange, isLoading, prependLines],
+  );
 
   const handleCopyLogs = useCallback(() => {
-    if (logs) {
-      copy(logs.join("\n"));
-      toast.success(
-        logRange.start == 0
-          ? "Copied logs to clipboard"
-          : "Copied visible logs to clipboard",
-      );
-    } else {
-      toast.error("Could not copy logs to clipboard");
+    if (logs.length) {
+      fetchInitialLogs()
+        .then(() => {
+          copy(logs.join("\n"));
+          toast.success("Copied logs to clipboard");
+        })
+        .catch(() => {
+          toast.error("Could not copy logs to clipboard");
+        });
     }
-  }, [logs, logRange]);
+  }, [logs, fetchInitialLogs]);
 
   const handleDownloadLogs = useCallback(() => {
     axios
@@ -157,153 +310,76 @@ function Logs() {
       .catch(() => {});
   }, [logService]);
 
-  // scroll to bottom
-
-  const [initialScroll, setInitialScroll] = useState(false);
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [endVisible, setEndVisible] = useState(true);
-  const endObserver = useRef<IntersectionObserver | null>(null);
-  const endLogRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (endObserver.current) endObserver.current.disconnect();
-      try {
-        endObserver.current = new IntersectionObserver((entries) => {
-          setEndVisible(entries[0].isIntersecting);
-        });
-        if (node) endObserver.current.observe(node);
-      } catch (e) {
-        // no op
-      }
+  const handleRowClick = useCallback(
+    (rowInfo: { lineNumber: number; rowIndex: number }) => {
+      const clickedLine = parseLogLines(logService, [
+        logs[rowInfo.rowIndex],
+      ])[0];
+      setSelectedLog(clickedLine);
     },
-    [setEndVisible],
-  );
-  const startObserver = useRef<IntersectionObserver | null>(null);
-  const startLogRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (startObserver.current) startObserver.current.disconnect();
-
-      if (logs.length == 0 || !initialScroll) {
-        return;
-      }
-
-      try {
-        startObserver.current = new IntersectionObserver(
-          (entries) => {
-            if (entries[0].isIntersecting && logRange.start > 0) {
-              const start = Math.max(0, logRange.start - logPageSize);
-
-              axios
-                .get(`logs/${logService}?start=${start}&end=${logRange.start}`)
-                .then((resp) => {
-                  if (resp.status == 200) {
-                    const data = resp.data as LogData;
-
-                    if (data.lines.length > 0) {
-                      setLogRange({
-                        start: start,
-                        end: logRange.end,
-                      });
-                      setLogs([...data.lines, ...logs]);
-                      setLogLines([
-                        ...parseLogLines(logService, data.lines),
-                        ...logLines,
-                      ]);
-                    }
-                  }
-                })
-                .catch(() => {});
-              contentRef.current?.scrollBy({
-                top: 10,
-              });
-            }
-          },
-          { rootMargin: `${10 * (isMobile ? 64 : 48)}px 0px 0px 0px` },
-        );
-        if (node) startObserver.current.observe(node);
-      } catch (e) {
-        // no op
-      }
-    },
-    // we need to listen on the current range of visible items
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [logRange, initialScroll],
+    [logs, logService],
   );
 
-  useEffect(() => {
-    if (logLines.length == 0) {
-      setInitialScroll(false);
-      return;
-    }
-
-    if (initialScroll) {
-      return;
-    }
-
-    if (!contentRef.current) {
-      return;
-    }
-
-    if (contentRef.current.scrollHeight <= contentRef.current.clientHeight) {
-      setInitialScroll(true);
-      return;
-    }
-
-    contentRef.current?.scrollTo({
-      top: contentRef.current?.scrollHeight,
-      behavior: "instant",
-    });
-    setTimeout(() => setInitialScroll(true), 300);
-    // we need to listen on the current range of visible items
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logLines, logService]);
-
-  // log filtering
-
-  const [filterSeverity, setFilterSeverity] = useState<LogSeverity[]>();
-
-  // log selection
-
-  const [selectedLog, setSelectedLog] = useState<LogLine>();
-
-  // interaction
+  // keyboard listener
 
   useKeyboardListener(
     ["PageDown", "PageUp", "ArrowDown", "ArrowUp"],
     (key, modifiers) => {
-      if (!modifiers.down) {
+      if (!key || !modifiers.down || !lazyLogWrapperRef.current) {
         return;
       }
 
-      switch (key) {
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: 480,
-          });
-          break;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -480,
-          });
-          break;
-        case "ArrowDown":
-          contentRef.current?.scrollBy({
-            top: 48,
-          });
-          break;
-        case "ArrowUp":
-          contentRef.current?.scrollBy({
-            top: -48,
-          });
-          break;
+      const container =
+        lazyLogWrapperRef.current.querySelector(".react-lazylog");
+
+      const logLineHeight = container?.querySelector(".log-line")?.clientHeight;
+
+      if (!logLineHeight) {
+        return;
       }
+
+      const scrollAmount = key.includes("Page")
+        ? logLineHeight * 10
+        : logLineHeight;
+      const direction = key.includes("Down") ? 1 : -1;
+      container?.scrollBy({ top: scrollAmount * direction });
     },
+  );
+
+  // format lines
+
+  const lineBufferRef = useRef<string>("");
+
+  const formatPart = useCallback(
+    (text: string) => {
+      lineBufferRef.current += text;
+
+      if (text.endsWith("\n")) {
+        const completeLine = lineBufferRef.current.trim();
+        lineBufferRef.current = "";
+
+        if (completeLine) {
+          const parsedLine = parseLogLines(logService, [completeLine])[0];
+          return (
+            <LogLineData
+              line={parsedLine}
+              logService={logService}
+              onClickSeverity={() => setFilterSeverity([parsedLine.severity])}
+              onSelect={() => setSelectedLog(parsedLine)}
+            />
+          );
+        }
+      }
+
+      return null;
+    },
+    [logService, setFilterSeverity, setSelectedLog],
   );
 
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
       e.preventDefault();
-      if (!contentRef.current) return;
+      if (!lazyLogWrapperRef.current) return;
 
       const selection = window.getSelection();
       if (!selection) return;
@@ -371,7 +447,7 @@ function Logs() {
       e.clipboardData?.setData("text/plain", copyText);
     };
 
-    const content = contentRef.current;
+    const content = lazyLogWrapperRef.current;
     content?.addEventListener("copy", handleCopy);
     return () => {
       content?.removeEventListener("copy", handleCopy);
@@ -393,11 +469,10 @@ function Logs() {
               onValueChange={(value: LogType) => {
                 if (value) {
                   setLogs([]);
-                  setLogLines([]);
                   setFilterSeverity(undefined);
                   setLogService(value);
                 }
-              }} // don't allow the severity to be unselected
+              }}
             >
               {Object.values(logTypes).map((item) => (
                 <ToggleGroupItem
@@ -435,128 +510,146 @@ function Logs() {
             <FaDownload className="text-secondary-foreground" />
             <div className="hidden text-primary md:block">Download</div>
           </Button>
-          <LogLevelFilterButton
+          <LogSettingsButton
             selectedLabels={filterSeverity}
             updateLabelFilter={setFilterSeverity}
+            logSettings={logSettings}
+            setLogSettings={setLogSettings}
           />
         </div>
       </div>
 
-      {initialScroll && !endVisible && (
-        <Button
-          className="absolute bottom-8 left-[50%] z-20 flex -translate-x-[50%] items-center gap-1 rounded-md p-2"
-          aria-label="Jump to bottom of logs"
-          onClick={() =>
-            contentRef.current?.scrollTo({
-              top: contentRef.current?.scrollHeight,
-              behavior: "smooth",
-            })
-          }
-        >
-          <MdVerticalAlignBottom />
-          Jump to Bottom
-        </Button>
-      )}
-
-      <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-sm sm:p-2">
-        <div className="grid grid-cols-5 *:px-2 *:py-3 *:text-sm *:text-primary/40 sm:grid-cols-8 md:grid-cols-12">
-          <div className="flex items-center p-1 capitalize">Type</div>
-          <div className="col-span-2 flex items-center sm:col-span-1">
-            Timestamp
+      <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-xs sm:p-1">
+        <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
+          <div className="col-span-3 lg:col-span-2">
+            <div className="flex w-full flex-row items-center">
+              <div className="ml-1 min-w-16 capitalize lg:min-w-20">Type</div>
+              <div className="mr-3">Timestamp</div>
+            </div>
           </div>
-          <div className="col-span-2 flex items-center">Tag</div>
-          <div className="col-span-5 flex items-center sm:col-span-4 md:col-span-8">
-            Message
+          <div
+            className={cn(
+              "flex items-center",
+              logService == "frigate" ? "col-span-2" : "col-span-1",
+            )}
+          >
+            Tag
+          </div>
+          <div
+            className={cn(
+              "col-span-5 flex items-center",
+              logService == "frigate"
+                ? "md:col-span-7 lg:col-span-8"
+                : "md:col-span-8 lg:col-span-9",
+            )}
+          >
+            <div className="flex flex-1">Message</div>
           </div>
         </div>
-        <div
-          ref={contentRef}
-          className="no-scrollbar flex w-full flex-col overflow-y-auto overscroll-contain"
-        >
-          {logLines.length > 0 &&
-            [...Array(logRange.end).keys()].map((idx) => {
-              const logLine =
-                idx >= logRange.start
-                  ? logLines[idx - logRange.start]
-                  : undefined;
 
-              if (logLine) {
-                const line = logLines[idx - logRange.start];
-                if (filterSeverity && !filterSeverity.includes(line.severity)) {
-                  return (
-                    <div
-                      ref={idx == logRange.start + 10 ? startLogRef : undefined}
-                    />
-                  );
-                }
-
-                return (
-                  <LogLineData
-                    key={`${idx}-${logService}`}
-                    startRef={
-                      idx == logRange.start + 10 ? startLogRef : undefined
+        <div ref={lazyLogWrapperRef} className="size-full">
+          {isLoading ? (
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          ) : (
+            <EnhancedScrollFollow
+              startFollowing={!isLoading}
+              onCustomScroll={handleScroll}
+              render={({ follow, onScroll }) => (
+                <>
+                  {follow && !logSettings.disableStreaming && (
+                    <div className="absolute right-1 top-3">
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Logs are streaming from the server
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  )}
+                  <LazyLog
+                    ref={lazyLogRef}
+                    enableLineNumbers={false}
+                    selectableLines
+                    lineClassName="text-primary bg-background"
+                    highlightLineClassName="bg-primary/20"
+                    onRowClick={handleRowClick}
+                    formatPart={formatPart}
+                    text={logs.join("\n")}
+                    follow={follow}
+                    onScroll={onScroll}
+                    loadingComponent={
+                      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
                     }
-                    className={initialScroll ? "" : "invisible"}
-                    line={line}
-                    onClickSeverity={() => setFilterSeverity([line.severity])}
-                    onSelect={() => setSelectedLog(line)}
+                    loading={isLoading}
                   />
-                );
-              }
-
-              return (
-                <div
-                  key={`${idx}-${logService}`}
-                  className={isDesktop ? "h-12" : "h-16"}
-                />
-              );
-            })}
-          {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
+                </>
+              )}
+            />
+          )}
         </div>
-        {logLines.length == 0 && (
-          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-        )}
       </div>
     </div>
   );
 }
 
 type LogLineDataProps = {
-  startRef?: (node: HTMLDivElement | null) => void;
-  className: string;
+  className?: string;
   line: LogLine;
+  logService: string;
   onClickSeverity: () => void;
   onSelect: () => void;
 };
+
 function LogLineData({
-  startRef,
   className,
   line,
+  logService,
   onClickSeverity,
   onSelect,
 }: LogLineDataProps) {
   return (
     <div
-      ref={startRef}
       className={cn(
-        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-2 hover:bg-muted sm:grid-cols-8 md:grid-cols-12",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary bg-background_alt py-1 hover:bg-muted md:grid-cols-12 md:py-0",
         className,
-        "*:text-sm",
+        "text-xs lg:text-sm/5",
       )}
       onClick={onSelect}
     >
-      <div className="log-severity flex h-full items-center gap-2 p-1">
-        <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
+      <div className="col-span-3 flex h-full items-center gap-2 lg:col-span-2">
+        <div className="flex w-full flex-row items-center">
+          <div className="log-severity p-1">
+            <LogChip
+              severity={line.severity}
+              onClickSeverity={onClickSeverity}
+            />
+          </div>
+          <div className="log-timestamp whitespace-normal">
+            {line.dateStamp}
+          </div>
+        </div>
       </div>
-      <div className="log-timestamp col-span-2 flex h-full items-center sm:col-span-1">
-        {line.dateStamp}
-      </div>
-      <div className="log-section col-span-2 flex size-full items-center pr-2">
+
+      <div
+        className={cn(
+          "log-section flex size-full items-center pr-2",
+          logService == "frigate" ? "col-span-2" : "col-span-1",
+        )}
+      >
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.section}
         </div>
       </div>
-      <div className="log-content col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
+      <div
+        className={cn(
+          "log-content col-span-5 flex size-full items-center justify-between px-2 md:px-0 md:pr-2",
+          logService == "frigate"
+            ? "md:col-span-7 lg:col-span-8"
+            : "md:col-span-8 lg:col-span-9",
+        )}
+      >
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.content}
         </div>
