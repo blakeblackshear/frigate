@@ -48,7 +48,11 @@ from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
-from frigate.util.image import SharedMemoryFrameManager, calculate_region
+from frigate.util.image import (
+    SharedMemoryFrameManager,
+    calculate_region,
+    ensure_jpeg_bytes,
+)
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
@@ -374,6 +378,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         num_thumbnails = len(self.tracked_events.get(event.id, []))
 
+        # ensure we have a jpeg to pass to the model
+        thumbnail = ensure_jpeg_bytes(thumbnail)
+
         embed_image = (
             [snapshot_image]
             if event.has_snapshot and camera_config.genai.use_snapshot
@@ -502,6 +509,9 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         thumbnail = get_event_thumbnail_bytes(event)
+
+        # ensure we have a jpeg to pass to the model
+        thumbnail = ensure_jpeg_bytes(thumbnail)
 
         logger.debug(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"
