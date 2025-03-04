@@ -5,7 +5,7 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
-Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle, or can optionally be sent earlier after a number of significantly changed frames, for example in use in more real-time notifications. Descriptions can also be regenerated manually via the Frigate UI.
+Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle, or can optionally be sent earlier after a number of significantly changed frames, for example in use in more real-time notifications. Descriptions can also be regenerated manually via the Frigate UI. Note that if you are manually entering a description for events prior to the event completing, this will be overwritten by the generated response.
 
 ## Configuration
 
