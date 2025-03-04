@@ -975,3 +975,22 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
         [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]
     )
     return cv2.normalize(hist, hist).flatten()
+
+
+def ensure_jpeg_bytes(image_data):
+    """Ensure image data is jpeg bytes for genai"""
+    try:
+        img_array = np.frombuffer(image_data, dtype=np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+        if img is None:
+            return image_data
+
+        success, encoded_img = cv2.imencode(".jpg", img)
+
+        if success:
+            return encoded_img.tobytes()
+    except Exception as e:
+        logger.warning(f"Error when converting thumbnail to jpeg for genai: {e}")
+
+    return image_data
