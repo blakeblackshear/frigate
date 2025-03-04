@@ -238,8 +238,6 @@ class EmbeddingMaintainer(threading.Thread):
             self.tracked_events[data["id"]].append(data)
 
         # check if we're configured to send an early request after a minimum number of updates received
-        # we don't check required zones here - probably should, but does that run the risk in this simple logic
-        # that the object doesn't get into the required zones until later in the event?
         if (
             self.genai_client is not None
             and camera_config.genai.send_triggers.after_significant_updates
@@ -255,6 +253,10 @@ class EmbeddingMaintainer(threading.Thread):
                     if (
                         not camera_config.genai.objects
                         or event.label in camera_config.genai.objects
+                    ) and (
+                        not camera_config.genai.required_zones
+                        or set(data["entered_zones"])
+                        & set(camera_config.genai.required_zones)
                     ):
                         logger.debug(f"{camera} sending early request to GenAI")
 
