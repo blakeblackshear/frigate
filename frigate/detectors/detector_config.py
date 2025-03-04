@@ -38,6 +38,7 @@ class ModelTypeEnum(str, Enum):
     yolov9 = "yolov9"
     yolonas = "yolonas"
     dfine = "dfine"
+    hailoyolo = "hailo-yolo"
 
 
 class ModelConfig(BaseModel):

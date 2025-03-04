@@ -12,7 +12,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
-- [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 
 **AMD**
 
@@ -129,14 +129,56 @@ detectors:
     type: edgetpu
     device: pci
 ```
+---
 
-## Hailo-8l
 
-This detector is available for use with Hailo-8 AI Acceleration Module.
+## Hailo-8
 
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
+
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the Hailo hardware.
 
 ### Configuration
+
+When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.  
+If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
+
+#### YOLO 
+
+Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
+- **Hailo-8 hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
+- **Hailo-8L hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: hailo-yolo
+  # The detector automatically selects the default model based on your hardware:
+  # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
+  # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
+  #
+  # Optionally, you can specify a local model path to override the default.
+  # If a local path is provided and the file exists, it will be used instead of downloading.
+  # Example:
+  # path: /config/model_cache/hailo/yolov6n.hef
+  #
+  # You can also override using a custom URL:
+  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/ssd_mobilenet_v2.hef
+  # just make sure to give it the write configuration based on the model
+```
+
+#### SSD
+
+For SSD-based models, provide either a model path or URL to your compiled SSD model. The integration will first check the local path before downloading if necessary.
 
 ```yaml
 detectors:
@@ -148,10 +190,49 @@ model:
   width: 300
   height: 300
   input_tensor: nhwc
-  input_pixel_format: bgr
+  input_pixel_format: rgb
   model_type: ssd
-  path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+  # Specify the local model path (if available) or URL for SSD MobileNet v1.
+  # Example with a local path:
+  # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+  #
+  # Or override using a custom URL:
+  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
 ```
+
+#### Custom Models
+
+The Hailo detector supports all YOLO models compiled for Hailo hardware that include post-processing. You can specify a custom URL or a local path to download or use your model directly. If both are provided, the detector checks the local path first.
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+    # Optional: Specify a local model path.
+    # path: /config/model_cache/hailo/custom_model.hef
+    #
+    # Alternatively, or as a fallback, provide a custom URL:
+    # url: https://custom-model-url.com/path/to/model.hef
+
+model:
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: hailo-yolo
+```
+For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
+
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
+
+> **Note:**  
+> If both a model **path** and **URL** are provided, the detector will first check the local model path. If the file is not found, it will download the model from the URL.
+
+---
+
+
 
 ## OpenVINO Detector
 

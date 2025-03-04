@@ -1,8 +1,13 @@
 import logging
 import os
+import subprocess
 import urllib.request
-
 import numpy as np
+import queue
+import threading
+from functools import partial
+from typing import Dict, Optional, List, Tuple
+import cv2
 
 try:
     from hailo_platform import (
@@ -11,10 +16,10 @@ try:
         FormatType,
         HailoRTException,
         HailoStreamInterface,
-        InferVStreams,
         InputVStreamParams,
         OutputVStreamParams,
         VDevice,
+        HailoSchedulingAlgorithm,
     )
 except ModuleNotFoundError:
     pass
@@ -24,263 +29,394 @@ from typing_extensions import Literal
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum, InputTensorEnum, PixelFormatEnum, InputDTypeEnum
+from PIL import Image, ImageDraw, ImageFont
 
-# Set up logging
 logger = logging.getLogger(__name__)
 
-# Define the detector key for Hailo
-DETECTOR_KEY = "hailo8l"
+
+# ----------------- Inline Utility Functions ----------------- #
 
 
-# Configuration class for model settings
-class ModelConfig(BaseModel):
-    path: str = Field(default=None, title="Model Path")  # Path to the HEF file
+def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarray:
+    """
+    Resize a NumPy array image with unchanged aspect ratio using padding.
+    Optimized for the case where the image is 320x320 and the target is 640x640.
+    Assumes the input image is of shape (H, W, 3).
+    """
+    # Remove batch dimension if present (assumes batch size of 1)
+    if image.ndim == 4 and image.shape[0] == 1:
+        image = image[0]
+
+    h, w = image.shape[:2]
+
+    # Fast path: if image is 320x320 and target is 640x640, simply double the size quickly.
+    if (w, h) == (320, 320) and (model_w, model_h) == (640, 640):
+        return cv2.resize(image, (model_w, model_h), interpolation=cv2.INTER_LINEAR)
+
+    # Standard processing: calculate scaling factor to maintain aspect ratio.
+    scale = min(model_w / w, model_h / h)
+    new_w, new_h = int(w * scale), int(h * scale)
+
+    # Resize with high-quality bicubic interpolation
+    resized_image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+
+    # Create a new image with the target size filled with the padding color 114
+    padded_image = np.full((model_h, model_w, 3), 114, dtype=image.dtype)
+
+    # Calculate the center position for the resized image
+    x_offset = (model_w - new_w) // 2
+    y_offset = (model_h - new_h) // 2
+    padded_image[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized_image
+
+    return padded_image
 
 
-# Configuration class for Hailo detector
-class HailoDetectorConfig(BaseDetectorConfig):
-    type: Literal[DETECTOR_KEY]  # Type of the detector
-    device: str = Field(default="PCIe", title="Device Type")  # Device type (e.g., PCIe)
 
-
-# Hailo detector class implementation
-class HailoDetector(DetectionApi):
-    type_key = DETECTOR_KEY  # Set the type key to the Hailo detector key
-
-    def __init__(self, detector_config: HailoDetectorConfig):
-        # Initialize device type and model path from the configuration
-        self.h8l_device_type = detector_config.device
-        self.h8l_model_path = detector_config.model.path
-        self.h8l_model_height = detector_config.model.height
-        self.h8l_model_width = detector_config.model.width
-        self.h8l_model_type = detector_config.model.model_type
-        self.h8l_tensor_format = detector_config.model.input_tensor
-        self.h8l_pixel_format = detector_config.model.input_pixel_format
-        self.model_url = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.11.0/hailo8l/ssd_mobilenet_v1.hef"
-        self.cache_dir = os.path.join(MODEL_CACHE_DIR, "h8l_cache")
-        self.expected_model_filename = "ssd_mobilenet_v1.hef"
-        output_type = "FLOAT32"
-
-        logger.info(f"Initializing Hailo device as {self.h8l_device_type}")
-        self.check_and_prepare_model()
-        try:
-            # Validate device type
-            if self.h8l_device_type not in ["PCIe", "M.2"]:
-                raise ValueError(f"Unsupported device type: {self.h8l_device_type}")
-
-            # Initialize the Hailo device
-            self.target = VDevice()
-            # Load the HEF (Hailo's binary format for neural networks)
-            self.hef = HEF(self.h8l_model_path)
-            # Create configuration parameters from the HEF
-            self.configure_params = ConfigureParams.create_from_hef(
-                hef=self.hef, interface=HailoStreamInterface.PCIe
-            )
-            # Configure the device with the HEF
-            self.network_groups = self.target.configure(self.hef, self.configure_params)
-            self.network_group = self.network_groups[0]
-            self.network_group_params = self.network_group.create_params()
-
-            # Create input and output virtual stream parameters
-            self.input_vstream_params = InputVStreamParams.make(
-                self.network_group,
-                format_type=self.hef.get_input_vstream_infos()[0].format.type,
-            )
-            self.output_vstream_params = OutputVStreamParams.make(
-                self.network_group, format_type=getattr(FormatType, output_type)
-            )
-
-            # Get input and output stream information from the HEF
-            self.input_vstream_info = self.hef.get_input_vstream_infos()
-            self.output_vstream_info = self.hef.get_output_vstream_infos()
-
-            logger.info("Hailo device initialized successfully")
-            logger.debug(f"[__init__] Model Path: {self.h8l_model_path}")
-            logger.debug(f"[__init__] Input Tensor Format: {self.h8l_tensor_format}")
-            logger.debug(f"[__init__] Input Pixel Format: {self.h8l_pixel_format}")
-            logger.debug(f"[__init__] Input VStream Info: {self.input_vstream_info[0]}")
-            logger.debug(
-                f"[__init__] Output VStream Info: {self.output_vstream_info[0]}"
-            )
-        except HailoRTException as e:
-            logger.error(f"HailoRTException during initialization: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Failed to initialize Hailo device: {e}")
-            raise
-
-    def check_and_prepare_model(self):
-        # Ensure cache directory exists
-        if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
-
-        # Check for the expected model file
-        model_file_path = os.path.join(self.cache_dir, self.expected_model_filename)
-        if not os.path.isfile(model_file_path):
-            logger.info(
-                f"A model file was not found at {model_file_path}, Downloading one from {self.model_url}."
-            )
-            urllib.request.urlretrieve(self.model_url, model_file_path)
-            logger.info(f"A model file was downloaded to {model_file_path}.")
-        else:
-            logger.info(
-                f"A model file already exists at {model_file_path} not downloading one."
-            )
-
-    def detect_raw(self, tensor_input):
-        logger.debug("[detect_raw] Entering function")
-        logger.debug(
-            f"[detect_raw] The `tensor_input` = {tensor_input} tensor_input shape = {tensor_input.shape}"
-        )
-
-        if tensor_input is None:
-            raise ValueError(
-                "[detect_raw] The 'tensor_input' argument must be provided"
-            )
-
-        # Ensure tensor_input is a numpy array
-        if isinstance(tensor_input, list):
-            tensor_input = np.array(tensor_input)
-            logger.debug(
-                f"[detect_raw] Converted tensor_input to numpy array: shape {tensor_input.shape}"
-            )
-
-        input_data = tensor_input
-        logger.debug(
-            f"[detect_raw] Input data for inference shape: {tensor_input.shape}, dtype: {tensor_input.dtype}"
-        )
-
-        try:
-            with InferVStreams(
-                self.network_group,
-                self.input_vstream_params,
-                self.output_vstream_params,
-            ) as infer_pipeline:
-                input_dict = {}
-                if isinstance(input_data, dict):
-                    input_dict = input_data
-                    logger.debug("[detect_raw] it a dictionary.")
-                elif isinstance(input_data, (list, tuple)):
-                    for idx, layer_info in enumerate(self.input_vstream_info):
-                        input_dict[layer_info.name] = input_data[idx]
-                        logger.debug("[detect_raw] converted from list/tuple.")
-                else:
-                    if len(input_data.shape) == 3:
-                        input_data = np.expand_dims(input_data, axis=0)
-                        logger.debug("[detect_raw] converted from an array.")
-                    input_dict[self.input_vstream_info[0].name] = input_data
-
-                logger.debug(
-                    f"[detect_raw] Input dictionary for inference keys: {input_dict.keys()}"
-                )
-
-                with self.network_group.activate(self.network_group_params):
-                    raw_output = infer_pipeline.infer(input_dict)
-                    logger.debug(f"[detect_raw] Raw inference output: {raw_output}")
-
-                    if self.output_vstream_info[0].name not in raw_output:
-                        logger.error(
-                            f"[detect_raw] Missing output stream {self.output_vstream_info[0].name} in inference results"
-                        )
-                        return np.zeros((20, 6), np.float32)
-
-                    raw_output = raw_output[self.output_vstream_info[0].name][0]
-                    logger.debug(
-                        f"[detect_raw] Raw output for stream {self.output_vstream_info[0].name}: {raw_output}"
-                    )
-
-            # Process the raw output
-            detections = self.process_detections(raw_output)
-            if len(detections) == 0:
-                logger.debug(
-                    "[detect_raw] No detections found after processing. Setting default values."
-                )
-                return np.zeros((20, 6), np.float32)
-            else:
-                formatted_detections = detections
-                if (
-                    formatted_detections.shape[1] != 6
-                ):  # Ensure the formatted detections have 6 columns
-                    logger.error(
-                        f"[detect_raw] Unexpected shape for formatted detections: {formatted_detections.shape}. Expected (20, 6)."
-                    )
-                    return np.zeros((20, 6), np.float32)
-                return formatted_detections
-        except HailoRTException as e:
-            logger.error(f"[detect_raw] HailoRTException during inference: {e}")
-            return np.zeros((20, 6), np.float32)
-        except Exception as e:
-            logger.error(f"[detect_raw] Exception during inference: {e}")
-            return np.zeros((20, 6), np.float32)
-        finally:
-            logger.debug("[detect_raw] Exiting function")
-
-    def process_detections(self, raw_detections, threshold=0.5):
-        boxes, scores, classes = [], [], []
-        num_detections = 0
-
-        logger.debug(f"[process_detections] Raw detections: {raw_detections}")
-
-        for i, detection_set in enumerate(raw_detections):
-            if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
-                logger.debug(
-                    f"[process_detections] Detection set {i} is empty or not an array, skipping."
-                )
-                continue
-
-            logger.debug(
-                f"[process_detections] Detection set {i} shape: {detection_set.shape}"
-            )
-
-            for detection in detection_set:
-                if detection.shape[0] == 0:
-                    logger.debug(
-                        f"[process_detections] Detection in set {i} is empty, skipping."
-                    )
-                    continue
-
-                ymin, xmin, ymax, xmax = detection[:4]
-                score = np.clip(detection[4], 0, 1)  # Use np.clip for clarity
-
-                if score < threshold:
-                    logger.debug(
-                        f"[process_detections] Detection in set {i} has a score {score} below threshold {threshold}. Skipping."
-                    )
-                    continue
-
-                logger.debug(
-                    f"[process_detections] Adding detection with coordinates: ({xmin}, {ymin}), ({xmax}, {ymax}) and score: {score}"
-                )
-                boxes.append([ymin, xmin, ymax, xmax])
+def extract_detections(input_data: list, threshold: float = 0.5) -> dict:
+    """
+    (Legacy extraction function; not used by detect_raw below.)
+    Extract detections from raw inference output.
+    """
+    boxes, scores, classes = [], [], []
+    num_detections = 0
+    for i, detection in enumerate(input_data):
+        if len(detection) == 0:
+            continue
+        for det in detection:
+            bbox, score = det[:4], det[4]
+            if score >= threshold:
+                boxes.append(bbox)
                 scores.append(score)
                 classes.append(i)
                 num_detections += 1
+    return {
+        'detection_boxes': boxes,
+        'detection_classes': classes,
+        'detection_scores': scores,
+        'num_detections': num_detections
+    }
+# ----------------- End of Utility Functions ----------------- #
 
-        logger.debug(
-            f"[process_detections] Boxes: {boxes}, Scores: {scores}, Classes: {classes}, Num detections: {num_detections}"
-        )
+# Global constants and default URLs
+DETECTOR_KEY = "hailo8l"
+ARCH = None
+H8_DEFAULT_MODEL = "yolov6n.hef"
+H8L_DEFAULT_MODEL = "yolov6n.hef"
+H8_DEFAULT_URL = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef"
+H8L_DEFAULT_URL = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov6n.hef"
 
-        if num_detections == 0:
-            logger.debug("[process_detections] No valid detections found.")
-            return np.zeros((20, 6), np.float32)
+def detect_hailo_arch():
+    try:
+        result = subprocess.run(['hailortcli', 'fw-control', 'identify'], capture_output=True, text=True)
+        if result.returncode != 0:
+            logger.error(f"Inference error: {result.stderr}")
+            return None
+        for line in result.stdout.split('\n'):
+            if "Device Architecture" in line:
+                if "HAILO8L" in line:
+                    return "hailo8l"
+                elif "HAILO8" in line:
+                    return "hailo8"
+        logger.error(f"Inference error: Could not determine Hailo architecture from device information.")
+        return None
+    except Exception as e:
+        logger.error(f"Inference error: {e}")
+        return None
 
-        combined = np.hstack(
-            (
-                np.array(classes)[:, np.newaxis],
-                np.array(scores)[:, np.newaxis],
-                np.array(boxes),
+# ----------------- Inline Asynchronous Inference Class ----------------- #
+class HailoAsyncInference:
+    def __init__(
+        self,
+        hef_path: str,
+        input_queue: queue.Queue,
+        output_queue: queue.Queue,
+        batch_size: int = 1,
+        input_type: Optional[str] = None,
+        output_type: Optional[Dict[str, str]] = None,
+        send_original_frame: bool = False,
+    ) -> None:
+        self.input_queue = input_queue
+        self.output_queue = output_queue
+
+        # Create VDevice parameters with round-robin scheduling
+        params = VDevice.create_params()
+        params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
+
+        # Load HEF and create the infer model
+        self.hef = HEF(hef_path)
+        self.target = VDevice(params)
+        self.infer_model = self.target.create_infer_model(hef_path)
+        self.infer_model.set_batch_size(batch_size)
+        if input_type is not None:
+            self._set_input_type(input_type)
+        if output_type is not None:
+            self._set_output_type(output_type)
+        self.output_type = output_type
+        self.send_original_frame = send_original_frame
+
+    def _set_input_type(self, input_type: Optional[str] = None) -> None:
+        self.infer_model.input().set_format_type(getattr(FormatType, input_type))
+
+    def _set_output_type(self, output_type_dict: Optional[Dict[str, str]] = None) -> None:
+        for output_name, output_type in output_type_dict.items():
+            self.infer_model.output(output_name).set_format_type(getattr(FormatType, output_type))
+
+    def callback(self, completion_info, bindings_list: List, input_batch: List):
+        if completion_info.exception:
+            logging.error(f"Inference error: {completion_info.exception}")
+        else:
+            for i, bindings in enumerate(bindings_list):
+                if len(bindings._output_names) == 1:
+                    result = bindings.output().get_buffer()
+                else:
+                    result = {
+                        name: np.expand_dims(bindings.output(name).get_buffer(), axis=0)
+                        for name in bindings._output_names
+                    }
+                self.output_queue.put((input_batch[i], result))
+
+    def _create_bindings(self, configured_infer_model) -> object:
+        if self.output_type is None:
+            output_buffers = {
+                output_info.name: np.empty(
+                    self.infer_model.output(output_info.name).shape,
+                    dtype=getattr(np, str(output_info.format.type).split(".")[1].lower())
+                )
+                for output_info in self.hef.get_output_vstream_infos()
+            }
+        else:
+            output_buffers = {
+                name: np.empty(
+                    self.infer_model.output(name).shape,
+                    dtype=getattr(np, self.output_type[name].lower())
+                )
+                for name in self.output_type
+            }
+        return configured_infer_model.create_bindings(output_buffers=output_buffers)
+
+    def get_input_shape(self) -> Tuple[int, ...]:
+        return self.hef.get_input_vstream_infos()[0].shape
+
+    def run(self) -> None:
+        # Configure the infer model once and reuse vstream settings via run_async
+        with self.infer_model.configure() as configured_infer_model:
+            while True:
+                batch_data = self.input_queue.get()
+                if batch_data is None:
+                    break  # Sentinel to exit loop
+                if self.send_original_frame:
+                    original_batch, preprocessed_batch = batch_data
+                else:
+                    preprocessed_batch = batch_data
+                bindings_list = []
+                for frame in preprocessed_batch:
+                    bindings = self._create_bindings(configured_infer_model)
+                    bindings.input().set_buffer(np.array(frame))
+                    bindings_list.append(bindings)
+                configured_infer_model.wait_for_async_ready(timeout_ms=10000)
+                job = configured_infer_model.run_async(
+                    bindings_list,
+                    partial(
+                        self.callback,
+                        input_batch=original_batch if self.send_original_frame else preprocessed_batch,
+                        bindings_list=bindings_list,
+                    )
+                )
+            job.wait(10000)  # Wait for the last job to complete
+# ----------------- End of Async Class ----------------- #
+
+# ----------------- HailoDetector Class ----------------- #
+class HailoDetector(DetectionApi):
+    type_key = DETECTOR_KEY
+
+    def __init__(self, detector_config: 'HailoDetectorConfig'):
+        global ARCH
+        ARCH = detect_hailo_arch()
+        self.cache_dir = MODEL_CACHE_DIR
+        self.device_type = detector_config.device
+        # Model attributes should be provided in detector_config.model
+        self.model_path = detector_config.model.path if hasattr(detector_config.model, "path") else None
+        self.model_height = detector_config.model.height if hasattr(detector_config.model, "height") else None
+        self.model_width = detector_config.model.width if hasattr(detector_config.model, "width") else None
+        self.model_type = detector_config.model.model_type if hasattr(detector_config.model, "model_type") else None
+        self.tensor_format = detector_config.model.input_tensor if hasattr(detector_config.model, "input_tensor") else None
+        self.pixel_format = detector_config.model.input_pixel_format if hasattr(detector_config.model, "input_pixel_format") else None
+        self.input_dtype = detector_config.model.input_dtype if hasattr(detector_config.model, "input_dtype") else None
+        self.url = detector_config.url
+        self.output_type = "FLOAT32"
+        self.working_model_path = self.check_and_prepare()
+
+        # Set up asynchronous inference
+        self.batch_size = 1
+        self.input_queue = queue.Queue()
+        self.output_queue = queue.Queue()
+        try:
+            logging.debug(f"[INIT] Loading HEF model from {self.working_model_path}")
+            self.inference_engine = HailoAsyncInference(
+                self.working_model_path,
+                self.input_queue,
+                self.output_queue,
+                self.batch_size
             )
-        )
+            self.input_shape = self.inference_engine.get_input_shape()
+            logging.debug(f"[INIT] Model input shape: {self.input_shape}")
+        except Exception as e:
+            logging.error(f"[INIT] Failed to initialize HailoAsyncInference: {e}")
+            raise
 
-        if combined.shape[0] < 20:
-            padding = np.zeros(
-                (20 - combined.shape[0], combined.shape[1]), dtype=combined.dtype
-            )
-            combined = np.vstack((combined, padding))
+    @staticmethod
+    def extract_model_name(path: str = None, url: str = None) -> str:
+        model_name = None
+        if path and path.endswith(".hef"):
+            model_name = os.path.basename(path)
+        elif url and url.endswith(".hef"):
+            model_name = os.path.basename(url)
+        else:
+            print("Model name not found in path or URL. Checking default settings...")
+            if ARCH == "hailo8":
+                model_name = H8_DEFAULT_MODEL
+            else:
+                model_name = H8L_DEFAULT_MODEL
+            print(f"Using default model: {model_name}")
+        return model_name
 
-        logger.debug(
-            f"[process_detections] Combined detections (padded to 20 if necessary): {np.array_str(combined, precision=4, suppress_small=True)}"
-        )
+    @staticmethod
+    def download_model(url: str, destination: str):
+        if not url.endswith(".hef"):
+            raise ValueError("Invalid model URL. Only .hef files are supported.")
+        try:
+            urllib.request.urlretrieve(url, destination)
+            print(f"Downloaded model to {destination}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model from {url}: {str(e)}")
 
-        return combined[:20, :6]
+    def check_and_prepare(self) -> str:
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+        model_name = self.extract_model_name(self.model_path, self.url)
+        model_path = os.path.join(self.cache_dir, model_name)
+        if not self.model_path and not self.url:
+            if os.path.exists(model_path):
+                print(f"Model found in cache: {model_path}")
+                return model_path
+            else:
+                print(f"Downloading default model: {model_name}")
+                if ARCH == "hailo8":
+                    self.download_model(H8_DEFAULT_URL, model_path)
+                else:
+                    self.download_model(H8L_DEFAULT_URL, model_path)
+        elif self.model_path and self.url:
+            if os.path.exists(self.model_path):
+                print(f"Model found at path: {self.model_path}")
+                return self.model_path
+            else:
+                print(f"Model not found at path. Downloading from URL: {self.url}")
+                self.download_model(self.url, model_path)
+        elif self.url:
+            print(f"Downloading model from URL: {self.url}")
+            self.download_model(self.url, model_path)
+        elif self.model_path:
+            if os.path.exists(self.model_path):
+                print(f"Using existing model at: {self.model_path}")
+                return self.model_path
+            else:
+                raise FileNotFoundError(f"Model file not found at: {self.model_path}")
+        return model_path
+
+    def detect_raw(self, tensor_input):
+        logging.debug("[DETECT_RAW] Starting detection")
+
+        # Pre process the input tensor
+        logger.debug(f"[DETECT_RAW] Starting pre processing")
+        tensor_input = self.preprocess(tensor_input)
+
+        # Ensure tensor_input has a batch dimension
+        if isinstance(tensor_input, np.ndarray) and len(tensor_input.shape) == 3:
+            tensor_input = np.expand_dims(tensor_input, axis=0)
+            logging.debug(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
+
+        # Enqueue input and a sentinel value
+        self.input_queue.put(tensor_input)
+        self.input_queue.put(None)  # Sentinel value
+
+        # Run the inference engine
+        self.inference_engine.run()
+        result = self.output_queue.get()
+        if result is None:
+            logging.error("[DETECT_RAW] No inference result received")
+            return np.zeros((20, 6), dtype=np.float32)
+
+        original_input, infer_results = result
+        logging.debug("[DETECT_RAW] Inference completed.")
+
+        # If infer_results is a single-element list, unwrap it.
+        if isinstance(infer_results, list) and len(infer_results) == 1:
+            infer_results = infer_results[0]
+
+        # Set your threshold (adjust as needed)
+        threshold = 0.4
+        all_detections = []
+
+    # Use the outer loop index to determine the class
+        for class_id, detection_set in enumerate(infer_results):
+            if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
+                continue
+
+            logging.debug(f"[DETECT_RAW] Processing detection set {class_id} with shape {detection_set.shape}")
+            for det in detection_set:
+                # Expect at least 5 elements: [ymin, xmin, ymax, xmax, confidence]
+                if det.shape[0] < 5:
+                    continue
+                score = float(det[4])
+                if score < threshold:
+                    continue
+                if hasattr(self, "labels") and self.labels:
+                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id} -> {self.labels[class_id]}")
+                else:
+                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id}")
+
+                all_detections.append([class_id, score, det[0], det[1], det[2], det[3]])
+
+
+        if len(all_detections) == 0:
+            return np.zeros((20, 6), dtype=np.float32)
+
+        detections_array = np.array(all_detections, dtype=np.float32)
+
+        # Pad or truncate to exactly 20 rows
+        if detections_array.shape[0] > 20:
+            detections_array = detections_array[:20, :]
+        elif detections_array.shape[0] < 20:
+            pad = np.zeros((20 - detections_array.shape[0], 6), dtype=np.float32)
+            detections_array = np.vstack((detections_array, pad))
+
+
+        logging.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
+        return detections_array
+
+    # Preprocess method using inline utility
+    def preprocess(self, image):
+        if isinstance(image, np.ndarray):
+            # Process the tensor input and reintroduce the batch dimension.
+            processed = preprocess_tensor(image, self.input_shape[1], self.input_shape[0])
+            return np.expand_dims(processed, axis=0)
+        else:
+            raise ValueError("Unsupported image format for preprocessing")
+
+
+    # Close the Hailo device
+    def close(self):
+        logging.debug("[CLOSE] Closing HailoDetector")
+        try:
+            self.inference_engine.hef.close()
+            logging.debug("Hailo device closed successfully")
+        except Exception as e:
+            logging.error(f"Failed to close Hailo device: {e}")
+            raise
+
+# ----------------- Configuration Class ----------------- #
+class HailoDetectorConfig(BaseDetectorConfig):
+    type: Literal[DETECTOR_KEY]
+    device: str = Field(default="PCIe", title="Device Type")
+    url: Optional[str] = Field(default=None, title="Custom Model URL")
