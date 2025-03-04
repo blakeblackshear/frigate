@@ -813,6 +813,12 @@ cameras:
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
       required_zones: []
+      # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
+      send_triggers:
+        # Once the object is no longer tracked
+        tracked_object_end: True
+        # Optional: After X many significant updates are received (default: shown below)
+        after_significant_updates: None
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
       debug_save_thumbnails: False
 
