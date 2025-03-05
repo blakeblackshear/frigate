@@ -71,6 +71,7 @@ class Recordings(Model):  # type: ignore[misc]
     end_time = DateTimeField()
     duration = FloatField()
     motion = IntegerField(null=True)
+    is_calibrating = BooleanField(default=False)
     objects = IntegerField(null=True)
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB

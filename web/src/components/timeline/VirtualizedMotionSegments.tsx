@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import MotionSegment from "./MotionSegment";
 import { ReviewSegment, MotionData } from "@/types/review";
+import { MotionSegmentValue } from "@/hooks/use-motion-segment-utils";
 
 type VirtualizedMotionSegmentsProps = {
   timelineRef: React.RefObject<HTMLDivElement>;
@@ -23,7 +24,7 @@ type VirtualizedMotionSegmentsProps = {
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
   motionOnly: boolean;
-  getMotionSegmentValue: (timestamp: number) => number;
+  getMotionSegmentValue: (timestamp: number) => MotionSegmentValue;
 };
 
 export interface VirtualizedMotionSegmentsRef {
@@ -144,7 +145,8 @@ export const VirtualizedMotionSegments = forwardRef<
         );
 
         const segmentMotion =
-          firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
+          firstHalfMotionValue.totalMotion > 0 ||
+          secondHalfMotionValue.totalMotion > 0;
         const overlappingReviewItems = events.some(
           (item) =>
             (item.start_time >= motionStart && item.start_time < motionEnd) ||

@@ -4,6 +4,7 @@ import { ReviewSegment } from "@/types/review";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
+import { MotionSegmentValue } from "@/hooks/use-motion-segment-utils";
 import { isMobile } from "react-device-detect";
 import useTapUtils from "@/hooks/use-tap-utils";
 import { cn } from "@/lib/utils";
@@ -13,8 +14,8 @@ type MotionSegmentProps = {
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;
-  firstHalfMotionValue: number;
-  secondHalfMotionValue: number;
+  firstHalfMotionValue: MotionSegmentValue;
+  secondHalfMotionValue: MotionSegmentValue;
   motionOnly: boolean;
   showMinimap: boolean;
   minimapStartTime?: number;
@@ -77,12 +78,26 @@ export function MotionSegment({
   }, []);
 
   const firstHalfSegmentWidth = useMemo(() => {
-    return interpolateMotionAudioData(firstHalfMotionValue, maxSegmentWidth);
-  }, [maxSegmentWidth, firstHalfMotionValue, interpolateMotionAudioData]);
+    return interpolateMotionAudioData(
+      firstHalfMotionValue.totalMotion,
+      maxSegmentWidth,
+    );
+  }, [
+    maxSegmentWidth,
+    firstHalfMotionValue.totalMotion,
+    interpolateMotionAudioData,
+  ]);
 
   const secondHalfSegmentWidth = useMemo(() => {
-    return interpolateMotionAudioData(secondHalfMotionValue, maxSegmentWidth);
-  }, [maxSegmentWidth, secondHalfMotionValue, interpolateMotionAudioData]);
+    return interpolateMotionAudioData(
+      secondHalfMotionValue.totalMotion,
+      maxSegmentWidth,
+    );
+  }, [
+    maxSegmentWidth,
+    secondHalfMotionValue.totalMotion,
+    interpolateMotionAudioData,
+  ]);
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
@@ -222,6 +237,9 @@ export function MotionSegment({
                     secondHalfSegmentWidth
                       ? "bg-motion_review"
                       : "bg-muted-foreground",
+                    secondHalfSegmentWidth && secondHalfMotionValue.isCalibrating
+                      ? "bg-motion_review_is_calibrating"
+                      : "",
                   )}
                   style={{
                     width: secondHalfSegmentWidth || 1,
@@ -241,6 +259,9 @@ export function MotionSegment({
                     firstHalfSegmentWidth
                       ? "bg-motion_review"
                       : "bg-muted-foreground",
+                    firstHalfSegmentWidth && firstHalfMotionValue.isCalibrating
+                      ? "bg-motion_review_is_calibrating"
+                      : "",
                   )}
                   style={{
                     width: firstHalfSegmentWidth || 1,

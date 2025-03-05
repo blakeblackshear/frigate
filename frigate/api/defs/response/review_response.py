@@ -40,4 +40,5 @@ class ReviewSummaryResponse(BaseModel):
 class ReviewActivityMotionResponse(BaseModel):
     start_time: int
     motion: float
+    is_calibrating: bool
     camera: str

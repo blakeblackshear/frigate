@@ -57,6 +57,7 @@ export type RecordingsSummary = {
 export type MotionData = {
   start_time: number;
   motion?: number;
+  is_calibrating?: boolean;
   audio?: number;
   camera: string;
 };

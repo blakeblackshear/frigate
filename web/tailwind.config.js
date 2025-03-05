@@ -102,6 +102,9 @@ module.exports = {
           DEFAULT: "hsl(var(--motion_review))",
           dimmed: "hsl(var(--motion_review_dimmed))",
         },
+        motion_review_is_calibrating: {
+          DEFAULT: "hsl(var(--motion_review_is_calibrating))",
+        },
         audio_review: {
           DEFAULT: "hsl(var(--audio_review))",
         },

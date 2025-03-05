@@ -121,7 +121,7 @@ export function MotionReviewTimeline({
         );
 
         const segmentMotion =
-          firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
+          firstHalfMotionValue.totalMotion > 0 || secondHalfMotionValue.totalMotion > 0;
         if (segmentMotion && !overlappingReviewItems) {
           segments.push(segmentTime);
         }

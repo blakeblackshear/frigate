@@ -93,6 +93,7 @@ def output_frames(
             current_tracked_objects,
             motion_boxes,
             _,
+            _,
         ) = data
 
         frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
@@ -168,6 +169,7 @@ def output_frames(
             current_tracked_objects,
             motion_boxes,
             regions,
+            _,
         ) = data
 
         frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
