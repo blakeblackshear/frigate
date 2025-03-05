@@ -237,7 +237,8 @@ export function MotionSegment({
                     secondHalfSegmentWidth
                       ? "bg-motion_review"
                       : "bg-muted-foreground",
-                    secondHalfSegmentWidth && secondHalfMotionValue.isCalibrating
+                    secondHalfSegmentWidth &&
+                      secondHalfMotionValue.isCalibrating
                       ? "bg-motion_review_is_calibrating"
                       : "",
                   )}
