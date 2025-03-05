@@ -23,7 +23,7 @@ from frigate.ffmpeg_presets import (
 )
 from frigate.models import Previews
 from frigate.object_processing import TrackedObject
-from frigate.util.image import copy_yuv_to_position, get_yuv_crop
+from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +153,7 @@ class PreviewRecorder:
         self.config = config
         self.start_time = 0
         self.last_output_time = 0
+        self.offline = False
         self.output_frames = []
 
         if config.detect.width > config.detect.height:
@@ -308,6 +309,8 @@ class PreviewRecorder:
         frame_time: float,
         frame: np.ndarray,
     ) -> bool:
+        self.offline = False
+
         # check for updated record config
         _, updated_record_config = self.config_subscriber.check_for_update()
 
@@ -363,6 +366,15 @@ class PreviewRecorder:
             return False
 
     def flag_offline(self, frame_time: float) -> None:
+        if not self.offline:
+            self.write_frame_to_cache(
+                frame_time,
+                get_blank_yuv_frame(
+                    self.config.detect.width, self.config.detect.height
+                ),
+            )
+            self.offline = True
+
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
             if len(self.output_frames) == 0:

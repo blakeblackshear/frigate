@@ -41,22 +41,30 @@ def check_disabled_camera_update(
     has_enabled_camera = False
 
     for camera, last_update in write_times.items():
+        offline_time = now - last_update
+
         if config.cameras[camera].enabled:
             has_enabled_camera = True
+        else:
+            # flag camera as offline when it is disabled
+            previews[camera].flag_offline(now)
 
-        if now - last_update > 1:
-            # last camera update was more than one second ago
-            # need to send empty data to updaters because current
+        if offline_time > 1:
+            # last camera update was more than 1 second ago
+            # need to send empty data to birdseye because current
             # frame is now out of date
-            frame = get_blank_yuv_frame(
-                config.cameras[camera].detect.width,
-                config.cameras[camera].detect.height,
-            )
-
-            if birdseye:
-                birdseye.write_data(camera, [], [], now, frame)
-
-            previews[camera].write_data([], [], now, frame)
+            if birdseye and offline_time < 10:
+                # we only need to send blank frames to birdseye at the beginning of a camera being offline
+                birdseye.write_data(
+                    camera,
+                    [],
+                    [],
+                    now,
+                    get_blank_yuv_frame(
+                        config.cameras[camera].detect.width,
+                        config.cameras[camera].detect.height,
+                    ),
+                )
 
     if not has_enabled_camera and birdseye:
         birdseye.all_cameras_disabled()
@@ -170,6 +178,12 @@ def output_frames(
         else:
             failed_frame_requests[camera] = 0
 
+        # send frames for low fps recording
+        preview_recorders[camera].write_data(
+            current_tracked_objects, motion_boxes, frame_time, frame
+        )
+        preview_write_times[camera] = frame_time
+
         # send camera frame to ffmpeg process if websockets are connected
         if any(
             ws.environ["PATH_INFO"].endswith(camera) for ws in websocket_server.manager
@@ -193,11 +207,6 @@ def output_frames(
                 frame,
             )
 
-        # send frames for low fps recording
-        preview_recorders[camera].write_data(
-            current_tracked_objects, motion_boxes, frame_time, frame
-        )
-        preview_write_times[camera] = frame_time
         frame_manager.close(frame_name)
 
     move_preview_frames("clips")
