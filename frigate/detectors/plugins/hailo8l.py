@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 # ----------------- Inline Utility Functions ----------------- #
 
-
 def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarray:
     """
     Resize a NumPy array image with unchanged aspect ratio using padding.
@@ -70,7 +69,6 @@ def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarr
     padded_image[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized_image
 
     return padded_image
-
 
 
 def extract_detections(input_data: list, threshold: float = 0.5) -> dict:
@@ -260,12 +258,19 @@ class HailoDetector(DetectionApi):
             )
             self.input_shape = self.inference_engine.get_input_shape()
             logger.debug(f"[INIT] Model input shape: {self.input_shape}")
+            # Start the inference loop in a background thread
+            self.inference_thread = threading.Thread(target=self.inference_engine.run, daemon=True)
+            self.inference_thread.start()
         except Exception as e:
             logger.error(f"[INIT] Failed to initialize HailoAsyncInference: {e}")
             raise
 
-    
     def set_path_and_url(self, path: str = None):
+        if not path:
+            self.model_path = None
+            self.url = None
+            return
+
         if self.is_url(path):
             self.url = path
             self.model_path = None
@@ -275,7 +280,7 @@ class HailoDetector(DetectionApi):
 
     def is_url(self, url: str) -> bool:
         return url.startswith("http://") or url.startswith("https://") or url.startswith("www.")
-    
+
     @staticmethod
     def extract_model_name(path: str = None, url: str = None) -> str:
         model_name = None
@@ -338,7 +343,7 @@ class HailoDetector(DetectionApi):
     def detect_raw(self, tensor_input):
         logger.debug("[DETECT_RAW] Starting detection")
 
-        # Pre process the input tensor
+        # Preprocess the input tensor
         logger.debug(f"[DETECT_RAW] Starting pre processing")
         tensor_input = self.preprocess(tensor_input)
 
@@ -347,12 +352,10 @@ class HailoDetector(DetectionApi):
             tensor_input = np.expand_dims(tensor_input, axis=0)
             logger.debug(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
 
-        # Enqueue input and a sentinel value
+        # Enqueue input for asynchronous inference
         self.input_queue.put(tensor_input)
-        self.input_queue.put(None)  # Sentinel value
 
-        # Run the inference engine
-        self.inference_engine.run()
+        # Wait for inference result from the output queue
         result = self.output_queue.get()
         if result is None:
             logger.error("[DETECT_RAW] No inference result received")
@@ -369,26 +372,19 @@ class HailoDetector(DetectionApi):
         threshold = 0.4
         all_detections = []
 
-    # Use the outer loop index to determine the class
+        # Process each detection set
         for class_id, detection_set in enumerate(infer_results):
             if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
                 continue
 
             logger.debug(f"[DETECT_RAW] Processing detection set {class_id} with shape {detection_set.shape}")
             for det in detection_set:
-                # Expect at least 5 elements: [ymin, xmin, ymax, xmax, confidence]
                 if det.shape[0] < 5:
                     continue
                 score = float(det[4])
                 if score < threshold:
                     continue
-                if hasattr(self, "labels") and self.labels:
-                    logger.debug(f"[DETECT_RAW] Detected class id: {class_id} -> {self.labels[class_id]}")
-                else:
-                    logger.debug(f"[DETECT_RAW] Detected class id: {class_id}")
-
                 all_detections.append([class_id, score, det[0], det[1], det[2], det[3]])
-
 
         if len(all_detections) == 0:
             return np.zeros((20, 6), dtype=np.float32)
@@ -402,11 +398,9 @@ class HailoDetector(DetectionApi):
             pad = np.zeros((20 - detections_array.shape[0], 6), dtype=np.float32)
             detections_array = np.vstack((detections_array, pad))
 
-
         logger.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
         return detections_array
 
-    # Preprocess method using inline utility
     def preprocess(self, image):
         if isinstance(image, np.ndarray):
             # Process the tensor input and reintroduce the batch dimension.
@@ -415,8 +409,6 @@ class HailoDetector(DetectionApi):
         else:
             raise ValueError("Unsupported image format for preprocessing")
 
-
-    # Close the Hailo device
     def close(self):
         logger.debug("[CLOSE] Closing HailoDetector")
         try:
