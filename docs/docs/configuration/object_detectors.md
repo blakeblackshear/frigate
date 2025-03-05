@@ -156,12 +156,13 @@ detectors:
     device: PCIe
 
 model:
-  width: 640
-  height: 640
+  width: 320
+  height: 320
   input_tensor: nhwc
   input_pixel_format: rgb
   input_dtype: int
-  model_type: hailo-yolo
+  model_type: yolo-generic
+
   # The detector automatically selects the default model based on your hardware:
   # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
   # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
@@ -172,7 +173,7 @@ model:
   # path: /config/model_cache/hailo/yolov6n.hef
   #
   # You can also override using a custom URL:
-  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/ssd_mobilenet_v2.hef
+  # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef
   # just make sure to give it the write configuration based on the model
 ```
 
@@ -197,7 +198,7 @@ model:
   # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
   #
   # Or override using a custom URL:
-  # url: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
+  # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
 ```
 
 #### Custom Models
@@ -209,11 +210,6 @@ detectors:
   hailo8l:
     type: hailo8l
     device: PCIe
-    # Optional: Specify a local model path.
-    # path: /config/model_cache/hailo/custom_model.hef
-    #
-    # Alternatively, or as a fallback, provide a custom URL:
-    # url: https://custom-model-url.com/path/to/model.hef
 
 model:
   width: 640
@@ -221,14 +217,19 @@ model:
   input_tensor: nhwc
   input_pixel_format: rgb
   input_dtype: int
-  model_type: hailo-yolo
+  model_type: yolo-generic
+  # Optional: Specify a local model path.
+  # path: /config/model_cache/hailo/custom_model.hef
+  #
+  # Alternatively, or as a fallback, provide a custom URL:
+  # path: https://custom-model-url.com/path/to/model.hef
 ```
 For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
 
-Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation. 
 
 > **Note:**  
-> If both a model **path** and **URL** are provided, the detector will first check the local model path. If the file is not found, it will download the model from the URL.
+> The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
 
 ---
 

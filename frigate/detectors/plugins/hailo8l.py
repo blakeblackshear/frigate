@@ -164,7 +164,7 @@ class HailoAsyncInference:
 
     def callback(self, completion_info, bindings_list: List, input_batch: List):
         if completion_info.exception:
-            logging.error(f"Inference error: {completion_info.exception}")
+            logger.error(f"Inference error: {completion_info.exception}")
         else:
             for i, bindings in enumerate(bindings_list):
                 if len(bindings._output_names) == 1:
@@ -236,15 +236,14 @@ class HailoDetector(DetectionApi):
         self.cache_dir = MODEL_CACHE_DIR
         self.device_type = detector_config.device
         # Model attributes should be provided in detector_config.model
-        self.model_path = detector_config.model.path if hasattr(detector_config.model, "path") else None
         self.model_height = detector_config.model.height if hasattr(detector_config.model, "height") else None
         self.model_width = detector_config.model.width if hasattr(detector_config.model, "width") else None
         self.model_type = detector_config.model.model_type if hasattr(detector_config.model, "model_type") else None
         self.tensor_format = detector_config.model.input_tensor if hasattr(detector_config.model, "input_tensor") else None
         self.pixel_format = detector_config.model.input_pixel_format if hasattr(detector_config.model, "input_pixel_format") else None
         self.input_dtype = detector_config.model.input_dtype if hasattr(detector_config.model, "input_dtype") else None
-        self.url = detector_config.url
         self.output_type = "FLOAT32"
+        self.set_path_and_url(detector_config.model.path)
         self.working_model_path = self.check_and_prepare()
 
         # Set up asynchronous inference
@@ -252,7 +251,7 @@ class HailoDetector(DetectionApi):
         self.input_queue = queue.Queue()
         self.output_queue = queue.Queue()
         try:
-            logging.debug(f"[INIT] Loading HEF model from {self.working_model_path}")
+            logger.debug(f"[INIT] Loading HEF model from {self.working_model_path}")
             self.inference_engine = HailoAsyncInference(
                 self.working_model_path,
                 self.input_queue,
@@ -260,11 +259,23 @@ class HailoDetector(DetectionApi):
                 self.batch_size
             )
             self.input_shape = self.inference_engine.get_input_shape()
-            logging.debug(f"[INIT] Model input shape: {self.input_shape}")
+            logger.debug(f"[INIT] Model input shape: {self.input_shape}")
         except Exception as e:
-            logging.error(f"[INIT] Failed to initialize HailoAsyncInference: {e}")
+            logger.error(f"[INIT] Failed to initialize HailoAsyncInference: {e}")
             raise
 
+    
+    def set_path_and_url(self, path: str = None):
+        if self.is_url(path):
+            self.url = path
+            self.model_path = None
+        else:
+            self.model_path = path
+            self.url = None
+
+    def is_url(self, url: str) -> bool:
+        return url.startswith("http://") or url.startswith("https://") or url.startswith("www.")
+    
     @staticmethod
     def extract_model_name(path: str = None, url: str = None) -> str:
         model_name = None
@@ -325,7 +336,7 @@ class HailoDetector(DetectionApi):
         return model_path
 
     def detect_raw(self, tensor_input):
-        logging.debug("[DETECT_RAW] Starting detection")
+        logger.debug("[DETECT_RAW] Starting detection")
 
         # Pre process the input tensor
         logger.debug(f"[DETECT_RAW] Starting pre processing")
@@ -334,7 +345,7 @@ class HailoDetector(DetectionApi):
         # Ensure tensor_input has a batch dimension
         if isinstance(tensor_input, np.ndarray) and len(tensor_input.shape) == 3:
             tensor_input = np.expand_dims(tensor_input, axis=0)
-            logging.debug(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
+            logger.debug(f"[DETECT_RAW] Expanded input shape to {tensor_input.shape}")
 
         # Enqueue input and a sentinel value
         self.input_queue.put(tensor_input)
@@ -344,11 +355,11 @@ class HailoDetector(DetectionApi):
         self.inference_engine.run()
         result = self.output_queue.get()
         if result is None:
-            logging.error("[DETECT_RAW] No inference result received")
+            logger.error("[DETECT_RAW] No inference result received")
             return np.zeros((20, 6), dtype=np.float32)
 
         original_input, infer_results = result
-        logging.debug("[DETECT_RAW] Inference completed.")
+        logger.debug("[DETECT_RAW] Inference completed.")
 
         # If infer_results is a single-element list, unwrap it.
         if isinstance(infer_results, list) and len(infer_results) == 1:
@@ -363,7 +374,7 @@ class HailoDetector(DetectionApi):
             if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
                 continue
 
-            logging.debug(f"[DETECT_RAW] Processing detection set {class_id} with shape {detection_set.shape}")
+            logger.debug(f"[DETECT_RAW] Processing detection set {class_id} with shape {detection_set.shape}")
             for det in detection_set:
                 # Expect at least 5 elements: [ymin, xmin, ymax, xmax, confidence]
                 if det.shape[0] < 5:
@@ -372,9 +383,9 @@ class HailoDetector(DetectionApi):
                 if score < threshold:
                     continue
                 if hasattr(self, "labels") and self.labels:
-                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id} -> {self.labels[class_id]}")
+                    logger.debug(f"[DETECT_RAW] Detected class id: {class_id} -> {self.labels[class_id]}")
                 else:
-                    logging.debug(f"[DETECT_RAW] Detected class id: {class_id}")
+                    logger.debug(f"[DETECT_RAW] Detected class id: {class_id}")
 
                 all_detections.append([class_id, score, det[0], det[1], det[2], det[3]])
 
@@ -392,7 +403,7 @@ class HailoDetector(DetectionApi):
             detections_array = np.vstack((detections_array, pad))
 
 
-        logging.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
+        logger.debug(f"[DETECT_RAW] Processed detections: {detections_array}")
         return detections_array
 
     # Preprocess method using inline utility
@@ -407,16 +418,16 @@ class HailoDetector(DetectionApi):
 
     # Close the Hailo device
     def close(self):
-        logging.debug("[CLOSE] Closing HailoDetector")
+        logger.debug("[CLOSE] Closing HailoDetector")
         try:
             self.inference_engine.hef.close()
-            logging.debug("Hailo device closed successfully")
+            logger.debug("Hailo device closed successfully")
         except Exception as e:
-            logging.error(f"Failed to close Hailo device: {e}")
+            logger.error(f"Failed to close Hailo device: {e}")
             raise
 
 # ----------------- Configuration Class ----------------- #
 class HailoDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     device: str = Field(default="PCIe", title="Device Type")
-    url: Optional[str] = Field(default=None, title="Custom Model URL")
+    #url: Optional[str] = Field(default=None, title="Custom Model URL")
