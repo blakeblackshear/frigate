@@ -309,9 +309,10 @@ class AudioEventMaintainer(threading.Thread):
         """Fetch the latest config and update enabled state."""
         _, config_data = self.enabled_subscriber.check_for_update()
         if config_data:
-            enabled = config_data.enabled
-            return enabled
-        return self.was_enabled if self.was_enabled is not None else self.config.enabled
+            self.config.enabled = config_data.enabled
+            return config_data.enabled
+
+        return self.config.enabled
 
     def run(self) -> None:
         if self._update_enabled_state():
@@ -362,9 +363,9 @@ class AudioTfl:
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads
-        self.labels = load_labels("/audio-labelmap.txt", prefill=521)
+        self.labels = load_labels("audio-labelmap.txt", prefill=521)
         self.interpreter = Interpreter(
-            model_path="/cpu_audio_model.tflite",
+            model_path="cpu_audio_model.tflite",
             num_threads=self.num_threads,
         )
 
