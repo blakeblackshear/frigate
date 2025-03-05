@@ -242,6 +242,17 @@ class PreviewRecorder:
             self.last_output_time = ts
             self.output_frames.append(ts)
 
+    def reset_frame_cache(self, frame_time: float) -> None:
+        self.segment_end = (
+            (datetime.datetime.now() + datetime.timedelta(hours=1))
+            .astimezone(datetime.timezone.utc)
+            .replace(minute=0, second=0, microsecond=0)
+            .timestamp()
+        )
+        self.start_time = frame_time
+        self.last_output_time = frame_time
+        self.output_frames: list[float] = []
+
     def should_write_frame(
         self,
         current_tracked_objects: list[dict[str, any]],
@@ -308,7 +319,7 @@ class PreviewRecorder:
         motion_boxes: list[list[int]],
         frame_time: float,
         frame: np.ndarray,
-    ) -> bool:
+    ) -> None:
         self.offline = False
 
         # check for updated record config
@@ -322,7 +333,7 @@ class PreviewRecorder:
             self.start_time = frame_time
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
-            return False
+            return
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
@@ -343,27 +354,18 @@ class PreviewRecorder:
                     f"Not saving preview for {self.config.name} because there are no saved frames."
                 )
 
-            # reset frame cache
-            self.segment_end = (
-                (datetime.datetime.now() + datetime.timedelta(hours=1))
-                .astimezone(datetime.timezone.utc)
-                .replace(minute=0, second=0, microsecond=0)
-                .timestamp()
-            )
-            self.start_time = frame_time
-            self.last_output_time = frame_time
-            self.output_frames: list[float] = []
+            self.reset_frame_cache(frame_time)
 
             # include first frame to ensure consistent duration
             if self.config.record.enabled:
                 self.output_frames.append(frame_time)
                 self.write_frame_to_cache(frame_time, frame)
 
-            return True
+            return
         elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
-            return False
+            return
 
     def flag_offline(self, frame_time: float) -> None:
         if not self.offline:
@@ -378,6 +380,9 @@ class PreviewRecorder:
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
             if len(self.output_frames) == 0:
+                # camera has been offline for entire hour
+                # we have no preview to create
+                self.reset_frame_cache(frame_time)
                 return
 
             old_frame_path = get_cache_image_name(
@@ -394,16 +399,7 @@ class PreviewRecorder:
                 self.requestor,
             ).start()
 
-            # reset frame cache
-            self.segment_end = (
-                (datetime.datetime.now() + datetime.timedelta(hours=1))
-                .astimezone(datetime.timezone.utc)
-                .replace(minute=0, second=0, microsecond=0)
-                .timestamp()
-            )
-            self.start_time = frame_time
-            self.last_output_time = frame_time
-            self.output_frames = []
+            self.reset_frame_cache(frame_time)
 
     def stop(self) -> None:
         self.requestor.stop()
