@@ -150,6 +150,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.record_config_subscriber = ConfigSubscriber("config/record/")
         self.review_config_subscriber = ConfigSubscriber("config/review/")
+        self.enabled_config_subscriber = ConfigSubscriber("config/enabled/")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
 
         # manual events
@@ -450,7 +451,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                     updated_review_config,
                 ) = self.review_config_subscriber.check_for_update()
 
-                if not updated_record_topic and not updated_review_topic:
+                (
+                    updated_enabled_topic,
+                    updated_enabled_config,
+                ) = self.enabled_config_subscriber.check_for_update()
+
+                if (
+                    not updated_record_topic
+                    and not updated_review_topic
+                    and not updated_enabled_topic
+                ):
                     break
 
                 if updated_record_topic:
@@ -460,6 +470,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if updated_review_topic:
                     camera_name = updated_review_topic.rpartition("/")[-1]
                     self.config.cameras[camera_name].review = updated_review_config
+
+                if updated_enabled_config:
+                    camera_name = updated_enabled_topic.rpartition("/")[-1]
+                    self.config.cameras[
+                        camera_name
+                    ].enabled = updated_enabled_config.enabled
 
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
@@ -494,7 +510,10 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             current_segment = self.active_review_segments.get(camera)
 
-            if not self.config.cameras[camera].record.enabled:
+            if (
+                not self.config.cameras[camera].enabled
+                or not self.config.cameras[camera].record.enabled
+            ):
                 if current_segment:
                     self.end_segment(camera)
                 continue
