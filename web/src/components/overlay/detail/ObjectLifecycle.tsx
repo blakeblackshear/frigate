@@ -23,7 +23,6 @@ import {
   LuEar,
   LuFolderX,
   LuPlay,
-  LuPlayCircle,
   LuSettings,
   LuTruck,
 } from "react-icons/lu";
@@ -54,6 +53,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
+import { IoPlayCircleOutline } from "react-icons/io5";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -733,7 +733,7 @@ export function LifecycleIcon({
     case "gone":
       return <IoMdExit className={cn(className)} />;
     case "active":
-      return <LuPlayCircle className={cn(className)} />;
+      return <IoPlayCircleOutline className={cn(className)} />;
     case "stationary":
       return <LuCircle className={cn(className)} />;
     case "entered_zone":
