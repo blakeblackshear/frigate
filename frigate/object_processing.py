@@ -753,7 +753,7 @@ class TrackedObjectProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if not self._get_enabled_state(camera):
+            if not self.config.cameras[camera].enabled:
                 logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
