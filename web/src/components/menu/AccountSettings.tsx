@@ -18,21 +18,42 @@ import {
 } from "../ui/dropdown-menu";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
-import { LuLogOut } from "react-icons/lu";
+import { LuLogOut, LuPenSquare } from "react-icons/lu";
 import useSWR from "swr";
+import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import SetPasswordDialog from "../overlay/SetPasswordDialog";
 
 type AccountSettingsProps = {
   className?: string;
 };
+
 export default function AccountSettings({ className }: AccountSettingsProps) {
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR("config");
   const logoutUrl = config?.proxy?.logout_url || `${baseUrl}api/logout`;
 
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const Content = isDesktop ? DropdownMenuContent : DrawerContent;
   const MenuItem = isDesktop ? DropdownMenuItem : DialogClose;
+
+  const handlePasswordSave = async (password: string) => {
+    if (!profile?.username || profile.username === "anonymous") return;
+    try {
+      await axios.put(
+        `/users/${profile.username}/password`,
+        { password },
+        { withCredentials: true },
+      );
+      setPasswordDialogOpen(false);
+    } catch (error) {
+      toast.error("Error setting password.", { position: "top-center" });
+    }
+  };
 
   return (
     <Container modal={!isDesktop}>
@@ -68,6 +89,18 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             Current User: {profile?.username || "anonymous"}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
+          {profile?.username && profile.username !== "anonymous" && (
+            <MenuItem
+              className={
+                isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
+              }
+              aria-label="Set Password"
+              onClick={() => setPasswordDialogOpen(true)}
+            >
+              <LuPenSquare className="mr-2 size-4" />
+              <span>Set Password</span>
+            </MenuItem>
+          )}
           <MenuItem
             className={
               isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
@@ -81,6 +114,12 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           </MenuItem>
         </div>
       </Content>
+      <SetPasswordDialog
+        show={passwordDialogOpen}
+        onSave={handlePasswordSave}
+        onCancel={() => setPasswordDialogOpen(false)}
+        username={profile?.username}
+      />
     </Container>
   );
 }

@@ -53,6 +53,9 @@ import { cn } from "@/lib/utils";
 import useSWR from "swr";
 import RestartDialog from "../overlay/dialog/RestartDialog";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import SetPasswordDialog from "../overlay/SetPasswordDialog";
+import { toast } from "sonner";
+import axios from "axios";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -65,6 +68,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
 
   const isAdmin = useIsAdmin();
@@ -77,6 +81,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const SubItemTrigger = isDesktop ? DropdownMenuSubTrigger : DialogTrigger;
   const SubItemContent = isDesktop ? DropdownMenuSubContent : DialogContent;
   const Portal = isDesktop ? DropdownMenuPortal : DialogPortal;
+
+  const handlePasswordSave = async (password: string) => {
+    if (!profile?.username || profile.username === "anonymous") return;
+    try {
+      await axios.put(
+        `/users/${profile.username}/password`,
+        { password },
+        { withCredentials: true },
+      );
+      setPasswordDialogOpen(false);
+    } catch (error) {
+      toast.error("Error setting password.", { position: "top-center" });
+    }
+  };
 
   return (
     <>
@@ -127,6 +145,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 <DropdownMenuSeparator
                   className={isDesktop ? "mt-3" : "mt-1"}
                 />
+                {profile?.username && profile.username !== "anonymous" && (
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label="Set Password"
+                    onClick={() => setPasswordDialogOpen(true)}
+                  >
+                    <LuPenSquare className="mr-2 size-4" />
+                    <span>Set Password</span>
+                  </MenuItem>
+                )}
                 <MenuItem
                   className={
                     isDesktop
@@ -388,6 +420,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
         isOpen={restartDialogOpen}
         onClose={() => setRestartDialogOpen(false)}
         onRestart={() => sendRestart("restart")}
+      />
+      <SetPasswordDialog
+        show={passwordDialogOpen}
+        onSave={handlePasswordSave}
+        onCancel={() => setPasswordDialogOpen(false)}
+        username={profile?.username}
       />
     </>
   );
