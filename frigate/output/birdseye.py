@@ -281,12 +281,6 @@ class BirdsEyeFrameManager:
         self.stop_event = stop_event
         self.inactivity_threshold = config.birdseye.inactivity_threshold
 
-        self.enabled_subscribers = {
-            cam: ConfigSubscriber(f"config/enabled/{cam}", True)
-            for cam in config.cameras.keys()
-            if config.cameras[cam].enabled_in_config
-        }
-
         if config.birdseye.layout.max_cameras:
             self.last_refresh_time = 0
 
@@ -387,16 +381,6 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
-    def _get_enabled_state(self, camera: str) -> bool:
-        """Fetch the latest enabled state for a camera from ZMQ."""
-        _, config_data = self.enabled_subscribers[camera].check_for_update()
-
-        if config_data:
-            self.config.cameras[camera].enabled = config_data.enabled
-            return config_data.enabled
-
-        return self.config.cameras[camera].enabled
-
     def update_frame(self, frame: Optional[np.ndarray] = None) -> bool:
         """
         Update birdseye, optionally with a new frame.
@@ -410,7 +394,7 @@ class BirdsEyeFrameManager:
                 for cam, cam_data in self.cameras.items()
                 if self.config.cameras[cam].birdseye.enabled
                 and self.config.cameras[cam].enabled_in_config
-                and self._get_enabled_state(cam)
+                and self.config.cameras[cam].enabled
                 and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame_time"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
@@ -706,11 +690,11 @@ class BirdsEyeFrameManager:
         frame: np.ndarray,
     ) -> bool:
         # don't process if birdseye is disabled for this camera
-        camera_config = self.config.cameras[camera].birdseye
+        camera_config = self.config.cameras[camera]
         force_update = False
 
         # disabling birdseye is a little tricky
-        if not self._get_enabled_state(camera):
+        if not camera_config.birdseye.enabled or not camera_config.enabled:
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
             if self.cameras[camera]["last_active_frame"] > 0:
@@ -722,7 +706,7 @@ class BirdsEyeFrameManager:
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame.copy()
         self.cameras[camera]["current_frame_time"] = frame_time
-        if self.camera_active(camera_config.mode, object_count, motion_count):
+        if self.camera_active(camera_config.birdseye.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -744,11 +728,6 @@ class BirdsEyeFrameManager:
             self.last_output_time = now
             return True
         return False
-
-    def stop(self):
-        """Clean up subscribers when stopping."""
-        for subscriber in self.enabled_subscribers.values():
-            subscriber.stop()
 
 
 class Birdseye:
@@ -775,7 +754,8 @@ class Birdseye:
             "birdseye", self.converter, websocket_server, stop_event
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
-        self.config_subscriber = ConfigSubscriber("config/birdseye/")
+        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
+        self.birdseye_subscriber = ConfigSubscriber("config/birdseye/")
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
 
@@ -815,15 +795,27 @@ class Birdseye:
         # check if there is an updated config
         while True:
             (
-                updated_topic,
+                updated_birdseye_topic,
                 updated_birdseye_config,
-            ) = self.config_subscriber.check_for_update()
+            ) = self.birdseye_subscriber.check_for_update()
 
-            if not updated_topic:
+            (
+                updated_enabled_topic,
+                updated_enabled_config,
+            ) = self.config_enabled_subscriber.check_for_update()
+
+            if not updated_birdseye_topic and not updated_enabled_topic:
                 break
 
-            camera_name = updated_topic.rpartition("/")[-1]
-            self.config.cameras[camera_name].birdseye = updated_birdseye_config
+            if updated_birdseye_config:
+                camera_name = updated_birdseye_topic.rpartition("/")[-1]
+                self.config.cameras[camera_name].birdseye = updated_birdseye_config
+
+            if updated_enabled_config:
+                camera_name = updated_enabled_topic.rpartition("/")[-1]
+                self.config.cameras[
+                    camera_name
+                ].enabled = updated_enabled_config.enabled
 
         if self.birdseye_manager.update(
             camera,
@@ -835,7 +827,7 @@ class Birdseye:
             self.__send_new_frame()
 
     def stop(self) -> None:
-        self.config_subscriber.stop()
-        self.birdseye_manager.stop()
+        self.birdseye_subscriber.stop()
+        self.config_enabled_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()
