@@ -4,7 +4,8 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
 import axios from "axios";
-import { LuCamera, LuDownload, LuMoreVertical, LuTrash2 } from "react-icons/lu";
+import { LuCamera, LuDownload, LuTrash2 } from "react-icons/lu";
+import { FiMoreVertical } from "react-icons/fi";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { MdImageSearch } from "react-icons/md";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
@@ -216,7 +217,7 @@ export default function SearchResultActions({
 
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <LuMoreVertical className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+              <FiMoreVertical className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">{menuItems}</DropdownMenuContent>
           </DropdownMenu>
