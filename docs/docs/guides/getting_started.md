@@ -151,8 +151,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
           roles:
             - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
 ```
 
 ### Step 2: Start Frigate
@@ -307,7 +305,7 @@ By default, Frigate will retain video of all tracked objects for 10 days. The fu
 
 ### Step 7: Complete config
 
-At this point you have a complete config with basic functionality. 
+At this point you have a complete config with basic functionality.
 - View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
 - View [full config reference](../configuration/reference.md) for a complete list of configuration options.
 

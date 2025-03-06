@@ -300,6 +300,12 @@ def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     """Handle migrating frigate config to 0.16-0"""
     new_config = config.copy()
 
+    # migrate config that does not have detect -> enabled explicitly set to have it enabled
+    if new_config.get("detect", {}).get("enabled") is None:
+        detect_config = new_config.get("detect", {})
+        detect_config["enabled"] = True
+        new_config["detect"] = detect_config
+
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, any]] = camera.copy()
 
