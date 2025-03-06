@@ -58,8 +58,8 @@ export default function RoleChangeDialog({
                 features
               </li>
               <li>
-                • <span className="font-medium">Viewer:</span> Limited to
-                viewing content only
+                • <span className="font-medium">Viewer:</span> Limited to Live
+                dashboards, Review, Explore, and Exports only.
               </li>
             </ul>
           </div>
@@ -76,13 +76,13 @@ export default function RoleChangeDialog({
             <SelectContent>
               <SelectItem value="admin" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
-                  <LuShield className="h-4 w-4 text-primary" />
+                  <LuShield className="size-4 text-primary" />
                   <span>Admin</span>
                 </div>
               </SelectItem>
               <SelectItem value="viewer" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
-                  <LuUser className="h-4 w-4 text-muted-foreground" />
+                  <LuUser className="size-4 text-primary" />
                   <span>Viewer</span>
                 </div>
               </SelectItem>
