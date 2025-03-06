@@ -281,12 +281,6 @@ class BirdsEyeFrameManager:
         self.stop_event = stop_event
         self.inactivity_threshold = config.birdseye.inactivity_threshold
 
-        self.enabled_subscribers = {
-            cam: ConfigSubscriber(f"config/enabled/{cam}", True)
-            for cam in config.cameras.keys()
-            if config.cameras[cam].enabled_in_config
-        }
-
         if config.birdseye.layout.max_cameras:
             self.last_refresh_time = 0
 
@@ -735,11 +729,6 @@ class BirdsEyeFrameManager:
             return True
         return False
 
-    def stop(self):
-        """Clean up subscribers when stopping."""
-        for subscriber in self.enabled_subscribers.values():
-            subscriber.stop()
-
 
 class Birdseye:
     def __init__(
@@ -839,6 +828,6 @@ class Birdseye:
 
     def stop(self) -> None:
         self.birdseye_subscriber.stop()
-        self.birdseye_manager.stop()
+        self.config_enabled_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()
