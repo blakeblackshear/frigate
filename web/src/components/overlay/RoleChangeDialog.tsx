@@ -55,7 +55,7 @@ export default function RoleChangeDialog({
             <ul className="mt-2 space-y-1 pl-5">
               <li>
                 • <span className="font-medium">Admin:</span> Full access to all
-                features
+                features.
               </li>
               <li>
                 • <span className="font-medium">Viewer:</span> Limited to Live
