@@ -18,7 +18,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
-import { LuLogOut, LuPenSquare } from "react-icons/lu";
+import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
 import { useState } from "react";
 import axios from "axios";
@@ -97,7 +97,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               aria-label="Set Password"
               onClick={() => setPasswordDialogOpen(true)}
             >
-              <LuPenSquare className="mr-2 size-4" />
+              <LuSquarePen className="mr-2 size-4" />
               <span>Set Password</span>
             </MenuItem>
           )}

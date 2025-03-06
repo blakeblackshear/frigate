@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
-import { LuPlus, LuShield, LuUserCog, LuUserCog2 } from "react-icons/lu";
+import { LuPlus, LuShield, LuUserCog } from "react-icons/lu";
 import {
   Table,
   TableBody,
@@ -217,7 +217,7 @@ export default function AuthenticationView() {
                                         setShowRoleChange(true);
                                       }}
                                     >
-                                      <LuUserCog2 className="size-3.5" />
+                                      <LuUserCog className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
                                         Role
                                       </span>
