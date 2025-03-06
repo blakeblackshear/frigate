@@ -138,7 +138,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
         >
           <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
             {isMobile && (
-              <>
+              <div className="mb-2">
                 <DropdownMenuLabel>
                   Current User: {profile?.username || "anonymous"}
                 </DropdownMenuLabel>
@@ -172,7 +172,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     <span>Logout</span>
                   </a>
                 </MenuItem>
-              </>
+              </div>
             )}
             {isAdmin && (
               <>
