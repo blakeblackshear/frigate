@@ -94,6 +94,12 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 
 ### Hailo-8
 
+| Name            | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
+| --------------- | ---------------------- | ----------------------- |
+| ssd mobilenet v1| ~ 6 ms                 | ~ 10 ms                 |
+| yolov6n         | ~ 7 ms                 | ~ 11 ms                 |
+
+
 Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
 
 **Default Model Configuration:**
