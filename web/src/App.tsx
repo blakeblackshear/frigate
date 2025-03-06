@@ -55,12 +55,12 @@ function App() {
                       <Route path="/review" element={<Events />} />
                       <Route path="/explore" element={<Explore />} />
                       <Route path="/export" element={<Exports />} />
+                      <Route path="/settings" element={<Settings />} />
                     </Route>
                     <Route
                       element={<ProtectedRoute requiredRoles={["admin"]} />}
                     >
                       <Route path="/system" element={<System />} />
-                      <Route path="/settings" element={<Settings />} />
                       <Route path="/config" element={<ConfigEditor />} />
                       <Route path="/logs" element={<Logs />} />
                       <Route path="/faces" element={<FaceLibrary />} />
