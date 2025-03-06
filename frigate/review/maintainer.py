@@ -454,7 +454,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 (
                     updated_enabled_topic,
                     updated_enabled_config,
-                ) = self.review_config_subscriber.check_for_update()
+                ) = self.enabled_config_subscriber.check_for_update()
 
                 if (
                     not updated_record_topic
