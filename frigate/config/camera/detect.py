@@ -32,6 +32,7 @@ class StationaryConfig(FrigateBaseModel):
 
 
 class DetectConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Detection Enabled.")
     height: Optional[int] = Field(
         default=None, title="Height of the stream for the detect role."
     )
@@ -41,7 +42,6 @@ class DetectConfig(FrigateBaseModel):
     fps: int = Field(
         default=5, title="Number of frames per second to process through detection."
     )
-    enabled: bool = Field(default=True, title="Detection Enabled.")
     min_initialized: Optional[int] = Field(
         default=None,
         title="Minimum number of consecutive hits for an object to be initialized by the tracker.",
