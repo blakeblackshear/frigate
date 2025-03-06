@@ -28,9 +28,9 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'ALTER TABLE "user" ADD COLUMN "role" VARCHAR(20) NOT NULL DEFAULT "admin"'
+        'ALTER TABLE "user" ADD COLUMN "role" VARCHAR(20) NOT NULL DEFAULT \'admin\''
     )
-    migrator.sql('UPDATE "user" SET "role" = "admin" WHERE "role" IS NULL')
+    migrator.sql('UPDATE "user" SET "role" = \'admin\' WHERE "role" IS NULL')
 
 
 def rollback(migrator, database, fake=False, **kwargs):
