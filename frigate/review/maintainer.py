@@ -510,7 +510,10 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             current_segment = self.active_review_segments.get(camera)
 
-            if not self.config.cameras[camera].enabled or not self.config.cameras[camera].record.enabled:
+            if (
+                not self.config.cameras[camera].enabled
+                or not self.config.cameras[camera].record.enabled
+            ):
                 if current_segment:
                     self.end_segment(camera)
                 continue

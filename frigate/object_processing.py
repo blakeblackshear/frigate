@@ -440,7 +440,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.enabled_subscriber = ConfigSubscriber("config/enabled/", True)
+        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
 
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
@@ -704,13 +704,12 @@ class TrackedObjectProcessor(threading.Thread):
 
     def run(self):
         while not self.stop_event.is_set():
-
             # check for config updates
             while True:
                 (
                     updated_enabled_topic,
                     updated_enabled_config,
-                ) = self.enabled_subscriber.check_for_update()
+                ) = self.config_enabled_subscriber.check_for_update()
 
                 if not updated_enabled_topic:
                     break
@@ -800,6 +799,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()
-        self.enabled_subscriber.stop()
+        self.config_enabled_subscriber.stop()
 
         logger.info("Exiting object processor...")
