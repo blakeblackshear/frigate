@@ -179,7 +179,7 @@ export default function AuthenticationView() {
                             {user.username === "admin" ? (
                               <LuShield className="size-4 text-primary" />
                             ) : (
-                              <LuUserCog className="size-4 text-muted-foreground" />
+                              <LuUserCog className="text-primary_variant size-4" />
                             )}
                             {user.username}
                           </div>
