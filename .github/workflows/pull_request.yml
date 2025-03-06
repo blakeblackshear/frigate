@@ -64,6 +64,9 @@ jobs:
           node-version: 20.x
       - run: npm install
         working-directory: ./web
+      - name: Build web
+        run: npm run build
+        working-directory: ./web
       # - name: Test
       #   run: npm run test
       #   working-directory: ./web
