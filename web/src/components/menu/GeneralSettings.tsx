@@ -155,7 +155,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     aria-label="Set Password"
                     onClick={() => setPasswordDialogOpen(true)}
                   >
-                    <LuPenSquare className="mr-2 size-4" />
+                    <LuSquarePen className="mr-2 size-4" />
                     <span>Set Password</span>
                   </MenuItem>
                 )}
