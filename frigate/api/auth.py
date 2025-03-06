@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
 from peewee import DoesNotExist
@@ -191,16 +191,18 @@ async def get_current_user(request: Request):
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
     encoded_token = request.cookies.get(JWT_COOKIE_NAME)
     if not encoded_token:
-        raise HTTPException(status_code=401, detail="No JWT token found")
+        return JSONResponse(content={"message": "No JWT token found"}, status_code=401)
 
     try:
         token = jwt.decode(encoded_token, request.app.jwt_token)
         if "sub" not in token.claims or "role" not in token.claims:
-            raise HTTPException(status_code=401, detail="Invalid JWT token")
+            return JSONResponse(
+                content={"message": "Invalid JWT token"}, status_code=401
+            )
         return {"username": token.claims["sub"], "role": token.claims["role"]}
     except Exception as e:
         logger.error(f"Error parsing JWT: {e}")
-        raise HTTPException(status_code=401, detail="Invalid JWT token")
+        return JSONResponse(content={"message": "Invalid JWT token"}, status_code=401)
 
 
 # Endpoints
@@ -430,9 +432,13 @@ def update_role(
     body: AppPutRoleBody,
 ):
     if username == "admin":
-        raise HTTPException(status_code=403, detail="Cannot modify admin user's role")
+        return JSONResponse(
+            content={"message": "Cannot modify admin user's role"}, status_code=403
+        )
     if body.role not in ["admin", "viewer"]:
-        raise HTTPException(status_code=400, detail="Role must be 'admin' or 'viewer'")
+        return JSONResponse(
+            content={"message": "Role must be 'admin' or 'viewer'"}, status_code=400
+        )
 
     User.set_by_id(username, {User.role: body.role})
     return JSONResponse(content={"success": True})
