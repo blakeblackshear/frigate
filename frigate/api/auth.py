@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
 from peewee import DoesNotExist
@@ -375,9 +375,7 @@ def login(request: Request, body: AppPostLoginBody):
 
 
 @router.get("/users")
-def get_users(current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+def get_users():
     exports = (
         User.select(User.username, User.role).order_by(User.username).dicts().iterator()
     )
@@ -388,10 +386,7 @@ def get_users(current_user: dict = Depends(get_current_user)):
 def create_user(
     request: Request,
     body: AppPostUsersBody,
-    current_user: dict = Depends(get_current_user),
 ):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
     if not re.match("^[A-Za-z0-9._]+$", body.username):
@@ -411,9 +406,7 @@ def create_user(
 
 
 @router.delete("/users/{username}")
-def delete_user(username: str, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+def delete_user(username: str):
     User.delete_by_id(username)
     return JSONResponse(content={"success": True})
 
@@ -423,10 +416,7 @@ def update_password(
     request: Request,
     username: str,
     body: AppPutPasswordBody,
-    current_user: dict = Depends(get_current_user),
 ):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
@@ -438,10 +428,7 @@ def update_password(
 def update_role(
     username: str,
     body: AppPutRoleBody,
-    current_user: dict = Depends(get_current_user),
 ):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
     if username == "admin":
         raise HTTPException(status_code=403, detail="Cannot modify admin user's role")
     if body.role not in ["admin", "viewer"]:
