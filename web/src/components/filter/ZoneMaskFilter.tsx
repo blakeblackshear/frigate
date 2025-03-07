@@ -99,9 +99,8 @@ export function GeneralFilterContent({
               >
                 <Trans>
                   ui.settingView.masksAndZonesSettings.
-                  {item.replace(/_([a-z])/g, (match, letter) =>
-                    letter.toUpperCase(),
-                  ) + "s"}
+                  {item.replace(/_([a-z])/g, (letter) => letter.toUpperCase()) +
+                    "s"}
                 </Trans>
               </Label>
               <Switch

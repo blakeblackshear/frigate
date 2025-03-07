@@ -122,7 +122,7 @@ export default function Settings() {
         setSelectedCamera(firstEnabledCamera.name);
       } else if (
         !cameraEnabledStates[selectedCamera] &&
-        page !== "camera settings"
+        page !== "cameraSettings"
       ) {
         // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
         const firstEnabledCamera =
@@ -331,7 +331,7 @@ function CameraSelectButton({
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => {
             const isEnabled = cameraEnabledStates[item.name];
-            const isCameraSettingsPage = currentPage === "camera settings";
+            const isCameraSettingsPage = currentPage === "cameraSettings";
             return (
               <FilterSwitch
                 key={item.name}
