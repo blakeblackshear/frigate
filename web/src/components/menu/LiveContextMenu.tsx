@@ -209,7 +209,7 @@ export default function LiveContextMenu({
   // notifications
 
   const notificationsEnabledInConfig =
-    config?.cameras[camera].notifications.enabled_in_config;
+    config?.cameras[camera]?.notifications?.enabled_in_config;
 
   const { payload: notificationState, send: sendNotification } =
     useNotifications(camera);
