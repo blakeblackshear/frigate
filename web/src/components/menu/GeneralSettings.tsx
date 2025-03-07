@@ -6,7 +6,7 @@ import {
   LuList,
   LuLogOut,
   LuMoon,
-  LuPenSquare,
+  LuSquarePen,
   LuRotateCw,
   LuSettings,
   LuSun,
@@ -215,7 +215,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                   aria-label="Configuration editor"
                 >
-                  <LuPenSquare className="mr-2 size-4" />
+                  <LuSquarePen className="mr-2 size-4" />
                   <span>
                     <Trans>ui.configurationEditor</Trans>
                   </span>

@@ -440,10 +440,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.enabled_subscribers = {
-            camera: ConfigSubscriber(f"config/enabled/{camera}", True)
-            for camera in config.cameras.keys()
-        }
+        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
 
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
@@ -705,24 +702,34 @@ class TrackedObjectProcessor(threading.Thread):
                         {"enabled": False, "motion": 0, "objects": []},
                     )
 
-    def _get_enabled_state(self, camera: str) -> bool:
-        _, config_data = self.enabled_subscribers[camera].check_for_update()
-
-        if config_data:
-            self.config.cameras[camera].enabled = config_data.enabled
-
-            if self.camera_states[camera].prev_enabled is None:
-                self.camera_states[camera].prev_enabled = config_data.enabled
-
-        return self.config.cameras[camera].enabled
-
     def run(self):
         while not self.stop_event.is_set():
+            # check for config updates
+            while True:
+                (
+                    updated_enabled_topic,
+                    updated_enabled_config,
+                ) = self.config_enabled_subscriber.check_for_update()
+
+                if not updated_enabled_topic:
+                    break
+
+                camera_name = updated_enabled_topic.rpartition("/")[-1]
+                self.config.cameras[
+                    camera_name
+                ].enabled = updated_enabled_config.enabled
+
+                if self.camera_states[camera_name].prev_enabled is None:
+                    self.camera_states[
+                        camera_name
+                    ].prev_enabled = updated_enabled_config.enabled
+
+            # manage camera disabled state
             for camera, config in self.config.cameras.items():
                 if not config.enabled_in_config:
                     continue
 
-                current_enabled = self._get_enabled_state(camera)
+                current_enabled = config.enabled
                 camera_state = self.camera_states[camera]
 
                 if camera_state.prev_enabled and not current_enabled:
@@ -746,7 +753,7 @@ class TrackedObjectProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if not self._get_enabled_state(camera):
+            if not self.config.cameras[camera].enabled:
                 logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
@@ -792,7 +799,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()
-        for subscriber in self.enabled_subscribers.values():
-            subscriber.stop()
+        self.config_enabled_subscriber.stop()
 
         logger.info("Exiting object processor...")

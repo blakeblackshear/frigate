@@ -22,7 +22,8 @@ import { t } from "i18next";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans } from "react-i18next";
-import { LuAlertCircle, LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { CiCircleAlert } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -313,7 +314,7 @@ export default function NotificationView({
               </div>
             </div>
             <Alert variant="destructive">
-              <LuAlertCircle className="size-5" />
+              <CiCircleAlert className="size-5" />
               <AlertTitle>Notifications Unavailable</AlertTitle>
 
               <AlertDescription>

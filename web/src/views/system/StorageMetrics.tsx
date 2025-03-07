@@ -8,8 +8,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useSWR from "swr";
-import { LuAlertCircle } from "react-icons/lu";
 import { Trans } from "react-i18next";
+import { CiCircleAlert } from "react-icons/ci";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
@@ -89,7 +89,7 @@ export default function StorageMetrics({
                   className="focus:outline-none"
                   aria-label="Unused Storage Information"
                 >
-                  <LuAlertCircle
+                  <CiCircleAlert
                     className="size-5"
                     aria-label="Unused Storage Information"
                   />
