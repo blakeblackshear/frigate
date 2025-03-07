@@ -442,7 +442,7 @@ export function RecordingView({
           )}
           {isDesktop && (
             <ReviewFilterGroup
-              filters={["date", "general"]}
+              filters={["cameras", "date", "general"]}
               reviewSummary={reviewSummary}
               recordingsSummary={recordingsSummary}
               filter={filter}
@@ -450,7 +450,22 @@ export function RecordingView({
               filterList={reviewFilterList}
               showReviewed
               setShowReviewed={() => {}}
-              onUpdateFilter={updateFilter}
+              mainCamera={mainCamera}
+              onUpdateFilter={(newFilter: ReviewFilter) => {
+                const updatedCameras =
+                  newFilter.cameras === undefined
+                    ? undefined // Respect undefined as "all cameras"
+                    : newFilter.cameras
+                      ? Array.from(
+                          new Set([mainCamera, ...(newFilter.cameras || [])]),
+                        ) // Include mainCamera if specific cameras are selected
+                      : [mainCamera];
+                const adjustedFilter: ReviewFilter = {
+                  ...newFilter,
+                  cameras: updatedCameras,
+                };
+                updateFilter(adjustedFilter);
+              }}
               setMotionOnly={() => {}}
             />
           )}
