@@ -504,7 +504,7 @@ async def update_role(
     # viewers can't change anyone's role
     if current_role == "viewer":
         raise HTTPException(
-            status_code=403, detail="Viewers can only update their own password"
+            status_code=403, detail="Admin role is required to change user roles"
         )
     if username == "admin":
         return JSONResponse(
