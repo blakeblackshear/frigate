@@ -16,11 +16,6 @@ export default defineConfig({
       "/api": {
         target: `http://${proxyHost}`,
         ws: true,
-        configure: (proxy) => {
-          proxy.on("proxyReq", (proxyReq) => {
-            proxyReq.setHeader("x-server-port", "5000");
-          });
-        },
       },
       "/vod": {
         target: `http://${proxyHost}`,

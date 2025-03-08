@@ -208,21 +208,9 @@ async def get_current_user(request: Request):
 
 def require_role(required_roles: List[str]):
     async def role_checker(request: Request):
-        print(f"Headers in require_role: {dict(request.headers)}")
-        # # Bypass role check for port 5000 (internal, trusted)
-        # if int(request.headers.get("x-server-port", default=0)) == 5000:
-        #     return "anonymous"
-
         # Get role from header (could be comma-separated)
         role_header = request.headers.get("remote-role")
         roles = [r.strip() for r in role_header.split(",")] if role_header else []
-
-        # # If no roles from header, try JWT
-        # # We could also just look up the user's role in the db?
-        # if not roles:
-        #     current_user = await get_current_user(request)
-        #     if not isinstance(current_user, JSONResponse):
-        #         roles = [current_user.get("role")] if current_user.get("role") else []
 
         # Check if we have any roles
         if not roles:
