@@ -208,20 +208,21 @@ async def get_current_user(request: Request):
 
 def require_role(required_roles: List[str]):
     async def role_checker(request: Request):
-        # Bypass role check for port 5000 (internal, trusted)
-        if int(request.headers.get("x-server-port", default=0)) == 5000:
-            return "anonymous"
+        print(f"Headers in require_role: {dict(request.headers)}")
+        # # Bypass role check for port 5000 (internal, trusted)
+        # if int(request.headers.get("x-server-port", default=0)) == 5000:
+        #     return "anonymous"
 
         # Get role from header (could be comma-separated)
         role_header = request.headers.get("remote-role")
         roles = [r.strip() for r in role_header.split(",")] if role_header else []
 
-        # If no roles from header, try JWT
-        # We could also just look up the user's role in the db?
-        if not roles:
-            current_user = await get_current_user(request)
-            if not isinstance(current_user, JSONResponse):
-                roles = [current_user.get("role")] if current_user.get("role") else []
+        # # If no roles from header, try JWT
+        # # We could also just look up the user's role in the db?
+        # if not roles:
+        #     current_user = await get_current_user(request)
+        #     if not isinstance(current_user, JSONResponse):
+        #         roles = [current_user.get("role")] if current_user.get("role") else []
 
         # Check if we have any roles
         if not roles:
@@ -252,7 +253,10 @@ def auth(request: Request):
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
     if int(request.headers.get("x-server-port", default=0)) == 5000:
         success_response.headers["remote-user"] = "anonymous"
-        success_response.headers["remote-role"] = "anonymous"
+        success_response.headers["remote-role"] = "admin"
+        print(
+            f"port 5000, returning success response, {dict(success_response.headers)}"
+        )
         return success_response
 
     fail_response = Response("", status_code=401)
@@ -421,7 +425,7 @@ def login(request: Request, body: AppPostLoginBody):
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
-@router.get("/users", dependencies=[Depends(require_role(["admin", "anonymous"]))])
+@router.get("/users", dependencies=[Depends(require_role(["admin"]))])
 def get_users():
     exports = (
         User.select(User.username, User.role).order_by(User.username).dicts().iterator()
@@ -429,7 +433,7 @@ def get_users():
     return JSONResponse([e for e in exports])
 
 
-@router.post("/users", dependencies=[Depends(require_role(["admin", "anonymous"]))])
+@router.post("/users", dependencies=[Depends(require_role(["admin"]))])
 def create_user(
     request: Request,
     body: AppPostUsersBody,
@@ -488,7 +492,7 @@ async def update_password(
 
 @router.put(
     "/users/{username}/role",
-    dependencies=[Depends(require_role(["admin", "anonymous"]))],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 async def update_role(
     request: Request,
