@@ -79,6 +79,16 @@ if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.
         -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem" 2>/dev/null
 fi
 
+# build templates for optional BASE_PATH environment variable
+python3 /usr/local/nginx/get_base_path.py | \
+    tempio -template /usr/local/nginx/templates/base_path.gotmpl \
+       -out /usr/local/nginx/conf/base_path.conf
+
+# build templates for optional base_path in web manifest
+python3 /usr/local/nginx/get_base_path.py | \
+    tempio -template /usr/local/nginx/templates/web_manifest.gotmpl \
+       -out /usr/local/nginx/conf/web_manifest.conf
+
 # build templates for optional TLS support
 python3 /usr/local/nginx/get_tls_settings.py | \
     tempio  -template /usr/local/nginx/templates/listen.gotmpl \
