@@ -108,6 +108,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink E1 Pro               |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink E1 Zoom              |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink RLC-823A 16x         |      ✅      |      ❌      |                                                                                                                                                 |
+| Reolink Trackmix PoE (P760)  |      ✅      |      ❌      | Relative movement not supported. Built-in Autotracking only, no Autotracking via Frigate. `_main` streams output h265 only.                     |
 | Speco O8P32X                 |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X               |      ✅      |      ❌      | Incomplete ONVIF support reported on original, and 4k models. All models are suspected incompatable.                                            |
 | Tapo                         |      ✅      |      ❌      | Many models supported, ONVIF Service Port: 2020                                                                                                 |
