@@ -122,10 +122,10 @@ export default function SetPasswordDialog({
             {/* Password strength indicator */}
             {password && (
               <div className="mt-2 space-y-1">
-                <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-secondary-foreground">
                   <div
                     className={`${getStrengthColor()} transition-all duration-300`}
-                    style={{ width: `${(passwordStrength / 4) * 100}%` }}
+                    style={{ width: `${(passwordStrength / 3) * 100}%` }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">

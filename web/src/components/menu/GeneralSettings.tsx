@@ -84,16 +84,19 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   const handlePasswordSave = async (password: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
-    try {
-      await axios.put(
-        `/users/${profile.username}/password`,
-        { password },
-        { withCredentials: true },
-      );
-      setPasswordDialogOpen(false);
-    } catch (error) {
-      toast.error("Error setting password.", { position: "top-center" });
-    }
+    axios
+      .put(`users/${profile.username}/password`, { password })
+      .then((response) => {
+        if (response.status === 200) {
+          setPasswordDialogOpen(false);
+          toast.success("Password updated successfully.", {
+            position: "top-center",
+          });
+        }
+      })
+      .catch(() => {
+        toast.error("Error setting password.", { position: "top-center" });
+      });
   };
 
   return (
