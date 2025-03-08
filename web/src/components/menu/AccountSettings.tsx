@@ -95,7 +95,8 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       >
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
           <DropdownMenuLabel>
-            Current User: {profile?.username || "anonymous"}
+            Current User: {profile?.username || "anonymous"}{" "}
+            {profile?.role && `(${profile.role})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
           {profile?.username && profile.username !== "anonymous" && (

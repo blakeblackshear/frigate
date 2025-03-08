@@ -149,7 +149,8 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             {isMobile && (
               <div className="mb-2">
                 <DropdownMenuLabel>
-                  Current User: {profile?.username || "anonymous"}
+                  Current User: {profile?.username || "anonymous"}{" "}
+                  {profile?.role && `(${profile.role})`}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator
                   className={isDesktop ? "mt-3" : "mt-1"}
