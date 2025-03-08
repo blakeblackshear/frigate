@@ -171,10 +171,13 @@ export default function CameraSettingsView({
           }
         })
         .catch((error) => {
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);

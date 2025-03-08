@@ -93,16 +93,13 @@ function Exports() {
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to rename export: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to rename export: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to rename export: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [mutate],

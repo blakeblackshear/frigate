@@ -99,16 +99,13 @@ export default function FaceLibrary() {
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to upload image: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to upload image: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to upload image: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [pageToggle, refreshFaces],
@@ -132,16 +129,13 @@ export default function FaceLibrary() {
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to set face name: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to set face name: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to set face name: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [refreshFaces],
@@ -308,15 +302,13 @@ function FaceAttempt({
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(`Failed to train: ${error.response.data.message}`, {
-              position: "top-center",
-            });
-          } else {
-            toast.error(`Failed to train: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to train: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [image, onRefresh],
@@ -334,18 +326,13 @@ function FaceAttempt({
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to update score: ${error.response.data.message}`,
-            {
-              position: "top-center",
-            },
-          );
-        } else {
-          toast.error(`Failed to update score: ${error.message}`, {
-            position: "top-center",
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to update face score: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [image, onRefresh]);
 
@@ -361,15 +348,13 @@ function FaceAttempt({
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(`Failed to delete: ${error.response.data.message}`, {
-            position: "top-center",
-          });
-        } else {
-          toast.error(`Failed to delete: ${error.message}`, {
-            position: "top-center",
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [image, onRefresh]);
 
@@ -478,15 +463,13 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(`Failed to delete: ${error.response.data.message}`, {
-            position: "top-center",
-          });
-        } else {
-          toast.error(`Failed to delete: ${error.message}`, {
-            position: "top-center",
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [name, image, onRefresh]);
 

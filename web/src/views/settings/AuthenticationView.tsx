@@ -60,66 +60,102 @@ export default function AuthenticationView() {
           });
         }
       })
-      .catch(() => {
-        toast.error("Error setting password", { position: "top-center" });
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to save password: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, []);
 
-  const onCreate = async (
+  const onCreate = (
     user: string,
     password: string,
     role: "admin" | "viewer",
   ) => {
-    try {
-      await axios.post("users", { username: user, password, role });
-      setShowCreate(false);
-      mutateUsers((users) => {
-        users?.push({ username: user, role: role });
-        return users;
-      }, false);
-      toast.success(`User ${user} created successfully`, {
-        position: "top-center",
+    axios
+      .post("users", { username: user, password, role })
+      .then((response) => {
+        if (response.status === 200 || response.status === 201) {
+          setShowCreate(false);
+          mutateUsers((users) => {
+            users?.push({ username: user, role: role });
+            return users;
+          }, false);
+          toast.success(`User ${user} created successfully`, {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to create user: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
-    } catch (error) {
-      toast.error("Error creating user. Check server logs.", {
-        position: "top-center",
-      });
-    }
   };
 
-  const onDelete = async (user: string) => {
-    try {
-      await axios.delete(`users/${user}`);
-      setShowDelete(false);
-      mutateUsers((users) => users?.filter((u) => u.username !== user), false);
-      toast.success(`User ${user} deleted successfully`, {
-        position: "top-center",
+  const onDelete = (user: string) => {
+    axios
+      .delete(`users/${user}`)
+      .then((response) => {
+        if (response.status === 200) {
+          setShowDelete(false);
+          mutateUsers(
+            (users) => users?.filter((u) => u.username !== user),
+            false,
+          );
+          toast.success(`User ${user} deleted successfully`, {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete user: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
-    } catch (error) {
-      toast.error("Error deleting user. Check server logs.", {
-        position: "top-center",
-      });
-    }
   };
 
-  const onChangeRole = async (user: string, newRole: "admin" | "viewer") => {
+  const onChangeRole = (user: string, newRole: "admin" | "viewer") => {
     if (user === "admin") return; // Prevent role change for 'admin'
-    try {
-      await axios.put(`users/${user}/role`, { role: newRole });
-      mutateUsers(
-        (users) =>
-          users?.map((u) =>
-            u.username === user ? { ...u, role: newRole } : u,
-          ),
-        false,
-      );
-      setShowRoleChange(false);
-      toast.success(`Role updated for ${user}`, { position: "top-center" });
-    } catch (error) {
-      toast.error("Error updating role. Check server logs.", {
-        position: "top-center",
+
+    axios
+      .put(`users/${user}/role`, { role: newRole })
+      .then((response) => {
+        if (response.status === 200) {
+          setShowRoleChange(false);
+          mutateUsers(
+            (users) =>
+              users?.map((u) =>
+                u.username === user ? { ...u, role: newRole } : u,
+              ),
+            false,
+          );
+          toast.success(`Role updated for ${user}`, {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to update role: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
-    }
   };
 
   if (!config || !users) {

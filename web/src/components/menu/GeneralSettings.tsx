@@ -94,8 +94,14 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           });
         }
       })
-      .catch(() => {
-        toast.error("Error setting password.", { position: "top-center" });
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Error setting password: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   };
 
