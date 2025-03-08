@@ -220,7 +220,7 @@ def require_role(required_roles: List[str]):
         if not any(role in required_roles for role in roles):
             raise HTTPException(
                 status_code=403,
-                detail=f"Role not authorized. Roles: {roles}, Required: {required_roles}",
+                detail=f"Role {', '.join(roles)} not authorized. Required: {', '.join(required_roles)}",
             )
 
         # Return the first matching role
