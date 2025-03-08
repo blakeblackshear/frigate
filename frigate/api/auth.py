@@ -242,9 +242,6 @@ def auth(request: Request):
     if int(request.headers.get("x-server-port", default=0)) == 5000:
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
-        print(
-            f"port 5000, returning success response, {dict(success_response.headers)}"
-        )
         return success_response
 
     fail_response = Response("", status_code=401)
