@@ -394,8 +394,12 @@ function ObjectDetailsTab({
           },
         );
       })
-      .catch(() => {
-        toast.error("Failed to update the description", {
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to update the description: ${errorMessage}`, {
           position: "top-center",
         });
         setDesc(search.data.description);
@@ -422,11 +426,13 @@ function ObjectDetailsTab({
           }
         })
         .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
           toast.error(
-            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description: ${error.response.data.message}`,
-            {
-              position: "top-center",
-            },
+            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description: ${errorMessage}`,
+            { position: "top-center" },
           );
         });
     },
@@ -492,8 +498,12 @@ function ObjectDetailsTab({
             setIsSubLabelDialogOpen(false);
           }
         })
-        .catch(() => {
-          toast.error("Failed to update sub label.", {
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to update sub label: ${errorMessage}`, {
             position: "top-center",
           });
         });
