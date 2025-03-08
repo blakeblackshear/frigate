@@ -1,7 +1,7 @@
 aiofiles == 24.1.*
 click == 8.1.*
 # FastAPI
-aiohttp == 3.11.2
+aiohttp == 3.11.3
 starlette == 0.41.2
 starlette-context == 0.3.6
 fastapi == 0.115.*
@@ -20,9 +20,9 @@ pandas == 2.2.*
 peewee == 3.17.*
 peewee_migrate == 1.13.*
 psutil == 6.1.*
-pydantic == 2.8.*
+pydantic == 2.10.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
-pytz == 2024.*
+pytz == 2025.*
 pyzmq == 26.2.*
 ruamel.yaml == 0.18.*
 tzlocal == 5.2
@@ -34,8 +34,8 @@ ws4py == 0.5.*
 unidecode == 1.3.*
 # Image Manipulation
 numpy == 1.26.*
-opencv-python-headless == 4.10.0.*
-opencv-contrib-python == 4.9.0.*
+opencv-python-headless == 4.11.0.*
+opencv-contrib-python == 4.11.0.*
 scipy == 1.14.*
 # OpenVino & ONNX
 openvino == 2024.4.*
@@ -46,7 +46,7 @@ transformers == 4.45.*
 # Generative AI
 google-generativeai == 0.8.*
 ollama == 0.3.*
-openai == 1.51.*
+openai == 1.65.*
 # push notifications
 py-vapid == 1.9.*
 pywebpush == 2.0.*
