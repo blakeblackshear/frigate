@@ -172,7 +172,7 @@ class TestHttp(unittest.TestCase):
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
-            client.delete(f"/events/{id}")
+            client.delete(f"/events/{id}", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event == "Event not found"
 
@@ -192,12 +192,12 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            client.post(f"/events/{id}/retain")
+            client.post(f"/events/{id}/retain", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is True
-            client.delete(f"/events/{id}/retain")
+            client.delete(f"/events/{id}/retain", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
@@ -262,6 +262,7 @@ class TestHttp(unittest.TestCase):
             new_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": sub_label},
+                headers={"remote-role": "admin"},
             )
             assert new_sub_label_response.status_code == 200
             event = client.get(f"/events/{id}").json()
@@ -271,6 +272,7 @@ class TestHttp(unittest.TestCase):
             empty_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": ""},
+                headers={"remote-role": "admin"},
             )
             assert empty_sub_label_response.status_code == 200
             event = client.get(f"/events/{id}").json()
@@ -298,6 +300,7 @@ class TestHttp(unittest.TestCase):
             client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": sub_label},
+                headers={"remote-role": "admin"},
             )
             sub_labels = client.get("/sub_labels").json()
             assert sub_labels

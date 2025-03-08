@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -708,7 +709,11 @@ def event(event_id: str):
         return JSONResponse(content="Event not found", status_code=404)
 
 
-@router.post("/events/{event_id}/retain", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -928,7 +933,11 @@ def false_positive(request: Request, event_id: str):
     )
 
 
-@router.delete("/events/{event_id}/retain", response_model=GenericResponse)
+@router.delete(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -947,7 +956,11 @@ def delete_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/sub_label", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/sub_label",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_sub_label(
     request: Request,
     event_id: str,
@@ -1022,7 +1035,11 @@ def set_sub_label(
     )
 
 
-@router.post("/events/{event_id}/description", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/description",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_description(
     request: Request,
     event_id: str,
@@ -1069,7 +1086,11 @@ def set_description(
     )
 
 
-@router.put("/events/{event_id}/description/regenerate", response_model=GenericResponse)
+@router.put(
+    "/events/{event_id}/description/regenerate",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
@@ -1137,14 +1158,22 @@ def delete_single_event(event_id: str, request: Request) -> dict:
     return {"success": True, "message": f"Event {event_id} deleted"}
 
 
-@router.delete("/events/{event_id}", response_model=GenericResponse)
+@router.delete(
+    "/events/{event_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_event(request: Request, event_id: str):
     result = delete_single_event(event_id, request)
     status_code = 200 if result["success"] else 404
     return JSONResponse(content=result, status_code=status_code)
 
 
-@router.delete("/events/", response_model=EventMultiDeleteResponse)
+@router.delete(
+    "/events/",
+    response_model=EventMultiDeleteResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_events(request: Request, body: EventsDeleteBody):
     if not body.event_ids:
         return JSONResponse(
@@ -1170,7 +1199,11 @@ def delete_events(request: Request, body: EventsDeleteBody):
     return JSONResponse(content=response, status_code=200)
 
 
-@router.post("/events/{camera_name}/{label}/create", response_model=EventCreateResponse)
+@router.post(
+    "/events/{camera_name}/{label}/create",
+    response_model=EventCreateResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def create_event(
     request: Request,
     camera_name: str,
@@ -1226,7 +1259,11 @@ def create_event(
     )
 
 
-@router.put("/events/{event_id}/end", response_model=GenericResponse)
+@router.put(
+    "/events/{event_id}/end",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()

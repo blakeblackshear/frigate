@@ -40,6 +40,7 @@ import UiSettingsView from "@/views/settings/UiSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const allSettingsViews = [
   "UI settings",
@@ -61,6 +62,15 @@ export default function Settings() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [searchParams] = useSearchParams();
+
+  // auth and roles
+
+  const isAdmin = useIsAdmin();
+
+  const allowedViewsForViewer: SettingsType[] = ["UI settings", "debug"];
+  const visibleSettingsViews = !isAdmin
+    ? allowedViewsForViewer
+    : allSettingsViews;
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -149,7 +159,12 @@ export default function Settings() {
 
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
-      setPage(page as SettingsType);
+      // Restrict viewer to UI settings
+      if (!isAdmin && !["UI settings", "debug"].includes(page)) {
+        setPage("UI settings");
+      } else {
+        setPage(page as SettingsType);
+      }
     }
     // don't clear url params if we're creating a new object mask
     return !searchParams.has("object_mask");
@@ -180,11 +195,16 @@ export default function Settings() {
               value={pageToggle}
               onValueChange={(value: SettingsType) => {
                 if (value) {
-                  setPageToggle(value);
+                  // Restrict viewer navigation
+                  if (!isAdmin && !["UI settings", "debug"].includes(value)) {
+                    setPageToggle("UI settings");
+                  } else {
+                    setPageToggle(value);
+                  }
                 }
               }}
             >
-              {Object.values(allSettingsViews).map((item) => (
+              {visibleSettingsViews.map((item) => (
                 <ToggleGroupItem
                   key={item}
                   className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}

@@ -22,6 +22,7 @@ from markupsafe import escape
 from peewee import operator
 from pydantic import ValidationError
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
@@ -201,7 +202,7 @@ def config_raw():
         )
 
 
-@router.post("/config/save")
+@router.post("/config/save", dependencies=[Depends(require_role(["admin"]))])
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     new_config = body.decode()
     if not new_config:
@@ -326,7 +327,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-@router.put("/config/set")
+@router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
 
@@ -542,7 +543,7 @@ async def logs(
         )
 
 
-@router.post("/restart")
+@router.post("/restart", dependencies=[Depends(require_role(["admin"]))])
 def restart():
     try:
         restart_frigate()

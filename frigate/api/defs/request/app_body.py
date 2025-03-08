@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -12,8 +14,13 @@ class AppPutPasswordBody(BaseModel):
 class AppPostUsersBody(BaseModel):
     username: str
     password: str
+    role: Optional[str] = "viewer"
 
 
 class AppPostLoginBody(BaseModel):
     user: str
     password: str
+
+
+class AppPutRoleBody(BaseModel):
+    role: str

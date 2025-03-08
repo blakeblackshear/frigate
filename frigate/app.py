@@ -620,6 +620,7 @@ class FrigateApp:
                 )
                 User.replace(
                     username="admin",
+                    role="admin",
                     password_hash=password_hash,
                     notification_tokens=[],
                 ).execute()

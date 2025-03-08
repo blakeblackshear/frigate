@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -343,7 +344,11 @@ def set_multiple_reviewed(body: ReviewModifyMultipleBody):
     )
 
 
-@router.post("/reviews/delete", response_model=GenericResponse)
+@router.post(
+    "/reviews/delete",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_reviews(body: ReviewModifyMultipleBody):
     list_of_ids = body.ids
     reviews = (
