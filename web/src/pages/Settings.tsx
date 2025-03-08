@@ -20,7 +20,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import { isMobile } from "react-device-detect";
+import { isMobile, isMobileSafari } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -40,6 +40,8 @@ import UiSettingsView from "@/views/settings/UiSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
+import { isInIframe } from "@/utils/isIFrame";
+import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const allSettingsViews = [
@@ -150,7 +152,7 @@ export default function Settings() {
       );
       if (element instanceof HTMLElement) {
         scrollIntoView(element, {
-          behavior: "smooth",
+          behavior: isMobileSafari && !isPWA && isInIframe ? "auto" : "smooth",
           inline: "start",
         });
       }
