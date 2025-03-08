@@ -136,7 +136,7 @@ def get_jwt_secret() -> str:
             logger.debug("Using jwt secret from .jwt_secret file in config directory.")
             with open(jwt_secret_file) as f:
                 try:
-                    jwt_secret = f.readline()
+                    jwt_secret = f.readline().strip()
                 except Exception:
                     logger.warning(
                         "Unable to read jwt token from .jwt_secret file in config directory. A new jwt token will be created at each startup."
