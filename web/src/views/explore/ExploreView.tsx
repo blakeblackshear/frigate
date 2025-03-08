@@ -3,7 +3,7 @@ import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
 import { cn } from "@/lib/utils";
-import { LuArrowRightCircle } from "react-icons/lu";
+import { BsArrowRightCircle } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import {
   Tooltip,
@@ -183,7 +183,7 @@ function ThumbnailRow({
         >
           <Tooltip>
             <TooltipTrigger>
-              <LuArrowRightCircle
+              <BsArrowRightCircle
                 className="ml-2 text-secondary-foreground transition-all duration-300 hover:text-primary"
                 size={24}
               />
@@ -262,7 +262,7 @@ function ExploreThumbnailImage({
           }
           loading={isSafari ? "eager" : "lazy"}
           draggable={false}
-          src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
+          src={`${apiHost}api/events/${event.id}/thumbnail.webp`}
           onClick={() => setSearchDetail(event)}
           onLoad={onImgLoad}
           alt={`${event.label} thumbnail`}

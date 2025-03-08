@@ -99,18 +99,21 @@ export default function ExportDialog({
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(`Failed to start export: ${error.message}`, {
-            position: "top-center",
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to start export: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [camera, name, range, setRange, setName, setMode]);
+
+  const handleCancel = useCallback(() => {
+    setName("");
+    setMode("none");
+    setRange(undefined);
+  }, [setMode, setRange]);
 
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
@@ -129,7 +132,7 @@ export default function ExportDialog({
         show={mode == "timeline"}
         onPreview={() => setShowPreview(true)}
         onSave={() => onStartExport()}
-        onCancel={() => setMode("none")}
+        onCancel={handleCancel}
       />
       <Overlay
         open={mode == "select"}
@@ -176,7 +179,7 @@ export default function ExportDialog({
             setName={setName}
             setRange={setRange}
             setMode={setMode}
-            onCancel={() => setMode("none")}
+            onCancel={handleCancel}
           />
         </Content>
       </Overlay>
@@ -234,6 +237,9 @@ export function ExportContent({
         case "24":
           now.setHours(now.getHours() - 24);
           start = now.getTime() / 1000;
+          break;
+        case "custom":
+          start = latestTime - 3600;
           break;
       }
 

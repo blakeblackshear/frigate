@@ -12,6 +12,10 @@ class HeaderMappingConfig(FrigateBaseModel):
     user: str = Field(
         default=None, title="Header name from upstream proxy to identify user."
     )
+    role: str = Field(
+        default=None,
+        title="Header name from upstream proxy to identify user role.",
+    )
 
 
 class ProxyConfig(FrigateBaseModel):

@@ -34,7 +34,7 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 ### Prerequisites
 
 - GNU make
-- Docker
+- Docker (including buildx plugin)
 - An extra detector (Coral, OpenVINO, etc.) is optional but recommended to simulate real world performance.
 
 :::note

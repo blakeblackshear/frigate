@@ -22,6 +22,7 @@ except ModuleNotFoundError:
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
@@ -57,7 +58,7 @@ class HailoDetector(DetectionApi):
         self.h8l_tensor_format = detector_config.model.input_tensor
         self.h8l_pixel_format = detector_config.model.input_pixel_format
         self.model_url = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.11.0/hailo8l/ssd_mobilenet_v1.hef"
-        self.cache_dir = "/config/model_cache/h8l_cache"
+        self.cache_dir = os.path.join(MODEL_CACHE_DIR, "h8l_cache")
         self.expected_model_filename = "ssd_mobilenet_v1.hef"
         output_type = "FLOAT32"
 

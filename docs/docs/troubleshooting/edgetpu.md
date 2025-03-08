@@ -10,6 +10,12 @@ There are many possible causes for a USB coral not being detected and some are O
 1. When the device is first plugged in and has not initialized it will appear as `1a6e:089a Global Unichip Corp.` when running `lsusb` or checking the hardware page in HA OS.
 2. Once initialized, the device will appear as `18d1:9302 Google Inc.` when running `lsusb` or checking the hardware page in HA OS.
 
+:::tip
+
+Using `lsusb` or checking the hardware page in HA OS will show as `1a6e:089a Global Unichip Corp.` until Frigate runs an inferance using the coral. So don't worry about the identification until after Frigate has attempted to detect the coral.
+
+:::
+
 If the coral does not initialize then Frigate can not interface with it. Some common reasons for the USB based Coral not initializing are:
 
 ### Not Enough Power
@@ -53,6 +59,10 @@ The most common reason for the PCIe Coral not being detected is that the driver 
 
 - In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
 - For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
+
+## Attempting to load TPU as pci & Fatal Python error: Illegal instruction
+
+This is an issue due to outdated gasket driver when being used with new linux kernels. Installing an updated driver from https://github.com/jnicolson/gasket-builder has been reported to fix the issue.
 
 ### Not detected on Raspberry Pi5
 

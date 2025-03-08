@@ -11,8 +11,9 @@ import secrets
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
 from peewee import DoesNotExist
@@ -22,6 +23,7 @@ from frigate.api.defs.request.app_body import (
     AppPostLoginBody,
     AppPostUsersBody,
     AppPutPasswordBody,
+    AppPutRoleBody,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import AuthConfig, ProxyConfig
@@ -169,8 +171,10 @@ def verify_password(password, password_hash):
     return secrets.compare_digest(password_hash, compare_hash)
 
 
-def create_encoded_jwt(user, expiration, secret):
-    return jwt.encode({"alg": "HS256"}, {"sub": user, "exp": expiration}, secret)
+def create_encoded_jwt(user, role, expiration, secret):
+    return jwt.encode(
+        {"alg": "HS256"}, {"sub": user, "role": role, "exp": expiration}, secret
+    )
 
 
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, secure):
@@ -184,7 +188,48 @@ def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, sec
     )
 
 
-# Endpoint for use with nginx auth_request
+async def get_current_user(request: Request):
+    JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
+    encoded_token = request.cookies.get(JWT_COOKIE_NAME)
+    if not encoded_token:
+        return JSONResponse(content={"message": "No JWT token found"}, status_code=401)
+
+    try:
+        token = jwt.decode(encoded_token, request.app.jwt_token)
+        if "sub" not in token.claims or "role" not in token.claims:
+            return JSONResponse(
+                content={"message": "Invalid JWT token"}, status_code=401
+            )
+        return {"username": token.claims["sub"], "role": token.claims["role"]}
+    except Exception as e:
+        logger.error(f"Error parsing JWT: {e}")
+        return JSONResponse(content={"message": "Invalid JWT token"}, status_code=401)
+
+
+def require_role(required_roles: List[str]):
+    async def role_checker(request: Request):
+        # Get role from header (could be comma-separated)
+        role_header = request.headers.get("remote-role")
+        roles = [r.strip() for r in role_header.split(",")] if role_header else []
+
+        # Check if we have any roles
+        if not roles:
+            raise HTTPException(status_code=403, detail="Role not provided")
+
+        # Check if any role matches required_roles
+        if not any(role in required_roles for role in roles):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role {', '.join(roles)} not authorized. Required: {', '.join(required_roles)}",
+            )
+
+        # Return the first matching role
+        return next((role for role in roles if role in required_roles), roles[0])
+
+    return role_checker
+
+
+# Endpoints
 @router.get("/auth")
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
@@ -195,6 +240,8 @@ def auth(request: Request):
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
     if int(request.headers.get("x-server-port", default=0)) == 5000:
+        success_response.headers["remote-user"] = "anonymous"
+        success_response.headers["remote-role"] = "admin"
         return success_response
 
     fail_response = Response("", status_code=401)
@@ -211,14 +258,18 @@ def auth(request: Request):
     if not auth_config.enabled:
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
-        if proxy_config.header_map.user is not None:
-            upstream_user_header_value = request.headers.get(
-                proxy_config.header_map.user,
-                default="anonymous",
-            )
-            success_response.headers["remote-user"] = upstream_user_header_value
-        else:
-            success_response.headers["remote-user"] = "anonymous"
+        user_header = proxy_config.header_map.user
+        role_header = proxy_config.header_map.get("role", "Remote-Role")
+        success_response.headers["remote-user"] = (
+            request.headers.get(user_header, default="anonymous")
+            if user_header
+            else "anonymous"
+        )
+        success_response.headers["remote-role"] = (
+            request.headers.get(role_header, default="viewer")
+            if role_header
+            else "viewer"
+        )
         return success_response
 
     # now apply authentication
@@ -251,11 +302,15 @@ def auth(request: Request):
         if "sub" not in token.claims:
             logger.debug("user not set in jwt token")
             return fail_response
+        if "role" not in token.claims:
+            logger.debug("role not set in jwt token")
+            return fail_response
         if "exp" not in token.claims:
             logger.debug("exp not set in jwt token")
             return fail_response
 
         user = token.claims.get("sub")
+        role = token.claims.get("role")
         current_time = int(time.time())
 
         # if the jwt is expired
@@ -283,7 +338,7 @@ def auth(request: Request):
                 return fail_response
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
-                user, new_expiration, request.app.jwt_token
+                user, role, new_expiration, request.app.jwt_token
             )
             set_jwt_cookie(
                 success_response,
@@ -294,6 +349,7 @@ def auth(request: Request):
             )
 
         success_response.headers["remote-user"] = user
+        success_response.headers["remote-role"] = role
         return success_response
     except Exception as e:
         logger.error(f"Error parsing jwt: {e}")
@@ -302,8 +358,16 @@ def auth(request: Request):
 
 @router.get("/profile")
 def profile(request: Request):
-    username = request.headers.get("remote-user")
-    return JSONResponse(content={"username": username})
+    username = request.headers.get("remote-user", "anonymous")
+    if username != "anonymous":
+        try:
+            user = User.get_by_id(username)
+            role = getattr(user, "role", "viewer")
+        except DoesNotExist:
+            role = "viewer"  # Fallback if user deleted
+    else:
+        role = None
+    return JSONResponse(content={"username": username, "role": role})
 
 
 @router.get("/logout")
@@ -333,8 +397,11 @@ def login(request: Request, body: AppPostLoginBody):
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
+        role = getattr(db_user, "role", "viewer")
+        if role not in ["admin", "viewer"]:
+            role = "viewer"  # Enforce valid roles
         expiration = int(time.time()) + JWT_SESSION_LENGTH
-        encoded_jwt = create_encoded_jwt(user, expiration, request.app.jwt_token)
+        encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
@@ -343,25 +410,31 @@ def login(request: Request, body: AppPostLoginBody):
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
-@router.get("/users")
+@router.get("/users", dependencies=[Depends(require_role(["admin"]))])
 def get_users():
-    exports = User.select(User.username).order_by(User.username).dicts().iterator()
+    exports = (
+        User.select(User.username, User.role).order_by(User.username).dicts().iterator()
+    )
     return JSONResponse([e for e in exports])
 
 
-@router.post("/users")
-def create_user(request: Request, body: AppPostUsersBody):
+@router.post("/users", dependencies=[Depends(require_role(["admin"]))])
+def create_user(
+    request: Request,
+    body: AppPostUsersBody,
+):
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
     if not re.match("^[A-Za-z0-9._]+$", body.username):
-        JSONResponse(content={"message": "Invalid username"}, status_code=400)
+        return JSONResponse(content={"message": "Invalid username"}, status_code=400)
 
+    role = body.role if body.role in ["admin", "viewer"] else "viewer"
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
-
     User.insert(
         {
             User.username: body.username,
             User.password_hash: password_hash,
+            User.role: role,
             User.notification_tokens: [],
         }
     ).execute()
@@ -375,15 +448,61 @@ def delete_user(username: str):
 
 
 @router.put("/users/{username}/password")
-def update_password(request: Request, username: str, body: AppPutPasswordBody):
+async def update_password(
+    request: Request,
+    username: str,
+    body: AppPutPasswordBody,
+):
+    current_user = await get_current_user(request)
+    if isinstance(current_user, JSONResponse):
+        # auth failed
+        return current_user
+
+    current_username = current_user.get("username")
+    current_role = current_user.get("role")
+
+    # viewers can only change their own password
+    if current_role == "viewer" and current_username != username:
+        raise HTTPException(
+            status_code=403, detail="Viewers can only update their own password"
+        )
+
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
+    User.set_by_id(username, {User.password_hash: password_hash})
 
-    User.set_by_id(
-        username,
-        {
-            User.password_hash: password_hash,
-        },
-    )
+    return JSONResponse(content={"success": True})
+
+
+@router.put(
+    "/users/{username}/role",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+async def update_role(
+    request: Request,
+    username: str,
+    body: AppPutRoleBody,
+):
+    current_user = await get_current_user(request)
+    if isinstance(current_user, JSONResponse):
+        # auth failed
+        return current_user
+
+    current_role = current_user.get("role")
+    # viewers can't change anyone's role
+    if current_role == "viewer":
+        raise HTTPException(
+            status_code=403, detail="Admin role is required to change user roles"
+        )
+    if username == "admin":
+        return JSONResponse(
+            content={"message": "Cannot modify admin user's role"}, status_code=403
+        )
+    if body.role not in ["admin", "viewer"]:
+        return JSONResponse(
+            content={"message": "Role must be 'admin' or 'viewer'"}, status_code=400
+        )
+
+    User.set_by_id(username, {User.role: body.role})
     return JSONResponse(content={"success": True})

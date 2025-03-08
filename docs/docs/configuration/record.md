@@ -183,6 +183,8 @@ record:
   sync_recordings: True
 ```
 
+This feature is meant to fix variations in files, not completely delete entries in the database. If you delete all of your media, don't use `sync_recordings`, just stop Frigate, delete the `frigate.db` database, and restart.
+
 :::warning
 
 The sync operation uses considerable CPU resources and in most cases is not needed, only enable when necessary.
