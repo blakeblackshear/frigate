@@ -129,7 +129,9 @@ export default function UiSettingsView() {
                   onCheckedChange={setAlertVideos}
                 />
                 <Label className="cursor-pointer" htmlFor="images-only">
-                  <Trans ns="views/settings">general.liveDashboard.playAlertVideos.label</Trans>
+                  <Trans ns="views/settings">
+                    general.liveDashboard.playAlertVideos.label
+                  </Trans>
                 </Label>
               </div>
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
@@ -264,7 +266,7 @@ export default function UiSettingsView() {
                 {t(
                   "general.calendar.firstWeekday." +
                     WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase(),
-                    {ns: "views/settings"}
+                  { ns: "views/settings" },
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -275,11 +277,9 @@ export default function UiSettingsView() {
                       className="cursor-pointer"
                       value={index.toString()}
                     >
-                      {t(
-                        "general.calendar.firstWeekday." +
-                          day.toLowerCase(),
-                          {ns: "views/settings"}
-                      )}
+                      {t("general.calendar.firstWeekday." + day.toLowerCase(), {
+                        ns: "views/settings",
+                      })}
                     </SelectItem>
                   ))}
                 </SelectGroup>

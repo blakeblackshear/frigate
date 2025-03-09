@@ -121,7 +121,10 @@ function Exports() {
               <Trans ns="views/exports">deleteExport</Trans>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <Trans ns="views/exports" values={{ exportName: deleteClip?.exportName }}>
+              <Trans
+                ns="views/exports"
+                values={{ exportName: deleteClip?.exportName }}
+              >
                 deleteExport.desc
               </Trans>
             </AlertDialogDescription>

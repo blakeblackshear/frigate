@@ -64,6 +64,7 @@
     "info": "Info"
   },
   "menu": {
+    "system": "System",
     "systemMetrics": "System metrics",
     "configuration": "Configuration",
     "systemLogs": "System logs",
@@ -112,5 +113,11 @@
       "error": "Failed to save config changes: {{errorMessage}}",
       "error.noMessage": "Failed to save config changes"
     }
+  },
+  "role": {
+    "title": "Role",
+    "admin": "Admin",
+    "viewer": "Viewer",
+    "desc": "Admins have full access to all features in the Frigate UI. Viewers are limited to viewing cameras, review items, and historical footage in the UI."
   }
 }

@@ -11,6 +11,7 @@ import {
   LuSettings,
   LuSun,
   LuSunMoon,
+  LuEarth,
 } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -195,7 +196,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             )}
             {isAdmin && (
               <>
-                <DropdownMenuLabel><Trans>menu.system</Trans></DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  <Trans>menu.system</Trans>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
                   <Link to="/system#general">
@@ -208,7 +211,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       aria-label="System metrics"
                     >
                       <LuActivity className="mr-2 size-4" />
-                      <span><Trans>menu.systemMetrics</Trans></span>
+                      <span>
+                        <Trans>menu.systemMetrics</Trans>
+                      </span>
                     </MenuItem>
                   </Link>
                   <Link to="/logs">
@@ -221,7 +226,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       aria-label="System logs"
                     >
                       <LuList className="mr-2 size-4" />
-                      <span><Trans>menu.systemLogs</Trans></span>
+                      <span>
+                        <Trans>menu.systemLogs</Trans>
+                      </span>
                     </MenuItem>
                   </Link>
                 </DropdownMenuGroup>
@@ -261,7 +268,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       aria-label="Configuration editor"
                     >
                       <LuSquarePen className="mr-2 size-4" />
-                      <span><Trans>menu.configurationEditor</Trans></span>
+                      <span>
+                        <Trans>menu.configurationEditor</Trans>
+                      </span>
                     </MenuItem>
                   </Link>
                 </>
@@ -277,8 +286,91 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
               >
+                <LuLanguages className="mr-2 size-4" />
+                <span>
+                  <Trans>menu.languages</Trans>
+                </span>
+              </SubItemTrigger>
+              <Portal>
+                <SubItemContent
+                  className={
+                    isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                  }
+                >
+                  <span tabIndex={0} className="sr-only" />
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label="Light mode"
+                    onClick={() => setLanguage("en")}
+                  >
+                    {language.trim() === "en" ? (
+                      <>
+                        <LuLanguages className="mr-2 size-4" />
+                        <Trans>menu.language.en</Trans>
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.language.en</Trans>
+                      </span>
+                    )}
+                  </MenuItem>
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label="Dark mode"
+                    onClick={() => setLanguage("zh-CN")}
+                  >
+                    {language === "zh-CN" ? (
+                      <>
+                        <LuLanguages className="mr-2 size-4" />
+                        <Trans>menu.language.zhCN</Trans>
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.language.zhCN</Trans>
+                      </span>
+                    )}
+                  </MenuItem>
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label="Use the system settings for light or dark mode"
+                    onClick={() => setLanguage(systemLanguage)}
+                  >
+                    {language === systemLanguage ? (
+                      <>
+                        <LuEarth className="mr-2 size-4 scale-100 transition-all" />
+                        <Trans>menu.withSystem</Trans>
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.withSystem</Trans>
+                      </span>
+                    )}
+                  </MenuItem>
+                </SubItemContent>
+              </Portal>
+            </SubItem>
+            <SubItem>
+              <SubItemTrigger
+                className={
+                  isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
+                }
+              >
                 <LuSunMoon className="mr-2 size-4" />
-                <span><Trans>menu.darkMode.label</Trans></span>
+                <span>
+                  <Trans>menu.darkMode.label</Trans>
+                </span>
               </SubItemTrigger>
               <Portal>
                 <SubItemContent
@@ -302,7 +394,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         <Trans>menu.darkMode.light</Trans>
                       </>
                     ) : (
-                      <span className="ml-6 mr-2"><Trans>menu.darkMode.light</Trans></span>
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.darkMode.light</Trans>
+                      </span>
                     )}
                   </MenuItem>
                   <MenuItem
@@ -320,7 +414,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         <Trans>menu.darkMode.dark</Trans>
                       </>
                     ) : (
-                      <span className="ml-6 mr-2"><Trans>menu.darkMode.dark</Trans></span>
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.darkMode.dark</Trans>
+                      </span>
                     )}
                   </MenuItem>
                   <MenuItem
@@ -338,7 +434,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         <Trans>menu.withSystem</Trans>
                       </>
                     ) : (
-                      <span className="ml-6 mr-2"><Trans>menu.withSystem</Trans></span>
+                      <span className="ml-6 mr-2">
+                        <Trans>menu.withSystem</Trans>
+                      </span>
                     )}
                   </MenuItem>
                 </SubItemContent>
@@ -351,7 +449,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 }
               >
                 <LuSunMoon className="mr-2 size-4" />
-                <span><Trans>menu.theme.label</Trans></span>
+                <span>
+                  <Trans>menu.theme.label</Trans>
+                </span>
               </SubItemTrigger>
               <Portal>
                 <SubItemContent
@@ -432,7 +532,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   onClick={() => setRestartDialogOpen(true)}
                 >
                   <LuRotateCw className="mr-2 size-4" />
-                  <span><Trans>menu.restart</Trans></span>
+                  <span>
+                    <Trans>menu.restart</Trans>
+                  </span>
                 </MenuItem>
               </>
             )}

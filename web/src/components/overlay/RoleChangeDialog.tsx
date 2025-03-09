@@ -1,3 +1,4 @@
+import { Trans } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -41,27 +42,16 @@ export default function RoleChangeDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            Change User Role
+            <Trans ns="views/settings">users.dialog.changeRole.title</Trans>
           </DialogTitle>
           <DialogDescription>
-            Update permissions for{" "}
-            <span className="font-medium">{username}</span>
+            <Trans ns="views/settings" values={{username}}>users.dialog.changeRole.desc</Trans>
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-6">
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Select the appropriate role for this user:</p>
-            <ul className="mt-2 space-y-1 pl-5">
-              <li>
-                • <span className="font-medium">Admin:</span> Full access to all
-                features.
-              </li>
-              <li>
-                • <span className="font-medium">Viewer:</span> Limited to Live
-                dashboards, Review, Explore, and Exports only.
-              </li>
-            </ul>
+            <Trans ns="views/settings">users.dialog.changeRole.roleInfo</Trans>
           </div>
 
           <Select
@@ -77,13 +67,13 @@ export default function RoleChangeDialog({
               <SelectItem value="admin" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuShield className="size-4 text-primary" />
-                  <span>Admin</span>
+                  <span><Trans>role.admin</Trans></span>
                 </div>
               </SelectItem>
               <SelectItem value="viewer" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuUser className="size-4 text-primary" />
-                  <span>Viewer</span>
+                  <span><Trans>role.viewer</Trans></span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -99,7 +89,7 @@ export default function RoleChangeDialog({
                 onClick={onCancel}
                 type="button"
               >
-                Cancel
+                <Trans>button.cancel</Trans>
               </Button>
               <Button
                 variant="select"
@@ -108,7 +98,7 @@ export default function RoleChangeDialog({
                 onClick={() => onSave(selectedRole)}
                 disabled={selectedRole === currentRole}
               >
-                Save
+                <Trans>button.save</Trans>
               </Button>
             </div>
           </div>

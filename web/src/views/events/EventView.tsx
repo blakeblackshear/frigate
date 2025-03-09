@@ -199,9 +199,12 @@ export default function EventView({
         )
         .then((response) => {
           if (response.status == 200) {
-            toast.success(t("export.toast.success", { ns: "components/dialog"}), {
-              position: "top-center",
-            });
+            toast.success(
+              t("export.toast.success", { ns: "components/dialog" }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -209,9 +212,15 @@ export default function EventView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-            toast.error(t("export.toast.error", { ns: "components/dialog", message: errorMessage }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("export.toast.error", {
+              ns: "components/dialog",
+              message: errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         });
     },
     [reviewItems],

@@ -76,7 +76,7 @@ export default function useStats(stats: FrigateStats | undefined) {
           text: t("stats.ffmpegHighCpuUsage", {
             camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
             ffmpegAvg,
-            ns: "views/system"
+            ns: "views/system",
           }), //`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
           color: "text-danger",
           relevantLink: "/system#cameras",
@@ -88,7 +88,7 @@ export default function useStats(stats: FrigateStats | undefined) {
           text: t("stats.detectHighCpuUsage", {
             camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
             detectAvg,
-            ns: "views/system"
+            ns: "views/system",
           }), //`${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
           color: "text-danger",
           relevantLink: "/system#cameras",

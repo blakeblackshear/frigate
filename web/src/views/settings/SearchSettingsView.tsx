@@ -100,12 +100,9 @@ export default function ExploreSettingsView({
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(
-            t("toast.save.error", { errorMessage: res.statusText }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.error(t("toast.save.error", { errorMessage: res.statusText }), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
@@ -113,11 +110,14 @@ export default function ExploreSettingsView({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("toast.save.error", {
-          errorMessage
-        }), {
-          position: "top-center",
-        });
+        toast.error(
+          t("toast.save.error", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       })
       .finally(() => {
         setIsLoading(false);
@@ -272,7 +272,7 @@ export default function ExploreSettingsView({
                 {t(
                   "explore.semanticSearch.modelSize." +
                     ExploreSettings.model_size,
-                  { ns: "views/settings"}
+                  { ns: "views/settings" },
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -283,11 +283,9 @@ export default function ExploreSettingsView({
                       className="cursor-pointer"
                       value={size}
                     >
-                      {t(
-                        "explore.semanticSearch.modelSize." +
-                          size,
-                        { ns: "views/settings"}
-                      )}
+                      {t("explore.semanticSearch.modelSize." + size, {
+                        ns: "views/settings",
+                      })}
                     </SelectItem>
                   ))}
                 </SelectGroup>

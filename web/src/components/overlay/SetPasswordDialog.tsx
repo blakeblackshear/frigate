@@ -79,10 +79,10 @@ export default function SetPasswordDialog({
 
   const getStrengthLabel = () => {
     if (!password) return "";
-    if (passwordStrength <= 1) return "Weak";
-    if (passwordStrength === 2) return "Medium";
-    if (passwordStrength === 3) return "Strong";
-    return "Very Strong";
+    if (passwordStrength <= 1) return t("users.dialog.form.password.strength.weak", { ns: "views/settings" });
+    if (passwordStrength === 2) return t("users.dialog.form.password.strength.medium", { ns: "views/settings" });
+    if (passwordStrength === 3) return t("users.dialog.form.password.strength.strong", { ns: "views/settings" });
+    return t("users.dialog.form.password.strength.veryStrong", { ns: "views/settings" });
   };
 
   const getStrengthColor = () => {
@@ -98,7 +98,14 @@ export default function SetPasswordDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-2">
           <DialogTitle>
-            {username ? t("users.dialog.passwordSetting.updatePassword", {username, ns: "views/settings"}) : t("users.dialog.passwordSetting.setPassword", {ns: "views/settings"})}
+            {username
+              ? t("users.dialog.passwordSetting.updatePassword", {
+                  username,
+                  ns: "views/settings",
+                })
+              : t("users.dialog.passwordSetting.setPassword", {
+                  ns: "views/settings",
+                })}
           </DialogTitle>
           <DialogDescription>
             <Trans ns="views/settings">users.dialog.passwordSetting.desc</Trans>
@@ -107,7 +114,9 @@ export default function SetPasswordDialog({
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="password"><Trans ns="views/settings">users.dialog.form.newPassword</Trans></Label>
+            <Label htmlFor="password">
+              <Trans ns="views/settings">users.dialog.form.newPassword</Trans>
+            </Label>
             <Input
               id="password"
               className="h-10"
@@ -117,7 +126,9 @@ export default function SetPasswordDialog({
                 setPassword(event.target.value);
                 setError(null);
               }}
-              placeholder={t("users.dialog.form.newPassword.placeholder", {ns: "views/settings"})}
+              placeholder={t("users.dialog.form.newPassword.placeholder", {
+                ns: "views/settings",
+              })}
               autoFocus
             />
 
@@ -131,7 +142,7 @@ export default function SetPasswordDialog({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Password strength:{" "}
+                  <Trans ns="views/settings">users.dialog.form.password.strength</Trans>
                   <span className="font-medium">{getStrengthLabel()}</span>
                 </p>
               </div>
@@ -139,7 +150,11 @@ export default function SetPasswordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password"><Trans ns="views/settings">users.dialog.form.password.confirm</Trans></Label>
+            <Label htmlFor="confirm-password">
+              <Trans ns="views/settings">
+                users.dialog.form.password.confirm
+              </Trans>
+            </Label>
             <Input
               id="confirm-password"
               className="h-10"
@@ -149,7 +164,7 @@ export default function SetPasswordDialog({
                 setConfirmPassword(event.target.value);
                 setError(null);
               }}
-              placeholder="Confirm new password"
+              placeholder={t("users.dialog.form.newPassword.confirm.placeholder", { ns: "views/settings"})}
             />
 
             {/* Password match indicator */}
@@ -158,12 +173,20 @@ export default function SetPasswordDialog({
                 {password === confirmPassword ? (
                   <>
                     <LuCheck className="size-3.5 text-green-500" />
-                    <span className="text-green-600"><Trans ns="views/settings">users.dialog.form.password.match</Trans></span>
+                    <span className="text-green-600">
+                      <Trans ns="views/settings">
+                        users.dialog.form.password.match
+                      </Trans>
+                    </span>
                   </>
                 ) : (
                   <>
                     <LuX className="size-3.5 text-red-500" />
-                    <span className="text-red-600"><Trans ns="views/settings">users.dialog.form.password.notMatch</Trans></span>
+                    <span className="text-red-600">
+                      <Trans ns="views/settings">
+                        users.dialog.form.password.notMatch
+                      </Trans>
+                    </span>
                   </>
                 )}
               </div>

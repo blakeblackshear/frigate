@@ -109,7 +109,9 @@ export default function ObjectMaskEditPane({
       polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {ns: "views/settings"}),
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
+        ns: "views/settings",
+      }),
       path: ["polygon.isFinished"],
     });
 
@@ -198,19 +200,13 @@ export default function ObjectMaskEditPane({
           if (res.status === 200) {
             toast.success(
               polygon.name
-                ? t(
-                    "masksAndZones.objectMasks.toast.success",
-                    {
-                      polygonName: polygon.name,
-                      ns: "views/settings"
-                    },
-                  )
-                : t(
-                    "masksAndZones.objectMasks.toast.success.noName",
-                    {
-                      ns: "views/settings"
-                    }
-                  ),
+                ? t("masksAndZones.objectMasks.toast.success", {
+                    polygonName: polygon.name,
+                    ns: "views/settings",
+                  })
+                : t("masksAndZones.objectMasks.toast.success.noName", {
+                    ns: "views/settings",
+                  }),
               {
                 position: "top-center",
               },
@@ -232,11 +228,14 @@ export default function ObjectMaskEditPane({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", {
-            errorMessage
-          }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -265,12 +264,9 @@ export default function ObjectMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = t(
-      "masksAndZones.objectMasks.documentTitle",
-      {
-        ns: "views/settings"
-      }
-    );
+    document.title = t("masksAndZones.objectMasks.documentTitle", {
+      ns: "views/settings",
+    });
   }, []);
 
   if (!polygon) {
@@ -283,17 +279,15 @@ export default function ObjectMaskEditPane({
       <Heading as="h3" className="my-2">
         {polygon.name.length
           ? t("masksAndZones.objectMasks.edit", {
-              ns: "views/settings"
-          })
+              ns: "views/settings",
+            })
           : t("masksAndZones.objectMasks.add", {
-              ns: "views/settings"
-          })}
+              ns: "views/settings",
+            })}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
-          <Trans ns="views/settings">
-            masksAndZones.objectMasks.context
-          </Trans>
+          <Trans ns="views/settings">masksAndZones.objectMasks.context</Trans>
         </p>
       </div>
       <Separator className="my-3 bg-secondary" />
@@ -302,7 +296,7 @@ export default function ObjectMaskEditPane({
           <div className="my-1 inline-flex">
             {t("masksAndZones.objectMasks.point", {
               count: polygons[activePolygonIndex].points.length,
-              ns: "views/settings"
+              ns: "views/settings",
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -474,7 +468,7 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (
           <SelectItem key={item} value={item}>
-            {t(item, {ns: "objects"})}
+            {t(item, { ns: "objects" })}
           </SelectItem>
         ))}
       </SelectGroup>

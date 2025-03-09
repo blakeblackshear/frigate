@@ -70,16 +70,26 @@ export default function ExportDialog({
 
   const onStartExport = useCallback(() => {
     if (!range) {
-      toast.error(t("export.toast.error.noVaildTimeSelected", {ns: "components/dialog"}), {
-        position: "top-center",
-      });
+      toast.error(
+        t("export.toast.error.noVaildTimeSelected", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
       return;
     }
 
     if (range.before < range.after) {
-      toast.error(t("export.toast.error.endTimeMustAfterStartTime", {ns: "components/dialog"}), {
-        position: "top-center",
-      });
+      toast.error(
+        t("export.toast.error.endTimeMustAfterStartTime", {
+          ns: "components/dialog",
+        }),
+        {
+          position: "top-center",
+        },
+      );
       return;
     }
 
@@ -93,9 +103,12 @@ export default function ExportDialog({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(t("export.toast.success", {ns: "components/dialog"}), {
-            position: "top-center",
-          });
+          toast.success(
+            t("export.toast.success", { ns: "components/dialog" }),
+            {
+              position: "top-center",
+            },
+          );
           setName("");
           setRange(undefined);
           setMode("none");
@@ -106,10 +119,13 @@ export default function ExportDialog({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-          toast.error(
-            t("export.toast.error.failed", { error: errorMessage, ns: "components/dialog" }),
-            { position: "top-center" },
-          );
+        toast.error(
+          t("export.toast.error.failed", {
+            error: errorMessage,
+            ns: "components/dialog",
+          }),
+          { position: "top-center" },
+        );
       });
   }, [camera, name, range, setRange, setName, setMode]);
 
@@ -290,11 +306,11 @@ export function ExportContent({
               <Label className="cursor-pointer capitalize" htmlFor={opt}>
                 {isNaN(parseInt(opt))
                   ? opt == "timeline"
-                    ? t("export.time.fromTimeline", {ns: "components/dialog"})
-                    : t("export.time." + opt, {ns: "components/dialog"})
+                    ? t("export.time.fromTimeline", { ns: "components/dialog" })
+                    : t("export.time." + opt, { ns: "components/dialog" })
                   : t("export.time.lastHour", {
                       count: parseInt(opt),
-                      ns: "components/dialog"
+                      ns: "components/dialog",
                     })}
               </Label>
             </div>
@@ -311,7 +327,7 @@ export function ExportContent({
       <Input
         className="text-md my-6"
         type="search"
-        placeholder={t("export.name.placeholder", {ns: "components/dialog"})}
+        placeholder={t("export.name.placeholder", { ns: "components/dialog" })}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
@@ -342,8 +358,8 @@ export function ExportContent({
           }}
         >
           {selectedOption == "timeline"
-            ? t("export.select", {ns: "components/dialog"})
-            : t("export.export", {ns: "components/dialog"})}
+            ? t("export.select", { ns: "components/dialog" })
+            : t("export.export", { ns: "components/dialog" })}
         </Button>
       </DialogFooter>
     </div>
@@ -598,10 +614,14 @@ export function ExportPreviewDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
+            <Trans ns="components/dialog">
+              export.fromTimeline.previewExport
+            </Trans>
           </DialogTitle>
           <DialogDescription className="sr-only">
-            <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
+            <Trans ns="components/dialog">
+              export.fromTimeline.previewExport
+            </Trans>
           </DialogDescription>
         </DialogHeader>
         <GenericVideoPlayer source={source} />

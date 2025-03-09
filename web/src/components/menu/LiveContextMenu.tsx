@@ -242,7 +242,10 @@ export default function LiveContextMenu({
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt: config?.ui.time_format == "24hour" ? t("time.formattedTimestampExcludeSeconds.24hour"): t("time.formattedTimestampExcludeSeconds"),
+      strftime_fmt:
+        config?.ui.time_format == "24hour"
+          ? t("time.formattedTimestampExcludeSeconds.24hour")
+          : t("time.formattedTimestampExcludeSeconds"),
     });
   };
 
@@ -359,7 +362,9 @@ export default function LiveContextMenu({
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
                   onClick={isEnabled ? resetPreferredLiveMode : undefined}
                 >
-                  <div className="text-primary"><Trans>button</Trans></div>
+                  <div className="text-primary">
+                    <Trans>button</Trans>
+                  </div>
                 </div>
               </ContextMenuItem>
             </>

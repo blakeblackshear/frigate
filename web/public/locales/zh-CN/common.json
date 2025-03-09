@@ -112,5 +112,11 @@
       "error": "保存配置信息失败： {{errorMessage}}",
       "error.noMessage": "保存配置信息失败"
     }
+  },
+  "role": {
+    "title": "权限组",
+    "admin": "管理员",
+    "viewer": "查看者",
+    "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
   }
 }

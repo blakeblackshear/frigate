@@ -74,9 +74,9 @@ export default function CameraInfoDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="capitalize">
-              {t("system.cameras.info.cameraProbeInfo", {
+              {t("cameras.info.cameraProbeInfo", {
                 camera: camera.name.replaceAll("_", " "),
-                ns: "views/system"
+                ns: "views/system",
               })}
             </DialogTitle>
           </DialogHeader>
@@ -90,7 +90,10 @@ export default function CameraInfoDialog({
                 {ffprobeInfo.map((stream, idx) => (
                   <div key={idx} className="mb-5">
                     <div className="mb-1 rounded-md bg-secondary p-2 text-lg text-primary">
-                      {t("cameras.info.stream", { idx: idx + 1, ns: "views/system" })}
+                      {t("cameras.info.stream", {
+                        idx: idx + 1,
+                        ns: "views/system",
+                      })}
                     </div>
                     {stream.return_code == 0 ? (
                       <div>
@@ -99,11 +102,15 @@ export default function CameraInfoDialog({
                             {codec.width ? (
                               <div className="text-muted-foreground">
                                 <div className="ml-2">
-                                  <Trans ns="views/system">cameras.info.video</Trans>
+                                  <Trans ns="views/system">
+                                    cameras.info.video
+                                  </Trans>
                                 </div>
                                 <div className="ml-5">
                                   <div>
-                                    <Trans ns="views/system">cameras.info.codec</Trans>
+                                    <Trans ns="views/system">
+                                      cameras.info.codec
+                                    </Trans>
                                     <span className="text-primary">
                                       {" "}
                                       {codec.codec_long_name}
@@ -138,10 +145,14 @@ export default function CameraInfoDialog({
                                     )}
                                   </div>
                                   <div>
-                                    <Trans ns="views/system">cameras.info.fps</Trans>{" "}
+                                    <Trans ns="views/system">
+                                      cameras.info.fps
+                                    </Trans>{" "}
                                     <span className="text-primary">
                                       {codec.avg_frame_rate == "0/0"
-                                        ? t("cameras.info.unknown", { ns: "views/system" })
+                                        ? t("cameras.info.unknown", {
+                                            ns: "views/system",
+                                          })
                                         : codec.avg_frame_rate}
                                     </span>
                                   </div>
@@ -151,7 +162,9 @@ export default function CameraInfoDialog({
                               <div className="text-muted-foreground">
                                 <div className="ml-2 mt-1">Audio:</div>
                                 <div className="ml-4">
-                                  <Trans ns="views/system">cameras.info.codec</Trans>{" "}
+                                  <Trans ns="views/system">
+                                    cameras.info.codec
+                                  </Trans>{" "}
                                   <span className="text-primary">
                                     {codec.codec_long_name}
                                   </span>
@@ -166,7 +179,7 @@ export default function CameraInfoDialog({
                         <div>
                           {t("cameras.info.error", {
                             error: stream.stderr,
-                            ns: "views/system"
+                            ns: "views/system",
                           })}
                         </div>
                       </div>

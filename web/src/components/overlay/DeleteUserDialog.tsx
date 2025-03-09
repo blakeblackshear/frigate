@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
 } from "../ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
@@ -35,7 +34,9 @@ export default function DeleteUserDialog({
 
         <div className="my-4 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center text-sm">
           <p className="font-medium text-destructive">
-            <Trans ns="views/settings" values={{username}}>users.dialog.deleteUser.warn</Trans>
+            <Trans ns="views/settings" values={{ username }}>
+              users.dialog.deleteUser.warn
+            </Trans>
           </p>
         </div>
 

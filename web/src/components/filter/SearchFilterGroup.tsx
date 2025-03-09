@@ -198,7 +198,9 @@ export default function SearchFilterGroup({
                 }
           }
           defaultText={
-            isMobile ? t("dates.all.short", {ns: "components/filter"}) : t("dates.all", {ns: "components/filter"})
+            isMobile
+              ? t("dates.all.short", { ns: "components/filter" })
+              : t("dates.all", { ns: "components/filter" })
           }
           updateSelectedRange={onUpdateSelectedRange}
         />
@@ -240,18 +242,21 @@ function GeneralFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return t("labels.all.short", {ns: "components/filter"});
+      return t("labels.all.short", { ns: "components/filter" });
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return t("labels.all", {ns: "components/filter"});
+      return t("labels.all", { ns: "components/filter" });
     }
 
     if (selectedLabels.length == 1) {
-      return t(selectedLabels[0], { ns: "objects"});
+      return t(selectedLabels[0], { ns: "objects" });
     }
 
-    return t("labels.count", { count: selectedLabels.length, ns: "components/filter" });
+    return t("labels.count", {
+      count: selectedLabels.length,
+      ns: "components/filter",
+    });
   }, [selectedLabels]);
 
   // ui
@@ -352,7 +357,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={t(item, {ns: "objects"})}
+              label={t(item, { ns: "objects" })}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -501,13 +506,13 @@ export function SortTypeContent({
   onClose,
 }: SortTypeContentProps) {
   const sortLabels = {
-    date_asc: t("sort.dateAsc", {ns: "components/filter"}),
-    date_desc: t("sort.dateDesc", {ns: "components/filter"}),
-    score_asc: t("sort.scoreAsc", {ns: "components/filter"}),
-    score_desc: t("sort.scoreDesc", {ns: "components/filter"}),
-    speed_asc: t("sort.speedAsc", {ns: "components/filter"}),
-    speed_desc: t("sort.speedDesc", {ns: "components/filter"}),
-    relevance: t("sort.relevance", {ns: "components/filter"}),
+    date_asc: t("sort.dateAsc", { ns: "components/filter" }),
+    date_desc: t("sort.dateDesc", { ns: "components/filter" }),
+    score_asc: t("sort.scoreAsc", { ns: "components/filter" }),
+    score_desc: t("sort.scoreDesc", { ns: "components/filter" }),
+    speed_asc: t("sort.speedAsc", { ns: "components/filter" }),
+    speed_desc: t("sort.speedDesc", { ns: "components/filter" }),
+    relevance: t("sort.relevance", { ns: "components/filter" }),
   };
   return (
     <>

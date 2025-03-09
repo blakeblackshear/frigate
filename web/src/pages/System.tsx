@@ -94,7 +94,9 @@ function System() {
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && (
-                <div className="capitalize">{t(item+".title", {ns:"views/system"})}</div>
+                <div className="capitalize">
+                  {t(item + ".title", { ns: "views/system" })}
+                </div>
               )}
             </ToggleGroupItem>
           ))}
@@ -110,7 +112,9 @@ function System() {
         </div>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <div className="h-full content-center font-medium"><Trans ns="views/system">title</Trans></div>
+        <div className="h-full content-center font-medium">
+          <Trans ns="views/system">title</Trans>
+        </div>
         {statsSnapshot && (
           <div className="h-full content-center text-sm text-muted-foreground">
             {statsSnapshot.service.version}

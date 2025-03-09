@@ -158,7 +158,7 @@
     "motionMasks": {
       "label": "运动遮罩",
       "documentTitle": "编辑运动遮罩 - Frigate",
-      "desc": "该功能用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪",
+      "desc": "运动遮罩用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪",
       "desc.documentation": "文档（英文）",
       "add": "添加运动遮罩",
       "edit": "编辑运动遮罩",
@@ -200,7 +200,10 @@
     "contourArea": "轮廓面积",
     "contourArea.desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>",
     "improveContrast": "提高对比度",
-    "improveContrast.desc": "提高较暗场景的对比度。默认值：开启"
+    "improveContrast.desc": "提高较暗场景的对比度。默认值：开启",
+    "toast": {
+      "success": "运动设置已保存。"
+    }
   },
   "debug": {
     "title": "调试",
@@ -248,29 +251,73 @@
   },
   "users": {
     "title": "用户",
+    "management": "用户管理",
+    "management.desc": "管理此 Frigate 实例的用户账户。",
     "addUser": "添加用户",
     "updatePassword": "修改密码",
     "toast": {
+      "success": {
+        "createUser": "用户 {{user}} 创建成功",
+        "deleteUser": "用户 {{user}} 删除成功"
+      },
       "error": {
-        "setPasswordFailed": "保存密码出现错误",
-        "createUserFailed": "创建用户失败！请检查后台日志。",
-        "deleteUserFailed": "删除用户失败！请检查后台日志。"
+        "setPasswordFailed": "保存密码出现错误：{{errorMessage}}",
+        "createUserFailed": "创建用户失败：{{errorMessage}}",
+        "deleteUserFailed": "删除用户失败：{{errorMessage}}"
       }
     },
+    "table": {
+      "username": "用户名",
+      "actions": "操作",
+      "role": "权限组",
+      "noUsers": "未找到用户。",
+      "changeRole": "更改用户角色",
+      "password": "密码",
+      "deleteUser": "删除用户"
+    },
     "dialog": {
+      "form": {
+        "user": "用户名",
+        "user.desc": "仅允许使用字母、数字、句点和下划线。",
+        "user.placeholder": "请输入用户名",
+        "password": "密码",
+        "password.placeholder": "请输入密码",
+        "password.confirm": "确认密码",
+        "password.confirm.placeholder": "请再次输入密码",
+        "password.strength": "密码强度：",
+        "password.strength.weak": "弱",
+        "password.strength.medium": "中等",
+        "password.strength.strong": "强",
+        "password.strength.veryStrong": "非常强",
+        "password.match": "密码匹配",
+        "password.notMatch": "密码不匹配",
+        "newPassword": "新密码",
+        "newPassword.placeholder": "请输入新密码",
+        "newPassword.confirm.placeholder": "请再次输入新密码",
+        "usernameIsRequired": "用户名为必填项"
+      },
       "createUser": {
-        "title": "创建用户",
+        "title": "创建新用户",
+        "desc": "创建一个新用户账户，并指定一个角色以控制访问 Frigate UI 的权限。",
         "user": "用户",
         "password": "密码",
         "usernameOnlyInclude": "用户名只能包含字母、数字和 _"
       },
       "deleteUser": {
         "title": "删除该用户",
-        "warn": "你确定要删除该用户吗？"
+        "desc": "此操作无法撤销。这将永久删除用户账户并移除所有相关数据。",
+        "warn": "你确定要删除 <span className=\"font-bold\">{{username}}</span> 吗？"
       },
-      "setPassword": {
-        "title": "修改密码"
-      }
+      "passwordSetting": {
+        "updatePassword": "更新 {{username}} 的密码",
+        "setPassword": "设置密码",
+        "desc": "创建一个强密码来保护此账户。"
+      },
+      "changeRole": {
+        "title": "更改用户权限组",
+        "desc": "更新 <span className=\"font-medium\">{{username}}</span> 的权限",
+        "roleInfo": "<p>请选择此用户的适当角色：</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">管理员 (Admin)：</span> 拥有所有功能的完整访问权限。</li><li> • <span className=\"font-medium\">查看者 (Viewer)：</span> 仅限访问实时监控、回放、探测和导出功能。</li></ul>"
+    }
     }
   },
   "notification": {

@@ -51,16 +51,22 @@ export default function CreateUserDialog({
     .object({
       user: z
         .string()
-        .min(1, "Username is required")
+        .min(1, t("users.dialog.form.usernameIsRequired", {
+          ns: "views/settings",
+        }))
         .regex(/^[A-Za-z0-9._]+$/, {
-          message: t("users.dialog.createUser.usernameOnlyInclude", {ns: "views/settings"}),
+          message: t("users.dialog.createUser.usernameOnlyInclude", {
+            ns: "views/settings",
+          }),
         }),
       password: z.string().min(1, "Password is required"),
       confirmPassword: z.string().min(1, "Please confirm your password"),
       role: z.enum(["admin", "viewer"]),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords don't match",
+      message: t("users.dialog.form.password.notMatch", {
+        ns: "views/settings",
+      }),
       path: ["confirmPassword"],
     });
 
@@ -111,9 +117,11 @@ export default function CreateUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle><Trans ns="views/settings">users.dialog.createUser.title</Trans></DialogTitle>
+          <DialogTitle>
+            <Trans ns="views/settings">users.dialog.createUser.title</Trans>
+          </DialogTitle>
           <DialogDescription>
-          <Trans ns="views/settings">users.dialog.createUser.desc</Trans>
+            <Trans ns="views/settings">users.dialog.createUser.desc</Trans>
           </DialogDescription>
         </DialogHeader>
 
@@ -127,17 +135,21 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">users.dialog.createUser.user</Trans>
+                    <Trans ns="views/settings">
+                      users.dialog.form.user
+                    </Trans>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter username"
+                      placeholder={t("users.dialog.form.user.placeholder", { ns: "views/settings" })}
                       className="h-10"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-muted-foreground">
-                    <Trans ns="views/settings">users.dialog.createUser.user.desc</Trans>
+                    <Trans ns="views/settings">
+                      users.dialog.form.user.desc
+                    </Trans>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -149,11 +161,13 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">users.dialog.createUser.password</Trans>
+                    <Trans ns="views/settings">
+                      users.dialog.form.password
+                    </Trans>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter password"
+                      placeholder={t("users.dialog.form.password.placeholder", { ns: "views/settings" })}
                       type="password"
                       className="h-10"
                       {...field}
@@ -169,11 +183,13 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">users.dialog.createUser.confirmPassword</Trans>
+                    <Trans ns="views/settings">
+                      users.dialog.form.password.confirm
+                    </Trans>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Confirm password"
+                      placeholder={t("users.dialog.form.password.confirm.placeholder", { ns: "views/settings" })}
                       type="password"
                       className="h-10"
                       {...field}
@@ -185,14 +201,18 @@ export default function CreateUserDialog({
                         <>
                           <LuCheck className="size-3.5 text-green-500" />
                           <span className="text-green-600">
-                            <Trans ns="views/settings">users.dialog.createUser.password.match</Trans>
+                            <Trans ns="views/settings">
+                              users.dialog.form.password.match
+                            </Trans>
                           </span>
                         </>
                       ) : (
                         <>
                           <LuX className="size-3.5 text-red-500" />
                           <span className="text-red-600">
-                            <Trans ns="views/settings">users.dialog.createUser.password.notMatch</Trans>
+                            <Trans ns="views/settings">
+                            users.dialog.form.password.notMatch
+                            </Trans>
                           </span>
                         </>
                       )}
@@ -207,7 +227,9 @@ export default function CreateUserDialog({
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium"><Trans>role.title</Trans></FormLabel>
+                  <FormLabel className="text-sm font-medium">
+                    <Trans>role.title</Trans>
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -224,7 +246,9 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <Shield className="h-4 w-4 text-primary" />
-                          <span><Trans>role.admin</Trans></span>
+                          <span>
+                            <Trans>role.admin</Trans>
+                          </span>
                         </div>
                       </SelectItem>
                       <SelectItem
@@ -233,7 +257,9 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span><Trans>role.viewer</Trans></span>
+                          <span>
+                            <Trans>role.viewer</Trans>
+                          </span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -256,7 +282,7 @@ export default function CreateUserDialog({
                     onClick={handleCancel}
                     type="button"
                   >
-                    Cancel
+                    <Trans>button.cancel</Trans>
                   </Button>
                   <Button
                     variant="select"
@@ -268,7 +294,9 @@ export default function CreateUserDialog({
                     {isLoading ? (
                       <div className="flex flex-row items-center gap-2">
                         <ActivityIndicator />
-                        <span><Trans>button.saving</Trans></span>
+                        <span>
+                          <Trans>button.saving</Trans>
+                        </span>
                       </div>
                     ) : (
                       <Trans>button.save</Trans>

@@ -92,7 +92,9 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem aria-label={t("itemMenu.downloadVideo.aria", {ns: "views/explore"})}>
+        <MenuItem
+          aria-label={t("itemMenu.downloadVideo.aria", { ns: "views/explore" })}
+        >
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
@@ -107,7 +109,9 @@ export default function SearchResultActions({
       )}
       {searchResult.has_snapshot && (
         <MenuItem
-          aria-label={t("itemMenu.downloadSnapshot.aria", {ns: "views/explore"})}
+          aria-label={t("itemMenu.downloadSnapshot.aria", {
+            ns: "views/explore",
+          })}
         >
           <a
             className="flex items-center"
@@ -123,7 +127,9 @@ export default function SearchResultActions({
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label={t("itemMenu.viewObjectLifecycle.aria", {ns: "views/explore"})}
+          aria-label={t("itemMenu.viewObjectLifecycle.aria", {
+            ns: "views/explore",
+          })}
           onClick={showObjectLifecycle}
         >
           <FaArrowsRotate className="mr-2 size-4" />
@@ -134,7 +140,7 @@ export default function SearchResultActions({
       )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
-          aria-label={t("itemMenu.findSimilar.aria", {ns: "views/explore"})}
+          aria-label={t("itemMenu.findSimilar.aria", { ns: "views/explore" })}
           onClick={findSimilar}
         >
           <MdImageSearch className="mr-2 size-4" />
@@ -150,7 +156,9 @@ export default function SearchResultActions({
         searchResult.data.type == "object" &&
         !searchResult.plus_id && (
           <MenuItem
-            aria-label={t("itemMenu.submitToPlus.aria", {ns: "views/explore"})}
+            aria-label={t("itemMenu.submitToPlus.aria", {
+              ns: "views/explore",
+            })}
             onClick={showSnapshot}
           >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
@@ -215,7 +223,9 @@ export default function SearchResultActions({
                     onClick={findSimilar}
                   />
                 </TooltipTrigger>
-                <TooltipContent><Trans ns="views/explore">itemMenu.findSimilar.label</Trans></TooltipContent>
+                <TooltipContent>
+                  <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
+                </TooltipContent>
               </Tooltip>
             )}
 
@@ -232,7 +242,9 @@ export default function SearchResultActions({
                     onClick={showSnapshot}
                   />
                 </TooltipTrigger>
-                <TooltipContent><Trans ns="views/explore">itemMenu.submitToPlus.label</Trans></TooltipContent>
+                <TooltipContent>
+                  <Trans ns="views/explore">itemMenu.submitToPlus.label</Trans>
+                </TooltipContent>
               </Tooltip>
             )}
 

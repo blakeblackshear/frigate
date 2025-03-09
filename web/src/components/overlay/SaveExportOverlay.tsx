@@ -43,7 +43,9 @@ export default function SaveExportOverlay({
           onClick={onPreview}
         >
           <LuVideo />
-          <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
+          <Trans ns="components/dialog">
+            export.fromTimeline.previewExport
+          </Trans>
         </Button>
         <Button
           className="flex items-center gap-1"

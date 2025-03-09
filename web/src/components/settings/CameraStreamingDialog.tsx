@@ -168,7 +168,10 @@ export function CameraStreamingDialog({
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="mb-4">
         <DialogTitle className="capitalize">
-          <Trans ns="components/camera" values={{ cameraName: camera.replaceAll("_", " ") }}>
+          <Trans
+            ns="components/camera"
+            values={{ cameraName: camera.replaceAll("_", " ") }}
+          >
             group.camera.setting.title
           </Trans>
         </DialogTitle>
@@ -183,17 +186,23 @@ export function CameraStreamingDialog({
             <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
               <LuX className="size-4 text-danger" />
               <div>
-                <Trans ns="components/dialog">streaming.restreaming.disabled</Trans>
+                <Trans ns="components/dialog">
+                  streaming.restreaming.disabled
+                </Trans>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
                     <LuInfo className="size-4" />
-                    <span className="sr-only"><Trans>button.info</Trans></span>
+                    <span className="sr-only">
+                      <Trans>button.info</Trans>
+                    </span>
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  <Trans ns="components/dialog">streaming.restreaming.desc</Trans>
+                  <Trans ns="components/dialog">
+                    streaming.restreaming.desc
+                  </Trans>
                   <div className="mt-2 flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/live"
@@ -286,7 +295,9 @@ export function CameraStreamingDialog({
           )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
-            <Trans ns="components/camera">group.camera.setting.streamMethod</Trans>
+            <Trans ns="components/camera">
+              group.camera.setting.streamMethod
+            </Trans>
           </Label>
           <Select
             value={streamType}
@@ -357,7 +368,9 @@ export function CameraStreamingDialog({
               htmlFor="compatibility"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              <Trans ns="components/camera">group.camera.setting.compatibilityMode</Trans>
+              <Trans ns="components/camera">
+                group.camera.setting.compatibilityMode
+              </Trans>
             </Label>
           </div>
           <div className="flex flex-col gap-2 leading-none">

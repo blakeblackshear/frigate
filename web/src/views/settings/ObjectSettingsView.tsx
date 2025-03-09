@@ -166,7 +166,7 @@ export default function ObjectSettingsView({
                     .map((detector) => capitalizeFirstLetter(detector))
                     .join(",")
                 : "",
-                ns: "views/settings",
+              ns: "views/settings",
             })}
           </p>
           <p>
@@ -264,7 +264,9 @@ export default function ObjectSettingsView({
                             <PopoverTrigger asChild>
                               <div className="cursor-pointer p-0">
                                 <LuInfo className="size-4" />
-                                <span className="sr-only"><Trans>button.info</Trans></span>
+                                <span className="sr-only">
+                                  <Trans>button.info</Trans>
+                                </span>
                               </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 text-sm">

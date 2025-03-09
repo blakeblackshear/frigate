@@ -66,12 +66,9 @@ const timeAgo = ({
       if (monthDiff > 0) {
         const unitAmount = monthDiff;
         return t("time.ago", {
-          timeAgo: t(
-            `time.${dense ? timeUnits[i].unit : timeUnits[i].full}`,
-            {
-              time: unitAmount,
-            },
-          ),
+          timeAgo: t(`time.${dense ? timeUnits[i].unit : timeUnits[i].full}`, {
+            time: unitAmount,
+          }),
         });
       }
     } else if (elapsed >= timeUnits[i].value) {

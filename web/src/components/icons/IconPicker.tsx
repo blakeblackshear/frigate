@@ -117,7 +117,9 @@ export default function IconPicker({
           </div>
           <Input
             type="text"
-            placeholder={t("iconPicker.search.placeholder", {ns: "components/icons"})}
+            placeholder={t("iconPicker.search.placeholder", {
+              ns: "components/icons",
+            })}
             className="text-md mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

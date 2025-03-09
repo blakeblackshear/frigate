@@ -300,7 +300,9 @@ export default function CameraMetrics({
                       {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                           <div className="mb-5">
-                            <Trans ns="views/system">cameras.framesAndDetections</Trans>
+                            <Trans ns="views/system">
+                              cameras.framesAndDetections
+                            </Trans>
                           </div>
                           <CameraLineGraph
                             graphId={`${camera.name}-dps`}

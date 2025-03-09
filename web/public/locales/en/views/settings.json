@@ -91,6 +91,10 @@
       "noDefinedZones": "No zones are defined for this camera.",
       "objectAlertsTips": "All {{alertsLabels}} objects on {{cameraName}} will be shown as Alerts.",
       "zoneObjectAlertsTips": "All {{alertsLabels}} objects detected in {{zone}} on {{cameraName}} will be shown as Alerts.",
+      "objectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
+      "zoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized in {{zone}} on {{cameraName}} will be shown as Detections.",
+      "zoneObjectDetectionsTips.notSelectDetections": "All {{detectionsLabels}} objects detected in {{zone}} on {{cameraName}} not categorized as Alerts will be shown as Detections regardless of which zone they are in.",
+      "zoneObjectDetectionsTips.regardlessOfZoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
       "selectAlertsZones": "Select zones for Alerts",
       "selectDetectionsZones": "Select zones for Detections",
       "limitDetections": "Limit detections to specific zones",
@@ -103,9 +107,24 @@
     "filter": {
       "all": "All Masks and Zones"
     },
-    "polygonDrawing": {
-      "error": {
-        "mustBeFinished": "多边形绘制必须完成闭合后才能保存。"
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Zone name must be at least 2 characters.",
+          "mustNotBeSameWithCamera": "Zone name must not be the same as camera name.",
+          "alreadyExists": "A zone with this name already exists for this camera.",
+          "mustNotContainPeriod": "Zone name must not contain periods.",
+          "hasIllegalCharacter": "Zone name contains illegal characters."
+        }
+      },
+      "distance.error": "Distance must be greater than or equal to 0.1.",
+      "distance.error.mustBeFilled": "All distance fields must be filled to use speed estimation.",
+      "inertia.error.mustBeAboveZero": "Inertia must be above 0.",
+      "loiteringTime.error.mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0.",
+      "polygonDrawing": {
+        "error": {
+          "mustBeFinished": "Polygon drawing must be finished before saving."
+        }
       }
     },
     "zones": {
@@ -182,7 +201,9 @@
     "contourArea.desc": "The contour area value is used to decide which groups of changed pixels qualify as motion. <em>Default: 10</em>",
     "improveContrast": "Improve Contrast",
     "improveContrast.desc": "Improve contrast for darker scenes. <em>Default: ON</em>",
-    "toast.success": "Motion settings have been saved.",
+    "toast": {
+      "success": "Motion settings have been saved."
+    }
   },
   "debug": {
     "title": "Debug",
@@ -230,29 +251,86 @@
   },
   "users": {
     "title": "Users",
+    "management": "Users Management",
+    "management.desc": "Manage this Frigate instance's user accounts.",
     "addUser": "Add User",
     "updatePassword": "Update Password",
     "toast": {
+      "success": {
+        "createUser": "User {{user}} created successfully",
+        "deleteUser": "User {{user}} deleted successfully"
+      },
       "error": {
-        "setPasswordFailed": "Error setting password",
-        "createUserFailed": "Error creating user. Check server logs.",
-        "deleteUserFailed": "Error deleting user. Check server logs."
+        "setPasswordFailed": "Failed to save password: {{errorMessage}}",
+        "createUserFailed": "Failed to create user: {{errorMessage}}",
+        "deleteUserFailed": "Failed to delete user: {{errorMessage}}"
       }
     },
+    "table": {
+      "username": "Username",
+      "actions": "Actions",
+      "role": "Role",
+      "noUsers": "No users found.",
+      "changeRole": "Change user role",
+      "password": "Password",
+      "deleteUser": "Delete user"
+    },
     "dialog": {
+      "form": {
+        "user": "Username",
+        "user.desc": "Only letters, numbers, periods and underscores allowed.",
+        "user.placeholder": "Enter username",
+        "password": "Password",
+        "password.placeholder": "Enter password",
+        "password.confirm": "Confirm Password",
+        "password.confirm.placeholder": "Confirm Password",
+        "password.strength": "password strength: ",
+        "password.strength.weak": "Weak",
+        "password.strength.medium": "Medium",
+        "password.strength.strong": "Strong",
+        "password.strength.veryStrong": "Very strong",
+        "password.match": "Passwords match",
+        "password.notMatch": "Passwords don't match",
+        "newPassword": "New Password",
+        "newPassword.placeholder": "Enter new password",
+        "newPassword.confirm.placeholder": "Re-enter new password",
+        "usernameIsRequired": "Username is required"
+      },
       "createUser": {
-        "title": "Create User",
-        "user": "user",
-        "password": "password",
+        "title": "Create New User",
+        "desc": "Add a new user account and specify an role for access to areas of the Frigate UI.",
         "usernameOnlyInclude": "Username may only include letters, numbers, . or _"
       },
       "deleteUser": {
         "title": "Delete User",
-        "warn": "Are you sure?"
+        "desc": "This action cannot be undone. This will permanently delete the user account and remove all associated data.",
+        "warn": "Are you sure you want to delete <span className=\"font-bold\">{{username}}</span>?"
       },
-      "setPassword": {
-        "title": "Set Password"
+      "passwordSetting": {
+        "updatePassword": "Update Password for {{username}}",
+        "setPassword": "Set Password",
+        "desc": "Create a strong password to secure this account."
+      },
+      "changeRole": {
+        "title": "Change User Role",
+        "desc": "Update permissions for <span className=\"font-medium\">{{username}}</span>",
+        "roleInfo": "<p>Select the appropriate role for this user:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Admin:</span> Full access to all features. </li><li> • <span className=\"font-medium\">Viewer:</span> Limited to Live dashboards, Review, Explore, and Exports only.</li></ul>"
       }
     }
+  },
+  "notification": {
+    "title": "Notifications",
+    "notificationSettings": "Notification Settings",
+    "desc": "Frigate can send native push notifications to your device when running in the browser or installed as a PWA.",
+    "documentation": "Read the Documentation",
+    "email": "Email",
+    "email.placeholder": "e.g. example@email.com",
+    "email.desc": "A valid email is required and will be used to notify you if there are any issues with the push service.",
+    "cameras": "Cameras",
+    "cameras.noCameras": "No cameras available",
+    "cameras.desc": "Select which cameras to enable notifications for.",
+    "deviceSpecific": "Device Specific Settings",
+    "registerDevice": "Register This Device",
+    "unregisterDevice": "Unregister This Device"
   }
 }

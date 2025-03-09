@@ -656,7 +656,9 @@ export function CameraGroupEdit({
     name: z
       .string()
       .min(2, {
-        message: t("group.name.errorMessage.mustLeastCharacters", { ns: "components/camera" }),
+        message: t("group.name.errorMessage.mustLeastCharacters", {
+          ns: "components/camera",
+        }),
       })
       .transform((val: string) => val.trim().replace(/\s+/g, "_"))
       .refine(
@@ -667,7 +669,9 @@ export function CameraGroupEdit({
           );
         },
         {
-          message: t("group.name.errorMessage.exists", { ns: "components/camera" }),
+          message: t("group.name.errorMessage.exists", {
+            ns: "components/camera",
+          }),
         },
       )
       .refine(
@@ -679,7 +683,9 @@ export function CameraGroupEdit({
         },
       )
       .refine((value: string) => value.toLowerCase() !== "default", {
-        message: t("group.name.errorMessage.invalid", { ns: "components/camera" }),
+        message: t("group.name.errorMessage.invalid", {
+          ns: "components/camera",
+        }),
       }),
 
     cameras: z.array(z.string()),
@@ -735,7 +741,10 @@ export function CameraGroupEdit({
         .then(async (res) => {
           if (res.status === 200) {
             toast.success(
-              t("group.toast.success", { name: values.name, ns: "components/camera"}),
+              t("group.toast.success", {
+                name: values.name,
+                ns: "components/camera",
+              }),
               {
                 position: "top-center",
               },
@@ -756,9 +765,9 @@ export function CameraGroupEdit({
         })
         .catch((error) => {
           const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
           toast.error(
             t("toast.save.error", {
               errorMessage,
@@ -809,7 +818,9 @@ export function CameraGroupEdit({
               <FormControl>
                 <Input
                   className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                  placeholder={t("group.name.placeholder", { ns: "components/camera" })}
+                  placeholder={t("group.name.placeholder", {
+                    ns: "components/camera",
+                  })}
                   {...field}
                 />
               </FormControl>

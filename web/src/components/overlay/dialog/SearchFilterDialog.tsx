@@ -753,7 +753,9 @@ export function SnapshotClipFilterContent({
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
               >
-                <Trans ns="components/filter">features.submittedToFrigatePlus.label</Trans>
+                <Trans ns="components/filter">
+                  features.submittedToFrigatePlus.label
+                </Trans>
               </Label>
             </div>
             <ToggleGroup

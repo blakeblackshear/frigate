@@ -98,9 +98,12 @@ export default function MobileReviewSettingsDrawer({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(t("export.toast.success", { ns: "components/dialog"}), {
-            position: "top-center",
-          });
+          toast.success(
+            t("export.toast.success", { ns: "components/dialog" }),
+            {
+              position: "top-center",
+            },
+          );
           setName("");
           setRange(undefined);
           setMode("none");

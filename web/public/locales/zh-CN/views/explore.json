@@ -29,7 +29,7 @@
     "regenerateFromThumbnails": "从缩略图重新生成",
     "tips": {
       "descriptionSaved": "已保存描述",
-      "saveDescriptionFailed": "更新描述失败"
+      "saveDescriptionFailed": "更新描述失败：{{errorMessage}}"
     }
   },
   "itemMenu": {

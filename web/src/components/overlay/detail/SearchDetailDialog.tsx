@@ -374,9 +374,12 @@ function ObjectDetailsTab({
       .post(`events/${search.id}/description`, { description: desc })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success(t("details.tips.descriptionSaved", {ns: "views/explore"}), {
-            position: "top-center",
-          });
+          toast.success(
+            t("details.tips.descriptionSaved", { ns: "views/explore" }),
+            {
+              position: "top-center",
+            },
+          );
         }
         mutate(
           (key) =>
@@ -407,9 +410,15 @@ function ObjectDetailsTab({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-          toast.error(t("details.tips.saveDescriptionFailed", {ns: "views/explore", errorMessage}), {
-          position: "top-center",
-        });
+        toast.error(
+          t("details.tips.saveDescriptionFailed", {
+            ns: "views/explore",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
         setDesc(search.data.description);
       });
   }, [desc, search, mutate]);
@@ -580,7 +589,9 @@ function ObjectDetailsTab({
                 {averageEstimatedSpeed && (
                   <div className="flex flex-row items-center gap-2">
                     {averageEstimatedSpeed}{" "}
-                    {config?.ui.unit_system == "imperial" ? t("unit.speed.mph") : t("unit.speed.kph")}{" "}
+                    {config?.ui.unit_system == "imperial"
+                      ? t("unit.speed.mph")
+                      : t("unit.speed.kph")}{" "}
                     {velocityAngle != undefined && (
                       <span className="text-primary/40">
                         <FaArrowRight
@@ -668,7 +679,9 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40"></div>
             <Textarea
               className="h-64"
-              placeholder={t("details.description.placeholder", {ns: "views/explore"})}
+              placeholder={t("details.description.placeholder", {
+                ns: "views/explore",
+              })}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onFocus={handleDescriptionFocus}
@@ -734,13 +747,16 @@ function ObjectDetailsTab({
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title={t("details.editSubLable", {ns: "views/explore"})}
+            title={t("details.editSubLable", { ns: "views/explore" })}
             description={
               search.label
                 ? t("details.editSubLable.desc", {
-                    label: t(search.label, { ns: "objects" }), ns: "views/explore",
+                    label: t(search.label, { ns: "objects" }),
+                    ns: "views/explore",
                   })
-                : t("details.editSubLable.desc.noLabel", { ns: "views/explore" })
+                : t("details.editSubLable.desc.noLabel", {
+                    ns: "views/explore",
+                  })
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}

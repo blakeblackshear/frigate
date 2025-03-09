@@ -108,7 +108,10 @@ export default function RestartDialog({
               </SheetTitle>
               <SheetDescription className="text-center">
                 <div>
-                  {t("restart.restarting.content", { countdown, ns: "components/dialog" })}
+                  {t("restart.restarting.content", {
+                    countdown,
+                    ns: "components/dialog",
+                  })}
                 </div>
               </SheetDescription>
             </SheetHeader>

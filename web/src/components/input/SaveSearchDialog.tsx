@@ -37,7 +37,7 @@ export function SaveSearchDialog({
       toast.success(
         t("search.saveSearch.success", {
           searchName: searchName.trim(),
-          ns: "components/dialog"
+          ns: "components/dialog",
         }),
         {
           position: "top-center",
@@ -73,7 +73,9 @@ export function SaveSearchDialog({
           value={searchName}
           className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
-          placeholder={t("search.saveSearch.placeholder", {ns: "components/dialog"})}
+          placeholder={t("search.saveSearch.placeholder", {
+            ns: "components/dialog",
+          })}
         />
         {overwrite && (
           <div className="ml-1 text-sm text-danger">

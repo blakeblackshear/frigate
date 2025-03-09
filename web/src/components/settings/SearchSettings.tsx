@@ -63,7 +63,9 @@ export default function ExploreSettings({
             <Trans ns="components/filter">explore.settings.defaultView</Trans>
           </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <Trans ns="components/filter">explore.settings.defaultView.desc</Trans>
+            <Trans ns="components/filter">
+              explore.settings.defaultView.desc
+            </Trans>
           </div>
         </div>
         <Select
@@ -72,8 +74,12 @@ export default function ExploreSettings({
         >
           <SelectTrigger className="w-full">
             {defaultView == "summary"
-              ? t("explore.settings.defaultView.summary", {ns: "components/filter"})
-              : t("explore.settings.defaultView.unfilteredGrid", {ns: "components/filter"})}
+              ? t("explore.settings.defaultView.summary", {
+                  ns: "components/filter",
+                })
+              : t("explore.settings.defaultView.unfilteredGrid", {
+                  ns: "components/filter",
+                })}
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -84,8 +90,12 @@ export default function ExploreSettings({
                   value={value}
                 >
                   {value == "summary"
-                    ? t("explore.settings.defaultView.summary", {ns: "components/filter"})
-                    : t("explore.settings.defaultView.unfilteredGrid", {ns: "components/filter"})}
+                    ? t("explore.settings.defaultView.summary", {
+                        ns: "components/filter",
+                      })
+                    : t("explore.settings.defaultView.unfilteredGrid", {
+                        ns: "components/filter",
+                      })}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -98,10 +108,14 @@ export default function ExploreSettings({
           <div className="flex w-full flex-col space-y-4">
             <div className="space-y-0.5">
               <div className="text-md">
-                <Trans ns="components/filter">explore.settings.gridColumns</Trans>
+                <Trans ns="components/filter">
+                  explore.settings.gridColumns
+                </Trans>
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <Trans ns="components/filter">explore.settings.gridColumns.desc</Trans>
+                <Trans ns="components/filter">
+                  explore.settings.gridColumns.desc
+                </Trans>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -166,7 +180,9 @@ export function SearchTypeContent({
             <Trans ns="components/filter">explore.settings.searchSource</Trans>
           </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <Trans ns="components/filter">explore.settings.searchSource.desc</Trans>
+            <Trans ns="components/filter">
+              explore.settings.searchSource.desc
+            </Trans>
           </div>
         </div>
         <div className="mt-2.5 flex flex-col gap-2.5">

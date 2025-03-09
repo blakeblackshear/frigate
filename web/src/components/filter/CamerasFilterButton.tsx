@@ -153,7 +153,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label={t("cameras.all", { ns: "components/filter"})}
+          label={t("cameras.all", { ns: "components/filter" })}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);

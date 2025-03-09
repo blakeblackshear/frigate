@@ -120,7 +120,7 @@ export default function MotionTunerView({
       .then((res) => {
         if (res.status === 200) {
           toast.success(
-            t("motionDetectionTuner.toast.success", { ns: "views/settings"}),
+            t("motionDetectionTuner.toast.success", { ns: "views/settings" }),
             {
               position: "top-center",
             },
@@ -128,12 +128,9 @@ export default function MotionTunerView({
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(
-            t("toast.save.error", { errorMessage: res.statusText }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.error(t("toast.save.error", { errorMessage: res.statusText }), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
@@ -215,7 +212,9 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                <Trans ns="views/settings">motionDetectionTuner.Threshold</Trans>
+                <Trans ns="views/settings">
+                  motionDetectionTuner.Threshold
+                </Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
@@ -246,7 +245,9 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                <Trans ns="views/settings">motionDetectionTuner.contourArea</Trans>
+                <Trans ns="views/settings">
+                  motionDetectionTuner.contourArea
+                </Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>

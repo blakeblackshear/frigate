@@ -32,7 +32,7 @@ export default function CalendarFilterButton({
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    "%b %-d",
+    t("time.formattedTimestampOnlyMonthAndDay"),
   );
 
   const trigger = (
@@ -48,7 +48,9 @@ export default function CalendarFilterButton({
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
-        {day == undefined ? t("calendarFilter.last24Hours", {ns: "views/events"}) : selectedDate}
+        {day == undefined
+          ? t("calendarFilter.last24Hours", { ns: "views/events" })
+          : selectedDate}
       </div>
     </Button>
   );

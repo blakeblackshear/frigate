@@ -67,9 +67,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("users.toast.error.setPasswordFailed", {ns: "views/settings", errorMessage}), {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.setPasswordFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   }, []);
 
@@ -87,9 +93,12 @@ export default function AuthenticationView() {
             users?.push({ username: user, role: role });
             return users;
           }, false);
-          toast.success(t("users.toast.success.createUser", {ns: "views/settings", user}), {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.createUser", { ns: "views/settings", user }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -97,9 +106,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("users.toast.error.createUserFailed", {ns: "views/settings", errorMessage}), {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.createUserFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -113,9 +128,12 @@ export default function AuthenticationView() {
             (users) => users?.filter((u) => u.username !== user),
             false,
           );
-          toast.success(t("users.toast.success.deleteUser", {ns: "views/settings", user}), {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.deleteUser", { ns: "views/settings", user }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -123,9 +141,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("users.toast.error.deleteUserFailed", {ns: "views/settings", errorMessage}), {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.deleteUserFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -188,7 +212,7 @@ export default function AuthenticationView() {
             onClick={() => setShowCreate(true)}
           >
             <LuPlus className="size-4" />
-            Add User
+            <Trans ns="views/settings">users.addUser</Trans>
           </Button>
         </div>
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -197,9 +221,13 @@ export default function AuthenticationView() {
               <Table>
                 <TableHeader className="sticky top-0 bg-muted/50">
                   <TableRow>
-                    <TableHead className="w-[250px]"><Trans ns="views/settings">users.table.username</Trans></TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead className="text-right"><Trans ns="views/settings">users.table.actions</Trans></TableHead>
+                    <TableHead className="w-[250px]">
+                      <Trans ns="views/settings">users.table.username</Trans>
+                    </TableHead>
+                    <TableHead><Trans ns="views/settings">users.table.role</Trans></TableHead>
+                    <TableHead className="text-right">
+                      <Trans ns="views/settings">users.table.actions</Trans>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -233,7 +261,7 @@ export default function AuthenticationView() {
                                 : ""
                             }
                           >
-                            {user.role || "viewer"}
+                            <Trans>role.{user.role || "viewer"}</Trans>
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -262,7 +290,11 @@ export default function AuthenticationView() {
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p><Trans ns="views/settings">users.table.changeRole</Trans></p>
+                                    <p>
+                                      <Trans ns="views/settings">
+                                        users.table.changeRole
+                                      </Trans>
+                                    </p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
@@ -280,12 +312,18 @@ export default function AuthenticationView() {
                                   >
                                     <FaUserEdit className="size-3.5" />
                                     <span className="ml-1.5 hidden sm:inline-block">
-                                      <Trans ns="views/settings">users.table.password</Trans>
+                                      <Trans ns="views/settings">
+                                        users.table.password
+                                      </Trans>
                                     </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p><Trans ns="views/settings">users.updatePassword</Trans></p>
+                                  <p>
+                                    <Trans ns="views/settings">
+                                      users.updatePassword
+                                    </Trans>
+                                  </p>
                                 </TooltipContent>
                               </Tooltip>
 
@@ -308,7 +346,11 @@ export default function AuthenticationView() {
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p><Trans ns="views/settings">users.table.deleteUser</Trans></p>
+                                    <p>
+                                      <Trans ns="views/settings">
+                                        users.table.deleteUser
+                                      </Trans>
+                                    </p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}

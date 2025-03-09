@@ -78,7 +78,7 @@ export default function CameraSettingsView({
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
       ? cameraConfig.review.alerts.labels
-          .map((label) => t(label, {ns: "objects"}))
+          .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
   }, [cameraConfig]);
@@ -86,7 +86,7 @@ export default function CameraSettingsView({
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
       ? cameraConfig.review.detections.labels
-          .map((label) => t(label, {ns: "objects"}))
+          .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
   }, [cameraConfig]);
@@ -159,14 +159,9 @@ export default function CameraSettingsView({
         })
         .then((res) => {
           if (res.status === 200) {
-            toast.success(
-              t(
-                "camera.reviewClassification.toast.success",
-              ),
-              {
-                position: "top-center",
-              },
-            );
+            toast.success(t("camera.reviewClassification.toast.success"), {
+              position: "top-center",
+            });
             updateConfig();
           } else {
             toast.error(
@@ -182,11 +177,14 @@ export default function CameraSettingsView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", {
-            errorMessage
-          }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -322,9 +320,7 @@ export default function CameraSettingsView({
                 />
                 <div className="space-y-0.5">
                   <Label htmlFor="detections-enabled">
-                    <Trans ns="views/settings">
-                      camera.review.detections
-                    </Trans>
+                    <Trans ns="views/settings">camera.review.detections</Trans>
                   </Label>
                 </div>
               </div>
@@ -465,19 +461,16 @@ export default function CameraSettingsView({
                                 cameraName: capitalizeFirstLetter(
                                   cameraConfig?.name ?? "",
                                 ).replaceAll("_", " "),
-                                ns: "views/settings"
+                                ns: "views/settings",
                               },
                             )
-                          : t(
-                              "camera.reviewClassification.objectAlertsTips",
-                              {
-                                alertsLabels,
-                                cameraName: capitalizeFirstLetter(
-                                  cameraConfig?.name ?? "",
-                                ).replaceAll("_", " "),
-                                ns: "views/settings"
-                              },
-                            )}
+                          : t("camera.reviewClassification.objectAlertsTips", {
+                              alertsLabels,
+                              cameraName: capitalizeFirstLetter(
+                                cameraConfig?.name ?? "",
+                              ).replaceAll("_", " "),
+                              ns: "views/settings",
+                            })}
                       </div>
                     </FormItem>
                   )}

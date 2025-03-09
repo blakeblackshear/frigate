@@ -182,7 +182,9 @@ export function CombinedStorageGraph({
                 <Trans ns="views/system">storage.cameraStorage.camera</Trans>
               </TableHead>
               <TableHead>
-                <Trans ns="views/system">storage.cameraStorage.storageUsed</Trans>
+                <Trans ns="views/system">
+                  storage.cameraStorage.storageUsed
+                </Trans>
               </TableHead>
               <TableHead>
                 <Trans ns="views/system">
@@ -205,8 +207,8 @@ export function CombinedStorageGraph({
                   ></div>
                   {item.name === "Unused"
                     ? t("storage.cameraStorage.unused", {
-                      ns: "views/system",
-                    })
+                        ns: "views/system",
+                      })
                     : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>

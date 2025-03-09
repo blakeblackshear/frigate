@@ -107,7 +107,9 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {ns: "views/settings"}),
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
+        ns: "views/settings",
+      }),
       path: ["polygon.isFinished"],
     });
 
@@ -166,19 +168,13 @@ export default function MotionMaskEditPane({
         if (res.status === 200) {
           toast.success(
             polygon.name
-              ? t(
-                  "masksAndZones.motionMasks.toast.success",
-                  {
-                    polygonName: polygon.name,
-                    ns: "views/settings"
-                  },
-                )
-              : t(
-                  "masksAndZones.motionMasks.toast.success.noName",
-                  {
-                    ns: "views/settings"
-                  }
-                ),
+              ? t("masksAndZones.motionMasks.toast.success", {
+                  polygonName: polygon.name,
+                  ns: "views/settings",
+                })
+              : t("masksAndZones.motionMasks.toast.success.noName", {
+                  ns: "views/settings",
+                }),
             {
               position: "top-center",
             },
@@ -224,12 +220,9 @@ export default function MotionMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = t(
-      "masksAndZones.motionMasks.documentTitle",
-      {
-        ns: "views/settings"
-      }
-    );
+    document.title = t("masksAndZones.motionMasks.documentTitle", {
+      ns: "views/settings",
+    });
   }, []);
 
   if (!polygon) {
@@ -241,14 +234,12 @@ export default function MotionMaskEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("masksAndZones.motionMasks.edit", {ns: "views/settings"})
-          : t("masksAndZones.motionMasks.add", {ns: "views/settings"})}
+          ? t("masksAndZones.motionMasks.edit", { ns: "views/settings" })
+          : t("masksAndZones.motionMasks.add", { ns: "views/settings" })}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
-          <Trans ns="views/settings">
-            masksAndZones.motionMasks.context
-          </Trans>
+          <Trans ns="views/settings">masksAndZones.motionMasks.context</Trans>
         </p>
 
         <div className="flex items-center text-primary">
@@ -271,7 +262,7 @@ export default function MotionMaskEditPane({
           <div className="my-1 inline-flex">
             {t("masksAndZones.motionMasks.point", {
               count: polygons[activePolygonIndex].points.length,
-              ns: "views/settings"
+              ns: "views/settings",
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -297,13 +288,10 @@ export default function MotionMaskEditPane({
       {polygonArea && polygonArea >= 0.35 && (
         <>
           <div className="mb-3 text-sm text-danger">
-            {t(
-              "masksAndZones.motionMasks.polygonAreaTooLarge",
-              {
-                polygonArea: Math.round(polygonArea * 100),
-                ns: "views/settings"
-              },
-            )}
+            {t("masksAndZones.motionMasks.polygonAreaTooLarge", {
+              polygonArea: Math.round(polygonArea * 100),
+              ns: "views/settings",
+            })}
           </div>
           <div className="mb-3 text-sm text-primary">
             <Trans ns="views/settings">
