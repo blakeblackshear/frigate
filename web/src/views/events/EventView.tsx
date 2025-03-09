@@ -205,16 +205,13 @@ export default function EventView({
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              t("export.toast.error", { ns: "components/dialog", message: error.response.data.message }),
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(t("export.toast.error", { ns: "components/dialog", message: error.message }), {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+            toast.error(t("export.toast.error", { ns: "components/dialog", message: errorMessage }), {
+            position: "top-center",
+          });
         });
     },
     [reviewItems],

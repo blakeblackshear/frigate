@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
 import { LanguageProvider } from "./language-provider";
 import { StreamingSettingsProvider } from "./streaming-settings-provider";
+import { AuthProvider } from "./auth-context";
 
 type TProvidersProps = {
   children: ReactNode;
@@ -15,21 +16,23 @@ type TProvidersProps = {
 function providers({ children }: TProvidersProps) {
   return (
     <RecoilRoot>
-      <ApiProvider>
-        <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
-          <LanguageProvider>
-            <TooltipProvider>
-              <IconContext.Provider value={{ size: "20" }}>
-                <StatusBarMessagesProvider>
-                  <StreamingSettingsProvider>
-                    {children}
-                  </StreamingSettingsProvider>
-                </StatusBarMessagesProvider>
-              </IconContext.Provider>
-            </TooltipProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </ApiProvider>
+      <AuthProvider>
+        <ApiProvider>
+          <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
+            <LanguageProvider>
+              <TooltipProvider>
+                <IconContext.Provider value={{ size: "20" }}>
+                  <StatusBarMessagesProvider>
+                    <StreamingSettingsProvider>
+                      {children}
+                    </StreamingSettingsProvider>
+                  </StatusBarMessagesProvider>
+                </IconContext.Provider>
+              </TooltipProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </ApiProvider>
+      </AuthProvider>
     </RecoilRoot>
   );
 }

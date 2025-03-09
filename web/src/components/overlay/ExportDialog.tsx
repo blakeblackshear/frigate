@@ -102,20 +102,14 @@ export default function ExportDialog({
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          // api error message need to be translated
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
           toast.error(
-            `${t("export.toast.error.failed", { error: error.response.data.message, ns: "components/dialog" })}`,
+            t("export.toast.error.failed", { error: errorMessage, ns: "components/dialog" }),
             { position: "top-center" },
           );
-        } else {
-          toast.error(
-            `${t("export.toast.error.failed", { error: error.message, ns: "components/dialog" })}`,
-            {
-              position: "top-center",
-            },
-          );
-        }
       });
   }, [camera, name, range, setRange, setName, setMode]);
 

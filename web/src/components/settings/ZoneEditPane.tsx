@@ -448,12 +448,15 @@ export default function ZoneEditPane({
           }
         })
         .catch((error) => {
-          toast.error(
-            t("toast.save.error", {
-              errorMessage: error.response.data.message,
-            }),
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.save.error", {
+            errorMessage,
+          }), {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);

@@ -283,10 +283,13 @@ function NewGroupDialog({
         .catch((error) => {
           setOpen(false);
           setEditState("none");
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);
@@ -752,9 +755,13 @@ export function CameraGroupEdit({
           }
         })
         .catch((error) => {
+          const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
           toast.error(
             t("toast.save.error", {
-              errorMessage: error.response.data.message,
+              errorMessage,
             }),
             { position: "top-center" },
           );

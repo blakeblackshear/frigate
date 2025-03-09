@@ -40,10 +40,13 @@ export default function UiSettingsView() {
           });
         })
         .catch((error) => {
-          toast.error(
-            `Failed to clear stored layout: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to clear stored layout: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     });
   }, [config]);
@@ -60,10 +63,13 @@ export default function UiSettingsView() {
         });
       })
       .catch((error) => {
-        toast.error(
-          `Failed to clear camera groups streaming settings: ${error.response.data.message}`,
-          { position: "top-center" },
-        );
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to clear streaming settings: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [config]);
 
