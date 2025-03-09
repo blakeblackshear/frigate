@@ -45,7 +45,9 @@ export default function RoleChangeDialog({
             <Trans ns="views/settings">users.dialog.changeRole.title</Trans>
           </DialogTitle>
           <DialogDescription>
-            <Trans ns="views/settings" values={{username}}>users.dialog.changeRole.desc</Trans>
+            <Trans ns="views/settings" values={{ username }}>
+              users.dialog.changeRole.desc
+            </Trans>
           </DialogDescription>
         </DialogHeader>
 
@@ -67,13 +69,17 @@ export default function RoleChangeDialog({
               <SelectItem value="admin" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuShield className="size-4 text-primary" />
-                  <span><Trans>role.admin</Trans></span>
+                  <span>
+                    <Trans>role.admin</Trans>
+                  </span>
                 </div>
               </SelectItem>
               <SelectItem value="viewer" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuUser className="size-4 text-primary" />
-                  <span><Trans>role.viewer</Trans></span>
+                  <span>
+                    <Trans>role.viewer</Trans>
+                  </span>
                 </div>
               </SelectItem>
             </SelectContent>

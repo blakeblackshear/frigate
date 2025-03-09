@@ -224,7 +224,9 @@ export default function AuthenticationView() {
                     <TableHead className="w-[250px]">
                       <Trans ns="views/settings">users.table.username</Trans>
                     </TableHead>
-                    <TableHead><Trans ns="views/settings">users.table.role</Trans></TableHead>
+                    <TableHead>
+                      <Trans ns="views/settings">users.table.role</Trans>
+                    </TableHead>
                     <TableHead className="text-right">
                       <Trans ns="views/settings">users.table.actions</Trans>
                     </TableHead>

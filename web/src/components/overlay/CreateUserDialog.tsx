@@ -51,9 +51,12 @@ export default function CreateUserDialog({
     .object({
       user: z
         .string()
-        .min(1, t("users.dialog.form.usernameIsRequired", {
-          ns: "views/settings",
-        }))
+        .min(
+          1,
+          t("users.dialog.form.usernameIsRequired", {
+            ns: "views/settings",
+          }),
+        )
         .regex(/^[A-Za-z0-9._]+$/, {
           message: t("users.dialog.createUser.usernameOnlyInclude", {
             ns: "views/settings",
@@ -135,13 +138,13 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">
-                      users.dialog.form.user
-                    </Trans>
+                    <Trans ns="views/settings">users.dialog.form.user</Trans>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("users.dialog.form.user.placeholder", { ns: "views/settings" })}
+                      placeholder={t("users.dialog.form.user.placeholder", {
+                        ns: "views/settings",
+                      })}
                       className="h-10"
                       {...field}
                     />
@@ -167,7 +170,9 @@ export default function CreateUserDialog({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("users.dialog.form.password.placeholder", { ns: "views/settings" })}
+                      placeholder={t("users.dialog.form.password.placeholder", {
+                        ns: "views/settings",
+                      })}
                       type="password"
                       className="h-10"
                       {...field}
@@ -189,7 +194,10 @@ export default function CreateUserDialog({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("users.dialog.form.password.confirm.placeholder", { ns: "views/settings" })}
+                      placeholder={t(
+                        "users.dialog.form.password.confirm.placeholder",
+                        { ns: "views/settings" },
+                      )}
                       type="password"
                       className="h-10"
                       {...field}
@@ -211,7 +219,7 @@ export default function CreateUserDialog({
                           <LuX className="size-3.5 text-red-500" />
                           <span className="text-red-600">
                             <Trans ns="views/settings">
-                            users.dialog.form.password.notMatch
+                              users.dialog.form.password.notMatch
                             </Trans>
                           </span>
                         </>

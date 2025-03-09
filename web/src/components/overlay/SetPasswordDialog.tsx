@@ -79,10 +79,21 @@ export default function SetPasswordDialog({
 
   const getStrengthLabel = () => {
     if (!password) return "";
-    if (passwordStrength <= 1) return t("users.dialog.form.password.strength.weak", { ns: "views/settings" });
-    if (passwordStrength === 2) return t("users.dialog.form.password.strength.medium", { ns: "views/settings" });
-    if (passwordStrength === 3) return t("users.dialog.form.password.strength.strong", { ns: "views/settings" });
-    return t("users.dialog.form.password.strength.veryStrong", { ns: "views/settings" });
+    if (passwordStrength <= 1)
+      return t("users.dialog.form.password.strength.weak", {
+        ns: "views/settings",
+      });
+    if (passwordStrength === 2)
+      return t("users.dialog.form.password.strength.medium", {
+        ns: "views/settings",
+      });
+    if (passwordStrength === 3)
+      return t("users.dialog.form.password.strength.strong", {
+        ns: "views/settings",
+      });
+    return t("users.dialog.form.password.strength.veryStrong", {
+      ns: "views/settings",
+    });
   };
 
   const getStrengthColor = () => {
@@ -142,7 +153,9 @@ export default function SetPasswordDialog({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <Trans ns="views/settings">users.dialog.form.password.strength</Trans>
+                  <Trans ns="views/settings">
+                    users.dialog.form.password.strength
+                  </Trans>
                   <span className="font-medium">{getStrengthLabel()}</span>
                 </p>
               </div>
@@ -164,7 +177,10 @@ export default function SetPasswordDialog({
                 setConfirmPassword(event.target.value);
                 setError(null);
               }}
-              placeholder={t("users.dialog.form.newPassword.confirm.placeholder", { ns: "views/settings"})}
+              placeholder={t(
+                "users.dialog.form.newPassword.confirm.placeholder",
+                { ns: "views/settings" },
+              )}
             />
 
             {/* Password match indicator */}

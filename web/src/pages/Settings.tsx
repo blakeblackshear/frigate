@@ -70,7 +70,7 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
-  const allowedViewsForViewer: SettingsType[] = ["UI settings", "debug"];
+  const allowedViewsForViewer: SettingsType[] = ["uiSettings", "debug"];
   const visibleSettingsViews = !isAdmin
     ? allowedViewsForViewer
     : allSettingsViews;
@@ -164,7 +164,7 @@ export default function Settings() {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
       if (!isAdmin && !["UI settings", "debug"].includes(page)) {
-        setPage("UI settings");
+        setPage("uiSettings");
       } else {
         setPage(page as SettingsType);
       }
@@ -200,7 +200,7 @@ export default function Settings() {
                 if (value) {
                   // Restrict viewer navigation
                   if (!isAdmin && !["UI settings", "debug"].includes(value)) {
-                    setPageToggle("UI settings");
+                    setPageToggle("uiSettings");
                   } else {
                     setPageToggle(value);
                   }
