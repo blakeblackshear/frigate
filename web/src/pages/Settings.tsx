@@ -20,7 +20,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import { isMobile, isMobileSafari } from "react-device-detect";
+import { isIOS, isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -152,7 +152,8 @@ export default function Settings() {
       );
       if (element instanceof HTMLElement) {
         scrollIntoView(element, {
-          behavior: isMobileSafari && !isPWA && isInIframe ? "auto" : "smooth",
+          behavior:
+            isMobile && isIOS && !isPWA && isInIframe ? "auto" : "smooth",
           inline: "start",
         });
       }
