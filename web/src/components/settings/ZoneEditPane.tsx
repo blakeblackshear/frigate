@@ -68,7 +68,7 @@ export default function ZoneEditPane({
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
@@ -414,10 +414,13 @@ export default function ZoneEditPane({
           }
         })
         .catch((error) => {
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);

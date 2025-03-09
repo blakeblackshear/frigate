@@ -31,6 +31,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { debounce } from "lodash";
+import { isIOS, isMobile } from "react-device-detect";
+import { isPWA } from "@/utils/isPWA";
+import { isInIframe } from "@/utils/isIFrame";
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -54,7 +57,8 @@ function Logs() {
       );
       if (element instanceof HTMLElement) {
         scrollIntoView(element, {
-          behavior: "smooth",
+          behavior:
+            isMobile && isIOS && !isPWA && isInIframe ? "auto" : "smooth",
           inline: "start",
         });
       }

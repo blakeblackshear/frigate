@@ -5,16 +5,22 @@ from abc import ABC, abstractmethod
 
 from frigate.config import FrigateConfig
 
-from ..types import DataProcessorMetrics, PostProcessDataEnum
+from ..types import DataProcessorMetrics, DataProcessorModelRunner, PostProcessDataEnum
 
 logger = logging.getLogger(__name__)
 
 
 class PostProcessorApi(ABC):
     @abstractmethod
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        metrics: DataProcessorMetrics,
+        model_runner: DataProcessorModelRunner,
+    ) -> None:
         self.config = config
         self.metrics = metrics
+        self.model_runner = model_runner
         pass
 
     @abstractmethod

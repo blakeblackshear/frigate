@@ -6,13 +6,17 @@ import random
 import shutil
 import string
 
-from fastapi import APIRouter, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pathvalidate import sanitize_filename
+from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.tags import Tags
 from frigate.const import FACE_DIR
 from frigate.embeddings import EmbeddingsContext
+from frigate.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +45,7 @@ def get_faces():
     return JSONResponse(status_code=200, content=face_dict)
 
 
-@router.post("/faces/reprocess")
+@router.post("/faces/reprocess", dependencies=[Depends(require_role(["admin"]))])
 def reclassify_face(request: Request, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -118,7 +122,7 @@ def train_face(request: Request, name: str, body: dict = None):
     )
 
 
-@router.post("/faces/{name}/create")
+@router.post("/faces/{name}/create", dependencies=[Depends(require_role(["admin"]))])
 async def create_face(request: Request, name: str):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -135,7 +139,7 @@ async def create_face(request: Request, name: str):
     )
 
 
-@router.post("/faces/{name}/register")
+@router.post("/faces/{name}/register", dependencies=[Depends(require_role(["admin"]))])
 async def register_face(request: Request, name: str, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -151,7 +155,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.post("/faces/{name}/delete")
+@router.post("/faces/{name}/delete", dependencies=[Depends(require_role(["admin"]))])
 def deregister_faces(request: Request, name: str, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -174,5 +178,38 @@ def deregister_faces(request: Request, name: str, body: dict = None):
     )
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )
+
+
+@router.put("/lpr/reprocess")
+def reprocess_license_plate(request: Request, event_id: str):
+    if not request.app.frigate_config.lpr.enabled:
+        message = "License plate recognition is not enabled."
+        logger.error(message)
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": message,
+                }
+            ),
+            status_code=400,
+        )
+
+    try:
+        event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        message = f"Event {event_id} not found"
+        logger.error(message)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=404
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    response = context.reprocess_plate(model_to_dict(event))
+
+    return JSONResponse(
+        content=response,
         status_code=200,
     )

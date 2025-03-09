@@ -9,7 +9,7 @@ import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
-from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP
+from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP, MODEL_CACHE_DIR
 from frigate.plus import PlusApi
 from frigate.util.builtin import generate_color_palette, load_labels
 
@@ -37,6 +37,7 @@ class ModelTypeEnum(str, Enum):
     yolox = "yolox"
     yolov9 = "yolov9"
     yolonas = "yolonas"
+    dfine = "dfine"
 
 
 class ModelConfig(BaseModel):
@@ -122,7 +123,7 @@ class ModelConfig(BaseModel):
             return
 
         model_id = self.path[7:]
-        self.path = f"/config/model_cache/{model_id}"
+        self.path = os.path.join(MODEL_CACHE_DIR, model_id)
         model_info_path = f"{self.path}.json"
 
         # download the model if it doesn't exist

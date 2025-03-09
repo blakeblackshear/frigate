@@ -14,7 +14,7 @@ from frigate.util.services import get_video_properties
 logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.16-0"
-DEFAULT_CONFIG_FILE = "/config/config.yml"
+DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 
 def find_config_file() -> str:
@@ -299,6 +299,12 @@ def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
 def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     """Handle migrating frigate config to 0.16-0"""
     new_config = config.copy()
+
+    # migrate config that does not have detect -> enabled explicitly set to have it enabled
+    if new_config.get("detect", {}).get("enabled") is None:
+        detect_config = new_config.get("detect", {})
+        detect_config["enabled"] = True
+        new_config["detect"] = detect_config
 
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, any]] = camera.copy()

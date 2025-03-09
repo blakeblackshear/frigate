@@ -17,7 +17,6 @@ from frigate.detectors.detector_config import (
     InputDTypeEnum,
     InputTensorEnum,
 )
-from frigate.detectors.plugins.rocm import DETECTOR_KEY as ROCM_DETECTOR_KEY
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.services import listen
@@ -52,13 +51,7 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if detector_config:
-            if detector_config.type == ROCM_DETECTOR_KEY:
-                # ROCm requires NHWC as input
-                self.input_transform = None
-            else:
-                self.input_transform = tensor_transform(
-                    detector_config.model.input_tensor
-                )
+            self.input_transform = tensor_transform(detector_config.model.input_tensor)
 
             self.dtype = detector_config.model.input_dtype
         else:

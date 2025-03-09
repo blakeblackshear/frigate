@@ -14,16 +14,18 @@ ARG BASE_HOOK=
 
 FROM ${BASE_IMAGE} AS base
 ARG PIP_BREAK_SYSTEM_PACKAGES
+ARG BASE_HOOK
 
-RUN ${BASE_HOOK}
+RUN sh -c "$BASE_HOOK"
 
 FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
 ARG PIP_BREAK_SYSTEM_PACKAGES
 
 FROM ${SLIM_BASE} AS slim-base
 ARG PIP_BREAK_SYSTEM_PACKAGES
+ARG BASE_HOOK
 
-RUN ${BASE_HOOK}
+RUN sh -c "$BASE_HOOK"
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -37,10 +39,7 @@ ARG DEBIAN_FRONTEND
 ENV CCACHE_DIR /root/.ccache
 ENV CCACHE_MAXSIZE 2G
 
-# bind /var/cache/apt to tmpfs to speed up nginx build
-RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
-    --mount=type=cache,target=/root/.ccache \
+RUN --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
     /deps/build_nginx.sh
 
 FROM wget AS sqlite-vec
@@ -223,14 +222,22 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
+# Set HailoRT to disable logging
+ENV HAILORT_LOGGER_PATH=NONE
+
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
+ENV DEFAULT_FFMPEG_VERSION="7.0"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
+
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip"
+
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    python3 -m pip install --upgrade pip && \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /

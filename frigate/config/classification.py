@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Optional
 
 from pydantic import Field
@@ -9,6 +10,11 @@ __all__ = [
     "SemanticSearchConfig",
     "LicensePlateRecognitionConfig",
 ]
+
+
+class SemanticSearchModelEnum(str, Enum):
+    jinav1 = "jinav1"
+    jinav2 = "jinav2"
 
 
 class BirdClassificationConfig(FrigateBaseModel):
@@ -30,7 +36,11 @@ class ClassificationConfig(FrigateBaseModel):
 class SemanticSearchConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable semantic search.")
     reindex: Optional[bool] = Field(
-        default=False, title="Reindex all detections on startup."
+        default=False, title="Reindex all tracked objects on startup."
+    )
+    model: Optional[SemanticSearchModelEnum] = Field(
+        default=SemanticSearchModelEnum.jinav1,
+        title="The CLIP model to use for semantic search.",
     )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."

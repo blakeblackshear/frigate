@@ -204,16 +204,13 @@ export default function EventView({
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to start export: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to start export: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to start export: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [reviewItems],
@@ -620,6 +617,16 @@ function DetectionReview({
   );
 
   // existing review item
+
+  useEffect(() => {
+    if (loading || currentItems == null || itemsToReview == undefined) {
+      return;
+    }
+
+    if (currentItems.length == 0 && itemsToReview > 0) {
+      pullLatestData();
+    }
+  }, [loading, currentItems, itemsToReview, pullLatestData]);
 
   useEffect(() => {
     if (!startTime || !currentItems || currentItems.length == 0) {

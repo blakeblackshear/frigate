@@ -30,6 +30,7 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { isMobile } from "react-device-detect";
 import IconPicker, { IconElement } from "@/components/icons/IconPicker";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import ObjectPathPlotter from "@/components/overlay/detail/ObjectPathPlotter";
 
 // Color data
 const colors = [
@@ -223,6 +224,8 @@ function UIPlayground() {
         <div className="flex h-full">
           <div className="no-scrollbar mr-5 mt-4 flex-1 content-start gap-2 overflow-y-auto">
             <Heading as="h2">UI Playground</Heading>
+
+            <ObjectPathPlotter />
 
             <IconPicker
               selectedIcon={selectedIcon}
