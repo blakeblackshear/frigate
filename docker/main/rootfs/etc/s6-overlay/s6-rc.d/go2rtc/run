@@ -50,6 +50,56 @@ function set_libva_version() {
     export LIBAVFORMAT_VERSION_MAJOR
 }
 
+function migrate_from_homeassistant_config() {
+    if ! mountpoint --quiet /homeassistant_config; then
+        # Not running as a Home Assistant add-on
+        return 0
+    fi
+
+    local new_config_file="/config/config.yml"
+    local new_config_file_yaml="${new_config_file//.yml/.yaml}"
+    if [[ -f "${new_config_file_yaml}" || -f "${new_config_file}" ]]; then
+        # Already migrated
+        return 0
+    fi
+    unset new_config_file new_config_file_yaml
+
+    local old_config_file="/homeassistant_config/frigate.yml"
+    local old_config_file_yaml="${old_config_file//.yml/.yaml}"
+    local new_config_file="/config/config.yml"
+    if [[ -f "${old_config_file_yaml}" ]]; then
+        old_config_file="${old_config_file_yaml}"
+        new_config_file="/config/config.yaml"
+    elif [[ ! -f "${old_config_file}" ]]; then
+        # Nothing to migrate
+        return 0
+    fi
+    unset old_config_file_yaml
+
+    local db_path
+    db_path=$(yq eval '.database.path' "${old_config_file}")
+
+    if [[ "${db_path}" == "null" ]]; then
+        db_path="/config/frigate.db"
+    fi
+
+    if [[ "${db_path}" == /config/* ]]; then
+        # replace /config/ prefix with /homeassistant_config/
+        old_db_path="/homeassistant_config/${db_path:8}"
+
+        if [[ -f "${old_db_path}" ]]; then
+            new_db_dir="$(dirname "${db_path}")"
+            echo "[INFO] Migrating database from '${old_db_path}' to '${db_path}'..."
+            mv -vf "${old_db_path}"* "${new_db_dir}"
+        fi
+    fi
+
+    echo "[INFO] Migrating config from '${old_config_file}' to '${new_config_file}'..."
+    mv -vf "${old_config_file}" "${new_config_file}"
+}
+
+migrate_from_homeassistant_config
+
 set_libva_version
 
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
