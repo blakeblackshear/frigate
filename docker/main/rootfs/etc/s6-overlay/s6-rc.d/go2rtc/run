@@ -50,7 +50,7 @@ function set_libva_version() {
     export LIBAVFORMAT_VERSION_MAJOR
 }
 
-function migrate_from_homeassistant_config() {
+function migrate_addon_config_dir() {
     if ! mountpoint --quiet /homeassistant_config; then
         # Not running as a Home Assistant add-on
         return 0
@@ -98,7 +98,7 @@ function migrate_from_homeassistant_config() {
     mv -vf "${old_config_file}" "${new_config_file}"
 }
 
-migrate_from_homeassistant_config
+migrate_addon_config_dir
 
 set_libva_version
 
