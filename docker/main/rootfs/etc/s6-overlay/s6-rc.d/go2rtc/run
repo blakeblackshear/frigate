@@ -78,11 +78,9 @@ function migrate_addon_config_dir() {
 
     local db_path
     db_path=$(yq eval '.database.path' "${old_config_file}")
-
     if [[ "${db_path}" == "null" ]]; then
         db_path="/config/frigate.db"
     fi
-
     if [[ "${db_path}" == /config/* ]]; then
         # replace /config/ prefix with /homeassistant_config/
         local old_db_path="/homeassistant_config/${db_path:8}"
@@ -91,7 +89,23 @@ function migrate_addon_config_dir() {
             local new_db_dir
             new_db_dir="$(dirname "${db_path}")"
             echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
+            mkdir -p "${new_db_dir}"
             mv -vf "${old_db_path}"* "${new_db_dir}"
+        fi
+    fi
+
+    local model_path
+    model_path=$(yq eval '.model.path' "${old_config_file}")
+    if [[ "${model_path}" == /config/* ]]; then
+        # replace /config/ prefix with /homeassistant_config/
+        local old_model_path="/homeassistant_config/${model_path:8}"
+
+        if [[ -f "${old_model_path}" ]]; then
+            local new_model_dir
+            new_model_dir="$(dirname "${model_path}")"
+            echo "[INFO] Migrating model from '${old_model_path}' to '${model_path}'..."
+            mkdir -p "${new_model_dir}"
+            mv -vf "${old_model_path}" "${model_path}"
         fi
     fi
 
