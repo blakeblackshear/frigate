@@ -77,12 +77,12 @@ export default function StorageMetrics({
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">
-        <Trans>ui.system.storage.overview</Trans>
+        <Trans ns="views/system">storage.overview</Trans>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">
-            <Trans>ui.system.storage.recordings</Trans>
+            <Trans ns="views/system">storage.recordings.title</Trans>
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -97,7 +97,7 @@ export default function StorageMetrics({
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-2">
-                  <Trans>ui.system.storage.recordings.tips</Trans>
+                  <Trans ns="views/system">storage.recordings.tips</Trans>
                 </div>
               </PopoverContent>
             </Popover>
@@ -136,7 +136,7 @@ export default function StorageMetrics({
         </div>
       </div>
       <div className="mt-4 text-sm font-medium text-muted-foreground">
-        <Trans>ui.system.storage.cameraStorage</Trans>
+        <Trans ns="views/system">storage.cameraStorage.title</Trans>
       </div>
       <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
         <CombinedStorageGraph

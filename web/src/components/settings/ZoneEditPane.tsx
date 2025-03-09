@@ -105,7 +105,8 @@ export default function ZoneEditPane({
         .string()
         .min(2, {
           message: t(
-            "ui.form.message.zoneName.error.mustBeAtLeastTwoCharacters",
+            "masksAndZones.form.zoneName.error.mustBeAtLeastTwoCharacters",
+            { ns: "views/settings"}
           ),
         })
         .transform((val: string) => val.trim().replace(/\s+/g, "_"))
@@ -115,7 +116,8 @@ export default function ZoneEditPane({
           },
           {
             message: t(
-              "ui.form.message.zoneName.error.mustNotBeSameWithCamera",
+              "masksAndZones.form.zoneName.error.mustNotBeSameWithCamera",
+              { ns: "views/settings"}
             ),
           },
         )
@@ -129,7 +131,9 @@ export default function ZoneEditPane({
             return !otherPolygonNames.includes(value);
           },
           {
-            message: t("ui.form.message.zoneName.error.alreadyExists"),
+            message: t("masksAndZones.form.zoneName.error.alreadyExists",
+              { ns: "views/settings"}
+            ),
           },
         )
         .refine(
@@ -137,29 +141,36 @@ export default function ZoneEditPane({
             return !value.includes(".");
           },
           {
-            message: t("ui.form.message.zoneName.error.mustNotContainPeriod"),
+            message: t("masksAndZones.form.zoneName.error.mustNotContainPeriod",
+              { ns: "views/settings"}
+            ),
           },
         )
         .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-          message: t("ui.form.message.zoneName.error.hasIllegalCharacter"),
+          message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter",
+            { ns: "views/settings"}
+          ),
         }),
       inertia: z.coerce
         .number()
         .min(1, {
-          message: t("ui.form.message.inertia.error.mustBeAboveZero"),
+          message: t("masksAndZones.form.inertia.error.mustBeAboveZero",
+            { ns: "views/settings"}
+          ),
         })
         .or(z.literal("")),
       loitering_time: z.coerce
         .number()
         .min(0, {
           message: t(
-            "ui.form.message.loiteringTime.error.mustBeGreaterOrEqualZero",
+            "masksAndZones.form.loiteringTime.error.mustBeGreaterOrEqualZero",
+            { ns: "views/settings"}
           ),
         })
         .optional()
         .or(z.literal("")),
       isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
-        message: t("ui.form.message.polygonDrawing.error.mustBeFinished"),
+        message: t("masksAndZones.polygonDrawing.error.mustBeFinished", { ns: "views/settings" }),
       }),
       objects: z.array(z.string()).optional(),
       review_alerts: z.boolean().default(false).optional(),
@@ -168,28 +179,28 @@ export default function ZoneEditPane({
       lineA: z.coerce
         .number()
         .min(0.1, {
-          message: t("ui.form.message.distance.error"),
+          message: t("masksAndZones.form.distance.error", { ns: "views/settings"}),
         })
         .optional()
         .or(z.literal("")),
       lineB: z.coerce
         .number()
         .min(0.1, {
-          message: t("ui.form.message.distance.error"),
+          message: t("masksAndZones.form.distance.error", { ns: "views/settings"}),
         })
         .optional()
         .or(z.literal("")),
       lineC: z.coerce
         .number()
         .min(0.1, {
-          message: t("ui.form.message.distance.error"),
+          message: t("masksAndZones.form.distance.error", { ns: "views/settings"}),
         })
         .optional()
         .or(z.literal("")),
       lineD: z.coerce
         .number()
         .min(0.1, {
-          message: t("ui.form.message.distance.error"),
+          message: t("masksAndZones.form.distance.error", { ns: "views/settings"}),
         })
         .optional()
         .or(z.literal("")),
@@ -209,7 +220,7 @@ export default function ZoneEditPane({
         return true;
       },
       {
-        message: t("ui.form.message.distance.error.mustBeFilled"),
+        message: t("masksAndZones.form.distance.error.mustBeFilled", { ns: "views/settings"}),
         path: ["speedEstimation"],
       },
     )
@@ -224,7 +235,10 @@ export default function ZoneEditPane({
       },
       {
         message: t(
-          "ui.settingView.masksAndZonesSettings.zones.speedThreshold.toast.error.loiteringTimeError",
+          "masksAndZones.zones.speedThreshold.toast.error.loiteringTimeError",
+          {
+            ns: "views/settings"
+          }
         ),
         path: ["loitering_time"],
       },
@@ -265,7 +279,10 @@ export default function ZoneEditPane({
     ) {
       toast.error(
         t(
-          "ui.settingView.masksAndZonesSettings.zones.speedThreshold.toast.error.pointLengthError",
+          "masksAndZones.zones.speedThreshold.toast.error.pointLengthError",
+          {
+            ns: "views/settings"
+          }
         ),
       );
       form.setValue("speedEstimation", false);
@@ -330,7 +347,7 @@ export default function ZoneEditPane({
           // Wait for the config to be updated
           mutatedConfig = await updateConfig();
         } catch (error) {
-          toast.error(t("ui.toast.save.error.noMessage"), {
+          toast.error(t("toast.save.error.noMessage"), {
             position: "top-center",
           });
           return;
@@ -412,8 +429,9 @@ export default function ZoneEditPane({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              t("ui.settingView.masksAndZonesSettings.zones.toast.success", {
+              t("masksAndZones.zones.toast.success", {
                 zoneName,
+                ns: "views/settings",
               }),
               {
                 position: "top-center",
@@ -422,7 +440,7 @@ export default function ZoneEditPane({
             updateConfig();
           } else {
             toast.error(
-              t("ui.toast.save.error", { errorMessage: res.statusText }),
+              t("toast.save.error", { errorMessage: res.statusText }),
               {
                 position: "top-center",
               },
@@ -431,7 +449,7 @@ export default function ZoneEditPane({
         })
         .catch((error) => {
           toast.error(
-            t("ui.toast.save.error", {
+            t("toast.save.error", {
               errorMessage: error.response.data.message,
             }),
             { position: "top-center" },
@@ -470,7 +488,10 @@ export default function ZoneEditPane({
 
   useEffect(() => {
     document.title = t(
-      "ui.settingView.masksAndZonesSettings.zones.documentTitle",
+      "masksAndZones.zones.documentTitle",
+      {
+        ns: "views/settings"
+      }
     );
   }, []);
 
@@ -483,20 +504,25 @@ export default function ZoneEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("ui.settingView.masksAndZonesSettings.zones.edit")
-          : t("ui.settingView.masksAndZonesSettings.zones.add")}
+          ? t("masksAndZones.zones.edit",{
+            ns: "views/settings"
+          })
+          : t("masksAndZones.zones.add",{
+            ns: "views/settings"
+          })}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
-          <Trans>ui.settingView.masksAndZonesSettings.zones.desc</Trans>
+          <Trans ns="views/settings">masksAndZones.zones.desc</Trans>
         </p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {t("ui.settingView.masksAndZonesSettings.zones.point", {
+            {t("masksAndZones.zones.point", {
               count: polygons[activePolygonIndex].points.length,
+              ns: "views/settings"
             })}
 
             {polygons[activePolygonIndex].isFinished && (
@@ -513,8 +539,8 @@ export default function ZoneEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans>
-          ui.settingView.masksAndZonesSettings.zones.clickDrawPolygon
+        <Trans ns="views/settings">
+          masksAndZones.zones.clickDrawPolygon
         </Trans>
       </div>
 
@@ -528,20 +554,23 @@ export default function ZoneEditPane({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans>ui.settingView.masksAndZonesSettings.zones.name</Trans>
+                  <Trans ns="views/settings">masksAndZones.zones.name</Trans>
                 </FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder={t(
-                      "ui.settingView.masksAndZonesSettings.zones.name.inputPlaceHolder",
+                      "masksAndZones.zones.name.inputPlaceHolder",
+                      {
+                        ns: "views/settings"
+                      }
                     )}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.name.tips
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.name.tips
                   </Trans>
                 </FormDescription>
                 <FormMessage />
@@ -555,8 +584,8 @@ export default function ZoneEditPane({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.inertia
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.inertia
                   </Trans>
                 </FormLabel>
                 <FormControl>
@@ -567,8 +596,8 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.inertia.desc
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.inertia.desc
                   </Trans>
                 </FormDescription>
                 <FormMessage />
@@ -582,8 +611,8 @@ export default function ZoneEditPane({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.loiteringTime
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.loiteringTime
                   </Trans>
                 </FormLabel>
                 <FormControl>
@@ -594,8 +623,8 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.loiteringTime.desc
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.loiteringTime.desc
                   </Trans>
                 </FormDescription>
                 <FormMessage />
@@ -605,11 +634,11 @@ export default function ZoneEditPane({
           <Separator className="my-2 flex bg-secondary" />
           <FormItem>
             <FormLabel>
-              <Trans>ui.settingView.masksAndZonesSettings.zones.objects</Trans>
+              <Trans ns="views/settings">masksAndZones.zones.objects</Trans>
             </FormLabel>
             <FormDescription>
-              <Trans>
-                ui.settingView.masksAndZonesSettings.zones.objects.desc
+              <Trans ns="views/settings">
+                masksAndZones.zones.objects.desc
               </Trans>
             </FormDescription>
             <ZoneObjectSelector
@@ -644,8 +673,8 @@ export default function ZoneEditPane({
                         className="cursor-pointer text-primary"
                         htmlFor="allLabels"
                       >
-                        <Trans>
-                          ui.settingView.masksAndZonesSettings.zones.speedEstimation
+                        <Trans ns="views/settings">
+                          masksAndZones.zones.speedEstimation
                         </Trans>
                       </FormLabel>
                       <Switch
@@ -659,7 +688,10 @@ export default function ZoneEditPane({
                           ) {
                             toast.error(
                               t(
-                                "ui.settingView.masksAndZonesSettings.zones.speedEstimation.pointLengthError",
+                                "masksAndZones.zones.speedEstimation.pointLengthError",
+                                {
+                                  ns: "views/settings"
+                                }
                               ),
                             );
                             return;
@@ -670,7 +702,10 @@ export default function ZoneEditPane({
                           if (checked && loiteringTime && loiteringTime > 0) {
                             toast.error(
                               t(
-                                "ui.settingView.masksAndZonesSettings.zones.speedEstimation.loiteringTimeError",
+                                "masksAndZones.zones.speedEstimation.loiteringTimeError",
+                                {
+                                  ns: "views/settings"
+                                }
                               ),
                             );
                           }
@@ -681,8 +716,8 @@ export default function ZoneEditPane({
                   </FormControl>
                 </div>
                 <FormDescription>
-                  <Trans>
-                    ui.settingView.masksAndZonesSettings.zones.speedEstimation.desc
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.speedEstimation.desc
                   </Trans>
                 </FormDescription>
                 <FormMessage />
@@ -799,11 +834,12 @@ export default function ZoneEditPane({
                           values={{
                             unit:
                               config?.ui.unit_system == "imperial"
-                                ? t("ui.unit.speed.mph")
-                                : t("ui.unit.speed.kph"),
+                                ? t("unit.speed.mph")
+                                : t("unit.speed.kph"),
                           }}
+                          ns="views/settings"
                         >
-                          ui.settingView.masksAndZonesSettings.zones.speedThreshold
+                          masksAndZones.zones.speedThreshold
                         </Trans>
                       </FormLabel>
                       <FormControl>
@@ -813,8 +849,8 @@ export default function ZoneEditPane({
                         />
                       </FormControl>
                       <FormDescription>
-                        <Trans>
-                          ui.settingView.masksAndZonesSettings.zones.speedThreshold.desc
+                        <Trans ns="views/settings">
+                          masksAndZones.zones.speedThreshold.desc
                         </Trans>
                       </FormDescription>
                       <FormMessage />
@@ -839,7 +875,7 @@ export default function ZoneEditPane({
               aria-label="Cancel"
               onClick={onCancel}
             >
-              <Trans>ui.cancel</Trans>
+              <Trans>button.cancel</Trans>
             </Button>
             <Button
               variant="select"
@@ -852,11 +888,11 @@ export default function ZoneEditPane({
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
                   <span>
-                    <Trans>ui.saving</Trans>
+                    <Trans>button.saving</Trans>
                   </span>
                 </div>
               ) : (
-                <Trans>ui.save</Trans>
+                <Trans>button.save</Trans>
               )}
             </Button>
           </div>
@@ -936,7 +972,7 @@ export function ZoneObjectSelector({
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex items-center justify-between">
           <Label className="cursor-pointer text-primary" htmlFor="allLabels">
-            <Trans>ui.settingView.masksAndZonesSettings.zones.allObjects</Trans>
+            <Trans ns="views/settings">masksAndZones.zones.allObjects</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -957,7 +993,7 @@ export function ZoneObjectSelector({
                 className="w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                {t("object." + item)}
+                {t(item, {ns: "objects"})}
               </Label>
               <Switch
                 key={item}

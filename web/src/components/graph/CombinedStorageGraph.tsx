@@ -179,18 +179,18 @@ export function CombinedStorageGraph({
           <TableHeader>
             <TableRow>
               <TableHead>
-                <Trans>ui.system.storage.cameraStorage.camera</Trans>
+                <Trans ns="views/system">storage.cameraStorage.camera</Trans>
               </TableHead>
               <TableHead>
-                <Trans>ui.system.storage.cameraStorage.storageUsed</Trans>
+                <Trans ns="views/system">storage.cameraStorage.storageUsed</Trans>
               </TableHead>
               <TableHead>
-                <Trans>
-                  ui.system.storage.cameraStorage.percentageOfTotalUsed
+                <Trans ns="views/system">
+                  storage.cameraStorage.percentageOfTotalUsed
                 </Trans>
               </TableHead>
               <TableHead>
-                <Trans>ui.system.storage.cameraStorage.bandwidth</Trans>
+                <Trans ns="views/system">storage.cameraStorage.bandwidth</Trans>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -204,7 +204,9 @@ export function CombinedStorageGraph({
                     style={{ backgroundColor: item.color }}
                   ></div>
                   {item.name === "Unused"
-                    ? t("ui.system.storage.cameraStorage.unused")
+                    ? t("storage.cameraStorage.unused", {
+                      ns: "views/system",
+                    })
                     : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
@@ -221,8 +223,8 @@ export function CombinedStorageGraph({
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          <Trans>
-                            ui.system.storage.cameraStorage.unused.tips
+                          <Trans ns="views/system">
+                            storage.cameraStorage.unused.tips
                           </Trans>
                         </div>
                       </PopoverContent>

@@ -280,7 +280,7 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          <Trans>ui.reviewFilter.showReviewed</Trans>
+          <Trans ns="components/filter">review.showReviewed</Trans>
         </Label>
       </div>
 
@@ -366,7 +366,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        <Trans>ui.filter</Trans>
+        <Trans ns="components/filter">label</Trans>
       </div>
     </Button>
   );
@@ -447,7 +447,7 @@ export function GeneralFilterContent({
         {currentSeverity && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
-              label={t("ui.eventView.alerts")}
+              label={t("alerts", { ns: "views/events" })}
               disabled={currentSeverity == "alert"}
               isChecked={
                 currentSeverity == "alert" ? true : filter.showAll === true
@@ -457,7 +457,7 @@ export function GeneralFilterContent({
               }
             />
             <FilterSwitch
-              label={t("ui.eventView.detections")}
+              label={t("detections", { ns: "views/events" })}
               disabled={currentSeverity == "detection"}
               isChecked={
                 currentSeverity == "detection" ? true : filter.showAll === true
@@ -474,7 +474,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans>ui.filter.allLabels</Trans>
+            <Trans ns="components/filter">labels.all</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -521,7 +521,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                <Trans>ui.filter.allZones</Trans>
+                <Trans ns="components/filter">zones.all</Trans>
               </Label>
               <Switch
                 className="ml-1"
@@ -577,10 +577,10 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          <Trans>ui.apply</Trans>
+          <Trans>button.apply</Trans>
         </Button>
         <Button aria-label="Reset" onClick={onReset}>
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>
@@ -613,7 +613,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          <Trans>ui.eventView.motion.only</Trans>
+          <Trans ns="views/events">motion.only</Trans>
         </Label>
       </div>
 

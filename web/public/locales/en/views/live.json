@@ -1,0 +1,70 @@
+{
+  "documentTitle": "Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "twoWayTalk": {
+    "enable": "Enable Two Way Talk",
+    "disable": "Disable Two Way Talk"
+  },
+  "cameraAudio": {
+    "enable": "Enable Camera Audio",
+    "disable": "Disable Camera Audio"
+  },
+  "ptz": {
+    "move": {
+      "left": {
+        "label": "Move PTZ camera to the left"
+      },
+      "up": {
+        "label": "Move PTZ camera up"
+      },
+      "down": {
+        "label": "Move PTZ camera down"
+      },
+      "right": {
+        "label": "Move PTZ camera to the right"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Zoom PTZ camera in"
+      },
+      "out": {
+        "label": "Zoom PTZ camera out"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Click in the frame to center the PTZ camera"
+      }
+    }
+  },
+  "detect": {
+    "enable": "Enable Detect",
+    "disable": "Disable Detect"
+  },
+  "recording": {
+    "enable": "Enable Recording",
+    "disable": "Disable Recording"
+  },
+  "snapshots": {
+    "enable": "Enable Snapshots",
+    "disable": "Disable Snapshots"
+  },
+  "audioDetect": {
+    "enable": "Enable Audio Detect",
+    "disable": "Disable Audio Detect"
+  },
+  "autotracking": {
+    "enable": "Enable Autotracking",
+    "disable": "Disable Autotracking"
+  },
+  "manualRecording": {
+    "start": "Start on-demand recording",
+    "started": "Started manual on-demand recording.",
+    "failedToStart": "Failed to start manual on-demand recording.",
+    "recordDisabledTips": "Since recording is disabled or restricted in the config for this camera, only a snapshot will be saved.",
+    "end": "End on-demand recording",
+    "ended": "Ended manual on-demand recording.",
+    "failedToEnd": "Failed to end manual on-demand recording."
+  }
+}

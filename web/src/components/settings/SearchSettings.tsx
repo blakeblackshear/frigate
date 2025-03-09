@@ -52,7 +52,7 @@ export default function ExploreSettings({
       size="sm"
     >
       <FaCog className="text-secondary-foreground" />
-      <Trans>ui.searchView.settings</Trans>
+      <Trans ns="components/filter">explore.settings.title</Trans>
     </Button>
   );
   const content = (
@@ -60,10 +60,10 @@ export default function ExploreSettings({
       <div className="space-y-4">
         <div className="space-y-0.5">
           <div className="text-md">
-            <Trans>ui.searchView.settings.defaultView</Trans>
+            <Trans ns="components/filter">explore.settings.defaultView</Trans>
           </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <Trans>ui.searchView.settings.defaultView.desc</Trans>
+            <Trans ns="components/filter">explore.settings.defaultView.desc</Trans>
           </div>
         </div>
         <Select
@@ -72,8 +72,8 @@ export default function ExploreSettings({
         >
           <SelectTrigger className="w-full">
             {defaultView == "summary"
-              ? t("ui.searchView.settings.defaultView.summary")
-              : t("ui.searchView.settings.defaultView.unfilteredGrid")}
+              ? t("explore.settings.defaultView.summary", {ns: "components/filter"})
+              : t("explore.settings.defaultView.unfilteredGrid", {ns: "components/filter"})}
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -84,8 +84,8 @@ export default function ExploreSettings({
                   value={value}
                 >
                   {value == "summary"
-                    ? t("ui.searchView.settings.defaultView.summary")
-                    : t("ui.searchView.settings.defaultView.unfilteredGrid")}
+                    ? t("explore.settings.defaultView.summary", {ns: "components/filter"})
+                    : t("explore.settings.defaultView.unfilteredGrid", {ns: "components/filter"})}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -98,10 +98,10 @@ export default function ExploreSettings({
           <div className="flex w-full flex-col space-y-4">
             <div className="space-y-0.5">
               <div className="text-md">
-                <Trans>ui.searchView.settings.gridColumns</Trans>
+                <Trans ns="components/filter">explore.settings.gridColumns</Trans>
               </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <Trans>ui.searchView.settings.gridColumns.desc</Trans>
+                <Trans ns="components/filter">explore.settings.gridColumns.desc</Trans>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -163,10 +163,10 @@ export function SearchTypeContent({
         <DropdownMenuSeparator className="mb-3" />
         <div className="space-y-0.5">
           <div className="text-md">
-            <Trans>ui.searchView.settings.searchSource</Trans>
+            <Trans ns="components/filter">explore.settings.searchSource</Trans>
           </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <Trans>ui.searchView.settings.searchSource.desc</Trans>
+            <Trans ns="components/filter">explore.settings.searchSource.desc</Trans>
           </div>
         </div>
         <div className="mt-2.5 flex flex-col gap-2.5">

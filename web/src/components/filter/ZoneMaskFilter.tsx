@@ -30,7 +30,7 @@ export function ZoneMaskFilterButton({
       <div
         className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        <Trans>ui.filter</Trans>
+        <Trans ns="components/filter">label</Trans>
       </div>
     </Button>
   );
@@ -76,7 +76,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans>ui.settingView.masksAndZonesSettings.filter.all</Trans>
+            <Trans ns="components/filter">labels.all</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -97,8 +97,8 @@ export function GeneralFilterContent({
                 className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                <Trans>
-                  ui.settingView.masksAndZonesSettings.
+                <Trans ns="views/settings">
+                  masksAndZones.
                   {item.replace(/_([a-z])/g, (letter) => letter.toUpperCase()) +
                     "s"}
                 </Trans>

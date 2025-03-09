@@ -81,15 +81,15 @@ export default function RestartDialog({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Trans>ui.dialog.restart.title</Trans>
+              <Trans ns="components/dialog">restart.title</Trans>
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              <Trans>ui.cancel</Trans>
+              <Trans>button.cancel</Trans>
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleRestart}>
-              <Trans>ui.dialog.restart.button</Trans>
+              <Trans ns="components/dialog">restart.button</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -104,11 +104,11 @@ export default function RestartDialog({
             <ActivityIndicator />
             <SheetHeader className="mt-5 text-center">
               <SheetTitle className="text-center">
-                <Trans>ui.dialog.restart.restarting.title</Trans>
+                <Trans ns="components/dialog">restart.restarting.title</Trans>
               </SheetTitle>
               <SheetDescription className="text-center">
                 <div>
-                  {t("ui.dialog.restart.restarting.content", { countdown })}
+                  {t("restart.restarting.content", { countdown, ns: "components/dialog" })}
                 </div>
               </SheetDescription>
             </SheetHeader>
@@ -118,7 +118,7 @@ export default function RestartDialog({
               aria-label="Force reload now"
               onClick={handleForceReload}
             >
-              <Trans>ui.dialog.restart.restarting.button</Trans>
+              <Trans ns="components/dialog">restart.restarting.button</Trans>
             </Button>
           </div>
         </SheetContent>

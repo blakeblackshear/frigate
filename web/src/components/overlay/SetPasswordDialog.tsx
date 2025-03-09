@@ -27,7 +27,7 @@ export default function SetPasswordDialog({
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
-            <Trans>ui.settingView.users.dialog.setPassword</Trans>
+            <Trans ns="views/settings">users.dialog.setPassword.title</Trans>
           </DialogTitle>
         </DialogHeader>
         <Input
@@ -46,7 +46,7 @@ export default function SetPasswordDialog({
               onSave(password!);
             }}
           >
-            <Trans>ui.save</Trans>
+            <Trans>button.save</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -168,12 +168,12 @@ export function CameraStreamingDialog({
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="mb-4">
         <DialogTitle className="capitalize">
-          <Trans values={{ cameraName: camera.replaceAll("_", " ") }}>
-            ui.cameraGroup.camera.setting
+          <Trans ns="components/camera" values={{ cameraName: camera.replaceAll("_", " ") }}>
+            group.camera.setting.title
           </Trans>
         </DialogTitle>
         <DialogDescription>
-          <Trans>ui.cameraGroup.camera.setting.desc</Trans>
+          <Trans ns="components/camera">group.camera.setting.desc</Trans>
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col space-y-8">
@@ -183,17 +183,17 @@ export function CameraStreamingDialog({
             <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
               <LuX className="size-4 text-danger" />
               <div>
-                <Trans>ui.dialog.streaming.restreaming.disabled</Trans>
+                <Trans ns="components/dialog">streaming.restreaming.disabled</Trans>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
                     <LuInfo className="size-4" />
-                    <span className="sr-only">Info</span>
+                    <span className="sr-only"><Trans>button.info</Trans></span>
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  <Trans>ui.dialog.streaming.restreaming.desc</Trans>
+                  <Trans ns="components/dialog">streaming.restreaming.desc</Trans>
                   <div className="mt-2 flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/live"
@@ -201,8 +201,8 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      <Trans>
-                        ui.dialog.streaming.restreaming.readTheDocumentation
+                      <Trans ns="components/dialog">
+                        streaming.restreaming.readTheDocumentation
                       </Trans>
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
@@ -237,8 +237,8 @@ export function CameraStreamingDialog({
                     <>
                       <LuCheck className="size-4 text-success" />
                       <div>
-                        <Trans>
-                          ui.cameraGroup.camera.setting.audioIsAvailable
+                        <Trans ns="components/camera">
+                          group.camera.setting.audioIsAvailable
                         </Trans>
                       </div>
                     </>
@@ -246,8 +246,8 @@ export function CameraStreamingDialog({
                     <>
                       <LuX className="size-4 text-danger" />
                       <div>
-                        <Trans>
-                          ui.cameraGroup.camera.setting.audioIsUnavailable
+                        <Trans ns="components/camera">
+                          group.camera.setting.audioIsUnavailable
                         </Trans>
                       </div>
                       <Popover>
@@ -255,13 +255,13 @@ export function CameraStreamingDialog({
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
                             <span className="sr-only">
-                              <Trans>ui.info</Trans>
+                              <Trans>button.info</Trans>
                             </span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 text-xs">
-                          <Trans>
-                            ui.cameraGroup.camera.setting.audio.desc
+                          <Trans ns="components/camera">
+                            group.camera.setting.audio.desc
                           </Trans>
                           <div className="mt-2 flex items-center text-primary">
                             <Link
@@ -270,8 +270,8 @@ export function CameraStreamingDialog({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              <Trans>
-                                ui.cameraGroup.camera.setting.audio.desc.document
+                              <Trans ns="components/camera">
+                                group.camera.setting.audio.desc.document
                               </Trans>
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
@@ -286,7 +286,7 @@ export function CameraStreamingDialog({
           )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
-            <Trans>ui.cameraGroup.camera.setting.streamMethod</Trans>
+            <Trans ns="components/camera">group.camera.setting.streamMethod</Trans>
           </Label>
           <Select
             value={streamType}
@@ -297,48 +297,48 @@ export function CameraStreamingDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="no-streaming">
-                <Trans>
-                  ui.cameraGroup.camera.setting.streamMethod.method.noStreaming
+                <Trans ns="components/camera">
+                  group.camera.setting.streamMethod.method.noStreaming
                 </Trans>
               </SelectItem>
               <SelectItem value="smart">
-                <Trans>
-                  ui.cameraGroup.camera.setting.streamMethod.method.smartStreaming
+                <Trans ns="components/camera">
+                  group.camera.setting.streamMethod.method.smartStreaming
                 </Trans>
               </SelectItem>
               <SelectItem value="continuous">
-                <Trans>
-                  ui.cameraGroup.camera.setting.streamMethod.method.continuousStreaming
+                <Trans ns="components/camera">
+                  group.camera.setting.streamMethod.method.continuousStreaming
                 </Trans>
               </SelectItem>
             </SelectContent>
           </Select>
           {streamType === "no-streaming" && (
             <p className="text-sm text-muted-foreground">
-              <Trans>
-                ui.cameraGroup.camera.setting.streamMethod.method.noStreaming.desc
+              <Trans ns="components/camera">
+                group.camera.setting.streamMethod.method.noStreaming.desc
               </Trans>
             </p>
           )}
           {streamType === "smart" && (
             <p className="text-sm text-muted-foreground">
-              <Trans>
-                ui.cameraGroup.camera.setting.streamMethod.method.smartStreaming.desc
+              <Trans ns="components/camera">
+                group.camera.setting.streamMethod.method.smartStreaming.desc
               </Trans>
             </p>
           )}
           {streamType === "continuous" && (
             <>
               <p className="text-sm text-muted-foreground">
-                <Trans>
-                  ui.cameraGroup.camera.setting.streamMethod.method.continuousStreaming.desc
+                <Trans ns="components/camera">
+                  group.camera.setting.streamMethod.method.continuousStreaming.desc
                 </Trans>
               </p>
               <div className="flex items-center gap-2">
                 <IoIosWarning className="mr-2 size-5 text-danger" />
                 <div className="max-w-[85%] text-sm">
-                  <Trans>
-                    ui.cameraGroup.camera.setting.streamMethod.method.continuousStreaming.desc.warning
+                  <Trans ns="components/camera">
+                    group.camera.setting.streamMethod.method.continuousStreaming.desc.warning
                   </Trans>
                 </div>
               </div>
@@ -357,13 +357,13 @@ export function CameraStreamingDialog({
               htmlFor="compatibility"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              <Trans>ui.cameraGroup.camera.setting.compatibilityMode</Trans>
+              <Trans ns="components/camera">group.camera.setting.compatibilityMode</Trans>
             </Label>
           </div>
           <div className="flex flex-col gap-2 leading-none">
             <p className="text-sm text-muted-foreground">
-              <Trans>
-                ui.cameraGroup.camera.setting.compatibilityMode.desc
+              <Trans ns="components/camera">
+                group.camera.setting.compatibilityMode.desc
               </Trans>
             </p>
           </div>
@@ -376,7 +376,7 @@ export function CameraStreamingDialog({
             aria-label="Cancel"
             onClick={handleCancel}
           >
-            <Trans>ui.cancel</Trans>
+            <Trans>button.cancel</Trans>
           </Button>
           <Button
             variant="select"
@@ -389,11 +389,11 @@ export function CameraStreamingDialog({
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
                 <span>
-                  <Trans>ui.saving</Trans>
+                  <Trans>button.saving</Trans>
                 </span>
               </div>
             ) : (
-              <Trans>ui.save</Trans>
+              <Trans>button.save</Trans>
             )}
           </Button>
         </div>

@@ -130,7 +130,7 @@ export default function Statusbar() {
         {Object.entries(messages).length === 0 ? (
           <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
-            <Trans>ui.stats.healthy</Trans>
+            <Trans ns="views/system">stats.healthy</Trans>
           </div>
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (

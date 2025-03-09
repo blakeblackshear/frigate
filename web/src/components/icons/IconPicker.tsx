@@ -72,7 +72,7 @@ export default function IconPicker({
               className="mt-2 w-full text-muted-foreground"
               aria-label="Select an icon"
             >
-              <Trans>ui.iconPicker.selectIcon</Trans>
+              <Trans ns="components/icons">iconPicker.selectIcon</Trans>
             </Button>
           ) : (
             <div className="hover:cursor-pointer">
@@ -104,7 +104,7 @@ export default function IconPicker({
         >
           <div className="mb-3 flex flex-row items-center justify-between">
             <Heading as="h4">
-              <Trans>ui.iconPicker.selectIcon</Trans>
+              <Trans ns="components/icons">iconPicker.selectIcon</Trans>
             </Heading>
             <span tabIndex={0} className="sr-only" />
             <IoClose
@@ -117,7 +117,7 @@ export default function IconPicker({
           </div>
           <Input
             type="text"
-            placeholder={t("ui.iconPicker.search.placeholder")}
+            placeholder={t("iconPicker.search.placeholder", {ns: "components/icons"})}
             className="text-md mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

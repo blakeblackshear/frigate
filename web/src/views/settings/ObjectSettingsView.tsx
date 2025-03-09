@@ -47,53 +47,53 @@ export default function ObjectSettingsView({
   const DEBUG_OPTIONS = [
     {
       param: "bbox",
-      title: t("ui.settingView.debug.boundingBoxes"),
-      description: t("ui.settingView.debug.boundingBoxes.desc"),
+      title: t("debug.boundingBoxes.title", { ns: "views/settings" }),
+      description: t("debug.boundingBoxes.desc", { ns: "views/settings" }),
       info: (
         <>
           <p className="mb-2">
             <strong>
-              <Trans>ui.settingView.debug.boundingBoxes.colors</Trans>
+              <Trans ns="views/settings">debug.boundingBoxes.colors</Trans>
             </strong>
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <Trans>ui.settingView.debug.boundingBoxes.colors.info</Trans>
+            <Trans ns="views/settings">debug.boundingBoxes.colors.info</Trans>
           </ul>
         </>
       ),
     },
     {
       param: "timestamp",
-      title: t("ui.settingView.debug.timestamp"),
-      description: t("ui.settingView.debug.timestamp.desc"),
+      title: t("debug.timestamp.title", { ns: "views/settings" }),
+      description: t("debug.timestamp.desc", { ns: "views/settings" }),
     },
     {
       param: "zones",
-      title: t("ui.settingView.debug.zone"),
-      description: t("ui.settingView.debug.zone.desc"),
+      title: t("debug.zones.title", { ns: "views/settings" }),
+      description: t("debug.zones.desc", { ns: "views/settings" }),
     },
     {
       param: "mask",
-      title: t("ui.settingView.debug.mask"),
-      description: t("ui.settingView.debug.mask.desc"),
+      title: t("debug.mask.title", { ns: "views/settings" }),
+      description: t("debug.mask.desc", { ns: "views/settings" }),
     },
     {
       param: "motion",
-      title: t("ui.settingView.debug.motion"),
-      description: t("ui.settingView.debug.motion.desc"),
+      title: t("debug.motion.title", { ns: "views/settings" }),
+      description: t("debug.motion.desc", { ns: "views/settings" }),
       info: (
         <>
-          <Trans>ui.settingView.debug.motion.tips</Trans>
+          <Trans ns="views/settings">debug.motion.tips</Trans>
         </>
       ),
     },
     {
       param: "regions",
-      title: t("ui.settingView.debug.regions"),
-      description: t("ui.settingView.debug.regions.desc"),
+      title: t("debug.regions.title", { ns: "views/settings" }),
+      description: t("debug.regions.desc", { ns: "views/settings" }),
       info: (
         <>
-          <Trans>ui.settingView.debug.regions.tips</Trans>
+          <Trans ns="views/settings">debug.regions.tips</Trans>
         </>
       ),
     },
@@ -156,20 +156,21 @@ export default function ObjectSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          <Trans>ui.settingView.debug</Trans>
+          <Trans ns="views/settings">debug.title</Trans>
         </Heading>
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
-            {t("ui.settingView.debug.detectorDesc", {
+            {t("debug.detectorDesc", {
               detectors: config
                 ? Object.keys(config?.detectors)
                     .map((detector) => capitalizeFirstLetter(detector))
                     .join(",")
                 : "",
+                ns: "views/settings",
             })}
           </p>
           <p>
-            <Trans>ui.settingView.debug.desc</Trans>
+            <Trans ns="views/settings">debug.desc</Trans>
           </p>
         </div>
         {config?.cameras[cameraConfig.name]?.webui_url && (
@@ -191,10 +192,10 @@ export default function ObjectSettingsView({
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="debug">
-              <Trans>ui.settingView.debug.debugging</Trans>
+              <Trans ns="views/settings">debug.debugging</Trans>
             </TabsTrigger>
             <TabsTrigger value="objectlist">
-              <Trans>ui.settingView.debug.objectList</Trans>
+              <Trans ns="views/settings">debug.objectList</Trans>
             </TabsTrigger>
           </TabsList>
           <TabsContent value="debug">
@@ -254,8 +255,8 @@ export default function ObjectSettingsView({
                             className="mb-0 cursor-pointer capitalize text-primary"
                             htmlFor="debugdraw"
                           >
-                            <Trans>
-                              ui.settingView.debug.objectShapeFilterDrawing
+                            <Trans ns="views/settings">
+                              debug.objectShapeFilterDrawing.title
                             </Trans>
                           </Label>
 
@@ -263,12 +264,12 @@ export default function ObjectSettingsView({
                             <PopoverTrigger asChild>
                               <div className="cursor-pointer p-0">
                                 <LuInfo className="size-4" />
-                                <span className="sr-only">Info</span>
+                                <span className="sr-only"><Trans>button.info</Trans></span>
                               </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 text-sm">
-                              <Trans>
-                                ui.settingView.debug.objectShapeFilterDrawing.tips
+                              <Trans ns="views/settings">
+                                debug.objectShapeFilterDrawing.tips
                               </Trans>
                               <div className="mt-2 flex items-center text-primary">
                                 <Link
@@ -277,8 +278,8 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans>
-                                    ui.settingView.debug.objectShapeFilterDrawing.document
+                                  <Trans ns="views/settings">
+                                    debug.objectShapeFilterDrawing.document
                                   </Trans>
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
@@ -287,8 +288,8 @@ export default function ObjectSettingsView({
                           </Popover>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
-                          <Trans>
-                            ui.settingView.debug.objectShapeFilterDrawing.desc
+                          <Trans ns="views/settings">
+                            debug.objectShapeFilterDrawing.desc
                           </Trans>
                         </div>
                       </div>
@@ -439,7 +440,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
         })
       ) : (
         <div className="p-3 text-center">
-          <Trans>ui.settingView.debug.noObjects</Trans>
+          <Trans ns="views/settings">debug.noObjects</Trans>
         </div>
       )}
     </div>

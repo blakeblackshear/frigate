@@ -1,0 +1,64 @@
+{
+  "trackedObjectDetails": "探测对象详情",
+  "type": {
+    "details": "详情",
+    "snapshot": "快照",
+    "video": "视频",
+    "object_lifecycle": "对象生命周期"
+  },
+  "details": {
+    "label": "标签",
+    "editSubLable": "编辑子标签",
+    "editSubLable.desc": "为 {{label}} 输入新的子标签",
+    "editSubLable.desc.noLabel": "为此跟踪对象输入新的子标签",
+    "topScore": "最高得分",
+    "topScore.info": "最高分是跟踪对象的最高中位数得分，因此可能与搜索结果缩略图上显示的得分不同。",
+    "estimatedSpeed": "预计速度",
+    "camera": "摄像头",
+    "timestamp": "时间",
+    "button": {
+      "findSimilar": "查找相似项"
+    },
+    "description": {
+      "label": "描述",
+      "placeholder": "跟踪对象的描述",
+      "aiTips": "在跟踪对象的生命周期结束之前，Frigate 不会向您的生成式 AI 提供商请求描述。"
+    },
+    "button.regenerate": "重新生成",
+    "regenerateFromSnapshot": "从快照重新生成",
+    "regenerateFromThumbnails": "从缩略图重新生成",
+    "tips": {
+      "descriptionSaved": "已保存描述",
+      "saveDescriptionFailed": "更新描述失败"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "下载视频",
+      "aria": "下载视频"
+    },
+    "downloadSnapshot": {
+      "label": "下载快照",
+      "aria": "下载快照"
+    },
+    "viewObjectLifecycle": {
+      "label": "查看对象生命周期",
+      "aria": "显示对象的生命周期"
+    },
+    "findSimilar": {
+      "label": "查找相似项",
+      "aria": "查看相似的对象"
+    },
+    "submitToPlus": {
+      "label": "提交至 Frigate+",
+      "aria": "提交至 Frigate Plus"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "确认删除",
+      "desc": "删除此跟踪对象将移除快照、所有已保存的嵌入数据以及任何关联的对象生命周期条目。但在历史视图中的录制视频<em>不会</em>被删除。<br /><br />你确定要继续删除吗？"
+    }
+  },
+  "noTrackedObjects": "找不到探测的对象"
+}

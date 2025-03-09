@@ -198,7 +198,7 @@ export default function SearchFilterGroup({
                 }
           }
           defaultText={
-            isMobile ? t("ui.filter.allDates.short") : t("ui.filter.allDates")
+            isMobile ? t("dates.all.short", {ns: "components/filter"}) : t("dates.all", {ns: "components/filter"})
           }
           updateSelectedRange={onUpdateSelectedRange}
         />
@@ -240,18 +240,18 @@ function GeneralFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return t("ui.filter.allLabels.short");
+      return t("labels.all.short", {ns: "components/filter"});
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return t("ui.filter.allLabels");
+      return t("labels.all", {ns: "components/filter"});
     }
 
     if (selectedLabels.length == 1) {
-      return t("object." + selectedLabels[0]);
+      return t(selectedLabels[0], { ns: "objects"});
     }
 
-    return t("ui.filter.countLabels", { count: selectedLabels.length });
+    return t("labels.count", { count: selectedLabels.length, ns: "components/filter" });
   }, [selectedLabels]);
 
   // ui
@@ -335,7 +335,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans>ui.filter.allLabels</Trans>
+            <Trans ns="components/filter">labels.all</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -352,7 +352,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={t("object." + item)}
+              label={t(item, {ns: "objects"})}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -387,7 +387,7 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          <Trans>ui.apply</Trans>
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -396,7 +396,7 @@ export function GeneralFilterContent({
             updateLabelFilter(undefined);
           }}
         >
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>
@@ -445,7 +445,7 @@ function SortTypeButton({
       <div
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-primary"}`}
       >
-        <Trans>ui.filter.sort</Trans>
+        <Trans ns="components/filter">sort.label</Trans>
       </div>
     </Button>
   );
@@ -501,13 +501,13 @@ export function SortTypeContent({
   onClose,
 }: SortTypeContentProps) {
   const sortLabels = {
-    date_asc: t("ui.filter.sort.dateAsc"),
-    date_desc: t("ui.filter.sort.dateDesc"),
-    score_asc: t("ui.filter.sort.scoreAsc"),
-    score_desc: t("ui.filter.sort.scoreDesc"),
-    speed_asc: "Estimated Speed (Ascending)",
-    speed_desc: "Estimated Speed (Descending)",
-    relevance: t("ui.filter.sort.relevance"),
+    date_asc: t("sort.dateAsc", {ns: "components/filter"}),
+    date_desc: t("sort.dateDesc", {ns: "components/filter"}),
+    score_asc: t("sort.scoreAsc", {ns: "components/filter"}),
+    score_desc: t("sort.scoreDesc", {ns: "components/filter"}),
+    speed_asc: t("sort.speedAsc", {ns: "components/filter"}),
+    speed_desc: t("sort.speedDesc", {ns: "components/filter"}),
+    relevance: t("sort.relevance", {ns: "components/filter"}),
   };
   return (
     <>
@@ -561,7 +561,7 @@ export function SortTypeContent({
             onClose();
           }}
         >
-          <Trans>ui.apply</Trans>
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -570,7 +570,7 @@ export function SortTypeContent({
             updateSortType(undefined);
           }}
         >
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>

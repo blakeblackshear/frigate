@@ -94,14 +94,14 @@ export default function ExploreSettingsView({
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success(t("ui.settingView.exploreSettings.toast.success"), {
+          toast.success(t("explore.toast.success"), {
             position: "top-center",
           });
           setChangedValue(false);
           updateConfig();
         } else {
           toast.error(
-            t("ui.toast.save.error", { errorMessage: res.statusText }),
+            t("toast.save.error", { errorMessage: res.statusText }),
             {
               position: "top-center",
             },
@@ -110,7 +110,7 @@ export default function ExploreSettingsView({
       })
       .catch((error) => {
         toast.error(
-          t("ui.toast.save.error", {
+          t("toast.save.error", {
             errorMessage: error.response.data.message,
           }),
           { position: "top-center" },
@@ -160,16 +160,16 @@ export default function ExploreSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <Heading as="h3" className="my-2">
-          <Trans>ui.settingView.exploreSettings</Trans>
+          <Trans ns="views/settings">explore.title</Trans>
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
         <Heading as="h4" className="my-2">
-          <Trans>ui.settingView.exploreSettings.semanticSearch</Trans>
+          <Trans ns="views/settings">explore.semanticSearch.title</Trans>
         </Heading>
         <div className="max-w-6xl">
           <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
             <p>
-              <Trans>ui.settingView.exploreSettings.semanticSearch.desc</Trans>
+              <Trans ns="views/settings">explore.semanticSearch.desc</Trans>
             </p>
 
             <div className="flex items-center text-primary">
@@ -179,8 +179,8 @@ export default function ExploreSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                <Trans>
-                  ui.settingView.exploreSettings.semanticSearch.readTheDocumentation
+                <Trans ns="views/settings">
+                  explore.semanticSearch.readTheDocumentation
                 </Trans>
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
@@ -201,7 +201,7 @@ export default function ExploreSettingsView({
             />
             <div className="space-y-0.5">
               <Label htmlFor="enabled">
-                <Trans>ui.enabled</Trans>
+                <Trans>button.enabled</Trans>
               </Label>
             </div>
           </div>
@@ -218,40 +218,40 @@ export default function ExploreSettingsView({
               />
               <div className="space-y-0.5">
                 <Label htmlFor="reindex">
-                  <Trans>
-                    ui.settingView.exploreSettings.semanticSearch.reindexOnStartup
+                  <Trans ns="views/settings">
+                    explore.semanticSearch.reindexOnStartup.label
                   </Trans>
                 </Label>
               </div>
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
-              <Trans>
-                ui.settingView.exploreSettings.semanticSearch.reindexOnStartup.desc
+              <Trans ns="views/settings">
+                explore.semanticSearch.reindexOnStartup.desc
               </Trans>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
               <div className="text-md">
-                <Trans>
-                  ui.settingView.exploreSettings.semanticSearch.modelSize
+                <Trans ns="views/settings">
+                  explore.semanticSearch.modelSize.label
                 </Trans>
               </div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
-                  <Trans>
-                    ui.settingView.exploreSettings.semanticSearch.modelSize.desc
+                  <Trans ns="views/settings">
+                    explore.semanticSearch.modelSize.desc
                   </Trans>
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
-                    <Trans>
-                      ui.settingView.exploreSettings.semanticSearch.modelSize.small.desc
+                    <Trans ns="views/settings">
+                      explore.semanticSearch.modelSize.small.desc
                     </Trans>
                   </li>
                   <li>
-                    <Trans>
-                      ui.settingView.exploreSettings.semanticSearch.modelSize.large.desc
+                    <Trans ns="views/settings">
+                      explore.semanticSearch.modelSize.large.desc
                     </Trans>
                   </li>
                 </ul>
@@ -267,8 +267,9 @@ export default function ExploreSettingsView({
             >
               <SelectTrigger className="w-20">
                 {t(
-                  "ui.settingView.exploreSettings.semanticSearch.modelSize." +
+                  "explore.semanticSearch.modelSize." +
                     ExploreSettings.model_size,
+                  { ns: "views/settings"}
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -280,8 +281,9 @@ export default function ExploreSettingsView({
                       value={size}
                     >
                       {t(
-                        "ui.settingView.exploreSettings.semanticSearch.modelSize." +
+                        "explore.semanticSearch.modelSize." +
                           size,
+                        { ns: "views/settings"}
                       )}
                     </SelectItem>
                   ))}
@@ -294,7 +296,7 @@ export default function ExploreSettingsView({
 
         <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
           <Button className="flex flex-1" aria-label="Reset" onClick={onCancel}>
-            <Trans>ui.reset</Trans>
+            <Trans>button.reset</Trans>
           </Button>
           <Button
             variant="select"
@@ -307,11 +309,11 @@ export default function ExploreSettingsView({
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
                 <span>
-                  <Trans>ui.saving</Trans>
+                  <Trans>button.saving</Trans>
                 </span>
               </div>
             ) : (
-              t("ui.save")
+              <Trans>button.save</Trans>
             )}
           </Button>
         </div>

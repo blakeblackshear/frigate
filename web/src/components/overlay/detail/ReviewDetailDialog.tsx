@@ -96,8 +96,8 @@ export default function ReviewDetailDialog({
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? t("ui.time.formattedTimestampWithYear.24hour")
-      : t("ui.time.formattedTimestampWithYear"),
+      ? t("time.formattedTimestampWithYear.24hour")
+      : t("time.formattedTimestampWithYear"),
     config?.ui.timezone,
   );
 

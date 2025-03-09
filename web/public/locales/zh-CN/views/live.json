@@ -1,0 +1,70 @@
+{
+  "documentTitle": "实时监控 - Frigate",
+  "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
+  "twoWayTalk": {
+    "enable": "开启双向对话",
+    "disable": "关闭双向对话"
+  },
+  "cameraAudio": {
+    "enable": "开启摄像头音频",
+    "disable": "关闭摄像头音频"
+  },
+  "ptz": {
+    "move": {
+      "left": {
+        "label": "PTZ摄像头向左移动"
+      },
+      "up": {
+        "label": "PTZ摄像头向上移动"
+      },
+      "down": {
+        "label": "PTZ摄像头向下移动"
+      },
+      "right": {
+        "label": "PTZ摄像头向右移动"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ摄像头放大"
+      },
+      "out": {
+        "label": "PTZ摄像头缩小"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "点击将PTZ摄像头画面居中"
+      }
+    }
+  },
+  "detect": {
+    "enable": "启用检测",
+    "disable": "关闭检测"
+  },
+  "recording": {
+    "enable": "启用录制",
+    "disable": "关闭录制"
+  },
+  "snapshots": {
+    "enable": "启用快照",
+    "disable": "关闭快照"
+  },
+  "audioDetect": {
+    "enable": "启用音频检测",
+    "disable": "关闭音频检测"
+  },
+  "autotracking": {
+    "enable": "启用自动追踪",
+    "disable": "关闭自动追踪"
+  },
+  "manualRecording": {
+    "start": "开始手动按需录制",
+    "started": "已启用手动按需录制",
+    "failedToStart": "启动手动录制失败",
+    "recordDisabledTips": "由于此摄像头的配置中禁用了录制或对其进行了限制，将只会保存快照。",
+    "end": "停止手动按需录制",
+    "ended": "已完成手动按需录制",
+    "failedToEnd": "停止手动录制失败"
+  }
+}

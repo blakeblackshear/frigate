@@ -35,8 +35,9 @@ export function SaveSearchDialog({
       onSave(searchName.trim());
       setSearchName("");
       toast.success(
-        t("ui.dialog.search.saveSearch.success", {
+        t("search.saveSearch.success", {
           searchName: searchName.trim(),
+          ns: "components/dialog"
         }),
         {
           position: "top-center",
@@ -62,28 +63,28 @@ export function SaveSearchDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            <Trans>ui.dialog.search.saveSearch</Trans>
+            <Trans ns="components/dialog">search.saveSearch.label</Trans>
           </DialogTitle>
           <DialogDescription className="sr-only">
-            <Trans>ui.dialog.search.saveSearch.desc</Trans>
+            <Trans ns="components/dialog">search.saveSearch.desc</Trans>
           </DialogDescription>
         </DialogHeader>
         <Input
           value={searchName}
           className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
-          placeholder={t("ui.dialog.search.saveSearch.placeholder")}
+          placeholder={t("search.saveSearch.placeholder", {ns: "components/dialog"})}
         />
         {overwrite && (
           <div className="ml-1 text-sm text-danger">
-            <Trans values={{ searchName }}>
-              ui.dialog.search.saveSearch.overwrite
+            <Trans ns="components/dialog" values={{ searchName }}>
+              search.saveSearch.overwrite
             </Trans>
           </div>
         )}
         <DialogFooter>
           <Button aria-label="Cancel" onClick={onClose}>
-            <Trans>ui.cancel</Trans>
+            <Trans>button.cancel</Trans>
           </Button>
           <Button
             onClick={handleSave}
@@ -91,7 +92,7 @@ export function SaveSearchDialog({
             className="mb-2 md:mb-0"
             aria-label="Save this search"
           >
-            <Trans>ui.save</Trans>
+            <Trans>button.save</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

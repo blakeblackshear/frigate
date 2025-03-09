@@ -29,7 +29,7 @@ function Exports() {
   const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
-    document.title = t("ui.exportView.documentTitle");
+    document.title = t("documentTitle", { ns: "views/exports" });
   }, []);
 
   // Search
@@ -121,17 +121,17 @@ function Exports() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Trans>ui.exportView.deleteExport</Trans>
+              <Trans ns="views/exports">deleteExport</Trans>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <Trans values={{ exportName: deleteClip?.exportName }}>
-                ui.exportView.deleteExport.desc
+              <Trans ns="views/exports" values={{ exportName: deleteClip?.exportName }}>
+                deleteExport.desc
               </Trans>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              <Trans>ui.cancel</Trans>
+              <Trans>button.cancel</Trans>
             </AlertDialogCancel>
             <Button
               className="text-white"
@@ -139,7 +139,7 @@ function Exports() {
               variant="destructive"
               onClick={() => onHandleDelete()}
             >
-              <Trans>ui.delete</Trans>
+              <Trans>button.delete</Trans>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -187,7 +187,7 @@ function Exports() {
         <div className="flex w-full items-center justify-center p-2">
           <Input
             className="text-md w-full bg-muted md:w-1/3"
-            placeholder={t("ui.exportView.search")}
+            placeholder={t("search", { ns: "views/exports" })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -215,7 +215,7 @@ function Exports() {
         ) : (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderX className="size-16" />
-            <Trans>ui.exportView.noExports</Trans>
+            <Trans ns="views/exports" i18nKey={"noExports"}></Trans>
           </div>
         )}
       </div>

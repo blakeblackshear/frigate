@@ -225,13 +225,13 @@ export default function CameraMetrics({
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">
-        <Trans>ui.system.cameras.overview</Trans>
+        <Trans ns="views/system">cameras.overview</Trans>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
           <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
             <div className="mb-5">
-              <Trans>ui.system.cameras.framesAndDetections</Trans>
+              <Trans ns="views/system">cameras.framesAndDetections</Trans>
             </div>
             <CameraLineGraph
               graphId="overall-stats"
@@ -300,7 +300,7 @@ export default function CameraMetrics({
                       {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                           <div className="mb-5">
-                            <Trans>ui.system.cameras.framesAndDetections</Trans>
+                            <Trans ns="views/system">cameras.framesAndDetections</Trans>
                           </div>
                           <CameraLineGraph
                             graphId={`${camera.name}-dps`}

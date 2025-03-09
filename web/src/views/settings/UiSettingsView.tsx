@@ -84,13 +84,13 @@ export default function UiSettingsView() {
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
-            <Trans>ui.settingView.generalSettings</Trans>
+            <Trans ns="views/settings">general.title</Trans>
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            <Trans>ui.settingView.generalSettings.liveDashboard</Trans>
+            <Trans ns="views/settings">general.liveDashboard.title</Trans>
           </Heading>
 
           <div className="mt-2 space-y-6">
@@ -102,15 +102,15 @@ export default function UiSettingsView() {
                   onCheckedChange={setAutoLive}
                 />
                 <Label className="cursor-pointer" htmlFor="auto-live">
-                  <Trans>
-                    ui.settingView.generalSettings.automaticLiveView
+                  <Trans ns="views/settings">
+                    general.liveDashboard.automaticLiveView.label
                   </Trans>
                 </Label>
               </div>
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>
-                  <Trans>
-                    ui.settingView.generalSettings.automaticLiveView.desc
+                  <Trans ns="views/settings">
+                    general.liveDashboard.automaticLiveView.desc
                   </Trans>
                 </p>
               </div>
@@ -123,13 +123,13 @@ export default function UiSettingsView() {
                   onCheckedChange={setAlertVideos}
                 />
                 <Label className="cursor-pointer" htmlFor="images-only">
-                  <Trans>ui.settingView.generalSettings.playAlertVideos</Trans>
+                  <Trans ns="views/settings">general.liveDashboard.playAlertVideos.label</Trans>
                 </Label>
               </div>
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>
-                  <Trans>
-                    ui.settingView.generalSettings.playAlertVideos.desc
+                  <Trans ns="views/settings">
+                    general.liveDashboard.playAlertVideos.desc
                   </Trans>
                 </p>
               </div>
@@ -140,12 +140,12 @@ export default function UiSettingsView() {
             <div className="mt-2 space-y-3">
               <div className="space-y-0.5">
                 <div className="text-md">
-                  <Trans>ui.settingView.generalSettings.storedLayouts</Trans>
+                  <Trans ns="views/settings">general.storedLayouts.title</Trans>
                 </div>
                 <div className="my-2 text-sm text-muted-foreground">
                   <p>
-                    <Trans>
-                      ui.settingView.generalSettings.storedLayouts.desc
+                    <Trans ns="views/settings">
+                      general.storedLayouts.desc
                     </Trans>
                   </p>
                 </div>
@@ -154,8 +154,8 @@ export default function UiSettingsView() {
                 aria-label="Clear all saved layouts"
                 onClick={clearStoredLayouts}
               >
-                <Trans>
-                  ui.settingView.generalSettings.storedLayouts.clearAll
+                <Trans ns="views/settings">
+                  general.storedLayouts.clearAll
                 </Trans>
               </Button>
             </div>
@@ -163,14 +163,14 @@ export default function UiSettingsView() {
             <div className="mt-2 space-y-3">
               <div className="space-y-0.5">
                 <div className="text-md">
-                  <Trans>
-                    ui.settingView.generalSettings.cameraGroupStreaming
+                  <Trans ns="views/settings">
+                    general.cameraGroupStreaming.title
                   </Trans>
                 </div>
                 <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                   <p>
-                    <Trans>
-                      ui.settingView.generalSettings.cameraGroupStreaming.desc
+                    <Trans ns="views/settings">
+                      general.cameraGroupStreaming.desc
                     </Trans>
                   </p>
                 </div>
@@ -179,8 +179,8 @@ export default function UiSettingsView() {
                 aria-label="Clear all group streaming settings"
                 onClick={clearStreamingSettings}
               >
-                <Trans>
-                  ui.settingView.generalSettings.cameraGroupStreaming.clearAll
+                <Trans ns="views/settings">
+                  general.cameraGroupStreaming.clearAll
                 </Trans>
               </Button>
             </div>
@@ -188,20 +188,20 @@ export default function UiSettingsView() {
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              <Trans>ui.settingView.generalSettings.recordingsViewer</Trans>
+              <Trans ns="views/settings">general.recordingsViewer.title</Trans>
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">
-                  <Trans>
-                    ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate
+                  <Trans ns="views/settings">
+                    general.recordingsViewer.defaultPlaybackRate.label
                   </Trans>
                 </div>
                 <div className="my-2 text-sm text-muted-foreground">
                   <p>
-                    <Trans>
-                      ui.settingView.generalSettings.recordingsViewer.defaultPlaybackRate.desc
+                    <Trans ns="views/settings">
+                      general.recordingsViewer.defaultPlaybackRate.desc
                     </Trans>
                   </p>
                 </div>
@@ -231,20 +231,20 @@ export default function UiSettingsView() {
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              <Trans>ui.settingView.generalSettings.calendar</Trans>
+              <Trans ns="views/settings">general.calendar.title</Trans>
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">
-                  <Trans>
-                    ui.settingView.generalSettings.calendar.firstWeekday
+                  <Trans ns="views/settings">
+                    general.calendar.firstWeekday.label
                   </Trans>
                 </div>
                 <div className="my-2 text-sm text-muted-foreground">
                   <p>
-                    <Trans>
-                      ui.settingView.generalSettings.calendar.firstWeekday.desc
+                    <Trans ns="views/settings">
+                      general.calendar.firstWeekday.desc
                     </Trans>
                   </p>
                 </div>
@@ -256,8 +256,9 @@ export default function UiSettingsView() {
             >
               <SelectTrigger className="w-32">
                 {t(
-                  "ui.settingView.generalSettings.calendar.firstWeekday." +
+                  "general.calendar.firstWeekday." +
                     WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase(),
+                    {ns: "views/settings"}
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -269,8 +270,9 @@ export default function UiSettingsView() {
                       value={index.toString()}
                     >
                       {t(
-                        "ui.settingView.generalSettings.calendar.firstWeekday." +
+                        "general.calendar.firstWeekday." +
                           day.toLowerCase(),
+                          {ns: "views/settings"}
                       )}
                     </SelectItem>
                   ))}

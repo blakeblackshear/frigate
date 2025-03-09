@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type CreateUserOverlayProps = {
   show: boolean;
@@ -39,7 +40,7 @@ export default function CreateUserDialog({
       .string()
       .min(1)
       .regex(/^[A-Za-z0-9._]+$/, {
-        message: "Username may only include letters, numbers, . or _",
+        message: t("users.dialog.createUser.usernameOnlyInclude", {ns: "views/settings"}),
       }),
     password: z.string(),
   });
@@ -65,7 +66,7 @@ export default function CreateUserDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <Trans>ui.settingView.users.dialog.createUser</Trans>
+            <Trans ns="views/settings">users.dialog.createUser.title</Trans>
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -75,7 +76,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Trans>ui.settingView.users.dialog.createUser.user</Trans>
+                    <Trans ns="views/settings">users.dialog.createUser.user</Trans>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -92,8 +93,8 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Trans>
-                      ui.settingView.users.dialog.createUser.password
+                    <Trans ns="views/settings">
+                      users.dialog.createUser.password
                     </Trans>
                   </FormLabel>
                   <FormControl>
@@ -113,7 +114,7 @@ export default function CreateUserDialog({
                 disabled={isLoading}
               >
                 {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
-                <Trans>ui.settingView.users.dialog.createUser</Trans>
+                <Trans ns="views/settings">users.dialog.createUser.title</Trans>
               </Button>
             </DialogFooter>
           </form>

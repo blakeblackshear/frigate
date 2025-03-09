@@ -61,15 +61,15 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: "today", label: t("ui.time.today") },
-  { name: "yesterday", label: t("ui.time.yesterday") },
-  { name: "last7", label: t("ui.time.last7") },
-  { name: "last14", label: t("ui.time.last14") },
-  { name: "last30", label: t("ui.time.last30") },
-  { name: "thisWeek", label: t("ui.time.thisWeek") },
-  { name: "lastWeek", label: t("ui.time.lastWeek") },
-  { name: "thisMonth", label: t("ui.time.thisMonth") },
-  { name: "lastMonth", label: t("ui.time.lastMonth") },
+  { name: "today", label: t("time.today") },
+  { name: "yesterday", label: t("time.yesterday") },
+  { name: "last7", label: t("time.last7") },
+  { name: "last14", label: t("time.last14") },
+  { name: "last30", label: t("time.last30") },
+  { name: "thisWeek", label: t("time.thisWeek") },
+  { name: "lastWeek", label: t("time.lastWeek") },
+  { name: "thisMonth", label: t("time.thisMonth") },
+  { name: "lastMonth", label: t("time.lastMonth") },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -431,7 +431,7 @@ export function DateRangePicker({
             }
           }}
         >
-          <Trans>ui.apply</Trans>
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           onClick={() => {
@@ -442,7 +442,7 @@ export function DateRangePicker({
           variant="ghost"
           aria-label="Reset"
         >
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </div>

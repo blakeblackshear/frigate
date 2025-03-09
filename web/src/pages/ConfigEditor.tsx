@@ -190,7 +190,7 @@ function ConfigEditor() {
       <div className="relative h-full overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            <Trans>ui.configEditorView.configEditor</Trans>
+            <Trans ns="views/configEditor">configEditor</Trans>
           </Heading>
           <div className="flex flex-row gap-1">
             <Button
@@ -201,7 +201,7 @@ function ConfigEditor() {
             >
               <LuCopy className="text-secondary-foreground" />
               <span className="hidden md:block">
-                <Trans>ui.configEditorView.copyConfig</Trans>
+                <Trans ns="views/configEditor">copyConfig</Trans>
               </span>
             </Button>
             <Button
@@ -215,7 +215,7 @@ function ConfigEditor() {
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
               <span className="hidden md:block">
-                <Trans>ui.configEditorView.saveAndRestart</Trans>
+                <Trans ns="views/configEditor">saveAndRestart</Trans>
               </span>
             </Button>
             <Button
@@ -226,7 +226,7 @@ function ConfigEditor() {
             >
               <LuSave className="text-secondary-foreground" />
               <span className="hidden md:block">
-                <Trans>ui.configEditorView.saveOnly</Trans>
+                <Trans ns="views/configEditor">saveOnly</Trans>
               </span>
             </Button>
           </div>

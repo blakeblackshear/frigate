@@ -348,13 +348,13 @@ export default function NotificationView({
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
               <Heading as="h3" className="my-2">
-                <Trans>ui.settingView.notification.notificationSettings</Trans>
+                <Trans ns="views/settings">notification.notificationSettings</Trans>
               </Heading>
 
               <div className="max-w-6xl">
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
                   <p>
-                    <Trans>ui.settingView.notification.desc</Trans>
+                    <Trans ns="views/settings">notification.desc</Trans>
                   </p>
                   <div className="flex items-center text-primary">
                     <Link
@@ -363,7 +363,7 @@ export default function NotificationView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      <Trans>ui.settingView.notification.documentation</Trans>{" "}
+                      <Trans ns="views/settings">notification.documentation</Trans>{" "}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -381,19 +381,20 @@ export default function NotificationView({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          <Trans>ui.settingView.notification.email</Trans>
+                          <Trans ns="views/settings">notification.email</Trans>
                         </FormLabel>
                         <FormControl>
                           <Input
                             className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
                             placeholder={t(
-                              "ui.settingView.notification.email.placeholder",
+                              "notification.email.placeholder",
+                              { ns: "views/settings" }
                             )}
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          <Trans>ui.settingView.notification.email.desc</Trans>
+                          <Trans ns="views/settings">notification.email.desc</Trans>
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -409,8 +410,8 @@ export default function NotificationView({
                           <>
                             <div className="mb-2">
                               <FormLabel className="flex flex-row items-center text-base">
-                                <Trans>
-                                  ui.settingView.notification.cameras
+                                <Trans ns="views/settings">
+                                  notification.cameras
                                 </Trans>
                               </FormLabel>
                             </div>
@@ -420,7 +421,7 @@ export default function NotificationView({
                                 name="allEnabled"
                                 render={({ field }) => (
                                   <FilterSwitch
-                                    label={t("ui.filter.allCameras")}
+                                    label={t("cameras.all", { ns: "components/filter" })}
                                     isChecked={field.value}
                                     onCheckedChange={(checked) => {
                                       setChangedValue(true);
@@ -459,16 +460,16 @@ export default function NotificationView({
                           </>
                         ) : (
                           <div className="font-normal text-destructive">
-                            <Trans>
-                              ui.settingView.notification.cameras.noCameras
+                            <Trans ns="views/settings">
+                              notification.cameras.noCameras
                             </Trans>
                           </div>
                         )}
 
                         <FormMessage />
                         <FormDescription>
-                          <Trans>
-                            ui.settingView.notification.cameras.desc
+                          <Trans ns="views/settings">
+                            notification.cameras.desc
                           </Trans>
                         </FormDescription>
                       </FormItem>
@@ -482,7 +483,7 @@ export default function NotificationView({
                       onClick={onCancel}
                       type="button"
                     >
-                      <Trans>ui.cancel</Trans>
+                      <Trans>button.cancel</Trans>
                     </Button>
                     <Button
                       variant="select"
@@ -495,11 +496,11 @@ export default function NotificationView({
                         <div className="flex flex-row items-center gap-2">
                           <ActivityIndicator />
                           <span>
-                            <Trans>ui.saving</Trans>
+                            <Trans>button.saving</Trans>
                           </span>
                         </div>
                       ) : (
-                        t("ui.save")
+                        <Trans>button.save</Trans>
                       )}
                     </Button>
                   </div>
@@ -512,7 +513,7 @@ export default function NotificationView({
                 <div className="flex flex-col gap-2 md:max-w-[50%]">
                   <Separator className="my-2 flex bg-secondary md:hidden" />
                   <Heading as="h4" className="my-2">
-                    <Trans>ui.settingView.notification.deviceSpecific</Trans>
+                    <Trans ns="views/settings">notification.deviceSpecific</Trans>
                   </Heading>
                   <Button
                     aria-label="Register or unregister notifications for this device"
@@ -556,8 +557,8 @@ export default function NotificationView({
                     }}
                   >
                     {registration != null
-                      ? t("ui.settingView.notification.unregisterDevice")
-                      : t("ui.settingView.notification.registerDevice")}
+                      ? t("notification.unregisterDevice", { ns: "views/settings" })
+                      : t("notification.registerDevice", { ns: "views/settings" })}
                   </Button>
                   {registration != null && registration.active && (
                     <Button
@@ -652,7 +653,7 @@ export function CameraNotificationSwitch({
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
+      strftime_fmt: config?.ui.time_format == "24hour" ? t("time.formattedTimestampExcludeSeconds.24hour"): t("time.formattedTimestampExcludeSeconds"),
     });
   };
 

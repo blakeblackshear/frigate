@@ -1,0 +1,63 @@
+{
+  "trackedObjectDetails": "Tracked Object Details",
+  "type": {
+    "details": "details",
+    "snapshot": "snapshot",
+    "video": "video",
+    "object_lifecycle": "object lifecycle"
+  },
+  "details": {
+    "label": "Label",
+    "editSubLable": "Edit sub label",
+    "editSubLable.desc": "Enter a new sub label for this {{label}}",
+    "editSubLable.desc.noLabel": "Enter a new sub label for this tracked object",
+    "topScore": "Top Score",
+    "topScore.info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail.",
+    "estimatedSpeed": "Estimated Speed",
+    "camera": "Camera",
+    "timestamp": "Timestamp",
+    "button": {
+      "findSimilar": "Find Similar"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description of the tracked object",
+      "aiTips": "Frigate will not request a description from your Generative AI provider until the tracked object's lifecycle has ended."
+    },
+    "button.regenerate": "Regenerate",
+    "regenerateFromSnapshot": "Regenerate from Snapshot",
+    "regenerateFromThumbnails": "Regenerate from Thumbnails",
+    "tips": {
+      "descriptionSaved": "Successfully saved description",
+      "saveDescriptionFailed": "Failed to update the description"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Download video",
+      "aria": "Download video"
+    },
+    "downloadSnapshot": {
+      "label": "Download snapshot",
+      "aria": "Download snapshot"
+    },
+    "viewObjectLifecycle": {
+      "label": "View object lifecycle",
+      "aria": "Show the object lifecycle"
+    },
+    "findSimilar": {
+      "label": "Find similar",
+      "aria": "Find similar tracked objects"
+    },
+    "submitToPlus": {
+      "label": "Submit to Frigate+",
+      "aria": "Submit to Frigate Plus"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "desc": "Deleting this tracked object removes the snapshot, any saved embeddings, and any associated object lifecycle entries. Recorded footage of this tracked object in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?"
+    }
+  }
+}

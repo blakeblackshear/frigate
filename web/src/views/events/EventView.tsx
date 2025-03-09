@@ -199,7 +199,7 @@ export default function EventView({
         )
         .then((response) => {
           if (response.status == 200) {
-            toast.success(t("ui.dialog.export.toast.success"), {
+            toast.success(t("export.toast.success", { ns: "components/dialog"}), {
               position: "top-center",
             });
           }
@@ -207,11 +207,11 @@ export default function EventView({
         .catch((error) => {
           if (error.response?.data?.message) {
             toast.error(
-              `Failed to start export: ${error.response.data.message}`,
+              t("export.toast.error", { ns: "components/dialog", message: error.response.data.message }),
               { position: "top-center" },
             );
           } else {
-            toast.error(`Failed to start export: ${error.message}`, {
+            toast.error(t("export.toast.error", { ns: "components/dialog", message: error.message }), {
               position: "top-center",
             });
           }
@@ -289,7 +289,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  <Trans>ui.eventView.alerts</Trans>
+                  <Trans ns="views/events">alerts</Trans>
                   {reviewCounts.alert > -1 ? (
                     ` ∙ ${reviewCounts.alert}`
                   ) : (
@@ -325,7 +325,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  <Trans>ui.eventView.detections</Trans>
+                  <Trans ns="views/events">detections</Trans>
                   {reviewCounts.detection > -1 ? (
                     ` ∙ ${reviewCounts.detection}`
                   ) : (
@@ -349,7 +349,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
                 <div className="hidden md:block">
-                  <Trans>ui.eventView.motion</Trans>
+                  <Trans ns="views/events">motion.label</Trans>
                 </div>
               </>
             )}
@@ -718,7 +718,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            <Trans>ui.eventView.empty.{severity.replace(/_/g, " ")}</Trans>
+            <Trans ns="views/events">empty.{severity.replace(/_/g, " ")}</Trans>
           </div>
         )}
 
@@ -1052,7 +1052,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        <Trans>ui.eventView.empty.motion</Trans>
+        <Trans ns="views/events">empty.motion</Trans>
       </div>
     );
   }

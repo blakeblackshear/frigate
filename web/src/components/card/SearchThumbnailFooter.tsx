@@ -31,8 +31,8 @@ export default function SearchThumbnailFooter({
   const formattedDate = useFormattedTimestamp(
     searchResult.start_time,
     config?.ui.time_format == "24hour"
-      ? t("ui.time.formattedTimestampExcludeSeconds.24hour")
-      : t("ui.time.formattedTimestampExcludeSeconds"),
+      ? t("time.formattedTimestampExcludeSeconds.24hour")
+      : t("time.formattedTimestampExcludeSeconds"),
     config?.ui.timezone,
   );
 

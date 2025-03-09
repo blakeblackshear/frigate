@@ -16,6 +16,7 @@ import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
 import { LuPlus } from "react-icons/lu";
 import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 export default function AuthenticationView() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -42,7 +43,7 @@ export default function AuthenticationView() {
         }
       })
       .catch((_error) => {
-        toast.error("Error setting password", {
+        toast.error(t("users.toast.error.setPasswordFailed", {ns: "views/settings"}), {
           position: "top-center",
         });
       });
@@ -60,7 +61,7 @@ export default function AuthenticationView() {
         return users;
       }, false);
     } catch (error) {
-      toast.error("Error creating user. Check server logs.", {
+      toast.error(t("users.toast.error.createUserFailed", {ns: "views/settings"}), {
         position: "top-center",
       });
     }
@@ -76,7 +77,7 @@ export default function AuthenticationView() {
         });
       }, false);
     } catch (error) {
-      toast.error("Error deleting user. Check server logs.", {
+      toast.error(t("users.toast.error.deleteUserFailed", {ns: "views/settings"}), {
         position: "top-center",
       });
     }
@@ -92,7 +93,7 @@ export default function AuthenticationView() {
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <div className="flex flex-row items-center justify-between gap-2">
           <Heading as="h3" className="my-2">
-            <Trans>ui.settingView.users</Trans>
+            <Trans ns="views/settings">users.title</Trans>
           </Heading>
           <Button
             className="flex items-center gap-1"
@@ -103,7 +104,7 @@ export default function AuthenticationView() {
             }}
           >
             <LuPlus className="text-secondary-foreground" />
-            <Trans>ui.settingView.users.addUser</Trans>
+            <Trans ns="views/settings">users.addUser</Trans>
           </Button>
         </div>
         <div className="mt-3 space-y-3">
@@ -125,7 +126,7 @@ export default function AuthenticationView() {
                   >
                     <FaUserEdit />
                     <div className="hidden md:block">
-                      <Trans>ui.settingView.users.updatePassword</Trans>
+                      <Trans ns="views/settings">users.updatePassword</Trans>
                     </div>
                   </Button>
                   <Button
@@ -139,7 +140,7 @@ export default function AuthenticationView() {
                   >
                     <HiTrash />
                     <div className="hidden md:block">
-                      <Trans>ui.delete</Trans>
+                      <Trans>button.delete</Trans>
                     </div>
                   </Button>
                 </div>

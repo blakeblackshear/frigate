@@ -194,7 +194,7 @@ export default function Settings() {
                   aria-label={`Select ${item}`}
                 >
                   <div className="capitalize">
-                    {t("ui.settingView.menu." + item)}
+                    {t("menu." + item, { ns: "views/settings" })}
                   </div>
                 </ToggleGroupItem>
               ))}

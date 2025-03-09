@@ -78,9 +78,9 @@ export default function Events() {
 
   useEffect(() => {
     if (recording) {
-      document.title = t("ui.review.recordings.documentTitle");
+      document.title = t("recordings.documentTitle", {ns: "views/events"});
     } else {
-      document.title = t("ui.review.documentTitle");
+      document.title = t("documentTitle", {ns: "views/events"});
     }
   }, [recording, severity]);
 

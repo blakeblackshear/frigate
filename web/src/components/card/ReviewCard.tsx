@@ -83,7 +83,7 @@ export default function ReviewCard({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(t("ui.dialog.export.toast.success"), {
+          toast.success(t("export.toast.success", { ns: "components/dialog"}), {
             position: "top-center",
           });
         }

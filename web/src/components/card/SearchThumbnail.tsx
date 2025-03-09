@@ -113,7 +113,7 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => t("object." + text))
+                  .map((text) => t(text, { ns: "objects" }))
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}

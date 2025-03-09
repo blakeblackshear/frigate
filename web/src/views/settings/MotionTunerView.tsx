@@ -120,7 +120,7 @@ export default function MotionTunerView({
       .then((res) => {
         if (res.status === 200) {
           toast.success(
-            t("ui.settingView.motionDetectionTuner.toast.success"),
+            t("motionDetectionTuner.toast.success", { ns: "views/settings"}),
             {
               position: "top-center",
             },
@@ -129,7 +129,7 @@ export default function MotionTunerView({
           updateConfig();
         } else {
           toast.error(
-            t("ui.toast.save.error", { errorMessage: res.statusText }),
+            t("toast.save.error", { errorMessage: res.statusText }),
             {
               position: "top-center",
             },
@@ -138,7 +138,7 @@ export default function MotionTunerView({
       })
       .catch((error) => {
         toast.error(
-          t("ui.toast.save.error", {
+          t("toast.save.error", {
             errorMessage: error.response.data.message,
           }),
           { position: "top-center" },
@@ -189,11 +189,11 @@ export default function MotionTunerView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          <Trans>ui.settingView.motionDetectionTuner</Trans>
+          <Trans ns="views/settings">motionDetectionTuner.title</Trans>
         </Heading>
         <div className="my-3 space-y-3 text-sm text-muted-foreground">
           <p>
-            <Trans>ui.settingView.motionDetectionTuner.desc</Trans>
+            <Trans ns="views/settings">motionDetectionTuner.desc</Trans>
           </p>
 
           <div className="flex items-center text-primary">
@@ -203,8 +203,8 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              <Trans>
-                ui.settingView.motionDetectionTuner.desc.documentation
+              <Trans ns="views/settings">
+                motionDetectionTuner.desc.documentation
               </Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
@@ -215,12 +215,12 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                <Trans>ui.settingView.motionDetectionTuner.Threshold</Trans>
+                <Trans ns="views/settings">motionDetectionTuner.Threshold</Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>
-                    ui.settingView.motionDetectionTuner.Threshold.desc
+                  <Trans ns="views/settings">
+                    motionDetectionTuner.Threshold.desc
                   </Trans>
                 </p>
               </div>
@@ -246,12 +246,12 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                <Trans>ui.settingView.motionDetectionTuner.contourArea</Trans>
+                <Trans ns="views/settings">motionDetectionTuner.contourArea</Trans>
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  <Trans>
-                    ui.settingView.motionDetectionTuner.contourArea.desc
+                  <Trans ns="views/settings">
+                    motionDetectionTuner.contourArea.desc
                   </Trans>
                 </p>
               </div>
@@ -278,13 +278,13 @@ export default function MotionTunerView({
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="improve-contrast">
-                <Trans>
-                  ui.settingView.motionDetectionTuner.improveContrast
+                <Trans ns="views/settings">
+                  motionDetectionTuner.improveContrast
                 </Trans>
               </Label>
               <div className="text-sm text-muted-foreground">
-                <Trans>
-                  ui.settingView.motionDetectionTuner.improveContrast.desc
+                <Trans ns="views/settings">
+                  motionDetectionTuner.improveContrast.desc
                 </Trans>
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function MotionTunerView({
               aria-label="Reset"
               onClick={onCancel}
             >
-              <Trans>ui.reset</Trans>
+              <Trans>button.reset</Trans>
             </Button>
             <Button
               variant="select"
@@ -319,11 +319,11 @@ export default function MotionTunerView({
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
                   <span>
-                    <Trans>ui.saving</Trans>
+                    <Trans>button.saving</Trans>
                   </span>
                 </div>
               ) : (
-                <Trans>ui.save</Trans>
+                <Trans>button.save</Trans>
               )}
             </Button>
           </div>

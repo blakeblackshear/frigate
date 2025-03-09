@@ -42,7 +42,7 @@ export function CamerasFilterButton({
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
-      return t("ui.menu.live.allCameras");
+      return t("menu.live.allCameras");
     }
 
     return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
@@ -145,7 +145,7 @@ export function CamerasFilterContent({
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            <Trans>ui.filter.allCameras.short</Trans>
+            <Trans ns="components/filter">cameras.all.short</Trans>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -153,7 +153,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label={t("ui.filter.allCameras")}
+          label={t("cameras.all", { ns: "components/filter"})}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);
@@ -235,7 +235,7 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          <Trans>ui.apply</Trans>
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -244,7 +244,7 @@ export function CamerasFilterContent({
             updateCameraFilter(undefined);
           }}
         >
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>

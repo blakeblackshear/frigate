@@ -89,7 +89,7 @@ export default function PreviewPlayer({
         className,
       )}
     >
-      <Trans>ui.player.noPreviewFound</Trans>
+      <Trans ns="components/player">noPreviewFound</Trans>
     </div>
   );
 }
@@ -325,8 +325,8 @@ function PreviewVideoPlayer({
       </video>
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background_alt text-primary dark:bg-black md:rounded-2xl">
-          <Trans value={{ camera: camera.replaceAll("_", " ") }}>
-            ui.player.noPreviewFoundFor
+          <Trans ns="components/player" value={{ camera: camera.replaceAll("_", " ") }}>
+            noPreviewFoundFor
           </Trans>
         </div>
       )}
@@ -547,8 +547,8 @@ function PreviewFramesPlayer({
       />
       {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary dark:bg-black md:rounded-2xl">
-          <Trans values={{ cameraName: camera.replaceAll("_", " ") }}>
-            ui.player.noPreviewFoundFor
+          <Trans ns="components/player" values={{ cameraName: camera.replaceAll("_", " ") }}>
+            noPreviewFoundFor
           </Trans>
         </div>
       )}

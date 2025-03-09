@@ -316,7 +316,7 @@ export default function PolygonItem({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <Trans>ui.edit</Trans>
+                <Trans>button.edit</Trans>
               </TooltipContent>
             </Tooltip>
 
@@ -331,7 +331,7 @@ export default function PolygonItem({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <Trans>ui.copyCoordinates</Trans>
+                <Trans>button.copyCoordinates</Trans>
               </TooltipContent>
             </Tooltip>
 
@@ -347,7 +347,7 @@ export default function PolygonItem({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <Trans>ui.delete</Trans>
+                <Trans>button.delete</Trans>
               </TooltipContent>
             </Tooltip>
           </div>

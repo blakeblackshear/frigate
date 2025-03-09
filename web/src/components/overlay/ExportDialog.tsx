@@ -70,14 +70,14 @@ export default function ExportDialog({
 
   const onStartExport = useCallback(() => {
     if (!range) {
-      toast.error(t("ui.dialog.export.toast.error.noVaildTimeSelected"), {
+      toast.error(t("export.toast.error.noVaildTimeSelected", {ns: "components/dialog"}), {
         position: "top-center",
       });
       return;
     }
 
     if (range.before < range.after) {
-      toast.error(t("ui.dialog.export.toast.error.endTimeMustAfterStartTime"), {
+      toast.error(t("export.toast.error.endTimeMustAfterStartTime", {ns: "components/dialog"}), {
         position: "top-center",
       });
       return;
@@ -93,7 +93,7 @@ export default function ExportDialog({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(t("ui.dialog.export.toast.success"), {
+          toast.success(t("export.toast.success", {ns: "components/dialog"}), {
             position: "top-center",
           });
           setName("");
@@ -105,12 +105,12 @@ export default function ExportDialog({
         if (error.response?.data?.message) {
           // api error message need to be translated
           toast.error(
-            `${t("ui.dialog.export.toast.error.failed", { error: error.response.data.message })}`,
+            `${t("export.toast.error.failed", { error: error.response.data.message, ns: "components/dialog" })}`,
             { position: "top-center" },
           );
         } else {
           toast.error(
-            `${t("ui.dialog.export.toast.error.failed", { error: error.message })}`,
+            `${t("export.toast.error.failed", { error: error.message, ns: "components/dialog" })}`,
             {
               position: "top-center",
             },
@@ -172,7 +172,7 @@ export default function ExportDialog({
             <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
             {isDesktop && (
               <div className="text-primary">
-                <Trans>ui.menu.export</Trans>
+                <Trans>menu.export</Trans>
               </div>
             )}
           </Button>
@@ -271,7 +271,7 @@ export function ExportContent({
         <>
           <DialogHeader>
             <DialogTitle>
-              <Trans>ui.menu.export</Trans>
+              <Trans>menu.export</Trans>
             </DialogTitle>
           </DialogHeader>
           <SelectSeparator className="my-4 bg-secondary" />
@@ -296,10 +296,11 @@ export function ExportContent({
               <Label className="cursor-pointer capitalize" htmlFor={opt}>
                 {isNaN(parseInt(opt))
                   ? opt == "timeline"
-                    ? t("ui.dialog.export.time.fromTimeline")
-                    : t("ui.dialog.export.time." + opt)
-                  : t("ui.dialog.export.time.lastHour", {
+                    ? t("export.time.fromTimeline", {ns: "components/dialog"})
+                    : t("export.time." + opt, {ns: "components/dialog"})
+                  : t("export.time.lastHour", {
                       count: parseInt(opt),
+                      ns: "components/dialog"
                     })}
               </Label>
             </div>
@@ -316,7 +317,7 @@ export function ExportContent({
       <Input
         className="text-md my-6"
         type="search"
-        placeholder={t("ui.dialog.export.name.placeholder")}
+        placeholder={t("export.name.placeholder", {ns: "components/dialog"})}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
@@ -328,7 +329,7 @@ export function ExportContent({
           className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
           onClick={onCancel}
         >
-          <Trans>ui.cancel</Trans>
+          <Trans>button.cancel</Trans>
         </div>
         <Button
           className={isDesktop ? "" : "w-full"}
@@ -347,8 +348,8 @@ export function ExportContent({
           }}
         >
           {selectedOption == "timeline"
-            ? t("ui.dialog.export.select")
-            : t("ui.dialog.export.export")}
+            ? t("export.select", {ns: "components/dialog"})
+            : t("export.export", {ns: "components/dialog"})}
         </Button>
       </DialogFooter>
     </div>
@@ -408,14 +409,14 @@ function CustomTimeSelector({
   const formattedStart = useFormattedTimestamp(
     startTime,
     config?.ui.time_format == "24hour"
-      ? t("ui.time.formattedTimestamp.24hour")
-      : t("ui.time.formattedTimestamp"),
+      ? t("time.formattedTimestamp.24hour")
+      : t("time.formattedTimestamp"),
   );
   const formattedEnd = useFormattedTimestamp(
     endTime,
     config?.ui.time_format == "24hour"
-      ? t("ui.time.formattedTimestamp.24hour")
-      : t("ui.time.formattedTimestamp"),
+      ? t("time.formattedTimestamp.24hour")
+      : t("time.formattedTimestamp"),
   );
 
   const startClock = useMemo(() => {
@@ -603,10 +604,10 @@ export function ExportPreviewDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            <Trans>ui.dialog.export.fromTimeline.previewExport</Trans>
+            <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
           </DialogTitle>
           <DialogDescription className="sr-only">
-            <Trans>ui.dialog.export.fromTimeline.previewExport</Trans>
+            <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
           </DialogDescription>
         </DialogHeader>
         <GenericVideoPlayer source={source} />

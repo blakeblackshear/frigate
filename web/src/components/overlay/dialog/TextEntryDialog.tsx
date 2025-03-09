@@ -88,10 +88,10 @@ export default function TextEntryDialog({
             />
             <DialogFooter className="pt-4">
               <Button type="button" onClick={() => setOpen(false)}>
-                <Trans>ui.cancel</Trans>
+                <Trans>button.cancel</Trans>
               </Button>
               <Button variant="select" type="submit">
-                <Trans>ui.save</Trans>
+                <Trans>button.save</Trans>
               </Button>
             </DialogFooter>
           </form>

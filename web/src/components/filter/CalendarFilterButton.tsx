@@ -48,7 +48,7 @@ export default function CalendarFilterButton({
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
-        {day == undefined ? t("ui.calendarFilter.last24Hours") : selectedDate}
+        {day == undefined ? t("calendarFilter.last24Hours", {ns: "views/events"}) : selectedDate}
       </div>
     </Button>
   );
@@ -68,7 +68,7 @@ export default function CalendarFilterButton({
             updateSelectedDay(undefined);
           }}
         >
-          <Trans>ui.reset</Trans>
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>
@@ -100,7 +100,7 @@ export function CalendarRangeFilterButton({
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    t("ui.time.formattedTimestampOnlyMonthAndDay"),
+    t("time.formattedTimestampOnlyMonthAndDay"),
   );
 
   const trigger = (

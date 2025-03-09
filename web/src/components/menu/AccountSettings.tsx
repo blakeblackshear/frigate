@@ -67,8 +67,8 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       >
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
           <DropdownMenuLabel>
-            {t("ui.menu.user.current", {
-              user: profile?.username || t("ui.menu.user.anonymous"),
+            {t("menu.user.current", {
+              user: profile?.username || t("menu.user.anonymous"),
             })}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
@@ -81,7 +81,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />
               <span>
-                <Trans>ui.menu.user.logout</Trans>
+                <Trans>menu.user.logout</Trans>
               </span>
             </a>
           </MenuItem>

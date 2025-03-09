@@ -23,11 +23,11 @@ export default function DeleteUserDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <Trans>ui.settingView.users.dialog.deleteUser</Trans>
+            <Trans ns="views/settings">users.dialog.deleteUser</Trans>
           </DialogTitle>
         </DialogHeader>
         <div>
-          <Trans>ui.settingView.users.dialog.deleteUser.warn</Trans>
+          <Trans ns="views/settings">users.dialog.deleteUser.warn</Trans>
         </div>
         <DialogFooter>
           <Button
@@ -37,7 +37,7 @@ export default function DeleteUserDialog({
             size="sm"
             onClick={onDelete}
           >
-            <Trans>ui.delete</Trans>
+            <Trans>button.delete</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

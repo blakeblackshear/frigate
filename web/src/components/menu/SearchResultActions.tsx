@@ -88,7 +88,7 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem aria-label={t("ui.exploreView.itemMenu.downloadVideo.aria")}>
+        <MenuItem aria-label={t("itemMenu.downloadVideo.aria", {ns: "views/explore"})}>
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
@@ -96,14 +96,14 @@ export default function SearchResultActions({
           >
             <LuDownload className="mr-2 size-4" />
             <span>
-              <Trans>ui.exploreView.itemMenu.downloadVideo</Trans>
+              <Trans ns="views/explore">itemMenu.downloadVideo</Trans>
             </span>
           </a>
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
         <MenuItem
-          aria-label={t("ui.exploreView.itemMenu.downloadSnapshot.aria")}
+          aria-label={t("itemMenu.downloadSnapshot.aria", {ns: "views/explore"})}
         >
           <a
             className="flex items-center"
@@ -112,30 +112,30 @@ export default function SearchResultActions({
           >
             <LuCamera className="mr-2 size-4" />
             <span>
-              <Trans>ui.exploreView.itemMenu.downloadSnapshot</Trans>
+              <Trans ns="views/explore">itemMenu.downloadSnapshot.label</Trans>
             </span>
           </a>
         </MenuItem>
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label={t("ui.exploreView.itemMenu.viewObjectLifecycle.aria")}
+          aria-label={t("itemMenu.viewObjectLifecycle.aria", {ns: "views/explore"})}
           onClick={showObjectLifecycle}
         >
           <FaArrowsRotate className="mr-2 size-4" />
           <span>
-            <Trans>ui.exploreView.itemMenu.viewObjectLifecycle</Trans>
+            <Trans ns="views/explore">itemMenu.viewObjectLifecycle.label</Trans>
           </span>
         </MenuItem>
       )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
-          aria-label={t("ui.exploreView.itemMenu.findSimilar.aria")}
+          aria-label={t("itemMenu.findSimilar.aria", {ns: "views/explore"})}
           onClick={findSimilar}
         >
           <MdImageSearch className="mr-2 size-4" />
           <span>
-            <Trans>ui.exploreView.itemMenu.findSimilar</Trans>
+            <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
           </span>
         </MenuItem>
       )}
@@ -146,12 +146,12 @@ export default function SearchResultActions({
         searchResult.data.type == "object" &&
         !searchResult.plus_id && (
           <MenuItem
-            aria-label={t("ui.exploreView.itemMenu.submitToPlus.aria")}
+            aria-label={t("itemMenu.submitToPlus.aria", {ns: "views/explore"})}
             onClick={showSnapshot}
           >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
             <span>
-              <Trans>ui.exploreView.itemMenu.submitToPlus</Trans>
+              <Trans ns="views/explore">itemMenu.submitToPlus</Trans>
             </span>
           </MenuItem>
         )}
@@ -161,7 +161,7 @@ export default function SearchResultActions({
       >
         <LuTrash2 className="mr-2 size-4" />
         <span>
-          <Trans>ui.delete</Trans>
+          <Trans>button.delete</Trans>
         </span>
       </MenuItem>
     </>
@@ -176,21 +176,21 @@ export default function SearchResultActions({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <Trans>ui.exploreView.dialog.confirmDelete</Trans>
+              <Trans ns="views/explore">dialog.confirmDelete</Trans>
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            <Trans>ui.exploreView.dialog.confirmDelete.desc</Trans>
+            <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              <Trans>ui.cancel</Trans>
+              <Trans>button.cancel</Trans>
             </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
-              <Trans>ui.delete</Trans>
+              <Trans>button.delete</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -211,7 +211,7 @@ export default function SearchResultActions({
                     onClick={findSimilar}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Find similar</TooltipContent>
+                <TooltipContent><Trans ns="views/explore">itemMenu.findSimilar.label</Trans></TooltipContent>
               </Tooltip>
             )}
 
@@ -228,7 +228,7 @@ export default function SearchResultActions({
                     onClick={showSnapshot}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Submit to Frigate+</TooltipContent>
+                <TooltipContent><Trans ns="views/explore">itemMenu.submitToPlus.label</Trans></TooltipContent>
               </Tooltip>
             )}
 

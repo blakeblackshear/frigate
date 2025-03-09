@@ -195,10 +195,10 @@ export default function SearchDetailDialog({
       >
         <Header>
           <Title>
-            <Trans>ui.exploreView.trackedObjectDetails</Trans>
+            <Trans ns="views/explore">trackedObjectDetails</Trans>
           </Title>
           <Description className="sr-only">
-            <Trans>ui.exploreView.details</Trans>
+            <Trans ns="views/explore">details</Trans>
           </Description>
         </Header>
         <ScrollArea
@@ -231,7 +231,7 @@ export default function SearchDetailDialog({
                     <FaRotate className="size-4" />
                   )}
                   <div className="capitalize">
-                    <Trans>ui.exploreView.type.{item}</Trans>
+                    <Trans ns="views/explore">type.{item}</Trans>
                   </div>
                 </ToggleGroupItem>
               ))}
@@ -314,8 +314,8 @@ function ObjectDetailsTab({
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? t("ui.time.formattedTimestampWithYear.24hour")
-      : t("ui.time.formattedTimestampWithYear"),
+      ? t("time.formattedTimestampWithYear.24hour")
+      : t("time.formattedTimestampWithYear"),
     config?.ui.timezone,
   );
 
@@ -374,7 +374,7 @@ function ObjectDetailsTab({
       .post(`events/${search.id}/description`, { description: desc })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success(t("ui.exploreView.details.tips.descriptionSaved"), {
+          toast.success(t("details.tips.descriptionSaved", {ns: "views/explore"}), {
             position: "top-center",
           });
         }
@@ -403,7 +403,7 @@ function ObjectDetailsTab({
         );
       })
       .catch(() => {
-        toast.error(t("ui.exploreView.details.tips.saveDescriptionFailed"), {
+        toast.error(t("details.tips.saveDescriptionFailed", {ns: "views/explore"}), {
           position: "top-center",
         });
         setDesc(search.data.description);
@@ -515,11 +515,11 @@ function ObjectDetailsTab({
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
-              <Trans>ui.exploreView.details.label</Trans>
+              <Trans ns="views/explore">details.label</Trans>
             </div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              <Trans>object.{search.label}</Trans>
+              <Trans ns="objects">{search.label}</Trans>
               {search.sub_label && ` (${search.sub_label})`}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -534,7 +534,7 @@ function ObjectDetailsTab({
                 </TooltipTrigger>
                 <TooltipPortal>
                   <TooltipContent>
-                    <Trans>ui.exploreView.details.editSubLable</Trans>
+                    <Trans ns="views/explore">details.editSubLable</Trans>
                   </TooltipContent>
                 </TooltipPortal>
               </Tooltip>
@@ -543,7 +543,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">
-                <Trans>ui.exploreView.details.topScore</Trans>
+                <Trans ns="views/explore">details.topScore</Trans>
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
@@ -552,7 +552,7 @@ function ObjectDetailsTab({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
-                    <Trans>ui.exploreView.details.topScore.info</Trans>
+                    <Trans ns="views/explore">details.topScore.info</Trans>
                   </PopoverContent>
                 </Popover>
               </div>
@@ -564,13 +564,13 @@ function ObjectDetailsTab({
           {averageEstimatedSpeed && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                <Trans>ui.exploreView.details.estimatedSpeed</Trans>
+                <Trans ns="views/explore">details.estimatedSpeed</Trans>
               </div>
               <div className="flex flex-col space-y-0.5 text-sm">
                 {averageEstimatedSpeed && (
                   <div className="flex flex-row items-center gap-2">
                     {averageEstimatedSpeed}{" "}
-                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    {config?.ui.unit_system == "imperial" ? t("unit.speed.mph") : t("unit.speed.kph")}{" "}
                     {velocityAngle != undefined && (
                       <span className="text-primary/40">
                         <FaArrowRight
@@ -588,7 +588,7 @@ function ObjectDetailsTab({
           )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
-              <Trans>ui.exploreView.details.camera</Trans>
+              <Trans ns="views/explore">details.camera</Trans>
             </div>
             <div className="text-sm capitalize">
               {search.camera.replaceAll("_", " ")}
@@ -596,7 +596,7 @@ function ObjectDetailsTab({
           </div>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
-              <Trans>ui.exploreView.details.timestamp</Trans>
+              <Trans ns="views/explore">details.timestamp</Trans>
             </div>
             <div className="text-sm">{formattedDate}</div>
           </div>
@@ -649,7 +649,7 @@ function ObjectDetailsTab({
                 <ActivityIndicator />
               </div>
               <div className="flex">
-                <Trans>ui.exploreView.details.description.aiTips</Trans>
+                <Trans ns="views/explore">details.description.aiTips</Trans>
               </div>
             </div>
           </>
@@ -658,7 +658,7 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40"></div>
             <Textarea
               className="h-64"
-              placeholder={t("ui.exploreView.details.description.placeholder")}
+              placeholder={t("details.description.placeholder", {ns: "views/explore"})}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onFocus={handleDescriptionFocus}
@@ -675,7 +675,7 @@ function ObjectDetailsTab({
                 aria-label="Regenerate tracked object description"
                 onClick={() => regenerateDescription("thumbnails")}
               >
-                <Trans>ui.exploreView.details.button.regenerate</Trans>
+                <Trans ns="views/explore">details.button.regenerate</Trans>
               </Button>
               {search.has_snapshot && (
                 <DropdownMenu>
@@ -693,8 +693,8 @@ function ObjectDetailsTab({
                       aria-label="Regenerate from snapshot"
                       onClick={() => regenerateDescription("snapshot")}
                     >
-                      <Trans>
-                        ui.exploreView.details.regenerateFromSnapshot
+                      <Trans ns="views/explore">
+                        details.regenerateFromSnapshot
                       </Trans>
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -702,8 +702,8 @@ function ObjectDetailsTab({
                       aria-label="Regenerate from thumbnails"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
-                      <Trans>
-                        ui.exploreView.details.regenerateFromThumbnails
+                      <Trans ns="views/explore">
+                        details.regenerateFromThumbnails
                       </Trans>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -718,19 +718,19 @@ function ObjectDetailsTab({
               aria-label="Save"
               onClick={updateDescription}
             >
-              <Trans>ui.save</Trans>
+              <Trans>button.save</Trans>
             </Button>
           )}
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title={t("ui.exploreView.details.editSubLable")}
+            title={t("details.editSubLable", {ns: "views/explore"})}
             description={
               search.label
-                ? t("ui.exploreView.details.editSubLable.desc", {
-                    label: t(`object.${search.label}`),
+                ? t("details.editSubLable.desc", {
+                    label: t(search.label, { ns: "objects" }), ns: "views/explore",
                   })
-                : t("ui.exploreView.details.editSubLable.desc.noLabel")
+                : t("details.editSubLable.desc.noLabel", { ns: "views/explore" })
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
@@ -833,7 +833,7 @@ export function ObjectSnapshotTab({
                       </TooltipTrigger>
                       <TooltipPortal>
                         <TooltipContent>
-                          <Trans>ui.download</Trans>
+                          <Trans>button.download</Trans>
                         </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>

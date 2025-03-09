@@ -1,0 +1,51 @@
+{
+  "label": "Filter",
+  "labels": {
+    "all": "All Labels",
+    "all.short": "Labels",
+    "count": "{{count}} Labels"
+  },
+  "zones": {
+    "all": "All Zones",
+    "all.short": "Zones"
+  },
+  "dates": {
+    "all": "All Dates",
+    "all.short": "Dates"
+  },
+  "more": "More Filters",
+  "timeRange": "Time Range",
+  "zones.label": "Zones",
+  "subLabels": {
+    "label": "Sub Labels",
+    "all": "All Sub Labels"
+  },
+  "score": "Score",
+  "estimatedSpeed": "Estimated Speed ({{unit}})",
+  "features": {
+    "label": "Features",
+    "hasSnapshot": "Has a snapshot",
+    "hasVideoClip": "Has a video clip",
+    "submittedToFrigatePlus": {
+      "label": "Submitted to Frigate+",
+      "tips": "You must first filter on tracked objects that have a snapshot.<br /><br />Tracked objects without a snapshot cannot be submitted to Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sort",
+    "dateAsc": "Date (Ascending)",
+    "dateDesc": "Date (Descending)",
+    "scoreAsc": "Object Score (Ascending)",
+    "scoreDesc": "Object Score (Descending)",
+    "speedAsc": "Estimated Speed (Ascending)",
+    "speedDesc": "Estimated Speed (Descending)",
+    "relevance": "Relevance"
+  },
+  "cameras": {
+    "all": "All Cameras",
+    "all.short": "Cameras"
+  },
+  "review": {
+    "showReviewed": "Show Reviewed"
+  }
+}

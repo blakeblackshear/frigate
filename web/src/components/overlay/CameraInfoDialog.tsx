@@ -74,13 +74,14 @@ export default function CameraInfoDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="capitalize">
-              {t("ui.system.cameras.info.cameraProbeInfo", {
+              {t("system.cameras.info.cameraProbeInfo", {
                 camera: camera.name.replaceAll("_", " "),
+                ns: "views/system"
               })}
             </DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            <Trans>ui.system.cameras.info.streamDataFromFFPROBE</Trans>
+            <Trans ns="views/system">cameras.info.streamDataFromFFPROBE</Trans>
           </DialogDescription>
 
           <div className="mb-2 p-4">
@@ -89,7 +90,7 @@ export default function CameraInfoDialog({
                 {ffprobeInfo.map((stream, idx) => (
                   <div key={idx} className="mb-5">
                     <div className="mb-1 rounded-md bg-secondary p-2 text-lg text-primary">
-                      {t("ui.system.cameras.info.stream", { idx: idx + 1 })}
+                      {t("cameras.info.stream", { idx: idx + 1, ns: "views/system" })}
                     </div>
                     {stream.return_code == 0 ? (
                       <div>
@@ -98,11 +99,11 @@ export default function CameraInfoDialog({
                             {codec.width ? (
                               <div className="text-muted-foreground">
                                 <div className="ml-2">
-                                  <Trans>ui.system.cameras.info.video</Trans>
+                                  <Trans ns="views/system">cameras.info.video</Trans>
                                 </div>
                                 <div className="ml-5">
                                   <div>
-                                    <Trans>ui.system.cameras.info.codec</Trans>
+                                    <Trans ns="views/system">cameras.info.codec</Trans>
                                     <span className="text-primary">
                                       {" "}
                                       {codec.codec_long_name}
@@ -111,8 +112,8 @@ export default function CameraInfoDialog({
                                   <div>
                                     {codec.width && codec.height ? (
                                       <>
-                                        <Trans>
-                                          ui.system.cameras.info.resolution
+                                        <Trans ns="views/system">
+                                          cameras.info.resolution
                                         </Trans>{" "}
                                         <span className="text-primary">
                                           {" "}
@@ -127,8 +128,8 @@ export default function CameraInfoDialog({
                                       </>
                                     ) : (
                                       <span>
-                                        <Trans>
-                                          ui.system.cameras.info.resolution
+                                        <Trans ns="views/system">
+                                          cameras.info.resolution
                                         </Trans>{" "}
                                         <span className="text-primary">
                                           Unknown
@@ -137,10 +138,10 @@ export default function CameraInfoDialog({
                                     )}
                                   </div>
                                   <div>
-                                    <Trans>ui.system.cameras.info.fps</Trans>{" "}
+                                    <Trans ns="views/system">cameras.info.fps</Trans>{" "}
                                     <span className="text-primary">
                                       {codec.avg_frame_rate == "0/0"
-                                        ? t("ui.system.cameras.info.unknown")
+                                        ? t("cameras.info.unknown", { ns: "views/system" })
                                         : codec.avg_frame_rate}
                                     </span>
                                   </div>
@@ -150,7 +151,7 @@ export default function CameraInfoDialog({
                               <div className="text-muted-foreground">
                                 <div className="ml-2 mt-1">Audio:</div>
                                 <div className="ml-4">
-                                  <Trans>ui.system.cameras.info.codec</Trans>{" "}
+                                  <Trans ns="views/system">cameras.info.codec</Trans>{" "}
                                   <span className="text-primary">
                                     {codec.codec_long_name}
                                   </span>
@@ -163,8 +164,9 @@ export default function CameraInfoDialog({
                     ) : (
                       <div className="px-2">
                         <div>
-                          {t("ui.system.cameras.info.error", {
+                          {t("cameras.info.error", {
                             error: stream.stderr,
+                            ns: "views/system"
                           })}
                         </div>
                       </div>
@@ -176,7 +178,7 @@ export default function CameraInfoDialog({
               <div className="flex flex-col items-center">
                 <ActivityIndicator />
                 <div className="mt-2">
-                  <Trans>ui.system.cameras.info.fetching</Trans>
+                  <Trans ns="views/system">cameras.info.fetching</Trans>
                 </div>
               </div>
             )}
@@ -188,7 +190,7 @@ export default function CameraInfoDialog({
               aria-label="Copy"
               onClick={() => onCopyFfprobe()}
             >
-              <Trans>ui.copy</Trans>
+              <Trans>button.copy</Trans>
             </Button>
           </DialogFooter>
         </DialogContent>

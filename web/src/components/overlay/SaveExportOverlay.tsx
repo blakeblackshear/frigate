@@ -34,7 +34,7 @@ export default function SaveExportOverlay({
           onClick={onCancel}
         >
           <LuX />
-          <Trans>ui.cancel</Trans>
+          <Trans>button.cancel</Trans>
         </Button>
         <Button
           className="flex items-center gap-1"
@@ -43,7 +43,7 @@ export default function SaveExportOverlay({
           onClick={onPreview}
         >
           <LuVideo />
-          <Trans>ui.dialog.export.fromTimeline.previewExport</Trans>
+          <Trans ns="components/dialog">export.fromTimeline.previewExport</Trans>
         </Button>
         <Button
           className="flex items-center gap-1"
@@ -53,7 +53,7 @@ export default function SaveExportOverlay({
           onClick={onSave}
         >
           <FaCompactDisc />
-          <Trans>ui.dialog.export.fromTimeline.saveExport</Trans>
+          <Trans ns="components/dialog">export.fromTimeline.saveExport</Trans>
         </Button>
       </div>
     </div>

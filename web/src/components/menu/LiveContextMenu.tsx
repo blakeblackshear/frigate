@@ -44,6 +44,8 @@ import {
   useNotifications,
   useNotificationSuspend,
 } from "@/api/ws";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -240,7 +242,7 @@ export default function LiveContextMenu({
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
+      strftime_fmt: config?.ui.time_format == "24hour" ? t("time.formattedTimestampExcludeSeconds.24hour"): t("time.formattedTimestampExcludeSeconds"),
     });
   };
 
@@ -357,7 +359,7 @@ export default function LiveContextMenu({
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
                   onClick={isEnabled ? resetPreferredLiveMode : undefined}
                 >
-                  <div className="text-primary">Reset</div>
+                  <div className="text-primary"><Trans>button</Trans></div>
                 </div>
               </ContextMenuItem>
             </>

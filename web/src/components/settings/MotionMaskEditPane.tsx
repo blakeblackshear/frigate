@@ -107,7 +107,7 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("ui.form.message.polygonDrawing.error.mustBeFinished"),
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {ns: "views/settings"}),
       path: ["polygon.isFinished"],
     });
 
@@ -167,13 +167,17 @@ export default function MotionMaskEditPane({
           toast.success(
             polygon.name
               ? t(
-                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success",
+                  "masksAndZones.motionMasks.toast.success",
                   {
                     polygonName: polygon.name,
+                    ns: "views/settings"
                   },
                 )
               : t(
-                  "ui.settingView.masksAndZonesSettings.motionMasks.toast.success.noName",
+                  "masksAndZones.motionMasks.toast.success.noName",
+                  {
+                    ns: "views/settings"
+                  }
                 ),
             {
               position: "top-center",
@@ -218,7 +222,10 @@ export default function MotionMaskEditPane({
 
   useEffect(() => {
     document.title = t(
-      "ui.settingView.masksAndZonesSettings.motionMasks.documentTitle",
+      "masksAndZones.motionMasks.documentTitle",
+      {
+        ns: "views/settings"
+      }
     );
   }, []);
 
@@ -231,13 +238,13 @@ export default function MotionMaskEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("ui.settingView.masksAndZonesSettings.motionMasks.edit")
-          : t("ui.settingView.masksAndZonesSettings.motionMasks.add")}
+          ? t("masksAndZones.motionMasks.edit", {ns: "views/settings"})
+          : t("masksAndZones.motionMasks.add", {ns: "views/settings"})}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
-          <Trans>
-            ui.settingView.masksAndZonesSettings.motionMasks.context
+          <Trans ns="views/settings">
+            masksAndZones.motionMasks.context
           </Trans>
         </p>
 
@@ -248,8 +255,8 @@ export default function MotionMaskEditPane({
             rel="noopener noreferrer"
             className="inline"
           >
-            <Trans>
-              ui.settingView.masksAndZonesSettings.motionMasks.context.documentation
+            <Trans ns="views/settings">
+              masksAndZones.motionMasks.context.documentation
             </Trans>{" "}
             <LuExternalLink className="ml-2 inline-flex size-3" />
           </Link>
@@ -259,8 +266,9 @@ export default function MotionMaskEditPane({
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {t("ui.settingView.masksAndZonesSettings.motionMasks.point", {
+            {t("masksAndZones.motionMasks.point", {
               count: polygons[activePolygonIndex].points.length,
+              ns: "views/settings"
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -276,8 +284,8 @@ export default function MotionMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans>
-          ui.settingView.masksAndZonesSettings.motionMasks.clickDrawPolygon
+        <Trans ns="views/settings">
+          masksAndZones.motionMasks.clickDrawPolygon
         </Trans>
       </div>
 
@@ -287,15 +295,16 @@ export default function MotionMaskEditPane({
         <>
           <div className="mb-3 text-sm text-danger">
             {t(
-              "ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge",
+              "masksAndZones.motionMasks.polygonAreaTooLarge",
               {
                 polygonArea: Math.round(polygonArea * 100),
+                ns: "views/settings"
               },
             )}
           </div>
           <div className="mb-3 text-sm text-primary">
-            <Trans>
-              ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.tips
+            <Trans ns="views/settings">
+              masksAndZones.motionMasks.polygonAreaTooLarge.tips
             </Trans>
             <Link
               to="https://github.com/blakeblackshear/frigate/discussions/13040"
@@ -303,8 +312,8 @@ export default function MotionMaskEditPane({
               rel="noopener noreferrer"
               className="my-3 block"
             >
-              <Trans>
-                ui.settingView.masksAndZonesSettings.motionMasks.polygonAreaTooLarge.documentation
+              <Trans ns="views/settings">
+                masksAndZones.motionMasks.polygonAreaTooLarge.documentation
               </Trans>{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
@@ -342,7 +351,7 @@ export default function MotionMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                <Trans>ui.cancel</Trans>
+                <Trans>button.cancel</Trans>
               </Button>
               <Button
                 variant="select"
@@ -355,11 +364,11 @@ export default function MotionMaskEditPane({
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
                     <span>
-                      <Trans>ui.saving</Trans>
+                      <Trans>button.saving</Trans>
                     </span>
                   </div>
                 ) : (
-                  <Trans>ui.save</Trans>
+                  <Trans>button.save</Trans>
                 )}
               </Button>
             </div>

@@ -163,7 +163,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent className="" side="right">
-                <Trans>ui.menu.live.allCameras</Trans>
+                <Trans>menu.live.allCameras</Trans>
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -352,10 +352,10 @@ function NewGroupDialog({
                 onClose={() => setOpen(false)}
               >
                 <Title>
-                  <Trans>ui.cameraGroup</Trans>
+                  <Trans ns="components/camera">group.label</Trans>
                 </Title>
                 <Description className="sr-only">
-                  <Trans>ui.cameraGroup.edit</Trans>
+                  <Trans ns="components/camera">group.edit</Trans>
                 </Description>
                 <div
                   className={cn(
@@ -404,9 +404,9 @@ function NewGroupDialog({
               >
                 <Title>
                   {editState == "add" ? (
-                    <Trans>ui.cameraGroup.add</Trans>
+                    <Trans ns="components/camera">group.add</Trans>
                   ) : (
-                    <Trans>ui.cameraGroup.edit</Trans>
+                    <Trans ns="components/camera">group.edit</Trans>
                   )}
                 </Title>
                 <Description className="sr-only">
@@ -481,10 +481,10 @@ export function EditGroupDialog({
           <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
             <Header className="mt-2" onClose={() => setOpen(false)}>
               <Title>
-                <Trans>ui.cameraGroup.edit</Trans>
+                <Trans ns="components/camera">group.edit</Trans>
               </Title>
               <Description className="sr-only">
-                <Trans>ui.cameraGroup.edit.desc</Trans>
+                <Trans ns="components/camera">group.edit.desc</Trans>
               </Description>
             </Header>
 
@@ -536,23 +536,23 @@ export function CameraGroupRow({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                <Trans>ui.cameraGroup.delete.confirm</Trans>
+                <Trans ns="components/camera">group.delete.confirm</Trans>
               </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
               <Trans values={{ name: group[0] }}>
-                ui.cameraGroup.delete.confirm.desc
+                group.delete.confirm.desc
               </Trans>
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>
-                <Trans>ui.cancel</Trans>
+                <Trans>button.cancel</Trans>
               </AlertDialogCancel>
               <AlertDialogAction
                 className={buttonVariants({ variant: "destructive" })}
                 onClick={onDeleteGroup}
               >
-                <Trans>ui.delete</Trans>
+                <Trans>button.delete</Trans>
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -570,13 +570,13 @@ export function CameraGroupRow({
                     aria-label="Edit group"
                     onClick={onEditGroup}
                   >
-                    Edit
+                    <Trans>button.edit</Trans>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     aria-label="Delete group"
                     onClick={() => setDeleteDialogOpen(true)}
                   >
-                    Delete
+                    <Trans>button.delete</Trans>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenuPortal>
@@ -594,7 +594,7 @@ export function CameraGroupRow({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <Trans>ui.edit</Trans>
+                <Trans>button.edit</Trans>
               </TooltipContent>
             </Tooltip>
 
@@ -607,7 +607,7 @@ export function CameraGroupRow({
                 />
               </TooltipTrigger>
               <TooltipContent>
-                <Trans>ui.delete</Trans>
+                <Trans>button.delete</Trans>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -653,7 +653,7 @@ export function CameraGroupEdit({
     name: z
       .string()
       .min(2, {
-        message: t("ui.cameraGroup.name.errorMessage.mustLeastCharacters"),
+        message: t("group.name.errorMessage.mustLeastCharacters", { ns: "components/camera" }),
       })
       .transform((val: string) => val.trim().replace(/\s+/g, "_"))
       .refine(
@@ -664,7 +664,7 @@ export function CameraGroupEdit({
           );
         },
         {
-          message: t("ui.cameraGroup.name.errorMessage.exists"),
+          message: t("group.name.errorMessage.exists", { ns: "components/camera" }),
         },
       )
       .refine(
@@ -672,11 +672,11 @@ export function CameraGroupEdit({
           return !value.includes(".");
         },
         {
-          message: t("ui.cameraGroup.name.errorMessage.nameMustNotPeriod"),
+          message: t("group.name.errorMessage.nameMustNotPeriod"),
         },
       )
       .refine((value: string) => value.toLowerCase() !== "default", {
-        message: t("ui.cameraGroup.name.errorMessage.invalid"),
+        message: t("group.name.errorMessage.invalid", { ns: "components/camera" }),
       }),
 
     cameras: z.array(z.string()),
@@ -732,7 +732,7 @@ export function CameraGroupEdit({
         .then(async (res) => {
           if (res.status === 200) {
             toast.success(
-              t("ui.cameraGroup.toast.success", { name: values.name }),
+              t("group.toast.success", { name: values.name, ns: "components/camera"}),
               {
                 position: "top-center",
               },
@@ -744,7 +744,7 @@ export function CameraGroupEdit({
             setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(
-              t("ui.toast.save.error", { errorMessage: res.statusText }),
+              t("toast.save.error", { errorMessage: res.statusText }),
               {
                 position: "top-center",
               },
@@ -753,7 +753,7 @@ export function CameraGroupEdit({
         })
         .catch((error) => {
           toast.error(
-            t("ui.toast.save.error", {
+            t("toast.save.error", {
               errorMessage: error.response.data.message,
             }),
             { position: "top-center" },
@@ -797,12 +797,12 @@ export function CameraGroupEdit({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                <Trans>ui.cameraGroup.name</Trans>
+                <Trans ns="components/camera">group.name.label</Trans>
               </FormLabel>
               <FormControl>
                 <Input
                   className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                  placeholder={t("ui.cameraGroup.name.placeholder")}
+                  placeholder={t("group.name.placeholder", { ns: "components/camera" })}
                   {...field}
                 />
               </FormControl>
@@ -819,10 +819,10 @@ export function CameraGroupEdit({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans>ui.cameraGroup.cameras</Trans>
+                  <Trans ns="components/camera">group.cameras.label</Trans>
                 </FormLabel>
                 <FormDescription>
-                  <Trans>ui.cameraGroup.cameras.desc</Trans>
+                  <Trans ns="components/camera">group.cameras.desc</Trans>
                 </FormDescription>
                 <FormMessage />
                 {[
@@ -908,7 +908,7 @@ export function CameraGroupEdit({
           render={({ field }) => (
             <FormItem className="flex flex-col space-y-2">
               <FormLabel>
-                <Trans>ui.cameraGroup.icon</Trans>
+                <Trans ns="components/camera">group.icon</Trans>
               </FormLabel>
               <FormControl>
                 <IconPicker
@@ -937,7 +937,7 @@ export function CameraGroupEdit({
             aria-label="Cancel"
             onClick={onCancel}
           >
-            <Trans>ui.cancel</Trans>
+            <Trans>button.cancel</Trans>
           </Button>
           <Button
             variant="select"
@@ -950,11 +950,11 @@ export function CameraGroupEdit({
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
                 <span>
-                  <Trans>ui.saving</Trans>
+                  <Trans>button.saving</Trans>
                 </span>
               </div>
             ) : (
-              <Trans>ui.save</Trans>
+              <Trans>button.save</Trans>
             )}
           </Button>
         </div>

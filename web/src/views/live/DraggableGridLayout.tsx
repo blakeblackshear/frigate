@@ -695,7 +695,7 @@ export default function DraggableGridLayout({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {fullscreen ? t("ui.exitFullscreen") : t("ui.fullscreen")}
+                      {fullscreen ? t("button.exitFullscreen") : t("button.fullscreen")}
                     </TooltipContent>
                   </Tooltip>
                 </>

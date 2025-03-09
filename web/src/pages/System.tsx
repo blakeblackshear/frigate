@@ -94,7 +94,7 @@ function System() {
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && (
-                <div className="capitalize">{t("ui.system." + item)}</div>
+                <div className="capitalize">{t(item+".title", {ns:"views/system"})}</div>
               )}
             </ToggleGroupItem>
           ))}
@@ -103,14 +103,14 @@ function System() {
         <div className="flex h-full items-center">
           {lastUpdated && (
             <div className="h-full content-center text-sm text-muted-foreground">
-              <Trans>ui.system.lastRefreshed</Trans>
+              <Trans ns="views/system">lastRefreshed</Trans>
               <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <div className="h-full content-center font-medium">System</div>
+        <div className="h-full content-center font-medium"><Trans ns="views/system">title</Trans></div>
         {statsSnapshot && (
           <div className="h-full content-center text-sm text-muted-foreground">
             {statsSnapshot.service.version}

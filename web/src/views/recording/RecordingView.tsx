@@ -401,7 +401,7 @@ export function RecordingView({
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
             {isDesktop && (
               <div className="text-primary">
-                <Trans>ui.back</Trans>
+                <Trans>button.back</Trans>
               </div>
             )}
           </Button>
@@ -416,7 +416,7 @@ export function RecordingView({
             <FaVideo className="size-5 text-secondary-foreground" />
             {isDesktop && (
               <div className="text-primary">
-                <Trans>ui.menu.live</Trans>
+                <Trans>menu.live</Trans>
               </div>
             )}
           </Button>
@@ -494,7 +494,7 @@ export function RecordingView({
                 aria-label="Select timeline"
               >
                 <div className="">
-                  <Trans>ui.review.timeline</Trans>
+                  <Trans ns="views/events">timeline</Trans>
                 </div>
               </ToggleGroupItem>
               <ToggleGroupItem
@@ -503,7 +503,7 @@ export function RecordingView({
                 aria-label="Select events"
               >
                 <div className="">
-                  <Trans>ui.review.events</Trans>
+                  <Trans ns="views/events">events.label</Trans>
                 </div>
               </ToggleGroupItem>
             </ToggleGroup>
@@ -811,7 +811,7 @@ function Timeline({
           >
             {mainCameraReviewItems.length === 0 ? (
               <div className="mt-5 text-center text-primary">
-                <Trans>ui.review.events.noFoundForTimePeriod</Trans>
+                <Trans ns="views/events">events.noFoundForTimePeriod</Trans>
               </div>
             ) : (
               mainCameraReviewItems.map((review) => {

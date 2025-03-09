@@ -7,13 +7,29 @@ i18n
   .use(HttpBackend)
   .init({
     fallbackLng: "en", // use en if detected lng is not available
-    //lng: "zh-Hans", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
-    // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
-    // if you're using a language detector, do not define the lng option
 
     backend: {
       loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
+
+    ns: [
+      'common',
+      'objects',
+      'audio',
+      'components/camera',
+      'components/dialog',
+      'components/filter',
+      'components/icons',
+      'components/player',
+      'views/events',
+      'views/explore',
+      'views/live',
+      'views/settings',
+      'views/system',
+      'views/exports',
+      'views/explore'
+    ],
+    defaultNS: 'common',
 
     react: {
       transSupportBasicHtmlNodes: true,
@@ -30,19 +46,32 @@ i18n
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
-    keySeparator: false,
+    keySeparator: ".",
     parseMissingKeyHandler: (key: string) => {
       const parts = key.split(".");
-      if (parts.length > 1) {
-        if (parts[0] === "object" || parts[0] === "audio") {
-          return (
-            parts[1].replaceAll("_", " ").charAt(0).toUpperCase() +
-            parts[1].slice(1)
-          );
-        }
-        return parts[parts.length - 1];
+      
+      // Handle special cases for objects and audio
+      if (parts[0] === "object" || parts[0] === "audio") {
+        return parts[1]
+          ?.split("_")
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" ") || key;
       }
-      return key;
+
+      // For nested keys, try to make them more readable
+      if (parts.length > 1) {
+        const lastPart = parts[parts.length - 1];
+        return lastPart
+          .split("_")
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" ");
+      }
+
+      // For single keys, just capitalize and format
+      return key
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
     },
   });
 

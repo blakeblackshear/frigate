@@ -65,15 +65,17 @@ function Live() {
         .split("_")
         .filter((text) => text)
         .map((text) => text[0].toUpperCase() + text.substring(1));
-      document.title = t("ui.live.documentTitle.withCamera", {
+      document.title = t("documentTitle.withCamera", {
         camera: capitalized.join(" "),
+        ns: "views/live"
       });
     } else if (cameraGroup && cameraGroup != "default") {
-      document.title = t("ui.live.documentTitle.withCamera", {
+      document.title = t("documentTitle.withCamera", {
         camera: `${cameraGroup[0].toUpperCase()}${cameraGroup.substring(1)}`,
+        ns: "views/live"
       });
     } else {
-      document.title = t("ui.live.documentTitle");
+      document.title = t("documentTitle", {ns: "views/live"});
     }
   }, [cameraGroup, selectedCameraName]);
 
