@@ -85,9 +85,10 @@ function migrate_addon_config_dir() {
 
     if [[ "${db_path}" == /config/* ]]; then
         # replace /config/ prefix with /homeassistant_config/
-        old_db_path="/homeassistant_config/${db_path:8}"
+        local old_db_path="/homeassistant_config/${db_path:8}"
 
         if [[ -f "${old_db_path}" ]]; then
+            local new_db_dir
             new_db_dir="$(dirname "${db_path}")"
             echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
             mv -vf "${old_db_path}"* "${new_db_dir}"
