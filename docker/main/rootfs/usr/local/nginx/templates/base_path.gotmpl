@@ -3,15 +3,17 @@ location = {{ .base_path }} {
     return 302 {{ .base_path }}/;
 }
 
-location {{ .base_path }}/ {
-  proxy_http_version 1.1;
-  proxy_cache_bypass $http_upgrade;
-  proxy_set_header Upgrade $http_upgrade;
-  proxy_set_header Connection $http_connection;
-  proxy_set_header Host $http_host;
-  proxy_set_header X-Ingress-Path {{ .base_path }};
-  proxy_set_header Authorization "";
-  proxy_pass http:/{{ .base_path }}:5000/;
-  access_log off;
+location /{{ .base_path }}/ {
+    # remove base_url from the path before passing upstream
+    rewrite ^/{{ .base_path }}/(.*) /$1 break;
+
+    proxy_pass http://127.0.0.1:8971;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Ingress-Path /{{ .base_path }};
+
+    access_log off;
 }
 {{ end }}
