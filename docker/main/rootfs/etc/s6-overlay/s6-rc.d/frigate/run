@@ -26,16 +26,16 @@ function migrate_db_from_media_to_config() {
     user_db_path=$(yq eval '.database.path' "${config_file}")
 
     if [[ "${user_db_path}" == "null" ]]; then
-        local previous_db_path="/media/frigate/frigate.db"
+        local old_db_path="/media/frigate/frigate.db"
         local new_db_dir="/config"
-        if [[ -f "${previous_db_path}" ]]; then
+        if [[ -f "${old_db_path}" ]]; then
             if mountpoint --quiet "${new_db_dir}"; then
                 # /config is a mount point, move the db
-                echo "[INFO] Moving db from '${previous_db_path}' to the '${new_db_dir}' dir..."
+                echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
                 # Move all files that starts with frigate.db to the new directory
-                mv -vf "${previous_db_path}"* "${new_db_dir}"
+                mv -vf "${old_db_path}"* "${new_db_dir}"
             else
-                echo "[ERROR] Trying to migrate the db path from '${previous_db_path}' to the '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir"
+                echo "[ERROR] Trying to migrate the database path from '${old_db_path}' to '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir"
                 return 1
             fi
         fi

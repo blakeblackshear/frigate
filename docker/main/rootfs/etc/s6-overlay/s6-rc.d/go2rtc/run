@@ -89,7 +89,7 @@ function migrate_from_homeassistant_config() {
 
         if [[ -f "${old_db_path}" ]]; then
             new_db_dir="$(dirname "${db_path}")"
-            echo "[INFO] Migrating database from '${old_db_path}' to '${db_path}'..."
+            echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
             mv -vf "${old_db_path}"* "${new_db_dir}"
         fi
     fi
