@@ -3,7 +3,7 @@ location = {{ .base_path }} {
     return 302 {{ .base_path }}/;
 }
 
-location /{{ .base_path }}/ {
+location ^~ /{{ .base_path }}/ {
     # remove base_url from the path before passing upstream
     rewrite ^/{{ .base_path }}/(.*) /$1 break;
 
