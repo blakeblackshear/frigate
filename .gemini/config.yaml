@@ -1,0 +1,40 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: RepoConfig
+description: Configuration for Gemini Code Assist on a repository. All fields are optional and have default values.
+type: object
+properties:
+  have_fun:
+    type: boolean
+    description: Enables fun features such as a poem in the initial pull request summary. Default: true.
+  code_review:
+    type: object
+    description: Configuration for code reviews. All fields are optional and have default values.
+    properties:
+      disable:
+        type: boolean
+        description: Disables Gemini from acting on pull requests. Default: false.
+      comment_severity_threshold:
+        type: string
+        enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        description: The minimum severity of review comments to consider. Default: MEDIUM.
+      max_review_comments:
+        type: integer
+        format: int64
+        description: The maximum number of review comments to consider. Use -1 for unlimited. Default: -1.
+      pull_request_opened:
+        type: object
+        description: Configuration for pull request opened events. All fields are optional and have default values.
+        properties:
+          help:
+            type: boolean
+            description: Posts a help message on pull request open. Default: false.
+          summary:
+            type: boolean
+            description: Posts a pull request summary on the pull request open. Default: true.
+          code_review:
+            type: boolean
+            description: Posts a code review on pull request open. Default: true.
