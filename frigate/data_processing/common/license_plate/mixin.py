@@ -8,12 +8,11 @@ from typing import List, Optional, Tuple
 
 import cv2
 import numpy as np
-import requests
 from Levenshtein import distance
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
-from frigate.const import FRIGATE_LOCALHOST
+from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
@@ -1059,22 +1058,15 @@ class LicensePlateProcessingMixin:
         )
 
         # Send the result to the API
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": sub_label,
-                "subLabelScore": avg_confidence,
-            },
+        self.sub_label_publisher.publish(
+            EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
         )
-
-        if resp.status_code == 200:
-            self.detected_license_plates[id] = {
-                "plate": top_plate,
-                "char_confidences": top_char_confidences,
-                "area": top_area,
-                "obj_data": obj_data,
-            }
+        self.detected_license_plates[id] = {
+            "plate": top_plate,
+            "char_confidences": top_char_confidences,
+            "area": top_area,
+            "obj_data": obj_data,
+        }
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
