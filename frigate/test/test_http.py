@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import unittest
+from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 from peewee_migrate import Router
@@ -11,6 +12,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.models import Event, Recordings, Timeline
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -243,6 +245,7 @@ class TestHttp(unittest.TestCase):
             assert len(events) == 1
 
     def test_set_delete_sub_label(self):
+        mock_event_updater = Mock(spec=EventMetadataPublisher)
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -252,10 +255,17 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
+            mock_event_updater,
         )
         id = "123456.random"
         sub_label = "sub"
+
+        def update_event(topic, payload):
+            event = Event.get(id=id)
+            event.sub_label = payload[1]
+            event.save()
+
+        mock_event_updater.publish.side_effect = update_event
 
         with TestClient(app) as client:
             _insert_mock_event(id)
@@ -281,6 +291,7 @@ class TestHttp(unittest.TestCase):
             assert event["sub_label"] == None
 
     def test_sub_label_list(self):
+        mock_event_updater = Mock(spec=EventMetadataPublisher)
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -290,10 +301,17 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
+            mock_event_updater,
         )
         id = "123456.random"
         sub_label = "sub"
+
+        def update_event(topic, payload):
+            event = Event.get(id=id)
+            event.sub_label = payload[1]
+            event.save()
+
+        mock_event_updater.publish.side_effect = update_event
 
         with TestClient(app) as client:
             _insert_mock_event(id)
