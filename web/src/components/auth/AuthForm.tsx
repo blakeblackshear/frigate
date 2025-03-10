@@ -20,24 +20,23 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AuthContext } from "@/context/auth-context";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const { login } = React.useContext(AuthContext);
 
   const formSchema = z.object({
-    user: z.string(),
-    password: z.string(),
+    user: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required"),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
-    defaultValues: {
-      user: "",
-      password: "",
-    },
+    defaultValues: { user: "", password: "" },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -50,11 +49,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           password: values.password,
         },
         {
-          headers: {
-            "X-CSRF-TOKEN": 1,
-          },
+          headers: { "X-CSRF-TOKEN": 1 },
         },
       );
+      const profileRes = await axios.get("/profile", { withCredentials: true });
+      login({
+        username: profileRes.data.username,
+        role: profileRes.data.role || "viewer",
+      });
       window.location.href = baseUrl;
     } catch (error) {
       if (axios.isAxiosError(error)) {

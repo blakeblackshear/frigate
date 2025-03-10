@@ -28,13 +28,13 @@ export default function NewReviewData({
 
   return (
     <div className={className}>
-      <div className="pointer-events-auto mr-[65px] flex items-center justify-center md:mr-[115px]">
+      <div className="pointer-events-auto mr-[65px] mt-8 flex items-center justify-center md:mr-[115px]">
         <Button
           className={cn(
             hasUpdate
               ? "duration-500 animate-in slide-in-from-top"
               : "invisible",
-            "mx-auto mt-5 bg-gray-400 text-center text-white",
+            "mx-auto bg-gray-400 text-center text-white",
           )}
           aria-label="View new review items"
           onClick={() => {

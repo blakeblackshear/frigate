@@ -23,8 +23,11 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
         if (
             prev_event["top_score"] != current_event["top_score"]
             or prev_event["entered_zones"] != current_event["entered_zones"]
-            or prev_event["thumbnail"] != current_event["thumbnail"]
             or prev_event["end_time"] != current_event["end_time"]
+            or prev_event["average_estimated_speed"]
+            != current_event["average_estimated_speed"]
+            or prev_event["velocity_angle"] != current_event["velocity_angle"]
+            or prev_event["path_data"] != current_event["path_data"]
         ):
             return True
     return False
@@ -184,7 +187,7 @@ class EventProcessor(threading.Thread):
             )
 
             # keep these from being set back to false because the event
-            # may have started while recordings and snapshots were enabled
+            # may have started while recordings/snapshots/alerts/detections were enabled
             # this would be an issue for long running events
             if self.events_in_process[event_data["id"]]["has_clip"]:
                 event_data["has_clip"] = True
@@ -198,7 +201,7 @@ class EventProcessor(threading.Thread):
                 Event.start_time: start_time,
                 Event.end_time: end_time,
                 Event.zones: list(event_data["entered_zones"]),
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.model_hash: first_detector.model.model_hash,
@@ -210,8 +213,11 @@ class EventProcessor(threading.Thread):
                     "score": score,
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
+                    "average_estimated_speed": event_data["average_estimated_speed"],
+                    "velocity_angle": event_data["velocity_angle"],
                     "type": "object",
                     "max_severity": event_data.get("max_severity"),
+                    "path_data": event_data.get("path_data"),
                 },
             }
 
@@ -251,7 +257,7 @@ class EventProcessor(threading.Thread):
                 Event.camera: event_data["camera"],
                 Event.start_time: event_data["start_time"],
                 Event.end_time: event_data["end_time"],
-                Event.thumbnail: event_data["thumbnail"],
+                Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],

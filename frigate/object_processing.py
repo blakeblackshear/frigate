@@ -1,28 +1,28 @@
 import datetime
 import json
 import logging
-import os
 import queue
 import threading
-from collections import Counter, defaultdict
+from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Callable, Optional
 
 import cv2
 import numpy as np
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
+    CameraMqttConfig,
     FrigateConfig,
-    MqttConfig,
     RecordConfig,
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.const import UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
@@ -51,8 +51,6 @@ class CameraState:
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
         self.best_objects: dict[str, TrackedObject] = {}
-        self.object_counts = defaultdict(int)
-        self.active_object_counts = defaultdict(int)
         self.tracked_objects: dict[str, TrackedObject] = {}
         self.frame_cache = {}
         self.zone_objects = defaultdict(list)
@@ -64,6 +62,7 @@ class CameraState:
         self.previous_frame_id = None
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.prev_enabled = self.camera_config.enabled
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -162,7 +161,12 @@ class CameraState:
                     box[2],
                     box[3],
                     text,
-                    f"{obj['score']:.0%} {int(obj['area'])}",
+                    f"{obj['score']:.0%} {int(obj['area'])}"
+                    + (
+                        f" {float(obj['current_estimated_speed']):.1f}"
+                        if obj["current_estimated_speed"] != 0
+                        else ""
+                    ),
                     thickness=thickness,
                     color=color,
                 )
@@ -256,6 +260,7 @@ class CameraState:
             new_obj = tracked_objects[id] = TrackedObject(
                 self.config.model,
                 self.camera_config,
+                self.config.ui,
                 self.frame_cache,
                 current_detections[id],
             )
@@ -307,6 +312,7 @@ class CameraState:
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
         camera_activity: dict[str, list[any]] = {
+            "enabled": True,
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }
@@ -338,6 +344,7 @@ class CameraState:
                         "ratio": obj.obj_data["ratio"],
                         "score": obj.obj_data["score"],
                         "sub_label": sub_label,
+                        "current_zones": obj.current_zones,
                     }
                 )
 
@@ -377,78 +384,6 @@ class CameraState:
         for c in self.callbacks["camera_activity"]:
             c(self.name, camera_activity)
 
-        # update overall camera state for each object type
-        obj_counter = Counter(
-            obj.obj_data["label"]
-            for obj in tracked_objects.values()
-            if not obj.false_positive
-        )
-
-        active_obj_counter = Counter(
-            obj.obj_data["label"]
-            for obj in tracked_objects.values()
-            if not obj.false_positive and obj.active
-        )
-
-        # keep track of all labels detected for this camera
-        total_label_count = 0
-        total_active_label_count = 0
-
-        # report on all detected objects
-        for obj_name, count in obj_counter.items():
-            total_label_count += count
-
-            if count != self.object_counts[obj_name]:
-                self.object_counts[obj_name] = count
-                for c in self.callbacks["object_status"]:
-                    c(self.name, obj_name, count)
-
-        # update the active count on all detected objects
-        # To ensure we emit 0's if all objects are stationary, we need to loop
-        # over the set of all objects, not just active ones.
-        for obj_name in set(obj_counter):
-            count = active_obj_counter[obj_name]
-            total_active_label_count += count
-
-            if count != self.active_object_counts[obj_name]:
-                self.active_object_counts[obj_name] = count
-                for c in self.callbacks["active_object_status"]:
-                    c(self.name, obj_name, count)
-
-        # publish for all labels detected for this camera
-        if total_label_count != self.object_counts.get("all"):
-            self.object_counts["all"] = total_label_count
-            for c in self.callbacks["object_status"]:
-                c(self.name, "all", total_label_count)
-
-        # publish active label counts for this camera
-        if total_active_label_count != self.active_object_counts.get("all"):
-            self.active_object_counts["all"] = total_active_label_count
-            for c in self.callbacks["active_object_status"]:
-                c(self.name, "all", total_active_label_count)
-
-        # expire any objects that are >0 and no longer detected
-        expired_objects = [
-            obj_name
-            for obj_name, count in self.object_counts.items()
-            if count > 0 and obj_name not in obj_counter
-        ]
-        for obj_name in expired_objects:
-            # Ignore the artificial all label
-            if obj_name == "all":
-                continue
-
-            self.object_counts[obj_name] = 0
-            for c in self.callbacks["object_status"]:
-                c(self.name, obj_name, 0)
-            # Only publish if the object was previously active.
-            if self.active_object_counts[obj_name] > 0:
-                for c in self.callbacks["active_object_status"]:
-                    c(self.name, obj_name, 0)
-                self.active_object_counts[obj_name] = 0
-            for c in self.callbacks["snapshot"]:
-                c(self.name, self.best_objects[obj_name], frame_name)
-
         # cleanup thumbnail frame cache
         current_thumb_frames = {
             obj.thumbnail_data["frame_time"]
@@ -480,6 +415,11 @@ class CameraState:
 
             self.previous_frame_id = frame_name
 
+    def shutdown(self) -> None:
+        for obj in self.tracked_objects.values():
+            if not obj.obj_data.get("end_time"):
+                obj.write_thumbnail_to_disk()
+
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(
@@ -499,6 +439,8 @@ class TrackedObjectProcessor(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
+
+        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
 
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
@@ -546,7 +488,7 @@ class TrackedObjectProcessor(threading.Thread):
                     EventStateEnum.update,
                     camera,
                     frame_name,
-                    obj.to_dict(include_thumbnail=True),
+                    obj.to_dict(),
                 )
             )
 
@@ -558,41 +500,13 @@ class TrackedObjectProcessor(threading.Thread):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
 
+            # write thumbnail to disk if it will be saved as an event
+            if obj.has_snapshot or obj.has_clip:
+                obj.write_thumbnail_to_disk()
+
             # write the snapshot to disk
             if obj.has_snapshot:
-                snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
-                jpg_bytes = obj.get_jpg_bytes(
-                    timestamp=snapshot_config.timestamp,
-                    bounding_box=snapshot_config.bounding_box,
-                    crop=snapshot_config.crop,
-                    height=snapshot_config.height,
-                    quality=snapshot_config.quality,
-                )
-                if jpg_bytes is None:
-                    logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
-                else:
-                    with open(
-                        os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"),
-                        "wb",
-                    ) as j:
-                        j.write(jpg_bytes)
-
-                # write clean snapshot if enabled
-                if snapshot_config.clean_copy:
-                    png_bytes = obj.get_clean_png()
-                    if png_bytes is None:
-                        logger.warning(
-                            f"Unable to save clean snapshot for {obj.obj_data['id']}."
-                        )
-                    else:
-                        with open(
-                            os.path.join(
-                                CLIPS_DIR,
-                                f"{camera}-{obj.obj_data['id']}-clean.png",
-                            ),
-                            "wb",
-                        ) as p:
-                            p.write(png_bytes)
+                obj.write_snapshot_to_disk()
 
             if not obj.false_positive:
                 message = {
@@ -609,14 +523,15 @@ class TrackedObjectProcessor(threading.Thread):
                     EventStateEnum.end,
                     camera,
                     frame_name,
-                    obj.to_dict(include_thumbnail=True),
+                    obj.to_dict(),
                 )
             )
 
         def snapshot(camera, obj: TrackedObject, frame_name: str):
-            mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
+            mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
-                jpg_bytes = obj.get_jpg_bytes(
+                jpg_bytes = obj.get_img_bytes(
+                    ext="jpg",
                     timestamp=mqtt_config.timestamp,
                     bounding_box=mqtt_config.bounding_box,
                     crop=mqtt_config.crop,
@@ -635,14 +550,6 @@ class TrackedObjectProcessor(threading.Thread):
                         retain=True,
                     )
 
-        def object_status(camera, object_name, status):
-            self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
-
-        def active_object_status(camera, object_name, status):
-            self.dispatcher.publish(
-                f"{camera}/{object_name}/active", status, retain=False
-            )
-
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
 
@@ -659,8 +566,6 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state.on("update", update)
             camera_state.on("end", end)
             camera_state.on("snapshot", snapshot)
-            camera_state.on("object_status", object_status)
-            camera_state.on("active_object_status", active_object_status)
             camera_state.on("camera_activity", camera_activity)
             self.camera_states[camera] = camera_state
 
@@ -779,8 +684,63 @@ class TrackedObjectProcessor(threading.Thread):
         """Returns the latest frame time for a given camera."""
         return self.camera_states[camera].current_frame_time
 
+    def force_end_all_events(self, camera: str, camera_state: CameraState):
+        """Ends all active events on camera when disabling."""
+        last_frame_name = camera_state.previous_frame_id
+        for obj_id, obj in list(camera_state.tracked_objects.items()):
+            if "end_time" not in obj.obj_data:
+                logger.debug(f"Camera {camera} disabled, ending active event {obj_id}")
+                obj.obj_data["end_time"] = datetime.datetime.now().timestamp()
+                # end callbacks
+                for callback in camera_state.callbacks["end"]:
+                    callback(camera, obj, last_frame_name)
+
+                # camera activity callbacks
+                for callback in camera_state.callbacks["camera_activity"]:
+                    callback(
+                        camera,
+                        {"enabled": False, "motion": 0, "objects": []},
+                    )
+
     def run(self):
         while not self.stop_event.is_set():
+            # check for config updates
+            while True:
+                (
+                    updated_enabled_topic,
+                    updated_enabled_config,
+                ) = self.config_enabled_subscriber.check_for_update()
+
+                if not updated_enabled_topic:
+                    break
+
+                camera_name = updated_enabled_topic.rpartition("/")[-1]
+                self.config.cameras[
+                    camera_name
+                ].enabled = updated_enabled_config.enabled
+
+                if self.camera_states[camera_name].prev_enabled is None:
+                    self.camera_states[
+                        camera_name
+                    ].prev_enabled = updated_enabled_config.enabled
+
+            # manage camera disabled state
+            for camera, config in self.config.cameras.items():
+                if not config.enabled_in_config:
+                    continue
+
+                current_enabled = config.enabled
+                camera_state = self.camera_states[camera]
+
+                if camera_state.prev_enabled and not current_enabled:
+                    logger.debug(f"Not processing objects for disabled camera {camera}")
+                    self.force_end_all_events(camera, camera_state)
+
+                camera_state.prev_enabled = current_enabled
+
+                if not current_enabled:
+                    continue
+
             try:
                 (
                     camera,
@@ -791,6 +751,10 @@ class TrackedObjectProcessor(threading.Thread):
                     regions,
                 ) = self.tracked_objects_queue.get(True, 1)
             except queue.Empty:
+                continue
+
+            if not self.config.cameras[camera].enabled:
+                logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
             camera_state = self.camera_states[camera]
@@ -817,124 +781,6 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-            # update zone counts for each label
-            # for each zone in the current camera
-            for zone in self.config.cameras[camera].zones.keys():
-                # count labels for the camera in the zone
-                obj_counter = Counter(
-                    obj.obj_data["label"]
-                    for obj in camera_state.tracked_objects.values()
-                    if zone in obj.current_zones and not obj.false_positive
-                )
-                active_obj_counter = Counter(
-                    obj.obj_data["label"]
-                    for obj in camera_state.tracked_objects.values()
-                    if (
-                        zone in obj.current_zones
-                        and not obj.false_positive
-                        and obj.active
-                    )
-                )
-                total_label_count = 0
-                total_active_label_count = 0
-
-                # update counts and publish status
-                for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
-                    # Ignore the artificial all label
-                    if label == "all":
-                        continue
-
-                    # if we have previously published a count for this zone/label
-                    zone_label = self.zone_data[zone][label]
-                    active_zone_label = self.active_zone_data[zone][label]
-                    if camera in zone_label:
-                        current_count = sum(zone_label.values())
-                        current_active_count = sum(active_zone_label.values())
-                        zone_label[camera] = (
-                            obj_counter[label] if label in obj_counter else 0
-                        )
-                        active_zone_label[camera] = (
-                            active_obj_counter[label]
-                            if label in active_obj_counter
-                            else 0
-                        )
-                        new_count = sum(zone_label.values())
-                        new_active_count = sum(active_zone_label.values())
-                        if new_count != current_count:
-                            self.dispatcher.publish(
-                                f"{zone}/{label}",
-                                new_count,
-                                retain=False,
-                            )
-                        if new_active_count != current_active_count:
-                            self.dispatcher.publish(
-                                f"{zone}/{label}/active",
-                                new_active_count,
-                                retain=False,
-                            )
-
-                        # Set the count for the /zone/all topic.
-                        total_label_count += new_count
-                        total_active_label_count += new_active_count
-
-                    # if this is a new zone/label combo for this camera
-                    else:
-                        if label in obj_counter:
-                            zone_label[camera] = obj_counter[label]
-                            active_zone_label[camera] = active_obj_counter[label]
-                            self.dispatcher.publish(
-                                f"{zone}/{label}",
-                                obj_counter[label],
-                                retain=False,
-                            )
-                            self.dispatcher.publish(
-                                f"{zone}/{label}/active",
-                                active_obj_counter[label],
-                                retain=False,
-                            )
-
-                            # Set the count for the /zone/all topic.
-                            total_label_count += obj_counter[label]
-                            total_active_label_count += active_obj_counter[label]
-
-                # if we have previously published a count for this zone all labels
-                zone_label = self.zone_data[zone]["all"]
-                active_zone_label = self.active_zone_data[zone]["all"]
-                if camera in zone_label:
-                    current_count = sum(zone_label.values())
-                    current_active_count = sum(active_zone_label.values())
-                    zone_label[camera] = total_label_count
-                    active_zone_label[camera] = total_active_label_count
-                    new_count = sum(zone_label.values())
-                    new_active_count = sum(active_zone_label.values())
-
-                    if new_count != current_count:
-                        self.dispatcher.publish(
-                            f"{zone}/all",
-                            new_count,
-                            retain=False,
-                        )
-                    if new_active_count != current_active_count:
-                        self.dispatcher.publish(
-                            f"{zone}/all/active",
-                            new_active_count,
-                            retain=False,
-                        )
-                # if this is a new zone all label for this camera
-                else:
-                    zone_label[camera] = total_label_count
-                    active_zone_label[camera] = total_active_label_count
-                    self.dispatcher.publish(
-                        f"{zone}/all",
-                        total_label_count,
-                        retain=False,
-                    )
-                    self.dispatcher.publish(
-                        f"{zone}/all/active",
-                        total_active_label_count,
-                        retain=False,
-                    )
-
             # cleanup event finished queue
             while not self.stop_event.is_set():
                 update = self.event_end_subscriber.check_for_update(timeout=0.01)
@@ -945,8 +791,14 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera, _ = update
                 self.camera_states[camera].finished(event_id)
 
+        # shut down camera states
+        for state in self.camera_states.values():
+            state.shutdown()
+
         self.requestor.stop()
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()
+        self.config_enabled_subscriber.stop()
+
         logger.info("Exiting object processor...")

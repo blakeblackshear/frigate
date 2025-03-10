@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -108,6 +109,28 @@ def review(params: ReviewQueryParams = Depends()):
     )
 
     return JSONResponse(content=[r for r in review])
+
+
+@router.get("/review_ids", response_model=list[ReviewSegmentResponse])
+def review_ids(ids: str):
+    ids = ids.split(",")
+
+    if not ids:
+        return JSONResponse(
+            content=({"success": False, "message": "Valid list of ids must be sent"}),
+            status_code=400,
+        )
+
+    try:
+        reviews = (
+            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
+        )
+        return JSONResponse(list(reviews))
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Review segments not found"}),
+            status_code=400,
+        )
 
 
 @router.get("/review/summary", response_model=ReviewSummaryResponse)
@@ -321,7 +344,11 @@ def set_multiple_reviewed(body: ReviewModifyMultipleBody):
     )
 
 
-@router.post("/reviews/delete", response_model=GenericResponse)
+@router.post(
+    "/reviews/delete",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_reviews(body: ReviewModifyMultipleBody):
     list_of_ids = body.ids
     reviews = (

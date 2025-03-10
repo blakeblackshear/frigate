@@ -64,7 +64,9 @@ class PtzAutotrackConfig(FrigateBaseModel):
             raise ValueError("Invalid type for movement_weights")
 
         if len(weights) != 5:
-            raise ValueError("movement_weights must have exactly 5 floats")
+            raise ValueError(
+                "movement_weights must have exactly 5 floats, remove this line from your config and run autotracking calibration"
+            )
 
         return weights
 

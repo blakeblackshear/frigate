@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { LuLoader2 } from "react-icons/lu";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export default function ActivityIndicator({ className = "w-full", size = 30 }) {
   return (
@@ -7,7 +7,7 @@ export default function ActivityIndicator({ className = "w-full", size = 30 }) {
       className={cn("flex items-center justify-center", className)}
       aria-label="Loading…"
     >
-      <LuLoader2 className="animate-spin" size={size} />
+      <AiOutlineLoading3Quarters className="animate-spin" size={size} />
     </div>
   );
 }

@@ -38,12 +38,37 @@ export default function UiSettingsView() {
           });
         })
         .catch((error) => {
-          toast.error(
-            `Failed to clear stored layout: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to clear stored layout: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     });
+  }, [config]);
+
+  const clearStreamingSettings = useCallback(async () => {
+    if (!config) {
+      return [];
+    }
+
+    await delData(`streaming-settings`)
+      .then(() => {
+        toast.success(`Cleared streaming settings for all camera groups.`, {
+          position: "top-center",
+        });
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to clear streaming settings: ${errorMessage}`, {
+          position: "top-center",
+        });
+      });
   }, [config]);
 
   useEffect(() => {
@@ -84,11 +109,15 @@ export default function UiSettingsView() {
                   Automatic Live View
                 </Label>
               </div>
-              <div className="my-2 text-sm text-muted-foreground">
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>
                   Automatically switch to a camera's live view when activity is
                   detected. Disabling this option causes static camera images on
-                  the Live dashboard to only update once per minute.
+                  the your dashboards to only update once per minute.{" "}
+                  <em>
+                    This is a global setting but can be overridden on each
+                    camera <strong>in camera groups only</strong>.
+                  </em>
                 </p>
               </div>
             </div>
@@ -103,7 +132,7 @@ export default function UiSettingsView() {
                   Play Alert Videos
                 </Label>
               </div>
-              <div className="my-2 text-sm text-muted-foreground">
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>
                   By default, recent alerts on the Live dashboard play as small
                   looping videos. Disable this option to only show a static
@@ -114,10 +143,10 @@ export default function UiSettingsView() {
           </div>
 
           <div className="my-3 flex w-full flex-col space-y-6">
-            <div className="mt-2 space-y-6">
+            <div className="mt-2 space-y-3">
               <div className="space-y-0.5">
                 <div className="text-md">Stored Layouts</div>
-                <div className="my-2 text-sm text-muted-foreground">
+                <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                   <p>
                     The layout of cameras in a camera group can be
                     dragged/resized. The positions are stored in your browser's
@@ -130,6 +159,24 @@ export default function UiSettingsView() {
                 onClick={clearStoredLayouts}
               >
                 Clear All Layouts
+              </Button>
+            </div>
+
+            <div className="mt-2 space-y-3">
+              <div className="space-y-0.5">
+                <div className="text-md">Camera Group Streaming Settings</div>
+                <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                  <p>
+                    Streaming settings for each camera group are stored in your
+                    browser's local storage.
+                  </p>
+                </div>
+              </div>
+              <Button
+                aria-label="Clear all group streaming settings"
+                onClick={clearStreamingSettings}
+              >
+                Clear All Streaming Settings
               </Button>
             </div>
 

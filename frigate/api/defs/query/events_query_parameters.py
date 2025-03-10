@@ -25,6 +25,8 @@ class EventsQueryParams(BaseModel):
     favorites: Optional[int] = None
     min_score: Optional[float] = None
     max_score: Optional[float] = None
+    min_speed: Optional[float] = None
+    max_speed: Optional[float] = None
     is_submitted: Optional[int] = None
     min_length: Optional[float] = None
     max_length: Optional[float] = None
@@ -51,6 +53,8 @@ class EventsSearchQueryParams(BaseModel):
     timezone: Optional[str] = "utc"
     min_score: Optional[float] = None
     max_score: Optional[float] = None
+    min_speed: Optional[float] = None
+    max_speed: Optional[float] = None
     sort: Optional[str] = None
 
 

@@ -7,7 +7,12 @@ import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
 import { ExportMode, GeneralFilter } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
-import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
+import {
+  RecordingsSummary,
+  ReviewFilter,
+  ReviewSeverity,
+  ReviewSummary,
+} from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import { toast } from "sonner";
@@ -36,6 +41,7 @@ type MobileReviewSettingsDrawerProps = {
   mode: ExportMode;
   showExportPreview: boolean;
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   allLabels: string[];
   allZones: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
@@ -54,6 +60,7 @@ export default function MobileReviewSettingsDrawer({
   mode,
   showExportPreview,
   reviewSummary,
+  recordingsSummary,
   allLabels,
   allZones,
   onUpdateFilter,
@@ -99,16 +106,13 @@ export default function MobileReviewSettingsDrawer({
         }
       })
       .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(`Failed to start export: ${error.message}`, {
-            position: "top-center",
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to start export: ${errorMessage}`, {
+          position: "top-center",
+        });
       });
   }, [camera, name, range, setRange, setName, setMode]);
 
@@ -211,6 +215,7 @@ export default function MobileReviewSettingsDrawer({
         <div className="flex w-full flex-row justify-center">
           <ReviewActivityCalendar
             reviewSummary={reviewSummary}
+            recordingsSummary={recordingsSummary}
             selectedDay={
               filter?.after == undefined
                 ? undefined

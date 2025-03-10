@@ -216,11 +216,14 @@ export default function InputWithTags({
         type == "after" ||
         type == "time_range" ||
         type == "min_score" ||
-        type == "max_score"
+        type == "max_score" ||
+        type == "min_speed" ||
+        type == "max_speed"
       ) {
         const newFilters = { ...filters };
         let timestamp = 0;
         let score = 0;
+        let speed = 0;
 
         switch (type) {
           case "before":
@@ -292,6 +295,40 @@ export default function InputWithTags({
                 return;
               }
               newFilters[type] = score / 100;
+            }
+            break;
+          case "min_speed":
+          case "max_speed":
+            speed = parseFloat(value);
+            if (score >= 0) {
+              // Check for conflicts between min_speed and max_speed
+              if (
+                type === "min_speed" &&
+                filters.max_speed !== undefined &&
+                speed > filters.max_speed
+              ) {
+                toast.error(
+                  "The 'min_speed' must be less than or equal to the 'max_speed'.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              if (
+                type === "max_speed" &&
+                filters.min_speed !== undefined &&
+                speed < filters.min_speed
+              ) {
+                toast.error(
+                  "The 'max_speed' must be greater than or equal to the 'min_speed'.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              newFilters[type] = speed;
             }
             break;
           case "time_range":
@@ -369,6 +406,10 @@ export default function InputWithTags({
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
       return Math.round(Number(filterValues) * 100).toString() + "%";
+    } else if (filterType === "min_speed" || filterType === "max_speed") {
+      return (
+        filterValues + (config?.ui.unit_system == "metric" ? " kph" : " mph")
+      );
     } else if (
       filterType === "has_clip" ||
       filterType === "has_snapshot" ||
@@ -397,7 +438,11 @@ export default function InputWithTags({
         ((filterType === "min_score" || filterType === "max_score") &&
           !isNaN(Number(trimmedValue)) &&
           Number(trimmedValue) >= 50 &&
-          Number(trimmedValue) <= 100)
+          Number(trimmedValue) <= 100) ||
+        ((filterType === "min_speed" || filterType === "max_speed") &&
+          !isNaN(Number(trimmedValue)) &&
+          Number(trimmedValue) >= 1 &&
+          Number(trimmedValue) <= 150)
       ) {
         createFilter(
           filterType,

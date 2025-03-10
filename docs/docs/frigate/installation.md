@@ -80,12 +80,12 @@ The Frigate container also stores logs in shm, which can take up to **40MB**, so
 You can calculate the **minimum** shm size for each camera with the following formula using the resolution specified for detect:
 
 ```console
-# Replace <width> and <height>
+# Template for one camera without logs, replace <width> and <height>
 $ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 20 + 270480) / 1048576))'
 
 # Example for 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576)) + 40'
-46.63MB
+$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576 + 40))'
+66.63MB
 
 # Example for eight cameras detecting at 1280x720, including logs
 $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 20 + 270480) / 1048576) * 8 + 40))'
@@ -117,7 +117,7 @@ For other installations, follow these steps for installation:
 
 #### Setup
 
-To set up Frigate, follow the default installation instructions, but use a Docker image with the `-h8l` suffix, for example: `ghcr.io/blakeblackshear/frigate:stable-h8l`
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 
@@ -250,7 +250,7 @@ The official docker image tags for the current stable version are:
 The community supported docker image tags for the current stable version are:
 
 - `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
-- `stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
+- `stable-tensorrt-jp6` - Frigate build optimized for nvidia Jetson devices running Jetpack 6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
 - `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
   - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat

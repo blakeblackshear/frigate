@@ -58,6 +58,7 @@ export default function BirdseyeLivePlayer({
         height={birdseyeConfig.height}
         containerRef={containerRef}
         playbackEnabled={true}
+        useWebGL={true}
       />
     );
   } else {

@@ -8,9 +8,25 @@
   "overrideCommand": false,
   "remoteUser": "vscode",
   "features": {
-    "ghcr.io/devcontainers/features/common-utils:1": {}
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+    // Uncomment the following lines to use ONNX Runtime with CUDA support
+    // "ghcr.io/devcontainers/features/nvidia-cuda:1": {
+    //   "installCudnn": true,
+    //   "installNvtx": true,
+    //   "installToolkit": true,
+    //   "cudaVersion": "12.5",
+    //   "cudnnVersion": "9.4.0.58"
+    // },
+    // "./features/onnxruntime-gpu": {}
   },
-  "forwardPorts": [8971, 5000, 5001, 5173, 8554, 8555],
+  "forwardPorts": [
+    8971,
+    5000,
+    5001,
+    5173,
+    8554,
+    8555
+  ],
   "portsAttributes": {
     "8971": {
       "label": "External NGINX",
@@ -64,10 +80,18 @@
         "editor.formatOnType": true,
         "python.testing.pytestEnabled": false,
         "python.testing.unittestEnabled": true,
-        "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
+        "python.testing.unittestArgs": [
+          "-v",
+          "-s",
+          "./frigate/test"
+        ],
         "files.trimTrailingWhitespace": true,
-        "eslint.workingDirectories": ["./web"],
-        "isort.args": ["--settings-path=./pyproject.toml"],
+        "eslint.workingDirectories": [
+          "./web"
+        ],
+        "isort.args": [
+          "--settings-path=./pyproject.toml"
+        ],
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.formatOnSave": true,
@@ -86,8 +110,15 @@
           ],
           "editor.tabSize": 2
         },
-        "cSpell.ignoreWords": ["rtmp"],
-        "cSpell.words": ["preact", "astype", "hwaccel", "mqtt"]
+        "cSpell.ignoreWords": [
+          "rtmp"
+        ],
+        "cSpell.words": [
+          "preact",
+          "astype",
+          "hwaccel",
+          "mqtt"
+        ]
       }
     }
   }

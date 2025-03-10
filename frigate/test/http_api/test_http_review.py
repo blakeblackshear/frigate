@@ -504,7 +504,7 @@ class TestHttpReview(BaseTestHttp):
     def test_post_reviews_delete_no_body(self):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
-            response = client.post("/reviews/delete")
+            response = client.post("/reviews/delete", headers={"remote-role": "admin"})
             # Missing ids
             assert response.status_code == 422
 
@@ -512,7 +512,9 @@ class TestHttpReview(BaseTestHttp):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             body = {"ids": [""]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             # Missing ids
             assert response.status_code == 422
 
@@ -521,7 +523,9 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": ["1"]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
@@ -536,7 +540,9 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": [id]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
@@ -558,7 +564,9 @@ class TestHttpReview(BaseTestHttp):
             assert len(recordings_ids_in_db_before) == 2
 
             body = {"ids": ids}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
