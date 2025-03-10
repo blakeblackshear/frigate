@@ -116,6 +116,7 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -982,6 +983,10 @@ function FrigateCameraFeatures({
   const { payload: autotrackingState, send: sendAutotracking } =
     useAutotrackingState(camera.name);
 
+  // roles
+
+  const isAdmin = useIsAdmin();
+
   // manual event
 
   const recordingEventIdRef = useRef<string | null>(null);
@@ -1080,65 +1085,71 @@ function FrigateCameraFeatures({
   if (isDesktop || isTablet) {
     return (
       <>
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={enabledState == "ON" ? LuPower : LuPowerOff}
-          isActive={enabledState == "ON"}
-          title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
-          onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
-          disabled={false}
-        />
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
-          isActive={detectState == "ON"}
-          title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
-          onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
-          disabled={!cameraEnabled}
-        />
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={recordState == "ON" ? LuVideo : LuVideoOff}
-          isActive={recordState == "ON"}
-          title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
-          onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
-          disabled={!cameraEnabled}
-        />
-        <CameraFeatureToggle
-          className="p-2 md:p-0"
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
-          isActive={snapshotState == "ON"}
-          title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
-          onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
-          disabled={!cameraEnabled}
-        />
-        {audioDetectEnabled && (
-          <CameraFeatureToggle
-            className="p-2 md:p-0"
-            variant={fullscreen ? "overlay" : "primary"}
-            Icon={audioState == "ON" ? LuEar : LuEarOff}
-            isActive={audioState == "ON"}
-            title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
-            onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
-            disabled={!cameraEnabled}
-          />
-        )}
-        {autotrackingEnabled && (
-          <CameraFeatureToggle
-            className="p-2 md:p-0"
-            variant={fullscreen ? "overlay" : "primary"}
-            Icon={autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff}
-            isActive={autotrackingState == "ON"}
-            title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
-            onClick={() =>
-              sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
-            }
-            disabled={!cameraEnabled}
-          />
+        {isAdmin && (
+          <>
+            <CameraFeatureToggle
+              className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={enabledState == "ON" ? LuPower : LuPowerOff}
+              isActive={enabledState == "ON"}
+              title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
+              onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
+              disabled={false}
+            />
+            <CameraFeatureToggle
+              className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
+              isActive={detectState == "ON"}
+              title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+              onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+              disabled={!cameraEnabled}
+            />
+            <CameraFeatureToggle
+              className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={recordState == "ON" ? LuVideo : LuVideoOff}
+              isActive={recordState == "ON"}
+              title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+              onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
+              disabled={!cameraEnabled}
+            />
+            <CameraFeatureToggle
+              className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
+              isActive={snapshotState == "ON"}
+              title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+              onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
+              disabled={!cameraEnabled}
+            />
+            {audioDetectEnabled && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={audioState == "ON" ? LuEar : LuEarOff}
+                isActive={audioState == "ON"}
+                title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+                onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+                disabled={!cameraEnabled}
+              />
+            )}
+            {autotrackingEnabled && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={
+                  autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff
+                }
+                isActive={autotrackingState == "ON"}
+                title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
+                onClick={() =>
+                  sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+                }
+                disabled={!cameraEnabled}
+              />
+            )}
+          </>
         )}
         <CameraFeatureToggle
           className={cn(
@@ -1421,55 +1432,60 @@ function FrigateCameraFeatures({
       </DrawerTrigger>
       <DrawerContent className="rounded-2xl px-2 py-4">
         <div className="mt-2 flex flex-col gap-2">
-          <FilterSwitch
-            label="Camera Enabled"
-            isChecked={enabledState == "ON"}
-            onCheckedChange={() =>
-              sendEnabled(enabledState == "ON" ? "OFF" : "ON")
-            }
-          />
-          <FilterSwitch
-            label="Object Detection"
-            isChecked={detectState == "ON"}
-            onCheckedChange={() =>
-              sendDetect(detectState == "ON" ? "OFF" : "ON")
-            }
-          />
-          {recordingEnabled && (
-            <FilterSwitch
-              label="Recording"
-              isChecked={recordState == "ON"}
-              onCheckedChange={() =>
-                sendRecord(recordState == "ON" ? "OFF" : "ON")
-              }
-            />
-          )}
-          <FilterSwitch
-            label="Snapshots"
-            isChecked={snapshotState == "ON"}
-            onCheckedChange={() =>
-              sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
-            }
-          />
-          {audioDetectEnabled && (
-            <FilterSwitch
-              label="Audio Detection"
-              isChecked={audioState == "ON"}
-              onCheckedChange={() =>
-                sendAudio(audioState == "ON" ? "OFF" : "ON")
-              }
-            />
-          )}
-          {autotrackingEnabled && (
-            <FilterSwitch
-              label="Autotracking"
-              isChecked={autotrackingState == "ON"}
-              onCheckedChange={() =>
-                sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
-              }
-            />
+          {isAdmin && (
+            <>
+              <FilterSwitch
+                label="Camera Enabled"
+                isChecked={enabledState == "ON"}
+                onCheckedChange={() =>
+                  sendEnabled(enabledState == "ON" ? "OFF" : "ON")
+                }
+              />
+              <FilterSwitch
+                label="Object Detection"
+                isChecked={detectState == "ON"}
+                onCheckedChange={() =>
+                  sendDetect(detectState == "ON" ? "OFF" : "ON")
+                }
+              />
+              {recordingEnabled && (
+                <FilterSwitch
+                  label="Recording"
+                  isChecked={recordState == "ON"}
+                  onCheckedChange={() =>
+                    sendRecord(recordState == "ON" ? "OFF" : "ON")
+                  }
+                />
+              )}
+              <FilterSwitch
+                label="Snapshots"
+                isChecked={snapshotState == "ON"}
+                onCheckedChange={() =>
+                  sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
+                }
+              />
+              {audioDetectEnabled && (
+                <FilterSwitch
+                  label="Audio Detection"
+                  isChecked={audioState == "ON"}
+                  onCheckedChange={() =>
+                    sendAudio(audioState == "ON" ? "OFF" : "ON")
+                  }
+                />
+              )}
+              {autotrackingEnabled && (
+                <FilterSwitch
+                  label="Autotracking"
+                  isChecked={autotrackingState == "ON"}
+                  onCheckedChange={() =>
+                    sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+                  }
+                />
+              )}
+            </>
           )}
         </div>
+
         <div className="mt-3 flex flex-col gap-5">
           {!isRestreamed && (
             <div className="flex flex-col gap-2 p-2">

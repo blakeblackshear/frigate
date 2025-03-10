@@ -6,11 +6,12 @@ import string
 from pathlib import Path
 
 import psutil
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.tags import Tags
@@ -130,7 +131,9 @@ def export_recording(
     )
 
 
-@router.patch("/export/{event_id}/rename")
+@router.patch(
+    "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
+)
 def export_rename(event_id: str, body: ExportRenameBody):
     try:
         export: Export = Export.get(Export.id == event_id)
@@ -158,7 +161,7 @@ def export_rename(event_id: str, body: ExportRenameBody):
     )
 
 
-@router.delete("/export/{event_id}")
+@router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
 def export_delete(event_id: str):
     try:
         export: Export = Export.get(Export.id == event_id)

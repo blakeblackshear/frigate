@@ -59,11 +59,12 @@ function ConfigEditor() {
         .catch((error) => {
           toast.error("Error saving config", { position: "top-center" });
 
-          if (error.response) {
-            setError(error.response.data.message);
-          } else {
-            setError(error.message);
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          setError(errorMessage);
         });
     },
     [editorRef],
