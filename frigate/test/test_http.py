@@ -11,8 +11,8 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
-from frigate.config import FrigateConfig
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
+from frigate.config import FrigateConfig
 from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.models import Event, Recordings, Timeline
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
