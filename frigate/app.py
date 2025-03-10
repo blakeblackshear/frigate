@@ -600,6 +600,7 @@ class FrigateApp:
                 User.insert(
                     {
                         User.username: "admin",
+                        User.role: "admin",
                         User.password_hash: password_hash,
                         User.notification_tokens: [],
                     }
