@@ -33,6 +33,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -93,7 +95,7 @@ export default function SearchFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      More Filters
+      <Trans ns="components/filter">more</Trans>
     </Button>
   );
   const content = (
@@ -175,7 +177,7 @@ export default function SearchFilterDialog({
             setOpen(false);
           }}
         >
-          Apply
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           aria-label="Reset filters to default values"
@@ -195,7 +197,7 @@ export default function SearchFilterDialog({
             }));
           }}
         >
-          Reset
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </div>
@@ -272,7 +274,9 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <div className="text-lg">Time Range</div>
+      <div className="text-lg">
+        <Trans ns="components/filter">timeRange</Trans>
+      </div>
       <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
@@ -370,7 +374,9 @@ export function ZoneFilterContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <div className="text-lg">Zones</div>
+        <div className="text-lg">
+          <Trans ns="components/filter">zones.label</Trans>
+        </div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -378,7 +384,7 @@ export function ZoneFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                <Trans ns="components/filter">zones.all</Trans>
               </Label>
               <Switch
                 className="ml-1"
@@ -436,10 +442,12 @@ export function SubFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="text-lg">Sub Labels</div>
+      <div className="text-lg">
+        <Trans ns="components/filter">subLabels.label</Trans>
+      </div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
-          All Sub Labels
+          <Trans ns="components/filter">subLabels.all</Trans>
         </Label>
         <Switch
           className="ml-1"
@@ -494,7 +502,9 @@ export function ScoreFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Score</div>
+      <div className="mb-3 text-lg">
+        <Trans ns="components/filter">score</Trans>
+      </div>
       <div className="flex items-center gap-1">
         <Input
           className="w-14 text-center"
@@ -549,7 +559,17 @@ export function SpeedFilterContent({
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">
-        Estimated Speed ({config?.ui.unit_system == "metric" ? "kph" : "mph"})
+        <Trans
+          values={{
+            unit:
+              config?.ui.unit_system == "metric"
+                ? t("unit.speed.kph")
+                : t("unit.speed.mph"),
+          }}
+          ns="components/filter"
+        >
+          filter.estimatedSpeed
+        </Trans>
       </div>
       <div className="flex items-center gap-1">
         <Input
@@ -636,7 +656,9 @@ export function SnapshotClipFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Features</div>
+      <div className="mb-3 text-lg">
+        <Trans ns="components/filter">features.label</Trans>
+      </div>
 
       <div className="my-2.5 space-y-1">
         <div className="flex items-center justify-between">
@@ -658,7 +680,7 @@ export function SnapshotClipFilterContent({
               htmlFor="snapshot-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a snapshot
+              <Trans ns="components/filter">features.hasSnapshot</Trans>
             </Label>
           </div>
           <ToggleGroup
@@ -679,14 +701,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              <Trans>button.yes</Trans>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              <Trans>button.no</Trans>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -720,12 +742,9 @@ export function SnapshotClipFilterContent({
                       side="left"
                       sideOffset={5}
                     >
-                      You must first filter on tracked objects that have a
-                      snapshot.
-                      <br />
-                      <br />
-                      Tracked objects without a snapshot cannot be submitted to
-                      Frigate+.
+                      <Trans ns="components/filter">
+                        features.submittedToFrigatePlus.tips
+                      </Trans>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -734,7 +753,9 @@ export function SnapshotClipFilterContent({
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
               >
-                Submitted to Frigate+
+                <Trans ns="components/filter">
+                  features.submittedToFrigatePlus.label
+                </Trans>
               </Label>
             </div>
             <ToggleGroup
@@ -760,14 +781,14 @@ export function SnapshotClipFilterContent({
                 aria-label="Yes"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                Yes
+                <Trans>button.yes</Trans>
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
                 aria-label="No"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                No
+                <Trans>button.no</Trans>
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -796,7 +817,7 @@ export function SnapshotClipFilterContent({
               htmlFor="clip-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a video clip
+              <Trans ns="components/filter">features.hasVideoClip</Trans>
             </Label>
           </div>
           <ToggleGroup
@@ -815,14 +836,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              <Trans>button.yes</Trans>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              <Trans>button.no</Trans>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

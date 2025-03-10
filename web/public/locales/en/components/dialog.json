@@ -1,0 +1,58 @@
+{
+  "restart": {
+    "title": "Are you sure you want to restart Frigate?",
+    "button": "Restart",
+    "restarting": {
+      "title": "Frigate is Restarting",
+      "content": "This page will reload in {{countdown}} seconds.",
+      "button": "Force Reload Now"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Select from Timeline",
+      "lastHour_one": "Last Hour",
+      "lastHour_other": "Last {{count}} Hours",
+      "custom": "Custom"
+    },
+    "name": {
+      "placeholder": "Name the Export"
+    },
+    "select": "Select",
+    "export": "Export",
+    "toast": {
+      "success": "Successfully started export. View the file in the /exports folder.",
+      "error": {
+        "failed": "Failed to start export: {{error}}",
+        "endTimeMustAfterStartTime": "End time must be after start time",
+        "noVaildTimeSelected": "No valid time range selected"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Save Export",
+      "previewExport": "Preview Export"
+    }
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "NotEnabled": "Restreaming is not enabled for this camera.",
+      "desc": "Set up go2rtc for additional live view options and audio for this camera.",
+      "desc.readTheDocumentation": "Read the documentation "
+    },
+    "showStats": {
+      "label": "Show stream stats",
+      "desc": "Enable this option to show stream statistics as an overlay on the camera feed."
+    },
+    "debugView": "Debug View"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Save Search",
+      "desc": "Provide a name for this saved search.",
+      "placeholder": "Enter a name for your search",
+      "overwrite": "{{searchName}} already exists. Saving will overwrite the existing value.",
+      "success": "Search ({{searchName}}) has been saved."
+    }
+  }
+}

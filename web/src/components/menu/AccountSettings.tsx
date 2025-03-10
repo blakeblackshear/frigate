@@ -20,6 +20,8 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
 import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -95,7 +97,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       >
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
           <DropdownMenuLabel>
-            Current User: {profile?.username || "anonymous"}{" "}
+            {t("menu.user.current", {
+              user: profile?.username || t("menu.user.anonymous"),
+            })}{" "}
             {profile?.role && `(${profile.role})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
@@ -119,7 +123,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />
-              <span>Logout</span>
+              <span>
+                <Trans>menu.user.logout</Trans>
+              </span>
             </a>
           </MenuItem>
         </div>

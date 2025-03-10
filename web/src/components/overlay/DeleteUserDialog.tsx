@@ -1,10 +1,10 @@
+import { Trans } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
 } from "../ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
@@ -25,18 +25,18 @@ export default function DeleteUserDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="flex flex-col items-center gap-2 sm:items-start">
           <div className="space-y-1 text-center sm:text-left">
-            <DialogTitle>Delete User</DialogTitle>
+            <Trans ns="views/settings">users.dialog.deleteUser.title</Trans>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the
-              user account and remove all associated data.
+              <Trans ns="views/settings">users.dialog.deleteUser.desc</Trans>
             </DialogDescription>
           </div>
         </DialogHeader>
 
         <div className="my-4 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center text-sm">
           <p className="font-medium text-destructive">
-            Are you sure you want to delete{" "}
-            <span className="font-bold">{username}</span>?
+            <Trans ns="views/settings" values={{ username }}>
+              users.dialog.deleteUser.warn
+            </Trans>
           </p>
         </div>
 
@@ -49,7 +49,7 @@ export default function DeleteUserDialog({
                 onClick={onCancel}
                 type="button"
               >
-                Cancel
+                <Trans>button.cancel</Trans>
               </Button>
               <Button
                 variant="destructive"
@@ -57,7 +57,7 @@ export default function DeleteUserDialog({
                 className="flex flex-1"
                 onClick={onDelete}
               >
-                Delete User
+                <Trans>button.delete</Trans>
               </Button>
             </div>
           </div>

@@ -16,6 +16,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 import { CiCircleAlert } from "react-icons/ci";
 
 type CameraStorage = {
@@ -176,10 +178,22 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Camera</TableHead>
-              <TableHead>Storage Used</TableHead>
-              <TableHead>Percentage of Total Used</TableHead>
-              <TableHead>Bandwidth</TableHead>
+              <TableHead>
+                <Trans ns="views/system">storage.cameraStorage.camera</Trans>
+              </TableHead>
+              <TableHead>
+                <Trans ns="views/system">
+                  storage.cameraStorage.storageUsed
+                </Trans>
+              </TableHead>
+              <TableHead>
+                <Trans ns="views/system">
+                  storage.cameraStorage.percentageOfTotalUsed
+                </Trans>
+              </TableHead>
+              <TableHead>
+                <Trans ns="views/system">storage.cameraStorage.bandwidth</Trans>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,7 +205,11 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name.replaceAll("_", " ")}
+                  {item.name === "Unused"
+                    ? t("storage.cameraStorage.unused", {
+                        ns: "views/system",
+                      })
+                    : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
                       <PopoverTrigger asChild>
@@ -207,10 +225,9 @@ export function CombinedStorageGraph({
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          This value may not accurately represent the free space
-                          available to Frigate if you have other files stored on
-                          your drive beyond Frigate's recordings. Frigate does
-                          not track storage usage outside of its recordings.
+                          <Trans ns="views/system">
+                            storage.cameraStorage.unused.tips
+                          </Trans>
                         </div>
                       </PopoverContent>
                     </Popover>

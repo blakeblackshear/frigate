@@ -14,6 +14,8 @@ import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -30,7 +32,7 @@ export default function CalendarFilterButton({
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    "%b %-d",
+    t("time.formattedTimestampOnlyMonthAndDay"),
   );
 
   const trigger = (
@@ -46,7 +48,9 @@ export default function CalendarFilterButton({
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
-        {day == undefined ? "Last 24 Hours" : selectedDate}
+        {day == undefined
+          ? t("calendarFilter.last24Hours", { ns: "views/events" })
+          : selectedDate}
       </div>
     </Button>
   );
@@ -66,7 +70,7 @@ export default function CalendarFilterButton({
             updateSelectedDay(undefined);
           }}
         >
-          Reset
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>
@@ -98,7 +102,7 @@ export function CalendarRangeFilterButton({
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    "%b %-d",
+    t("time.formattedTimestampOnlyMonthAndDay"),
   );
 
   const trigger = (

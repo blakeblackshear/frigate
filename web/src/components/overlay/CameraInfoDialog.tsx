@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type CameraInfoDialogProps = {
   camera: CameraConfig;
@@ -72,11 +74,14 @@ export default function CameraInfoDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="capitalize">
-              {camera.name.replaceAll("_", " ")} Camera Probe Info
+              {t("cameras.info.cameraProbeInfo", {
+                camera: camera.name.replaceAll("_", " "),
+                ns: "views/system",
+              })}
             </DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            Stream data is obtained with <code>ffprobe</code>.
+            <Trans ns="views/system">cameras.info.streamDataFromFFPROBE</Trans>
           </DialogDescription>
 
           <div className="mb-2 p-4">
@@ -85,7 +90,10 @@ export default function CameraInfoDialog({
                 {ffprobeInfo.map((stream, idx) => (
                   <div key={idx} className="mb-5">
                     <div className="mb-1 rounded-md bg-secondary p-2 text-lg text-primary">
-                      Stream {idx + 1}
+                      {t("cameras.info.stream", {
+                        idx: idx + 1,
+                        ns: "views/system",
+                      })}
                     </div>
                     {stream.return_code == 0 ? (
                       <div>
@@ -93,10 +101,16 @@ export default function CameraInfoDialog({
                           <div className="" key={idx}>
                             {codec.width ? (
                               <div className="text-muted-foreground">
-                                <div className="ml-2">Video:</div>
+                                <div className="ml-2">
+                                  <Trans ns="views/system">
+                                    cameras.info.video
+                                  </Trans>
+                                </div>
                                 <div className="ml-5">
                                   <div>
-                                    Codec:
+                                    <Trans ns="views/system">
+                                      cameras.info.codec
+                                    </Trans>
                                     <span className="text-primary">
                                       {" "}
                                       {codec.codec_long_name}
@@ -105,7 +119,9 @@ export default function CameraInfoDialog({
                                   <div>
                                     {codec.width && codec.height ? (
                                       <>
-                                        Resolution:{" "}
+                                        <Trans ns="views/system">
+                                          cameras.info.resolution
+                                        </Trans>{" "}
                                         <span className="text-primary">
                                           {" "}
                                           {codec.width}x{codec.height} (
@@ -119,7 +135,9 @@ export default function CameraInfoDialog({
                                       </>
                                     ) : (
                                       <span>
-                                        Resolution:{" "}
+                                        <Trans ns="views/system">
+                                          cameras.info.resolution
+                                        </Trans>{" "}
                                         <span className="text-primary">
                                           Unknown
                                         </span>
@@ -127,10 +145,14 @@ export default function CameraInfoDialog({
                                     )}
                                   </div>
                                   <div>
-                                    FPS:{" "}
+                                    <Trans ns="views/system">
+                                      cameras.info.fps
+                                    </Trans>{" "}
                                     <span className="text-primary">
                                       {codec.avg_frame_rate == "0/0"
-                                        ? "Unknown"
+                                        ? t("cameras.info.unknown", {
+                                            ns: "views/system",
+                                          })
                                         : codec.avg_frame_rate}
                                     </span>
                                   </div>
@@ -140,7 +162,9 @@ export default function CameraInfoDialog({
                               <div className="text-muted-foreground">
                                 <div className="ml-2 mt-1">Audio:</div>
                                 <div className="ml-4">
-                                  Codec:{" "}
+                                  <Trans ns="views/system">
+                                    cameras.info.codec
+                                  </Trans>{" "}
                                   <span className="text-primary">
                                     {codec.codec_long_name}
                                   </span>
@@ -152,7 +176,12 @@ export default function CameraInfoDialog({
                       </div>
                     ) : (
                       <div className="px-2">
-                        <div>Error: {stream.stderr}</div>
+                        <div>
+                          {t("cameras.info.error", {
+                            error: stream.stderr,
+                            ns: "views/system",
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -161,7 +190,9 @@ export default function CameraInfoDialog({
             ) : (
               <div className="flex flex-col items-center">
                 <ActivityIndicator />
-                <div className="mt-2">Fetching Camera Data</div>
+                <div className="mt-2">
+                  <Trans ns="views/system">cameras.info.fetching</Trans>
+                </div>
               </div>
             )}
           </div>
@@ -172,7 +203,7 @@ export default function CameraInfoDialog({
               aria-label="Copy"
               onClick={() => onCopyFfprobe()}
             >
-              Copy
+              <Trans>button.copy</Trans>
             </Button>
           </DialogFooter>
         </DialogContent>

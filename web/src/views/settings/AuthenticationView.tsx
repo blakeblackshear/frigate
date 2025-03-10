@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 import { LuPlus, LuShield, LuUserCog } from "react-icons/lu";
 import {
   Table,
@@ -65,9 +67,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to save password: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.setPasswordFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   }, []);
 
@@ -85,9 +93,12 @@ export default function AuthenticationView() {
             users?.push({ username: user, role: role });
             return users;
           }, false);
-          toast.success(`User ${user} created successfully`, {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.createUser", { ns: "views/settings", user }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -95,9 +106,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to create user: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.createUserFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -111,9 +128,12 @@ export default function AuthenticationView() {
             (users) => users?.filter((u) => u.username !== user),
             false,
           );
-          toast.success(`User ${user} deleted successfully`, {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.deleteUser", { ns: "views/settings", user }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -121,9 +141,15 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to delete user: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.deleteUserFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -173,10 +199,10 @@ export default function AuthenticationView() {
         <div className="mb-5 flex flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start">
             <Heading as="h3" className="my-2">
-              User Management
+              <Trans ns="views/settings">users.management</Trans>
             </Heading>
             <p className="text-sm text-muted-foreground">
-              Manage this Frigate instance's user accounts.
+              <Trans ns="views/settings">users.management.desc</Trans>
             </p>
           </div>
           <Button
@@ -186,7 +212,7 @@ export default function AuthenticationView() {
             onClick={() => setShowCreate(true)}
           >
             <LuPlus className="size-4" />
-            Add User
+            <Trans ns="views/settings">users.addUser</Trans>
           </Button>
         </div>
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -195,16 +221,22 @@ export default function AuthenticationView() {
               <Table>
                 <TableHeader className="sticky top-0 bg-muted/50">
                   <TableRow>
-                    <TableHead className="w-[250px]">Username</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[250px]">
+                      <Trans ns="views/settings">users.table.username</Trans>
+                    </TableHead>
+                    <TableHead>
+                      <Trans ns="views/settings">users.table.role</Trans>
+                    </TableHead>
+                    <TableHead className="text-right">
+                      <Trans ns="views/settings">users.table.actions</Trans>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={3} className="h-24 text-center">
-                        No users found.
+                        <Trans ns="views/settings">users.table.noUsers</Trans>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -231,7 +263,7 @@ export default function AuthenticationView() {
                                 : ""
                             }
                           >
-                            {user.role || "viewer"}
+                            <Trans>role.{user.role || "viewer"}</Trans>
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -255,12 +287,16 @@ export default function AuthenticationView() {
                                     >
                                       <LuUserCog className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        Role
+                                        <Trans>role.title</Trans>
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Change user role</p>
+                                    <p>
+                                      <Trans ns="views/settings">
+                                        users.table.changeRole
+                                      </Trans>
+                                    </p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
@@ -278,12 +314,18 @@ export default function AuthenticationView() {
                                   >
                                     <FaUserEdit className="size-3.5" />
                                     <span className="ml-1.5 hidden sm:inline-block">
-                                      Password
+                                      <Trans ns="views/settings">
+                                        users.table.password
+                                      </Trans>
                                     </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Update password</p>
+                                  <p>
+                                    <Trans ns="views/settings">
+                                      users.updatePassword
+                                    </Trans>
+                                  </p>
                                 </TooltipContent>
                               </Tooltip>
 
@@ -301,12 +343,16 @@ export default function AuthenticationView() {
                                     >
                                       <HiTrash className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        Delete
+                                        <Trans>button.delete</Trans>
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Delete user</p>
+                                    <p>
+                                      <Trans ns="views/settings">
+                                        users.table.deleteUser
+                                      </Trans>
+                                    </p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}

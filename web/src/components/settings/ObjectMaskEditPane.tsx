@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -107,7 +109,9 @@ export default function ObjectMaskEditPane({
       polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: "The polygon drawing must be finished before saving.",
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
+        ns: "views/settings",
+      }),
       path: ["polygon.isFinished"],
     });
 
@@ -195,16 +199,28 @@ export default function ObjectMaskEditPane({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              `${polygon.name || "Object Mask"} has been saved. Restart Frigate to apply changes.`,
+              polygon.name
+                ? t("masksAndZones.objectMasks.toast.success", {
+                    polygonName: polygon.name,
+                    ns: "views/settings",
+                  })
+                : t("masksAndZones.objectMasks.toast.success.noName", {
+                    ns: "views/settings",
+                  }),
               {
                 position: "top-center",
               },
             );
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -212,9 +228,14 @@ export default function ObjectMaskEditPane({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to save config changes: ${errorMessage}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -243,7 +264,9 @@ export default function ObjectMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = "Edit Object Mask - Frigate";
+    document.title = t("masksAndZones.objectMasks.documentTitle", {
+      ns: "views/settings",
+    });
   }, []);
 
   if (!polygon) {
@@ -254,23 +277,27 @@ export default function ObjectMaskEditPane({
     <>
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
-        {polygon.name.length ? "Edit" : "New"} Object Mask
+        {polygon.name.length
+          ? t("masksAndZones.objectMasks.edit", {
+              ns: "views/settings",
+            })
+          : t("masksAndZones.objectMasks.add", {
+              ns: "views/settings",
+            })}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
         <p>
-          Object filter masks are used to filter out false positives for a given
-          object type based on location.
+          <Trans ns="views/settings">masksAndZones.objectMasks.context</Trans>
         </p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
-            {polygons[activePolygonIndex].points.length}{" "}
-            {polygons[activePolygonIndex].points.length > 1 ||
-            polygons[activePolygonIndex].points.length == 0
-              ? "points"
-              : "point"}
+            {t("masksAndZones.objectMasks.point", {
+              count: polygons[activePolygonIndex].points.length,
+              ns: "views/settings",
+            })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
             )}
@@ -285,7 +312,9 @@ export default function ObjectMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        Click to draw a polygon on the image.
+        <Trans ns="views/settings">
+          masksAndZones.objectMasks.clickDrawPolygon
+        </Trans>
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -310,7 +339,11 @@ export default function ObjectMaskEditPane({
               name="objects"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Objects</FormLabel>
+                  <FormLabel>
+                    <Trans ns="views/settings">
+                      masksAndZones.objectMasks.objects
+                    </Trans>
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -326,7 +359,9 @@ export default function ObjectMaskEditPane({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    The object type that that applies to this object mask.
+                    <Trans ns="views/settings">
+                      masksAndZones.objectMasks.objects.desc
+                    </Trans>
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -349,7 +384,7 @@ export default function ObjectMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                Cancel
+                <Trans>button.cancel</Trans>
               </Button>
               <Button
                 variant="select"
@@ -361,10 +396,12 @@ export default function ObjectMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>Saving...</span>
+                    <span>
+                      <Trans>button.saving</Trans>
+                    </span>
                   </div>
                 ) : (
-                  "Save"
+                  <Trans>button.save</Trans>
                 )}
               </Button>
             </div>
@@ -423,11 +460,15 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
   return (
     <>
       <SelectGroup>
-        <SelectItem value="all_labels">All object types</SelectItem>
+        <SelectItem value="all_labels">
+          <Trans ns="views/settings">
+            masksAndZones.objectMasks.objects.allObjectTypes
+          </Trans>
+        </SelectItem>
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (
           <SelectItem key={item} value={item}>
-            {item.replaceAll("_", " ").charAt(0).toUpperCase() + item.slice(1)}
+            {t(item, { ns: "objects" })}
           </SelectItem>
         ))}
       </SelectGroup>

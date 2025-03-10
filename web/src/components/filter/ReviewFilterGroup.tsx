@@ -23,6 +23,8 @@ import { FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -278,7 +280,7 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          Show Reviewed
+          <Trans ns="components/filter">review.showReviewed</Trans>
         </Label>
       </div>
 
@@ -364,7 +366,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        Filter
+        <Trans ns="components/filter">label</Trans>
       </div>
     </Button>
   );
@@ -445,7 +447,7 @@ export function GeneralFilterContent({
         {currentSeverity && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
-              label="Alerts"
+              label={t("alerts", { ns: "views/events" })}
               disabled={currentSeverity == "alert"}
               isChecked={
                 currentSeverity == "alert" ? true : filter.showAll === true
@@ -455,7 +457,7 @@ export function GeneralFilterContent({
               }
             />
             <FilterSwitch
-              label="Detections"
+              label={t("detections", { ns: "views/events" })}
               disabled={currentSeverity == "detection"}
               isChecked={
                 currentSeverity == "detection" ? true : filter.showAll === true
@@ -472,7 +474,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Labels
+            <Trans ns="components/filter">labels.all</Trans>
           </Label>
           <Switch
             className="ml-1"
@@ -519,7 +521,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                <Trans ns="components/filter">zones.all</Trans>
               </Label>
               <Switch
                 className="ml-1"
@@ -575,10 +577,10 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          Apply
+          <Trans>button.apply</Trans>
         </Button>
         <Button aria-label="Reset" onClick={onReset}>
-          Reset
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>
@@ -611,7 +613,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          Motion only
+          <Trans ns="views/events">motion.only</Trans>
         </Label>
       </div>
 

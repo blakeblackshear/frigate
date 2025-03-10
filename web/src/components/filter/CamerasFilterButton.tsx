@@ -12,6 +12,8 @@ import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -40,7 +42,7 @@ export function CamerasFilterButton({
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
-      return "All Cameras";
+      return t("menu.live.allCameras");
     }
 
     return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
@@ -143,7 +145,7 @@ export function CamerasFilterContent({
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            Cameras
+            <Trans ns="components/filter">cameras.all.short</Trans>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -151,7 +153,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label="All Cameras"
+          label={t("cameras.all", { ns: "components/filter" })}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);
@@ -233,7 +235,7 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          Apply
+          <Trans>button.apply</Trans>
         </Button>
         <Button
           aria-label="Reset"
@@ -242,7 +244,7 @@ export function CamerasFilterContent({
             updateCameraFilter(undefined);
           }}
         >
-          Reset
+          <Trans>button.reset</Trans>
         </Button>
       </div>
     </>

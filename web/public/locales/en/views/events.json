@@ -1,0 +1,26 @@
+{
+  "alerts": "Alerts",
+  "detections": "Detections",
+  "motion": {
+    "label": "Motion",
+    "only": "Motion only"
+  },
+  "allCameras": "All Cameras",
+  "empty": {
+    "alert": "There are no alerts to review",
+    "detection": "There are no detections to review",
+    "motion": "No motion data found"
+  },
+  "timeline": "Timeline",
+  "events": {
+    "label": "Events",
+    "noFoundForTimePeriod": "No events found for this time period."
+  },
+  "documentTitle": "Review - Frigate",
+  "recordings": {
+    "documentTitle": "Recordings - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Last 24 Hours"
+  }
+}

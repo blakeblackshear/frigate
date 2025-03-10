@@ -17,8 +17,10 @@ import FilterSwitch from "../filter/FilterSwitch";
 import { SearchFilter, SearchSource } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 
-type SearchSettingsProps = {
+type ExploreSettingsProps = {
   className?: string;
   columns: number;
   defaultView: string;
@@ -27,7 +29,7 @@ type SearchSettingsProps = {
   setDefaultView: (view: string) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
 };
-export default function SearchSettings({
+export default function ExploreSettings({
   className,
   columns,
   setColumns,
@@ -35,7 +37,7 @@ export default function SearchSettings({
   filter,
   setDefaultView,
   onUpdateFilter,
-}: SearchSettingsProps) {
+}: ExploreSettingsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [open, setOpen] = useState(false);
 
@@ -50,17 +52,20 @@ export default function SearchSettings({
       size="sm"
     >
       <FaCog className="text-secondary-foreground" />
-      Settings
+      <Trans ns="components/filter">explore.settings.title</Trans>
     </Button>
   );
   const content = (
     <div className={cn(className, "my-3 space-y-5 py-3 md:mt-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">Default View</div>
+          <div className="text-md">
+            <Trans ns="components/filter">explore.settings.defaultView</Trans>
+          </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            When no filters are selected, display a summary of the most recent
-            tracked objects per label, or display an unfiltered grid.
+            <Trans ns="components/filter">
+              explore.settings.defaultView.desc
+            </Trans>
           </div>
         </div>
         <Select
@@ -68,7 +73,13 @@ export default function SearchSettings({
           onValueChange={(value) => setDefaultView(value)}
         >
           <SelectTrigger className="w-full">
-            {defaultView == "summary" ? "Summary" : "Unfiltered Grid"}
+            {defaultView == "summary"
+              ? t("explore.settings.defaultView.summary", {
+                  ns: "components/filter",
+                })
+              : t("explore.settings.defaultView.unfilteredGrid", {
+                  ns: "components/filter",
+                })}
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -78,7 +89,13 @@ export default function SearchSettings({
                   className="cursor-pointer"
                   value={value}
                 >
-                  {value == "summary" ? "Summary" : "Unfiltered Grid"}
+                  {value == "summary"
+                    ? t("explore.settings.defaultView.summary", {
+                        ns: "components/filter",
+                      })
+                    : t("explore.settings.defaultView.unfilteredGrid", {
+                        ns: "components/filter",
+                      })}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -90,9 +107,15 @@ export default function SearchSettings({
           <DropdownMenuSeparator />
           <div className="flex w-full flex-col space-y-4">
             <div className="space-y-0.5">
-              <div className="text-md">Grid Columns</div>
+              <div className="text-md">
+                <Trans ns="components/filter">
+                  explore.settings.gridColumns
+                </Trans>
+              </div>
               <div className="space-y-1 text-xs text-muted-foreground">
-                Select the number of columns in the grid view.
+                <Trans ns="components/filter">
+                  explore.settings.gridColumns.desc
+                </Trans>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -153,10 +176,13 @@ export function SearchTypeContent({
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
         <div className="space-y-0.5">
-          <div className="text-md">Search Source</div>
+          <div className="text-md">
+            <Trans ns="components/filter">explore.settings.searchSource</Trans>
+          </div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            Choose whether to search the thumbnails or descriptions of your
-            tracked objects.
+            <Trans ns="components/filter">
+              explore.settings.searchSource.desc
+            </Trans>
           </div>
         </div>
         <div className="mt-2.5 flex flex-col gap-2.5">

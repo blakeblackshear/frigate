@@ -54,6 +54,8 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
+import { Trans } from "react-i18next";
+import { t } from "i18next";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type EventViewProps = {
@@ -198,8 +200,10 @@ export default function EventView({
         .then((response) => {
           if (response.status == 200) {
             toast.success(
-              "Successfully started export. View the file in the /exports folder.",
-              { position: "top-center" },
+              t("export.toast.success", { ns: "components/dialog" }),
+              {
+                position: "top-center",
+              },
             );
           }
         })
@@ -208,9 +212,15 @@ export default function EventView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to start export: ${errorMessage}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("export.toast.error", {
+              ns: "components/dialog",
+              message: errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         });
     },
     [reviewItems],
@@ -285,7 +295,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  Alerts
+                  <Trans ns="views/events">alerts</Trans>
                   {reviewCounts.alert > -1 ? (
                     ` ∙ ${reviewCounts.alert}`
                   ) : (
@@ -321,7 +331,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  Detections
+                  <Trans ns="views/events">detections</Trans>
                   {reviewCounts.detection > -1 ? (
                     ` ∙ ${reviewCounts.detection}`
                   ) : (
@@ -344,7 +354,9 @@ export default function EventView({
             ) : (
               <>
                 <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">Motion</div>
+                <div className="hidden md:block">
+                  <Trans ns="views/events">motion.label</Trans>
+                </div>
               </>
             )}
           </ToggleGroupItem>
@@ -712,7 +724,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            There are no {severity.replace(/_/g, " ")}s to review
+            <Trans ns="views/events">empty.{severity.replace(/_/g, " ")}</Trans>
           </div>
         )}
 
@@ -1046,7 +1058,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        No motion data found
+        <Trans ns="views/events">empty.motion</Trans>
       </div>
     );
   }

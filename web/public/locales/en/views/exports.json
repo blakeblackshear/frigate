@@ -1,0 +1,7 @@
+{
+    "documentTitle": "Export - Frigate",
+    "search": "Search",
+    "noExports": "No exports found",
+    "deleteExport": "Delete Export",
+    "deleteExport.desc": "Are you sure you want to delete {{exportName}}?"
+}

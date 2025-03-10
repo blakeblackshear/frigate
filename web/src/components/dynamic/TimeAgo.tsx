@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 
 interface IProp {
@@ -40,7 +41,7 @@ const timeAgo = ({
 
   const elapsed: number = elapsedTime / 1000;
   if (elapsed < 10) {
-    return "just now";
+    return t("time.justNow");
   }
 
   for (let i = 0; i < timeUnits.length; i++) {
@@ -64,11 +65,19 @@ const timeAgo = ({
 
       if (monthDiff > 0) {
         const unitAmount = monthDiff;
-        return `${unitAmount}${dense ? timeUnits[i].unit : ` ${timeUnits[i].full}`}${dense ? "" : "s"} ago`;
+        return t("time.ago", {
+          timeAgo: t(`time.${dense ? timeUnits[i].unit : timeUnits[i].full}`, {
+            time: unitAmount,
+          }),
+        });
       }
     } else if (elapsed >= timeUnits[i].value) {
       const unitAmount: number = Math.floor(elapsed / timeUnits[i].value);
-      return `${unitAmount}${dense ? timeUnits[i].unit : ` ${timeUnits[i].full}`}${dense ? "" : "s"} ago`;
+      return t("time.ago", {
+        timeAgo: t(`time.${dense ? timeUnits[i].unit : timeUnits[i].full}`, {
+          time: unitAmount,
+        }),
+      });
     }
   }
   return "Invalid Time";

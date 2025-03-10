@@ -39,6 +39,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -90,45 +92,61 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem aria-label="Download video">
+        <MenuItem
+          aria-label={t("itemMenu.downloadVideo.aria", { ns: "views/explore" })}
+        >
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
             download={`${searchResult.camera}_${searchResult.label}.mp4`}
           >
             <LuDownload className="mr-2 size-4" />
-            <span>Download video</span>
+            <span>
+              <Trans ns="views/explore">itemMenu.downloadVideo</Trans>
+            </span>
           </a>
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
-        <MenuItem aria-label="Download snapshot">
+        <MenuItem
+          aria-label={t("itemMenu.downloadSnapshot.aria", {
+            ns: "views/explore",
+          })}
+        >
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
             <LuCamera className="mr-2 size-4" />
-            <span>Download snapshot</span>
+            <span>
+              <Trans ns="views/explore">itemMenu.downloadSnapshot.label</Trans>
+            </span>
           </a>
         </MenuItem>
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label="Show the object lifecycle"
+          aria-label={t("itemMenu.viewObjectLifecycle.aria", {
+            ns: "views/explore",
+          })}
           onClick={showObjectLifecycle}
         >
           <FaArrowsRotate className="mr-2 size-4" />
-          <span>View object lifecycle</span>
+          <span>
+            <Trans ns="views/explore">itemMenu.viewObjectLifecycle.label</Trans>
+          </span>
         </MenuItem>
       )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
-          aria-label="Find similar tracked objects"
+          aria-label={t("itemMenu.findSimilar.aria", { ns: "views/explore" })}
           onClick={findSimilar}
         >
           <MdImageSearch className="mr-2 size-4" />
-          <span>Find similar</span>
+          <span>
+            <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
+          </span>
         </MenuItem>
       )}
       {isMobileOnly &&
@@ -137,9 +155,16 @@ export default function SearchResultActions({
         searchResult.end_time &&
         searchResult.data.type == "object" &&
         !searchResult.plus_id && (
-          <MenuItem aria-label="Submit to Frigate Plus" onClick={showSnapshot}>
+          <MenuItem
+            aria-label={t("itemMenu.submitToPlus.aria", {
+              ns: "views/explore",
+            })}
+            onClick={showSnapshot}
+          >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
-            <span>Submit to Frigate+</span>
+            <span>
+              <Trans ns="views/explore">itemMenu.submitToPlus</Trans>
+            </span>
           </MenuItem>
         )}
       <MenuItem
@@ -147,7 +172,9 @@ export default function SearchResultActions({
         onClick={() => setDeleteDialogOpen(true)}
       >
         <LuTrash2 className="mr-2 size-4" />
-        <span>Delete</span>
+        <span>
+          <Trans>button.delete</Trans>
+        </span>
       </MenuItem>
     </>
   );
@@ -160,24 +187,22 @@ export default function SearchResultActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogTitle>
+              <Trans ns="views/explore">dialog.confirmDelete</Trans>
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            Deleting this tracked object removes the snapshot, any saved
-            embeddings, and any associated object lifecycle entries. Recorded
-            footage of this tracked object in History view will <em>NOT</em> be
-            deleted.
-            <br />
-            <br />
-            Are you sure you want to proceed?
+            <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              <Trans>button.cancel</Trans>
+            </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
-              Delete
+              <Trans>button.delete</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -198,7 +223,9 @@ export default function SearchResultActions({
                     onClick={findSimilar}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Find similar</TooltipContent>
+                <TooltipContent>
+                  <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
+                </TooltipContent>
               </Tooltip>
             )}
 
@@ -215,7 +242,9 @@ export default function SearchResultActions({
                     onClick={showSnapshot}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Submit to Frigate+</TooltipContent>
+                <TooltipContent>
+                  <Trans ns="views/explore">itemMenu.submitToPlus.label</Trans>
+                </TooltipContent>
               </Tooltip>
             )}
 

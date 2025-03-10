@@ -23,6 +23,8 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { LuExternalLink, LuInfo } from "react-icons/lu";
 import { Link } from "react-router-dom";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { Separator } from "@/components/ui/separator";
 import { isDesktop } from "react-device-detect";
@@ -45,78 +47,53 @@ export default function ObjectSettingsView({
   const DEBUG_OPTIONS = [
     {
       param: "bbox",
-      title: "Bounding boxes",
-      description: "Show bounding boxes around tracked objects",
+      title: t("debug.boundingBoxes.title", { ns: "views/settings" }),
+      description: t("debug.boundingBoxes.desc", { ns: "views/settings" }),
       info: (
         <>
           <p className="mb-2">
-            <strong>Object Bounding Box Colors</strong>
+            <strong>
+              <Trans ns="views/settings">debug.boundingBoxes.colors</Trans>
+            </strong>
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>
-              At startup, different colors will be assigned to each object label
-            </li>
-            <li>
-              A dark blue thin line indicates that object is not detected at
-              this current point in time
-            </li>
-            <li>
-              A gray thin line indicates that object is detected as being
-              stationary
-            </li>
-            <li>
-              A thick line indicates that object is the subject of autotracking
-              (when enabled)
-            </li>
+            <Trans ns="views/settings">debug.boundingBoxes.colors.info</Trans>
           </ul>
         </>
       ),
     },
     {
       param: "timestamp",
-      title: "Timestamp",
-      description: "Overlay a timestamp on the image",
+      title: t("debug.timestamp.title", { ns: "views/settings" }),
+      description: t("debug.timestamp.desc", { ns: "views/settings" }),
     },
     {
       param: "zones",
-      title: "Zones",
-      description: "Show an outline of any defined zones",
+      title: t("debug.zones.title", { ns: "views/settings" }),
+      description: t("debug.zones.desc", { ns: "views/settings" }),
     },
     {
       param: "mask",
-      title: "Motion masks",
-      description: "Show motion mask polygons",
+      title: t("debug.mask.title", { ns: "views/settings" }),
+      description: t("debug.mask.desc", { ns: "views/settings" }),
     },
     {
       param: "motion",
-      title: "Motion boxes",
-      description: "Show boxes around areas where motion is detected",
+      title: t("debug.motion.title", { ns: "views/settings" }),
+      description: t("debug.motion.desc", { ns: "views/settings" }),
       info: (
         <>
-          <p className="mb-2">
-            <strong>Motion Boxes</strong>
-          </p>
-          <p>
-            Red boxes will be overlaid on areas of the frame where motion is
-            currently being detected
-          </p>
+          <Trans ns="views/settings">debug.motion.tips</Trans>
         </>
       ),
     },
     {
       param: "regions",
-      title: "Regions",
-      description:
-        "Show a box of the region of interest sent to the object detector",
+      title: t("debug.regions.title", { ns: "views/settings" }),
+      description: t("debug.regions.desc", { ns: "views/settings" }),
       info: (
         <>
-          <p className="mb-2">
-            <strong>Region Boxes</strong>
-          </p>
-          <p>
-            Bright green boxes will be overlaid on areas of interest in the
-            frame that are being sent to the object detector.
-          </p>
+          <Trans ns="views/settings">debug.regions.tips</Trans>
         </>
       ),
     },
@@ -179,24 +156,21 @@ export default function ObjectSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          Debug
+          <Trans ns="views/settings">debug.title</Trans>
         </Heading>
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
-            Frigate uses your detectors{" "}
-            {config
-              ? "(" +
-                Object.keys(config?.detectors)
-                  .map((detector) => capitalizeFirstLetter(detector))
-                  .join(",") +
-                ")"
-              : ""}{" "}
-            to detect objects in your camera's video stream.
+            {t("debug.detectorDesc", {
+              detectors: config
+                ? Object.keys(config?.detectors)
+                    .map((detector) => capitalizeFirstLetter(detector))
+                    .join(",")
+                : "",
+              ns: "views/settings",
+            })}
           </p>
           <p>
-            Debugging view shows a real-time view of tracked objects and their
-            statistics. The object list shows a time-delayed summary of detected
-            objects.
+            <Trans ns="views/settings">debug.desc</Trans>
           </p>
         </div>
         {config?.cameras[cameraConfig.name]?.webui_url && (
@@ -217,8 +191,12 @@ export default function ObjectSettingsView({
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="debug">Debugging</TabsTrigger>
-            <TabsTrigger value="objectlist">Object List</TabsTrigger>
+            <TabsTrigger value="debug">
+              <Trans ns="views/settings">debug.debugging</Trans>
+            </TabsTrigger>
+            <TabsTrigger value="objectlist">
+              <Trans ns="views/settings">debug.objectList</Trans>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="debug">
             <div className="flex w-full flex-col space-y-6">
@@ -277,21 +255,24 @@ export default function ObjectSettingsView({
                             className="mb-0 cursor-pointer capitalize text-primary"
                             htmlFor="debugdraw"
                           >
-                            Object Shape Filter Drawing
+                            <Trans ns="views/settings">
+                              debug.objectShapeFilterDrawing.title
+                            </Trans>
                           </Label>
 
                           <Popover>
                             <PopoverTrigger asChild>
                               <div className="cursor-pointer p-0">
                                 <LuInfo className="size-4" />
-                                <span className="sr-only">Info</span>
+                                <span className="sr-only">
+                                  <Trans>button.info</Trans>
+                                </span>
                               </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 text-sm">
-                              Enable this option to draw a rectangle on the
-                              camera image to show its area and ratio. These
-                              values can then be used to set object shape filter
-                              parameters in your config.
+                              <Trans ns="views/settings">
+                                debug.objectShapeFilterDrawing.tips
+                              </Trans>
                               <div className="mt-2 flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/object_filters#object-shape"
@@ -299,7 +280,9 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  Read the documentation{" "}
+                                  <Trans ns="views/settings">
+                                    debug.objectShapeFilterDrawing.document
+                                  </Trans>
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -307,8 +290,9 @@ export default function ObjectSettingsView({
                           </Popover>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
-                          Draw a rectangle on the image to view area and ratio
-                          details
+                          <Trans ns="views/settings">
+                            debug.objectShapeFilterDrawing.desc
+                          </Trans>
                         </div>
                       </div>
                       <Switch
@@ -457,7 +441,9 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
           );
         })
       ) : (
-        <div className="p-3 text-center">No objects</div>
+        <div className="p-3 text-center">
+          <Trans ns="views/settings">debug.noObjects</Trans>
+        </div>
       )}
     </div>
   );

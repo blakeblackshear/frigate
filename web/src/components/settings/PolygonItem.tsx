@@ -36,6 +36,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { buttonVariants } from "../ui/button";
+import { Trans } from "react-i18next";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -317,7 +318,9 @@ export default function PolygonItem({
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
+              <TooltipContent>
+                <Trans>button.edit</Trans>
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -330,7 +333,9 @@ export default function PolygonItem({
                   onClick={() => handleCopyCoordinates(index)}
                 />
               </TooltipTrigger>
-              <TooltipContent>Copy coordinates</TooltipContent>
+              <TooltipContent>
+                <Trans>button.copyCoordinates</Trans>
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -344,7 +349,9 @@ export default function PolygonItem({
                   onClick={() => !isLoading && setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>
-              <TooltipContent>Delete</TooltipContent>
+              <TooltipContent>
+                <Trans>button.delete</Trans>
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
