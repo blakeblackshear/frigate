@@ -17,20 +17,22 @@ import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
-import { t } from "i18next";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
+
 import { LuFolderX } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 function Exports() {
+  const { t } = useTranslation(["views/exports"]);
   const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
-    document.title = t("documentTitle", { ns: "views/exports" });
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   // Search
 
@@ -117,29 +119,20 @@ function Exports() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              <Trans ns="views/exports">deleteExport</Trans>
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteExport")}</AlertDialogTitle>
             <AlertDialogDescription>
-              <Trans
-                ns="views/exports"
-                values={{ exportName: deleteClip?.exportName }}
-              >
-                deleteExport.desc
-              </Trans>
+              {t("deleteExport.desc", { exportName: deleteClip?.exportName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              <Trans>button.cancel</Trans>
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
             <Button
               className="text-white"
               aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >
-              <Trans>button.delete</Trans>
+              {t("button.delete")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -187,7 +180,7 @@ function Exports() {
         <div className="flex w-full items-center justify-center p-2">
           <Input
             className="text-md w-full bg-muted md:w-1/3"
-            placeholder={t("search", { ns: "views/exports" })}
+            placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -215,7 +208,7 @@ function Exports() {
         ) : (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderX className="size-16" />
-            <Trans ns="views/exports" i18nKey={"noExports"}></Trans>
+            {t("noExports")}
           </div>
         )}
       </div>

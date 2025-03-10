@@ -7,7 +7,7 @@ import { PolygonType } from "@/types/canvas";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type ZoneMaskFilterButtonProps = {
   selectedZoneMask?: PolygonType[];
@@ -17,6 +17,7 @@ export function ZoneMaskFilterButton({
   selectedZoneMask,
   updateZoneMaskFilter,
 }: ZoneMaskFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const trigger = (
     <Button
       size="sm"
@@ -30,7 +31,7 @@ export function ZoneMaskFilterButton({
       <div
         className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        <Trans ns="components/filter">label</Trans>
+        {t("label")}
       </div>
     </Button>
   );
@@ -68,6 +69,7 @@ export function GeneralFilterContent({
   selectedZoneMask,
   updateZoneMaskFilter,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="h-auto overflow-y-auto overflow-x-hidden">
@@ -76,7 +78,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans ns="components/filter">labels.all</Trans>
+            {t("labels.all")}
           </Label>
           <Switch
             className="ml-1"
@@ -97,11 +99,14 @@ export function GeneralFilterContent({
                 className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                <Trans ns="views/settings">
-                  masksAndZones.
-                  {item.replace(/_([a-z])/g, (letter) => letter.toUpperCase()) +
-                    "s"}
-                </Trans>
+                {t(
+                  "masksAndZones." +
+                    item.replace(/_([a-z])/g, (letter) =>
+                      letter.toUpperCase(),
+                    ) +
+                    "s",
+                  { ns: "views/settings" },
+                )}
               </Label>
               <Switch
                 key={item}

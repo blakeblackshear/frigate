@@ -31,7 +31,7 @@ import {
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type SearchViewProps = {
   search: string;
@@ -71,6 +71,7 @@ export default function SearchView({
   setColumns,
   setDefaultView,
 }: SearchViewProps) {
+  const { t } = useTranslation(["views/explore"]);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -521,7 +522,7 @@ export default function SearchView({
         {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
-            <Trans ns="views/explore">noTrackedObjects</Trans>
+            {t("noTrackedObjects")}
           </div>
         )}
 

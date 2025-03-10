@@ -31,7 +31,7 @@ import useSWR from "swr";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -50,6 +50,7 @@ export function CameraStreamingDialog({
   setIsDialogOpen,
   onSave,
 }: CameraStreamingDialogProps) {
+  const { t } = useTranslation(["components/camera"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -168,16 +169,11 @@ export function CameraStreamingDialog({
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="mb-4">
         <DialogTitle className="capitalize">
-          <Trans
-            ns="components/camera"
-            values={{ cameraName: camera.replaceAll("_", " ") }}
-          >
-            group.camera.setting.title
-          </Trans>
+          {t("group.camera.setting.title", {
+            cameraName: camera.replaceAll("_", " "),
+          })}
         </DialogTitle>
-        <DialogDescription>
-          <Trans ns="components/camera">group.camera.setting.desc</Trans>
-        </DialogDescription>
+        <DialogDescription>{t("group.camera.setting.desc")}</DialogDescription>
       </DialogHeader>
       <div className="flex flex-col space-y-8">
         {!isRestreamed && (
@@ -186,23 +182,19 @@ export function CameraStreamingDialog({
             <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
               <LuX className="size-4 text-danger" />
               <div>
-                <Trans ns="components/dialog">
-                  streaming.restreaming.disabled
-                </Trans>
+                {t("streaming.restreaming.disabled", {
+                  ns: "components/dialog",
+                })}
               </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
                     <LuInfo className="size-4" />
-                    <span className="sr-only">
-                      <Trans>button.info</Trans>
-                    </span>
+                    <span className="sr-only">{t("button.info")}</span>
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  <Trans ns="components/dialog">
-                    streaming.restreaming.desc
-                  </Trans>
+                  {t("streaming.restreaming.desc", { ns: "components/dialog" })}
                   <div className="mt-2 flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/live"
@@ -210,9 +202,9 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      <Trans ns="components/dialog">
-                        streaming.restreaming.readTheDocumentation
-                      </Trans>
+                      {t("streaming.restreaming.readTheDocumentation", {
+                        ns: "components/dialog",
+                      })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -245,33 +237,21 @@ export function CameraStreamingDialog({
                   {supportsAudioOutput ? (
                     <>
                       <LuCheck className="size-4 text-success" />
-                      <div>
-                        <Trans ns="components/camera">
-                          group.camera.setting.audioIsAvailable
-                        </Trans>
-                      </div>
+                      <div>{t("group.camera.setting.audioIsAvailable")}</div>
                     </>
                   ) : (
                     <>
                       <LuX className="size-4 text-danger" />
-                      <div>
-                        <Trans ns="components/camera">
-                          group.camera.setting.audioIsUnavailable
-                        </Trans>
-                      </div>
+                      <div>{t("group.camera.setting.audioIsUnavailable")}</div>
                       <Popover>
                         <PopoverTrigger asChild>
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
-                            <span className="sr-only">
-                              <Trans>button.info</Trans>
-                            </span>
+                            <span className="sr-only">{t("button.info")}</span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 text-xs">
-                          <Trans ns="components/camera">
-                            group.camera.setting.audio.desc
-                          </Trans>
+                          {t("group.camera.setting.audio.desc")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
                               to="https://docs.frigate.video/configuration/live"
@@ -279,9 +259,7 @@ export function CameraStreamingDialog({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              <Trans ns="components/camera">
-                                group.camera.setting.audio.desc.document
-                              </Trans>
+                              {t("group.camera.setting.audio.desc.document")}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>
@@ -295,9 +273,7 @@ export function CameraStreamingDialog({
           )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
-            <Trans ns="components/camera">
-              group.camera.setting.streamMethod
-            </Trans>
+            {t("group.camera.setting.streamMethod")}
           </Label>
           <Select
             value={streamType}
@@ -308,49 +284,43 @@ export function CameraStreamingDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="no-streaming">
-                <Trans ns="components/camera">
-                  group.camera.setting.streamMethod.method.noStreaming
-                </Trans>
+                {t("group.camera.setting.streamMethod.method.noStreaming")}
               </SelectItem>
               <SelectItem value="smart">
-                <Trans ns="components/camera">
-                  group.camera.setting.streamMethod.method.smartStreaming
-                </Trans>
+                {t("group.camera.setting.streamMethod.method.smartStreaming")}
               </SelectItem>
               <SelectItem value="continuous">
-                <Trans ns="components/camera">
-                  group.camera.setting.streamMethod.method.continuousStreaming
-                </Trans>
+                {t(
+                  "group.camera.setting.streamMethod.method.continuousStreaming",
+                )}
               </SelectItem>
             </SelectContent>
           </Select>
           {streamType === "no-streaming" && (
             <p className="text-sm text-muted-foreground">
-              <Trans ns="components/camera">
-                group.camera.setting.streamMethod.method.noStreaming.desc
-              </Trans>
+              {t("group.camera.setting.streamMethod.method.noStreaming.desc")}
             </p>
           )}
           {streamType === "smart" && (
             <p className="text-sm text-muted-foreground">
-              <Trans ns="components/camera">
-                group.camera.setting.streamMethod.method.smartStreaming.desc
-              </Trans>
+              {t(
+                "group.camera.setting.streamMethod.method.smartStreaming.desc",
+              )}
             </p>
           )}
           {streamType === "continuous" && (
             <>
               <p className="text-sm text-muted-foreground">
-                <Trans ns="components/camera">
-                  group.camera.setting.streamMethod.method.continuousStreaming.desc
-                </Trans>
+                {t(
+                  "group.camera.setting.streamMethod.method.continuousStreaming.desc",
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <IoIosWarning className="mr-2 size-5 text-danger" />
                 <div className="max-w-[85%] text-sm">
-                  <Trans ns="components/camera">
-                    group.camera.setting.streamMethod.method.continuousStreaming.desc.warning
-                  </Trans>
+                  {t(
+                    "group.camera.setting.streamMethod.method.continuousStreaming.desc.warning",
+                  )}
                 </div>
               </div>
             </>
@@ -368,16 +338,12 @@ export function CameraStreamingDialog({
               htmlFor="compatibility"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              <Trans ns="components/camera">
-                group.camera.setting.compatibilityMode
-              </Trans>
+              {t("group.camera.setting.compatibilityMode")}
             </Label>
           </div>
           <div className="flex flex-col gap-2 leading-none">
             <p className="text-sm text-muted-foreground">
-              <Trans ns="components/camera">
-                group.camera.setting.compatibilityMode.desc
-              </Trans>
+              {t("group.camera.setting.compatibilityMode.desc")}
             </p>
           </div>
         </div>
@@ -389,7 +355,7 @@ export function CameraStreamingDialog({
             aria-label="Cancel"
             onClick={handleCancel}
           >
-            <Trans>button.cancel</Trans>
+            {t("button.cancel")}
           </Button>
           <Button
             variant="select"
@@ -401,12 +367,10 @@ export function CameraStreamingDialog({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>
-                  <Trans>button.saving</Trans>
-                </span>
+                <span>{t("button.saving")}</span>
               </div>
             ) : (
-              <Trans>button.save</Trans>
+              t("button.save")
             )}
           </Button>
         </div>

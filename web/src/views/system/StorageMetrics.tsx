@@ -8,12 +8,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useSWR from "swr";
-import { Trans } from "react-i18next";
 import { CiCircleAlert } from "react-icons/ci";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useTranslation } from "react-i18next";
 
 type CameraStorage = {
   [key: string]: {
@@ -34,7 +34,7 @@ export default function StorageMetrics({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
-
+  const { t } = useTranslation(["views/system"]);
   const timezone = useTimezone(config);
 
   const totalStorage = useMemo(() => {
@@ -77,12 +77,12 @@ export default function StorageMetrics({
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">
-        <Trans ns="views/system">storage.overview</Trans>
+        {t("storage.overview")}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">
-            <Trans ns="views/system">storage.recordings.title</Trans>
+            {t("storage.recordings.title")}
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -96,9 +96,7 @@ export default function StorageMetrics({
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
-                <div className="space-y-2">
-                  <Trans ns="views/system">storage.recordings.tips</Trans>
-                </div>
+                <div className="space-y-2">{t("storage.recordings.tips")}</div>
               </PopoverContent>
             </Popover>
           </div>
@@ -136,7 +134,7 @@ export default function StorageMetrics({
         </div>
       </div>
       <div className="mt-4 text-sm font-medium text-muted-foreground">
-        <Trans ns="views/system">storage.cameraStorage.title</Trans>
+        {t("storage.cameraStorage.title")}
       </div>
       <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
         <CombinedStorageGraph

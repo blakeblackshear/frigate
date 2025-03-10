@@ -54,9 +54,9 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTranslation } from "react-i18next";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -96,6 +96,7 @@ export default function EventView({
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
+  const { t } = useTranslation(["views/event"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -223,7 +224,7 @@ export default function EventView({
           );
         });
     },
-    [reviewItems],
+    [reviewItems, t],
   );
 
   const [motionOnly, setMotionOnly] = useState(false);
@@ -295,7 +296,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  <Trans ns="views/events">alerts</Trans>
+                  {t("alerts")}
                   {reviewCounts.alert > -1 ? (
                     ` ∙ ${reviewCounts.alert}`
                   ) : (
@@ -331,7 +332,7 @@ export default function EventView({
               <>
                 <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
                 <div className="hidden md:flex md:flex-row md:items-center">
-                  <Trans ns="views/events">detections</Trans>
+                  {t("detections")}
                   {reviewCounts.detection > -1 ? (
                     ` ∙ ${reviewCounts.detection}`
                   ) : (
@@ -354,9 +355,7 @@ export default function EventView({
             ) : (
               <>
                 <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">
-                  <Trans ns="views/events">motion.label</Trans>
-                </div>
+                <div className="hidden md:block">{t("motion.label")}</div>
               </>
             )}
           </ToggleGroupItem>
@@ -473,6 +472,8 @@ function DetectionReview({
   setSelectedReviews,
   pullLatestData,
 }: DetectionReviewProps) {
+  const { t } = useTranslation(["views/event"]);
+
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
   // detail
@@ -724,7 +725,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            <Trans ns="views/events">empty.{severity.replace(/_/g, " ")}</Trans>
+            {t("empty." + severity.replace(/_/g, " "))}
           </div>
         )}
 
@@ -869,6 +870,7 @@ function MotionReview({
   motionOnly = false,
   onOpenRecording,
 }: MotionReviewProps) {
+  const { t } = useTranslation(["views/event"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -1058,7 +1060,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        <Trans ns="views/events">empty.motion</Trans>
+        {t("empty.motion")}
       </div>
     );
   }

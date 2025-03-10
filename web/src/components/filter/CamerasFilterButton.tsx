@@ -12,8 +12,7 @@ import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -31,6 +30,7 @@ export function CamerasFilterButton({
   mainCamera,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
     selectedCameras,
@@ -46,7 +46,7 @@ export function CamerasFilterButton({
     }
 
     return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
-  }, [selectedCameras]);
+  }, [selectedCameras, t]);
 
   // ui
 
@@ -140,12 +140,13 @@ export function CamerasFilterContent({
   setOpen,
   updateCameraFilter,
 }: CamerasFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            <Trans ns="components/filter">cameras.all.short</Trans>
+            {t("cameras.all.short")}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -153,7 +154,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label={t("cameras.all", { ns: "components/filter" })}
+          label={t("cameras.all")}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);
@@ -235,7 +236,7 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          <Trans>button.apply</Trans>
+          {t("button.apply")}
         </Button>
         <Button
           aria-label="Reset"
@@ -244,7 +245,7 @@ export function CamerasFilterContent({
             updateCameraFilter(undefined);
           }}
         >
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </>

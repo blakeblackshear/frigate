@@ -38,8 +38,7 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -68,6 +67,7 @@ export default function ObjectMaskEditPane({
   snapPoints,
   setSnapPoints,
 }: ObjectMaskEditPaneProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -109,9 +109,7 @@ export default function ObjectMaskEditPane({
       polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
-        ns: "views/settings",
-      }),
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -202,11 +200,8 @@ export default function ObjectMaskEditPane({
               polygon.name
                 ? t("masksAndZones.objectMasks.toast.success", {
                     polygonName: polygon.name,
-                    ns: "views/settings",
                   })
-                : t("masksAndZones.objectMasks.toast.success.noName", {
-                    ns: "views/settings",
-                  }),
+                : t("masksAndZones.objectMasks.toast.success.noName"),
               {
                 position: "top-center",
               },
@@ -248,6 +243,7 @@ export default function ObjectMaskEditPane({
       scaledHeight,
       setIsLoading,
       cameraConfig,
+      t,
     ],
   );
 
@@ -264,10 +260,8 @@ export default function ObjectMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = t("masksAndZones.objectMasks.documentTitle", {
-      ns: "views/settings",
-    });
-  }, []);
+    document.title = t("masksAndZones.objectMasks.documentTitle");
+  }, [t]);
 
   if (!polygon) {
     return;
@@ -278,17 +272,11 @@ export default function ObjectMaskEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("masksAndZones.objectMasks.edit", {
-              ns: "views/settings",
-            })
-          : t("masksAndZones.objectMasks.add", {
-              ns: "views/settings",
-            })}
+          ? t("masksAndZones.objectMasks.edit")
+          : t("masksAndZones.objectMasks.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
-        <p>
-          <Trans ns="views/settings">masksAndZones.objectMasks.context</Trans>
-        </p>
+        <p>{t("masksAndZones.objectMasks.context")}</p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
@@ -296,7 +284,6 @@ export default function ObjectMaskEditPane({
           <div className="my-1 inline-flex">
             {t("masksAndZones.objectMasks.point", {
               count: polygons[activePolygonIndex].points.length,
-              ns: "views/settings",
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -312,9 +299,7 @@ export default function ObjectMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans ns="views/settings">
-          masksAndZones.objectMasks.clickDrawPolygon
-        </Trans>
+        {t("masksAndZones.objectMasks.clickDrawPolygon")}
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -340,9 +325,7 @@ export default function ObjectMaskEditPane({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Trans ns="views/settings">
-                      masksAndZones.objectMasks.objects
-                    </Trans>
+                    {t("masksAndZones.objectMasks.objects")}
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -359,9 +342,7 @@ export default function ObjectMaskEditPane({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    <Trans ns="views/settings">
-                      masksAndZones.objectMasks.objects.desc
-                    </Trans>
+                    {t("masksAndZones.objectMasks.objects.desc")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -384,7 +365,7 @@ export default function ObjectMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                <Trans>button.cancel</Trans>
+                {t("button.cancel")}
               </Button>
               <Button
                 variant="select"
@@ -396,12 +377,10 @@ export default function ObjectMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>
-                      <Trans>button.saving</Trans>
-                    </span>
+                    <span>{t("button.saving")}</span>
                   </div>
                 ) : (
-                  <Trans>button.save</Trans>
+                  t("button.save")
                 )}
               </Button>
             </div>
@@ -417,6 +396,7 @@ type ZoneObjectSelectorProps = {
 };
 
 export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const attributeLabels = useMemo(() => {
@@ -461,9 +441,7 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
     <>
       <SelectGroup>
         <SelectItem value="all_labels">
-          <Trans ns="views/settings">
-            masksAndZones.objectMasks.objects.allObjectTypes
-          </Trans>
+          {t("masksAndZones.objectMasks.objects.allObjectTypes")}
         </SelectItem>
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (

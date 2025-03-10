@@ -18,10 +18,10 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { t } from "i18next";
+
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Trans } from "react-i18next";
+
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { CiCircleAlert } from "react-icons/ci";
 import { Link } from "react-router-dom";
@@ -43,6 +43,7 @@ import {
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -58,6 +59,8 @@ type NotificationsSettingsViewProps = {
 export default function NotificationView({
   setUnsavedChanges,
 }: NotificationsSettingsViewProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
     "config",
     {
@@ -351,16 +354,12 @@ export default function NotificationView({
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
               <Heading as="h3" className="my-2">
-                <Trans ns="views/settings">
-                  notification.notificationSettings
-                </Trans>
+                {t("notification.notificationSettings")}
               </Heading>
 
               <div className="max-w-6xl">
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                  <p>
-                    <Trans ns="views/settings">notification.desc</Trans>
-                  </p>
+                  <p>{t("notification.desc")}</p>
                   <div className="flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/notifications"
@@ -368,9 +367,7 @@ export default function NotificationView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      <Trans ns="views/settings">
-                        notification.documentation
-                      </Trans>{" "}
+                      {t("notification.documentation")}{" "}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -387,22 +384,16 @@ export default function NotificationView({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          <Trans ns="views/settings">notification.email</Trans>
-                        </FormLabel>
+                        <FormLabel>{t("notification.email")}</FormLabel>
                         <FormControl>
                           <Input
                             className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                            placeholder={t("notification.email.placeholder", {
-                              ns: "views/settings",
-                            })}
+                            placeholder={t("notification.email.placeholder")}
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          <Trans ns="views/settings">
-                            notification.email.desc
-                          </Trans>
+                          {t("notification.email.desc")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -418,9 +409,7 @@ export default function NotificationView({
                           <>
                             <div className="mb-2">
                               <FormLabel className="flex flex-row items-center text-base">
-                                <Trans ns="views/settings">
-                                  notification.cameras
-                                </Trans>
+                                {t("notification.cameras")}
                               </FormLabel>
                             </div>
                             <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
@@ -470,17 +459,13 @@ export default function NotificationView({
                           </>
                         ) : (
                           <div className="font-normal text-destructive">
-                            <Trans ns="views/settings">
-                              notification.cameras.noCameras
-                            </Trans>
+                            {t("notification.cameras.noCameras")}
                           </div>
                         )}
 
                         <FormMessage />
                         <FormDescription>
-                          <Trans ns="views/settings">
-                            notification.cameras.desc
-                          </Trans>
+                          {t("notification.cameras.desc")}
                         </FormDescription>
                       </FormItem>
                     )}
@@ -493,7 +478,7 @@ export default function NotificationView({
                       onClick={onCancel}
                       type="button"
                     >
-                      <Trans>button.cancel</Trans>
+                      {t("button.cancel")}
                     </Button>
                     <Button
                       variant="select"
@@ -505,12 +490,10 @@ export default function NotificationView({
                       {isLoading ? (
                         <div className="flex flex-row items-center gap-2">
                           <ActivityIndicator />
-                          <span>
-                            <Trans>button.saving</Trans>
-                          </span>
+                          <span>{t("button.saving")}</span>
                         </div>
                       ) : (
-                        <Trans>button.save</Trans>
+                        t("button.save")
                       )}
                     </Button>
                   </div>
@@ -523,9 +506,7 @@ export default function NotificationView({
                 <div className="flex flex-col gap-2 md:max-w-[50%]">
                   <Separator className="my-2 flex bg-secondary md:hidden" />
                   <Heading as="h4" className="my-2">
-                    <Trans ns="views/settings">
-                      notification.deviceSpecific
-                    </Trans>
+                    {t("notification.deviceSpecific")}
                   </Heading>
                   <Button
                     aria-label="Register or unregister notifications for this device"
@@ -569,12 +550,8 @@ export default function NotificationView({
                     }}
                   >
                     {registration != null
-                      ? t("notification.unregisterDevice", {
-                          ns: "views/settings",
-                        })
-                      : t("notification.registerDevice", {
-                          ns: "views/settings",
-                        })}
+                      ? t("notification.unregisterDevice")
+                      : t("notification.registerDevice")}
                   </Button>
                   {registration != null && registration.active && (
                     <Button
@@ -634,6 +611,7 @@ export function CameraNotificationSwitch({
   config,
   camera,
 }: CameraNotificationSwitchProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { payload: notificationState, send: sendNotification } =
     useNotifications(camera);
   const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =

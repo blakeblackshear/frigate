@@ -13,8 +13,7 @@ import { toast } from "sonner";
 import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import { LuPlus, LuShield, LuUserCog } from "react-icons/lu";
 import {
   Table,
@@ -32,8 +31,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import RoleChangeDialog from "@/components/overlay/RoleChangeDialog";
+import { useTranslation } from "react-i18next";
 
 export default function AuthenticationView() {
+  const { t } = useTranslation("views/settings");
   const { data: config } = useSWR<FrigateConfig>("config");
   const { data: users, mutate: mutateUsers } = useSWR<User[]>("users");
 
@@ -51,33 +52,35 @@ export default function AuthenticationView() {
     document.title = "Authentication Settings - Frigate";
   }, []);
 
-  const onSavePassword = useCallback((user: string, password: string) => {
-    axios
-      .put(`users/${user}/password`, { password })
-      .then((response) => {
-        if (response.status === 200) {
-          setShowSetPassword(false);
-          toast.success("Password updated successfully", {
-            position: "top-center",
-          });
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(
-          t("users.toast.error.setPasswordFailed", {
-            ns: "views/settings",
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
-      });
-  }, []);
+  const onSavePassword = useCallback(
+    (user: string, password: string) => {
+      axios
+        .put(`users/${user}/password`, { password })
+        .then((response) => {
+          if (response.status === 200) {
+            setShowSetPassword(false);
+            toast.success("Password updated successfully", {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("users.toast.error.setPasswordFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+        });
+    },
+    [t],
+  );
 
   const onCreate = (
     user: string,
@@ -93,12 +96,9 @@ export default function AuthenticationView() {
             users?.push({ username: user, role: role });
             return users;
           }, false);
-          toast.success(
-            t("users.toast.success.createUser", { ns: "views/settings", user }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.success(t("users.toast.success.createUser", { user }), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
@@ -108,7 +108,6 @@ export default function AuthenticationView() {
           "Unknown error";
         toast.error(
           t("users.toast.error.createUserFailed", {
-            ns: "views/settings",
             errorMessage,
           }),
           {
@@ -128,12 +127,9 @@ export default function AuthenticationView() {
             (users) => users?.filter((u) => u.username !== user),
             false,
           );
-          toast.success(
-            t("users.toast.success.deleteUser", { ns: "views/settings", user }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.success(t("users.toast.success.deleteUser", { user }), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
@@ -143,7 +139,6 @@ export default function AuthenticationView() {
           "Unknown error";
         toast.error(
           t("users.toast.error.deleteUserFailed", {
-            ns: "views/settings",
             errorMessage,
           }),
           {
@@ -199,10 +194,10 @@ export default function AuthenticationView() {
         <div className="mb-5 flex flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start">
             <Heading as="h3" className="my-2">
-              <Trans ns="views/settings">users.management</Trans>
+              {t("users.management")}
             </Heading>
             <p className="text-sm text-muted-foreground">
-              <Trans ns="views/settings">users.management.desc</Trans>
+              {t("users.management.desc")}
             </p>
           </div>
           <Button
@@ -212,7 +207,7 @@ export default function AuthenticationView() {
             onClick={() => setShowCreate(true)}
           >
             <LuPlus className="size-4" />
-            <Trans ns="views/settings">users.addUser</Trans>
+            {t("users.addUser")}
           </Button>
         </div>
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -222,13 +217,11 @@ export default function AuthenticationView() {
                 <TableHeader className="sticky top-0 bg-muted/50">
                   <TableRow>
                     <TableHead className="w-[250px]">
-                      <Trans ns="views/settings">users.table.username</Trans>
+                      {t("users.table.username")}
                     </TableHead>
-                    <TableHead>
-                      <Trans ns="views/settings">users.table.role</Trans>
-                    </TableHead>
+                    <TableHead>{t("users.table.role")}</TableHead>
                     <TableHead className="text-right">
-                      <Trans ns="views/settings">users.table.actions</Trans>
+                      {t("users.table.actions")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -236,7 +229,7 @@ export default function AuthenticationView() {
                   {users.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={3} className="h-24 text-center">
-                        <Trans ns="views/settings">users.table.noUsers</Trans>
+                        {t("users.table.noUsers")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -263,7 +256,7 @@ export default function AuthenticationView() {
                                 : ""
                             }
                           >
-                            <Trans>role.{user.role || "viewer"}</Trans>
+                            {t("role." + user.role || "viewer")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -287,16 +280,12 @@ export default function AuthenticationView() {
                                     >
                                       <LuUserCog className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        <Trans>role.title</Trans>
+                                        {t("role.title")}
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>
-                                      <Trans ns="views/settings">
-                                        users.table.changeRole
-                                      </Trans>
-                                    </p>
+                                    <p>{t("users.table.changeRole")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
@@ -314,18 +303,12 @@ export default function AuthenticationView() {
                                   >
                                     <FaUserEdit className="size-3.5" />
                                     <span className="ml-1.5 hidden sm:inline-block">
-                                      <Trans ns="views/settings">
-                                        users.table.password
-                                      </Trans>
+                                      {t("users.table.password")}
                                     </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>
-                                    <Trans ns="views/settings">
-                                      users.updatePassword
-                                    </Trans>
-                                  </p>
+                                  <p>{t("users.updatePassword")}</p>
                                 </TooltipContent>
                               </Tooltip>
 
@@ -343,16 +326,12 @@ export default function AuthenticationView() {
                                     >
                                       <HiTrash className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        <Trans>button.delete</Trans>
+                                        {t("button.delete")}
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>
-                                      <Trans ns="views/settings">
-                                        users.table.deleteUser
-                                      </Trans>
-                                    </p>
+                                    <p>{t("users.table.deleteUser")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}

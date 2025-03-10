@@ -23,7 +23,7 @@ import { FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
-import { Trans } from "react-i18next";
+
 import { t } from "i18next";
 
 const REVIEW_FILTERS = [
@@ -280,7 +280,7 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          <Trans ns="components/filter">review.showReviewed</Trans>
+          {t("review.showReviewed", { ns: "components/filter" })}
         </Label>
       </div>
 
@@ -366,7 +366,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        <Trans ns="components/filter">label</Trans>
+        {t("label", { ns: "components/filter" })}
       </div>
     </Button>
   );
@@ -474,7 +474,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans ns="components/filter">labels.all</Trans>
+            {t("labels.all", { ns: "components/filter" })}
           </Label>
           <Switch
             className="ml-1"
@@ -521,7 +521,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                <Trans ns="components/filter">zones.all</Trans>
+                {t("zones.all", { ns: "components/filter" })}
               </Label>
               <Switch
                 className="ml-1"
@@ -577,10 +577,10 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          <Trans>button.apply</Trans>
+          {t("button.apply")}
         </Button>
         <Button aria-label="Reset" onClick={onReset}>
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </>
@@ -613,7 +613,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          <Trans ns="views/events">motion.only</Trans>
+          {t("motion.only", { ns: "views/events" })}
         </Label>
       </div>
 

@@ -27,11 +27,11 @@ import { LuExternalLink } from "react-icons/lu";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { MdCircle } from "react-icons/md";
 import { cn } from "@/lib/utils";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
+import { useTranslation } from "react-i18next";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -47,6 +47,7 @@ export default function CameraSettingsView({
   selectedCamera,
   setUnsavedChanges,
 }: CameraSettingsViewProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -81,7 +82,7 @@ export default function CameraSettingsView({
           .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
-  }, [cameraConfig]);
+  }, [cameraConfig, t]);
 
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
@@ -89,7 +90,7 @@ export default function CameraSettingsView({
           .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
-  }, [cameraConfig]);
+  }, [cameraConfig, t]);
 
   // form
 
@@ -190,7 +191,7 @@ export default function CameraSettingsView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading, selectedCamera, cameraConfig],
+    [updateConfig, setIsLoading, selectedCamera, cameraConfig, t],
   );
 
   const onCancel = useCallback(() => {
@@ -259,13 +260,13 @@ export default function CameraSettingsView({
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
-            <Trans ns="views/settings">camera.title</Trans>
+            {t("camera.title")}
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            <Trans ns="views/settings">camera.streams.title</Trans>
+            {t("camera.streams.title")}
           </Heading>
 
           <div className="flex flex-row items-center">
@@ -278,18 +279,16 @@ export default function CameraSettingsView({
               }}
             />
             <div className="space-y-0.5">
-              <Label htmlFor="camera-enabled">
-                <Trans>button.enabled</Trans>
-              </Label>
+              <Label htmlFor="camera-enabled">{t("button.enabled")}</Label>
             </div>
           </div>
           <div className="mt-3 text-sm text-muted-foreground">
-            <Trans ns="views/settings">camera.streams.desc</Trans>
+            {t("camera.streams.desc")}
           </div>
           <Separator className="mb-2 mt-4 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            <Trans ns="views/settings">camera.review.title</Trans>
+            {t("camera.review.title")}
           </Heading>
 
           <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 space-y-3 text-sm text-primary-variant">
@@ -304,7 +303,7 @@ export default function CameraSettingsView({
               />
               <div className="space-y-0.5">
                 <Label htmlFor="alerts-enabled">
-                  <Trans ns="views/settings">camera.review.alerts</Trans>
+                  {t("camera.review.alerts")}
                 </Label>
               </div>
             </div>
@@ -320,12 +319,12 @@ export default function CameraSettingsView({
                 />
                 <div className="space-y-0.5">
                   <Label htmlFor="detections-enabled">
-                    <Trans ns="views/settings">camera.review.detections</Trans>
+                    {t("camera.review.detections")}
                   </Label>
                 </div>
               </div>
               <div className="mt-3 text-sm text-muted-foreground">
-                <Trans ns="views/settings">camera.review.desc</Trans>
+                {t("camera.review.desc")}
               </div>
             </div>
           </div>
@@ -333,16 +332,12 @@ export default function CameraSettingsView({
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            <Trans ns="views/settings">camera.reviewClassification.title</Trans>
+            {t("camera.reviewClassification.title")}
           </Heading>
 
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-              <p>
-                <Trans ns="views/settings">
-                  camera.reviewClassification.desc
-                </Trans>
-              </p>
+              <p>{t("camera.reviewClassification.desc")}</p>
               <div className="flex items-center text-primary">
                 <Link
                   to="https://docs.frigate.video/configuration/review"
@@ -350,9 +345,7 @@ export default function CameraSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  <Trans ns="views/settings">
-                    camera.reviewClassification.readTheDocumentation
-                  </Trans>{" "}
+                  {t("camera.reviewClassification.readTheDocumentation")}{" "}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -381,15 +374,13 @@ export default function CameraSettingsView({
                         <>
                           <div className="mb-2">
                             <FormLabel className="flex flex-row items-center text-base">
-                              <Trans ns="views/settings">
-                                camera.review.alerts
-                              </Trans>
+                              {t("camera.review.alerts")}
                               <MdCircle className="ml-3 size-2 text-severity_alert" />
                             </FormLabel>
                             <FormDescription>
-                              <Trans ns="views/settings">
-                                camera.reviewClassification.selectAlertsZones
-                              </Trans>
+                              {t(
+                                "camera.reviewClassification.selectAlertsZones",
+                              )}
                             </FormDescription>
                           </div>
                           <div className="max-w-md rounded-lg bg-secondary p-4 md:max-w-full">
@@ -438,9 +429,7 @@ export default function CameraSettingsView({
                         </>
                       ) : (
                         <div className="font-normal text-destructive">
-                          <Trans ns="views/settings">
-                            camera.reviewClassification.noDefinedZones
-                          </Trans>
+                          {t("camera.reviewClassification.noDefinedZones")}
                         </div>
                       )}
                       <FormMessage />
@@ -461,7 +450,6 @@ export default function CameraSettingsView({
                                 cameraName: capitalizeFirstLetter(
                                   cameraConfig?.name ?? "",
                                 ).replaceAll("_", " "),
-                                ns: "views/settings",
                               },
                             )
                           : t("camera.reviewClassification.objectAlertsTips", {
@@ -469,7 +457,6 @@ export default function CameraSettingsView({
                               cameraName: capitalizeFirstLetter(
                                 cameraConfig?.name ?? "",
                               ).replaceAll("_", " "),
-                              ns: "views/settings",
                             })}
                       </div>
                     </FormItem>
@@ -485,16 +472,14 @@ export default function CameraSettingsView({
                         <>
                           <div className="mb-2">
                             <FormLabel className="flex flex-row items-center text-base">
-                              <Trans ns="views/settings">
-                                camera.review.detections
-                              </Trans>
+                              {t("camera.review.detections")}
                               <MdCircle className="ml-3 size-2 text-severity_detection" />
                             </FormLabel>
                             {selectDetections && (
                               <FormDescription>
-                                <Trans ns="views/settings">
-                                  camera.reviewClassification.selectDetectionsZones
-                                </Trans>
+                                {t(
+                                  "camera.reviewClassification.selectDetectionsZones",
+                                )}
                               </FormDescription>
                             )}
                           </div>
@@ -557,9 +542,9 @@ export default function CameraSettingsView({
                                 htmlFor="select-detections"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                <Trans ns="views/settings">
-                                  camera.reviewClassification.limitDetections
-                                </Trans>
+                                {t(
+                                  "camera.reviewClassification.limitDetections",
+                                )}
                               </label>
                             </div>
                           </div>
@@ -568,58 +553,51 @@ export default function CameraSettingsView({
 
                       <div className="text-sm">
                         {watchedDetectionsZones &&
-                        watchedDetectionsZones.length > 0 ? (
-                          !selectDetections ? (
-                            <Trans
-                              i18nKey="camera.reviewClassification.zoneObjectDetectionsTips"
-                              values={{
+                        watchedDetectionsZones.length > 0
+                          ? !selectDetections
+                            ? t(
+                                "camera.reviewClassification.zoneObjectDetectionsTips",
+                                {
+                                  detectionsLabels,
+                                  zone: watchedDetectionsZones
+                                    .map((zone) =>
+                                      capitalizeFirstLetter(zone).replaceAll(
+                                        "_",
+                                        " ",
+                                      ),
+                                    )
+                                    .join(", "),
+                                  cameraName: capitalizeFirstLetter(
+                                    cameraConfig?.name ?? "",
+                                  ).replaceAll("_", " "),
+                                },
+                              )
+                            : t(
+                                "camera.reviewClassification.zoneObjectDetectionsTips.notSelectDetections",
+                                {
+                                  detectionsLabels,
+                                  zone: watchedDetectionsZones
+                                    .map((zone) =>
+                                      capitalizeFirstLetter(zone).replaceAll(
+                                        "_",
+                                        " ",
+                                      ),
+                                    )
+                                    .join(", "),
+                                  cameraName: capitalizeFirstLetter(
+                                    cameraConfig?.name ?? "",
+                                  ).replaceAll("_", " "),
+                                },
+                              )
+                          : t(
+                              "camera.reviewClassification.objectDetectionsTips",
+                              {
                                 detectionsLabels,
-                                zone: watchedDetectionsZones
-                                  .map((zone) =>
-                                    capitalizeFirstLetter(zone).replaceAll(
-                                      "_",
-                                      " ",
-                                    ),
-                                  )
-                                  .join(", "),
                                 cameraName: capitalizeFirstLetter(
                                   cameraConfig?.name ?? "",
                                 ).replaceAll("_", " "),
-                              }}
-                              ns="views/settings"
-                            ></Trans>
-                          ) : (
-                            <Trans
-                              i18nKey="camera.reviewClassification.zoneObjectDetectionsTips.notSelectDetections"
-                              values={{
-                                detectionsLabels,
-                                zone: watchedDetectionsZones
-                                  .map((zone) =>
-                                    capitalizeFirstLetter(zone).replaceAll(
-                                      "_",
-                                      " ",
-                                    ),
-                                  )
-                                  .join(", "),
-                                cameraName: capitalizeFirstLetter(
-                                  cameraConfig?.name ?? "",
-                                ).replaceAll("_", " "),
-                              }}
-                              ns="views/settings"
-                            />
-                          )
-                        ) : (
-                          <Trans
-                            i18nKey="camera.reviewClassification.objectDetectionsTips"
-                            values={{
-                              detectionsLabels,
-                              cameraName: capitalizeFirstLetter(
-                                cameraConfig?.name ?? "",
-                              ).replaceAll("_", " "),
-                            }}
-                            ns="views/settings"
-                          />
-                        )}
+                              },
+                            )}
                       </div>
                     </FormItem>
                   )}
@@ -634,7 +612,7 @@ export default function CameraSettingsView({
                   onClick={onCancel}
                   type="button"
                 >
-                  <Trans>button.cancel</Trans>
+                  {t("button.cancel")}
                 </Button>
                 <Button
                   variant="select"
@@ -646,12 +624,10 @@ export default function CameraSettingsView({
                   {isLoading ? (
                     <div className="flex flex-row items-center gap-2">
                       <ActivityIndicator />
-                      <span>
-                        <Trans>button.saving</Trans>
-                      </span>
+                      <span>{t("button.saving")}</span>
                     </div>
                   ) : (
-                    <Trans>button.save</Trans>
+                    t("button.save")
                   )}
                 </Button>
               </div>

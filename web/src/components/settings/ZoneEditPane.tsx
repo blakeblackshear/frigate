@@ -29,8 +29,7 @@ import { toast } from "sonner";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -61,6 +60,7 @@ export default function ZoneEditPane({
   snapPoints,
   setSnapPoints,
 }: ZoneEditPaneProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -106,7 +106,6 @@ export default function ZoneEditPane({
         .min(2, {
           message: t(
             "masksAndZones.form.zoneName.error.mustBeAtLeastTwoCharacters",
-            { ns: "views/settings" },
           ),
         })
         .transform((val: string) => val.trim().replace(/\s+/g, "_"))
@@ -117,7 +116,6 @@ export default function ZoneEditPane({
           {
             message: t(
               "masksAndZones.form.zoneName.error.mustNotBeSameWithCamera",
-              { ns: "views/settings" },
             ),
           },
         )
@@ -131,9 +129,7 @@ export default function ZoneEditPane({
             return !otherPolygonNames.includes(value);
           },
           {
-            message: t("masksAndZones.form.zoneName.error.alreadyExists", {
-              ns: "views/settings",
-            }),
+            message: t("masksAndZones.form.zoneName.error.alreadyExists"),
           },
         )
         .refine(
@@ -143,21 +139,16 @@ export default function ZoneEditPane({
           {
             message: t(
               "masksAndZones.form.zoneName.error.mustNotContainPeriod",
-              { ns: "views/settings" },
             ),
           },
         )
         .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-          message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter"),
         }),
       inertia: z.coerce
         .number()
         .min(1, {
-          message: t("masksAndZones.form.inertia.error.mustBeAboveZero", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.inertia.error.mustBeAboveZero"),
         })
         .or(z.literal("")),
       loitering_time: z.coerce
@@ -165,15 +156,12 @@ export default function ZoneEditPane({
         .min(0, {
           message: t(
             "masksAndZones.form.loiteringTime.error.mustBeGreaterOrEqualZero",
-            { ns: "views/settings" },
           ),
         })
         .optional()
         .or(z.literal("")),
       isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
-        message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
-          ns: "views/settings",
-        }),
+        message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
       }),
       objects: z.array(z.string()).optional(),
       review_alerts: z.boolean().default(false).optional(),
@@ -182,36 +170,28 @@ export default function ZoneEditPane({
       lineA: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.distance.error"),
         })
         .optional()
         .or(z.literal("")),
       lineB: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.distance.error"),
         })
         .optional()
         .or(z.literal("")),
       lineC: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.distance.error"),
         })
         .optional()
         .or(z.literal("")),
       lineD: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error", {
-            ns: "views/settings",
-          }),
+          message: t("masksAndZones.form.distance.error"),
         })
         .optional()
         .or(z.literal("")),
@@ -231,9 +211,7 @@ export default function ZoneEditPane({
         return true;
       },
       {
-        message: t("masksAndZones.form.distance.error.mustBeFilled", {
-          ns: "views/settings",
-        }),
+        message: t("masksAndZones.form.distance.error.mustBeFilled"),
         path: ["speedEstimation"],
       },
     )
@@ -249,9 +227,6 @@ export default function ZoneEditPane({
       {
         message: t(
           "masksAndZones.zones.speedThreshold.toast.error.loiteringTimeError",
-          {
-            ns: "views/settings",
-          },
         ),
         path: ["loitering_time"],
       },
@@ -291,13 +266,11 @@ export default function ZoneEditPane({
       polygon.points.length !== 4
     ) {
       toast.error(
-        t("masksAndZones.zones.speedThreshold.toast.error.pointLengthError", {
-          ns: "views/settings",
-        }),
+        t("masksAndZones.zones.speedThreshold.toast.error.pointLengthError"),
       );
       form.setValue("speedEstimation", false);
     }
-  }, [polygon, form]);
+  }, [polygon, form, t]);
 
   const saveToConfig = useCallback(
     async (
@@ -441,7 +414,6 @@ export default function ZoneEditPane({
             toast.success(
               t("masksAndZones.zones.toast.success", {
                 zoneName,
-                ns: "views/settings",
               }),
               {
                 position: "top-center",
@@ -483,6 +455,7 @@ export default function ZoneEditPane({
       scaledHeight,
       setIsLoading,
       cameraConfig,
+      t,
     ],
   );
 
@@ -503,10 +476,8 @@ export default function ZoneEditPane({
   }
 
   useEffect(() => {
-    document.title = t("masksAndZones.zones.documentTitle", {
-      ns: "views/settings",
-    });
-  }, []);
+    document.title = t("masksAndZones.zones.documentTitle");
+  }, [t]);
 
   if (!polygon) {
     return;
@@ -517,17 +488,11 @@ export default function ZoneEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("masksAndZones.zones.edit", {
-              ns: "views/settings",
-            })
-          : t("masksAndZones.zones.add", {
-              ns: "views/settings",
-            })}
+          ? t("masksAndZones.zones.edit")
+          : t("masksAndZones.zones.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
-        <p>
-          <Trans ns="views/settings">masksAndZones.zones.desc</Trans>
-        </p>
+        <p>{t("masksAndZones.zones.desc")}</p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
@@ -535,7 +500,6 @@ export default function ZoneEditPane({
           <div className="my-1 inline-flex">
             {t("masksAndZones.zones.point", {
               count: polygons[activePolygonIndex].points.length,
-              ns: "views/settings",
             })}
 
             {polygons[activePolygonIndex].isFinished && (
@@ -552,7 +516,7 @@ export default function ZoneEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans ns="views/settings">masksAndZones.zones.clickDrawPolygon</Trans>
+        {t("masksAndZones.zones.clickDrawPolygon")}
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -564,25 +528,16 @@ export default function ZoneEditPane({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans ns="views/settings">masksAndZones.zones.name</Trans>
-                </FormLabel>
+                <FormLabel>{t("masksAndZones.zones.name")}</FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                    placeholder={t(
-                      "masksAndZones.zones.name.inputPlaceHolder",
-                      {
-                        ns: "views/settings",
-                      },
-                    )}
+                    placeholder={t("masksAndZones.zones.name.inputPlaceHolder")}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans ns="views/settings">
-                    masksAndZones.zones.name.tips
-                  </Trans>
+                  {t("masksAndZones.zones.name.tips")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -594,9 +549,7 @@ export default function ZoneEditPane({
             name="inertia"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans ns="views/settings">masksAndZones.zones.inertia</Trans>
-                </FormLabel>
+                <FormLabel>{t("masksAndZones.zones.inertia")}</FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -605,9 +558,7 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans ns="views/settings">
-                    masksAndZones.zones.inertia.desc
-                  </Trans>
+                  {t("masksAndZones.zones.inertia.desc")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -619,11 +570,7 @@ export default function ZoneEditPane({
             name="loitering_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans ns="views/settings">
-                    masksAndZones.zones.loiteringTime
-                  </Trans>
-                </FormLabel>
+                <FormLabel>{t("masksAndZones.zones.loiteringTime")}</FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -632,9 +579,7 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  <Trans ns="views/settings">
-                    masksAndZones.zones.loiteringTime.desc
-                  </Trans>
+                  {t("masksAndZones.zones.loiteringTime.desc")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -642,13 +587,9 @@ export default function ZoneEditPane({
           />
           <Separator className="my-2 flex bg-secondary" />
           <FormItem>
-            <FormLabel>
-              <Trans ns="views/settings">masksAndZones.zones.objects</Trans>
-            </FormLabel>
+            <FormLabel>{t("masksAndZones.zones.objects")}</FormLabel>
             <FormDescription>
-              <Trans ns="views/settings">
-                masksAndZones.zones.objects.desc
-              </Trans>
+              {t("masksAndZones.zones.objects.desc")}
             </FormDescription>
             <ZoneObjectSelector
               camera={polygon.camera}
@@ -682,9 +623,7 @@ export default function ZoneEditPane({
                         className="cursor-pointer text-primary"
                         htmlFor="allLabels"
                       >
-                        <Trans ns="views/settings">
-                          masksAndZones.zones.speedEstimation
-                        </Trans>
+                        {t("masksAndZones.zones.speedEstimation")}
                       </FormLabel>
                       <Switch
                         checked={field.value}
@@ -698,9 +637,6 @@ export default function ZoneEditPane({
                             toast.error(
                               t(
                                 "masksAndZones.zones.speedEstimation.pointLengthError",
-                                {
-                                  ns: "views/settings",
-                                },
                               ),
                             );
                             return;
@@ -712,9 +648,6 @@ export default function ZoneEditPane({
                             toast.error(
                               t(
                                 "masksAndZones.zones.speedEstimation.loiteringTimeError",
-                                {
-                                  ns: "views/settings",
-                                },
                               ),
                             );
                           }
@@ -725,9 +658,7 @@ export default function ZoneEditPane({
                   </FormControl>
                 </div>
                 <FormDescription>
-                  <Trans ns="views/settings">
-                    masksAndZones.zones.speedEstimation.desc
-                  </Trans>
+                  {t("masksAndZones.zones.speedEstimation.desc")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -839,17 +770,12 @@ export default function ZoneEditPane({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Trans
-                          values={{
-                            unit:
-                              config?.ui.unit_system == "imperial"
-                                ? t("unit.speed.mph")
-                                : t("unit.speed.kph"),
-                          }}
-                          ns="views/settings"
-                        >
-                          masksAndZones.zones.speedThreshold
-                        </Trans>
+                        {t("masksAndZones.zones.speedThreshold", {
+                          unit:
+                            config?.ui.unit_system == "imperial"
+                              ? t("unit.speed.mph")
+                              : t("unit.speed.kph"),
+                        })}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -858,9 +784,7 @@ export default function ZoneEditPane({
                         />
                       </FormControl>
                       <FormDescription>
-                        <Trans ns="views/settings">
-                          masksAndZones.zones.speedThreshold.desc
-                        </Trans>
+                        {t("masksAndZones.zones.speedThreshold.desc")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -884,7 +808,7 @@ export default function ZoneEditPane({
               aria-label="Cancel"
               onClick={onCancel}
             >
-              <Trans>button.cancel</Trans>
+              {t("button.cancel")}
             </Button>
             <Button
               variant="select"
@@ -896,12 +820,10 @@ export default function ZoneEditPane({
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span>
-                    <Trans>button.saving</Trans>
-                  </span>
+                  <span>{t("button.saving")}</span>
                 </div>
               ) : (
-                <Trans>button.save</Trans>
+                t("button.save")
               )}
             </Button>
           </div>
@@ -924,6 +846,7 @@ export function ZoneObjectSelector({
   selectedLabels,
   updateLabelFilter,
 }: ZoneObjectSelectorProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const attributeLabels = useMemo(() => {
@@ -981,7 +904,7 @@ export function ZoneObjectSelector({
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex items-center justify-between">
           <Label className="cursor-pointer text-primary" htmlFor="allLabels">
-            <Trans ns="views/settings">masksAndZones.zones.allObjects</Trans>
+            {t("masksAndZones.zones.allObjects")}
           </Label>
           <Switch
             className="ml-1"

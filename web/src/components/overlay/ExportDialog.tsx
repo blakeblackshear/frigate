@@ -30,8 +30,7 @@ import { getUTCOffset } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -66,30 +65,21 @@ export default function ExportDialog({
   setMode,
   setShowPreview,
 }: ExportDialogProps) {
+  const { t } = useTranslation(["components/dialog"]);
   const [name, setName] = useState("");
 
   const onStartExport = useCallback(() => {
     if (!range) {
-      toast.error(
-        t("export.toast.error.noVaildTimeSelected", {
-          ns: "components/dialog",
-        }),
-        {
-          position: "top-center",
-        },
-      );
+      toast.error(t("export.toast.error.noVaildTimeSelected"), {
+        position: "top-center",
+      });
       return;
     }
 
     if (range.before < range.after) {
-      toast.error(
-        t("export.toast.error.endTimeMustAfterStartTime", {
-          ns: "components/dialog",
-        }),
-        {
-          position: "top-center",
-        },
-      );
+      toast.error(t("export.toast.error.endTimeMustAfterStartTime"), {
+        position: "top-center",
+      });
       return;
     }
 
@@ -103,12 +93,9 @@ export default function ExportDialog({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(
-            t("export.toast.success", { ns: "components/dialog" }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.success(t("export.toast.success"), {
+            position: "top-center",
+          });
           setName("");
           setRange(undefined);
           setMode("none");
@@ -122,12 +109,11 @@ export default function ExportDialog({
         toast.error(
           t("export.toast.error.failed", {
             error: errorMessage,
-            ns: "components/dialog",
           }),
           { position: "top-center" },
         );
       });
-  }, [camera, name, range, setRange, setName, setMode]);
+  }, [camera, name, range, setRange, setName, setMode, t]);
 
   const handleCancel = useCallback(() => {
     setName("");
@@ -181,9 +167,7 @@ export default function ExportDialog({
           >
             <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
             {isDesktop && (
-              <div className="text-primary">
-                <Trans>menu.export</Trans>
-              </div>
+              <div className="text-primary">{t("menu.export")}</div>
             )}
           </Button>
         </Trigger>
@@ -233,6 +217,7 @@ export function ExportContent({
   setMode,
   onCancel,
 }: ExportContentProps) {
+  const { t } = useTranslation(["components/dialog"]);
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
 
   const onSelectTime = useCallback(
@@ -280,9 +265,7 @@ export function ExportContent({
       {isDesktop && (
         <>
           <DialogHeader>
-            <DialogTitle>
-              <Trans>menu.export</Trans>
-            </DialogTitle>
+            <DialogTitle>{t("menu.export")}</DialogTitle>
           </DialogHeader>
           <SelectSeparator className="my-4 bg-secondary" />
         </>
@@ -306,11 +289,10 @@ export function ExportContent({
               <Label className="cursor-pointer capitalize" htmlFor={opt}>
                 {isNaN(parseInt(opt))
                   ? opt == "timeline"
-                    ? t("export.time.fromTimeline", { ns: "components/dialog" })
-                    : t("export.time." + opt, { ns: "components/dialog" })
+                    ? t("export.time.fromTimeline")
+                    : t("export.time." + opt)
                   : t("export.time.lastHour", {
                       count: parseInt(opt),
-                      ns: "components/dialog",
                     })}
               </Label>
             </div>
@@ -327,7 +309,7 @@ export function ExportContent({
       <Input
         className="text-md my-6"
         type="search"
-        placeholder={t("export.name.placeholder", { ns: "components/dialog" })}
+        placeholder={t("export.name.placeholder")}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
@@ -339,7 +321,7 @@ export function ExportContent({
           className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
           onClick={onCancel}
         >
-          <Trans>button.cancel</Trans>
+          {t("button.cancel")}
         </div>
         <Button
           className={isDesktop ? "" : "w-full"}
@@ -358,8 +340,8 @@ export function ExportContent({
           }}
         >
           {selectedOption == "timeline"
-            ? t("export.select", { ns: "components/dialog" })
-            : t("export.export", { ns: "components/dialog" })}
+            ? t("export.select")
+            : t("export.export")}
         </Button>
       </DialogFooter>
     </div>
@@ -376,6 +358,7 @@ function CustomTimeSelector({
   range,
   setRange,
 }: CustomTimeSelectorProps) {
+  const { t } = useTranslation(["components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // times
@@ -596,6 +579,7 @@ export function ExportPreviewDialog({
   showPreview,
   setShowPreview,
 }: ExportPreviewDialogProps) {
+  const { t } = useTranslation(["components/dialog"]);
   if (!range) {
     return null;
   }
@@ -613,15 +597,9 @@ export function ExportPreviewDialog({
         )}
       >
         <DialogHeader>
-          <DialogTitle>
-            <Trans ns="components/dialog">
-              export.fromTimeline.previewExport
-            </Trans>
-          </DialogTitle>
+          <DialogTitle>{t("export.fromTimeline.previewExport")}</DialogTitle>
           <DialogDescription className="sr-only">
-            <Trans ns="components/dialog">
-              export.fromTimeline.previewExport
-            </Trans>
+            {t("export.fromTimeline.previewExport")}
           </DialogDescription>
         </DialogHeader>
         <GenericVideoPlayer source={source} />

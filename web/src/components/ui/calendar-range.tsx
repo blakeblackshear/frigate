@@ -13,7 +13,7 @@ import { Switch } from "./switch";
 import { cn } from "@/lib/utils";
 import { LuCheck } from "react-icons/lu";
 import { t } from "i18next";
-import { Trans } from "react-i18next";
+
 
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
@@ -431,7 +431,7 @@ export function DateRangePicker({
             }
           }}
         >
-          <Trans>button.apply</Trans>
+          {t("button.apply")}
         </Button>
         <Button
           onClick={() => {
@@ -442,7 +442,7 @@ export function DateRangePicker({
           variant="ghost"
           aria-label="Reset"
         >
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </div>

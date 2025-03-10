@@ -2,7 +2,7 @@ import { LuVideo, LuX } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { FaCompactDisc } from "react-icons/fa";
 import { cn } from "@/lib/utils";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type SaveExportOverlayProps = {
   className: string;
@@ -18,6 +18,7 @@ export default function SaveExportOverlay({
   onSave,
   onCancel,
 }: SaveExportOverlayProps) {
+  const { t } = useTranslation("components/dialog");
   return (
     <div className={className}>
       <div
@@ -34,7 +35,7 @@ export default function SaveExportOverlay({
           onClick={onCancel}
         >
           <LuX />
-          <Trans>button.cancel</Trans>
+          {t("button.cancel")}
         </Button>
         <Button
           className="flex items-center gap-1"
@@ -43,9 +44,7 @@ export default function SaveExportOverlay({
           onClick={onPreview}
         >
           <LuVideo />
-          <Trans ns="components/dialog">
-            export.fromTimeline.previewExport
-          </Trans>
+          {t("export.fromTimeline.previewExport")}
         </Button>
         <Button
           className="flex items-center gap-1"
@@ -55,7 +54,7 @@ export default function SaveExportOverlay({
           onClick={onSave}
         >
           <FaCompactDisc />
-          <Trans ns="components/dialog">export.fromTimeline.saveExport</Trans>
+          {t("export.fromTimeline.saveExport", { ns: "components/dialog" })}
         </Button>
       </div>
     </div>

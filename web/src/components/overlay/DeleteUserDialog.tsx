@@ -1,4 +1,4 @@
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -20,23 +20,22 @@ export default function DeleteUserDialog({
   onDelete,
   onCancel,
 }: DeleteUserDialogProps) {
+  const { t } = useTranslation(["views/settings"]);
   return (
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="flex flex-col items-center gap-2 sm:items-start">
           <div className="space-y-1 text-center sm:text-left">
-            <Trans ns="views/settings">users.dialog.deleteUser.title</Trans>
+            {t("users.dialog.deleteUser.title")}
             <DialogDescription>
-              <Trans ns="views/settings">users.dialog.deleteUser.desc</Trans>
+              {t("users.dialog.deleteUser.desc")}
             </DialogDescription>
           </div>
         </DialogHeader>
 
         <div className="my-4 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center text-sm">
           <p className="font-medium text-destructive">
-            <Trans ns="views/settings" values={{ username }}>
-              users.dialog.deleteUser.warn
-            </Trans>
+            {t("users.dialog.deleteUser.warn", { username })}
           </p>
         </div>
 
@@ -49,7 +48,7 @@ export default function DeleteUserDialog({
                 onClick={onCancel}
                 type="button"
               >
-                <Trans>button.cancel</Trans>
+                {t("button.cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -57,7 +56,7 @@ export default function DeleteUserDialog({
                 className="flex flex-1"
                 onClick={onDelete}
               >
-                <Trans>button.delete</Trans>
+                {t("button.delete")}
               </Button>
             </div>
           </div>

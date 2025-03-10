@@ -24,8 +24,8 @@ import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
+import { useTranslation } from "react-i18next";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -41,6 +41,7 @@ export default function SearchFilterGroup({
   filterList,
   onUpdateFilter,
 }: SearchFilterGroupProps) {
+  const { t } = useTranslation(["components/filter"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -197,11 +198,7 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText={
-            isMobile
-              ? t("dates.all.short", { ns: "components/filter" })
-              : t("dates.all", { ns: "components/filter" })
-          }
+          defaultText={isMobile ? t("dates.all.short") : t("dates.all")}
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
@@ -235,6 +232,7 @@ function GeneralFilterButton({
   selectedLabels,
   updateLabelFilter,
 }: GeneralFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
@@ -242,11 +240,11 @@ function GeneralFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return t("labels.all.short", { ns: "components/filter" });
+      return t("labels.all.short");
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return t("labels.all", { ns: "components/filter" });
+      return t("labels.all");
     }
 
     if (selectedLabels.length == 1) {
@@ -257,7 +255,7 @@ function GeneralFilterButton({
       count: selectedLabels.length,
       ns: "components/filter",
     });
-  }, [selectedLabels]);
+  }, [selectedLabels, t]);
 
   // ui
 
@@ -332,6 +330,7 @@ export function GeneralFilterContent({
   setCurrentLabels,
   onClose,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="overflow-x-hidden">
@@ -340,7 +339,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            <Trans ns="components/filter">labels.all</Trans>
+            {t("labels.all")}
           </Label>
           <Switch
             className="ml-1"
@@ -392,7 +391,7 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          <Trans>button.apply</Trans>
+          {t("button.apply")}
         </Button>
         <Button
           aria-label="Reset"
@@ -401,7 +400,7 @@ export function GeneralFilterContent({
             updateLabelFilter(undefined);
           }}
         >
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </>
@@ -420,6 +419,7 @@ function SortTypeButton({
   selectedSortType,
   updateSortType,
 }: SortTypeButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentSortType, setCurrentSortType] = useState<
     SearchSortType | undefined
@@ -450,7 +450,7 @@ function SortTypeButton({
       <div
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-primary"}`}
       >
-        <Trans ns="components/filter">sort.label</Trans>
+        {t("sort.label")}
       </div>
     </Button>
   );
@@ -505,14 +505,15 @@ export function SortTypeContent({
   setCurrentSortType,
   onClose,
 }: SortTypeContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   const sortLabels = {
-    date_asc: t("sort.dateAsc", { ns: "components/filter" }),
-    date_desc: t("sort.dateDesc", { ns: "components/filter" }),
-    score_asc: t("sort.scoreAsc", { ns: "components/filter" }),
-    score_desc: t("sort.scoreDesc", { ns: "components/filter" }),
-    speed_asc: t("sort.speedAsc", { ns: "components/filter" }),
-    speed_desc: t("sort.speedDesc", { ns: "components/filter" }),
-    relevance: t("sort.relevance", { ns: "components/filter" }),
+    date_asc: t("sort.dateAsc"),
+    date_desc: t("sort.dateDesc"),
+    score_asc: t("sort.scoreAsc"),
+    score_desc: t("sort.scoreDesc"),
+    speed_asc: t("sort.speedAsc"),
+    speed_desc: t("sort.speedDesc"),
+    relevance: t("sort.relevance"),
   };
   return (
     <>
@@ -566,7 +567,7 @@ export function SortTypeContent({
             onClose();
           }}
         >
-          <Trans>button.apply</Trans>
+          {t("button.apply")}
         </Button>
         <Button
           aria-label="Reset"
@@ -575,7 +576,7 @@ export function SortTypeContent({
             updateSortType(undefined);
           }}
         >
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </>

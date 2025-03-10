@@ -39,8 +39,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+
+import { useTranslation } from "react-i18next";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -61,6 +61,8 @@ export default function SearchResultActions({
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
+  const { t } = useTranslation(["views/explore"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -92,61 +94,45 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem
-          aria-label={t("itemMenu.downloadVideo.aria", { ns: "views/explore" })}
-        >
+        <MenuItem aria-label={t("itemMenu.downloadVideo.aria")}>
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
             download={`${searchResult.camera}_${searchResult.label}.mp4`}
           >
             <LuDownload className="mr-2 size-4" />
-            <span>
-              <Trans ns="views/explore">itemMenu.downloadVideo</Trans>
-            </span>
+            <span>{t("itemMenu.downloadVideo")}</span>
           </a>
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
-        <MenuItem
-          aria-label={t("itemMenu.downloadSnapshot.aria", {
-            ns: "views/explore",
-          })}
-        >
+        <MenuItem aria-label={t("itemMenu.downloadSnapshot.aria")}>
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
             <LuCamera className="mr-2 size-4" />
-            <span>
-              <Trans ns="views/explore">itemMenu.downloadSnapshot.label</Trans>
-            </span>
+            <span>{t("itemMenu.downloadSnapshot.label")}</span>
           </a>
         </MenuItem>
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label={t("itemMenu.viewObjectLifecycle.aria", {
-            ns: "views/explore",
-          })}
+          aria-label={t("itemMenu.viewObjectLifecycle.aria")}
           onClick={showObjectLifecycle}
         >
           <FaArrowsRotate className="mr-2 size-4" />
-          <span>
-            <Trans ns="views/explore">itemMenu.viewObjectLifecycle.label</Trans>
-          </span>
+          <span>{t("itemMenu.viewObjectLifecycle.label")}</span>
         </MenuItem>
       )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
-          aria-label={t("itemMenu.findSimilar.aria", { ns: "views/explore" })}
+          aria-label={t("itemMenu.findSimilar.aria")}
           onClick={findSimilar}
         >
           <MdImageSearch className="mr-2 size-4" />
-          <span>
-            <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
-          </span>
+          <span>{t("itemMenu.findSimilar.label")}</span>
         </MenuItem>
       )}
       {isMobileOnly &&
@@ -156,15 +142,11 @@ export default function SearchResultActions({
         searchResult.data.type == "object" &&
         !searchResult.plus_id && (
           <MenuItem
-            aria-label={t("itemMenu.submitToPlus.aria", {
-              ns: "views/explore",
-            })}
+            aria-label={t("itemMenu.submitToPlus.aria")}
             onClick={showSnapshot}
           >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
-            <span>
-              <Trans ns="views/explore">itemMenu.submitToPlus</Trans>
-            </span>
+            <span>{t("itemMenu.submitToPlus")}</span>
           </MenuItem>
         )}
       <MenuItem
@@ -172,9 +154,7 @@ export default function SearchResultActions({
         onClick={() => setDeleteDialogOpen(true)}
       >
         <LuTrash2 className="mr-2 size-4" />
-        <span>
-          <Trans>button.delete</Trans>
-        </span>
+        <span>{t("button.delete")}</span>
       </MenuItem>
     </>
   );
@@ -187,22 +167,18 @@ export default function SearchResultActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              <Trans ns="views/explore">dialog.confirmDelete</Trans>
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("dialog.confirmDelete")}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>
+            {t("dialog.confirmDelete.desc")}
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              <Trans>button.cancel</Trans>
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
-              <Trans>button.delete</Trans>
+              {t("button.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -224,7 +200,7 @@ export default function SearchResultActions({
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <Trans ns="views/explore">itemMenu.findSimilar.label</Trans>
+                  {t("itemMenu.findSimilar.label")}
                 </TooltipContent>
               </Tooltip>
             )}
@@ -243,7 +219,7 @@ export default function SearchResultActions({
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <Trans ns="views/explore">itemMenu.submitToPlus.label</Trans>
+                  {t("itemMenu.submitToPlus.label")}
                 </TooltipContent>
               </Tooltip>
             )}

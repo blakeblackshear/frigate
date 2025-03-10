@@ -16,9 +16,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import { CiCircleAlert } from "react-icons/ci";
+import { useTranslation } from "react-i18next";
 
 type CameraStorage = {
   [key: string]: {
@@ -43,6 +43,8 @@ export function CombinedStorageGraph({
   cameraStorage,
   totalStorage,
 }: CombinedStorageGraphProps) {
+  const { t } = useTranslation(["views/system"]);
+
   const { theme, systemTheme } = useTheme();
 
   const entities = Object.keys(cameraStorage);
@@ -178,22 +180,12 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>{t("storage.cameraStorage.camera")}</TableHead>
+              <TableHead>{t("storage.cameraStorage.storageUsed")}</TableHead>
               <TableHead>
-                <Trans ns="views/system">storage.cameraStorage.camera</Trans>
+                {t("storage.cameraStorage.percentageOfTotalUsed")}
               </TableHead>
-              <TableHead>
-                <Trans ns="views/system">
-                  storage.cameraStorage.storageUsed
-                </Trans>
-              </TableHead>
-              <TableHead>
-                <Trans ns="views/system">
-                  storage.cameraStorage.percentageOfTotalUsed
-                </Trans>
-              </TableHead>
-              <TableHead>
-                <Trans ns="views/system">storage.cameraStorage.bandwidth</Trans>
-              </TableHead>
+              <TableHead>{t("storage.cameraStorage.bandwidth")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -206,9 +198,7 @@ export function CombinedStorageGraph({
                     style={{ backgroundColor: item.color }}
                   ></div>
                   {item.name === "Unused"
-                    ? t("storage.cameraStorage.unused", {
-                        ns: "views/system",
-                      })
+                    ? t("storage.cameraStorage.unused")
                     : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
@@ -225,9 +215,7 @@ export function CombinedStorageGraph({
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          <Trans ns="views/system">
-                            storage.cameraStorage.unused.tips
-                          </Trans>
+                          {t("storage.cameraStorage.unused.tips")}
                         </div>
                       </PopoverContent>
                     </Popover>

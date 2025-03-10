@@ -73,8 +73,7 @@ import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const SEARCH_TABS = [
   "details",
@@ -100,6 +99,7 @@ export default function SearchDetailDialog({
   setSimilarity,
   setInputFocused,
 }: SearchDetailDialogProps) {
+  const { t } = useTranslation(["views/explore"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -194,12 +194,8 @@ export default function SearchDetailDialog({
         )}
       >
         <Header>
-          <Title>
-            <Trans ns="views/explore">trackedObjectDetails</Trans>
-          </Title>
-          <Description className="sr-only">
-            <Trans ns="views/explore">details</Trans>
-          </Description>
+          <Title>{t("trackedObjectDetails")}</Title>
+          <Description className="sr-only">{t("details")}</Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -230,9 +226,7 @@ export default function SearchDetailDialog({
                   {item == "object_lifecycle" && (
                     <FaRotate className="size-4" />
                   )}
-                  <div className="capitalize">
-                    <Trans ns="views/explore">type.{item}</Trans>
-                  </div>
+                  <div className="capitalize">{t("type.{item}")}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -289,6 +283,8 @@ function ObjectDetailsTab({
   setSimilarity,
   setInputFocused,
 }: ObjectDetailsTabProps) {
+  const { t } = useTranslation(["views/explore"]);
+
   const apiHost = useApiHost();
 
   // mutation / revalidation
@@ -374,12 +370,9 @@ function ObjectDetailsTab({
       .post(`events/${search.id}/description`, { description: desc })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success(
-            t("details.tips.descriptionSaved", { ns: "views/explore" }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.success(t("details.tips.descriptionSaved"), {
+            position: "top-center",
+          });
         }
         mutate(
           (key) =>
@@ -412,7 +405,6 @@ function ObjectDetailsTab({
           "Unknown error";
         toast.error(
           t("details.tips.saveDescriptionFailed", {
-            ns: "views/explore",
             errorMessage,
           }),
           {
@@ -421,7 +413,7 @@ function ObjectDetailsTab({
         );
         setDesc(search.data.description);
       });
-  }, [desc, search, mutate]);
+  }, [desc, search, mutate, t]);
 
   const regenerateDescription = useCallback(
     (source: "snapshot" | "thumbnails") => {
@@ -533,12 +525,10 @@ function ObjectDetailsTab({
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              <Trans ns="views/explore">details.label</Trans>
-            </div>
+            <div className="text-sm text-primary/40">{t("details.label")}</div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              <Trans ns="objects">{search.label}</Trans>
+              {t("{search.label}", { ns: "objects" })}
               {search.sub_label && ` (${search.sub_label})`}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -552,9 +542,7 @@ function ObjectDetailsTab({
                   </span>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>
-                    <Trans ns="views/explore">details.editSubLable</Trans>
-                  </TooltipContent>
+                  <TooltipContent>{t("details.editSubLable")}</TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             </div>
@@ -562,7 +550,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">
-                <Trans ns="views/explore">details.topScore</Trans>
+                {t("details.topScore")}
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
@@ -571,7 +559,7 @@ function ObjectDetailsTab({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
-                    <Trans ns="views/explore">details.topScore.info</Trans>
+                    {t("details.topScore.info")}
                   </PopoverContent>
                 </Popover>
               </div>
@@ -583,7 +571,7 @@ function ObjectDetailsTab({
           {averageEstimatedSpeed && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                <Trans ns="views/explore">details.estimatedSpeed</Trans>
+                {t("details.estimatedSpeed")}
               </div>
               <div className="flex flex-col space-y-0.5 text-sm">
                 {averageEstimatedSpeed && (
@@ -608,16 +596,14 @@ function ObjectDetailsTab({
             </div>
           )}
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              <Trans ns="views/explore">details.camera</Trans>
-            </div>
+            <div className="text-sm text-primary/40">{t("details.camera")}</div>
             <div className="text-sm capitalize">
               {search.camera.replaceAll("_", " ")}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
-              <Trans ns="views/explore">details.timestamp</Trans>
+              {t("details.timestamp")}
             </div>
             <div className="text-sm">{formattedDate}</div>
           </div>
@@ -669,9 +655,7 @@ function ObjectDetailsTab({
               <div className="flex">
                 <ActivityIndicator />
               </div>
-              <div className="flex">
-                <Trans ns="views/explore">details.description.aiTips</Trans>
-              </div>
+              <div className="flex">{t("details.description.aiTips")}</div>
             </div>
           </>
         ) : (
@@ -679,9 +663,7 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40"></div>
             <Textarea
               className="h-64"
-              placeholder={t("details.description.placeholder", {
-                ns: "views/explore",
-              })}
+              placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onFocus={handleDescriptionFocus}
@@ -698,7 +680,7 @@ function ObjectDetailsTab({
                 aria-label="Regenerate tracked object description"
                 onClick={() => regenerateDescription("thumbnails")}
               >
-                <Trans ns="views/explore">details.button.regenerate</Trans>
+                {t("details.button.regenerate")}
               </Button>
               {search.has_snapshot && (
                 <DropdownMenu>
@@ -716,18 +698,14 @@ function ObjectDetailsTab({
                       aria-label="Regenerate from snapshot"
                       onClick={() => regenerateDescription("snapshot")}
                     >
-                      <Trans ns="views/explore">
-                        details.regenerateFromSnapshot
-                      </Trans>
+                      {t("details.regenerateFromSnapshot")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
                       aria-label="Regenerate from thumbnails"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
-                      <Trans ns="views/explore">
-                        details.regenerateFromThumbnails
-                      </Trans>
+                      {t("details.regenerateFromThumbnails")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -741,22 +719,19 @@ function ObjectDetailsTab({
               aria-label="Save"
               onClick={updateDescription}
             >
-              <Trans>button.save</Trans>
+              {t("button.save")}
             </Button>
           )}
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title={t("details.editSubLable", { ns: "views/explore" })}
+            title={t("details.editSubLable")}
             description={
               search.label
                 ? t("details.editSubLable.desc", {
                     label: t(search.label, { ns: "objects" }),
-                    ns: "views/explore",
                   })
-                : t("details.editSubLable.desc.noLabel", {
-                    ns: "views/explore",
-                  })
+                : t("details.editSubLable.desc.noLabel")
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
@@ -776,6 +751,7 @@ export function ObjectSnapshotTab({
   search,
   onEventUploaded,
 }: ObjectSnapshotTabProps) {
+  const { t } = useTranslation(["components/dialog"]);
   type SubmissionState = "reviewing" | "uploading" | "submitted";
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -858,9 +834,7 @@ export function ObjectSnapshotTab({
                         </a>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent>
-                          <Trans>button.download</Trans>
-                        </TooltipContent>
+                        <TooltipContent>{t("button.download")}</TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </div>

@@ -11,10 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Trans } from "react-i18next";
+
 import { Label } from "../ui/label";
 import { LuCheck, LuX } from "react-icons/lu";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type SetPasswordProps = {
   show: boolean;
@@ -29,6 +29,7 @@ export default function SetPasswordDialog({
   onCancel,
   username,
 }: SetPasswordProps) {
+  const { t } = useTranslation(["views/settings"]);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
@@ -80,20 +81,12 @@ export default function SetPasswordDialog({
   const getStrengthLabel = () => {
     if (!password) return "";
     if (passwordStrength <= 1)
-      return t("users.dialog.form.password.strength.weak", {
-        ns: "views/settings",
-      });
+      return t("users.dialog.form.password.strength.weak");
     if (passwordStrength === 2)
-      return t("users.dialog.form.password.strength.medium", {
-        ns: "views/settings",
-      });
+      return t("users.dialog.form.password.strength.medium");
     if (passwordStrength === 3)
-      return t("users.dialog.form.password.strength.strong", {
-        ns: "views/settings",
-      });
-    return t("users.dialog.form.password.strength.veryStrong", {
-      ns: "views/settings",
-    });
+      return t("users.dialog.form.password.strength.strong");
+    return t("users.dialog.form.password.strength.veryStrong");
   };
 
   const getStrengthColor = () => {
@@ -114,19 +107,17 @@ export default function SetPasswordDialog({
                   username,
                   ns: "views/settings",
                 })
-              : t("users.dialog.passwordSetting.setPassword", {
-                  ns: "views/settings",
-                })}
+              : t("users.dialog.passwordSetting.setPassword")}
           </DialogTitle>
           <DialogDescription>
-            <Trans ns="views/settings">users.dialog.passwordSetting.desc</Trans>
+            {t("users.dialog.passwordSetting.desc")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="password">
-              <Trans ns="views/settings">users.dialog.form.newPassword</Trans>
+              {t("users.dialog.form.newPassword")}
             </Label>
             <Input
               id="password"
@@ -137,9 +128,7 @@ export default function SetPasswordDialog({
                 setPassword(event.target.value);
                 setError(null);
               }}
-              placeholder={t("users.dialog.form.newPassword.placeholder", {
-                ns: "views/settings",
-              })}
+              placeholder={t("users.dialog.form.newPassword.placeholder")}
               autoFocus
             />
 
@@ -153,9 +142,7 @@ export default function SetPasswordDialog({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <Trans ns="views/settings">
-                    users.dialog.form.password.strength
-                  </Trans>
+                  {t("users.dialog.form.password.strength")}
                   <span className="font-medium">{getStrengthLabel()}</span>
                 </p>
               </div>
@@ -164,9 +151,7 @@ export default function SetPasswordDialog({
 
           <div className="space-y-2">
             <Label htmlFor="confirm-password">
-              <Trans ns="views/settings">
-                users.dialog.form.password.confirm
-              </Trans>
+              {t("users.dialog.form.password.confirm")}
             </Label>
             <Input
               id="confirm-password"
@@ -179,7 +164,6 @@ export default function SetPasswordDialog({
               }}
               placeholder={t(
                 "users.dialog.form.newPassword.confirm.placeholder",
-                { ns: "views/settings" },
               )}
             />
 
@@ -190,18 +174,14 @@ export default function SetPasswordDialog({
                   <>
                     <LuCheck className="size-3.5 text-green-500" />
                     <span className="text-green-600">
-                      <Trans ns="views/settings">
-                        users.dialog.form.password.match
-                      </Trans>
+                      {t("users.dialog.form.password.match")}
                     </span>
                   </>
                 ) : (
                   <>
                     <LuX className="size-3.5 text-red-500" />
                     <span className="text-red-600">
-                      <Trans ns="views/settings">
-                        users.dialog.form.password.notMatch
-                      </Trans>
+                      {t("users.dialog.form.password.notMatch")}
                     </span>
                   </>
                 )}
@@ -225,7 +205,7 @@ export default function SetPasswordDialog({
                 onClick={onCancel}
                 type="button"
               >
-                <Trans>button.cancel</Trans>
+                {t("button.cancel")}
               </Button>
               <Button
                 variant="select"
@@ -234,7 +214,7 @@ export default function SetPasswordDialog({
                 onClick={handleSave}
                 disabled={!password || password !== confirmPassword}
               >
-                <Trans>button.save</Trans>
+                {t("button.save")}
               </Button>
             </div>
           </div>

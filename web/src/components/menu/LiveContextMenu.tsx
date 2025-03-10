@@ -44,7 +44,7 @@ import {
   useNotifications,
   useNotificationSuspend,
 } from "@/api/ws";
-import { Trans } from "react-i18next";
+
 import { t } from "i18next";
 
 type LiveContextMenuProps = {
@@ -362,9 +362,7 @@ export default function LiveContextMenu({
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
                   onClick={isEnabled ? resetPreferredLiveMode : undefined}
                 >
-                  <div className="text-primary">
-                    <Trans>button</Trans>
-                  </div>
+                  <div className="text-primary">{t("button")}</div>
                 </div>
               </ContextMenuItem>
             </>

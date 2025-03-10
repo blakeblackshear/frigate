@@ -37,8 +37,9 @@ import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
-import { Trans } from "react-i18next";
+
 import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useTranslation } from "react-i18next";
 
 type MasksAndZoneViewProps = {
   selectedCamera: string;
@@ -51,6 +52,7 @@ export default function MasksAndZonesView({
   selectedZoneMask,
   setUnsavedChanges,
 }: MasksAndZoneViewProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
@@ -481,7 +483,7 @@ export default function MasksAndZonesView({
             {editPane === undefined && (
               <>
                 <Heading as="h3" className="my-2">
-                  <Trans ns="views/settings">menu.masksAndZones</Trans>
+                  {t("menu.masksAndZones")}
                 </Heading>
                 <div className="flex w-full flex-col">
                   {(selectedZoneMask === undefined ||
@@ -491,18 +493,12 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              <Trans ns="views/settings">
-                                masksAndZones.zones.label
-                              </Trans>
+                              {t("masksAndZones.zones.label")}
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>
-                                <Trans ns="views/settings">
-                                  masksAndZones.zones.desc
-                                </Trans>
-                              </p>
+                              <p>{t("masksAndZones.zones.desc")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/zones"
@@ -510,9 +506,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans ns="views/settings">
-                                    masksAndZones.zones.desc.documentation
-                                  </Trans>{" "}
+                                  {t("masksAndZones.zones.desc.documentation")}{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -534,9 +528,7 @@ export default function MasksAndZonesView({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <Trans ns="views/settings">
-                              masksAndZones.zones.add
-                            </Trans>
+                            {t("masksAndZones.zones.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -567,18 +559,12 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              <Trans ns="views/settings">
-                                masksAndZones.motionMasks.label
-                              </Trans>
+                              {t("masksAndZones.motionMasks.label")}
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>
-                                <Trans ns="views/settings">
-                                  masksAndZones.motionMasks.desc
-                                </Trans>
-                              </p>
+                              <p>{t("masksAndZones.motionMasks.desc")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/masks#motion-masks"
@@ -586,9 +572,9 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans ns="views/settings">
-                                    masksAndZones.motionMasks.desc.documentation
-                                  </Trans>{" "}
+                                  {t(
+                                    "masksAndZones.motionMasks.desc.documentation",
+                                  )}{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -610,9 +596,7 @@ export default function MasksAndZonesView({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <Trans ns="views/settings">
-                              masksAndZones.motionMasks.add
-                            </Trans>
+                            {t("masksAndZones.motionMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -645,18 +629,12 @@ export default function MasksAndZonesView({
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
-                              <Trans ns="views/settings">
-                                masksAndZones.objectMasks.label
-                              </Trans>
+                              {t("masksAndZones.objectMasks.label")}
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>
-                                <Trans ns="views/settings">
-                                  masksAndZones.objectMasks.desc
-                                </Trans>
-                              </p>
+                              <p>{t("masksAndZones.objectMasks.desc")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/masks#object-filter-masks"
@@ -664,9 +642,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans ns="views/settings">
-                                    masksAndZones.objectMasks.documentation
-                                  </Trans>{" "}
+                                  {t("masksAndZones.objectMasks.documentation")}{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -688,9 +664,7 @@ export default function MasksAndZonesView({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <Trans ns="views/settings">
-                              masksAndZones.objectMasks.add
-                            </Trans>
+                            {t("masksAndZones.objectMasks.add")}
                           </TooltipContent>
                         </Tooltip>
                       </div>

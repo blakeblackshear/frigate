@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
+
 import { z } from "zod";
 
 type TextEntryDialogProps = {
@@ -37,6 +38,8 @@ export default function TextEntryDialog({
   const formSchema = z.object({
     text: z.string(),
   });
+
+  const { t } = useTranslation("components/dialog");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,10 +91,10 @@ export default function TextEntryDialog({
             />
             <DialogFooter className="pt-4">
               <Button type="button" onClick={() => setOpen(false)}>
-                <Trans>button.cancel</Trans>
+                {t("button.cancel")}
               </Button>
               <Button variant="select" type="submit">
-                <Trans>button.save</Trans>
+                {t("button.save")}
               </Button>
             </DialogFooter>
           </form>

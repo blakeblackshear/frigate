@@ -23,11 +23,11 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { LuExternalLink, LuInfo } from "react-icons/lu";
 import { Link } from "react-router-dom";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { Separator } from "@/components/ui/separator";
 import { isDesktop } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -40,6 +40,8 @@ const emptyObject = Object.freeze({});
 export default function ObjectSettingsView({
   selectedCamera,
 }: ObjectSettingsViewProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,55 +49,45 @@ export default function ObjectSettingsView({
   const DEBUG_OPTIONS = [
     {
       param: "bbox",
-      title: t("debug.boundingBoxes.title", { ns: "views/settings" }),
-      description: t("debug.boundingBoxes.desc", { ns: "views/settings" }),
+      title: t("debug.boundingBoxes.title"),
+      description: t("debug.boundingBoxes.desc"),
       info: (
         <>
           <p className="mb-2">
-            <strong>
-              <Trans ns="views/settings">debug.boundingBoxes.colors</Trans>
-            </strong>
+            <strong>{t("debug.boundingBoxes.colors")}</strong>
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <Trans ns="views/settings">debug.boundingBoxes.colors.info</Trans>
+            {t("debug.boundingBoxes.colors.info")}
           </ul>
         </>
       ),
     },
     {
       param: "timestamp",
-      title: t("debug.timestamp.title", { ns: "views/settings" }),
-      description: t("debug.timestamp.desc", { ns: "views/settings" }),
+      title: t("debug.timestamp.title"),
+      description: t("debug.timestamp.desc"),
     },
     {
       param: "zones",
-      title: t("debug.zones.title", { ns: "views/settings" }),
-      description: t("debug.zones.desc", { ns: "views/settings" }),
+      title: t("debug.zones.title"),
+      description: t("debug.zones.desc"),
     },
     {
       param: "mask",
-      title: t("debug.mask.title", { ns: "views/settings" }),
-      description: t("debug.mask.desc", { ns: "views/settings" }),
+      title: t("debug.mask.title"),
+      description: t("debug.mask.desc"),
     },
     {
       param: "motion",
-      title: t("debug.motion.title", { ns: "views/settings" }),
-      description: t("debug.motion.desc", { ns: "views/settings" }),
-      info: (
-        <>
-          <Trans ns="views/settings">debug.motion.tips</Trans>
-        </>
-      ),
+      title: t("debug.motion.title"),
+      description: t("debug.motion.desc"),
+      info: <>{t("debug.motion.tips")}</>,
     },
     {
       param: "regions",
-      title: t("debug.regions.title", { ns: "views/settings" }),
-      description: t("debug.regions.desc", { ns: "views/settings" }),
-      info: (
-        <>
-          <Trans ns="views/settings">debug.regions.tips</Trans>
-        </>
-      ),
+      title: t("debug.regions.title"),
+      description: t("debug.regions.desc"),
+      info: <>{t("debug.regions.tips")}</>,
     },
   ];
 
@@ -156,7 +148,7 @@ export default function ObjectSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          <Trans ns="views/settings">debug.title</Trans>
+          {t("debug.title")}
         </Heading>
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
@@ -166,12 +158,9 @@ export default function ObjectSettingsView({
                     .map((detector) => capitalizeFirstLetter(detector))
                     .join(",")
                 : "",
-              ns: "views/settings",
             })}
           </p>
-          <p>
-            <Trans ns="views/settings">debug.desc</Trans>
-          </p>
+          <p>{t("debug.desc")}</p>
         </div>
         {config?.cameras[cameraConfig.name]?.webui_url && (
           <div className="mb-5 text-sm text-muted-foreground">
@@ -191,11 +180,9 @@ export default function ObjectSettingsView({
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="debug">
-              <Trans ns="views/settings">debug.debugging</Trans>
-            </TabsTrigger>
+            <TabsTrigger value="debug">{t("debug.debugging")}</TabsTrigger>
             <TabsTrigger value="objectlist">
-              <Trans ns="views/settings">debug.objectList</Trans>
+              {t("debug.objectList")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="debug">
@@ -255,9 +242,7 @@ export default function ObjectSettingsView({
                             className="mb-0 cursor-pointer capitalize text-primary"
                             htmlFor="debugdraw"
                           >
-                            <Trans ns="views/settings">
-                              debug.objectShapeFilterDrawing.title
-                            </Trans>
+                            {t("debug.objectShapeFilterDrawing.title")}
                           </Label>
 
                           <Popover>
@@ -265,14 +250,12 @@ export default function ObjectSettingsView({
                               <div className="cursor-pointer p-0">
                                 <LuInfo className="size-4" />
                                 <span className="sr-only">
-                                  <Trans>button.info</Trans>
+                                  {t("button.info")}
                                 </span>
                               </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-80 text-sm">
-                              <Trans ns="views/settings">
-                                debug.objectShapeFilterDrawing.tips
-                              </Trans>
+                              {t("debug.objectShapeFilterDrawing.tips")}
                               <div className="mt-2 flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/object_filters#object-shape"
@@ -280,9 +263,7 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  <Trans ns="views/settings">
-                                    debug.objectShapeFilterDrawing.document
-                                  </Trans>
+                                  {t("debug.objectShapeFilterDrawing.document")}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -290,9 +271,7 @@ export default function ObjectSettingsView({
                           </Popover>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
-                          <Trans ns="views/settings">
-                            debug.objectShapeFilterDrawing.desc
-                          </Trans>
+                          {t("debug.objectShapeFilterDrawing.desc")}
                         </div>
                       </div>
                       <Switch
@@ -348,6 +327,7 @@ type ObjectListProps = {
 };
 
 function ObjectList({ cameraConfig, objects }: ObjectListProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const colormap = useMemo(() => {
@@ -441,9 +421,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
           );
         })
       ) : (
-        <div className="p-3 text-center">
-          <Trans ns="views/settings">debug.noObjects</Trans>
-        </div>
+        <div className="p-3 text-center">{t("debug.noObjects")}</div>
       )}
     </div>
   );

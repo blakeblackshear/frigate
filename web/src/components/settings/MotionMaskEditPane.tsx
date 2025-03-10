@@ -22,8 +22,7 @@ import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -52,6 +51,7 @@ export default function MotionMaskEditPane({
   snapPoints,
   setSnapPoints,
 }: MotionMaskEditPaneProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -107,9 +107,7 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished", {
-        ns: "views/settings",
-      }),
+      message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -170,11 +168,8 @@ export default function MotionMaskEditPane({
             polygon.name
               ? t("masksAndZones.motionMasks.toast.success", {
                   polygonName: polygon.name,
-                  ns: "views/settings",
                 })
-              : t("masksAndZones.motionMasks.toast.success.noName", {
-                  ns: "views/settings",
-                }),
+              : t("masksAndZones.motionMasks.toast.success.noName"),
             {
               position: "top-center",
             },
@@ -205,6 +200,7 @@ export default function MotionMaskEditPane({
     scaledHeight,
     setIsLoading,
     cameraConfig,
+    t,
   ]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -220,10 +216,8 @@ export default function MotionMaskEditPane({
   }
 
   useEffect(() => {
-    document.title = t("masksAndZones.motionMasks.documentTitle", {
-      ns: "views/settings",
-    });
-  }, []);
+    document.title = t("masksAndZones.motionMasks.documentTitle");
+  }, [t]);
 
   if (!polygon) {
     return;
@@ -234,13 +228,11 @@ export default function MotionMaskEditPane({
       <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
-          ? t("masksAndZones.motionMasks.edit", { ns: "views/settings" })
-          : t("masksAndZones.motionMasks.add", { ns: "views/settings" })}
+          ? t("masksAndZones.motionMasks.edit")
+          : t("masksAndZones.motionMasks.add")}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
-        <p>
-          <Trans ns="views/settings">masksAndZones.motionMasks.context</Trans>
-        </p>
+        <p>{t("masksAndZones.motionMasks.context")}</p>
 
         <div className="flex items-center text-primary">
           <Link
@@ -249,9 +241,7 @@ export default function MotionMaskEditPane({
             rel="noopener noreferrer"
             className="inline"
           >
-            <Trans ns="views/settings">
-              masksAndZones.motionMasks.context.documentation
-            </Trans>{" "}
+            {t("masksAndZones.motionMasks.context.documentation")}{" "}
             <LuExternalLink className="ml-2 inline-flex size-3" />
           </Link>
         </div>
@@ -262,7 +252,6 @@ export default function MotionMaskEditPane({
           <div className="my-1 inline-flex">
             {t("masksAndZones.motionMasks.point", {
               count: polygons[activePolygonIndex].points.length,
-              ns: "views/settings",
             })}
             {polygons[activePolygonIndex].isFinished && (
               <FaCheckCircle className="ml-2 size-5" />
@@ -278,9 +267,7 @@ export default function MotionMaskEditPane({
         </div>
       )}
       <div className="mb-3 text-sm text-muted-foreground">
-        <Trans ns="views/settings">
-          masksAndZones.motionMasks.clickDrawPolygon
-        </Trans>
+        {t("masksAndZones.motionMasks.clickDrawPolygon")}
       </div>
 
       <Separator className="my-3 bg-secondary" />
@@ -290,22 +277,17 @@ export default function MotionMaskEditPane({
           <div className="mb-3 text-sm text-danger">
             {t("masksAndZones.motionMasks.polygonAreaTooLarge", {
               polygonArea: Math.round(polygonArea * 100),
-              ns: "views/settings",
             })}
           </div>
           <div className="mb-3 text-sm text-primary">
-            <Trans ns="views/settings">
-              masksAndZones.motionMasks.polygonAreaTooLarge.tips
-            </Trans>
+            {t("masksAndZones.motionMasks.polygonAreaTooLarge.tips")}
             <Link
               to="https://github.com/blakeblackshear/frigate/discussions/13040"
               target="_blank"
               rel="noopener noreferrer"
               className="my-3 block"
             >
-              <Trans ns="views/settings">
-                masksAndZones.motionMasks.polygonAreaTooLarge.documentation
-              </Trans>{" "}
+              {t("masksAndZones.motionMasks.polygonAreaTooLarge.documentation")}{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -342,7 +324,7 @@ export default function MotionMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                <Trans>button.cancel</Trans>
+                {t("button.cancel")}
               </Button>
               <Button
                 variant="select"
@@ -354,12 +336,10 @@ export default function MotionMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>
-                      <Trans>button.saving</Trans>
-                    </span>
+                    <span>{t("button.saving")}</span>
                   </div>
                 ) : (
-                  <Trans>button.save</Trans>
+                  t("button.save")
                 )}
               </Button>
             </div>

@@ -21,7 +21,7 @@ import { DialogClose } from "../ui/dialog";
 import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
 import { t } from "i18next";
-import { Trans } from "react-i18next";
+
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -123,9 +123,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />
-              <span>
-                <Trans>menu.user.logout</Trans>
-              </span>
+              <span>{t("menu.user.logout")}</span>
             </a>
           </MenuItem>
         </div>

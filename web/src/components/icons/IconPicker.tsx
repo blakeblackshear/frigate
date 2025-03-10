@@ -11,8 +11,8 @@ import { IoClose } from "react-icons/io5";
 import Heading from "../ui/heading";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
+import { useTranslation } from "react-i18next";
 
 export type IconName = keyof typeof LuIcons;
 
@@ -32,6 +32,7 @@ export default function IconPicker({
   selectedIcon,
   setSelectedIcon,
 }: IconPickerProps) {
+  const { t } = useTranslation(["components/icons"]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,7 +73,7 @@ export default function IconPicker({
               className="mt-2 w-full text-muted-foreground"
               aria-label="Select an icon"
             >
-              <Trans ns="components/icons">iconPicker.selectIcon</Trans>
+              {t("iconPicker.selectIcon")}
             </Button>
           ) : (
             <div className="hover:cursor-pointer">
@@ -103,9 +104,7 @@ export default function IconPicker({
           className="flex max-h-[50dvh] flex-col overflow-y-hidden md:max-h-[30dvh]"
         >
           <div className="mb-3 flex flex-row items-center justify-between">
-            <Heading as="h4">
-              <Trans ns="components/icons">iconPicker.selectIcon</Trans>
-            </Heading>
+            <Heading as="h4">{t("iconPicker.selectIcon")}</Heading>
             <span tabIndex={0} className="sr-only" />
             <IoClose
               size={15}

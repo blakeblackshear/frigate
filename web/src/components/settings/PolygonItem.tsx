@@ -36,7 +36,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { buttonVariants } from "../ui/button";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -57,6 +57,7 @@ export default function PolygonItem({
   setEditPane,
   handleCopyCoordinates,
 }: PolygonItemProps) {
+  const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -318,9 +319,7 @@ export default function PolygonItem({
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>
-                <Trans>button.edit</Trans>
-              </TooltipContent>
+              <TooltipContent>{t("button.edit")}</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -333,9 +332,7 @@ export default function PolygonItem({
                   onClick={() => handleCopyCoordinates(index)}
                 />
               </TooltipTrigger>
-              <TooltipContent>
-                <Trans>button.copyCoordinates</Trans>
-              </TooltipContent>
+              <TooltipContent>{t("button.copyCoordinates")}</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -349,9 +346,7 @@ export default function PolygonItem({
                   onClick={() => !isLoading && setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>
-              <TooltipContent>
-                <Trans>button.delete</Trans>
-              </TooltipContent>
+              <TooltipContent>{t("button.delete")}</TooltipContent>
             </Tooltip>
           </div>
         )}

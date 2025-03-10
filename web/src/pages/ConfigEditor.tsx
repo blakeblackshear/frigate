@@ -14,11 +14,12 @@ import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type SaveOptions = "saveonly" | "restart";
 
 function ConfigEditor() {
+  const { t } = useTranslation(["views/configEditor"]);
   const apiHost = useApiHost();
 
   useEffect(() => {
@@ -191,7 +192,7 @@ function ConfigEditor() {
       <div className="relative h-full overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            <Trans ns="views/configEditor">configEditor</Trans>
+            {t("configEditor")}
           </Heading>
           <div className="flex flex-row gap-1">
             <Button
@@ -201,9 +202,7 @@ function ConfigEditor() {
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
-              <span className="hidden md:block">
-                <Trans ns="views/configEditor">copyConfig</Trans>
-              </span>
+              <span className="hidden md:block">{t("copyConfig")}</span>
             </Button>
             <Button
               size="sm"
@@ -215,9 +214,7 @@ function ConfigEditor() {
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
-              <span className="hidden md:block">
-                <Trans ns="views/configEditor">saveAndRestart</Trans>
-              </span>
+              <span className="hidden md:block">{t("saveAndRestart")}</span>
             </Button>
             <Button
               size="sm"
@@ -226,9 +223,7 @@ function ConfigEditor() {
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block">
-                <Trans ns="views/configEditor">saveOnly</Trans>
-              </span>
+              <span className="hidden md:block">{t("saveOnly")}</span>
             </Button>
           </div>
         </div>

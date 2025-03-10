@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
-import { Trans } from "react-i18next";
+
 import { t } from "i18next";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
@@ -247,7 +247,7 @@ export default function MobileReviewSettingsDrawer({
               });
             }}
           >
-            <Trans>button.reset</Trans>
+            {t("button.reset")}
           </Button>
         </div>
       </div>

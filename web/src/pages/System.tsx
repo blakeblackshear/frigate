@@ -14,15 +14,15 @@ import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { Toaster } from "@/components/ui/sonner";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
 import { FrigateConfig } from "@/types/frigateConfig";
 import FeatureMetrics from "@/views/system/FeatureMetrics";
+import { useTranslation } from "react-i18next";
 
 const allMetrics = ["general", "features", "storage", "cameras"] as const;
 type SystemMetric = (typeof allMetrics)[number];
 
 function System() {
+  const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -94,9 +94,7 @@ function System() {
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && (
-                <div className="capitalize">
-                  {t(item + ".title", { ns: "views/system" })}
-                </div>
+                <div className="capitalize">{t(item + ".title")}</div>
               )}
             </ToggleGroupItem>
           ))}
@@ -105,16 +103,14 @@ function System() {
         <div className="flex h-full items-center">
           {lastUpdated && (
             <div className="h-full content-center text-sm text-muted-foreground">
-              <Trans ns="views/system">lastRefreshed</Trans>
+              {t("lastRefreshed")}
               <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <div className="h-full content-center font-medium">
-          <Trans ns="views/system">title</Trans>
-        </div>
+        <div className="h-full content-center font-medium">{t("title")}</div>
         {statsSnapshot && (
           <div className="h-full content-center text-sm text-muted-foreground">
             {statsSnapshot.service.version}

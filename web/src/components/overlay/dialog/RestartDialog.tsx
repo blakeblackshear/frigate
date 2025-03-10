@@ -18,8 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { baseUrl } from "@/api/baseUrl";
-import { t } from "i18next";
-import { Trans } from "react-i18next";
+
+import { useTranslation } from "react-i18next";
 
 type RestartDialogProps = {
   isOpen: boolean;
@@ -32,6 +32,7 @@ export default function RestartDialog({
   onClose,
   onRestart,
 }: RestartDialogProps) {
+  const { t } = useTranslation("components/dialog");
   const [restartDialogOpen, setRestartDialogOpen] = useState(isOpen);
   const [restartingSheetOpen, setRestartingSheetOpen] = useState(false);
   const [countdown, setCountdown] = useState(60);
@@ -80,16 +81,12 @@ export default function RestartDialog({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              <Trans ns="components/dialog">restart.title</Trans>
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("restart.title")}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              <Trans>button.cancel</Trans>
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleRestart}>
-              <Trans ns="components/dialog">restart.button</Trans>
+              {t("restart.button")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -104,13 +101,12 @@ export default function RestartDialog({
             <ActivityIndicator />
             <SheetHeader className="mt-5 text-center">
               <SheetTitle className="text-center">
-                <Trans ns="components/dialog">restart.restarting.title</Trans>
+                {t("restart.restarting.title")}
               </SheetTitle>
               <SheetDescription className="text-center">
                 <div>
                   {t("restart.restarting.content", {
                     countdown,
-                    ns: "components/dialog",
                   })}
                 </div>
               </SheetDescription>
@@ -121,7 +117,7 @@ export default function RestartDialog({
               aria-label="Force reload now"
               onClick={handleForceReload}
             >
-              <Trans ns="components/dialog">restart.restarting.button</Trans>
+              {t("restart.restarting.button")}
             </Button>
           </div>
         </SheetContent>

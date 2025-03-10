@@ -22,8 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import {
   Select,
   SelectContent,
@@ -33,6 +32,7 @@ import {
 } from "../ui/select";
 import { Shield, User } from "lucide-react";
 import { LuCheck, LuX } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
 
 type CreateUserOverlayProps = {
   show: boolean;
@@ -45,31 +45,23 @@ export default function CreateUserDialog({
   onCreate,
   onCancel,
 }: CreateUserOverlayProps) {
+  const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const formSchema = z
     .object({
       user: z
         .string()
-        .min(
-          1,
-          t("users.dialog.form.usernameIsRequired", {
-            ns: "views/settings",
-          }),
-        )
+        .min(1, t("users.dialog.form.usernameIsRequired"))
         .regex(/^[A-Za-z0-9._]+$/, {
-          message: t("users.dialog.createUser.usernameOnlyInclude", {
-            ns: "views/settings",
-          }),
+          message: t("users.dialog.createUser.usernameOnlyInclude"),
         }),
       password: z.string().min(1, "Password is required"),
       confirmPassword: z.string().min(1, "Please confirm your password"),
       role: z.enum(["admin", "viewer"]),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: t("users.dialog.form.password.notMatch", {
-        ns: "views/settings",
-      }),
+      message: t("users.dialog.form.password.notMatch"),
       path: ["confirmPassword"],
     });
 
@@ -120,11 +112,9 @@ export default function CreateUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            <Trans ns="views/settings">users.dialog.createUser.title</Trans>
-          </DialogTitle>
+          <DialogTitle>{t("users.dialog.createUser.title")}</DialogTitle>
           <DialogDescription>
-            <Trans ns="views/settings">users.dialog.createUser.desc</Trans>
+            {t("users.dialog.createUser.desc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -138,21 +128,17 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">users.dialog.form.user</Trans>
+                    {t("users.dialog.form.user")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("users.dialog.form.user.placeholder", {
-                        ns: "views/settings",
-                      })}
+                      placeholder={t("users.dialog.form.user.placeholder")}
                       className="h-10"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-muted-foreground">
-                    <Trans ns="views/settings">
-                      users.dialog.form.user.desc
-                    </Trans>
+                    {t("users.dialog.form.user.desc")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -164,15 +150,11 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">
-                      users.dialog.form.password
-                    </Trans>
+                    {t("users.dialog.form.password")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("users.dialog.form.password.placeholder", {
-                        ns: "views/settings",
-                      })}
+                      placeholder={t("users.dialog.form.password.placeholder")}
                       type="password"
                       className="h-10"
                       {...field}
@@ -188,15 +170,12 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans ns="views/settings">
-                      users.dialog.form.password.confirm
-                    </Trans>
+                    {t("users.dialog.form.password.confirm")}
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder={t(
                         "users.dialog.form.password.confirm.placeholder",
-                        { ns: "views/settings" },
                       )}
                       type="password"
                       className="h-10"
@@ -209,18 +188,14 @@ export default function CreateUserDialog({
                         <>
                           <LuCheck className="size-3.5 text-green-500" />
                           <span className="text-green-600">
-                            <Trans ns="views/settings">
-                              users.dialog.form.password.match
-                            </Trans>
+                            {t("users.dialog.form.password.match")}
                           </span>
                         </>
                       ) : (
                         <>
                           <LuX className="size-3.5 text-red-500" />
                           <span className="text-red-600">
-                            <Trans ns="views/settings">
-                              users.dialog.form.password.notMatch
-                            </Trans>
+                            {t("users.dialog.form.password.notMatch")}
                           </span>
                         </>
                       )}
@@ -236,7 +211,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    <Trans>role.title</Trans>
+                    {t("role.title")}
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -254,9 +229,7 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <Shield className="h-4 w-4 text-primary" />
-                          <span>
-                            <Trans>role.admin</Trans>
-                          </span>
+                          <span>{t("role.admin")}</span>
                         </div>
                       </SelectItem>
                       <SelectItem
@@ -265,15 +238,13 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            <Trans>role.viewer</Trans>
-                          </span>
+                          <span>{t("role.viewer")}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription className="text-xs text-muted-foreground">
-                    <Trans>role.desc</Trans>
+                    {t("role.desc")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -290,7 +261,7 @@ export default function CreateUserDialog({
                     onClick={handleCancel}
                     type="button"
                   >
-                    <Trans>button.cancel</Trans>
+                    {t("button.cancel")}
                   </Button>
                   <Button
                     variant="select"
@@ -302,12 +273,10 @@ export default function CreateUserDialog({
                     {isLoading ? (
                       <div className="flex flex-row items-center gap-2">
                         <ActivityIndicator />
-                        <span>
-                          <Trans>button.saving</Trans>
-                        </span>
+                        <span>{t("button.saving")}</span>
                       </div>
                     ) : (
-                      <Trans>button.save</Trans>
+                      t("button.save")
                     )}
                   </Button>
                 </div>

@@ -9,7 +9,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { NavData } from "@/types/navigation";
 import { IconType } from "react-icons";
 import { cn } from "@/lib/utils";
-import { Trans } from "react-i18next";
+import { t } from "i18next";
 
 const variants = {
   primary: {
@@ -61,9 +61,7 @@ export default function NavItem({
         <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
-            <p>
-              <Trans>{item.title}</Trans>
-            </p>
+            <p>{t("{item.title}")}</p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>

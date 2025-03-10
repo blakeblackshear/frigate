@@ -103,8 +103,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { useSessionPersistence } from "@/hooks/use-session-persistence";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+
 import {
   Select,
   SelectContent,
@@ -119,6 +118,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useTranslation } from "react-i18next";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -134,6 +134,7 @@ export default function LiveCameraView({
   fullscreen,
   toggleFullscreen,
 }: LiveCameraViewProps) {
+  const { t } = useTranslation(["views/live"]);
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
@@ -435,9 +436,7 @@ export default function LiveCameraView({
               >
                 <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                 {isDesktop && (
-                  <div className="text-primary">
-                    <Trans>button.back</Trans>
-                  </div>
+                  <div className="text-primary">{t("button.back")}</div>
                 )}
               </Button>
               <Button
@@ -459,9 +458,7 @@ export default function LiveCameraView({
               >
                 <LuHistory className="size-5 text-secondary-foreground" />
                 {isDesktop && (
-                  <div className="text-primary">
-                    <Trans>button.history</Trans>
-                  </div>
+                  <div className="text-primary">{t("button.history")}</div>
                 )}
               </Button>
             </div>
@@ -482,7 +479,7 @@ export default function LiveCameraView({
                   <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                   {isDesktop && (
                     <div className="text-secondary-foreground">
-                      <Trans>button.back</Trans>
+                      {t("button.back")}
                     </div>
                   )}
                 </Button>
@@ -681,6 +678,7 @@ function PtzControlPanel({
   clickOverlay: boolean;
   setClickOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const { t } = useTranslation(["views/live"]);
   const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
 
   const { send: sendPtz } = usePtzCommand(camera);
@@ -766,7 +764,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("pt") && (
         <>
           <TooltipButton
-            label={t("ptz.move.left.label", { ns: "views/live" })}
+            label={t("ptz.move.left.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_LEFT");
@@ -781,7 +779,7 @@ function PtzControlPanel({
             <FaAngleLeft />
           </TooltipButton>
           <TooltipButton
-            label={t("ptz.move.up.label", { ns: "views/live" })}
+            label={t("ptz.move.up.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_UP");
@@ -796,7 +794,7 @@ function PtzControlPanel({
             <FaAngleUp />
           </TooltipButton>
           <TooltipButton
-            label={t("ptz.move.down.label", { ns: "views/live" })}
+            label={t("ptz.move.down.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_DOWN");
@@ -811,7 +809,7 @@ function PtzControlPanel({
             <FaAngleDown />
           </TooltipButton>
           <TooltipButton
-            label={t("ptz.move.right.label", { ns: "views/live" })}
+            label={t("ptz.move.right.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_RIGHT");
@@ -830,7 +828,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("zoom") && (
         <>
           <TooltipButton
-            label={t("ptz.zoom.in.label", { ns: "views/live" })}
+            label={t("ptz.zoom.in.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_IN");
@@ -845,7 +843,7 @@ function PtzControlPanel({
             <MdZoomIn />
           </TooltipButton>
           <TooltipButton
-            label={t("ptz.zoom.out.label", { ns: "views/live" })}
+            label={t("ptz.zoom.out.label")}
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_OUT");
@@ -981,6 +979,8 @@ function FrigateCameraFeatures({
   supports2WayTalk,
   cameraEnabled,
 }: FrigateCameraFeaturesProps) {
+  const { t } = useTranslation(["views/live"]);
+
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
   );
@@ -1024,15 +1024,9 @@ function FrigateCameraFeatures({
         setIsRecording(true);
         const toastId = toast.success(
           <div className="flex flex-col space-y-3">
-            <div className="font-semibold">
-              <Trans ns="views/live">manualRecording.started</Trans>
-            </div>
+            <div className="font-semibold">{t("manualRecording.started")}</div>
             {!camera.record.enabled || camera.record.retain.days == 0 ? (
-              <div>
-                <Trans ns="views/live">
-                  manualRecording.recordDisabledTips
-                </Trans>
-              </div>
+              <div>{t("manualRecording.recordDisabledTips")}</div>
             ) : (
               <OnDemandRetentionMessage camera={camera} />
             )}
@@ -1045,11 +1039,11 @@ function FrigateCameraFeatures({
         setActiveToastId(toastId);
       }
     } catch (error) {
-      toast.error(t("manualRecording.failedToStart", { ns: "views/live" }), {
+      toast.error(t("manualRecording.failedToStart"), {
         position: "top-center",
       });
     }
-  }, [camera]);
+  }, [camera, t]);
 
   const endEvent = useCallback(() => {
     if (activeToastId) {
@@ -1062,16 +1056,16 @@ function FrigateCameraFeatures({
         });
         recordingEventIdRef.current = null;
         setIsRecording(false);
-        toast.success(t("manualRecording.ended", { ns: "views/live" }), {
+        toast.success(t("manualRecording.ended"), {
           position: "top-center",
         });
       }
     } catch (error) {
-      toast.error(t("manualRecording.failedToEnd", { ns: "views/live" }), {
+      toast.error(t("manualRecording.failedToEnd"), {
         position: "top-center",
       });
     }
-  }, [activeToastId]);
+  }, [activeToastId, t]);
 
   const handleEventButtonClick = useCallback(() => {
     if (isRecording) {
@@ -1174,9 +1168,7 @@ function FrigateCameraFeatures({
           variant={fullscreen ? "overlay" : "primary"}
           Icon={isRecording ? TbRecordMail : TbRecordMailOff}
           isActive={isRecording}
-          title={t("manualRecording." + (isRecording ? "stop" : "start"), {
-            ns: "views/live",
-          })}
+          title={t("manualRecording." + (isRecording ? "stop" : "start"))}
           onClick={handleEventButtonClick}
           disabled={!cameraEnabled}
         />
@@ -1197,15 +1189,13 @@ function FrigateCameraFeatures({
             <div className="flex flex-col gap-5 p-4">
               {!isRestreamed && (
                 <div className="flex flex-col gap-2">
-                  <Label>
-                    <Trans ns="components/dialog">streaming</Trans>
-                  </Label>
+                  <Label>{t("streaming", { ns: "components/dialog" })}</Label>
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                     <LuX className="size-4 text-danger" />
                     <div>
-                      <Trans ns="components/dialog">
-                        streaming.restreaming.disabled
-                      </Trans>
+                      {t("streaming.restreaming.disabled", {
+                        ns: "components/dialog",
+                      })}
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -1215,9 +1205,9 @@ function FrigateCameraFeatures({
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 text-xs">
-                        <Trans ns="components/dialog">
-                          streaming.restreaming.desc
-                        </Trans>
+                        {t("streaming.restreaming.desc", {
+                          ns: "components/dialog",
+                        })}
                         <div className="mt-2 flex items-center text-primary">
                           <Link
                             to="https://docs.frigate.video/configuration/live"
@@ -1225,9 +1215,9 @@ function FrigateCameraFeatures({
                             rel="noopener noreferrer"
                             className="inline"
                           >
-                            <Trans ns="components/dialog">
-                              streaming.restreaming.readTheDocumentation
-                            </Trans>
+                            {t("streaming.restreaming.readTheDocumentation", {
+                              ns: "components/dialog",
+                            })}
                             <LuExternalLink className="ml-2 inline-flex size-3" />
                           </Link>
                         </div>
@@ -1408,7 +1398,7 @@ function FrigateCameraFeatures({
                     className="mx-0 cursor-pointer text-primary"
                     htmlFor="showstats"
                   >
-                    <Trans ns="components/dialog">streaming.showStats</Trans>
+                    {t("streaming.showStats", { ns: "components/dialog" })}
                   </Label>
                   <Switch
                     className="ml-1"
@@ -1418,12 +1408,12 @@ function FrigateCameraFeatures({
                   />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  <Trans ns="components/dialog">streaming.showStats.desc</Trans>
+                  {t("streaming.showStats.desc", { ns: "components/dialog" })}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-sm font-medium leading-none">
-                  <Trans ns="components/dialog">streaming.debugView</Trans>
+                  {t("streaming.debugView", { ns: "components/dialog" })}
                   <LuExternalLink
                     onClick={() =>
                       navigate(`/settings?page=debug&camera=${camera.name}`)
@@ -1514,15 +1504,13 @@ function FrigateCameraFeatures({
         <div className="mt-3 flex flex-col gap-5">
           {!isRestreamed && (
             <div className="flex flex-col gap-2 p-2">
-              <Label>
-                <Trans ns="components/dialog">streaming</Trans>
-              </Label>
+              <Label>{t("streaming", { ns: "components/dialog" })}</Label>
               <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                 <LuX className="size-4 text-danger" />
                 <div>
-                  <Trans ns="components/dialog">
-                    streaming.restreaming.disabled
-                  </Trans>
+                  {t("streaming.restreaming.disabled", {
+                    ns: "components/dialog",
+                  })}
                 </div>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -1532,9 +1520,9 @@ function FrigateCameraFeatures({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 text-xs">
-                    <Trans ns="components/dialog">
-                      streaming.restreaming.desc
-                    </Trans>
+                    {t("streaming.restreaming.desc", {
+                      ns: "components/dialog",
+                    })}
                     <div className="mt-2 flex items-center text-primary">
                       <Link
                         to="https://docs.frigate.video/configuration/live"
@@ -1542,9 +1530,9 @@ function FrigateCameraFeatures({
                         rel="noopener noreferrer"
                         className="inline"
                       >
-                        <Trans ns="components/dialog">
-                          streaming.restreaming.readTheDocumentation
-                        </Trans>
+                        {t("streaming.restreaming.readTheDocumentation", {
+                          ns: "components/dialog",
+                        })}
                         <LuExternalLink className="ml-2 inline-flex size-3" />
                       </Link>
                     </div>
@@ -1697,9 +1685,7 @@ function FrigateCameraFeatures({
                 isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
               )}
             >
-              <Trans ns="views/live">
-                manualRecording.{isRecording ? "end" : "start"}
-              </Trans>
+              {t("manualRecording." + isRecording ? "end" : "start")}
             </Button>
             <p className="text-sm text-muted-foreground">
               Start a manual event based on this camera's recording retention

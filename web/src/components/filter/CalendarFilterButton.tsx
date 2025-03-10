@@ -15,7 +15,6 @@ import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { t } from "i18next";
-import { Trans } from "react-i18next";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -70,7 +69,7 @@ export default function CalendarFilterButton({
             updateSelectedDay(undefined);
           }}
         >
-          <Trans>button.reset</Trans>
+          {t("button.reset")}
         </Button>
       </div>
     </>

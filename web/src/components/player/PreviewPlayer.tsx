@@ -20,7 +20,7 @@ import {
   getPreviewForTimeRange,
   usePreviewForTimeRange,
 } from "@/hooks/use-camera-previews";
-import { Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -43,6 +43,7 @@ export default function PreviewPlayer({
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
   const currentPreview = usePreviewForTimeRange(
     cameraPreviews,
@@ -89,7 +90,7 @@ export default function PreviewPlayer({
         className,
       )}
     >
-      <Trans ns="components/player">noPreviewFound</Trans>
+      {t("noPreviewFound")}
     </div>
   );
 }
@@ -134,6 +135,7 @@ function PreviewVideoPlayer({
   onClick,
   setCurrentHourFrame,
 }: PreviewVideoPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // controlling playback
@@ -325,12 +327,7 @@ function PreviewVideoPlayer({
       </video>
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background_alt text-primary dark:bg-black md:rounded-2xl">
-          <Trans
-            ns="components/player"
-            value={{ camera: camera.replaceAll("_", " ") }}
-          >
-            noPreviewFoundFor
-          </Trans>
+          {t("noPreviewFoundFor", { camera: camera.replaceAll("_", " ") })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
@@ -450,6 +447,8 @@ function PreviewFramesPlayer({
   onControllerReady,
   onClick,
 }: PreviewFramesPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
+
   // frames data
 
   const { data: previewFrames } = useSWR<string[]>(
@@ -550,12 +549,7 @@ function PreviewFramesPlayer({
       />
       {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary dark:bg-black md:rounded-2xl">
-          <Trans
-            ns="components/player"
-            values={{ cameraName: camera.replaceAll("_", " ") }}
-          >
-            noPreviewFoundFor
-          </Trans>
+          {t("noPreviewFoundFor", { cameraName: camera.replaceAll("_", " ") })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
