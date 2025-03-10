@@ -800,7 +800,6 @@ class TrackedObjectProcessor(threading.Thread):
                     break
 
                 (event_id, sub_label, score) = payload
-
                 self.set_sub_label(event_id, sub_label, score)
 
             try:

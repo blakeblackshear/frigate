@@ -23,7 +23,7 @@ class EventMetadataPublisher(Publisher):
         super().__init__()
 
     def publish(self, topic: EventMetadataTypeEnum, payload: any) -> None:
-        super().publish(payload, topic)
+        super().publish(payload, topic.value)
 
 
 class EventMetadataSubscriber(Subscriber):
@@ -32,8 +32,7 @@ class EventMetadataSubscriber(Subscriber):
     topic_base = "event_metadata/"
 
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+        super().__init__(topic.value)
 
     def check_for_update(self, timeout: float = 1) -> tuple | None:
         return super().check_for_update(timeout)

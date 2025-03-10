@@ -15,6 +15,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
 from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
     EventMetadataSubscriber,
     EventMetadataTypeEnum,
 )
@@ -89,6 +90,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
+        self.event_metadata_publisher = EventMetadataPublisher()
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
@@ -108,15 +110,15 @@ class EmbeddingMaintainer(threading.Thread):
         self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.realtime_processors.append(FaceRealTimeProcessor(self.config, metrics))
+            self.realtime_processors.append(FaceRealTimeProcessor(self.config, self.event_metadata_publisher, metrics))
 
         if self.config.classification.bird.enabled:
-            self.realtime_processors.append(BirdRealTimeProcessor(self.config, metrics))
+            self.realtime_processors.append(BirdRealTimeProcessor(self.config, self.event_metadata_publisher, metrics))
 
         if self.config.lpr.enabled:
             self.realtime_processors.append(
                 LicensePlateRealTimeProcessor(
-                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config, self.event_metadata_publisher, metrics, lpr_model_runner, self.detected_license_plates
                 )
             )
 
@@ -126,7 +128,7 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
-                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config, self.event_metadata_publisher, metrics, lpr_model_runner, self.detected_license_plates
                 )
             )
 
@@ -150,6 +152,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
+        self.event_metadata_publisher.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
         self.requestor.stop()

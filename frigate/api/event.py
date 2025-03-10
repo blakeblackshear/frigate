@@ -999,7 +999,7 @@ def set_sub_label(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        (event_id, new_sub_label, new_score), EventMetadataTypeEnum.sub_label
+        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
     )
 
     return JSONResponse(
@@ -1082,7 +1082,7 @@ def regenerate_description(
 
     if camera_config.genai.enabled:
         request.app.event_metadata_updater.publish(
-            (event.id, params.source), EventMetadataTypeEnum.regenerate_description
+            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
         )
 
         return JSONResponse(
