@@ -119,7 +119,7 @@ class User(Model):  # type: ignore[misc]
     username = CharField(null=False, primary_key=True, max_length=30)
     role = CharField(
         max_length=20,
-        default="viewer",
+        default="admin",
     )
     password_hash = CharField(null=False, max_length=120)
     notification_tokens = JSONField()
