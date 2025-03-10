@@ -43,7 +43,7 @@ from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
-from frigate.events.types import EventTypeEnum
+from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
@@ -375,15 +375,17 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
-        (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
-            timeout=0.01
-        )
+        (topic, payload) = self.event_metadata_subscriber.check_for_update(timeout=0.01)
 
         if topic is None:
             return
 
+        event_id, source = payload
+
         if event_id:
-            self.handle_regenerate_description(event_id, source)
+            self.handle_regenerate_description(
+                event_id, RegenerateDescriptionEnum(source)
+            )
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""

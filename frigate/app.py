@@ -20,10 +20,7 @@ from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Dispatcher
-from frigate.comms.event_metadata_updater import (
-    EventMetadataPublisher,
-    EventMetadataTypeEnum,
-)
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
@@ -327,9 +324,7 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
-        self.event_metadata_updater = EventMetadataPublisher(
-            EventMetadataTypeEnum.regenerate_description
-        )
+        self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_onvif(self) -> None:
