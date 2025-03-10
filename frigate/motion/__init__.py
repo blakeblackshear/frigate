@@ -11,9 +11,8 @@ class MotionDetector(ABC):
         frame_shape: Tuple[int, int, int],
         config: MotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
+        name: str = 'abc',
+        ptx_metrics = None,
     ):
         pass
 
