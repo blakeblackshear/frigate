@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -191,6 +192,22 @@ export default function FaceLibrary() {
         });
       });
   }, [selectedFaces, refreshFaces]);
+
+  // keyboard
+
+  useKeyboardListener(["a"], (key, modifiers) => {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "a":
+        if (modifiers.ctrl) {
+          setSelectedFaces([...trainImages]);
+        }
+        break;
+    }
+  });
 
   if (!config) {
     return <ActivityIndicator />;
