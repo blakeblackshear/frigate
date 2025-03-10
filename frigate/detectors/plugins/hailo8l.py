@@ -343,7 +343,7 @@ class HailoDetector(DetectionApi):
             raise ValueError("Invalid model URL. Only .hef files are supported.")
         try:
             urllib.request.urlretrieve(url, destination)
-            print(f"Downloaded model to {destination}")
+            logger.debug(f"Downloaded model to {destination}")
         except Exception as e:
             raise RuntimeError(f"Failed to download model from {url}: {str(e)}")
 
@@ -354,20 +354,20 @@ class HailoDetector(DetectionApi):
         cached_model_path = os.path.join(self.cache_dir, model_name)
         if not self.model_path and not self.url:
             if os.path.exists(cached_model_path):
-                print(f"Model found in cache: {cached_model_path}")
+                logger.debug(f"Model found in cache: {cached_model_path}")
                 return cached_model_path
             else:
-                print(f"Downloading default model: {model_name}")
+                logger.debug(f"Downloading default model: {model_name}")
                 if ARCH == "hailo8":
                     self.download_model(H8_DEFAULT_URL, cached_model_path)
                 else:
                     self.download_model(H8L_DEFAULT_URL, cached_model_path)
         elif self.url:
-            print(f"Downloading model from URL: {self.url}")
+            logger.debug(f"Downloading model from URL: {self.url}")
             self.download_model(self.url, cached_model_path)
         elif self.model_path:
             if os.path.exists(self.model_path):
-                print(f"Using existing model at: {self.model_path}")
+                logger.debug(f"Using existing model at: {self.model_path}")
                 return self.model_path
             else:
                 raise FileNotFoundError(f"Model file not found at: {self.model_path}")
