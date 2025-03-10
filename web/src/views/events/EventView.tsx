@@ -757,7 +757,12 @@ function DetectionReview({
                       />
                     </div>
                     <div
-                      className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
+                      className={cn(
+                        "review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px]",
+                        selected
+                          ? `outline-severity_${value.severity} shadow-severity_${value.severity}`
+                          : "outline-transparent duration-500",
+                      )}
                     />
                   </div>
                 );
