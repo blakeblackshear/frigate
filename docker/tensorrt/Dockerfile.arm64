@@ -86,6 +86,9 @@ RUN apt-get -qq update \
     libx264-163 libx265-199 libegl1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Fixes "Error loading shared libs"
+RUN mkdir -p /etc/ld.so.conf.d && echo /usr/lib/ffmpeg/jetson/lib/ > /etc/ld.so.conf.d/ffmpeg.conf
+
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     --mount=type=bind,from=trt-model-wheels,source=/trt-model-wheels,target=/deps/trt-model-wheels \
