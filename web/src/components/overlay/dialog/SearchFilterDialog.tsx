@@ -33,7 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -176,7 +176,7 @@ export default function SearchFilterDialog({
             setOpen(false);
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
           aria-label="Reset filters to default values"
@@ -196,7 +196,7 @@ export default function SearchFilterDialog({
             }));
           }}
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </div>
@@ -691,14 +691,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              {t("button.yes")}
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              {t("button.no")}
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -732,7 +732,9 @@ export function SnapshotClipFilterContent({
                       side="left"
                       sideOffset={5}
                     >
-                      {t("features.submittedToFrigatePlus.tips")}
+                      <Trans ns="components/filter">
+                        features.submittedToFrigatePlus.tips
+                      </Trans>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -767,14 +769,14 @@ export function SnapshotClipFilterContent({
                 aria-label="Yes"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                {t("button.yes")}
+                {t("button.yes", { ns: "common" })}
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
                 aria-label="No"
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                {t("button.no")}
+                {t("button.no", { ns: "common" })}
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -822,14 +824,14 @@ export function SnapshotClipFilterContent({
               aria-label="Yes"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              {t("button.yes")}
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
               aria-label="No"
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              {t("button.no")}
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

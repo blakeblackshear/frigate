@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -236,7 +236,11 @@ export default function MotionTunerView({
                 {t("motionDetectionTuner.contourArea")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
-                <p>{t("motionDetectionTuner.contourArea.desc")}</p>
+                <p>
+                  <Trans ns="views/settings">
+                    motionDetectionTuner.contourArea.desc
+                  </Trans>
+                </p>
               </div>
             </div>
             <div className="flex flex-row justify-between">
@@ -264,7 +268,9 @@ export default function MotionTunerView({
                 {t("motionDetectionTuner.improveContrast")}
               </Label>
               <div className="text-sm text-muted-foreground">
-                {t("motionDetectionTuner.improveContrast.desc")}
+                <Trans ns="views/settings">
+                  motionDetectionTuner.improveContrast.desc
+                </Trans>
               </div>
             </div>
             <Switch
@@ -285,7 +291,7 @@ export default function MotionTunerView({
               aria-label="Reset"
               onClick={onCancel}
             >
-              {t("button.reset")}
+              {t("button.reset", { ns: "common" })}
             </Button>
             <Button
               variant="select"
@@ -297,10 +303,10 @@ export default function MotionTunerView({
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span>{t("button.saving")}</span>
+                  <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (
-                t("button.save")
+                t("button.save", { ns: "common" })
               )}
             </Button>
           </div>

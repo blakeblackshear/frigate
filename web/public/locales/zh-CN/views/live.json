@@ -38,6 +38,10 @@
       }
     }
   },
+  "camera": {
+    "enable": "开启摄像头",
+    "disable": "关闭摄像头"
+  },
   "detect": {
     "enable": "启用检测",
     "disable": "关闭检测"

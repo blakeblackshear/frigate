@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
 
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -154,7 +154,7 @@ export default function SearchResultActions({
         onClick={() => setDeleteDialogOpen(true)}
       >
         <LuTrash2 className="mr-2 size-4" />
-        <span>{t("button.delete")}</span>
+        <span>{t("button.delete", { ns: "common" })}</span>
       </MenuItem>
     </>
   );
@@ -170,15 +170,17 @@ export default function SearchResultActions({
             <AlertDialogTitle>{t("dialog.confirmDelete")}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            {t("dialog.confirmDelete.desc")}
+            <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
-              {t("button.delete")}
+              {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

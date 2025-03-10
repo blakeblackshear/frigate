@@ -719,7 +719,7 @@ function ObjectDetailsTab({
               aria-label="Save"
               onClick={updateDescription}
             >
-              {t("button.save")}
+              {t("button.save", { ns: "common" })}
             </Button>
           )}
           <TextEntryDialog
@@ -834,7 +834,9 @@ export function ObjectSnapshotTab({
                         </a>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent>{t("button.download")}</TooltipContent>
+                        <TooltipContent>
+                          {t("button.download", { ns: "common" })}
+                        </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </div>

@@ -250,7 +250,7 @@ export default function ObjectSettingsView({
                               <div className="cursor-pointer p-0">
                                 <LuInfo className="size-4" />
                                 <span className="sr-only">
-                                  {t("button.info")}
+                                  {t("button.info", { ns: "common" })}
                                 </span>
                               </div>
                             </PopoverTrigger>

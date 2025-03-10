@@ -187,7 +187,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 >
                   <a className="flex" href={logoutUrl}>
                     <LuLogOut className="mr-2 size-4" />
-                    <span>Logout</span>
+                    <span>{t("menu.user.logout", { ns: "common" })}</span>
                   </a>
                 </MenuItem>
               </div>

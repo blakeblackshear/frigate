@@ -436,7 +436,9 @@ export default function LiveCameraView({
               >
                 <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                 {isDesktop && (
-                  <div className="text-primary">{t("button.back")}</div>
+                  <div className="text-primary">
+                    {t("button.back", { ns: "common" })}
+                  </div>
                 )}
               </Button>
               <Button
@@ -458,7 +460,9 @@ export default function LiveCameraView({
               >
                 <LuHistory className="size-5 text-secondary-foreground" />
                 {isDesktop && (
-                  <div className="text-primary">{t("button.history")}</div>
+                  <div className="text-primary">
+                    {t("button.history", { ns: "common" })}
+                  </div>
                 )}
               </Button>
             </div>
@@ -479,7 +483,7 @@ export default function LiveCameraView({
                   <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                   {isDesktop && (
                     <div className="text-secondary-foreground">
-                      {t("button.back")}
+                      {t("button.back", { ns: "common" })}
                     </div>
                   )}
                 </Button>
@@ -491,7 +495,9 @@ export default function LiveCameraView({
                   Icon={fullscreen ? FaCompress : FaExpand}
                   isActive={fullscreen}
                   title={
-                    fullscreen ? t("button.close") : t("button.fullscreen")
+                    fullscreen
+                      ? t("button.close", { ns: "common" })
+                      : t("button.fullscreen", { ns: "common" })
                   }
                   onClick={toggleFullscreen}
                 />
@@ -502,7 +508,11 @@ export default function LiveCameraView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={LuPictureInPicture}
                   isActive={pip}
-                  title={pip ? t("button.close") : t("button.pictureInPicture")}
+                  title={
+                    pip
+                      ? t("button.close", { ns: "common" })
+                      : t("button.pictureInPicture", { ns: "common" })
+                  }
                   onClick={() => {
                     if (!pip) {
                       setPip(true);
@@ -1101,7 +1111,9 @@ function FrigateCameraFeatures({
               variant={fullscreen ? "overlay" : "primary"}
               Icon={enabledState == "ON" ? LuPower : LuPowerOff}
               isActive={enabledState == "ON"}
-              title={`${enabledState == "ON" ? "Disable" : "Enable"} Camera`}
+              title={
+                enabledState == "ON" ? t("camera.disable") : t("camera.enable")
+              }
               onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
               disabled={false}
             />
@@ -1110,7 +1122,9 @@ function FrigateCameraFeatures({
               variant={fullscreen ? "overlay" : "primary"}
               Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
               isActive={detectState == "ON"}
-              title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+              title={
+                detectState == "ON" ? t("detect.disable") : t("detect.enable")
+              }
               onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
               disabled={!cameraEnabled}
             />
@@ -1119,7 +1133,11 @@ function FrigateCameraFeatures({
               variant={fullscreen ? "overlay" : "primary"}
               Icon={recordState == "ON" ? LuVideo : LuVideoOff}
               isActive={recordState == "ON"}
-              title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+              title={
+                recordState == "ON"
+                  ? t("recording.disable")
+                  : t("recording.enable")
+              }
               onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
               disabled={!cameraEnabled}
             />
@@ -1128,7 +1146,11 @@ function FrigateCameraFeatures({
               variant={fullscreen ? "overlay" : "primary"}
               Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
               isActive={snapshotState == "ON"}
-              title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+              title={
+                snapshotState == "ON"
+                  ? t("snapshots.disable")
+                  : t("snapshots.enable")
+              }
               onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
               disabled={!cameraEnabled}
             />
@@ -1138,7 +1160,11 @@ function FrigateCameraFeatures({
                 variant={fullscreen ? "overlay" : "primary"}
                 Icon={audioState == "ON" ? LuEar : LuEarOff}
                 isActive={audioState == "ON"}
-                title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+                title={
+                  audioState == "ON"
+                    ? t("audioDetect.disable")
+                    : t("audioDetect.enable")
+                }
                 onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
                 disabled={!cameraEnabled}
               />
@@ -1151,7 +1177,11 @@ function FrigateCameraFeatures({
                   autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff
                 }
                 isActive={autotrackingState == "ON"}
-                title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
+                title={
+                  autotrackingState == "ON"
+                    ? t("autotracking.disable")
+                    : t("autotracking.enable")
+                }
                 onClick={() =>
                   sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
                 }
@@ -1189,11 +1219,13 @@ function FrigateCameraFeatures({
             <div className="flex flex-col gap-5 p-4">
               {!isRestreamed && (
                 <div className="flex flex-col gap-2">
-                  <Label>{t("streaming", { ns: "components/dialog" })}</Label>
+                  <Label>
+                    {t("streaming.label", { ns: "components/dialog" })}
+                  </Label>
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                     <LuX className="size-4 text-danger" />
                     <div>
-                      {t("streaming.restreaming.disabled", {
+                      {t("streaming.restreaming.NotEnabled", {
                         ns: "components/dialog",
                       })}
                     </div>
@@ -1398,7 +1430,9 @@ function FrigateCameraFeatures({
                     className="mx-0 cursor-pointer text-primary"
                     htmlFor="showstats"
                   >
-                    {t("streaming.showStats", { ns: "components/dialog" })}
+                    {t("streaming.showStats.label", {
+                      ns: "components/dialog",
+                    })}
                   </Label>
                   <Switch
                     className="ml-1"

@@ -401,7 +401,9 @@ export function RecordingView({
           >
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
             {isDesktop && (
-              <div className="text-primary">{t("button.back")}</div>
+              <div className="text-primary">
+                {t("button.back", { ns: "common" })}
+              </div>
             )}
           </Button>
           <Button

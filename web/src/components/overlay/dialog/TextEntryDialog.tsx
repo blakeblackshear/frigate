@@ -91,10 +91,10 @@ export default function TextEntryDialog({
             />
             <DialogFooter className="pt-4">
               <Button type="button" onClick={() => setOpen(false)}>
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button variant="select" type="submit">
-                {t("button.save")}
+                {t("button.save", { ns: "common" })}
               </Button>
             </DialogFooter>
           </form>

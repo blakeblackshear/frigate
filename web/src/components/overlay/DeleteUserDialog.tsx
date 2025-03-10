@@ -48,7 +48,7 @@ export default function DeleteUserDialog({
                 onClick={onCancel}
                 type="button"
               >
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="destructive"
@@ -56,7 +56,7 @@ export default function DeleteUserDialog({
                 className="flex flex-1"
                 onClick={onDelete}
               >
-                {t("button.delete")}
+                {t("button.delete", { ns: "common" })}
               </Button>
             </div>
           </div>

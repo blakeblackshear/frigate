@@ -577,10 +577,10 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button aria-label="Reset" onClick={onReset}>
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>

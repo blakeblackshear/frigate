@@ -125,14 +125,16 @@ function Exports() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <Button
               className="text-white"
               aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >
-              {t("button.delete")}
+              {t("button.delete", { ns: "common" })}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

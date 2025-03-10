@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -558,7 +558,9 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  {t("masksAndZones.zones.inertia.desc")}
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.inertia.desc
+                  </Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -579,7 +581,9 @@ export default function ZoneEditPane({
                   />
                 </FormControl>
                 <FormDescription>
-                  {t("masksAndZones.zones.loiteringTime.desc")}
+                  <Trans ns="views/settings">
+                    masksAndZones.zones.loiteringTime.desc
+                  </Trans>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -808,7 +812,7 @@ export default function ZoneEditPane({
               aria-label="Cancel"
               onClick={onCancel}
             >
-              {t("button.cancel")}
+              {t("button.cancel", { ns: "common" })}
             </Button>
             <Button
               variant="select"
@@ -820,10 +824,10 @@ export default function ZoneEditPane({
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span>{t("button.saving")}</span>
+                  <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (
-                t("button.save")
+                t("button.save", { ns: "common" })
               )}
             </Button>
           </div>

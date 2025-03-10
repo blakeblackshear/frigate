@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -52,7 +52,7 @@ export default function RoleChangeDialog({
 
         <div className="py-6">
           <div className="mb-4 text-sm text-muted-foreground">
-            {t("users.dialog.changeRole.roleInfo")}
+            <Trans ns="views/settings">users.dialog.changeRole.roleInfo</Trans>
           </div>
 
           <Select
@@ -90,7 +90,7 @@ export default function RoleChangeDialog({
                 onClick={onCancel}
                 type="button"
               >
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
@@ -99,7 +99,7 @@ export default function RoleChangeDialog({
                 onClick={() => onSave(selectedRole)}
                 disabled={selectedRole === currentRole}
               >
-                {t("button.save")}
+                {t("button.save", { ns: "common" })}
               </Button>
             </div>
           </div>

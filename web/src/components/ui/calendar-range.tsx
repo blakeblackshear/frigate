@@ -431,7 +431,7 @@ export function DateRangePicker({
             }
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common"})}
         </Button>
         <Button
           onClick={() => {
@@ -442,7 +442,7 @@ export function DateRangePicker({
           variant="ghost"
           aria-label="Reset"
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common"})}
         </Button>
       </div>
     </div>

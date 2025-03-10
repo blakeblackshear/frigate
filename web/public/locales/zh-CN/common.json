@@ -64,6 +64,7 @@
     "info": "信息"
   },
   "menu": {
+    "system": "系统",
     "systemMetrics": "系统信息",
     "configuration": "配置",
     "systemLogs": "系统日志",

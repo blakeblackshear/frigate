@@ -69,7 +69,7 @@ export default function CalendarFilterButton({
             updateSelectedDay(undefined);
           }}
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>

@@ -256,7 +256,9 @@ export default function AuthenticationView() {
                                 : ""
                             }
                           >
-                            {t("role." + user.role || "viewer")}
+                            {t("role." + (user.role || "viewer"), {
+                              ns: "common",
+                            })}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -280,7 +282,7 @@ export default function AuthenticationView() {
                                     >
                                       <LuUserCog className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        {t("role.title")}
+                                        {t("role.title", { ns: "common" })}
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
@@ -326,7 +328,7 @@ export default function AuthenticationView() {
                                     >
                                       <HiTrash className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        {t("button.delete")}
+                                        {t("button.delete", { ns: "common" })}
                                       </span>
                                     </Button>
                                   </TooltipTrigger>

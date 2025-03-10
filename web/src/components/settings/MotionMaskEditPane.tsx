@@ -22,7 +22,7 @@ import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -232,7 +232,9 @@ export default function MotionMaskEditPane({
           : t("masksAndZones.motionMasks.add")}
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
-        <p>{t("masksAndZones.motionMasks.context")}</p>
+        <p>
+          <Trans ns="views/settings">masksAndZones.motionMasks.context</Trans>
+        </p>
 
         <div className="flex items-center text-primary">
           <Link
@@ -324,7 +326,7 @@ export default function MotionMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
@@ -336,10 +338,10 @@ export default function MotionMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>{t("button.saving")}</span>
+                    <span>{t("button.saving", { ns: "common" })}</span>
                   </div>
                 ) : (
-                  t("button.save")
+                  t("button.save", { ns: "common" })
                 )}
               </Button>
             </div>

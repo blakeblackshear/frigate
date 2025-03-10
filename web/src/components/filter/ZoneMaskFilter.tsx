@@ -101,10 +101,10 @@ export function GeneralFilterContent({
               >
                 {t(
                   "masksAndZones." +
-                    item.replace(/_([a-z])/g, (letter) =>
-                      letter.toUpperCase(),
-                    ) +
-                    "s",
+                    item
+                      .replace(/_([a-z])/g, (letter) => letter.toUpperCase())
+                      .replace("_", "") +
+                    "s.label",
                   { ns: "views/settings" },
                 )}
               </Label>

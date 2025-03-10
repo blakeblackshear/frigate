@@ -391,7 +391,7 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
           aria-label="Reset"
@@ -400,7 +400,7 @@ export function GeneralFilterContent({
             updateLabelFilter(undefined);
           }}
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>
@@ -567,7 +567,7 @@ export function SortTypeContent({
             onClose();
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
           aria-label="Reset"
@@ -576,7 +576,7 @@ export function SortTypeContent({
             updateSortType(undefined);
           }}
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>

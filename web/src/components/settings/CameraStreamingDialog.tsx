@@ -31,7 +31,7 @@ import useSWR from "swr";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -173,7 +173,9 @@ export function CameraStreamingDialog({
             cameraName: camera.replaceAll("_", " "),
           })}
         </DialogTitle>
-        <DialogDescription>{t("group.camera.setting.desc")}</DialogDescription>
+        <DialogDescription>
+          <Trans ns="components/camera">group.camera.setting.desc</Trans>
+        </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col space-y-8">
         {!isRestreamed && (
@@ -190,7 +192,9 @@ export function CameraStreamingDialog({
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
                     <LuInfo className="size-4" />
-                    <span className="sr-only">{t("button.info")}</span>
+                    <span className="sr-only">
+                      {t("button.info", { ns: "common" })}
+                    </span>
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
@@ -247,7 +251,9 @@ export function CameraStreamingDialog({
                         <PopoverTrigger asChild>
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
-                            <span className="sr-only">{t("button.info")}</span>
+                            <span className="sr-only">
+                              {t("button.info", { ns: "common" })}
+                            </span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 text-xs">
@@ -355,7 +361,7 @@ export function CameraStreamingDialog({
             aria-label="Cancel"
             onClick={handleCancel}
           >
-            {t("button.cancel")}
+            {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             variant="select"
@@ -367,10 +373,10 @@ export function CameraStreamingDialog({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>{t("button.saving")}</span>
+                <span>{t("button.saving", { ns: "common" })}</span>
               </div>
             ) : (
-              t("button.save")
+              t("button.save", { ns: "common" })
             )}
           </Button>
         </div>

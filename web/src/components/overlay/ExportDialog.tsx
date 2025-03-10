@@ -321,7 +321,7 @@ export function ExportContent({
           className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
           onClick={onCancel}
         >
-          {t("button.cancel")}
+          {t("button.cancel", { ns: "common" })}
         </div>
         <Button
           className={isDesktop ? "" : "w-full"}

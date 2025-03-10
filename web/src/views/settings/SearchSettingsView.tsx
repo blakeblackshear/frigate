@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type ExploreSettingsViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -172,7 +172,9 @@ export default function ExploreSettingsView({
         </Heading>
         <div className="max-w-6xl">
           <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-            <p>{t("explore.semanticSearch.desc")}</p>
+            <p>
+              <Trans ns="views/settings">explore.semanticSearch.desc</Trans>
+            </p>
 
             <div className="flex items-center text-primary">
               <Link
@@ -200,7 +202,9 @@ export default function ExploreSettingsView({
               }}
             />
             <div className="space-y-0.5">
-              <Label htmlFor="enabled">{t("button.enabled")}</Label>
+              <Label htmlFor="enabled">
+                {t("button.enabled", { ns: "common" })}
+              </Label>
             </div>
           </div>
           <div className="flex flex-col">
@@ -221,7 +225,9 @@ export default function ExploreSettingsView({
               </div>
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
-              {t("explore.semanticSearch.reindexOnStartup.desc")}
+              <Trans ns="views/settings">
+                explore.semanticSearch.reindexOnStartup.desc
+              </Trans>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
@@ -230,10 +236,22 @@ export default function ExploreSettingsView({
                 {t("explore.semanticSearch.modelSize.label")}
               </div>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>{t("explore.semanticSearch.modelSize.desc")}</p>
+                <p>
+                  <Trans ns="views/settings">
+                    explore.semanticSearch.modelSize.desc
+                  </Trans>
+                </p>
                 <ul className="list-disc pl-5 text-sm">
-                  <li>{t("explore.semanticSearch.modelSize.small.desc")}</li>
-                  <li>{t("explore.semanticSearch.modelSize.large.desc")}</li>
+                  <li>
+                    <Trans ns="views/settings">
+                      explore.semanticSearch.modelSize.small.desc
+                    </Trans>
+                  </li>
+                  <li>
+                    <Trans ns="views/settings">
+                      explore.semanticSearch.modelSize.large.desc
+                    </Trans>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -271,7 +289,7 @@ export default function ExploreSettingsView({
 
         <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
           <Button className="flex flex-1" aria-label="Reset" onClick={onCancel}>
-            {t("button.reset")}
+            {t("button.reset", { ns: "common" })}
           </Button>
           <Button
             variant="select"
@@ -283,10 +301,10 @@ export default function ExploreSettingsView({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>{t("button.saving")}</span>
+                <span>{t("button.saving", { ns: "common" })}</span>
               </div>
             ) : (
-              t("button.save")
+              t("button.save", { ns: "common" })
             )}
           </Button>
         </div>

@@ -80,7 +80,7 @@ export function SaveSearchDialog({
         )}
         <DialogFooter>
           <Button aria-label="Cancel" onClick={onClose}>
-            {t("button.cancel")}
+            {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             onClick={handleSave}
@@ -88,7 +88,7 @@ export function SaveSearchDialog({
             className="mb-2 md:mb-0"
             aria-label="Save this search"
           >
-            {t("button.save")}
+            {t("button.save", { ns: "common" })}
           </Button>
         </DialogFooter>
       </DialogContent>

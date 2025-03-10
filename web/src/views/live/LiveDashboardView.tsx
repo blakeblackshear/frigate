@@ -564,8 +564,8 @@ export default function LiveDashboardView({
                 </TooltipTrigger>
                 <TooltipContent>
                   {fullscreen
-                    ? t("button.exitFullscreen")
-                    : t("button.fullscreen")}
+                    ? t("button.exitFullscreen", { ns: "common" })
+                    : t("button.fullscreen", { ns: "common" })}
                 </TooltipContent>
               </Tooltip>
             </div>

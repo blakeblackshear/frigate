@@ -365,7 +365,7 @@ export default function ObjectMaskEditPane({
                 aria-label="Cancel"
                 onClick={onCancel}
               >
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
@@ -377,10 +377,10 @@ export default function ObjectMaskEditPane({
                 {isLoading ? (
                   <div className="flex flex-row items-center gap-2">
                     <ActivityIndicator />
-                    <span>{t("button.saving")}</span>
+                    <span>{t("button.saving", { ns: "common" })}</span>
                   </div>
                 ) : (
-                  t("button.save")
+                  t("button.save", { ns: "common" })
                 )}
               </Button>
             </div>

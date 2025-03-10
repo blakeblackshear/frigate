@@ -478,7 +478,7 @@ export default function NotificationView({
                       onClick={onCancel}
                       type="button"
                     >
-                      {t("button.cancel")}
+                      {t("button.cancel", { ns: "common" })}
                     </Button>
                     <Button
                       variant="select"
@@ -490,10 +490,10 @@ export default function NotificationView({
                       {isLoading ? (
                         <div className="flex flex-row items-center gap-2">
                           <ActivityIndicator />
-                          <span>{t("button.saving")}</span>
+                          <span>{t("button.saving", { ns: "common" })}</span>
                         </div>
                       ) : (
-                        t("button.save")
+                        t("button.save", { ns: "common" })
                       )}
                     </Button>
                   </div>

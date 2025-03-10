@@ -84,7 +84,9 @@ export default function RestartDialog({
             <AlertDialogTitle>{t("restart.title")}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleRestart}>
               {t("restart.button")}
             </AlertDialogAction>

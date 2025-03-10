@@ -319,7 +319,9 @@ export default function PolygonItem({
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>{t("button.edit")}</TooltipContent>
+              <TooltipContent>
+                {t("button.edit", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -332,7 +334,9 @@ export default function PolygonItem({
                   onClick={() => handleCopyCoordinates(index)}
                 />
               </TooltipTrigger>
-              <TooltipContent>{t("button.copyCoordinates")}</TooltipContent>
+              <TooltipContent>
+                {t("button.copyCoordinates", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -346,7 +350,9 @@ export default function PolygonItem({
                   onClick={() => !isLoading && setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>
-              <TooltipContent>{t("button.delete")}</TooltipContent>
+              <TooltipContent>
+                {t("button.delete", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}

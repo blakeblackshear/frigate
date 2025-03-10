@@ -247,7 +247,7 @@ export default function MobileReviewSettingsDrawer({
               });
             }}
           >
-            {t("button.reset")}
+            {t("button.reset", { ns: "common" })}
           </Button>
         </div>
       </div>

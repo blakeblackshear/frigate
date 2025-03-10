@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type CameraInfoDialogProps = {
   camera: CameraConfig;
@@ -80,7 +80,7 @@ export default function CameraInfoDialog({
             </DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            {t("cameras.info.streamDataFromFFPROBE")}
+            <Trans ns="views/system">cameras.info.streamDataFromFFPROBE</Trans>
           </DialogDescription>
 
           <div className="mb-2 p-4">
@@ -184,7 +184,7 @@ export default function CameraInfoDialog({
               aria-label="Copy"
               onClick={() => onCopyFfprobe()}
             >
-              {t("button.copy")}
+              {t("button.copy", { ns: "common" })}
             </Button>
           </DialogFooter>
         </DialogContent>

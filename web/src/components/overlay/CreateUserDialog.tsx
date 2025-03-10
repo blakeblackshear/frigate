@@ -211,7 +211,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    {t("role.title")}
+                    {t("role.title", { ns: "common" })}
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -229,7 +229,7 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <Shield className="h-4 w-4 text-primary" />
-                          <span>{t("role.admin")}</span>
+                          <span>{t("role.admin", { ns: "common" })}</span>
                         </div>
                       </SelectItem>
                       <SelectItem
@@ -238,13 +238,13 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{t("role.viewer")}</span>
+                          <span>{t("role.viewer", { ns: "common" })}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription className="text-xs text-muted-foreground">
-                    {t("role.desc")}
+                    {t("role.desc", { ns: "common" })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -261,7 +261,7 @@ export default function CreateUserDialog({
                     onClick={handleCancel}
                     type="button"
                   >
-                    {t("button.cancel")}
+                    {t("button.cancel", { ns: "common" })}
                   </Button>
                   <Button
                     variant="select"
@@ -273,10 +273,10 @@ export default function CreateUserDialog({
                     {isLoading ? (
                       <div className="flex flex-row items-center gap-2">
                         <ActivityIndicator />
-                        <span>{t("button.saving")}</span>
+                        <span>{t("button.saving", { ns: "common" })}</span>
                       </div>
                     ) : (
-                      t("button.save")
+                      t("button.save", { ns: "common" })
                     )}
                   </Button>
                 </div>

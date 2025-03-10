@@ -38,6 +38,10 @@
       }
     }
   },
+  "camera": {
+    "enable": "Enable Camera",
+    "disable": "Disable Camera"
+  },
   "detect": {
     "enable": "Enable Detect",
     "disable": "Disable Detect"

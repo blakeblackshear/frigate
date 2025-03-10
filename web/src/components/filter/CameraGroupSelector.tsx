@@ -76,7 +76,7 @@ import { Switch } from "../ui/switch";
 import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -165,7 +165,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent className="" side="right">
-                {t("menu.live.allCameras")}
+                {t("menu.live.allCameras", { ns: "common" })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -536,15 +536,19 @@ export function CameraGroupRow({
               <AlertDialogTitle>{t("group.delete.confirm")}</AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
-              {t("group.delete.confirm.desc", { name: group[0] })}
+              <Trans ns="components/camera" values={{ name: group[0] }}>
+                group.delete.confirm.desc
+              </Trans>
             </AlertDialogDescription>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
+              <AlertDialogCancel>
+                {t("button.cancel", { ns: "common" })}
+              </AlertDialogCancel>
               <AlertDialogAction
                 className={buttonVariants({ variant: "destructive" })}
                 onClick={onDeleteGroup}
               >
-                {t("button.delete")}
+                {t("button.delete", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -562,13 +566,13 @@ export function CameraGroupRow({
                     aria-label="Edit group"
                     onClick={onEditGroup}
                   >
-                    {t("button.edit")}
+                    {t("button.edit", { ns: "common" })}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     aria-label="Delete group"
                     onClick={() => setDeleteDialogOpen(true)}
                   >
-                    {t("button.delete")}
+                    {t("button.delete", { ns: "common" })}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenuPortal>
@@ -585,7 +589,9 @@ export function CameraGroupRow({
                   onClick={onEditGroup}
                 />
               </TooltipTrigger>
-              <TooltipContent>{t("button.edit")}</TooltipContent>
+              <TooltipContent>
+                {t("button.edit", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -596,7 +602,9 @@ export function CameraGroupRow({
                   onClick={() => setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>
-              <TooltipContent>{t("button.delete")}</TooltipContent>
+              <TooltipContent>
+                {t("button.delete", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
@@ -925,7 +933,7 @@ export function CameraGroupEdit({
             aria-label="Cancel"
             onClick={onCancel}
           >
-            {t("button.cancel")}
+            {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             variant="select"
@@ -937,10 +945,10 @@ export function CameraGroupEdit({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>{t("button.saving")}</span>
+                <span>{t("button.saving", { ns: "common" })}</span>
               </div>
             ) : (
-              t("button.save")
+              t("button.save", { ns: "common" })
             )}
           </Button>
         </div>

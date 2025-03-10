@@ -35,7 +35,7 @@ export default function SaveExportOverlay({
           onClick={onCancel}
         >
           <LuX />
-          {t("button.cancel")}
+          {t("button.cancel", { ns: "common" })}
         </Button>
         <Button
           className="flex items-center gap-1"

@@ -205,7 +205,7 @@ export default function SetPasswordDialog({
                 onClick={onCancel}
                 type="button"
               >
-                {t("button.cancel")}
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
@@ -214,7 +214,7 @@ export default function SetPasswordDialog({
                 onClick={handleSave}
                 disabled={!password || password !== confirmPassword}
               >
-                {t("button.save")}
+                {t("button.save", { ns: "common" })}
               </Button>
             </div>
           </div>

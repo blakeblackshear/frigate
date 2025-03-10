@@ -42,7 +42,7 @@ export function CamerasFilterButton({
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
-      return t("menu.live.allCameras");
+      return t("menu.live.allCameras", { ns: "common" });
     }
 
     return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
@@ -236,7 +236,7 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          {t("button.apply")}
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
           aria-label="Reset"
@@ -245,7 +245,7 @@ export function CamerasFilterContent({
             updateCameraFilter(undefined);
           }}
         >
-          {t("button.reset")}
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>
