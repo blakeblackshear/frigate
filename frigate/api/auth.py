@@ -359,14 +359,14 @@ def auth(request: Request):
 @router.get("/profile")
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
-    if username != "anonymous":
+    role = request.headers.get("remote-role")
+
+    if role is None and username != "anonymous":
         try:
             user = User.get_by_id(username)
             role = getattr(user, "role", "viewer")
         except DoesNotExist:
             role = "viewer"  # Fallback if user deleted
-    else:
-        role = None
     return JSONResponse(content={"username": username, "role": role})
 
 
