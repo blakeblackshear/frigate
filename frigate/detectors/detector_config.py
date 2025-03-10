@@ -40,6 +40,7 @@ class ModelTypeEnum(str, Enum):
     dfine = "dfine"
     yologeneric = "yolo-generic"
 
+
 class ModelConfig(BaseModel):
     path: Optional[str] = Field(None, title="Custom Object detection model path.")
     labelmap_path: Optional[str] = Field(
