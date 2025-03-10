@@ -172,6 +172,8 @@ export default function FaceLibrary() {
     axios
       .post(`/faces/train/delete`, { ids: selectedFaces })
       .then((resp) => {
+        setSelectedFaces([]);
+
         if (resp.status == 200) {
           toast.success(`Successfully deleted face.`, {
             position: "top-center",
@@ -259,7 +261,7 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        {selectedFaces?.length ? (
+        {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
             <Button className="flex gap-2" onClick={() => onDelete()}>
               <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
