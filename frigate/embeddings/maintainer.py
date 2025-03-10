@@ -110,15 +110,27 @@ class EmbeddingMaintainer(threading.Thread):
         self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.realtime_processors.append(FaceRealTimeProcessor(self.config, self.event_metadata_publisher, metrics))
+            self.realtime_processors.append(
+                FaceRealTimeProcessor(
+                    self.config, self.event_metadata_publisher, metrics
+                )
+            )
 
         if self.config.classification.bird.enabled:
-            self.realtime_processors.append(BirdRealTimeProcessor(self.config, self.event_metadata_publisher, metrics))
+            self.realtime_processors.append(
+                BirdRealTimeProcessor(
+                    self.config, self.event_metadata_publisher, metrics
+                )
+            )
 
         if self.config.lpr.enabled:
             self.realtime_processors.append(
                 LicensePlateRealTimeProcessor(
-                    self.config, self.event_metadata_publisher, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config,
+                    self.event_metadata_publisher,
+                    metrics,
+                    lpr_model_runner,
+                    self.detected_license_plates,
                 )
             )
 
@@ -128,7 +140,11 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
-                    self.config, self.event_metadata_publisher, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config,
+                    self.event_metadata_publisher,
+                    metrics,
+                    lpr_model_runner,
+                    self.detected_license_plates,
                 )
             )
 
