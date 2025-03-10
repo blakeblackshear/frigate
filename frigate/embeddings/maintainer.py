@@ -15,6 +15,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
 from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
     EventMetadataSubscriber,
     EventMetadataTypeEnum,
 )
@@ -43,7 +44,7 @@ from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
-from frigate.events.types import EventTypeEnum
+from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
@@ -89,6 +90,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
+        self.event_metadata_publisher = EventMetadataPublisher()
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
@@ -108,15 +110,27 @@ class EmbeddingMaintainer(threading.Thread):
         self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
-            self.realtime_processors.append(FaceRealTimeProcessor(self.config, metrics))
+            self.realtime_processors.append(
+                FaceRealTimeProcessor(
+                    self.config, self.event_metadata_publisher, metrics
+                )
+            )
 
         if self.config.classification.bird.enabled:
-            self.realtime_processors.append(BirdRealTimeProcessor(self.config, metrics))
+            self.realtime_processors.append(
+                BirdRealTimeProcessor(
+                    self.config, self.event_metadata_publisher, metrics
+                )
+            )
 
         if self.config.lpr.enabled:
             self.realtime_processors.append(
                 LicensePlateRealTimeProcessor(
-                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config,
+                    self.event_metadata_publisher,
+                    metrics,
+                    lpr_model_runner,
+                    self.detected_license_plates,
                 )
             )
 
@@ -126,7 +140,11 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
-                    self.config, metrics, lpr_model_runner, self.detected_license_plates
+                    self.config,
+                    self.event_metadata_publisher,
+                    metrics,
+                    lpr_model_runner,
+                    self.detected_license_plates,
                 )
             )
 
@@ -150,6 +168,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
+        self.event_metadata_publisher.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
         self.requestor.stop()
@@ -375,15 +394,17 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
-        (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
-            timeout=0.01
-        )
+        (topic, payload) = self.event_metadata_subscriber.check_for_update(timeout=0.01)
 
         if topic is None:
             return
 
+        event_id, source = payload
+
         if event_id:
-            self.handle_regenerate_description(event_id, source)
+            self.handle_regenerate_description(
+                event_id, RegenerateDescriptionEnum(source)
+            )
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""

@@ -9,10 +9,15 @@ from typing import Callable, Optional
 
 import cv2
 import numpy as np
+from peewee import DoesNotExist
 
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.event_metadata_updater import (
+    EventMetadataSubscriber,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
@@ -24,6 +29,7 @@ from frigate.config import (
 )
 from frigate.const import UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
+from frigate.models import Event, Timeline
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
@@ -446,6 +452,9 @@ class TrackedObjectProcessor(threading.Thread):
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
         self.event_sender = EventUpdatePublisher()
         self.event_end_subscriber = EventEndSubscriber()
+        self.sub_label_subscriber = EventMetadataSubscriber(
+            EventMetadataTypeEnum.sub_label
+        )
 
         self.camera_activity: dict[str, dict[str, any]] = {}
 
@@ -684,6 +693,46 @@ class TrackedObjectProcessor(threading.Thread):
         """Returns the latest frame time for a given camera."""
         return self.camera_states[camera].current_frame_time
 
+    def set_sub_label(
+        self, event_id: str, sub_label: str | None, score: float | None
+    ) -> None:
+        """Update sub label for given event id."""
+        tracked_obj: TrackedObject = None
+
+        for state in self.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+
+        try:
+            event: Event = Event.get(Event.id == event_id)
+        except DoesNotExist:
+            event = None
+
+        if not tracked_obj and not event:
+            return
+
+        if tracked_obj:
+            tracked_obj.obj_data["sub_label"] = (sub_label, score)
+
+        if event:
+            event.sub_label = sub_label
+            data = event.data
+            if sub_label is None:
+                data["sub_label_score"] = None
+            elif score is not None:
+                data["sub_label_score"] = score
+            event.data = data
+            event.save()
+
+            # update timeline items
+            Timeline.update(
+                data=Timeline.data.update({"sub_label": (sub_label, score)})
+            ).where(Timeline.source_id == event_id).execute()
+
+        return True
+
     def force_end_all_events(self, camera: str, camera_state: CameraState):
         """Ends all active events on camera when disabling."""
         last_frame_name = camera_state.previous_frame_id
@@ -740,6 +789,18 @@ class TrackedObjectProcessor(threading.Thread):
 
                 if not current_enabled:
                     continue
+
+            # check for sub label updates
+            while True:
+                (topic, payload) = self.sub_label_subscriber.check_for_update(
+                    timeout=0.1
+                )
+
+                if not topic:
+                    break
+
+                (event_id, sub_label, score) = payload
+                self.set_sub_label(event_id, sub_label, score)
 
             try:
                 (
@@ -799,6 +860,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()
+        self.sub_label_subscriber.stop()
         self.config_enabled_subscriber.stop()
 
         logger.info("Exiting object processor...")

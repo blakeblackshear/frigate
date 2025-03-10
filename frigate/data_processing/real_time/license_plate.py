@@ -4,6 +4,7 @@ import logging
 
 import numpy as np
 
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.config import FrigateConfig
 from frigate.data_processing.common.license_plate.mixin import (
     LicensePlateProcessingMixin,
@@ -22,6 +23,7 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
     def __init__(
         self,
         config: FrigateConfig,
+        sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
         detected_license_plates: dict[str, dict[str, any]],
@@ -30,6 +32,7 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.model_runner = model_runner
         self.lpr_config = config.lpr
         self.config = config
+        self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics)
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
