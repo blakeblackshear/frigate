@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -141,6 +142,73 @@ export default function FaceLibrary() {
     [refreshFaces],
   );
 
+  // face multiselect
+
+  const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
+
+  const onClickFace = useCallback(
+    (imageId: string) => {
+      const index = selectedFaces.indexOf(imageId);
+
+      if (index != -1) {
+        if (selectedFaces.length == 1) {
+          setSelectedFaces([]);
+        } else {
+          const copy = [
+            ...selectedFaces.slice(0, index),
+            ...selectedFaces.slice(index + 1),
+          ];
+          setSelectedFaces(copy);
+        }
+      } else {
+        const copy = [...selectedFaces];
+        copy.push(imageId);
+        setSelectedFaces(copy);
+      }
+    },
+    [selectedFaces, setSelectedFaces],
+  );
+
+  const onDelete = useCallback(() => {
+    axios
+      .post(`/faces/train/delete`, { ids: selectedFaces })
+      .then((resp) => {
+        setSelectedFaces([]);
+
+        if (resp.status == 200) {
+          toast.success(`Successfully deleted face.`, {
+            position: "top-center",
+          });
+          refreshFaces();
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete: ${errorMessage}`, {
+          position: "top-center",
+        });
+      });
+  }, [selectedFaces, refreshFaces]);
+
+  // keyboard
+
+  useKeyboardListener(["a"], (key, modifiers) => {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "a":
+        if (modifiers.ctrl) {
+          setSelectedFaces([...trainImages]);
+        }
+        break;
+    }
+  });
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -210,16 +278,27 @@ export default function FaceLibrary() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        <div className="flex items-center justify-center gap-2">
-          <Button className="flex gap-2" onClick={() => setAddFace(true)}>
-            <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
-            Add Face
-          </Button>
-          <Button className="flex gap-2" onClick={() => setUpload(true)}>
-            <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-            Upload Image
-          </Button>
-        </div>
+        {selectedFaces?.length > 0 ? (
+          <div className="flex items-center justify-center gap-2">
+            <Button className="flex gap-2" onClick={() => onDelete()}>
+              <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
+              Delete Face Attempts
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2">
+            <Button className="flex gap-2" onClick={() => setAddFace(true)}>
+              <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
+              Add Face
+            </Button>
+            {pageToggle != "train" && (
+              <Button className="flex gap-2" onClick={() => setUpload(true)}>
+                <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
+                Upload Image
+              </Button>
+            )}
+          </div>
+        )}
       </div>
       {pageToggle &&
         (pageToggle == "train" ? (
@@ -227,6 +306,8 @@ export default function FaceLibrary() {
             config={config}
             attemptImages={trainImages}
             faceNames={faces}
+            selectedFaces={selectedFaces}
+            onClickFace={onClickFace}
             onRefresh={refreshFaces}
           />
         ) : (
@@ -244,22 +325,28 @@ type TrainingGridProps = {
   config: FrigateConfig;
   attemptImages: string[];
   faceNames: string[];
+  selectedFaces: string[];
+  onClickFace: (image: string) => void;
   onRefresh: () => void;
 };
 function TrainingGrid({
   config,
   attemptImages,
   faceNames,
+  selectedFaces,
+  onClickFace,
   onRefresh,
 }: TrainingGridProps) {
   return (
-    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
       {attemptImages.map((image: string) => (
         <FaceAttempt
           key={image}
           image={image}
           faceNames={faceNames}
           threshold={config.face_recognition.threshold}
+          selected={selectedFaces.includes(image)}
+          onClick={() => onClickFace(image)}
           onRefresh={onRefresh}
         />
       ))}
@@ -271,12 +358,16 @@ type FaceAttemptProps = {
   image: string;
   faceNames: string[];
   threshold: number;
+  selected: boolean;
+  onClick: () => void;
   onRefresh: () => void;
 };
 function FaceAttempt({
   image,
   faceNames,
   threshold,
+  selected,
+  onClick,
   onRefresh,
 }: FaceAttemptProps) {
   const data = useMemo(() => {
@@ -336,30 +427,16 @@ function FaceAttempt({
       });
   }, [image, onRefresh]);
 
-  const onDelete = useCallback(() => {
-    axios
-      .post(`/faces/train/delete`, { ids: [image] })
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(`Successfully deleted face.`, {
-            position: "top-center",
-          });
-          onRefresh();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(`Failed to delete: ${errorMessage}`, {
-          position: "top-center",
-        });
-      });
-  }, [image, onRefresh]);
-
   return (
-    <div className="relative flex flex-col rounded-lg">
+    <div
+      className={cn(
+        "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
+        selected
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500",
+      )}
+      onClick={onClick}
+    >
       <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
         <img className="size-40" src={`${baseUrl}clips/faces/train/${image}`} />
       </div>
@@ -408,15 +485,6 @@ function FaceAttempt({
                 />
               </TooltipTrigger>
               <TooltipContent>Reprocess Face</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger>
-                <LuTrash2
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={onDelete}
-                />
-              </TooltipTrigger>
-              <TooltipContent>Delete Face Attempt</TooltipContent>
             </Tooltip>
           </div>
         </div>
