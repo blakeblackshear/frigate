@@ -4,7 +4,7 @@
   "service": "devcontainer",
   "workspaceFolder": "/workspace/frigate",
   "initializeCommand": ".devcontainer/initialize.sh",
-  "postCreateCommand": ".devcontainer/post_create.sh",
+  // "postCreateCommand": ".devcontainer/post_create.sh",
   "overrideCommand": false,
   "remoteUser": "vscode",
   "features": {
