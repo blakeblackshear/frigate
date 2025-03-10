@@ -259,7 +259,7 @@ def auth(request: Request):
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
         user_header = proxy_config.header_map.user
-        role_header = proxy_config.header_map.get("role", "Remote-Role")
+        role_header = proxy_config.header_map.role
         success_response.headers["remote-user"] = (
             request.headers.get(user_header, default="anonymous")
             if user_header
@@ -359,14 +359,14 @@ def auth(request: Request):
 @router.get("/profile")
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
-    if username != "anonymous":
+    role = request.headers.get("remote-role")
+
+    if role is None and username != "anonymous":
         try:
             user = User.get_by_id(username)
             role = getattr(user, "role", "viewer")
         except DoesNotExist:
             role = "viewer"  # Fallback if user deleted
-    else:
-        role = None
     return JSONResponse(content={"username": username, "role": role})
 
 
