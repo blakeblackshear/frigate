@@ -265,11 +265,18 @@ def auth(request: Request):
             if user_header
             else "anonymous"
         )
-        success_response.headers["remote-role"] = (
+        role_header = proxy_config.header_map.role
+        role = (
             request.headers.get(role_header, default="viewer")
             if role_header
             else "viewer"
         )
+
+        # if comma-separated with "admin", use "admin", else "viewer"
+        success_response.headers["remote-role"] = (
+            "admin" if role and "admin" in role else "viewer"
+        )
+
         return success_response
 
     # now apply authentication
@@ -359,14 +366,8 @@ def auth(request: Request):
 @router.get("/profile")
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
-    role = request.headers.get("remote-role")
+    role = request.headers.get("remote-role", "viewer")
 
-    if role is None and username != "anonymous":
-        try:
-            user = User.get_by_id(username)
-            role = getattr(user, "role", "viewer")
-        except DoesNotExist:
-            role = "viewer"  # Fallback if user deleted
     return JSONResponse(content={"username": username, "role": role})
 
 
