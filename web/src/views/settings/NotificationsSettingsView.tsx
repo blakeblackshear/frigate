@@ -20,7 +20,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { LuAlertCircle, LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { CiCircleAlert } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -80,7 +81,7 @@ export default function NotificationView({
     return Object.values(config.cameras)
       .filter(
         (conf) =>
-          conf.enabled &&
+          conf.enabled_in_config &&
           conf.notifications &&
           conf.notifications.enabled_in_config,
       )
@@ -266,10 +267,13 @@ export default function NotificationView({
           }
         })
         .catch((error) => {
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);
@@ -311,7 +315,7 @@ export default function NotificationView({
               </div>
             </div>
             <Alert variant="destructive">
-              <LuAlertCircle className="size-5" />
+              <CiCircleAlert className="size-5" />
               <AlertTitle>Notifications Unavailable</AlertTitle>
 
               <AlertDescription>

@@ -44,6 +44,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
         """Set initial state topics."""
         for camera_name, camera in self.config.cameras.items():
             self.publish(
+                f"{camera_name}/enabled/state",
+                "ON" if camera.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
                 f"{camera_name}/recordings/state",
                 "ON" if camera.record.enabled_in_config else "OFF",
                 retain=True,
@@ -196,6 +201,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         # register callbacks
         callback_types = [
+            "enabled",
             "recordings",
             "snapshots",
             "detect",

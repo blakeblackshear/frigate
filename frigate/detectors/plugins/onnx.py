@@ -99,5 +99,5 @@ class ONNXDetector(DetectionApi):
             return post_process_yolov9(predictions, self.w, self.h)
         else:
             raise Exception(
-                f"{self.onnx_model_type} is currently not supported for rocm. See the docs for more info on supported models."
+                f"{self.onnx_model_type} is currently not supported for onnx. See the docs for more info on supported models."
             )

@@ -28,7 +28,11 @@ function System() {
   const metrics = useMemo(() => {
     const metrics = [...allMetrics];
 
-    if (!config?.semantic_search.enabled) {
+    if (
+      !config?.semantic_search.enabled &&
+      !config?.lpr.enabled &&
+      !config?.face_recognition.enabled
+    ) {
       const index = metrics.indexOf("features");
       metrics.splice(index, 1);
     }

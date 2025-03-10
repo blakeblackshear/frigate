@@ -28,10 +28,6 @@ logger = logging.getLogger(__name__)
 
 
 def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
-    # Only initialize embeddings if semantic search is enabled
-    if not config.semantic_search.enabled:
-        return
-
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:

@@ -7,6 +7,7 @@ import openvino.properties as props
 from pydantic import Field
 from typing_extensions import Literal
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolov9
@@ -41,8 +42,10 @@ class OvDetector(DetectionApi):
             logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError
 
-        os.makedirs("/config/model_cache/openvino", exist_ok=True)
-        self.ov_core.set_property({props.cache_dir: "/config/model_cache/openvino"})
+        os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino"), exist_ok=True)
+        self.ov_core.set_property(
+            {props.cache_dir: os.path.join(MODEL_CACHE_DIR, "openvino")}
+        )
         self.interpreter = self.ov_core.compile_model(
             model=detector_config.model.path, device_name=detector_config.device
         )

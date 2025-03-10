@@ -18,6 +18,7 @@ type CameraFilterButtonProps = {
   groups: [string, CameraGroupConfig][];
   selectedCameras: string[] | undefined;
   hideText?: boolean;
+  mainCamera?: string;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
 export function CamerasFilterButton({
@@ -25,6 +26,7 @@ export function CamerasFilterButton({
   groups,
   selectedCameras,
   hideText = isMobile,
+  mainCamera,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
   const [open, setOpen] = useState(false);
@@ -74,6 +76,7 @@ export function CamerasFilterButton({
       allCameras={allCameras}
       groups={groups}
       currentCameras={currentCameras}
+      mainCamera={mainCamera}
       setCurrentCameras={setCurrentCameras}
       setOpen={setOpen}
       updateCameraFilter={updateCameraFilter}
@@ -120,6 +123,7 @@ export function CamerasFilterButton({
 type CamerasFilterContentProps = {
   allCameras: string[];
   currentCameras: string[] | undefined;
+  mainCamera?: string;
   groups: [string, CameraGroupConfig][];
   setCurrentCameras: (cameras: string[] | undefined) => void;
   setOpen: (open: boolean) => void;
@@ -128,6 +132,7 @@ type CamerasFilterContentProps = {
 export function CamerasFilterContent({
   allCameras,
   currentCameras,
+  mainCamera,
   groups,
   setCurrentCameras,
   setOpen,
@@ -178,12 +183,29 @@ export function CamerasFilterContent({
               key={item}
               isChecked={currentCameras?.includes(item) ?? false}
               label={item.replaceAll("_", " ")}
+              disabled={
+                mainCamera !== undefined &&
+                currentCameras !== undefined &&
+                item === mainCamera
+              } // Disable only if mainCamera exists and cameras are filtered
               onCheckedChange={(isChecked) => {
+                if (
+                  mainCamera !== undefined && // Only enforce if mainCamera is defined
+                  item === mainCamera &&
+                  !isChecked &&
+                  currentCameras !== undefined
+                ) {
+                  return; // Prevent deselecting mainCamera when filtered and mainCamera is defined
+                }
                 if (isChecked) {
                   const updatedCameras = currentCameras
                     ? [...currentCameras]
-                    : [];
-                  updatedCameras.push(item);
+                    : mainCamera !== undefined && item !== mainCamera // If mainCamera exists and this isn’t it
+                      ? [mainCamera] // Start with mainCamera when transitioning from undefined
+                      : []; // Otherwise start empty
+                  if (!updatedCameras.includes(item)) {
+                    updatedCameras.push(item);
+                  }
                   setCurrentCameras(updatedCameras);
                 } else {
                   const updatedCameras = currentCameras

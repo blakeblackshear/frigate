@@ -34,10 +34,10 @@ class LicensePlateProcessingMixin:
         self.batch_size = 6
 
         # Detection specific parameters
-        self.min_size = 3
+        self.min_size = 8
         self.max_size = 960
-        self.box_thresh = 0.8
-        self.mask_thresh = 0.8
+        self.box_thresh = 0.6
+        self.mask_thresh = 0.6
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -158,47 +158,40 @@ class LicensePlateProcessingMixin:
             logger.debug("Model runners not loaded")
             return [], [], []
 
-        plate_points = self._detect(image)
-        if len(plate_points) == 0:
-            logger.debug("No points found by OCR detector model")
+        boxes = self._detect(image)
+        if len(boxes) == 0:
+            logger.debug("No boxes found by OCR detector model")
             return [], [], []
 
-        plate_points = self._sort_polygon(list(plate_points))
-        plate_images = [self._crop_license_plate(image, x) for x in plate_points]
-        rotated_images, _ = self._classify(plate_images)
+        boxes = self._sort_boxes(list(boxes))
+        plate_images = [self._crop_license_plate(image, x) for x in boxes]
 
-        # debug rotated and classification result
         if WRITE_DEBUG_IMAGES:
             current_time = int(datetime.datetime.now().timestamp())
             for i, img in enumerate(plate_images):
                 cv2.imwrite(
-                    f"debug/frames/license_plate_rotated_{current_time}_{i + 1}.jpg",
-                    img,
-                )
-            for i, img in enumerate(rotated_images):
-                cv2.imwrite(
-                    f"debug/frames/license_plate_classified_{current_time}_{i + 1}.jpg",
+                    f"debug/frames/license_plate_cropped_{current_time}_{i + 1}.jpg",
                     img,
                 )
 
         # keep track of the index of each image for correct area calc later
-        sorted_indices = np.argsort([x.shape[1] / x.shape[0] for x in rotated_images])
+        sorted_indices = np.argsort([x.shape[1] / x.shape[0] for x in plate_images])
         reverse_mapping = {
             idx: original_idx for original_idx, idx in enumerate(sorted_indices)
         }
 
-        results, confidences = self._recognize(rotated_images)
+        results, confidences = self._recognize(plate_images)
 
         if results:
-            license_plates = [""] * len(rotated_images)
-            average_confidences = [[0.0]] * len(rotated_images)
-            areas = [0] * len(rotated_images)
+            license_plates = [""] * len(plate_images)
+            average_confidences = [[0.0]] * len(plate_images)
+            areas = [0] * len(plate_images)
 
             # map results back to original image order
             for i, (plate, conf) in enumerate(zip(results, confidences)):
                 original_idx = reverse_mapping[i]
 
-                height, width = rotated_images[original_idx].shape[:2]
+                height, width = plate_images[original_idx].shape[:2]
                 area = height * width
 
                 average_confidence = conf
@@ -206,7 +199,7 @@ class LicensePlateProcessingMixin:
                 # set to True to write each cropped image for debugging
                 if False:
                     save_image = cv2.cvtColor(
-                        rotated_images[original_idx], cv2.COLOR_RGB2BGR
+                        plate_images[original_idx], cv2.COLOR_RGB2BGR
                     )
                     filename = f"debug/frames/plate_{original_idx}_{plate}_{area}.jpg"
                     cv2.imwrite(filename, save_image)
@@ -328,7 +321,7 @@ class LicensePlateProcessingMixin:
             # Use pyclipper to shrink the polygon slightly based on the computed distance.
             offset = PyclipperOffset()
             offset.AddPath(points, JT_ROUND, ET_CLOSEDPOLYGON)
-            points = np.array(offset.Execute(distance * 1.5)).reshape((-1, 1, 2))
+            points = np.array(offset.Execute(distance * 1.75)).reshape((-1, 1, 2))
 
             # get the minimum bounding box around the shrunken polygon.
             box, min_side = self._get_min_boxes(points)
@@ -453,46 +446,64 @@ class LicensePlateProcessingMixin:
         )
 
     @staticmethod
-    def _clockwise_order(point: np.ndarray) -> np.ndarray:
+    def _clockwise_order(pts: np.ndarray) -> np.ndarray:
         """
-        Arrange the points of a polygon in clockwise order based on their angular positions
-        around the polygon's center.
+        Arrange the points of a polygon in order: top-left, top-right, bottom-right, bottom-left.
+        taken from https://github.com/PyImageSearch/imutils/blob/master/imutils/perspective.py
 
         Args:
-            point (np.ndarray): Array of points of the polygon.
+            pts (np.ndarray): Array of points of the polygon.
 
         Returns:
-            np.ndarray: Points ordered in clockwise direction.
+            np.ndarray: Points ordered clockwise starting from top-left.
         """
-        center = point.mean(axis=0)
-        return point[
-            np.argsort(np.arctan2(point[:, 1] - center[1], point[:, 0] - center[0]))
-        ]
+        # Sort the points based on their x-coordinates
+        x_sorted = pts[np.argsort(pts[:, 0]), :]
+
+        # Separate the left-most and right-most points
+        left_most = x_sorted[:2, :]
+        right_most = x_sorted[2:, :]
+
+        # Sort the left-most coordinates by y-coordinates
+        left_most = left_most[np.argsort(left_most[:, 1]), :]
+        (tl, bl) = left_most  # Top-left and bottom-left
+
+        # Use the top-left as an anchor to calculate distances to right points
+        # The further point will be the bottom-right
+        distances = np.sqrt(
+            ((tl[0] - right_most[:, 0]) ** 2) + ((tl[1] - right_most[:, 1]) ** 2)
+        )
+
+        # Sort right points by distance (descending)
+        right_idx = np.argsort(distances)[::-1]
+        (br, tr) = right_most[right_idx, :]  # Bottom-right and top-right
+
+        return np.array([tl, tr, br, bl])
 
     @staticmethod
-    def _sort_polygon(points):
+    def _sort_boxes(boxes):
         """
-        Sort polygons based on their position in the image. If polygons are close in vertical
+        Sort polygons based on their position in the image. If boxes are close in vertical
         position (within 5 pixels), sort them by horizontal position.
 
         Args:
-            points: List of polygons to sort.
+            points: detected text boxes with shape [4, 2]
 
         Returns:
-            List: Sorted list of polygons.
+            List: sorted boxes(array) with shape [4, 2]
         """
-        points.sort(key=lambda x: (x[0][1], x[0][0]))
-        for i in range(len(points) - 1):
+        boxes.sort(key=lambda x: (x[0][1], x[0][0]))
+        for i in range(len(boxes) - 1):
             for j in range(i, -1, -1):
-                if abs(points[j + 1][0][1] - points[j][0][1]) < 5 and (
-                    points[j + 1][0][0] < points[j][0][0]
+                if abs(boxes[j + 1][0][1] - boxes[j][0][1]) < 5 and (
+                    boxes[j + 1][0][0] < boxes[j][0][0]
                 ):
-                    temp = points[j]
-                    points[j] = points[j + 1]
-                    points[j + 1] = temp
+                    temp = boxes[j]
+                    boxes[j] = boxes[j + 1]
+                    boxes[j + 1] = temp
                 else:
                     break
-        return points
+        return boxes
 
     @staticmethod
     def _zero_pad(image: np.ndarray) -> np.ndarray:
@@ -583,9 +594,11 @@ class LicensePlateProcessingMixin:
             for j in range(len(outputs)):
                 label, score = outputs[j]
                 results[indices[i + j]] = [label, score]
-                # make sure we have high confidence if we need to flip a box, this will be rare in lpr
-                if "180" in label and score >= 0.9:
-                    images[indices[i + j]] = cv2.rotate(images[indices[i + j]], 1)
+                # make sure we have high confidence if we need to flip a box
+                if "180" in label and score >= 0.7:
+                    images[indices[i + j]] = cv2.rotate(
+                        images[indices[i + j]], cv2.ROTATE_180
+                    )
 
         return images, results
 
@@ -682,7 +695,7 @@ class LicensePlateProcessingMixin:
         )
         height, width = image.shape[0:2]
         if height * 1.0 / width >= 1.5:
-            image = np.rot90(image, k=3)
+            image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         return image
 
     def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
@@ -942,9 +955,23 @@ class LicensePlateProcessingMixin:
                 return
 
             license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+
+            # Expand the license_plate_box by 30%
+            box_array = np.array(license_plate_box)
+            expansion = (box_array[2:] - box_array[:2]) * 0.30
+            expanded_box = np.array(
+                [
+                    license_plate_box[0] - expansion[0],
+                    license_plate_box[1] - expansion[1],
+                    license_plate_box[2] + expansion[0],
+                    license_plate_box[3] + expansion[1],
+                ]
+            ).clip(0, [license_plate_frame.shape[1], license_plate_frame.shape[0]] * 2)
+
+            # Crop using the expanded box
             license_plate_frame = license_plate_frame[
-                license_plate_box[1] : license_plate_box[3],
-                license_plate_box[0] : license_plate_box[2],
+                int(expanded_box[1]) : int(expanded_box[3]),
+                int(expanded_box[0]) : int(expanded_box[2]),
             ]
 
         # double the size of the license plate frame for better OCR

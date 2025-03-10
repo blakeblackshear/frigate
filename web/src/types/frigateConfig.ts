@@ -57,6 +57,7 @@ export interface CameraConfig {
     width: number;
   };
   enabled: boolean;
+  enabled_in_config: boolean;
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -362,6 +363,10 @@ export interface FrigateConfig {
   };
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
+
+  lpr: {
+    enabled: boolean;
+  };
 
   logger: {
     default: string;

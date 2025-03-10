@@ -49,6 +49,7 @@ type ReviewFilterGroupProps = {
   motionOnly: boolean;
   filterList?: FilterList;
   showReviewed: boolean;
+  mainCamera?: string;
   setShowReviewed: (show: boolean) => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
@@ -63,6 +64,7 @@ export default function ReviewFilterGroup({
   motionOnly,
   filterList,
   showReviewed,
+  mainCamera,
   setShowReviewed,
   onUpdateFilter,
   setMotionOnly,
@@ -185,6 +187,7 @@ export default function ReviewFilterGroup({
           allCameras={filterValues.cameras}
           groups={groups}
           selectedCameras={filter?.cameras}
+          mainCamera={mainCamera}
           updateCameraFilter={(newCameras) => {
             onUpdateFilter({ ...filter, cameras: newCameras });
           }}

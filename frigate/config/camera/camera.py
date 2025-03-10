@@ -102,6 +102,9 @@ class CameraConfig(FrigateBaseModel):
     zones: dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
     )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of camera."
+    )
 
     _ffmpeg_cmds: list[dict[str, list[str]]] = PrivateAttr()
 

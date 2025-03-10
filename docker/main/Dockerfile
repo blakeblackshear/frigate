@@ -39,10 +39,7 @@ ARG DEBIAN_FRONTEND
 ENV CCACHE_DIR /root/.ccache
 ENV CCACHE_MAXSIZE 2G
 
-# bind /var/cache/apt to tmpfs to speed up nginx build
-RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
-    --mount=type=cache,target=/root/.ccache \
+RUN --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
     /deps/build_nginx.sh
 
 FROM wget AS sqlite-vec
@@ -224,6 +221,9 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
+
+# Set HailoRT to disable logging
+ENV HAILORT_LOGGER_PATH=NONE
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
