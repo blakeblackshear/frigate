@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useCallback, useEffect, useMemo } from "react";
-import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,6 +37,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { getAttributeLabels } from "@/utils/iconUtil";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -48,6 +49,8 @@ type ObjectMaskEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ObjectMaskEditPane({
@@ -60,6 +63,8 @@ export default function ObjectMaskEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  snapPoints,
+  setSnapPoints,
 }: ObjectMaskEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -203,10 +208,13 @@ export default function ObjectMaskEditPane({
           }
         })
         .catch((error) => {
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);
@@ -271,6 +279,8 @@ export default function ObjectMaskEditPane({
             polygons={polygons}
             setPolygons={setPolygons}
             activePolygonIndex={activePolygonIndex}
+            snapPoints={snapPoints}
+            setSnapPoints={setSnapPoints}
           />
         </div>
       )}
@@ -334,13 +344,18 @@ export default function ObjectMaskEditPane({
           </div>
           <div className="flex flex-1 flex-col justify-end">
             <div className="flex flex-row gap-2 pt-5">
-              <Button className="flex flex-1" onClick={onCancel}>
+              <Button
+                className="flex flex-1"
+                aria-label="Cancel"
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
               <Button
                 variant="select"
                 disabled={isLoading}
                 className="flex flex-1"
+                aria-label="Save"
                 type="submit"
               >
                 {isLoading ? (
@@ -367,6 +382,14 @@ type ZoneObjectSelectorProps = {
 export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  const attributeLabels = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return getAttributeLabels(config);
+  }, [config]);
+
   const cameraConfig = useMemo(() => {
     if (config && camera) {
       return config.cameras[camera];
@@ -382,20 +405,20 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
 
     Object.values(config.cameras).forEach((camera) => {
       camera.objects.track.forEach((label) => {
-        if (!ATTRIBUTE_LABELS.includes(label)) {
+        if (!attributeLabels.includes(label)) {
           labels.add(label);
         }
       });
     });
 
     cameraConfig.objects.track.forEach((label) => {
-      if (!ATTRIBUTE_LABELS.includes(label)) {
+      if (!attributeLabels.includes(label)) {
         labels.add(label);
       }
     });
 
     return [...labels].sort();
-  }, [config, cameraConfig]);
+  }, [config, cameraConfig, attributeLabels]);
 
   return (
     <>

@@ -13,7 +13,7 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { ReviewDetailPaneType, ReviewSegment } from "@/types/review";
 import { Event } from "@/types/event";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 import ObjectLifecycle from "./ObjectLifecycle";
@@ -38,6 +38,10 @@ import {
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { LuSearch } from "react-icons/lu";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -50,6 +54,8 @@ export default function ReviewDetailDialog({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  const navigate = useNavigate();
 
   // upload
 
@@ -67,6 +73,23 @@ export default function ReviewDetailDialog({
     }
 
     return events.length != review?.data.detections.length;
+  }, [review, events]);
+
+  const missingObjects = useMemo(() => {
+    if (!review || !events) {
+      return [];
+    }
+
+    const detectedIds = review.data.detections;
+    const missing = Array.from(
+      new Set(
+        events
+          .filter((event) => !detectedIds.includes(event.id))
+          .map((event) => event.label),
+      ),
+    );
+
+    return missing;
   }, [review, events]);
 
   const formattedDate = useFormattedTimestamp(
@@ -89,11 +112,35 @@ export default function ReviewDetailDialog({
     review != undefined,
   );
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        // short timeout to allow the mobile page animation
+        // to complete before updating the state
+        setTimeout(() => {
+          setReview(undefined);
+          setSelectedEvent(undefined);
+          setPane("overview");
+        }, 300);
+      }
+    },
+    [setReview, setIsOpen],
+  );
+
   useEffect(() => {
     setIsOpen(review != undefined);
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [review]);
+
+  // keyboard listener
+
+  useKeyboardListener(["Esc"], (key, modifiers) => {
+    if (key == "Esc" && modifiers.down && !modifiers.repeat) {
+      setIsOpen(false);
+    }
+  });
 
   const Overlay = isDesktop ? Sheet : MobilePage;
   const Content = isDesktop ? SheetContent : MobilePageContent;
@@ -107,16 +154,7 @@ export default function ReviewDetailDialog({
 
   return (
     <>
-      <Overlay
-        open={isOpen ?? false}
-        onOpenChange={(open) => {
-          if (!open) {
-            setReview(undefined);
-            setSelectedEvent(undefined);
-            setPane("overview");
-          }
-        }}
-      >
+      <Overlay open={isOpen ?? false} onOpenChange={handleOpenChange}>
         <FrigatePlusDialog
           upload={upload}
           onClose={() => setUpload(undefined)}
@@ -138,19 +176,20 @@ export default function ReviewDetailDialog({
         >
           <span tabIndex={0} className="sr-only" />
           {pane == "overview" && (
-            <Header className="justify-center" onClose={() => setIsOpen(false)}>
+            <Header className="justify-center">
               <Title>Review Item Details</Title>
               <Description className="sr-only">Review item details</Description>
               <div
                 className={cn(
-                  "absolute",
+                  "absolute flex gap-2 lg:flex-col",
                   isDesktop && "right-1 top-8",
                   isMobile && "right-0 top-3",
                 )}
               >
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
+                      aria-label="Share this review item"
                       size="sm"
                       onClick={() =>
                         shareOrCopy(`${baseUrl}review?id=${review.id}`)
@@ -159,7 +198,21 @@ export default function ReviewDetailDialog({
                       <FaShareAlt className="size-4 text-secondary-foreground" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Share this review item</TooltipContent>
+                  <TooltipPortal>
+                    <TooltipContent>Share this review item</TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <DownloadVideoButton
+                      source={`${baseUrl}api/${review.camera}/start/${review.start_time}/end/${review.end_time || Date.now() / 1000}/clip.mp4`}
+                      camera={review.camera}
+                      startTime={review.start_time}
+                    />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>Download</TooltipContent>
+                  </TooltipPortal>
                 </Tooltip>
               </div>
             </Header>
@@ -180,7 +233,7 @@ export default function ReviewDetailDialog({
                   </div>
                 </div>
                 <div className="flex w-full flex-col items-center gap-2">
-                  <div className="flex w-full flex-col gap-1.5">
+                  <div className="flex w-full flex-col gap-1.5 lg:pr-8">
                     <div className="text-sm text-primary/40">Objects</div>
                     <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm capitalize">
                       {events?.map((event) => {
@@ -195,6 +248,21 @@ export default function ReviewDetailDialog({
                             )}
                             {event.sub_label ?? event.label} (
                             {Math.round(event.data.top_score * 100)}%)
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <div
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    navigate(`/explore?event_id=${event.id}`);
+                                  }}
+                                >
+                                  <LuSearch className="size-4 text-muted-foreground" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipPortal>
+                                <TooltipContent>View in Explore</TooltipContent>
+                              </TooltipPortal>
+                            </Tooltip>
                           </div>
                         );
                       })}
@@ -221,8 +289,25 @@ export default function ReviewDetailDialog({
               </div>
               {hasMismatch && (
                 <div className="p-4 text-center text-sm">
-                  Some objects that were detected are not included in this list
-                  because the object does not have a snapshot
+                  {(() => {
+                    const detectedCount = Math.abs(
+                      (events?.length ?? 0) -
+                        (review?.data.detections.length ?? 0),
+                    );
+                    const objectLabel =
+                      detectedCount === 1 ? "object was" : "objects were";
+
+                    return `${detectedCount} unavailable ${objectLabel} detected and included in this review item.`;
+                  })()}{" "}
+                  Those objects either did not qualify as an alert or detection
+                  or have already been cleaned up/deleted.
+                  {missingObjects.length > 0 && (
+                    <div className="mt-2">
+                      Adjust your configuration if you want Frigate to save
+                      tracked objects for the following labels:{" "}
+                      {missingObjects.join(", ")}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="relative flex size-full flex-col gap-2">
@@ -309,7 +394,7 @@ function EventItem({
           src={
             event.has_snapshot
               ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-              : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+              : `${apiHost}api/events/${event.id}/thumbnail.webp`
           }
         />
         {hovered && (
@@ -324,7 +409,7 @@ function EventItem({
                     href={
                       event.has_snapshot
                         ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-                        : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                        : `${apiHost}api/events/${event.id}/thumbnail.webp`
                     }
                   >
                     <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
@@ -337,6 +422,7 @@ function EventItem({
 
               {event.has_snapshot &&
                 event.plus_id == undefined &&
+                event.data.type == "object" &&
                 config?.plus.enabled && (
                   <Tooltip>
                     <TooltipTrigger>

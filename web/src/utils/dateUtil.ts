@@ -230,6 +230,23 @@ export const getDurationFromTimestamps = (
 };
 
 /**
+ *
+ * @param seconds - number of seconds to convert into hours, minutes and seconds
+ * @returns string - formatted duration in hours, minutes and seconds
+ */
+export const formatSecondsToDuration = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) {
+    return "Invalid duration";
+  }
+
+  const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
+  return formatDuration(duration, {
+    format: ["hours", "minutes", "seconds"],
+    delimiter: ", ",
+  });
+};
+
+/**
  * Adapted from https://stackoverflow.com/a/29268535 this takes a timezone string and
  * returns the offset of that timezone from UTC in minutes.
  * @param timezone string representation of the timezone the user is requesting

@@ -3,11 +3,14 @@ import os
 
 import numpy as np
 import openvino as ov
+import openvino.properties as props
 from pydantic import Field
 from typing_extensions import Literal
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.model import post_process_yolov9
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,12 @@ class OvDetectorConfig(BaseDetectorConfig):
 
 class OvDetector(DetectionApi):
     type_key = DETECTOR_KEY
-    supported_models = [ModelTypeEnum.ssd, ModelTypeEnum.yolonas, ModelTypeEnum.yolox]
+    supported_models = [
+        ModelTypeEnum.ssd,
+        ModelTypeEnum.yolonas,
+        ModelTypeEnum.yolov9,
+        ModelTypeEnum.yolox,
+    ]
 
     def __init__(self, detector_config: OvDetectorConfig):
         self.ov_core = ov.Core()
@@ -34,6 +42,10 @@ class OvDetector(DetectionApi):
             logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError
 
+        os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino"), exist_ok=True)
+        self.ov_core.set_property(
+            {props.cache_dir: os.path.join(MODEL_CACHE_DIR, "openvino")}
+        )
         self.interpreter = self.ov_core.compile_model(
             model=detector_config.model.path, device_name=detector_config.device
         )
@@ -157,8 +169,7 @@ class OvDetector(DetectionApi):
 
         if self.model_invalid:
             return detections
-
-        if self.ov_model_type == ModelTypeEnum.ssd:
+        elif self.ov_model_type == ModelTypeEnum.ssd:
             results = infer_request.get_output_tensor(0).data[0][0]
 
             for i, (_, class_id, score, xmin, ymin, xmax, ymax) in enumerate(results):
@@ -173,8 +184,7 @@ class OvDetector(DetectionApi):
                     xmax,
                 ]
             return detections
-
-        if self.ov_model_type == ModelTypeEnum.yolonas:
+        elif self.ov_model_type == ModelTypeEnum.yolonas:
             predictions = infer_request.get_output_tensor(0).data
 
             for i, prediction in enumerate(predictions):
@@ -193,8 +203,10 @@ class OvDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
-
-        if self.ov_model_type == ModelTypeEnum.yolox:
+        elif self.ov_model_type == ModelTypeEnum.yolov9:
+            out_tensor = infer_request.get_output_tensor(0).data
+            return post_process_yolov9(out_tensor, self.w, self.h)
+        elif self.ov_model_type == ModelTypeEnum.yolox:
             out_tensor = infer_request.get_output_tensor()
             # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
             results = out_tensor.data

@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -46,8 +47,8 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-
-const SEGMENT_DURATION = 30;
+import { useTimezone } from "@/hooks/use-date-utils";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -74,6 +75,18 @@ export function RecordingView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // recordings summary
+
+  const timezone = useTimezone(config);
+
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
+    "recordings/summary",
+    {
+      timezone: timezone,
+      cameras: allCameras ?? null,
+    },
+  ]);
 
   // controller state
 
@@ -140,6 +153,7 @@ export function RecordingView({
 
   const [exportMode, setExportMode] = useState<ExportMode>("none");
   const [exportRange, setExportRange] = useState<TimeRange>();
+  const [showExportPreview, setShowExportPreview] = useState(false);
 
   // move to next clip
 
@@ -379,6 +393,7 @@ export function RecordingView({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
+            aria-label="Go back"
             size="sm"
             onClick={() => navigate(-1)}
           >
@@ -387,6 +402,7 @@ export function RecordingView({
           </Button>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
+            aria-label="Go to the main camera live view"
             size="sm"
             onClick={() => {
               navigate(`/#${mainCamera}`);
@@ -412,6 +428,7 @@ export function RecordingView({
               latestTime={timeRange.before}
               mode={exportMode}
               range={exportRange}
+              showPreview={showExportPreview}
               setRange={(range) => {
                 setExportRange(range);
 
@@ -420,18 +437,35 @@ export function RecordingView({
                 }
               }}
               setMode={setExportMode}
+              setShowPreview={setShowExportPreview}
             />
           )}
           {isDesktop && (
             <ReviewFilterGroup
-              filters={["date", "general"]}
+              filters={["cameras", "date", "general"]}
               reviewSummary={reviewSummary}
+              recordingsSummary={recordingsSummary}
               filter={filter}
               motionOnly={false}
               filterList={reviewFilterList}
               showReviewed
               setShowReviewed={() => {}}
-              onUpdateFilter={updateFilter}
+              mainCamera={mainCamera}
+              onUpdateFilter={(newFilter: ReviewFilter) => {
+                const updatedCameras =
+                  newFilter.cameras === undefined
+                    ? undefined // Respect undefined as "all cameras"
+                    : newFilter.cameras
+                      ? Array.from(
+                          new Set([mainCamera, ...(newFilter.cameras || [])]),
+                        ) // Include mainCamera if specific cameras are selected
+                      : [mainCamera];
+                const adjustedFilter: ReviewFilter = {
+                  ...newFilter,
+                  cameras: updatedCameras,
+                };
+                updateFilter(adjustedFilter);
+              }}
               setMotionOnly={() => {}}
             />
           )}
@@ -471,13 +505,16 @@ export function RecordingView({
             filter={filter}
             currentTime={currentTime}
             latestTime={timeRange.before}
+            recordingsSummary={recordingsSummary}
             mode={exportMode}
             range={exportRange}
+            showExportPreview={showExportPreview}
             allLabels={reviewFilterList.labels}
             allZones={reviewFilterList.zones}
             onUpdateFilter={updateFilter}
             setRange={setExportRange}
             setMode={setExportMode}
+            setShowExportPreview={setShowExportPreview}
           />
         </div>
       </div>
@@ -626,6 +663,7 @@ export function RecordingView({
 
 type TimelineProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
+  timelineRef?: MutableRefObject<HTMLDivElement | null>;
   mainCamera: string;
   timelineType: TimelineType;
   timeRange: TimeRange;
@@ -639,6 +677,7 @@ type TimelineProps = {
 };
 function Timeline({
   contentRef,
+  timelineRef,
   mainCamera,
   timelineType,
   timeRange,
@@ -650,12 +689,48 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
-  const { data: motionData } = useSWR<MotionData[]>([
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+
+  // timeline interaction
+
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 30,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 30, timestampSpread: 15 },
+      { segmentDuration: 15, timestampSpread: 5 },
+      { segmentDuration: 5, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: selectedTimelineRef,
+    timelineDuration: timeRange.after - timeRange.before,
+  });
+
+  // motion data
+
+  const { data: motionData, isLoading } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,
-      scale: SEGMENT_DURATION / 2,
+      scale: Math.round(zoomSettings.segmentDuration / 2),
       cameras: mainCamera,
     },
   ]);
@@ -688,10 +763,11 @@ function Timeline({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
       {timelineType == "timeline" ? (
-        motionData ? (
+        !isLoading ? (
           <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
+            timelineRef={selectedTimelineRef}
+            segmentDuration={zoomSettings.segmentDuration}
+            timestampSpread={zoomSettings.timestampSpread}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
             showHandlebar={exportRange == undefined}
@@ -704,9 +780,10 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            isZooming={isZooming}
+            zoomDirection={zoomDirection}
           />
         ) : (
           <Skeleton className="size-full" />

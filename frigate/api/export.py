@@ -4,17 +4,25 @@ import logging
 import random
 import string
 from pathlib import Path
-from typing import Optional
 
 import psutil
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
+from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
+from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
-from frigate.models import Export, Recordings
-from frigate.record.export import PlaybackFactorEnum, RecordingExporter
+from frigate.models import Export, Previews, Recordings
+from frigate.record.export import (
+    PlaybackFactorEnum,
+    PlaybackSourceEnum,
+    RecordingExporter,
+)
+from frigate.util.builtin import is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +41,7 @@ def export_recording(
     camera_name: str,
     start_time: float,
     end_time: float,
-    body: dict = None,
+    body: ExportRecordingsBody,
 ):
     if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
         return JSONResponse(
@@ -43,36 +51,52 @@ def export_recording(
             status_code=404,
         )
 
-    json: dict[str, any] = body or {}
-    playback_factor = json.get("playback", "realtime")
-    friendly_name: Optional[str] = json.get("name")
+    playback_factor = body.playback
+    playback_source = body.source
+    friendly_name = body.name
+    existing_image = body.image_path
 
-    if len(friendly_name or "") > 256:
-        return JSONResponse(
-            content=({"success": False, "message": "File name is too long."}),
-            status_code=401,
+    if playback_source == "recordings":
+        recordings_count = (
+            Recordings.select()
+            .where(
+                Recordings.start_time.between(start_time, end_time)
+                | Recordings.end_time.between(start_time, end_time)
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .count()
         )
 
-    existing_image = json.get("image_path")
-
-    recordings_count = (
-        Recordings.select()
-        .where(
-            Recordings.start_time.between(start_time, end_time)
-            | Recordings.end_time.between(start_time, end_time)
-            | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
+        if recordings_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No recordings found for time range"}
+                ),
+                status_code=400,
+            )
+    else:
+        previews_count = (
+            Previews.select()
+            .where(
+                Previews.start_time.between(start_time, end_time)
+                | Previews.end_time.between(start_time, end_time)
+                | ((start_time > Previews.start_time) & (end_time < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .count()
         )
-        .where(Recordings.camera == camera_name)
-        .count()
-    )
 
-    if recordings_count <= 0:
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "No recordings found for time range"}
-            ),
-            status_code=400,
-        )
+        if not is_current_hour(start_time) and previews_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No previews found for time range"}
+                ),
+                status_code=400,
+            )
 
     export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
     exporter = RecordingExporter(
@@ -88,6 +112,11 @@ def export_recording(
             if playback_factor in PlaybackFactorEnum.__members__.values()
             else PlaybackFactorEnum.realtime
         ),
+        (
+            PlaybackSourceEnum[playback_source]
+            if playback_source in PlaybackSourceEnum.__members__.values()
+            else PlaybackSourceEnum.recordings
+        ),
     )
     exporter.start()
     return JSONResponse(
@@ -102,8 +131,10 @@ def export_recording(
     )
 
 
-@router.patch("/export/{event_id}/{new_name}")
-def export_rename(event_id: str, new_name: str):
+@router.patch(
+    "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
+)
+def export_rename(event_id: str, body: ExportRenameBody):
     try:
         export: Export = Export.get(Export.id == event_id)
     except DoesNotExist:
@@ -117,7 +148,7 @@ def export_rename(event_id: str, new_name: str):
             status_code=404,
         )
 
-    export.name = new_name
+    export.name = body.name
     export.save()
     return JSONResponse(
         content=(
@@ -130,7 +161,7 @@ def export_rename(event_id: str, new_name: str):
     )
 
 
-@router.delete("/export/{event_id}")
+@router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
 def export_delete(event_id: str):
     try:
         export: Export = Export.get(Export.id == event_id)
@@ -181,3 +212,14 @@ def export_delete(event_id: str):
         ),
         status_code=200,
     )
+
+
+@router.get("/exports/{export_id}")
+def get_export(export_id: str):
+    try:
+        return JSONResponse(content=model_to_dict(Export.get(Export.id == export_id)))
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export not found"},
+            status_code=404,
+        )

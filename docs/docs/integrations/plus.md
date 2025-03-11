@@ -29,15 +29,15 @@ You cannot use the `environment_vars` section of your Frigate configuration file
 
 ## Submit examples
 
-Once your API key is configured, you can submit examples directly from the Explore page in Frigate using the `Frigate+` button.
+Once your API key is configured, you can submit examples directly from the Explore page in Frigate. From the More Filters menu, select "Has a Snapshot - Yes" and "Submitted to Frigate+ - No", and press Apply at the bottom of the pane. Then, click on a thumbnail and select the Snapshot tab.
+
+You can use your keyboard's left and right arrow keys to quickly navigate between the tracked object snapshots.
 
 :::note
 
 Snapshots must be enabled to be able to submit examples to Frigate+
 
 :::
-
-![Send To Plus](/img/plus/send-to-plus.jpg)
 
 ![Submit To Plus](/img/plus/submit-to-plus.jpg)
 

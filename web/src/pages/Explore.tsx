@@ -1,15 +1,24 @@
-import { useEventUpdate, useModelState } from "@/api/ws";
+import {
+  useEmbeddingsReindexProgress,
+  useTrackedObjectUpdate,
+  useModelState,
+} from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import AnimatedCircularProgressBar from "@/components/ui/circular-progress-bar";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
+import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import { ModelState } from "@/types/ws";
+import { formatSecondsToDuration } from "@/utils/dateUtil";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isMobileOnly } from "react-device-detect";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -21,6 +30,23 @@ export default function Explore() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  // grid
+
+  const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
+  const gridColumns = useMemo(() => {
+    if (isMobileOnly) {
+      return 2;
+    }
+    return columnCount ?? 4;
+  }, [columnCount]);
+
+  // default layout
+
+  const [defaultView, setDefaultView, defaultViewLoaded] = usePersistence(
+    "exploreDefaultView",
+    "summary",
+  );
 
   const timezone = useTimezone(config);
 
@@ -59,7 +85,11 @@ export default function Explore() {
   const searchQuery: SearchQuery = useMemo(() => {
     // no search parameters
     if (searchSearchParams && Object.keys(searchSearchParams).length === 0) {
-      return null;
+      if (defaultView == "grid") {
+        return ["events", {}];
+      } else {
+        return null;
+      }
     }
 
     // parameters, but no search term and not similarity
@@ -80,6 +110,15 @@ export default function Explore() {
           after: searchSearchParams["after"],
           time_range: searchSearchParams["time_range"],
           search_type: searchSearchParams["search_type"],
+          min_score: searchSearchParams["min_score"],
+          max_score: searchSearchParams["max_score"],
+          min_speed: searchSearchParams["min_speed"],
+          max_speed: searchSearchParams["max_speed"],
+          has_snapshot: searchSearchParams["has_snapshot"],
+          is_submitted: searchSearchParams["is_submitted"],
+          has_clip: searchSearchParams["has_clip"],
+          event_id: searchSearchParams["event_id"],
+          sort: searchSearchParams["sort"],
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
@@ -106,12 +145,20 @@ export default function Explore() {
         after: searchSearchParams["after"],
         time_range: searchSearchParams["time_range"],
         search_type: searchSearchParams["search_type"],
+        min_score: searchSearchParams["min_score"],
+        max_score: searchSearchParams["max_score"],
+        min_speed: searchSearchParams["min_speed"],
+        max_speed: searchSearchParams["max_speed"],
+        has_snapshot: searchSearchParams["has_snapshot"],
+        is_submitted: searchSearchParams["is_submitted"],
+        has_clip: searchSearchParams["has_clip"],
         event_id: searchSearchParams["event_id"],
+        sort: searchSearchParams["sort"],
         timezone,
         include_thumbnails: 0,
       },
     ];
-  }, [searchTerm, searchSearchParams, similaritySearch, timezone]);
+  }, [searchTerm, searchSearchParams, similaritySearch, timezone, defaultView]);
 
   // paging
 
@@ -124,12 +171,17 @@ export default function Explore() {
 
     const [url, params] = searchQuery;
 
-    // If it's not the first page, use the last item's start_time as the 'before' parameter
+    const isAscending = params.sort?.includes("date_asc");
+
     if (pageIndex > 0 && previousPageData) {
       const lastDate = previousPageData[previousPageData.length - 1].start_time;
       return [
         url,
-        { ...params, before: lastDate.toString(), limit: API_LIMIT },
+        {
+          ...params,
+          [isAscending ? "after" : "before"]: lastDate.toString(),
+          limit: API_LIMIT,
+        },
       ];
     }
 
@@ -143,6 +195,18 @@ export default function Explore() {
     revalidateFirstPage: true,
     revalidateOnFocus: true,
     revalidateAll: false,
+    onError: (error) => {
+      toast.error(
+        `Error fetching tracked objects: ${error.response.data.message}`,
+        {
+          position: "top-center",
+        },
+      );
+      if (error.response.status === 404) {
+        // reset all filters if 404
+        setSearchFilter({});
+      }
+    },
   });
 
   const searchResults = useMemo(
@@ -174,41 +238,84 @@ export default function Explore() {
 
   // mutation and revalidation
 
-  const eventUpdate = useEventUpdate();
+  const trackedObjectUpdate = useTrackedObjectUpdate();
 
   useEffect(() => {
-    mutate();
+    if (trackedObjectUpdate) {
+      mutate();
+    }
     // mutate / revalidate when event description updates come in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventUpdate]);
+  }, [trackedObjectUpdate]);
+
+  // embeddings reindex progress
+
+  const { payload: reindexState } = useEmbeddingsReindexProgress();
+
+  const embeddingsReindexing = useMemo(() => {
+    if (reindexState) {
+      switch (reindexState.status) {
+        case "indexing":
+          return true;
+        case "completed":
+          return false;
+        default:
+          return undefined;
+      }
+    }
+  }, [reindexState]);
 
   // model states
 
-  const { payload: minilmModelState } = useModelState(
-    "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
+  const modelVersion = config?.semantic_search.model || "jinav1";
+  const modelSize = config?.semantic_search.model_size || "small";
+
+  // Text model state
+  const { payload: textModelState } = useModelState(
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-text_model_fp16.onnx"
+      : modelSize === "large"
+        ? "jinaai/jina-clip-v2-model_fp16.onnx"
+        : "jinaai/jina-clip-v2-model_quantized.onnx",
   );
-  const { payload: minilmTokenizerState } = useModelState(
-    "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
+
+  // Tokenizer state
+  const { payload: textTokenizerState } = useModelState(
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-tokenizer"
+      : "jinaai/jina-clip-v2-tokenizer",
   );
-  const { payload: clipImageModelState } = useModelState(
-    "clip-clip_image_model_vitb32.onnx",
-  );
-  const { payload: clipTextModelState } = useModelState(
-    "clip-clip_text_model_vitb32.onnx",
+
+  // Vision model state (same as text model for jinav2)
+  const visionModelFile =
+    modelVersion === "jinav1"
+      ? modelSize === "large"
+        ? "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+        : "jinaai/jina-clip-v1-vision_model_quantized.onnx"
+      : modelSize === "large"
+        ? "jinaai/jina-clip-v2-model_fp16.onnx"
+        : "jinaai/jina-clip-v2-model_quantized.onnx";
+  const { payload: visionModelState } = useModelState(visionModelFile);
+
+  // Preprocessor/feature extractor state
+  const { payload: visionFeatureExtractorState } = useModelState(
+    modelVersion === "jinav1"
+      ? "jinaai/jina-clip-v1-preprocessor_config.json"
+      : "jinaai/jina-clip-v2-preprocessor_config.json",
   );
 
   const allModelsLoaded = useMemo(() => {
     return (
-      minilmModelState === "downloaded" &&
-      minilmTokenizerState === "downloaded" &&
-      clipImageModelState === "downloaded" &&
-      clipTextModelState === "downloaded"
+      textModelState === "downloaded" &&
+      textTokenizerState === "downloaded" &&
+      visionModelState === "downloaded" &&
+      visionFeatureExtractorState === "downloaded"
     );
   }, [
-    minilmModelState,
-    minilmTokenizerState,
-    clipImageModelState,
-    clipTextModelState,
+    textModelState,
+    textTokenizerState,
+    visionModelState,
+    visionFeatureExtractorState,
   ]);
 
   const renderModelStateIcon = (modelState: ModelState) => {
@@ -225,10 +332,13 @@ export default function Explore() {
   };
 
   if (
-    !minilmModelState ||
-    !minilmTokenizerState ||
-    !clipImageModelState ||
-    !clipTextModelState
+    !defaultViewLoaded ||
+    (config?.semantic_search.enabled &&
+      (!reindexState ||
+        !textModelState ||
+        !textTokenizerState ||
+        !visionModelState ||
+        !visionFeatureExtractorState))
   ) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -237,58 +347,114 @@ export default function Explore() {
 
   return (
     <>
-      {!allModelsLoaded ? (
+      {config?.semantic_search.enabled &&
+      (!allModelsLoaded || embeddingsReindexing) ? (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
+          <div className="flex max-w-96 flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
             <div className="my-5 flex flex-col items-center gap-2 text-xl">
               <TbExclamationCircle className="mb-3 size-10" />
-              <div>Search Unavailable</div>
+              <div>Explore is Unavailable</div>
             </div>
-            <div className="max-w-96 text-center">
-              Frigate is downloading the necessary embeddings models to support
-              semantic searching. This may take several minutes depending on the
-              speed of your network connection.
-            </div>
-            <div className="flex w-96 flex-col gap-2 py-5">
-              <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(clipImageModelState)}
-                CLIP image model
-              </div>
-              <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(clipTextModelState)}
-                CLIP text model
-              </div>
-              <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(minilmModelState)}
-                MiniLM sentence model
-              </div>
-              <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(minilmTokenizerState)}
-                MiniLM tokenizer
-              </div>
-            </div>
-            {(minilmModelState === "error" ||
-              clipImageModelState === "error" ||
-              clipTextModelState === "error") && (
-              <div className="my-3 max-w-96 text-center text-danger">
-                An error has occurred. Check Frigate logs.
-              </div>
+            {embeddingsReindexing && allModelsLoaded && (
+              <>
+                <div className="text-center text-primary-variant">
+                  Explore can be used after tracked object embeddings have
+                  finished reindexing.
+                </div>
+                <div className="pt-5 text-center">
+                  <AnimatedCircularProgressBar
+                    min={0}
+                    max={reindexState.total_objects}
+                    value={reindexState.processed_objects}
+                    gaugePrimaryColor="hsl(var(--selected))"
+                    gaugeSecondaryColor="hsl(var(--secondary))"
+                  />
+                </div>
+                <div className="flex w-96 flex-col gap-2 py-5">
+                  {reindexState.time_remaining !== null && (
+                    <div className="mb-3 flex flex-col items-center justify-center gap-1">
+                      <div className="text-primary-variant">
+                        {reindexState.time_remaining === -1
+                          ? "Starting up..."
+                          : "Estimated time remaining:"}
+                      </div>
+                      {reindexState.time_remaining >= 0 &&
+                        (formatSecondsToDuration(reindexState.time_remaining) ||
+                          "Finishing shortly")}
+                    </div>
+                  )}
+                  <div className="flex flex-row items-center justify-center gap-3">
+                    <span className="text-primary-variant">
+                      Thumbnails embedded:
+                    </span>
+                    {reindexState.thumbnails}
+                  </div>
+                  <div className="flex flex-row items-center justify-center gap-3">
+                    <span className="text-primary-variant">
+                      Descriptions embedded:
+                    </span>
+                    {reindexState.descriptions}
+                  </div>
+                  <div className="flex flex-row items-center justify-center gap-3">
+                    <span className="text-primary-variant">
+                      Tracked objects processed:
+                    </span>
+                    {reindexState.processed_objects} /{" "}
+                    {reindexState.total_objects}
+                  </div>
+                </div>
+              </>
             )}
-            <div className="max-w-96 text-center">
-              You may want to reindex the embeddings of your tracked objects
-              once the models are downloaded.
-            </div>
-            <div className="flex max-w-96 items-center text-primary-variant">
-              <Link
-                to="https://docs.frigate.video/configuration/semantic_search"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                Read the documentation{" "}
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
+            {!allModelsLoaded && (
+              <>
+                <div className="text-center text-primary-variant">
+                  Frigate is downloading the necessary embeddings models to
+                  support the Semantic Search feature. This may take several
+                  minutes depending on the speed of your network connection.
+                </div>
+                <div className="flex w-96 flex-col gap-2 py-5">
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    {renderModelStateIcon(visionModelState)}
+                    Vision model
+                  </div>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    {renderModelStateIcon(visionFeatureExtractorState)}
+                    Vision model feature extractor
+                  </div>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    {renderModelStateIcon(textModelState)}
+                    Text model
+                  </div>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    {renderModelStateIcon(textTokenizerState)}
+                    Text tokenizer
+                  </div>
+                </div>
+                {(textModelState === "error" ||
+                  textTokenizerState === "error" ||
+                  visionModelState === "error" ||
+                  visionFeatureExtractorState === "error") && (
+                  <div className="my-3 max-w-96 text-center text-danger">
+                    An error has occurred. Check Frigate logs.
+                  </div>
+                )}
+                <div className="text-center text-primary-variant">
+                  You may want to reindex the embeddings of your tracked objects
+                  once the models are downloaded.
+                </div>
+                <div className="flex items-center text-primary-variant">
+                  <Link
+                    to="https://docs.frigate.video/configuration/semantic_search"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    Read the documentation{" "}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : (
@@ -298,6 +464,10 @@ export default function Explore() {
           searchFilter={searchFilter}
           searchResults={searchResults}
           isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
+          isValidating={isValidating}
+          hasMore={!isReachingEnd}
+          columns={gridColumns}
+          defaultView={defaultView}
           setSearch={setSearch}
           setSimilaritySearch={(search) => {
             setSearchFilter({
@@ -308,8 +478,10 @@ export default function Explore() {
           }}
           setSearchFilter={setSearchFilter}
           onUpdateFilter={setSearchFilter}
+          setColumns={setColumnCount}
+          setDefaultView={setDefaultView}
           loadMore={loadMore}
-          hasMore={!isReachingEnd}
+          refresh={mutate}
         />
       )}
     </>

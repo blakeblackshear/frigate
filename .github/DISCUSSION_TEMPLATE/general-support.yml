@@ -103,19 +103,6 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: object-detector
-    attributes:
-      label: Object Detector
-      options:
-        - Coral
-        - OpenVino
-        - TensorRT
-        - RKNN
-        - Other
-        - CPU (no coral)
-    validations:
-      required: true
-  - type: dropdown
     id: network
     attributes:
       label: Network connection

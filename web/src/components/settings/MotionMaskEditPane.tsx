@@ -33,6 +33,8 @@ type MotionMaskEditPaneProps = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function MotionMaskEditPane({
@@ -45,6 +47,8 @@ export default function MotionMaskEditPane({
   setIsLoading,
   onSave,
   onCancel,
+  snapPoints,
+  setSnapPoints,
 }: MotionMaskEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -172,10 +176,13 @@ export default function MotionMaskEditPane({
         }
       })
       .catch((error) => {
-        toast.error(
-          `Failed to save config changes: ${error.response.data.message}`,
-          { position: "top-center" },
-        );
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to save config changes: ${errorMessage}`, {
+          position: "top-center",
+        });
       })
       .finally(() => {
         setIsLoading(false);
@@ -252,6 +259,8 @@ export default function MotionMaskEditPane({
             polygons={polygons}
             setPolygons={setPolygons}
             activePolygonIndex={activePolygonIndex}
+            snapPoints={snapPoints}
+            setSnapPoints={setSnapPoints}
           />
         </div>
       )}
@@ -308,11 +317,16 @@ export default function MotionMaskEditPane({
           />
           <div className="flex flex-1 flex-col justify-end">
             <div className="flex flex-row gap-2 pt-5">
-              <Button className="flex flex-1" onClick={onCancel}>
+              <Button
+                className="flex flex-1"
+                aria-label="Cancel"
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
               <Button
                 variant="select"
+                aria-label="Save"
                 disabled={isLoading}
                 className="flex flex-1"
                 type="submit"

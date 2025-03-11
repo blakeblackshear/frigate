@@ -13,7 +13,7 @@ class AuthConfig(FrigateBaseModel):
         default=False, title="Reset the admin password on startup"
     )
     cookie_name: str = Field(
-        default="frigate_token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
+        default="frigate_token", title="Name for jwt token cookie", pattern=r"^[a-z_]+$"
     )
     cookie_secure: bool = Field(default=False, title="Set secure flag on cookie")
     session_length: int = Field(

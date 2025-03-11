@@ -8,7 +8,8 @@ import re
 import signal
 import subprocess as sp
 import traceback
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional, Tuple
 
 import cv2
 import psutil
@@ -255,8 +256,42 @@ def get_amd_gpu_stats() -> dict[str, str]:
         return results
 
 
-def get_intel_gpu_stats() -> dict[str, str]:
+def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
     """Get stats using intel_gpu_top."""
+
+    def get_stats_manually(output: str) -> dict[str, str]:
+        """Find global stats via regex when json fails to parse."""
+        reading = "".join(output)
+        results: dict[str, str] = {}
+
+        # render is used for qsv
+        render = []
+        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[14:])
+            single = packet.get("busy", 0.0)
+            render.append(float(single))
+
+        if render:
+            render_avg = sum(render) / len(render)
+        else:
+            render_avg = 1
+
+        # video is used for vaapi
+        video = []
+        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[10:])
+            single = packet.get("busy", 0.0)
+            video.append(float(single))
+
+        if video:
+            video_avg = sum(video) / len(video)
+        else:
+            video_avg = 1
+
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
+        results["mem"] = "-%"
+        return results
+
     intel_gpu_top_command = [
         "timeout",
         "0.5s",
@@ -267,6 +302,9 @@ def get_intel_gpu_stats() -> dict[str, str]:
         "-s",
         "1",
     ]
+
+    if sriov:
+        intel_gpu_top_command += ["-d", "drm:/dev/dri/card0"]
 
     p = sp.run(
         intel_gpu_top_command,
@@ -279,7 +317,13 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
         return None
     else:
-        data = json.loads(f'[{"".join(p.stdout.split())}]')
+        output = "".join(p.stdout.split())
+
+        try:
+            data = json.loads(f"[{output}]")
+        except json.JSONDecodeError:
+            return get_stats_manually(output)
+
         results: dict[str, str] = {}
         render = {"global": []}
         video = {"global": []}
@@ -318,16 +362,17 @@ def get_intel_gpu_stats() -> dict[str, str]:
                     if video_frame is not None:
                         video[key].append(float(video_frame))
 
-        results["gpu"] = (
-            f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
-        )
-        results["mem"] = "-%"
+        if render["global"] and video["global"]:
+            results["gpu"] = (
+                f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
+            )
+            results["mem"] = "-%"
 
         if len(render.keys()) > 1:
             results["clients"] = {}
 
             for key in render.keys():
-                if key == "global":
+                if key == "global" or not render[key] or not video[key]:
                     continue
 
                 results["clients"][key] = (
@@ -349,12 +394,22 @@ def try_get_info(f, h, default="N/A"):
 
 
 def get_nvidia_gpu_stats() -> dict[int, dict]:
+    names: dict[str, int] = {}
     results = {}
     try:
         nvml.nvmlInit()
         deviceCount = nvml.nvmlDeviceGetCount()
         for i in range(deviceCount):
             handle = nvml.nvmlDeviceGetHandleByIndex(i)
+            gpu_name = nvml.nvmlDeviceGetName(handle)
+
+            # handle case where user has multiple of same GPU
+            if gpu_name in names:
+                names[gpu_name] += 1
+                gpu_name += f" ({names.get(gpu_name)})"
+            else:
+                names[gpu_name] = 1
+
             meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
             enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
@@ -382,7 +437,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 dec_util = -1
 
             results[i] = {
-                "name": nvml.nvmlDeviceGetName(handle),
+                "name": gpu_name,
                 "gpu": gpu_util,
                 "mem": gpu_mem_util,
                 "enc": enc_util,
@@ -543,7 +598,7 @@ async def get_video_properties(
     width = height = 0
 
     try:
-        # Open the video stream
+        # Open the video stream using OpenCV
         video = cv2.VideoCapture(url)
 
         # Check if the video stream was opened successfully
@@ -581,3 +636,71 @@ async def get_video_properties(
         result["fourcc"] = fourcc
 
     return result
+
+
+def process_logs(
+    contents: str,
+    service: Optional[str] = None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+) -> Tuple[int, List[str]]:
+    log_lines = []
+    last_message = None
+    last_timestamp = None
+    repeat_count = 0
+
+    for raw_line in contents.splitlines():
+        clean_line = raw_line.strip()
+
+        if len(clean_line) < 10:
+            continue
+
+        # Handle cases where S6 does not include date in log line
+        if "  " not in clean_line:
+            clean_line = f"{datetime.now()}  {clean_line}"
+
+        try:
+            # Find the position of the first double space to extract timestamp and message
+            date_end = clean_line.index("  ")
+            timestamp = clean_line[:date_end]
+            full_message = clean_line[date_end:].strip()
+
+            # For frigate, remove the date part from message comparison
+            if service == "frigate":
+                # Skip the date at the start of the message if it exists
+                date_parts = full_message.split("]", 1)
+                if len(date_parts) > 1:
+                    message_part = date_parts[1].strip()
+                else:
+                    message_part = full_message
+            else:
+                message_part = full_message
+
+            if message_part == last_message:
+                repeat_count += 1
+                continue
+            else:
+                if repeat_count > 0:
+                    # Insert a deduplication message formatted the same way as logs
+                    dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                    log_lines.append(dedup_message)
+                    repeat_count = 0
+
+                log_lines.append(clean_line)
+                last_timestamp = timestamp
+
+                last_message = message_part
+
+        except ValueError:
+            # If we can't parse the line properly, just add it as is
+            log_lines.append(clean_line)
+            continue
+
+    # If there were repeated messages at the end, log the count
+    if repeat_count > 0:
+        dedup_message = (
+            f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+        )
+        log_lines.append(dedup_message)
+
+    return len(log_lines), log_lines[start:end]

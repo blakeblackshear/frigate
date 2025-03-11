@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import Field
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
@@ -17,7 +18,7 @@ supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
-model_cache_dir = "/config/model_cache/rknn_cache/"
+model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 
 
 class RknnDetectorConfig(BaseDetectorConfig):
@@ -108,7 +109,7 @@ class Rknn(DetectionApi):
                     model_props["model_type"] = model_type
 
             if model_matched:
-                model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
+                model_props["filename"] = model_path + f"-{soc}-v2.3.0-1.rknn"
 
                 model_props["path"] = model_cache_dir + model_props["filename"]
 
@@ -129,24 +130,24 @@ class Rknn(DetectionApi):
             os.mkdir(model_cache_dir)
 
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/{filename}",
+            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.0/{filename}",
             model_cache_dir + filename,
         )
 
     def check_config(self, config):
         if (config.model.width != 320) or (config.model.height != 320):
             raise Exception(
-                "Make sure to set the model width and height to 320 in your config.yml."
+                "Make sure to set the model width and height to 320 in your config."
             )
 
         if config.model.input_pixel_format != "bgr":
             raise Exception(
-                'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+                'Make sure to set the model input_pixel_format to "bgr" in your config.'
             )
 
         if config.model.input_tensor != "nhwc":
             raise Exception(
-                'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+                'Make sure to set the model input_tensor to "nhwc" in your config.'
             )
 
     def detect_raw(self, tensor_input):

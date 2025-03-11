@@ -19,6 +19,13 @@ class FileLock:
         self.path = path
         self.lock_file = f"{path}.lock"
 
+        # we have not acquired the lock yet so it should not exist
+        if os.path.exists(self.lock_file):
+            try:
+                os.remove(self.lock_file)
+            except Exception:
+                pass
+
     def acquire(self):
         parent_dir = os.path.dirname(self.lock_file)
         os.makedirs(parent_dir, exist_ok=True)
@@ -44,26 +51,26 @@ class ModelDownloader:
         download_path: str,
         file_names: List[str],
         download_func: Callable[[str], None],
+        complete_func: Callable[[], None] | None = None,
         silent: bool = False,
     ):
         self.model_name = model_name
         self.download_path = download_path
         self.file_names = file_names
         self.download_func = download_func
+        self.complete_func = complete_func
         self.silent = silent
         self.requestor = InterProcessRequestor()
         self.download_thread = None
         self.download_complete = threading.Event()
 
     def ensure_model_files(self):
-        for file in self.file_names:
-            self.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file}",
-                    "state": ModelStatusTypesEnum.downloading,
-                },
-            )
+        self.mark_files_state(
+            self.requestor,
+            self.model_name,
+            self.file_names,
+            ModelStatusTypesEnum.downloading,
+        )
         self.download_thread = threading.Thread(
             target=self._download_models,
             name=f"_download_model_{self.model_name}",
@@ -92,10 +99,14 @@ class ModelDownloader:
                 },
             )
 
+        if self.complete_func:
+            self.complete_func()
+
+        self.requestor.stop()
         self.download_complete.set()
 
     @staticmethod
-    def download_from_url(url: str, save_path: str, silent: bool = False):
+    def download_from_url(url: str, save_path: str, silent: bool = False) -> Path:
         temporary_filename = Path(save_path).with_name(
             os.path.basename(save_path) + ".part"
         )
@@ -118,6 +129,24 @@ class ModelDownloader:
 
         if not silent:
             logger.info(f"Downloading complete: {url}")
+
+        return Path(save_path)
+
+    @staticmethod
+    def mark_files_state(
+        requestor: InterProcessRequestor,
+        model_name: str,
+        files: list[str],
+        state: ModelStatusTypesEnum,
+    ) -> None:
+        for file_name in files:
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{model_name}-{file_name}",
+                    "state": state,
+                },
+            )
 
     def wait_for_download(self):
         self.download_complete.wait()

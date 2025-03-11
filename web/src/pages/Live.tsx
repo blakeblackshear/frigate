@@ -62,6 +62,7 @@ function Live() {
     if (selectedCameraName) {
       const capitalized = selectedCameraName
         .split("_")
+        .filter((text) => text)
         .map((text) => text[0].toUpperCase() + text.substring(1));
       document.title = `${capitalized.join(" ")} - Live - Frigate`;
     } else if (cameraGroup && cameraGroup != "default") {
@@ -100,12 +101,14 @@ function Live() {
     ) {
       const group = config.camera_groups[cameraGroup];
       return Object.values(config.cameras)
-        .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
+        .filter(
+          (conf) => conf.enabled_in_config && group.cameras.includes(conf.name),
+        )
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config, cameraGroup]);
 

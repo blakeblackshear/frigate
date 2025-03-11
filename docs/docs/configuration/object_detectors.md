@@ -10,32 +10,46 @@ title: Object Detectors
 Frigate supports multiple different detectors that work on different types of hardware:
 
 **Most Hardware**
+
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
-- [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 
 **AMD**
+
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
 
 **Intel**
+
 - [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
 - [ONNX](#onnx): OpenVINO will automatically be detected and used as a detector in the default Frigate image when a supported ONNX model is configured.
 
 **Nvidia**
-- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs, using one of many default models.
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
+
+- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs and Jetson devices, using one of many default models.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp(4/5)` Frigate images when a supported ONNX model is configured.
 
 **Rockchip**
+
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
 **For Testing**
-- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results. 
+
+- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
+
+:::
+
+:::note
+
+Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time).
+
+This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
 
 :::
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -115,6 +129,111 @@ detectors:
     type: edgetpu
     device: pci
 ```
+---
+
+
+## Hailo-8
+
+This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
+
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the Hailo hardware.
+
+### Configuration
+
+When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.  
+If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
+
+#### YOLO 
+
+Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
+- **Hailo-8 hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
+- **Hailo-8L hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 320
+  height: 320
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: yolo-generic
+
+  # The detector automatically selects the default model based on your hardware:
+  # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
+  # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
+  #
+  # Optionally, you can specify a local model path to override the default.
+  # If a local path is provided and the file exists, it will be used instead of downloading.
+  # Example:
+  # path: /config/model_cache/hailo/yolov6n.hef
+  #
+  # You can also override using a custom URL:
+  # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef
+  # just make sure to give it the write configuration based on the model
+```
+
+#### SSD
+
+For SSD-based models, provide either a model path or URL to your compiled SSD model. The integration will first check the local path before downloading if necessary.
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  model_type: ssd
+  # Specify the local model path (if available) or URL for SSD MobileNet v1.
+  # Example with a local path:
+  # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+  #
+  # Or override using a custom URL:
+  # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
+```
+
+#### Custom Models
+
+The Hailo detector supports all YOLO models compiled for Hailo hardware that include post-processing. You can specify a custom URL or a local path to download or use your model directly. If both are provided, the detector checks the local path first.
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+
+model:
+  width: 640
+  height: 640
+  input_tensor: nhwc
+  input_pixel_format: rgb
+  input_dtype: int
+  model_type: yolo-generic
+  # Optional: Specify a local model path.
+  # path: /config/model_cache/hailo/custom_model.hef
+  #
+  # Alternatively, or as a fallback, provide a custom URL:
+  # path: https://custom-model-url.com/path/to/model.hef
+```
+For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
+
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation. 
+
+> **Note:**  
+> The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
+
+---
+
+
 
 ## OpenVINO Detector
 
@@ -144,7 +263,9 @@ detectors:
 
 #### SSDLite MobileNet v2
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
+
+Use the model configuration shown below when using the OpenVINO detector with the default OpenVINO model:
 
 ```yaml
 detectors:
@@ -167,15 +288,7 @@ This detector also supports YOLOX. Frigate does not come with any YOLOX models p
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
-
-:::warning
-
-The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
-
-:::
-
-The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
@@ -197,13 +310,43 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+#### YOLOv9
+
+[YOLOv9](https://github.com/WongKinYiu/yolov9) models are supported, but not included by default.
+
+:::tip
+
+The YOLOv9 detector has been designed to support YOLOv9 models, but may support other YOLO model architectures as well.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  model_type: yolov9
+  width: 640 # <--- should match the imgsize set during model export
+  height: 640 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
 ## NVidia TensorRT Detector
 
 Nvidia GPUs may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt`. This detector is designed to work with Yolo models for object detection.
 
 ### Minimum Hardware Support
 
-The TensorRT detector uses the 12.x series of CUDA libraries which have minor version compatibility. The minimum driver version on the host system must be `>=530`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
+The TensorRT detector uses the 12.x series of CUDA libraries which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
 
 To use the TensorRT detector, make sure your host system has the [nvidia-container-runtime](https://docs.docker.com/config/containers/resource_constraints/#access-an-nvidia-gpu) installed to pass through the GPU to the container and the host system has a compatible driver installed for your GPU.
 
@@ -223,7 +366,7 @@ The model used for TensorRT must be preprocessed on the same hardware platform t
 
 The Frigate image will generate model files during startup if the specified model is not found. Processed models are stored in the `/config/model_cache` folder. Typically the `/config` path is mapped to a directory on the host already and the `model_cache` does not need to be mapped separately unless the user wants to store it in a different location on the host.
 
-By default, the `yolov7-320` model will be generated, but this can be overridden by specifying the `YOLO_MODELS` environment variable in Docker. One or more models may be listed in a comma-separated format, and each one will be generated. To select no model generation, set the variable to an empty string, `YOLO_MODELS=""`. Models will only be generated if the corresponding `{model}.trt` file is not present in the `model_cache` folder, so you can force a model to be regenerated by deleting it from your Frigate data folder.
+By default, no models will be generated, but this can be overridden by specifying the `YOLO_MODELS` environment variable in Docker. One or more models may be listed in a comma-separated format, and each one will be generated. Models will only be generated if the corresponding `{model}.trt` file is not present in the `model_cache` folder, so you can force a model to be regenerated by deleting it from your Frigate data folder.
 
 If you have a Jetson device with DLAs (Xavier or Orin), you can generate a model that will run on the DLA by appending `-dla` to your model name, e.g. specify `YOLO_MODELS=yolov7-320-dla`. The model will run on DLA0 (Frigate does not currently support DLA1). DLA-incompatible layers will fall back to running on the GPU.
 
@@ -231,6 +374,8 @@ If your GPU does not support FP16 operations, you can pass the environment varia
 
 Specific models can be selected by passing an environment variable to the `docker run` command or in your `docker-compose.yml` file. Use the form `-e YOLO_MODELS=yolov4-416,yolov4-tiny-416` to select one or more model names. The models available are shown below.
 
+<details>
+<summary>Available Models</summary>
 ```
 yolov3-288
 yolov3-416
@@ -254,17 +399,19 @@ yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
 yolov7-640
+yolov7-416
 yolov7-320
 yolov7x-640
 yolov7x-320
 ```
+</details>
 
 An example `docker-compose.yml` fragment that converts the `yolov4-608` and `yolov7x-640` models for a Pascal card would look something like this:
 
 ```yml
 frigate:
   environment:
-    - YOLO_MODELS=yolov4-608,yolov7x-640
+    - YOLO_MODELS=yolov7-320,yolov7x-640
     - USE_FP16=false
 ```
 
@@ -281,6 +428,8 @@ frigate:
 The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
+
+Use the config below to work with generated TRT models:
 
 ```yaml
 detectors:
@@ -300,7 +449,7 @@ model:
 
 ### Setup
 
-The `rocm` detector supports running YOLO-NAS models on AMD GPUs. Use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
+Support for AMD GPUs is provided using the [ONNX detector](#ONNX). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
 
 ### Docker settings for GPU access
 
@@ -350,7 +499,7 @@ When using docker compose:
 ```yaml
 services:
   frigate:
-...
+
 environment:
   HSA_OVERRIDE_GFX_VERSION: "9.0.0"
 ```
@@ -379,41 +528,31 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 
 ### Supported Models
 
-There is no default model provided, the following formats are supported:
-
-#### YOLO-NAS
-
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
-
-:::warning
-
-The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
-
-:::
-
-The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
-
-After placing the downloaded onnx model in your config folder, you can use the following configuration:
-
-```yaml
-detectors:
-  rocm:
-    type: rocm
-
-model:
-  model_type: yolonas
-  width: 320 # <--- should match whatever was set in notebook
-  height: 320 # <--- should match whatever was set in notebook
-  input_pixel_format: bgr
-  path: /config/yolo_nas_s.onnx
-  labelmap_path: /labelmap/coco-80.txt
-```
-
-Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+See [ONNX supported models](#supported-models) for supported models, there are some caveats:
+- D-FINE models are not supported
+- YOLO-NAS models are known to not run well on integrated GPUs
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+
+:::info
+
+If the correct build is used for your GPU then the GPU will be detected and used automatically.
+
+- **AMD**
+
+  - ROCm will automatically be detected and used with the ONNX detector in the `-rocm` Frigate image.
+
+- **Intel**
+
+  - OpenVINO will automatically be detected and used with the ONNX detector in the default Frigate image.
+
+- **Nvidia**
+  - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp(4/5)` Frigate image.
+
+:::
 
 :::tip
 
@@ -435,15 +574,7 @@ There is no default model provided, the following formats are supported:
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
-
-:::warning
-
-The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
-
-:::
-
-The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
@@ -457,7 +588,64 @@ model:
   width: 320 # <--- should match whatever was set in notebook
   height: 320 # <--- should match whatever was set in notebook
   input_pixel_format: bgr
+  input_tensor: nchw
   path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### YOLOv9
+
+[YOLOv9](https://github.com/WongKinYiu/yolov9) models are supported, but not included by default.
+
+:::tip
+
+The YOLOv9 detector has been designed to support YOLOv9 models, but may support other YOLO model architectures as well.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolov9
+  width: 640 # <--- should match the imgsize set during model export
+  height: 640 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+#### D-FINE
+
+[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+
+:::warning
+
+D-FINE is currently not supported on OpenVINO
+
+:::
+
+After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/dfine_m_obj2coco.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -482,11 +670,12 @@ detectors:
   cpu1:
     type: cpu
     num_threads: 3
-    model:
-      path: "/custom_model.tflite"
   cpu2:
     type: cpu
     num_threads: 3
+
+model:
+  path: "/custom_model.tflite"
 ```
 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
@@ -525,7 +714,7 @@ Hardware accelerated object detection is supported on the following SoCs:
 - RK3576
 - RK3588
 
-This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.0.0.beta0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
 
 ### Prerequisites
 
@@ -600,26 +789,79 @@ $ cat /sys/kernel/debug/rknpu/load
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
 
-## Hailo-8l
+### Converting your own onnx model to rknn format
 
-This detector is available for use with Hailo-8 AI Acceleration Module.
+To convert a onnx model to the rknn format using the [rknn-toolkit2](https://github.com/airockchip/rknn-toolkit2/) you have to:
 
-See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+- Place one ore more models in onnx format in the directory `config/model_cache/rknn_cache/onnx` on your docker host (this might require `sudo` privileges).
+- Save the configuration file under `config/conv2rknn.yaml` (see below for details).
+- Run `docker exec <frigate_container_id> python3 /opt/conv2rknn.py`. If the conversion was successful, the rknn models will be placed in `config/model_cache/rknn_cache`.
 
-### Configuration
+This is an example configuration file that you need to adjust to your specific onnx model:
 
 ```yaml
-detectors:
-  hailo8l:
-    type: hailo8l
-    device: PCIe
-    model:
-      path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+soc: ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
+quantization: false
 
-model:
-  width: 300
-  height: 300
-  input_tensor: nhwc
-  input_pixel_format: bgr
-  model_type: ssd
+output_name: "{input_basename}"
+
+config:
+  mean_values: [[0, 0, 0]]
+  std_values: [[255, 255, 255]]
+  quant_img_rgb2bgr: true
 ```
+
+Explanation of the paramters:
+
+- `soc`: A list of all SoCs you want to build the rknn model for. If you don't specify this parameter, the script tries to find out your SoC and builds the rknn model for this one.
+- `quantization`: true: 8 bit integer (i8) quantization, false: 16 bit float (fp16). Default: false.
+- `output_name`: The output name of the model. The following variables are available:
+  - `quant`: "i8" or "fp16" depending on the config
+  - `input_basename`: the basename of the input model (e.g. "my_model" if the input model is calles "my_model.onnx")
+  - `soc`: the SoC this model was build for (e.g. "rk3588")
+  - `tk_version`: Version of `rknn-toolkit2` (e.g. "2.3.0")
+  - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
+- `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.0/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.0_EN.pdf).
+
+# Models
+
+Some model types are not included in Frigate by default.
+
+## Downloading Models
+
+Here are some tips for getting different model types
+
+### Downloading D-FINE Model
+
+To export as ONNX:
+
+1. Clone: https://github.com/Peterande/D-FINE and install all dependencies.
+2. Select and download a checkpoint from the [readme](https://github.com/Peterande/D-FINE).
+3. Modify line 58 of `tools/deployment/export_onnx.py` and change batch size to 1: `data = torch.rand(1, 3, 640, 640)`
+4. Run the export, making sure you select the right config, for your checkpoint.
+
+Example:
+
+```
+python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml -r output/dfine_m_obj2coco.pth
+```
+
+:::tip
+
+Model export has only been tested on Linux (or WSL2). Not all dependencies are in `requirements.txt`. Some live in the deployment folder, and some are still missing entirely and must be installed manually.
+
+Make sure you change the batch size to 1 before exporting.
+
+:::
+
+### Downloading YOLO-NAS Model
+
+You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.

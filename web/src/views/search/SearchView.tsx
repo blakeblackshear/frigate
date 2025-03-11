@@ -1,20 +1,16 @@
 import SearchThumbnail from "@/components/card/SearchThumbnail";
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import Chip from "@/components/indicators/Chip";
-import SearchDetailDialog from "@/components/overlay/detail/SearchDetailDialog";
+import SearchDetailDialog, {
+  SearchTab,
+} from "@/components/overlay/detail/SearchDetailDialog";
 import { Toaster } from "@/components/ui/sonner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobileOnly } from "react-device-detect";
-import { LuColumns, LuImage, LuSearchX, LuText } from "react-icons/lu";
+import { isMobileOnly } from "react-device-detect";
+import { LuImage, LuSearchX, LuText } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
 import useKeyboardListener, {
@@ -25,14 +21,16 @@ import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { Slider } from "@/components/ui/slider";
+import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
+import SearchSettings from "@/components/settings/SearchSettings";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { usePersistence } from "@/hooks/use-persistence";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import Chip from "@/components/indicators/Chip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+import SearchActionGroup from "@/components/filter/SearchActionGroup";
 
 type SearchViewProps = {
   search: string;
@@ -40,12 +38,18 @@ type SearchViewProps = {
   searchFilter?: SearchFilter;
   searchResults?: SearchResult[];
   isLoading: boolean;
+  isValidating: boolean;
+  hasMore: boolean;
+  columns: number;
+  defaultView?: string;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   setSearchFilter: (filter: SearchFilter) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
   loadMore: () => void;
-  hasMore: boolean;
+  refresh: () => void;
+  setColumns: (columns: number) => void;
+  setDefaultView: (name: string) => void;
 };
 export default function SearchView({
   search,
@@ -53,12 +57,18 @@ export default function SearchView({
   searchFilter,
   searchResults,
   isLoading,
+  isValidating,
+  hasMore,
+  columns,
+  defaultView = "summary",
   setSearch,
   setSimilaritySearch,
   setSearchFilter,
   onUpdateFilter,
   loadMore,
-  hasMore,
+  refresh,
+  setColumns,
+  setDefaultView,
 }: SearchViewProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -67,18 +77,19 @@ export default function SearchView({
 
   // grid
 
-  const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
-  const effectiveColumnCount = useMemo(() => columnCount ?? 4, [columnCount]);
-
-  const gridClassName = cn("grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2", {
-    "sm:grid-cols-2": effectiveColumnCount <= 2,
-    "sm:grid-cols-3": effectiveColumnCount === 3,
-    "sm:grid-cols-4": effectiveColumnCount === 4,
-    "sm:grid-cols-5": effectiveColumnCount === 5,
-    "sm:grid-cols-6": effectiveColumnCount === 6,
-    "sm:grid-cols-7": effectiveColumnCount === 7,
-    "sm:grid-cols-8": effectiveColumnCount >= 8,
-  });
+  const gridClassName = cn(
+    "grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2",
+    isMobileOnly && "grid-cols-2",
+    {
+      "sm:grid-cols-2": columns <= 2,
+      "sm:grid-cols-3": columns === 3,
+      "sm:grid-cols-4": columns === 4,
+      "sm:grid-cols-5": columns === 5,
+      "sm:grid-cols-6": columns === 6,
+      "sm:grid-cols-7": columns === 7,
+      "sm:grid-cols-8": columns === 8,
+    },
+  );
 
   // suggestions values
 
@@ -145,8 +156,16 @@ export default function SearchView({
           : ["12:00AM-11:59PM"],
       before: [formatDateToLocaleString()],
       after: [formatDateToLocaleString(-5)],
+      min_score: ["50"],
+      max_score: ["100"],
+      min_speed: ["1"],
+      max_speed: ["150"],
+      has_clip: ["yes", "no"],
+      has_snapshot: ["yes", "no"],
+      ...(config?.plus?.enabled &&
+        searchFilter?.has_snapshot && { is_submitted: ["yes", "no"] }),
     }),
-    [config, allLabels, allZones, allSubLabels],
+    [config, allLabels, allZones, allSubLabels, searchFilter],
   );
 
   // remove duplicate event ids
@@ -161,16 +180,73 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
+  const [page, setPage] = useState<SearchTab>("details");
 
   // search interaction
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedObjects, setSelectedObjects] = useState<string[]>([]);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const onSelectSearch = useCallback((item: SearchResult, index: number) => {
-    setSearchDetail(item);
-    setSelectedIndex(index);
-  }, []);
+  const onSelectSearch = useCallback(
+    (item: SearchResult, ctrl: boolean, page: SearchTab = "details") => {
+      if (selectedObjects.length > 1 || ctrl) {
+        const index = selectedObjects.indexOf(item.id);
+
+        if (index != -1) {
+          if (selectedObjects.length == 1) {
+            setSelectedObjects([]);
+          } else {
+            const copy = [
+              ...selectedObjects.slice(0, index),
+              ...selectedObjects.slice(index + 1),
+            ];
+            setSelectedObjects(copy);
+          }
+        } else {
+          const copy = [...selectedObjects];
+          copy.push(item.id);
+          setSelectedObjects(copy);
+        }
+      } else {
+        setPage(page);
+        setSearchDetail(item);
+      }
+    },
+    [selectedObjects],
+  );
+
+  const onSelectAllObjects = useCallback(() => {
+    if (!uniqueResults || uniqueResults.length == 0) {
+      return;
+    }
+
+    if (selectedObjects.length < uniqueResults.length) {
+      setSelectedObjects(uniqueResults.map((value) => value.id));
+    } else {
+      setSelectedObjects([]);
+    }
+  }, [uniqueResults, selectedObjects]);
+
+  useEffect(() => {
+    setSelectedObjects([]);
+    // unselect items when search term or filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, searchFilter]);
+
+  // confidence score
+
+  const zScoreToConfidence = (score: number) => {
+    // Normalizing is not needed for similarity searches
+    // Sigmoid function for normalized: 1 / (1 + e^x)
+    // Cosine for similarity
+    if (searchFilter) {
+      const notNormalized = searchFilter?.search_type?.includes("similarity");
+
+      const confidence = notNormalized ? 1 - score : 1 / (1 + Math.exp(score));
+
+      return Math.round(confidence * 100);
+    }
+  };
 
   // update search detail when results change
 
@@ -186,15 +262,6 @@ export default function SearchView({
       }
     }
   }, [searchResults, searchDetail]);
-
-  // confidence score - probably needs tweaking
-
-  const zScoreToConfidence = (score: number) => {
-    // Sigmoid function: 1 / (1 + e^x)
-    const confidence = 1 / (1 + Math.exp(score));
-
-    return Math.round(confidence * 100);
-  };
 
   const hasExistingSearch = useMemo(
     () => searchResults != undefined || searchFilter != undefined,
@@ -212,23 +279,44 @@ export default function SearchView({
       }
 
       switch (key) {
-        case "ArrowLeft":
-          setSelectedIndex((prevIndex) => {
-            const newIndex =
-              prevIndex === null
-                ? uniqueResults.length - 1
-                : (prevIndex - 1 + uniqueResults.length) % uniqueResults.length;
-            setSearchDetail(uniqueResults[newIndex]);
-            return newIndex;
-          });
+        case "a":
+          if (modifiers.ctrl) {
+            onSelectAllObjects();
+          }
           break;
-        case "ArrowRight":
-          setSelectedIndex((prevIndex) => {
+        case "ArrowLeft":
+          if (uniqueResults.length > 0) {
+            const currentIndex = searchDetail
+              ? uniqueResults.findIndex(
+                  (result) => result.id === searchDetail.id,
+                )
+              : -1;
+
             const newIndex =
-              prevIndex === null ? 0 : (prevIndex + 1) % uniqueResults.length;
+              currentIndex === -1
+                ? uniqueResults.length - 1
+                : (currentIndex - 1 + uniqueResults.length) %
+                  uniqueResults.length;
+
             setSearchDetail(uniqueResults[newIndex]);
-            return newIndex;
-          });
+          }
+          break;
+
+        case "ArrowRight":
+          if (uniqueResults.length > 0) {
+            const currentIndex = searchDetail
+              ? uniqueResults.findIndex(
+                  (result) => result.id === searchDetail.id,
+                )
+              : -1;
+
+            const newIndex =
+              currentIndex === -1
+                ? 0
+                : (currentIndex + 1) % uniqueResults.length;
+
+            setSearchDetail(uniqueResults[newIndex]);
+          }
           break;
         case "PageDown":
           contentRef.current?.scrollBy({
@@ -244,32 +332,80 @@ export default function SearchView({
           break;
       }
     },
-    [uniqueResults, inputFocused],
+    [uniqueResults, inputFocused, onSelectAllObjects, searchDetail],
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
+    ["a", "ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
     onKeyboardShortcut,
     !inputFocused,
   );
 
   // scroll into view
 
+  const [prevSearchDetail, setPrevSearchDetail] = useState<
+    SearchResult | undefined
+  >();
+
+  // keep track of previous ref to outline thumbnail when dialog closes
+  const prevSearchDetailRef = useRef<SearchResult | undefined>();
+
   useEffect(() => {
-    if (
-      selectedIndex !== null &&
-      uniqueResults &&
-      itemRefs.current?.[selectedIndex]
-    ) {
-      scrollIntoView(itemRefs.current[selectedIndex], {
-        block: "center",
-        behavior: "smooth",
-        scrollMode: "if-needed",
-      });
+    if (searchDetail === undefined && prevSearchDetailRef.current) {
+      setPrevSearchDetail(prevSearchDetailRef.current);
     }
-    // we only want to scroll when the index changes
+    prevSearchDetailRef.current = searchDetail;
+  }, [searchDetail]);
+
+  useEffect(() => {
+    if (uniqueResults && itemRefs.current && prevSearchDetail) {
+      const selectedIndex = uniqueResults.findIndex(
+        (result) => result.id === prevSearchDetail.id,
+      );
+
+      const parent = itemRefs.current[selectedIndex];
+
+      if (selectedIndex !== -1 && parent) {
+        const target = parent.querySelector(".review-item-ring");
+        if (target) {
+          scrollIntoView(target, {
+            block: "center",
+            behavior: "smooth",
+            scrollMode: "if-needed",
+          });
+          target.classList.add(`outline-selected`);
+          target.classList.remove("outline-transparent");
+
+          setTimeout(() => {
+            target.classList.remove(`outline-selected`);
+            target.classList.add("outline-transparent");
+          }, 3000);
+        }
+      }
+    }
+    // we only want to scroll when the dialog closes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIndex]);
+  }, [prevSearchDetail]);
+
+  useEffect(() => {
+    if (uniqueResults && itemRefs.current && searchDetail) {
+      const selectedIndex = uniqueResults.findIndex(
+        (result) => result.id === searchDetail.id,
+      );
+
+      const parent = itemRefs.current[selectedIndex];
+
+      if (selectedIndex !== -1 && parent) {
+        scrollIntoView(parent, {
+          block: "center",
+          behavior: "smooth",
+          scrollMode: "if-needed",
+        });
+      }
+    }
+    // we only want to scroll when changing the detail pane
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchDetail]);
 
   // observer for loading more
 
@@ -304,10 +440,13 @@ export default function SearchView({
       <Toaster closeButton={true} />
       <SearchDetailDialog
         search={searchDetail}
+        page={page}
         setSearch={setSearchDetail}
+        setSearchPage={setPage}
         setSimilarity={
           searchDetail && (() => setSimilaritySearch(searchDetail))
         }
+        setInputFocused={setInputFocused}
       />
 
       <div
@@ -335,15 +474,40 @@ export default function SearchView({
 
         {hasExistingSearch && (
           <ScrollArea className="w-full whitespace-nowrap lg:ml-[35%]">
-            <div className="flex flex-row">
-              <SearchFilterGroup
-                className={cn(
-                  "w-full justify-between md:justify-start lg:justify-end",
-                )}
-                filter={searchFilter}
-                onUpdateFilter={onUpdateFilter}
-              />
-              <ScrollBar orientation="horizontal" className="h-0" />
+            <div className="flex flex-row gap-2">
+              {selectedObjects.length == 0 ? (
+                <>
+                  <SearchFilterGroup
+                    className={cn(
+                      "w-full justify-between md:justify-start lg:justify-end",
+                    )}
+                    filter={searchFilter}
+                    onUpdateFilter={onUpdateFilter}
+                  />
+                  <SearchSettings
+                    columns={columns}
+                    setColumns={setColumns}
+                    defaultView={defaultView}
+                    setDefaultView={setDefaultView}
+                    filter={searchFilter}
+                    onUpdateFilter={onUpdateFilter}
+                  />
+                  <ScrollBar orientation="horizontal" className="h-0" />
+                </>
+              ) : (
+                <div
+                  className={cn(
+                    "scrollbar-container flex justify-center gap-2 overflow-x-auto",
+                    "h-10 w-full justify-between md:justify-start lg:justify-end",
+                  )}
+                >
+                  <SearchActionGroup
+                    selectedObjects={selectedObjects}
+                    setSelectedObjects={setSelectedObjects}
+                    pullLatestData={refresh}
+                  />
+                </div>
+              )}
             </div>
           </ScrollArea>
         )}
@@ -360,35 +524,47 @@ export default function SearchView({
           </div>
         )}
 
-        {uniqueResults?.length == 0 &&
-          isLoading &&
-          (searchTerm ||
+        {((isLoading && uniqueResults?.length == 0) || // show on initial load
+          (isValidating && !isLoading)) && // or revalidation
+          (searchTerm || // or change of filter/search term
             (searchFilter && Object.keys(searchFilter).length !== 0)) && (
-            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <ActivityIndicator className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background/80 p-3 dark:bg-background/50" />
           )}
 
         {uniqueResults && (
           <div className={gridClassName}>
             {uniqueResults &&
               uniqueResults.map((value, index) => {
-                const selected = selectedIndex === index;
+                const selected = selectedObjects.includes(value.id);
 
                 return (
                   <div
                     key={value.id}
                     ref={(item) => (itemRefs.current[index] = item)}
                     data-start={value.start_time}
-                    className="review-item relative rounded-lg"
+                    className="relative flex flex-col rounded-lg"
                   >
                     <div
                       className={cn(
-                        "aspect-square size-full overflow-hidden rounded-lg",
+                        "aspect-square w-full overflow-hidden rounded-t-lg border",
                       )}
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        findSimilar={() => setSimilaritySearch(value)}
-                        onClick={() => onSelectSearch(value, index)}
+                        onClick={(
+                          value: SearchResult,
+                          ctrl: boolean,
+                          detail: boolean,
+                        ) => {
+                          if (detail && selectedObjects.length == 0) {
+                            setSearchDetail(value);
+                          } else {
+                            onSelectSearch(
+                              value,
+                              ctrl || selectedObjects.length > 0,
+                            );
+                          }
+                        }}
                       />
                       {(searchTerm ||
                         searchFilter?.search_type?.includes("similarity")) && (
@@ -399,11 +575,10 @@ export default function SearchView({
                                 className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
                               >
                                 {value.search_source == "thumbnail" ? (
-                                  <LuImage className="mr-1 size-3" />
+                                  <LuImage className="size-3" />
                                 ) : (
-                                  <LuText className="mr-1 size-3" />
+                                  <LuText className="size-3" />
                                 )}
-                                {zScoreToConfidence(value.search_distance)}%
                               </Chip>
                             </TooltipTrigger>
                             <TooltipPortal>
@@ -419,6 +594,24 @@ export default function SearchView({
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
+                    <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
+                      <SearchThumbnailFooter
+                        searchResult={value}
+                        columns={columns}
+                        findSimilar={() => {
+                          if (config?.semantic_search.enabled) {
+                            setSimilaritySearch(value);
+                          }
+                        }}
+                        refreshResults={refresh}
+                        showObjectLifecycle={() =>
+                          onSelectSearch(value, false, "object lifecycle")
+                        }
+                        showSnapshot={() =>
+                          onSelectSearch(value, false, "snapshot")
+                        }
+                      />
+                    </div>
                   </div>
                 );
               })}
@@ -430,57 +623,19 @@ export default function SearchView({
             <div className="flex h-12 w-full justify-center">
               {hasMore && isLoading && <ActivityIndicator />}
             </div>
-
-            {isDesktop && columnCount && (
-              <div
-                className={cn(
-                  "fixed bottom-12 right-3 z-50 flex flex-row gap-2 lg:bottom-9",
-                )}
-              >
-                <Popover>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <PopoverTrigger asChild>
-                        <div className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-75 transition-all duration-300 hover:bg-muted hover:opacity-100">
-                          <LuColumns className="size-5 md:m-[6px]" />
-                        </div>
-                      </PopoverTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>Adjust Grid Columns</TooltipContent>
-                  </Tooltip>
-                  <PopoverContent className="mr-2 w-80">
-                    <div className="space-y-4">
-                      <div className="font-medium leading-none">
-                        Grid Columns
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <Slider
-                          value={[effectiveColumnCount]}
-                          onValueChange={([value]) => setColumnCount(value)}
-                          max={8}
-                          min={2}
-                          step={1}
-                          className="flex-grow"
-                        />
-                        <span className="w-9 text-center text-sm font-medium">
-                          {effectiveColumnCount}
-                        </span>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
           </>
         )}
       </div>
       {searchFilter &&
         Object.keys(searchFilter).length === 0 &&
-        !searchTerm && (
+        !searchTerm &&
+        defaultView == "summary" && (
           <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
             <ExploreView
               searchDetail={searchDetail}
               setSearchDetail={setSearchDetail}
+              setSimilaritySearch={setSimilaritySearch}
+              onSelectSearch={onSelectSearch}
             />
           </div>
         )}

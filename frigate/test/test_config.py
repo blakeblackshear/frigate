@@ -75,11 +75,11 @@ class TestConfig(unittest.TestCase):
             "detectors": {
                 "cpu": {
                     "type": "cpu",
-                    "model": {"path": "/cpu_model.tflite"},
+                    "model_path": "/cpu_model.tflite",
                 },
                 "edgetpu": {
                     "type": "edgetpu",
-                    "model": {"path": "/edgetpu_model.tflite"},
+                    "model_path": "/edgetpu_model.tflite",
                 },
                 "openvino": {
                     "type": "openvino",
@@ -854,9 +854,9 @@ class TestConfig(unittest.TestCase):
         assert frigate_config.model.merged_labelmap[0] == "person"
 
     def test_plus_labelmap(self):
-        with open("/config/model_cache/test", "w") as f:
+        with open(os.path.join(MODEL_CACHE_DIR, "test"), "w") as f:
             json.dump(self.plus_model_info, f)
-        with open("/config/model_cache/test.json", "w") as f:
+        with open(os.path.join(MODEL_CACHE_DIR, "test.json"), "w") as f:
             json.dump(self.plus_model_info, f)
 
         config = {

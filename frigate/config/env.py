@@ -23,7 +23,7 @@ EnvString = Annotated[str, AfterValidator(validate_env_string)]
 
 def validate_env_vars(v: dict[str, str], info: ValidationInfo) -> dict[str, str]:
     if isinstance(info.context, dict) and info.context.get("install", False):
-        for k, v in v:
+        for k, v in v.items():
             os.environ[k] = v
 
     return v

@@ -14,29 +14,38 @@ from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.events_body import (
-    EventsCreateBody,
-    EventsDescriptionBody,
-    EventsEndBody,
-    EventsSubLabelBody,
-    SubmitPlusBody,
-)
-from frigate.api.defs.events_query_parameters import (
+from frigate.api.auth import require_role
+from frigate.api.defs.query.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
     EventsSearchQueryParams,
     EventsSummaryQueryParams,
 )
-from frigate.api.defs.regenerate_query_parameters import (
+from frigate.api.defs.query.regenerate_query_parameters import (
     RegenerateQueryParameters,
 )
-from frigate.api.defs.tags import Tags
-from frigate.const import (
-    CLIPS_DIR,
+from frigate.api.defs.request.events_body import (
+    EventsCreateBody,
+    EventsDeleteBody,
+    EventsDescriptionBody,
+    EventsEndBody,
+    EventsSubLabelBody,
+    SubmitPlusBody,
 )
+from frigate.api.defs.response.event_response import (
+    EventCreateResponse,
+    EventMultiDeleteResponse,
+    EventResponse,
+    EventUploadPlusResponse,
+)
+from frigate.api.defs.response.generic_response import GenericResponse
+from frigate.api.defs.tags import Tags
+from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
+from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
+from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.object_processing import TrackedObject
+from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -44,7 +53,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.events])
 
 
-@router.get("/events")
+@router.get("/events", response_model=list[EventResponse])
 def events(params: EventsQueryParams = Depends()):
     camera = params.camera
     cameras = params.cameras
@@ -85,9 +94,12 @@ def events(params: EventsQueryParams = Depends()):
     favorites = params.favorites
     min_score = params.min_score
     max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     is_submitted = params.is_submitted
     min_length = params.min_length
     max_length = params.max_length
+    event_id = params.event_id
 
     sort = params.sort
 
@@ -218,6 +230,12 @@ def events(params: EventsQueryParams = Depends()):
     if min_score is not None:
         clauses.append((Event.data["score"] >= min_score))
 
+    if max_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] <= max_speed))
+
+    if min_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] >= min_speed))
+
     if min_length is not None:
         clauses.append(((Event.end_time - Event.start_time) >= min_length))
 
@@ -230,6 +248,9 @@ def events(params: EventsQueryParams = Depends()):
         elif is_submitted > 0:
             clauses.append((Event.plus_id != ""))
 
+    if event_id is not None:
+        clauses.append((Event.id == event_id))
+
     if len(clauses) == 0:
         clauses.append((True))
 
@@ -238,9 +259,15 @@ def events(params: EventsQueryParams = Depends()):
             order_by = Event.data["score"].asc()
         elif sort == "score_desc":
             order_by = Event.data["score"].desc()
+        elif sort == "speed_asc":
+            order_by = Event.data["average_estimated_speed"].asc()
+        elif sort == "speed_desc":
+            order_by = Event.data["average_estimated_speed"].desc()
         elif sort == "date_asc":
             order_by = Event.start_time.asc()
         elif sort == "date_desc":
+            order_by = Event.start_time.desc()
+        else:
             order_by = Event.start_time.desc()
     else:
         order_by = Event.start_time.desc()
@@ -257,73 +284,78 @@ def events(params: EventsQueryParams = Depends()):
     return JSONResponse(content=list(events))
 
 
-@router.get("/events/explore")
+@router.get("/events/explore", response_model=list[EventResponse])
 def events_explore(limit: int = 10):
-    subquery = Event.select(
-        Event.id,
-        Event.camera,
-        Event.label,
-        Event.zones,
-        Event.start_time,
-        Event.end_time,
-        Event.has_clip,
-        Event.has_snapshot,
-        Event.plus_id,
-        Event.retain_indefinitely,
-        Event.sub_label,
-        Event.top_score,
-        Event.false_positive,
-        Event.box,
-        Event.data,
-        fn.rank()
-        .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
-        .alias("rank"),
-        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count"),
-    ).alias("subquery")
+    # get distinct labels for all events
+    distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
 
-    query = (
-        Event.select(
-            subquery.c.id,
-            subquery.c.camera,
-            subquery.c.label,
-            subquery.c.zones,
-            subquery.c.start_time,
-            subquery.c.end_time,
-            subquery.c.has_clip,
-            subquery.c.has_snapshot,
-            subquery.c.plus_id,
-            subquery.c.retain_indefinitely,
-            subquery.c.sub_label,
-            subquery.c.top_score,
-            subquery.c.false_positive,
-            subquery.c.box,
-            subquery.c.data,
-            subquery.c.event_count,
-        )
-        .from_(subquery)
-        .where(subquery.c.rank <= limit)
-        .order_by(subquery.c.event_count.desc(), subquery.c.start_time.desc())
-        .dicts()
-    )
+    label_counts = {}
 
-    events = list(query.iterator())
+    def event_generator():
+        for label_obj in distinct_labels.iterator():
+            label = label_obj.label
 
-    processed_events = [
-        {k: v for k, v in event.items() if k != "data"}
-        | {
-            "data": {
-                k: v
-                for k, v in event["data"].items()
-                if k in ["type", "score", "top_score", "description"]
+            # get most recent events for this label
+            label_events = (
+                Event.select()
+                .where(Event.label == label)
+                .order_by(Event.start_time.desc())
+                .limit(limit)
+                .iterator()
+            )
+
+            # count total events for this label
+            label_counts[label] = Event.select().where(Event.label == label).count()
+
+            yield from label_events
+
+    def process_events():
+        for event in event_generator():
+            processed_event = {
+                "id": event.id,
+                "camera": event.camera,
+                "label": event.label,
+                "zones": event.zones,
+                "start_time": event.start_time,
+                "end_time": event.end_time,
+                "has_clip": event.has_clip,
+                "has_snapshot": event.has_snapshot,
+                "plus_id": event.plus_id,
+                "retain_indefinitely": event.retain_indefinitely,
+                "sub_label": event.sub_label,
+                "top_score": event.top_score,
+                "false_positive": event.false_positive,
+                "box": event.box,
+                "data": {
+                    k: v
+                    for k, v in event.data.items()
+                    if k
+                    in [
+                        "type",
+                        "score",
+                        "top_score",
+                        "description",
+                        "sub_label_score",
+                        "average_estimated_speed",
+                        "velocity_angle",
+                        "path_data",
+                    ]
+                },
+                "event_count": label_counts[event.label],
             }
-        }
-        for event in events
-    ]
+            yield processed_event
+
+    # convert iterator to list and sort
+    processed_events = sorted(
+        process_events(),
+        key=lambda x: (x["event_count"], x["start_time"]),
+        reverse=True,
+    )
 
     return JSONResponse(content=processed_events)
 
 
-@router.get("/event_ids")
+@router.get("/event_ids", response_model=list[EventResponse])
 def event_ids(ids: str):
     ids = ids.split(",")
 
@@ -348,6 +380,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
     limit = params.limit
+    sort = params.sort
 
     # Filters
     cameras = params.cameras
@@ -355,7 +388,14 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     zones = params.zones
     after = params.after
     before = params.before
+    min_score = params.min_score
+    max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     time_range = params.time_range
+    has_clip = params.has_clip
+    has_snapshot = params.has_snapshot
+    is_submitted = params.is_submitted
 
     # for similarity search
     event_id = params.event_id
@@ -394,6 +434,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         Event.end_time,
         Event.has_clip,
         Event.has_snapshot,
+        Event.top_score,
         Event.data,
         Event.plus_id,
         ReviewSegment.thumb_path,
@@ -429,6 +470,36 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
     if before:
         event_filters.append((Event.start_time < before))
+
+    if has_clip is not None:
+        event_filters.append((Event.has_clip == has_clip))
+
+    if has_snapshot is not None:
+        event_filters.append((Event.has_snapshot == has_snapshot))
+
+    if is_submitted is not None:
+        if is_submitted == 0:
+            event_filters.append((Event.plus_id.is_null()))
+        elif is_submitted > 0:
+            event_filters.append((Event.plus_id != ""))
+
+    if min_score is not None and max_score is not None:
+        event_filters.append((Event.data["score"].between(min_score, max_score)))
+    else:
+        if min_score is not None:
+            event_filters.append((Event.data["score"] >= min_score))
+        if max_score is not None:
+            event_filters.append((Event.data["score"] <= max_score))
+
+    if min_speed is not None and max_speed is not None:
+        event_filters.append(
+            (Event.data["average_estimated_speed"].between(min_speed, max_speed))
+        )
+    else:
+        if min_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] >= min_speed))
+        if max_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] <= max_speed))
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -472,13 +543,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 status_code=404,
             )
 
-        thumb_result = context.embeddings.search_thumbnail(search_event)
-        thumb_ids = dict(
-            zip(
-                [result[0] for result in thumb_result],
-                context.thumb_stats.normalize([result[1] for result in thumb_result]),
-            )
-        )
+        thumb_result = context.search_thumbnail(search_event)
+        thumb_ids = {result[0]: result[1] for result in thumb_result}
         search_results = {
             event_id: {"distance": distance, "source": "thumbnail"}
             for event_id, distance in thumb_ids.items()
@@ -486,15 +552,18 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     else:
         search_types = search_type.split(",")
 
+        # only save stats for multi-modal searches
+        save_stats = "thumbnail" in search_types and "description" in search_types
+
         if "thumbnail" in search_types:
-            thumb_result = context.embeddings.search_thumbnail(query)
+            thumb_result = context.search_thumbnail(query)
+
+            thumb_distances = context.thumb_stats.normalize(
+                [result[1] for result in thumb_result], save_stats
+            )
+
             thumb_ids = dict(
-                zip(
-                    [result[0] for result in thumb_result],
-                    context.thumb_stats.normalize(
-                        [result[1] for result in thumb_result]
-                    ),
-                )
+                zip([result[0] for result in thumb_result], thumb_distances)
             )
             search_results.update(
                 {
@@ -504,13 +573,14 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             )
 
         if "description" in search_types:
-            desc_result = context.embeddings.search_description(query)
-            desc_ids = dict(
-                zip(
-                    [result[0] for result in desc_result],
-                    context.desc_stats.normalize([result[1] for result in desc_result]),
-                )
+            desc_result = context.search_description(query)
+
+            desc_distances = context.desc_stats.normalize(
+                [result[1] for result in desc_result], save_stats
             )
+
+            desc_ids = dict(zip([result[0] for result in desc_result], desc_distances))
+
             for event_id, distance in desc_ids.items():
                 if (
                     event_id not in search_results
@@ -546,7 +616,17 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         processed_event["data"] = {
             k: v
             for k, v in event["data"].items()
-            if k in ["type", "score", "top_score", "description"]
+            if k
+            in [
+                "type",
+                "score",
+                "top_score",
+                "description",
+                "sub_label_score",
+                "average_estimated_speed",
+                "velocity_angle",
+                "path_data",
+            ]
         }
 
         if event["id"] in search_results:
@@ -555,10 +635,20 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         processed_events.append(processed_event)
 
-    # Sort by search distance if search_results are available, otherwise by start_time
-    if search_results:
+    if (sort is None or sort == "relevance") and search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
+    elif min_score is not None and max_score is not None and sort == "score_asc":
+        processed_events.sort(key=lambda x: x["score"])
+    elif min_score is not None and max_score is not None and sort == "score_desc":
+        processed_events.sort(key=lambda x: x["score"], reverse=True)
+    elif min_speed is not None and max_speed is not None and sort == "speed_asc":
+        processed_events.sort(key=lambda x: x["average_estimated_speed"])
+    elif min_speed is not None and max_speed is not None and sort == "speed_desc":
+        processed_events.sort(key=lambda x: x["average_estimated_speed"], reverse=True)
+    elif sort == "date_asc":
+        processed_events.sort(key=lambda x: x["start_time"])
     else:
+        # "date_desc" default
         processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
@@ -612,7 +702,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
     return JSONResponse(content=[e for e in groups.dicts()])
 
 
-@router.get("/events/{event_id}")
+@router.get("/events/{event_id}", response_model=EventResponse)
 def event(event_id: str):
     try:
         return model_to_dict(Event.get(Event.id == event_id))
@@ -620,7 +710,11 @@ def event(event_id: str):
         return JSONResponse(content="Event not found", status_code=404)
 
 
-@router.post("/events/{event_id}/retain")
+@router.post(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -639,7 +733,7 @@ def set_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/plus")
+@router.post("/events/{event_id}/plus", response_model=EventUploadPlusResponse)
 def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
@@ -751,7 +845,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     )
 
 
-@router.put("/events/{event_id}/false_positive")
+@router.put("/events/{event_id}/false_positive", response_model=EventUploadPlusResponse)
 def false_positive(request: Request, event_id: str):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
@@ -840,7 +934,11 @@ def false_positive(request: Request, event_id: str):
     )
 
 
-@router.delete("/events/{event_id}/retain")
+@router.delete(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -859,7 +957,11 @@ def delete_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/sub_label")
+@router.post(
+    "/events/{event_id}/sub_label",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_sub_label(
     request: Request,
     event_id: str,
@@ -868,50 +970,52 @@ def set_sub_label(
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = None
+
+        for state in request.app.detected_frames_processor.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
         return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
             status_code=404,
         )
 
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
-    if not event.end_time:
-        # update tracked object
-        tracked_obj: TrackedObject = (
-            request.app.detected_frames_processor.camera_states[
-                event.camera
-            ].tracked_objects.get(event.id)
-        )
+    if new_sub_label == "":
+        new_sub_label = None
+        new_score = None
 
-        if tracked_obj:
-            tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+    )
 
-        # update timeline items
-        Timeline.update(
-            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
-        ).where(Timeline.source_id == event_id).execute()
-
-    event.sub_label = new_sub_label
-
-    if new_score:
-        data = event.data
-        data["sub_label_score"] = new_score
-        event.data = data
-
-    event.save()
     return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Event " + event_id + " sub label set to " + new_sub_label,
-            }
-        ),
+        content={
+            "success": True,
+            "message": f"Event {event_id} sub label set to {new_sub_label if new_sub_label is not None else 'None'}",
+        },
         status_code=200,
     )
 
 
-@router.post("/events/{event_id}/description")
+@router.post(
+    "/events/{event_id}/description",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_description(
     request: Request,
     event_id: str,
@@ -927,27 +1031,19 @@ def set_description(
 
     new_description = body.description
 
-    if new_description is None or len(new_description) == 0:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "description cannot be empty",
-                }
-            ),
-            status_code=400,
-        )
-
     event.data["description"] = new_description
     event.save()
 
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
-        context.embeddings.upsert_description(
-            event_id=event_id,
-            description=new_description,
-        )
+        if len(new_description) > 0:
+            context.update_description(
+                event_id,
+                new_description,
+            )
+        else:
+            context.db.delete_embeddings_description(event_ids=[event_id])
 
     response_message = (
         f"Event {event_id} description is now blank"
@@ -966,7 +1062,11 @@ def set_description(
     )
 
 
-@router.put("/events/{event_id}/description/regenerate")
+@router.put(
+    "/events/{event_id}/description/regenerate",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
@@ -978,11 +1078,12 @@ def regenerate_description(
             status_code=404,
         )
 
-    if (
-        request.app.frigate_config.semantic_search.enabled
-        and request.app.frigate_config.genai.enabled
-    ):
-        request.app.event_metadata_updater.publish((event.id, params.source))
+    camera_config = request.app.frigate_config.cameras[event.camera]
+
+    if camera_config.genai.enabled:
+        request.app.event_metadata_updater.publish(
+            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+        )
 
         return JSONResponse(
             content=(
@@ -1001,47 +1102,86 @@ def regenerate_description(
         content=(
             {
                 "success": False,
-                "message": "Semantic search and generative AI are not enabled",
+                "message": "Semantic Search and Generative AI must be enabled to regenerate a description",
             }
         ),
         status_code=400,
     )
 
 
-@router.delete("/events/{event_id}")
-def delete_event(request: Request, event_id: str):
+def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
+        return {"success": False, "message": f"Event {event_id} not found"}
 
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-        media.unlink(missing_ok=True)
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-        media.unlink(missing_ok=True)
-    if event.has_clip:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-        media.unlink(missing_ok=True)
+        snapshot_paths = [
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg"),
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"),
+        ]
+        for media in snapshot_paths:
+            media.unlink(missing_ok=True)
 
     event.delete_instance()
     Timeline.delete().where(Timeline.source_id == event_id).execute()
+
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
-        context.embeddings.delete_thumbnail(id=[event_id])
-        context.embeddings.delete_description(id=[event_id])
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " deleted"}),
-        status_code=200,
-    )
+        context.db.delete_embeddings_thumbnail(event_ids=[event_id])
+        context.db.delete_embeddings_description(event_ids=[event_id])
+
+    return {"success": True, "message": f"Event {event_id} deleted"}
 
 
-@router.post("/events/{camera_name}/{label}/create")
+@router.delete(
+    "/events/{event_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def delete_event(request: Request, event_id: str):
+    result = delete_single_event(event_id, request)
+    status_code = 200 if result["success"] else 404
+    return JSONResponse(content=result, status_code=status_code)
+
+
+@router.delete(
+    "/events/",
+    response_model=EventMultiDeleteResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def delete_events(request: Request, body: EventsDeleteBody):
+    if not body.event_ids:
+        return JSONResponse(
+            content=({"success": False, "message": "No event IDs provided."}),
+            status_code=404,
+        )
+
+    deleted_events = []
+    not_found_events = []
+
+    for event_id in body.event_ids:
+        result = delete_single_event(event_id, request)
+        if result["success"]:
+            deleted_events.append(event_id)
+        else:
+            not_found_events.append(event_id)
+
+    response = {
+        "success": True,
+        "deleted_events": deleted_events,
+        "not_found_events": not_found_events,
+    }
+    return JSONResponse(content=response, status_code=200)
+
+
+@router.post(
+    "/events/{camera_name}/{label}/create",
+    response_model=EventCreateResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def create_event(
     request: Request,
     camera_name: str,
@@ -1063,9 +1203,11 @@ def create_event(
         )
 
     try:
-        frame = request.app.detected_frames_processor.get_current_frame(camera_name)
+        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
+        external_processor: ExternalEventProcessor = request.app.external_processor
 
-        event_id = request.app.external_processor.create_manual_event(
+        frame = frame_processor.get_current_frame(camera_name)
+        event_id = external_processor.create_manual_event(
             camera_name,
             label,
             body.source_type,
@@ -1095,7 +1237,11 @@ def create_event(
     )
 
 
-@router.put("/events/{event_id}/end")
+@router.put(
+    "/events/{event_id}/end",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()

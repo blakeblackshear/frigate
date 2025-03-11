@@ -8,6 +8,7 @@ export interface UiConfig {
   strftime_fmt?: string;
   dashboard: boolean;
   order: number;
+  unit_system?: "metric" | "imperial";
 }
 
 export interface BirdseyeConfig {
@@ -19,13 +20,8 @@ export interface BirdseyeConfig {
   width: number;
 }
 
-export const ATTRIBUTE_LABELS = [
-  "amazon",
-  "face",
-  "fedex",
-  "license_plate",
-  "ups",
-];
+export type SearchModel = "jinav1" | "jinav2";
+export type SearchModelSize = "small" | "large";
 
 export interface CameraConfig {
   audio: {
@@ -61,6 +57,7 @@ export interface CameraConfig {
     width: number;
   };
   enabled: boolean;
+  enabled_in_config: boolean;
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -83,10 +80,17 @@ export interface CameraConfig {
     cmd: string;
     roles: string[];
   }[];
+  genai: {
+    enabled: string;
+    prompt: string;
+    object_prompts: { [key: string]: string };
+    required_zones: string[];
+    objects: string[];
+  };
   live: {
     height: number;
     quality: number;
-    stream_name: string;
+    streams: { [key: string]: string };
   };
   motion: {
     contour_area: number;
@@ -109,6 +113,11 @@ export interface CameraConfig {
     timestamp: boolean;
   };
   name: string;
+  notifications: {
+    enabled: boolean;
+    email?: string;
+    enabled_in_config: boolean;
+  };
   objects: {
     filters: {
       [objectName: string]: {
@@ -141,6 +150,7 @@ export interface CameraConfig {
     password: string | null;
     port: number;
     user: string | null;
+    tls_insecure: boolean;
   };
   record: {
     enabled: boolean;
@@ -171,12 +181,22 @@ export interface CameraConfig {
   };
   review: {
     alerts: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
     detections: {
+      enabled: boolean;
       required_zones: string[];
       labels: string[];
+      retain: {
+        days: number;
+        mode: string;
+      };
     };
   };
   rtmp: {
@@ -213,9 +233,11 @@ export interface CameraConfig {
   zones: {
     [zoneName: string]: {
       coordinates: string;
+      distances: string[];
       filters: Record<string, unknown>;
       inertia: number;
       loitering_time: number;
+      speed_threshold: number;
       objects: string[];
       color: number[];
     };
@@ -226,6 +248,24 @@ export type CameraGroupConfig = {
   cameras: string[];
   icon: IconName;
   order: number;
+};
+
+export type StreamType = "no-streaming" | "smart" | "continuous";
+
+export type CameraStreamingSettings = {
+  streamName: string;
+  streamType: StreamType;
+  compatibilityMode: boolean;
+  playAudio: boolean;
+  volume: number;
+};
+
+export type GroupStreamingSettings = {
+  [cameraName: string]: CameraStreamingSettings;
+};
+
+export type AllGroupsStreamingSettings = {
+  [groupName: string]: GroupStreamingSettings;
 };
 
 export interface FrigateConfig {
@@ -286,6 +326,11 @@ export interface FrigateConfig {
 
   environment_vars: Record<string, unknown>;
 
+  face_recognition: {
+    enabled: boolean;
+    threshold: number;
+  };
+
   ffmpeg: {
     global_args: string[];
     hwaccel_args: string;
@@ -319,10 +364,8 @@ export interface FrigateConfig {
 
   camera_groups: { [groupName: string]: CameraGroupConfig };
 
-  live: {
-    height: number;
-    quality: number;
-    stream_name: string;
+  lpr: {
+    enabled: boolean;
   };
 
   logger: {
@@ -340,6 +383,8 @@ export interface FrigateConfig {
     path: string | null;
     width: number;
     colormap: { [key: string]: [number, number, number] };
+    attributes_map: { [key: string]: [string] };
+    all_attributes: [string];
   };
 
   motion: Record<string, unknown> | null;
@@ -361,6 +406,7 @@ export interface FrigateConfig {
   notifications: {
     enabled: boolean;
     email?: string;
+    enabled_in_config: boolean;
   };
 
   objects: {
@@ -417,6 +463,9 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
+    reindex: boolean;
+    model: SearchModel;
+    model_size: SearchModelSize;
   };
 
   snapshots: {

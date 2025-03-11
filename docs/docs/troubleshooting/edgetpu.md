@@ -10,6 +10,12 @@ There are many possible causes for a USB coral not being detected and some are O
 1. When the device is first plugged in and has not initialized it will appear as `1a6e:089a Global Unichip Corp.` when running `lsusb` or checking the hardware page in HA OS.
 2. Once initialized, the device will appear as `18d1:9302 Google Inc.` when running `lsusb` or checking the hardware page in HA OS.
 
+:::tip
+
+Using `lsusb` or checking the hardware page in HA OS will show as `1a6e:089a Global Unichip Corp.` until Frigate runs an inferance using the coral. So don't worry about the identification until after Frigate has attempted to detect the coral.
+
+:::
+
 If the coral does not initialize then Frigate can not interface with it. Some common reasons for the USB based Coral not initializing are:
 
 ### Not Enough Power
@@ -49,7 +55,25 @@ The USB Coral can become stuck and need to be restarted, this can happen for a n
 
 ## PCIe Coral Not Detected
 
-The most common reason for the PCIe coral not being detected is that the driver has not been installed. See [the coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) for how to install the driver for the PCIe based coral.
+The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run. 
+
+- In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
+- For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
+
+## Attempting to load TPU as pci & Fatal Python error: Illegal instruction
+
+This is an issue due to outdated gasket driver when being used with new linux kernels. Installing an updated driver from https://github.com/jnicolson/gasket-builder has been reported to fix the issue.
+
+### Not detected on Raspberry Pi5
+
+A kernel update to the RPi5 means an upate to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)
+
+Specifically, add the following to config.txt
+
+```
+dtoverlay=pciex1-compat-pi5,no-mip
+dtoverlay=pcie-32bit-dma-pi5
+```
 
 ## Only One PCIe Coral Is Detected With Coral Dual EdgeTPU
 

@@ -1,3 +1,0 @@
-# ONNX
-onnxruntime-openvino == 1.19.* ; platform_machine == 'x86_64'
-onnxruntime == 1.19.* ; platform_machine == 'aarch64'

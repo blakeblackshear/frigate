@@ -1,6 +1,7 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
@@ -50,17 +51,17 @@ export function ThresholdBarGraph({
 
       let timeOffset = 0;
       if (dateIndex < 0) {
-        timeOffset = 5000 * Math.abs(dateIndex);
+        timeOffset = 5 * Math.abs(dateIndex);
       }
 
-      const date = new Date(
-        updateTimes[Math.max(1, dateIndex) - 1] * 1000 - timeOffset,
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.max(1, dateIndex) - 1] - timeOffset,
+        {
+          timezone: config?.ui.timezone,
+          strftime_fmt:
+            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+        },
       );
-      return date.toLocaleTimeString([], {
-        hour12: config?.ui.time_format != "24hour",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
     },
     [config, updateTimes],
   );

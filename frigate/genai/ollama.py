@@ -21,15 +21,28 @@ class OllamaClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        client = ApiClient(host=self.genai_config.base_url, timeout=self.timeout)
-        response = client.pull(self.genai_config.model)
-        if response["status"] != "success":
-            logger.error("Failed to pull %s model from Ollama", self.genai_config.model)
+        try:
+            client = ApiClient(host=self.genai_config.base_url, timeout=self.timeout)
+            # ensure the model is available locally
+            response = client.show(self.genai_config.model)
+            if response.get("error"):
+                logger.error(
+                    "Ollama error: %s",
+                    response["error"],
+                )
+                return None
+            return client
+        except Exception as e:
+            logger.warning("Error initializing Ollama: %s", str(e))
             return None
-        return client
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Ollama"""
+        if self.provider is None:
+            logger.warning(
+                "Ollama provider has not been initialized, a description will not be generated. Check your Ollama configuration."
+            )
+            return None
         try:
             result = self.provider.generate(
                 self.genai_config.model,

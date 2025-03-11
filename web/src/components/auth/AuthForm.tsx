@@ -20,24 +20,23 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AuthContext } from "@/context/auth-context";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const { login } = React.useContext(AuthContext);
 
   const formSchema = z.object({
-    user: z.string(),
-    password: z.string(),
+    user: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required"),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
-    defaultValues: {
-      user: "",
-      password: "",
-    },
+    defaultValues: { user: "", password: "" },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -50,11 +49,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           password: values.password,
         },
         {
-          headers: {
-            "X-CSRF-TOKEN": 1,
-          },
+          headers: { "X-CSRF-TOKEN": 1 },
         },
       );
+      const profileRes = await axios.get("/profile", { withCredentials: true });
+      login({
+        username: profileRes.data.username,
+        role: profileRes.data.role || "viewer",
+      });
       window.location.href = baseUrl;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -63,7 +65,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           toast.error("Exceeded rate limit. Try again later.", {
             position: "top-center",
           });
-        } else if (err.response?.status === 400) {
+        } else if (err.response?.status === 401) {
           toast.error("Login failed", {
             position: "top-center",
           });
@@ -85,7 +87,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             name="user"
             render={({ field }) => (
@@ -121,6 +123,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               variant="select"
               disabled={isLoading}
               className="flex flex-1"
+              aria-label="Login"
             >
               {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
               Login

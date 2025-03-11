@@ -6,6 +6,8 @@ on:
     branches:
       - dev
       - master
+    paths-ignore:
+      - "docs/**"
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
@@ -17,11 +19,13 @@ env:
 
 jobs:
   amd64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Build
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -38,11 +42,13 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm
     name: ARM Build
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -60,8 +66,9 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rpi
           files: docker/rpi/rpi.hcl
@@ -69,47 +76,15 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-      - name: Build and push Rockchip build
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rk
-          files: docker/rockchip/rk.hcl
-          set: |
-            rk.tags=${{ steps.setup.outputs.image-name }}-rk
-            *.cache-from=type=gha
-  jetson_jp4_build:
-    runs-on: ubuntu-latest
-    name: Jetson Jetpack 4
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up QEMU and Buildx
-        id: setup
-        uses: ./.github/actions/setup
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push TensorRT (Jetson, Jetpack 4)
-        env:
-          ARCH: arm64
-          BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
-          SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-          TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v4
-        with:
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
-    runs-on: ubuntu-latest
+    if: false
+    runs-on: ubuntu-22.04
     name: Jetson Jetpack 5
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -121,8 +96,9 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -130,14 +106,45 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
+  jetson_jp6_build:
+    runs-on: ubuntu-22.04-arm
+    name: Jetson Jetpack 6
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (Jetson, Jetpack 6)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          SLIM_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          TRT_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp6
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6,mode=max
   amd64_extra_builds:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: AMD64 Extra Build
     needs:
       - amd64_build
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -146,8 +153,9 @@ jobs:
       - name: Build and push TensorRT (x86 GPU)
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
@@ -155,46 +163,49 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
-  combined_extra_builds:
-    runs-on: ubuntu-latest
-    name: Combined Extra Builds
-    needs:
-      - amd64_build
-      - arm64_build
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up QEMU and Buildx
-        id: setup
-        uses: ./.github/actions/setup
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v4
-        with:
-          push: true
-          targets: h8l
-          files: docker/hailo8l/h8l.hcl
-          set: |
-            h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
       - name: AMD/ROCm general build
         env:
           AMDGPU: gfx
           HSA_OVERRIDE: 0
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v6
         with:
+          source: .
           push: true
           targets: rocm
           files: docker/rocm/rocm.hcl
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
+            *.cache-from=type=gha
+  arm64_extra_builds:
+    runs-on: ubuntu-22.04-arm
+    name: ARM Extra Build
+    needs:
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Rockchip build
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: rk
+          files: docker/rockchip/rk.hcl
+          set: |
+            rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Assemble and push default build
     needs:
       - amd64_build

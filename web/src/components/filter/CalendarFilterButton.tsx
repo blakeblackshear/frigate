@@ -2,7 +2,7 @@ import {
   useFormattedRange,
   useFormattedTimestamp,
 } from "@/hooks/use-date-utils";
-import { ReviewSummary } from "@/types/review";
+import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Button } from "../ui/button";
 import { FaCalendarAlt } from "react-icons/fa";
 import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
@@ -17,11 +17,13 @@ import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   day?: Date;
   updateSelectedDay: (day?: Date) => void;
 };
 export default function CalendarFilterButton({
   reviewSummary,
+  recordingsSummary,
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
@@ -34,6 +36,7 @@ export default function CalendarFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
+      aria-label="Select a date to filter by"
       variant={day == undefined ? "default" : "select"}
       size="sm"
     >
@@ -51,12 +54,14 @@ export default function CalendarFilterButton({
     <>
       <ReviewActivityCalendar
         reviewSummary={reviewSummary}
+        recordingsSummary={recordingsSummary}
         selectedDay={day}
         onSelect={updateSelectedDay}
       />
       <DropdownMenuSeparator />
       <div className="flex items-center justify-center p-2">
         <Button
+          aria-label="Reset"
           onClick={() => {
             updateSelectedDay(undefined);
           }}
@@ -99,6 +104,7 @@ export function CalendarRangeFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
+      aria-label="Select a date to filter by"
       variant={range == undefined ? "default" : "select"}
       size="sm"
     >

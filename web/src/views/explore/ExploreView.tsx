@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
-import { isIOS, isMobileOnly, isSafari } from "react-device-detect";
+import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
 import { cn } from "@/lib/utils";
-import { LuArrowRightCircle } from "react-icons/lu";
+import { BsArrowRightCircle } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import {
   Tooltip,
@@ -15,17 +15,25 @@ import { SearchResult } from "@/types/search";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { useEventUpdate } from "@/api/ws";
+import { useTrackedObjectUpdate } from "@/api/ws";
 import { isEqual } from "lodash";
+import TimeAgo from "@/components/dynamic/TimeAgo";
+import SearchResultActions from "@/components/menu/SearchResultActions";
+import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
   setSearchDetail: (search: SearchResult | undefined) => void;
+  setSimilaritySearch: (search: SearchResult) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 export default function ExploreView({
   searchDetail,
   setSearchDetail,
+  setSimilaritySearch,
+  onSelectSearch,
 }: ExploreViewProps) {
   // title
 
@@ -64,13 +72,13 @@ export default function ExploreView({
     }, {});
   }, [events]);
 
-  const eventUpdate = useEventUpdate();
+  const trackedObjectUpdate = useTrackedObjectUpdate();
 
   useEffect(() => {
     mutate();
     // mutate / revalidate when event description updates come in
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventUpdate]);
+  }, [trackedObjectUpdate]);
 
   // update search detail when results change
 
@@ -101,6 +109,9 @@ export default function ExploreView({
           isValidating={isValidating}
           objectType={label}
           setSearchDetail={setSearchDetail}
+          mutate={mutate}
+          setSimilaritySearch={setSimilaritySearch}
+          onSelectSearch={onSelectSearch}
         />
       ))}
     </div>
@@ -112,6 +123,9 @@ type ThumbnailRowType = {
   searchResults?: SearchResult[];
   isValidating: boolean;
   setSearchDetail: (search: SearchResult | undefined) => void;
+  mutate: () => void;
+  setSimilaritySearch: (search: SearchResult) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 function ThumbnailRow({
@@ -119,6 +133,9 @@ function ThumbnailRow({
   searchResults,
   isValidating,
   setSearchDetail,
+  mutate,
+  setSimilaritySearch,
+  onSelectSearch,
 }: ThumbnailRowType) {
   const navigate = useNavigate();
 
@@ -154,6 +171,9 @@ function ThumbnailRow({
             <ExploreThumbnailImage
               event={event}
               setSearchDetail={setSearchDetail}
+              mutate={mutate}
+              setSimilaritySearch={setSimilaritySearch}
+              onSelectSearch={onSelectSearch}
             />
           </div>
         ))}
@@ -163,7 +183,7 @@ function ThumbnailRow({
         >
           <Tooltip>
             <TooltipTrigger>
-              <LuArrowRightCircle
+              <BsArrowRightCircle
                 className="ml-2 text-secondary-foreground transition-all duration-300 hover:text-primary"
                 size={24}
               />
@@ -183,42 +203,83 @@ function ThumbnailRow({
 type ExploreThumbnailImageProps = {
   event: SearchResult;
   setSearchDetail: (search: SearchResult | undefined) => void;
+  mutate: () => void;
+  setSimilaritySearch: (search: SearchResult) => void;
+  onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 function ExploreThumbnailImage({
   event,
   setSearchDetail,
+  mutate,
+  setSimilaritySearch,
+  onSelectSearch,
 }: ExploreThumbnailImageProps) {
   const apiHost = useApiHost();
+  const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
+  const handleFindSimilar = () => {
+    if (config?.semantic_search.enabled) {
+      setSimilaritySearch(event);
+    }
+  };
+
+  const handleShowObjectLifecycle = () => {
+    onSelectSearch(event, false, "object lifecycle");
+  };
+
+  const handleShowSnapshot = () => {
+    onSelectSearch(event, false, "snapshot");
+  };
+
   return (
-    <>
-      <ImageLoadingIndicator
-        className="absolute inset-0"
-        imgLoaded={imgLoaded}
-      />
-      <img
-        ref={imgRef}
-        className={cn(
-          "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out lg:rounded-2xl",
+    <SearchResultActions
+      searchResult={event}
+      findSimilar={handleFindSimilar}
+      refreshResults={mutate}
+      showObjectLifecycle={handleShowObjectLifecycle}
+      showSnapshot={handleShowSnapshot}
+      isContextMenu={true}
+    >
+      <div className="relative size-full">
+        <ImageLoadingIndicator
+          className="absolute inset-0"
+          imgLoaded={imgLoaded}
+        />
+        <img
+          ref={imgRef}
+          className={cn(
+            "absolute size-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out lg:rounded-2xl",
+            !imgLoaded && "invisible",
+          )}
+          style={
+            isIOS
+              ? {
+                  WebkitUserSelect: "none",
+                  WebkitTouchCallout: "none",
+                }
+              : undefined
+          }
+          loading={isSafari ? "eager" : "lazy"}
+          draggable={false}
+          src={`${apiHost}api/events/${event.id}/thumbnail.webp`}
+          onClick={() => setSearchDetail(event)}
+          onLoad={onImgLoad}
+          alt={`${event.label} thumbnail`}
+        />
+        {isDesktop && (
+          <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+            {event.end_time ? (
+              <TimeAgo time={event.start_time * 1000} dense />
+            ) : (
+              <div>
+                <ActivityIndicator size={10} />
+              </div>
+            )}
+          </div>
         )}
-        style={
-          isIOS
-            ? {
-                WebkitUserSelect: "none",
-                WebkitTouchCallout: "none",
-              }
-            : undefined
-        }
-        loading={isSafari ? "eager" : "lazy"}
-        draggable={false}
-        src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
-        onClick={() => setSearchDetail(event)}
-        onLoad={() => {
-          onImgLoad();
-        }}
-      />
-    </>
+      </div>
+    </SearchResultActions>
   );
 }
 

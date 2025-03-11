@@ -25,6 +25,7 @@ from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
+from .notification import NotificationConfig
 from .objects import ObjectConfig
 from .onvif import OnvifConfig
 from .record import RecordConfig
@@ -85,6 +86,9 @@ class CameraConfig(FrigateBaseModel):
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig, title="MQTT configuration."
     )
+    notifications: NotificationConfig = Field(
+        default_factory=NotificationConfig, title="Notifications configuration."
+    )
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
@@ -97,6 +101,9 @@ class CameraConfig(FrigateBaseModel):
     )
     zones: dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of camera."
     )
 
     _ffmpeg_cmds: list[dict[str, list[str]]] = PrivateAttr()
@@ -167,7 +174,7 @@ class CameraConfig(FrigateBaseModel):
             record_args = get_ffmpeg_arg_list(
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
-                    self.ffmpeg.output_args._force_record_hvc1,
+                    self.ffmpeg.apple_compatibility,
                 )
                 or self.ffmpeg.output_args.record
             )

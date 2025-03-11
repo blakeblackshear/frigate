@@ -10,6 +10,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { GpuInfo, Nvinfo, Vainfo } from "@/types/stats";
 import { Button } from "../ui/button";
 import copy from "copy-to-clipboard";
+import { toast } from "sonner";
 
 type GPUInfoDialogProps = {
   showGpuInfo: boolean;
@@ -30,12 +31,11 @@ export default function GPUInfoDialog({
 
   const onCopyInfo = async () => {
     copy(
-      JSON.stringify(gpuType == "vainfo" ? vainfo : nvinfo).replace(
-        /[\\\s]+/gi,
-        "",
-      ),
+      JSON.stringify(gpuType == "vainfo" ? vainfo : nvinfo)
+        .replace(/\\t/g, "\t")
+        .replace(/\\n/g, "\n"),
     );
-    setShowGpuInfo(false);
+    toast.success("Copied GPU info to clipboard.");
   };
 
   if (gpuType == "vainfo") {
@@ -59,8 +59,17 @@ export default function GPUInfoDialog({
             <ActivityIndicator />
           )}
           <DialogFooter>
-            <Button onClick={() => setShowGpuInfo(false)}>Close</Button>
-            <Button variant="select" onClick={() => onCopyInfo()}>
+            <Button
+              aria-label="Close GPU info"
+              onClick={() => setShowGpuInfo(false)}
+            >
+              Close
+            </Button>
+            <Button
+              aria-label="Copy GPU info"
+              variant="select"
+              onClick={() => onCopyInfo()}
+            >
               Copy
             </Button>
           </DialogFooter>
@@ -88,8 +97,17 @@ export default function GPUInfoDialog({
             <ActivityIndicator />
           )}
           <DialogFooter>
-            <Button onClick={() => setShowGpuInfo(false)}>Close</Button>
-            <Button variant="select" onClick={() => onCopyInfo()}>
+            <Button
+              aria-label="Close GPU info"
+              onClick={() => setShowGpuInfo(false)}
+            >
+              Close
+            </Button>
+            <Button
+              aria-label="Copy GPU info"
+              variant="select"
+              onClick={() => onCopyInfo()}
+            >
               Copy
             </Button>
           </DialogFooter>

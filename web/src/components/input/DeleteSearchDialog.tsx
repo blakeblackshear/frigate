@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "../ui/button";
 
 type DeleteSearchDialogProps = {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export function DeleteSearchDialog({
           <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-destructive text-white"
+            className={buttonVariants({ variant: "destructive" })}
           >
             Delete
           </AlertDialogAction>

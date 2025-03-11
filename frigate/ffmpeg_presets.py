@@ -6,9 +6,11 @@ from enum import Enum
 from typing import Any
 
 from frigate.const import (
+    FFMPEG_HVC1_ARGS,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
+    LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
@@ -50,16 +52,8 @@ class LibvaGpuSelector:
         return ""
 
 
-FPS_VFR_PARAM = (
-    "-fps_mode vfr"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
-    else "-vsync 2"
-)
-TIMEOUT_PARAM = (
-    "-timeout"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
-    else "-stimeout"
-)
+FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
+TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
@@ -71,8 +65,8 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     FFMPEG_HWACCEL_VAAPI: f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
-    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv",
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
@@ -118,12 +112,12 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m {2}",
     FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {2}",
     "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
-    "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
+    "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v main -level:v 4.1 -async_depth:v 1 {2}",
     FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner {1} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {2}",
     "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
-    "preset-jetson-h265": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
+    "preset-jetson-h265": "{0} -hide_banner {1} -c:v h264_nvmpi -profile main {2}",
     "preset-rk-h264": "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
-    "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v high {2}",
+    "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {2}",
 }
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h264"] = (
@@ -138,13 +132,13 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m -pix_fmt yuv420p {2}",
     FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi {2}",
     "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
-    "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v hevc_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
+    "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v hevc_qsv -profile:v main -level:v 4.1 -async_depth:v 1 {2}",
     FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {1} -c:v h264_nvenc {2}",
     "preset-nvidia-h265": "{0} -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {1} -c:v hevc_nvenc {2}",
     "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
-    "preset-jetson-h265": "{0} -hide_banner {1} -c:v hevc_nvmpi -profile high {2}",
+    "preset-jetson-h265": "{0} -hide_banner {1} -c:v hevc_nvmpi -profile main {2}",
     "preset-rk-h264": "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
-    "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v high {2}",
+    "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {2}",
 }
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-nvidia-h264"] = (
@@ -497,6 +491,6 @@ def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
 
     if force_record_hvc1:
         # Apple only supports HEVC if it is hvc1 (vs. hev1)
-        preset += ["-tag:v", "hvc1"]
+        preset += FFMPEG_HVC1_ARGS
 
     return preset

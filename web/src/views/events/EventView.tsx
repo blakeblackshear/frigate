@@ -12,6 +12,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -53,11 +54,13 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
   currentReviewItems: ReviewSegment[] | null;
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   relevantPreviews?: Preview[];
   timeRange: TimeRange;
   filter?: ReviewFilter;
@@ -76,6 +79,7 @@ export default function EventView({
   reviewItems,
   currentReviewItems,
   reviewSummary,
+  recordingsSummary,
   relevantPreviews,
   timeRange,
   filter,
@@ -117,13 +121,11 @@ export default function EventView({
       return {
         alert: summary.total_alert ?? 0,
         detection: summary.total_detection ?? 0,
-        significant_motion: summary.total_motion ?? 0,
       };
     } else {
       return {
         alert: summary.total_alert - summary.reviewed_alert,
         detection: summary.total_detection - summary.reviewed_detection,
-        significant_motion: summary.total_motion - summary.reviewed_motion,
       };
     }
   }, [filter, showReviewed, reviewSummary]);
@@ -202,16 +204,13 @@ export default function EventView({
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to start export: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to start export: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to start export: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [reviewItems],
@@ -360,6 +359,7 @@ export default function EventView({
             }
             currentSeverity={severityToggle}
             reviewSummary={reviewSummary}
+            recordingsSummary={recordingsSummary}
             filter={filter}
             motionOnly={motionOnly}
             filterList={reviewFilterList}
@@ -463,8 +463,6 @@ function DetectionReview({
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
-  const segmentDuration = 60;
-
   // detail
 
   const [reviewDetail, setReviewDetail] = useState<ReviewSegment>();
@@ -494,9 +492,38 @@ function DetectionReview({
     [timeRange],
   );
 
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 60,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 60, timestampSpread: 15 },
+      { segmentDuration: 30, timestampSpread: 5 },
+      { segmentDuration: 10, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration,
+  });
+
   const { alignStartDateToTimeline, getVisibleTimelineDuration } =
     useTimelineUtils({
-      segmentDuration,
+      segmentDuration: zoomSettings.segmentDuration,
       timelineDuration,
       timelineRef: reviewTimelineRef,
     });
@@ -590,6 +617,16 @@ function DetectionReview({
   );
 
   // existing review item
+
+  useEffect(() => {
+    if (loading || currentItems == null || itemsToReview == undefined) {
+      return;
+    }
+
+    if (currentItems.length == 0 && itemsToReview > 0) {
+      pullLatestData();
+    }
+  }, [loading, currentItems, itemsToReview, pullLatestData]);
 
   useEffect(() => {
     if (!startTime || !currentItems || currentItems.length == 0) {
@@ -694,7 +731,7 @@ function DetectionReview({
                     data-start={value.start_time}
                     data-segment-start={
                       alignStartDateToTimeline(value.start_time) -
-                      segmentDuration
+                      zoomSettings.segmentDuration
                     }
                     className="review-item relative rounded-lg"
                   >
@@ -720,7 +757,12 @@ function DetectionReview({
                       />
                     </div>
                     <div
-                      className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
+                      className={cn(
+                        "review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px]",
+                        selected
+                          ? `outline-severity_${value.severity} shadow-severity_${value.severity}`
+                          : "outline-transparent duration-500",
+                      )}
                     />
                   </div>
                 );
@@ -737,6 +779,7 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
+                  aria-label="Mark these items as reviewed"
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
@@ -750,13 +793,13 @@ function DetectionReview({
         </div>
       </div>
       <div className="flex w-[65px] flex-row md:w-[110px]">
-        <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
+        <div className="no-scrollbar w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
           ) : (
             <EventReviewTimeline
-              segmentDuration={segmentDuration}
-              timestampSpread={15}
+              segmentDuration={zoomSettings.segmentDuration}
+              timestampSpread={zoomSettings.timestampSpread}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
               showMinimap={showMinimap && !previewTime}
@@ -770,6 +813,8 @@ function DetectionReview({
               contentRef={contentRef}
               timelineRef={reviewTimelineRef}
               dense={isMobile}
+              isZooming={isZooming}
+              zoomDirection={zoomDirection}
             />
           )}
         </div>
@@ -781,7 +826,7 @@ function DetectionReview({
               reviewTimelineRef={reviewTimelineRef}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
-              segmentDuration={segmentDuration}
+              segmentDuration={zoomSettings.segmentDuration}
               events={reviewItems?.all ?? []}
               severityType={severity}
             />
@@ -1096,7 +1141,6 @@ function MotionReview({
             setHandlebarTime={setCurrentTime}
             events={reviewItems?.all ?? []}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => {
               if (playing && scrubbing) {
@@ -1106,6 +1150,8 @@ function MotionReview({
               setScrubbing(scrubbing);
             }}
             dense={isMobileOnly}
+            isZooming={false}
+            zoomDirection={null}
           />
         ) : (
           <Skeleton className="size-full" />

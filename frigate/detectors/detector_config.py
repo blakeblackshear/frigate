@@ -9,7 +9,7 @@ import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
-from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP
+from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP, MODEL_CACHE_DIR
 from frigate.plus import PlusApi
 from frigate.util.builtin import generate_color_palette, load_labels
 
@@ -27,10 +27,18 @@ class InputTensorEnum(str, Enum):
     nhwc = "nhwc"
 
 
+class InputDTypeEnum(str, Enum):
+    float = "float"
+    int = "int"
+
+
 class ModelTypeEnum(str, Enum):
     ssd = "ssd"
     yolox = "yolox"
+    yolov9 = "yolov9"
     yolonas = "yolonas"
+    dfine = "dfine"
+    yologeneric = "yolo-generic"
 
 
 class ModelConfig(BaseModel):
@@ -53,12 +61,16 @@ class ModelConfig(BaseModel):
     input_pixel_format: PixelFormatEnum = Field(
         default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
     )
+    input_dtype: InputDTypeEnum = Field(
+        default=InputDTypeEnum.int, title="Model Input D Type"
+    )
     model_type: ModelTypeEnum = Field(
         default=ModelTypeEnum.ssd, title="Object Detection Model Type"
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
     _all_attributes: list[str] = PrivateAttr()
+    _all_attribute_logos: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
 
     @property
@@ -70,8 +82,16 @@ class ModelConfig(BaseModel):
         return self._colormap
 
     @property
+    def non_logo_attributes(self) -> list[str]:
+        return ["face", "license_plate"]
+
+    @property
     def all_attributes(self) -> list[str]:
         return self._all_attributes
+
+    @property
+    def all_attribute_logos(self) -> list[str]:
+        return self._all_attribute_logos
 
     @property
     def model_hash(self) -> str:
@@ -93,6 +113,9 @@ class ModelConfig(BaseModel):
             unique_attributes.update(attributes)
 
         self._all_attributes = list(unique_attributes)
+        self._all_attribute_logos = list(
+            unique_attributes - set(self.non_logo_attributes)
+        )
 
     def check_and_load_plus_model(
         self, plus_api: PlusApi, detector: str = None
@@ -101,7 +124,7 @@ class ModelConfig(BaseModel):
             return
 
         model_id = self.path[7:]
-        self.path = f"/config/model_cache/{model_id}"
+        self.path = os.path.join(MODEL_CACHE_DIR, model_id)
         model_info_path = f"{self.path}.json"
 
         # download the model if it doesn't exist
@@ -140,6 +163,9 @@ class ModelConfig(BaseModel):
             unique_attributes.update(attributes)
 
         self._all_attributes = list(unique_attributes)
+        self._all_attribute_logos = list(
+            unique_attributes - set(["face", "license_plate"])
+        )
 
         self._merged_labelmap = {
             **{int(key): val for key, val in model_info["labelMap"].items()},
@@ -157,10 +183,14 @@ class ModelConfig(BaseModel):
             self._model_hash = file_hash.hexdigest()
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
-        """Get a list of colors for enabled labels."""
-        colors = generate_color_palette(len(enabled_labels))
-
-        self._colormap = {label: color for label, color in zip(enabled_labels, colors)}
+        """Get a list of colors for enabled labels that aren't attributes."""
+        enabled_trackable_labels = list(
+            filter(lambda label: label not in self._all_attributes, enabled_labels)
+        )
+        colors = generate_color_palette(len(enabled_trackable_labels))
+        self._colormap = {
+            label: color for label, color in zip(enabled_trackable_labels, colors)
+        }
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
@@ -170,6 +200,9 @@ class BaseDetectorConfig(BaseModel):
     type: str = Field(default="cpu", title="Detector Type")
     model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
+    )
+    model_path: Optional[str] = Field(
+        default=None, title="Detector specific model path."
     )
     model_config = ConfigDict(
         extra="allow", arbitrary_types_allowed=True, protected_namespaces=()

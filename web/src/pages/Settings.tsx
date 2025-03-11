@@ -20,7 +20,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import { isMobile } from "react-device-detect";
+import { isIOS, isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -29,16 +29,24 @@ import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
-import GeneralSettingsView from "@/views/settings/GeneralSettingsView";
 import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
+import SearchSettingsView from "@/views/settings/SearchSettingsView";
+import UiSettingsView from "@/views/settings/UiSettingsView";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
+import { useSearchParams } from "react-router-dom";
+import { useInitialCameraState } from "@/api/ws";
+import { isInIframe } from "@/utils/isIFrame";
+import { isPWA } from "@/utils/isPWA";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const allSettingsViews = [
-  "general",
+  "UI settings",
+  "explore settings",
   "camera settings",
   "masks / zones",
   "motion tuner",
@@ -49,24 +57,22 @@ const allSettingsViews = [
 type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
-  const [page, setPage] = useState<SettingsType>("general");
+  const [page, setPage] = useState<SettingsType>("UI settings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // available settings views
+  const [searchParams] = useSearchParams();
 
-  const settingsViews = useMemo(() => {
-    const views = [...allSettingsViews];
+  // auth and roles
 
-    if (!("Notification" in window) || !window.isSecureContext) {
-      const index = views.indexOf("notifications");
-      views.splice(index, 1);
-    }
+  const isAdmin = useIsAdmin();
 
-    return views;
-  }, []);
+  const allowedViewsForViewer: SettingsType[] = ["UI settings", "debug"];
+  const visibleSettingsViews = !isAdmin
+    ? allowedViewsForViewer
+    : allSettingsViews;
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -78,11 +84,32 @@ export default function Settings() {
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
   const [selectedCamera, setSelectedCamera] = useState<string>("");
+
+  const { payload: allCameraStates } = useInitialCameraState(
+    cameras.length > 0 ? cameras[0].name : "",
+    true,
+  );
+
+  const cameraEnabledStates = useMemo(() => {
+    const states: Record<string, boolean> = {};
+    if (allCameraStates) {
+      Object.entries(allCameraStates).forEach(([camName, state]) => {
+        states[camName] = state.config?.enabled ?? false;
+      });
+    }
+    // fallback to config if ws data isn’t available yet
+    cameras.forEach((cam) => {
+      if (!(cam.name in states)) {
+        states[cam.name] = cam.enabled;
+      }
+    });
+    return states;
+  }, [allCameraStates, cameras]);
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
@@ -98,10 +125,25 @@ export default function Settings() {
   );
 
   useEffect(() => {
-    if (cameras.length > 0 && selectedCamera === "") {
-      setSelectedCamera(cameras[0].name);
+    if (cameras.length > 0) {
+      if (!selectedCamera) {
+        // Set to first enabled camera initially if no selection
+        const firstEnabledCamera =
+          cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
+        setSelectedCamera(firstEnabledCamera.name);
+      } else if (
+        !cameraEnabledStates[selectedCamera] &&
+        page !== "camera settings"
+      ) {
+        // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
+        const firstEnabledCamera =
+          cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
+        if (firstEnabledCamera.name !== selectedCamera) {
+          setSelectedCamera(firstEnabledCamera.name);
+        }
+      }
     }
-  }, [cameras, selectedCamera]);
+  }, [cameras, selectedCamera, cameraEnabledStates, page]);
 
   useEffect(() => {
     if (tabsRef.current) {
@@ -110,12 +152,35 @@ export default function Settings() {
       );
       if (element instanceof HTMLElement) {
         scrollIntoView(element, {
-          behavior: "smooth",
+          behavior:
+            isMobile && isIOS && !isPWA && isInIframe ? "auto" : "smooth",
           inline: "start",
         });
       }
     }
   }, [tabsRef, pageToggle]);
+
+  useSearchEffect("page", (page: string) => {
+    if (allSettingsViews.includes(page as SettingsType)) {
+      // Restrict viewer to UI settings
+      if (!isAdmin && !["UI settings", "debug"].includes(page)) {
+        setPage("UI settings");
+      } else {
+        setPage(page as SettingsType);
+      }
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
+
+  useSearchEffect("camera", (camera: string) => {
+    const cameraNames = cameras.map((c) => c.name);
+    if (cameraNames.includes(camera)) {
+      setSelectedCamera(camera);
+    }
+    // don't clear url params if we're creating a new object mask
+    return !searchParams.has("object_mask");
+  });
 
   useEffect(() => {
     document.title = "Settings - Frigate";
@@ -133,14 +198,19 @@ export default function Settings() {
               value={pageToggle}
               onValueChange={(value: SettingsType) => {
                 if (value) {
-                  setPageToggle(value);
+                  // Restrict viewer navigation
+                  if (!isAdmin && !["UI settings", "debug"].includes(value)) {
+                    setPageToggle("UI settings");
+                  } else {
+                    setPageToggle(value);
+                  }
                 }
               }}
             >
-              {Object.values(settingsViews).map((item) => (
+              {visibleSettingsViews.map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "general" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
@@ -167,12 +237,17 @@ export default function Settings() {
               allCameras={cameras}
               selectedCamera={selectedCamera}
               setSelectedCamera={setSelectedCamera}
+              cameraEnabledStates={cameraEnabledStates}
+              currentPage={page}
             />
           </div>
         )}
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "general" && <GeneralSettingsView />}
+        {page == "UI settings" && <UiSettingsView />}
+        {page == "explore settings" && (
+          <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
+        )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
         )}
@@ -231,22 +306,27 @@ type CameraSelectButtonProps = {
   allCameras: CameraConfig[];
   selectedCamera: string;
   setSelectedCamera: React.Dispatch<React.SetStateAction<string>>;
+  cameraEnabledStates: Record<string, boolean>;
+  currentPage: SettingsType;
 };
 
 function CameraSelectButton({
   allCameras,
   selectedCamera,
   setSelectedCamera,
+  cameraEnabledStates,
+  currentPage,
 }: CameraSelectButtonProps) {
   const [open, setOpen] = useState(false);
 
   if (!allCameras.length) {
-    return;
+    return null;
   }
 
   const trigger = (
     <Button
       className="flex items-center gap-2 bg-selected capitalize hover:bg-selected"
+      aria-label="Select a camera"
       size="sm"
     >
       <FaVideo className="text-background dark:text-primary" />
@@ -269,19 +349,24 @@ function CameraSelectButton({
       )}
       <div className="scrollbar-container mb-5 h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4 md:mb-1">
         <div className="flex flex-col gap-2.5">
-          {allCameras.map((item) => (
-            <FilterSwitch
-              key={item.name}
-              isChecked={item.name === selectedCamera}
-              label={item.name.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  setSelectedCamera(item.name);
-                  setOpen(false);
-                }
-              }}
-            />
-          ))}
+          {allCameras.map((item) => {
+            const isEnabled = cameraEnabledStates[item.name];
+            const isCameraSettingsPage = currentPage === "camera settings";
+            return (
+              <FilterSwitch
+                key={item.name}
+                isChecked={item.name === selectedCamera}
+                label={item.name.replaceAll("_", " ")}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked && (isEnabled || isCameraSettingsPage)) {
+                    setSelectedCamera(item.name);
+                    setOpen(false);
+                  }
+                }}
+                disabled={!isEnabled && !isCameraSettingsPage}
+              />
+            );
+          })}
         </div>
       </div>
     </>

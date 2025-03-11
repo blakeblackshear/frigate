@@ -23,7 +23,6 @@ import {
   LuEar,
   LuFolderX,
   LuPlay,
-  LuPlayCircle,
   LuSettings,
   LuTruck,
 } from "react-icons/lu";
@@ -45,6 +44,16 @@ import {
 } from "@/components/ui/tooltip";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useNavigate } from "react-router-dom";
+import { ObjectPath } from "./ObjectPath";
+import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
+import { IoPlayCircleOutline } from "react-icons/io5";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -68,6 +77,7 @@ export default function ObjectLifecycle({
 
   const { data: config } = useSWR<FrigateConfig>("config");
   const apiHost = useApiHost();
+  const navigate = useNavigate();
 
   const [imgLoaded, setImgLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -100,6 +110,17 @@ export default function ObjectLifecycle({
     [config, event],
   );
 
+  const getObjectColor = useCallback(
+    (label: string) => {
+      const objectColor = config?.model?.colormap[label];
+      if (objectColor) {
+        const reversed = [...objectColor].reverse();
+        return reversed;
+      }
+    },
+    [config],
+  );
+
   const getZonePolygon = useCallback(
     (zoneName: string) => {
       if (!imgRef.current || !config) {
@@ -112,7 +133,7 @@ export default function ObjectLifecycle({
 
       return zonePoints
         .split(",")
-        .map(parseFloat)
+        .map(Number.parseFloat)
         .reduce((acc, value, index) => {
           const isXCoordinate = index % 2 === 0;
           const coordinate = isXCoordinate
@@ -150,6 +171,47 @@ export default function ObjectLifecycle({
     );
   }, [config, event.camera]);
 
+  const savedPathPoints = useMemo(() => {
+    return (
+      event.data.path_data?.map(([coords, timestamp]: [number[], number]) => ({
+        x: coords[0],
+        y: coords[1],
+        timestamp,
+        lifecycle_item: undefined,
+      })) || []
+    );
+  }, [event.data.path_data]);
+
+  const eventSequencePoints = useMemo(() => {
+    return (
+      eventSequence
+        ?.filter((event) => event.data.box !== undefined)
+        .map((event) => {
+          const [left, top, width, height] = event.data.box!;
+
+          return {
+            x: left + width / 2, // Center x-coordinate
+            y: top + height, // Bottom y-coordinate
+            timestamp: event.timestamp,
+            lifecycle_item: event,
+          };
+        }) || []
+    );
+  }, [eventSequence]);
+
+  // final object path with timeline points included
+  const pathPoints = useMemo(() => {
+    // don't display a path if we don't have any saved path points
+    if (
+      savedPathPoints.length === 0 ||
+      config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config
+    )
+      return [];
+    return [...savedPathPoints, ...eventSequencePoints].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+  }, [savedPathPoints, eventSequencePoints, config, event]);
+
   const [timeIndex, setTimeIndex] = useState(0);
 
   const handleSetBox = useCallback(
@@ -163,12 +225,13 @@ export default function ObjectLifecycle({
           top: `${box[1] * imgRect.height}px`,
           width: `${box[2] * imgRect.width}px`,
           height: `${box[3] * imgRect.height}px`,
+          borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
         };
 
         setBoxStyle(style);
       }
     },
-    [imgRef],
+    [imgRef, event, getObjectColor],
   );
 
   // image
@@ -203,6 +266,20 @@ export default function ObjectLifecycle({
     setCurrent(index);
   };
 
+  const handleThumbnailNavigation = useCallback(
+    (direction: "next" | "previous") => {
+      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      const newIndex =
+        direction === "next"
+          ? Math.min(current + 1, eventSequence.length - 1)
+          : Math.max(current - 1, 0);
+      mainApi.scrollTo(newIndex);
+      thumbnailApi.scrollTo(newIndex);
+      setCurrent(newIndex);
+    },
+    [mainApi, thumbnailApi, current, eventSequence],
+  );
+
   useEffect(() => {
     if (eventSequence && eventSequence.length > 0) {
       setTimeIndex(eventSequence?.[current].timestamp);
@@ -232,6 +309,21 @@ export default function ObjectLifecycle({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainApi, thumbnailApi]);
 
+  const handlePathPointClick = useCallback(
+    (index: number) => {
+      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      const sequenceIndex = eventSequence.findIndex(
+        (item) => item.timestamp === pathPoints[index].timestamp,
+      );
+      if (sequenceIndex !== -1) {
+        mainApi.scrollTo(sequenceIndex);
+        thumbnailApi.scrollTo(sequenceIndex);
+        setCurrent(sequenceIndex);
+      }
+    },
+    [mainApi, thumbnailApi, eventSequence, pathPoints],
+  );
+
   if (!event.id || !eventSequence || !config || !timeIndex) {
     return <ActivityIndicator />;
   }
@@ -242,6 +334,7 @@ export default function ObjectLifecycle({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
+            aria-label="Go back"
             size="sm"
             onClick={() => setPane("overview")}
           >
@@ -278,62 +371,108 @@ export default function ObjectLifecycle({
             imgLoaded ? "visible" : "invisible",
           )}
         >
-          <img
-            key={event.id}
-            ref={imgRef}
-            className={cn(
-              "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
-            )}
-            loading={isSafari ? "eager" : "lazy"}
-            style={
-              isIOS
-                ? {
-                    WebkitUserSelect: "none",
-                    WebkitTouchCallout: "none",
-                  }
-                : undefined
-            }
-            draggable={false}
-            src={src}
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setHasError(true)}
-          />
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <img
+                key={event.id}
+                ref={imgRef}
+                className={cn(
+                  "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
+                )}
+                loading={isSafari ? "eager" : "lazy"}
+                style={
+                  isIOS
+                    ? {
+                        WebkitUserSelect: "none",
+                        WebkitTouchCallout: "none",
+                      }
+                    : undefined
+                }
+                draggable={false}
+                src={src}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setHasError(true)}
+              />
 
-          {showZones &&
-            lifecycleZones?.map((zone) => (
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  width: imgRef.current?.clientWidth,
-                  height: imgRef.current?.clientHeight,
-                }}
-                key={zone}
-              >
-                <svg
-                  viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                  className="absolute inset-0"
-                >
-                  <polygon
-                    points={getZonePolygon(zone)}
-                    className="fill-none stroke-2"
+              {showZones &&
+                imgRef.current?.width &&
+                imgRef.current?.height &&
+                lifecycleZones?.map((zone) => (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
                     style={{
-                      stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
-                      fill:
-                        selectedZone == zone
-                          ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
-                          : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
-                      strokeWidth: selectedZone == zone ? 4 : 2,
+                      width: imgRef.current?.clientWidth,
+                      height: imgRef.current?.clientHeight,
                     }}
-                  />
-                </svg>
-              </div>
-            ))}
+                    key={zone}
+                  >
+                    <svg
+                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                      className="absolute inset-0"
+                    >
+                      <polygon
+                        points={getZonePolygon(zone)}
+                        className="fill-none stroke-2"
+                        style={{
+                          stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
+                          fill:
+                            selectedZone == zone
+                              ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
+                              : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
+                          strokeWidth: selectedZone == zone ? 4 : 2,
+                        }}
+                      />
+                    </svg>
+                  </div>
+                ))}
 
-          {boxStyle && (
-            <div className="absolute border-2 border-red-600" style={boxStyle}>
-              <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
-            </div>
-          )}
+              {boxStyle && (
+                <div className="absolute border-2" style={boxStyle}>
+                  <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
+                </div>
+              )}
+              {imgRef.current?.width &&
+                imgRef.current?.height &&
+                pathPoints &&
+                pathPoints.length > 0 && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                      width: imgRef.current?.clientWidth,
+                      height: imgRef.current?.clientHeight,
+                    }}
+                    key="path"
+                  >
+                    <svg
+                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                      className="absolute inset-0"
+                    >
+                      <ObjectPath
+                        positions={pathPoints}
+                        color={getObjectColor(event.label)}
+                        width={2}
+                        imgRef={imgRef}
+                        onPointClick={handlePathPointClick}
+                      />
+                    </svg>
+                  </div>
+                )}
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem>
+                <div
+                  className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
+                  onClick={() =>
+                    navigate(
+                      `/settings?page=masks%20/%20zones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
+                    )
+                  }
+                >
+                  <div className="text-primary">Create Object Mask</div>
+                </div>
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </div>
       </div>
 
@@ -346,6 +485,7 @@ export default function ObjectLifecycle({
               <Button
                 variant={showControls ? "select" : "default"}
                 className="size-7 p-1.5"
+                aria-label="Adjust annotation settings"
               >
                 <LuSettings
                   className="size-5"
@@ -367,6 +507,11 @@ export default function ObjectLifecycle({
           {current + 1} of {eventSequence.length}
         </div>
       </div>
+      {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
+        <div className="-mt-2 mb-2 text-sm text-danger">
+          Bounding box positions will be inaccurate for autotracking cameras.
+        </div>
+      )}
       {showControls && (
         <AnnotationSettingsPane
           event={event}
@@ -383,7 +528,7 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem key={index}>
                 <Card className="p-1 text-sm md:p-2" key={index}>
-                  <CardContent className="flex flex-row items-center gap-3 p-1 md:p-6">
+                  <CardContent className="flex flex-row items-center gap-3 p-1 md:p-2">
                     <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
                       <div
                         className="rounded-lg p-2"
@@ -411,6 +556,7 @@ export default function ObjectLifecycle({
                         </div>
                         <div className="text-sm text-primary-variant">
                           {formatUnixTimestampToDateTime(item.timestamp, {
+                            timezone: config.ui.timezone,
                             strftime_fmt:
                               config.ui.time_format == "24hour"
                                 ? "%d %b %H:%M:%S"
@@ -460,7 +606,10 @@ export default function ObjectLifecycle({
                           </p>
                           {Array.isArray(item.data.box) &&
                           item.data.box.length >= 4
-                            ? (item.data.box[2] / item.data.box[3]).toFixed(2)
+                            ? (
+                                aspectRatio *
+                                (item.data.box[2] / item.data.box[3])
+                              ).toFixed(2)
                             : "N/A"}
                         </div>
                       </div>
@@ -470,12 +619,27 @@ export default function ObjectLifecycle({
                             Area
                           </p>
                           {Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? Math.round(
-                                detectArea *
-                                  (item.data.box[2] * item.data.box[3]),
-                              )
-                            : "N/A"}
+                          item.data.box.length >= 4 ? (
+                            <>
+                              <div className="flex flex-col text-xs">
+                                px:{" "}
+                                {Math.round(
+                                  detectArea *
+                                    (item.data.box[2] * item.data.box[3]),
+                                )}
+                              </div>
+                              <div className="flex flex-col text-xs">
+                                %:{" "}
+                                {(
+                                  (detectArea *
+                                    (item.data.box[2] * item.data.box[3])) /
+                                  detectArea
+                                ).toFixed(4)}
+                              </div>
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
                         </div>
                       </div>
                     </div>
@@ -493,7 +657,7 @@ export default function ObjectLifecycle({
             containScroll: "keepSnaps",
             dragFree: true,
           }}
-          className="w-full max-w-[72%] md:max-w-[85%]"
+          className="max-w-[72%] md:max-w-[85%]"
           setApi={setThumbnailApi}
         >
           <CarouselContent
@@ -505,10 +669,7 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem
                 key={index}
-                className={cn(
-                  "basis-1/4 cursor-pointer pl-1 md:basis-[10%]",
-                  fullscreen && "md:basis-16",
-                )}
+                className={cn("basis-auto cursor-pointer pl-1")}
                 onClick={() => handleThumbnailClick(index)}
               >
                 <div className="p-1">
@@ -543,8 +704,14 @@ export default function ObjectLifecycle({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious
+            disabled={current === 0}
+            onClick={() => handleThumbnailNavigation("previous")}
+          />
+          <CarouselNext
+            disabled={current === eventSequence.length - 1}
+            onClick={() => handleThumbnailNavigation("next")}
+          />
         </Carousel>
       </div>
     </div>
@@ -566,7 +733,7 @@ export function LifecycleIcon({
     case "gone":
       return <IoMdExit className={cn(className)} />;
     case "active":
-      return <LuPlayCircle className={cn(className)} />;
+      return <IoPlayCircleOutline className={cn(className)} />;
     case "stationary":
       return <LuCircle className={cn(className)} />;
     case "entered_zone":
@@ -586,49 +753,5 @@ export function LifecycleIcon({
       return <LuCircleDot className={cn(className)} />;
     default:
       return null;
-  }
-}
-
-function getLifecycleItemDescription(lifecycleItem: ObjectLifecycleSequence) {
-  const label = (
-    (Array.isArray(lifecycleItem.data.sub_label)
-      ? lifecycleItem.data.sub_label[0]
-      : lifecycleItem.data.sub_label) || lifecycleItem.data.label
-  ).replaceAll("_", " ");
-
-  switch (lifecycleItem.class_type) {
-    case "visible":
-      return `${label} detected`;
-    case "entered_zone":
-      return `${label} entered ${lifecycleItem.data.zones
-        .join(" and ")
-        .replaceAll("_", " ")}`;
-    case "active":
-      return `${label} became active`;
-    case "stationary":
-      return `${label} became stationary`;
-    case "attribute": {
-      let title = "";
-      if (
-        lifecycleItem.data.attribute == "face" ||
-        lifecycleItem.data.attribute == "license_plate"
-      ) {
-        title = `${lifecycleItem.data.attribute.replaceAll(
-          "_",
-          " ",
-        )} detected for ${label}`;
-      } else {
-        title = `${
-          lifecycleItem.data.sub_label
-        } recognized as ${lifecycleItem.data.attribute.replaceAll("_", " ")}`;
-      }
-      return title;
-    }
-    case "gone":
-      return `${label} left`;
-    case "heard":
-      return `${label} heard`;
-    case "external":
-      return `${label} detected`;
   }
 }

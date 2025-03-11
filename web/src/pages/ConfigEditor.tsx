@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -32,6 +33,8 @@ function ConfigEditor() {
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
   const configRef = useRef<HTMLDivElement | null>(null);
   const schemaConfiguredRef = useRef(false);
+
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -56,11 +59,12 @@ function ConfigEditor() {
         .catch((error) => {
           toast.error("Error saving config", { position: "top-center" });
 
-          if (error.response) {
-            setError(error.response.data.message);
-          } else {
-            setError(error.message);
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          setError(errorMessage);
         });
     },
     [editorRef],
@@ -192,6 +196,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Copy config"
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
@@ -200,7 +205,8 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
-              onClick={() => onHandleSaveConfig("restart")}
+              aria-label="Save and restart"
+              onClick={() => setRestartDialogOpen(true)}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
@@ -211,6 +217,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Save only without restarting"
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
@@ -220,7 +227,7 @@ function ConfigEditor() {
         </div>
 
         {error && (
-          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-full">
+          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
             {error}
           </div>
         )}
@@ -228,6 +235,11 @@ function ConfigEditor() {
         <div ref={configRef} className="mt-2 h-[calc(100%-2.75rem)]" />
       </div>
       <Toaster closeButton={true} />
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => onHandleSaveConfig("restart")}
+      />
     </div>
   );
 }

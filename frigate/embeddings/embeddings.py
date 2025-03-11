@@ -1,23 +1,30 @@
 """SQLite-vec embeddings database."""
 
-import base64
-import io
+import datetime
 import logging
-import struct
+import os
 import time
-from typing import List, Tuple, Union
 
-from PIL import Image
+from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import UPDATE_MODEL_STATE
+from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
+from frigate.const import (
+    CONFIG_DIR,
+    UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
+    UPDATE_MODEL_STATE,
+)
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
+from frigate.util.builtin import serialize
+from frigate.util.path import get_event_thumbnail_bytes
 
-from .functions.clip import ClipEmbedding
-from .functions.minilm_l6_v2 import MiniLMEmbedding
+from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
+from .onnx.jina_v2_embedding import JinaV2Embedding
 
 logger = logging.getLogger(__name__)
 
@@ -53,32 +60,24 @@ def get_metadata(event: Event) -> dict:
     )
 
 
-def serialize(vector: List[float]) -> bytes:
-    """Serializes a list of floats into a compact "raw bytes" format"""
-    return struct.pack("%sf" % len(vector), *vector)
-
-
-def deserialize(bytes_data: bytes) -> List[float]:
-    """Deserializes a compact "raw bytes" format into a list of floats"""
-    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
-
-
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(self, db: SqliteVecQueueDatabase) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        db: SqliteVecQueueDatabase,
+        metrics: DataProcessorMetrics,
+    ) -> None:
+        self.config = config
         self.db = db
+        self.metrics = metrics
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self._create_tables()
+        self.db.create_embeddings_tables()
 
-        models = [
-            "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
-            "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
-            "clip-clip_image_model_vitb32.onnx",
-            "clip-clip_text_model_vitb32.onnx",
-        ]
+        models = self.get_model_definitions()
 
         for model in models:
             self.requestor.send_data(
@@ -89,205 +88,283 @@ class Embeddings:
                 },
             )
 
-        self.clip_embedding = ClipEmbedding(
-            preferred_providers=["CPUExecutionProvider"]
-        )
-        self.minilm_embedding = MiniLMEmbedding(
-            preferred_providers=["CPUExecutionProvider"],
-        )
-
-    def _create_tables(self):
-        # Create vec0 virtual table for thumbnail embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
-                id TEXT PRIMARY KEY,
-                thumbnail_embedding FLOAT[512]
-            );
-        """)
-
-        # Create vec0 virtual table for description embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
-                id TEXT PRIMARY KEY,
-                description_embedding FLOAT[384]
-            );
-        """)
-
-    def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
-        # Convert thumbnail bytes to PIL Image
-        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-        # Generate embedding using CLIP
-        embedding = self.clip_embedding([image])[0]
-
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-            VALUES(?, ?)
-            """,
-            (event_id, serialize(embedding)),
-        )
-
-        return embedding
-
-    def upsert_description(self, event_id: str, description: str):
-        # Generate embedding using MiniLM
-        embedding = self.minilm_embedding([description])[0]
-
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-            VALUES(?, ?)
-            """,
-            (event_id, serialize(embedding)),
-        )
-
-        return embedding
-
-    def delete_thumbnail(self, event_ids: List[str]) -> None:
-        ids = ",".join(["?" for _ in event_ids])
-        self.db.execute_sql(
-            f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", event_ids
-        )
-
-    def delete_description(self, event_ids: List[str]) -> None:
-        ids = ",".join(["?" for _ in event_ids])
-        self.db.execute_sql(
-            f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids
-        )
-
-    def search_thumbnail(
-        self, query: Union[Event, str], event_ids: List[str] = None
-    ) -> List[Tuple[str, float]]:
-        if query.__class__ == Event:
-            cursor = self.db.execute_sql(
-                """
-                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
-                """,
-                [query.id],
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            # Single JinaV2Embedding instance for both text and vision
+            self.embedding = JinaV2Embedding(
+                model_size=self.config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU"
+                if self.config.semantic_search.model_size == "large"
+                else "CPU",
+            )
+            self.text_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="text"
+            )
+            self.vision_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="vision"
+            )
+        else:  # Default to jinav1
+            self.text_embedding = JinaV1TextEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="CPU",
+            )
+            self.vision_embedding = JinaV1ImageEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU" if config.semantic_search.model_size == "large" else "CPU",
             )
 
-            row = cursor.fetchone() if cursor else None
+    def get_model_definitions(self):
+        # Version-specific models
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            models = [
+                "jinaai/jina-clip-v2-tokenizer",
+                "jinaai/jina-clip-v2-model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v2-model_quantized.onnx",
+                "jinaai/jina-clip-v2-preprocessor_config.json",
+            ]
+        else:  # Default to jinav1
+            models = [
+                "jinaai/jina-clip-v1-text_model_fp16.onnx",
+                "jinaai/jina-clip-v1-tokenizer",
+                "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
+                "jinaai/jina-clip-v1-preprocessor_config.json",
+            ]
 
-            if row:
-                query_embedding = deserialize(
-                    row[0]
-                )  # Deserialize the thumbnail embedding
-            else:
-                # If no embedding found, generate it and return it
-                thumbnail = base64.b64decode(query.thumbnail)
-                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
-        else:
-            query_embedding = self.clip_embedding([query])[0]
-
-        sql_query = """
-            SELECT
-                id,
-                distance
-            FROM vec_thumbnails
-            WHERE thumbnail_embedding MATCH ?
-                AND k = 100
-        """
-
-        # Add the IN clause if event_ids is provided and not empty
-        # this is the only filter supported by sqlite-vec as of 0.1.3
-        # but it seems to be broken in this version
-        if event_ids:
-            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
-
-        # order by distance DESC is not implemented in this version of sqlite-vec
-        # when it's implemented, we can use cosine similarity
-        sql_query += " ORDER BY distance"
-
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
+        # Add common models
+        models.extend(
+            [
+                "facenet-facenet.onnx",
+                "paddleocr-onnx-detection.onnx",
+                "paddleocr-onnx-classification.onnx",
+                "paddleocr-onnx-recognition.onnx",
+            ]
         )
 
-        results = self.db.execute_sql(sql_query, parameters).fetchall()
+        return models
 
-        return results
+    def embed_thumbnail(
+        self, event_id: str, thumbnail: bytes, upsert: bool = True
+    ) -> ndarray:
+        """Embed thumbnail and optionally insert into DB.
 
-    def search_description(
-        self, query_text: str, event_ids: List[str] = None
-    ) -> List[Tuple[str, float]]:
-        query_embedding = self.minilm_embedding([query_text])[0]
-
-        # Prepare the base SQL query
-        sql_query = """
-            SELECT
-                id,
-                distance
-            FROM vec_descriptions
-            WHERE description_embedding MATCH ?
-                AND k = 100
+        @param: event_id in Events DB
+        @param: thumbnail bytes in jpg format
+        @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
+        # Convert thumbnail bytes to PIL Image
+        embedding = self.vision_embedding([thumbnail])[0]
 
-        # Add the IN clause if event_ids is provided and not empty
-        # this is the only filter supported by sqlite-vec as of 0.1.3
-        # but it seems to be broken in this version
-        if event_ids:
-            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+        if upsert:
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                VALUES(?, ?)
+                """,
+                (event_id, serialize(embedding)),
+            )
 
-        # order by distance DESC is not implemented in this version of sqlite-vec
-        # when it's implemented, we can use cosine similarity
-        sql_query += " ORDER BY distance"
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.image_embeddings_fps.value = (
+            self.metrics.image_embeddings_fps.value * 9 + duration
+        ) / 10
 
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
-        )
+        return embedding
 
-        results = self.db.execute_sql(sql_query, parameters).fetchall()
+    def batch_embed_thumbnail(
+        self, event_thumbs: dict[str, bytes], upsert: bool = True
+    ) -> list[ndarray]:
+        """Embed thumbnails and optionally insert into DB.
 
-        return results
+        @param: event_thumbs Map of Event IDs in DB to thumbnail bytes in jpg format
+        @param: upsert If embedding should be upserted into vec DB
+        """
+        start = datetime.datetime.now().timestamp()
+        ids = list(event_thumbs.keys())
+        embeddings = self.vision_embedding(list(event_thumbs.values()))
+
+        if upsert:
+            items = []
+
+            for i in range(len(ids)):
+                items.append(ids[i])
+                items.append(serialize(embeddings[i]))
+
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                VALUES {}
+                """.format(", ".join(["(?, ?)"] * len(ids))),
+                items,
+            )
+
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
+
+        return embeddings
+
+    def embed_description(
+        self, event_id: str, description: str, upsert: bool = True
+    ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
+        embedding = self.text_embedding([description])[0]
+
+        if upsert:
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                VALUES(?, ?)
+                """,
+                (event_id, serialize(embedding)),
+            )
+
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + duration
+        ) / 10
+
+        return embedding
+
+    def batch_embed_description(
+        self, event_descriptions: dict[str, str], upsert: bool = True
+    ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
+        # upsert embeddings one by one to avoid token limit
+        embeddings = []
+
+        for desc in event_descriptions.values():
+            embeddings.append(self.text_embedding([desc])[0])
+
+        if upsert:
+            ids = list(event_descriptions.keys())
+            items = []
+
+            for i in range(len(ids)):
+                items.append(ids[i])
+                items.append(serialize(embeddings[i]))
+
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                VALUES {}
+                """.format(", ".join(["(?, ?)"] * len(ids))),
+                items,
+            )
+
+        duration = datetime.datetime.now().timestamp() - start
+        self.metrics.text_embeddings_sps.value = (
+            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        ) / 10
+
+        return embeddings
 
     def reindex(self) -> None:
-        logger.info("Indexing event embeddings...")
+        logger.info("Indexing tracked object embeddings...")
+
+        self.db.drop_embeddings_tables()
+        logger.debug("Dropped embeddings tables.")
+        self.db.create_embeddings_tables()
+        logger.debug("Created embeddings tables.")
+
+        # Delete the saved stats file
+        if os.path.exists(os.path.join(CONFIG_DIR, ".search_stats.json")):
+            os.remove(os.path.join(CONFIG_DIR, ".search_stats.json"))
 
         st = time.time()
+
+        # Get total count of events to process
+        total_events = Event.select().count()
+
+        batch_size = (
+            4
+            if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2
+            else 32
+        )
+        current_page = 1
+
         totals = {
-            "thumb": 0,
-            "desc": 0,
+            "thumbnails": 0,
+            "descriptions": 0,
+            "processed_objects": total_events - 1 if total_events < batch_size else 0,
+            "total_objects": total_events,
+            "time_remaining": 0 if total_events < batch_size else -1,
+            "status": "indexing",
         }
 
-        batch_size = 100
-        current_page = 1
+        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
 
         while len(events) > 0:
             event: Event
+            batch_thumbs = {}
+            batch_descs = {}
             for event in events:
-                thumbnail = base64.b64decode(event.thumbnail)
-                self.upsert_thumbnail(event.id, thumbnail)
-                totals["thumb"] += 1
-                if description := event.data.get("description", "").strip():
-                    totals["desc"] += 1
-                    self.upsert_description(event.id, description)
+                thumbnail = get_event_thumbnail_bytes(event)
 
+                if thumbnail is None:
+                    continue
+
+                batch_thumbs[event.id] = thumbnail
+                totals["thumbnails"] += 1
+
+                if description := event.data.get("description", "").strip():
+                    batch_descs[event.id] = description
+                    totals["descriptions"] += 1
+
+                totals["processed_objects"] += 1
+
+            # run batch embedding
+            self.batch_embed_thumbnail(batch_thumbs)
+
+            if batch_descs:
+                self.batch_embed_description(batch_descs)
+
+            # report progress every batch so we don't spam the logs
+            progress = (totals["processed_objects"] / total_events) * 100
+            logger.debug(
+                "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
+                totals["processed_objects"],
+                total_events,
+                progress,
+                totals["thumbnails"],
+                totals["descriptions"],
+            )
+
+            # Calculate time remaining
+            elapsed_time = time.time() - st
+            avg_time_per_event = elapsed_time / totals["processed_objects"]
+            remaining_events = total_events - totals["processed_objects"]
+            time_remaining = avg_time_per_event * remaining_events
+            totals["time_remaining"] = int(time_remaining)
+
+            self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+            # Move to the next page
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )
 
         logger.info(
             "Embedded %d thumbnails and %d descriptions in %s seconds",
-            totals["thumb"],
-            totals["desc"],
-            time.time() - st,
+            totals["thumbnails"],
+            totals["descriptions"],
+            round(time.time() - st, 1),
         )
+        totals["status"] = "completed"
+
+        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)

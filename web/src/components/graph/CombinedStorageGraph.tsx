@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
-import { LuAlertCircle } from "react-icons/lu";
+import { CiCircleAlert } from "react-icons/ci";
 
 type CameraStorage = {
   [key: string]: {
@@ -199,7 +199,7 @@ export function CombinedStorageGraph({
                           className="focus:outline-none"
                           aria-label="Unused Storage Information"
                         >
-                          <LuAlertCircle
+                          <CiCircleAlert
                             className="size-5"
                             aria-label="Unused Storage Information"
                           />
@@ -216,7 +216,7 @@ export function CombinedStorageGraph({
                     </Popover>
                   )}
                 </TableCell>
-                <TableCell>{getUnitSize(item.usage)}</TableCell>
+                <TableCell>{getUnitSize(item.usage ?? 0)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>
                 <TableCell>
                   {item.name === "Unused"

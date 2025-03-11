@@ -15,25 +15,52 @@ With a subscription, 12 model trainings per year are included. If you cancel you
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
+## Available model types
+
+There are two model types offered in Frigate+, `mobiledet` and `yolonas`. Both of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
+
+Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types).
+
+| Model Type  | Description                                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                            |
+| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs. |
+
 ## Supported detector types
+
+Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), and ONNX (`onnx`) detectors.
 
 :::warning
 
-Frigate+ models are not supported for TensorRT or OpenVino yet.
+Using Frigate+ models with `onnx` is only available with Frigate 0.15 and later.
 
 :::
 
-Currently, Frigate+ models only support CPU (`cpu`) and Coral (`edgetpu`) models. OpenVino is next in line to gain support.
+| Hardware                                                                                                                     | Recommended Detector Type | Recommended Model Type |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)                                                       | `cpu`                     | `mobiledet`            |
+| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector)                                             | `edgetpu`                 | `mobiledet`            |
+| [Intel](/configuration/object_detectors.md#openvino-detector)                                                                | `openvino`                | `yolonas`              |
+| [NVidia GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#onnx)\*                   | `onnx`                    | `yolonas`              |
+| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `onnx`                    | `yolonas`              |
 
-The models are created using the same MobileDet architecture as the default model. Additional architectures will be added in future releases as needed.
+_\* Requires Frigate 0.15_
 
 ## Available label types
 
-Frigate+ models support a more relevant set of objects for security cameras. Currently, only the following objects are supported: `person`, `face`, `car`, `license_plate`, `amazon`, `ups`, `fedex`, `package`, `dog`, `cat`, `deer`. Other object types available in the default Frigate model are not available. Additional object types will be added in future releases.
+Frigate+ models support a more relevant set of objects for security cameras. Currently, the following objects are supported:
+
+- **People**: `person`, `face`
+- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `license_plate`
+- **Delivery Logos**: `amazon`, `usps`, `ups`, `fedex`, `dhl`, `an_post`, `purolator`, `postnl`, `nzpost`, `postnord`, `gls`, `dpd`
+- **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`
+- **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`
+
+Other object types available in the default Frigate model are not available. Additional object types will be added in future releases.
 
 ### Label attributes
 
-Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate review items directly. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
+Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, and delivery logos such as `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate review items directly. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
 
 In order to have Frigate start using these attribute labels, you will need to add them to the list of objects to track:
 
@@ -56,6 +83,6 @@ When using Frigate+ models, Frigate will choose the snapshot of a person object 
 
 ![Face Attribute](/img/plus/attribute-example-face.jpg)
 
-`amazon`, `ups`, and `fedex` labels are used to automatically assign a sub label to car objects.
+Delivery logos such as `amazon`, `ups`, and `fedex` labels are used to automatically assign a sub label to car objects.
 
 ![Fedex Attribute](/img/plus/attribute-example-fedex.jpg)

@@ -167,7 +167,11 @@ export default function CameraInfoDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="select" onClick={() => onCopyFfprobe()}>
+            <Button
+              variant="select"
+              aria-label="Copy"
+              onClick={() => onCopyFfprobe()}
+            >
               Copy
             </Button>
           </DialogFooter>

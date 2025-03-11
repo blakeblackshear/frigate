@@ -52,6 +52,7 @@ export type ObjectType = {
 };
 
 export interface FrigateCameraState {
+  enabled: boolean;
   motion: boolean;
   objects: ObjectType[];
 }
@@ -61,5 +62,14 @@ export type ModelState =
   | "downloading"
   | "downloaded"
   | "error";
+
+export type EmbeddingsReindexProgressType = {
+  thumbnails: number;
+  descriptions: number;
+  processed_objects: number;
+  total_objects: number;
+  time_remaining: number;
+  status: string;
+};
 
 export type ToggleableSetting = "ON" | "OFF";

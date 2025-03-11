@@ -6,7 +6,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Textarea } from "../../ui/textarea";
@@ -21,13 +21,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Event } from "@/types/event";
-import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
+  FaArrowRight,
   FaCheckCircle,
   FaChevronDown,
+  FaDownload,
   FaHistory,
   FaImage,
   FaRegListAlt,
@@ -62,8 +63,16 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { Card, CardContent } from "@/components/ui/card";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
-import { useResizeObserver } from "@/hooks/resize-observer";
-import { VideoResolutionType } from "@/types/live";
+import { GenericVideoPlayer } from "@/components/player/GenericVideoPlayer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuInfo } from "react-icons/lu";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { FaPencilAlt } from "react-icons/fa";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 
 const SEARCH_TABS = [
   "details",
@@ -71,17 +80,23 @@ const SEARCH_TABS = [
   "video",
   "object lifecycle",
 ] as const;
-type SearchTab = (typeof SEARCH_TABS)[number];
+export type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
+  page: SearchTab;
   setSearch: (search: SearchResult | undefined) => void;
+  setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function SearchDetailDialog({
   search,
+  page,
   setSearch,
+  setSearchPage,
   setSimilarity,
+  setInputFocused,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -89,15 +104,34 @@ export default function SearchDetailDialog({
 
   // tabs
 
-  const [page, setPage] = useState<SearchTab>("details");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [pageToggle, setPageToggle] = useOptimisticState(
+    page,
+    setSearchPage,
+    100,
+  );
 
   // dialog and mobile page
 
   const [isOpen, setIsOpen] = useState(search != undefined);
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        // short timeout to allow the mobile page animation
+        // to complete before updating the state
+        setTimeout(() => {
+          setSearch(undefined);
+        }, 300);
+      }
+    },
+    [setSearch],
+  );
+
   useEffect(() => {
-    setIsOpen(search != undefined);
+    if (search) {
+      setIsOpen(search != undefined);
+    }
   }, [search]);
 
   const searchTabs = useMemo(() => {
@@ -112,16 +146,15 @@ export default function SearchDetailDialog({
       views.splice(index, 1);
     }
 
-    if (search.data.type != "object") {
-      const index = views.indexOf("object lifecycle");
+    if (!search.has_clip) {
+      const index = views.indexOf("video");
       views.splice(index, 1);
     }
 
-    // TODO implement
-    //if (!config.semantic_search.enabled) {
-    //  const index = views.indexOf("similar-calendar");
-    //  views.splice(index, 1);
-    // }
+    if (search.data.type != "object" || !search.has_clip) {
+      const index = views.indexOf("object lifecycle");
+      views.splice(index, 1);
+    }
 
     return views;
   }, [config, search]);
@@ -132,9 +165,9 @@ export default function SearchDetailDialog({
     }
 
     if (!searchTabs.includes(pageToggle)) {
-      setPage("details");
+      setSearchPage("details");
     }
-  }, [pageToggle, searchTabs]);
+  }, [pageToggle, searchTabs, setSearchPage]);
 
   if (!search) {
     return;
@@ -149,14 +182,7 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSearch(undefined);
-        }
-      }}
-    >
+    <Overlay open={isOpen} onOpenChange={handleOpenChange}>
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",
@@ -165,7 +191,7 @@ export default function SearchDetailDialog({
           isMobile && "px-4",
         )}
       >
-        <Header onClose={() => setIsOpen(false)}>
+        <Header>
           <Title>Tracked Object Details</Title>
           <Description className="sr-only">Tracked object details</Description>
         </Header>
@@ -211,6 +237,7 @@ export default function SearchDetailDialog({
             config={config}
             setSearch={setSearch}
             setSimilarity={setSimilarity}
+            setInputFocused={setInputFocused}
           />
         )}
         {page == "snapshot" && (
@@ -245,12 +272,14 @@ type ObjectDetailsTabProps = {
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
   setSimilarity,
+  setInputFocused,
 }: ObjectDetailsTabProps) {
   const apiHost = useApiHost();
 
@@ -261,6 +290,15 @@ function ObjectDetailsTab({
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
+  const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
+
+  const handleDescriptionFocus = useCallback(() => {
+    setInputFocused(true);
+  }, [setInputFocused]);
+
+  const handleDescriptionBlur = useCallback(() => {
+    setInputFocused(false);
+  }, [setInputFocused]);
 
   // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.data.description ?? ""), [search]);
@@ -278,7 +316,7 @@ function ObjectDetailsTab({
       return 0;
     }
 
-    const value = search.score ?? search.data.top_score;
+    const value = search.data.top_score ?? search.top_score ?? 0;
 
     return Math.round(value * 100);
   }, [search]);
@@ -288,8 +326,32 @@ function ObjectDetailsTab({
       return undefined;
     }
 
-    if (search.sub_label) {
-      return Math.round((search.data?.top_score ?? 0) * 100);
+    if (search.sub_label && search.data?.sub_label_score) {
+      return Math.round((search.data?.sub_label_score ?? 0) * 100);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
+  const averageEstimatedSpeed = useMemo(() => {
+    if (!search || !search.data?.average_estimated_speed) {
+      return undefined;
+    }
+
+    if (search.data?.average_estimated_speed != 0) {
+      return search.data?.average_estimated_speed.toFixed(1);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
+  const velocityAngle = useMemo(() => {
+    if (!search || !search.data?.velocity_angle) {
+      return undefined;
+    }
+
+    if (search.data?.velocity_angle != 0) {
+      return search.data?.velocity_angle.toFixed(1);
     } else {
       return undefined;
     }
@@ -314,10 +376,30 @@ function ObjectDetailsTab({
             (key.includes("events") ||
               key.includes("events/search") ||
               key.includes("events/explore")),
+          (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+            if (!currentData) return currentData;
+            // optimistic update
+            return currentData
+              .flat()
+              .map((event) =>
+                event.id === search.id
+                  ? { ...event, data: { ...event.data, description: desc } }
+                  : event,
+              );
+          },
+          {
+            optimisticData: true,
+            rollbackOnError: true,
+            revalidate: false,
+          },
         );
       })
-      .catch(() => {
-        toast.error("Failed to update the description", {
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to update the description: ${errorMessage}`, {
           position: "top-center",
         });
         setDesc(search.data.description);
@@ -343,16 +425,90 @@ function ObjectDetailsTab({
             );
           }
         })
-        .catch(() => {
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
           toast.error(
-            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description`,
-            {
-              position: "top-center",
-            },
+            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description: ${errorMessage}`,
+            { position: "top-center" },
           );
         });
     },
     [search, config],
+  );
+
+  const handleSubLabelSave = useCallback(
+    (text: string) => {
+      if (!search) return;
+
+      // set score to 1.0 if we're manually entering a sub label
+      const subLabelScore =
+        text === "" ? undefined : search.data?.sub_label_score || 1.0;
+
+      axios
+        .post(`${apiHost}api/events/${search.id}/sub_label`, {
+          camera: search.camera,
+          subLabel: text,
+          subLabelScore: subLabelScore,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Successfully updated sub label.", {
+              position: "top-center",
+            });
+
+            mutate(
+              (key) =>
+                typeof key === "string" &&
+                (key.includes("events") ||
+                  key.includes("events/search") ||
+                  key.includes("events/explore")),
+              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+                if (!currentData) return currentData;
+                return currentData.flat().map((event) =>
+                  event.id === search.id
+                    ? {
+                        ...event,
+                        sub_label: text,
+                        data: {
+                          ...event.data,
+                          sub_label_score: subLabelScore,
+                        },
+                      }
+                    : event,
+                );
+              },
+              {
+                optimisticData: true,
+                rollbackOnError: true,
+                revalidate: false,
+              },
+            );
+
+            setSearch({
+              ...search,
+              sub_label: text,
+              data: {
+                ...search.data,
+                sub_label_score: subLabelScore,
+              },
+            });
+            setIsSubLabelDialogOpen(false);
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to update sub label: ${errorMessage}`, {
+            position: "top-center",
+          });
+        });
+    },
+    [search, apiHost, mutate, setSearch],
   );
 
   return (
@@ -365,14 +521,69 @@ function ObjectDetailsTab({
               {getIconForLabel(search.label, "size-4 text-primary")}
               {search.label}
               {search.sub_label && ` (${search.sub_label})`}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <FaPencilAlt
+                      className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                      onClick={() => {
+                        setIsSubLabelDialogOpen(true);
+                      }}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Edit sub label</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">Score</div>
+            <div className="text-sm text-primary/40">
+              <div className="flex flex-row items-center gap-1">
+                Top Score
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="cursor-pointer p-0">
+                      <LuInfo className="size-4" />
+                      <span className="sr-only">Info</span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    The top score is the highest median score for the tracked
+                    object, so this may differ from the score shown on the
+                    search result thumbnail.
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
             <div className="text-sm">
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
+          {averageEstimatedSpeed && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">Estimated Speed</div>
+              <div className="flex flex-col space-y-0.5 text-sm">
+                {averageEstimatedSpeed && (
+                  <div className="flex flex-row items-center gap-2">
+                    {averageEstimatedSpeed}{" "}
+                    {config?.ui.unit_system == "imperial" ? "mph" : "kph"}{" "}
+                    {velocityAngle != undefined && (
+                      <span className="text-primary/40">
+                        <FaArrowRight
+                          size={10}
+                          style={{
+                            transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
+                          }}
+                        />
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">Camera</div>
             <div className="text-sm capitalize">
@@ -396,34 +607,67 @@ function ObjectDetailsTab({
                 : undefined
             }
             draggable={false}
-            src={`${apiHost}api/events/${search.id}/thumbnail.jpg`}
+            src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
           />
-          <Button
-            onClick={() => {
-              setSearch(undefined);
+          {config?.semantic_search.enabled && search.data.type == "object" && (
+            <Button
+              aria-label="Find similar tracked objects"
+              onClick={() => {
+                setSearch(undefined);
 
-              if (setSimilarity) {
-                setSimilarity();
-              }
-            }}
-          >
-            Find Similar
-          </Button>
+                if (setSimilarity) {
+                  setSimilarity();
+                }
+              }}
+            >
+              Find Similar
+            </Button>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="text-sm text-primary/40">Description</div>
-        <Textarea
-          className="h-64"
-          placeholder="Description of the tracked object"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-        />
+        {config?.cameras[search.camera].genai.enabled &&
+        !search.end_time &&
+        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+          search.zones.some((zone) =>
+            config.cameras[search.camera].genai.required_zones.includes(zone),
+          )) &&
+        (config.cameras[search.camera].genai.objects.length === 0 ||
+          config.cameras[search.camera].genai.objects.includes(
+            search.label,
+          )) ? (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <div className="flex h-64 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
+              <div className="flex">
+                <ActivityIndicator />
+              </div>
+              <div className="flex">
+                Frigate will not request a description from your Generative AI
+                provider until the tracked object's lifecycle has ended.
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-sm text-primary/40">Description</div>
+            <Textarea
+              className="h-64"
+              placeholder="Description of the tracked object"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              onFocus={handleDescriptionFocus}
+              onBlur={handleDescriptionBlur}
+            />
+          </>
+        )}
+
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.genai.enabled && (
-            <div className="flex items-center">
+          {config?.cameras[search.camera].genai.enabled && search.end_time && (
+            <div className="flex items-start">
               <Button
                 className="rounded-r-none border-r-0"
+                aria-label="Regenerate tracked object description"
                 onClick={() => regenerateDescription("thumbnails")}
               >
                 Regenerate
@@ -431,19 +675,24 @@ function ObjectDetailsTab({
               {search.has_snapshot && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="rounded-l-none border-l-0 px-2">
+                    <Button
+                      className="rounded-l-none border-l-0 px-2"
+                      aria-label="Expand regeneration menu"
+                    >
                       <FaChevronDown className="size-3" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       className="cursor-pointer"
+                      aria-label="Regenerate from snapshot"
                       onClick={() => regenerateDescription("snapshot")}
                     >
                       Regenerate from Snapshot
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
+                      aria-label="Regenerate from thumbnails"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
                       Regenerate from Thumbnails
@@ -453,9 +702,25 @@ function ObjectDetailsTab({
               )}
             </div>
           )}
-          <Button variant="select" onClick={updateDescription}>
-            Save
-          </Button>
+          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
+            !config?.cameras[search.camera].genai.enabled) && (
+            <Button
+              variant="select"
+              aria-label="Save"
+              onClick={updateDescription}
+            >
+              Save
+            </Button>
+          )}
+          <TextEntryDialog
+            open={isSubLabelDialogOpen}
+            setOpen={setIsSubLabelDialogOpen}
+            title="Edit Sub Label"
+            description={`Enter a new sub label for this ${search.label ?? "tracked object"}.`}
+            onSave={handleSubLabelSave}
+            defaultValue={search?.sub_label || ""}
+            allowEmpty={true}
+          />
         </div>
       </div>
     </div>
@@ -466,7 +731,7 @@ type ObjectSnapshotTabProps = {
   search: Event;
   onEventUploaded: () => void;
 };
-function ObjectSnapshotTab({
+export function ObjectSnapshotTab({
   search,
   onEventUploaded,
 }: ObjectSnapshotTabProps) {
@@ -524,69 +789,103 @@ function ObjectSnapshotTab({
               }}
             >
               {search?.id && (
-                <img
-                  ref={imgRef}
-                  className={`mx-auto max-h-[60dvh] bg-black object-contain`}
-                  src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
-                  alt={`${search?.label}`}
-                  loading={isSafari ? "eager" : "lazy"}
-                  onLoad={() => {
-                    onImgLoad();
-                  }}
-                />
+                <div className="relative mx-auto">
+                  <img
+                    ref={imgRef}
+                    className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                    alt={`${search?.label}`}
+                    loading={isSafari ? "eager" : "lazy"}
+                    onLoad={() => {
+                      onImgLoad();
+                    }}
+                  />
+                  <div
+                    className={cn(
+                      "absolute right-1 top-1 flex items-center gap-2",
+                    )}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a
+                          download
+                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                        >
+                          <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                            <FaDownload className="size-4 text-white" />
+                          </Chip>
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>Download</TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  </div>
+                </div>
               )}
             </TransformComponent>
-            <Card className="p-1 text-sm md:p-2">
-              <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
-                <div className={cn("flex flex-col space-y-3")}>
-                  <div
-                    className={
-                      "text-lg font-semibold leading-none tracking-tight"
-                    }
-                  >
-                    Submit To Frigate+
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Objects in locations you want to avoid are not false
-                    positives. Submitting them as false positives will confuse
-                    the model.
-                  </div>
-                </div>
-
-                <div className="flex flex-row justify-center gap-2 md:justify-end">
-                  {state == "reviewing" && (
-                    <>
-                      <Button
-                        className="bg-success"
-                        onClick={() => {
-                          setState("uploading");
-                          onSubmitToPlus(false);
-                        }}
+            {search.data.type == "object" &&
+              search.plus_id !== "not_enabled" &&
+              search.end_time &&
+              search.label != "on_demand" && (
+                <Card className="p-1 text-sm md:p-2">
+                  <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
+                    <div className={cn("flex flex-col space-y-3")}>
+                      <div
+                        className={
+                          "text-lg font-semibold leading-none tracking-tight"
+                        }
                       >
-                        This is a {search?.label}
-                      </Button>
-                      <Button
-                        className="text-white"
-                        variant="destructive"
-                        onClick={() => {
-                          setState("uploading");
-                          onSubmitToPlus(true);
-                        }}
-                      >
-                        This is not a {search?.label}
-                      </Button>
-                    </>
-                  )}
-                  {state == "uploading" && <ActivityIndicator />}
-                  {state == "submitted" && (
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <FaCheckCircle className="text-success" />
-                      Submitted
+                        Submit To Frigate+
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Objects in locations you want to avoid are not false
+                        positives. Submitting them as false positives will
+                        confuse the model.
+                      </div>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+
+                    <div className="flex flex-row justify-center gap-2 md:justify-end">
+                      {state == "reviewing" && (
+                        <>
+                          <Button
+                            className="bg-success"
+                            aria-label="Confirm this label for Frigate Plus"
+                            onClick={() => {
+                              setState("uploading");
+                              onSubmitToPlus(false);
+                            }}
+                          >
+                            This is{" "}
+                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                            {search?.label}
+                          </Button>
+                          <Button
+                            className="text-white"
+                            aria-label="Do not confirm this label for Frigate Plus"
+                            variant="destructive"
+                            onClick={() => {
+                              setState("uploading");
+                              onSubmitToPlus(true);
+                            }}
+                          >
+                            This is not{" "}
+                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                            {search?.label}
+                          </Button>
+                        </>
+                      )}
+                      {state == "uploading" && <ActivityIndicator />}
+                      {state == "submitted" && (
+                        <div className="flex flex-row items-center justify-center gap-2">
+                          <FaCheckCircle className="text-success" />
+                          Submitted
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </TransformWrapper>
       </div>
@@ -597,99 +896,62 @@ function ObjectSnapshotTab({
 type VideoTabProps = {
   search: SearchResult;
 };
-function VideoTab({ search }: VideoTabProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
-
+export function VideoTab({ search }: VideoTabProps) {
   const navigate = useNavigate();
   const { data: reviewItem } = useSWR<ReviewSegment>([
     `review/event/${search.id}`,
   ]);
+  const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef);
-  const [videoResolution, setVideoResolution] = useState<VideoResolutionType>({
-    width: 0,
-    height: 0,
-  });
-
-  const videoAspectRatio = useMemo(() => {
-    return videoResolution.width / videoResolution.height || 16 / 9;
-  }, [videoResolution]);
-
-  const containerAspectRatio = useMemo(() => {
-    return containerWidth / containerHeight || 16 / 9;
-  }, [containerWidth, containerHeight]);
-
-  const videoDimensions = useMemo(() => {
-    if (!containerWidth || !containerHeight)
-      return { width: "100%", height: "100%" };
-
-    if (containerAspectRatio > videoAspectRatio) {
-      const height = containerHeight;
-      const width = height * videoAspectRatio;
-      return { width: `${width}px`, height: `${height}px` };
-    } else {
-      const width = containerWidth;
-      const height = width / videoAspectRatio;
-      return { width: `${width}px`, height: `${height}px` };
-    }
-  }, [containerWidth, containerHeight, videoAspectRatio, containerAspectRatio]);
+  const source = `${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`;
 
   return (
-    <div ref={containerRef} className="relative flex h-full w-full flex-col">
-      <div className="relative flex flex-grow items-center justify-center">
-        {(isLoading || !reviewItem) && (
-          <ActivityIndicator className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2" />
-        )}
+    <GenericVideoPlayer source={source}>
+      {reviewItem && (
         <div
-          className="relative flex items-center justify-center"
-          style={videoDimensions}
-        >
-          <HlsVideoPlayer
-            videoRef={videoRef}
-            currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
-            hotKeys
-            visible
-            frigateControls={false}
-            fullscreen={false}
-            supportsFullscreen={false}
-            onPlaying={() => setIsLoading(false)}
-            setFullResolution={setVideoResolution}
-          />
-          {!isLoading && reviewItem && (
-            <div
-              className={cn(
-                "absolute top-2 z-10 flex items-center",
-                isIOS ? "right-8" : "right-2",
-              )}
-            >
-              <Tooltip>
-                <TooltipTrigger>
-                  <Chip
-                    className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                    onClick={() => {
-                      if (reviewItem?.id) {
-                        const params = new URLSearchParams({
-                          id: reviewItem.id,
-                        }).toString();
-                        navigate(`/review?${params}`);
-                      }
-                    }}
-                  >
-                    <FaHistory className="size-4 text-white" />
-                  </Chip>
-                </TooltipTrigger>
-                <TooltipContent side="left">View in History</TooltipContent>
-              </Tooltip>
-            </div>
+          className={cn(
+            "absolute top-2 z-10 flex items-center gap-2",
+            isIOS ? "right-8" : "right-2",
           )}
+        >
+          <Tooltip>
+            <TooltipTrigger>
+              <Chip
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                onClick={() => {
+                  if (reviewItem?.id) {
+                    const params = new URLSearchParams({
+                      id: reviewItem.id,
+                    }).toString();
+                    navigate(`/review?${params}`);
+                  }
+                }}
+              >
+                <FaHistory className="size-4 text-white" />
+              </Chip>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>View in History</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                download
+                href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4`}
+              >
+                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                  <FaDownload className="size-4 text-white" />
+                </Chip>
+              </a>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>Download</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
         </div>
-      </div>
-    </div>
+      )}
+    </GenericVideoPlayer>
   );
 }

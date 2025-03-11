@@ -2,6 +2,7 @@ aarch
 absdiff
 airockchip
 Alloc
+alpr
 Amcrest
 amdgpu
 analyzeduration
@@ -12,6 +13,7 @@ argmax
 argmin
 argpartition
 ascontiguousarray
+astype
 authelia
 authentik
 autodetected
@@ -42,6 +44,8 @@ codeproject
 colormap
 colorspace
 comms
+cooldown
+coro
 ctypeslib
 CUDA
 Cuvid
@@ -59,6 +63,8 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+facenet
+fastapi
 faststart
 fflags
 ffprobe
@@ -111,6 +117,8 @@ itemsize
 Jellyfin
 jetson
 jetsons
+jina
+jinaai
 joserfc
 jsmpeg
 jsonify
@@ -184,6 +192,7 @@ openai
 opencv
 openvino
 OWASP
+paddleocr
 paho
 passwordless
 popleft
@@ -193,6 +202,7 @@ poweroff
 preexec
 probesize
 protobuf
+pstate
 psutil
 pubkey
 putenv
@@ -212,6 +222,7 @@ rcond
 RDONLY
 rebranded
 referer
+reindex
 Reolink
 restream
 restreamed
@@ -236,6 +247,7 @@ sleeptime
 SNDMORE
 socs
 sqliteq
+sqlitevecq
 ssdlite
 statm
 stimeout
@@ -270,9 +282,11 @@ unraid
 unreviewed
 userdata
 usermod
+uvicorn
 vaapi
 vainfo
 variations
+vbios
 vconcat
 vitb
 vstream

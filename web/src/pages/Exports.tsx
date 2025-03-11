@@ -83,24 +83,23 @@ function Exports() {
   const onHandleRename = useCallback(
     (id: string, update: string) => {
       axios
-        .patch(`export/${id}/${encodeURIComponent(update)}`)
+        .patch(`export/${id}/rename`, {
+          name: update,
+        })
         .then((response) => {
-          if (response.status == 200) {
+          if (response.status === 200) {
             setDeleteClip(undefined);
             mutate();
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to rename export: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to rename export: ${error.message}`, {
-              position: "top-center",
-            });
-          }
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to rename export: ${errorMessage}`, {
+            position: "top-center",
+          });
         });
     },
     [mutate],
@@ -125,6 +124,7 @@ function Exports() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
               className="text-white"
+              aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >

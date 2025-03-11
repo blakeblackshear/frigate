@@ -2,6 +2,7 @@ import { baseUrl } from "./baseUrl";
 import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import {
+  EmbeddingsReindexProgressType,
   FrigateCameraState,
   FrigateEvent,
   FrigateReview,
@@ -45,27 +46,54 @@ function useValue(): useValueReturn {
 
     const cameraActivity: { [key: string]: object } = JSON.parse(activityValue);
 
-    if (!cameraActivity) {
+    if (Object.keys(cameraActivity).length === 0) {
       return;
     }
 
     const cameraStates: WsState = {};
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
-      const { record, detect, snapshots, audio, autotracking } =
+      const {
+        record,
+        detect,
+        enabled,
+        snapshots,
+        audio,
+        notifications,
+        notifications_suspended,
+        autotracking,
+        alerts,
+        detections,
+      } =
         // @ts-expect-error we know this is correct
         state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
+      cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/notifications/state`] = notifications
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/notifications/suspended`] =
+        notifications_suspended || 0;
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_alerts/state`] = alerts ? "ON" : "OFF";
+      cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
     });
 
-    setWsState({ ...wsState, ...cameraStates });
-    setHasCameraState(true);
+    setWsState((prevState) => ({
+      ...prevState,
+      ...cameraStates,
+    }));
+
+    if (Object.keys(cameraStates).length > 0) {
+      setHasCameraState(true);
+    }
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsState]);
@@ -76,7 +104,10 @@ function useValue(): useValueReturn {
       const data: Update = JSON.parse(event.data);
 
       if (data) {
-        setWsState({ ...wsState, [data.topic]: data.payload });
+        setWsState((prevState) => ({
+          ...prevState,
+          [data.topic]: data.payload,
+        }));
       }
     },
     onOpen: () => {
@@ -85,6 +116,9 @@ function useValue(): useValueReturn {
         message: "",
         retain: false,
       });
+    },
+    onClose: () => {
+      setHasCameraState(false);
     },
     shouldReconnect: () => true,
     retryOnError: true,
@@ -130,6 +164,17 @@ export function useWs(watchTopic: string, publishTopic: string) {
   );
 
   return { value, send };
+}
+
+export function useEnabledState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/enabled/state`, `${camera}/enabled/set`);
+  return { payload: (payload ?? "ON") as ToggleableSetting, send };
 }
 
 export function useDetectState(camera: string): {
@@ -184,6 +229,31 @@ export function useAutotrackingState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/ptz_autotracker/state`, `${camera}/ptz_autotracker/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useAlertsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/review_alerts/state`, `${camera}/review_alerts/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useDetectionsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review_detections/state`,
+    `${camera}/review_detections/set`,
+  );
   return { payload: payload as ToggleableSetting, send };
 }
 
@@ -302,6 +372,42 @@ export function useModelState(
   return { payload: data ? data[model] : undefined };
 }
 
+export function useEmbeddingsReindexProgress(
+  revalidateOnFocus: boolean = true,
+): {
+  payload: EmbeddingsReindexProgressType;
+} {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("embeddings_reindex_progress", "embeddingsReindexProgress");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("embeddingsReindexProgress");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("embeddingsReindexProgress");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data };
+}
+
 export function useMotionActivity(camera: string): { payload: string } {
   const {
     value: { payload },
@@ -358,9 +464,45 @@ export function useImproveContrast(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
-export function useEventUpdate(): { payload: string } {
+export function useTrackedObjectUpdate(): { payload: string } {
   const {
     value: { payload },
-  } = useWs("event_update", "");
+  } = useWs("tracked_object_update", "");
   return useDeepMemo(JSON.parse(payload as string));
+}
+
+export function useNotifications(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/notifications/state`, `${camera}/notifications/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useNotificationSuspend(camera: string): {
+  payload: string;
+  send: (payload: number, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/notifications/suspended`,
+    `${camera}/notifications/suspend`,
+  );
+  return { payload: payload as string, send };
+}
+
+export function useNotificationTest(): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs("notification_test", "notification_test");
+  return { payload: payload as string, send };
 }

@@ -14,6 +14,7 @@ from requests.exceptions import RequestException
 from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.object_detection import ObjectDetectProcess
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
@@ -51,11 +52,13 @@ def get_latest_version(config: FrigateConfig) -> str:
 def stats_init(
     config: FrigateConfig,
     camera_metrics: dict[str, CameraMetrics],
+    embeddings_metrics: DataProcessorMetrics | None,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
+        "embeddings_metrics": embeddings_metrics,
         "detectors": detectors,
         "started": int(time.time()),
         "latest_frigate_version": get_latest_version(config),
@@ -195,10 +198,10 @@ async def set_gpu_stats(
                 continue
 
             # intel QSV GPU
-            intel_usage = get_intel_gpu_stats()
+            intel_usage = get_intel_gpu_stats(config.telemetry.stats.sriov)
 
-            if intel_usage:
-                stats["intel-qsv"] = intel_usage
+            if intel_usage is not None:
+                stats["intel-qsv"] = intel_usage or {"gpu": "", "mem": ""}
             else:
                 stats["intel-qsv"] = {"gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
@@ -220,10 +223,10 @@ async def set_gpu_stats(
                     continue
 
                 # intel VAAPI GPU
-                intel_usage = get_intel_gpu_stats()
+                intel_usage = get_intel_gpu_stats(config.telemetry.stats.sriov)
 
-                if intel_usage:
-                    stats["intel-vaapi"] = intel_usage
+                if intel_usage is not None:
+                    stats["intel-vaapi"] = intel_usage or {"gpu": "", "mem": ""}
                 else:
                     stats["intel-vaapi"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
@@ -279,6 +282,40 @@ def stats_snapshot(
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
+    stats["embeddings"] = {}
+
+    # Get metrics if available
+    embeddings_metrics = stats_tracking.get("embeddings_metrics")
+
+    if embeddings_metrics:
+        # Add metrics based on what's enabled
+        if config.semantic_search.enabled:
+            stats["embeddings"].update(
+                {
+                    "image_embedding_speed": round(
+                        embeddings_metrics.image_embeddings_fps.value * 1000, 2
+                    ),
+                    "text_embedding_speed": round(
+                        embeddings_metrics.text_embeddings_sps.value * 1000, 2
+                    ),
+                }
+            )
+
+        if config.face_recognition.enabled:
+            stats["embeddings"]["face_recognition_speed"] = round(
+                embeddings_metrics.face_rec_fps.value * 1000, 2
+            )
+
+        if config.lpr.enabled:
+            stats["embeddings"]["plate_recognition_speed"] = round(
+                embeddings_metrics.alpr_pps.value * 1000, 2
+            )
+
+            if "license_plate" not in config.objects.all_objects:
+                stats["embeddings"]["yolov9_plate_detection_speed"] = round(
+                    embeddings_metrics.yolov9_lpr_fps.value * 1000, 2
+                )
+
     get_processing_stats(config, stats, hwaccel_errors)
 
     stats["service"] = {
@@ -293,7 +330,7 @@ def stats_snapshot(
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
         try:
             storage_stats = shutil.disk_usage(path)
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             stats["service"]["storage"][path] = {}
             continue
 

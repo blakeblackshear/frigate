@@ -18,6 +18,7 @@ type CameraFilterButtonProps = {
   groups: [string, CameraGroupConfig][];
   selectedCameras: string[] | undefined;
   hideText?: boolean;
+  mainCamera?: string;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
 export function CamerasFilterButton({
@@ -25,6 +26,7 @@ export function CamerasFilterButton({
   groups,
   selectedCameras,
   hideText = isMobile,
+  mainCamera,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
   const [open, setOpen] = useState(false);
@@ -55,6 +57,7 @@ export function CamerasFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 capitalize"
+      aria-label="Cameras Filter"
       variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
@@ -69,6 +72,73 @@ export function CamerasFilterButton({
     </Button>
   );
   const content = (
+    <CamerasFilterContent
+      allCameras={allCameras}
+      groups={groups}
+      currentCameras={currentCameras}
+      mainCamera={mainCamera}
+      setCurrentCameras={setCurrentCameras}
+      setOpen={setOpen}
+      updateCameraFilter={updateCameraFilter}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentCameras(selectedCameras);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      modal={false}
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentCameras(selectedCameras);
+        }
+        setOpen(open);
+      }}
+    >
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent>{content}</DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type CamerasFilterContentProps = {
+  allCameras: string[];
+  currentCameras: string[] | undefined;
+  mainCamera?: string;
+  groups: [string, CameraGroupConfig][];
+  setCurrentCameras: (cameras: string[] | undefined) => void;
+  setOpen: (open: boolean) => void;
+  updateCameraFilter: (cameras: string[] | undefined) => void;
+};
+export function CamerasFilterContent({
+  allCameras,
+  currentCameras,
+  mainCamera,
+  groups,
+  setCurrentCameras,
+  setOpen,
+  updateCameraFilter,
+}: CamerasFilterContentProps) {
+  return (
     <>
       {isMobile && (
         <>
@@ -113,12 +183,29 @@ export function CamerasFilterButton({
               key={item}
               isChecked={currentCameras?.includes(item) ?? false}
               label={item.replaceAll("_", " ")}
+              disabled={
+                mainCamera !== undefined &&
+                currentCameras !== undefined &&
+                item === mainCamera
+              } // Disable only if mainCamera exists and cameras are filtered
               onCheckedChange={(isChecked) => {
+                if (
+                  mainCamera !== undefined && // Only enforce if mainCamera is defined
+                  item === mainCamera &&
+                  !isChecked &&
+                  currentCameras !== undefined
+                ) {
+                  return; // Prevent deselecting mainCamera when filtered and mainCamera is defined
+                }
                 if (isChecked) {
                   const updatedCameras = currentCameras
                     ? [...currentCameras]
-                    : [];
-                  updatedCameras.push(item);
+                    : mainCamera !== undefined && item !== mainCamera // If mainCamera exists and this isn’t it
+                      ? [mainCamera] // Start with mainCamera when transitioning from undefined
+                      : []; // Otherwise start empty
+                  if (!updatedCameras.includes(item)) {
+                    updatedCameras.push(item);
+                  }
                   setCurrentCameras(updatedCameras);
                 } else {
                   const updatedCameras = currentCameras
@@ -138,6 +225,7 @@ export function CamerasFilterButton({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
+          aria-label="Apply"
           variant="select"
           disabled={currentCameras?.length === 0}
           onClick={() => {
@@ -148,6 +236,7 @@ export function CamerasFilterButton({
           Apply
         </Button>
         <Button
+          aria-label="Reset"
           onClick={() => {
             setCurrentCameras(undefined);
             updateCameraFilter(undefined);
@@ -157,41 +246,5 @@ export function CamerasFilterButton({
         </Button>
       </div>
     </>
-  );
-
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentCameras(selectedCameras);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <DropdownMenu
-      modal={false}
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          setCurrentCameras(selectedCameras);
-        }
-        setOpen(open);
-      }}
-    >
-      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent>{content}</DropdownMenuContent>
-    </DropdownMenu>
   );
 }

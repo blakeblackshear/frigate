@@ -37,6 +37,7 @@ import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type MasksAndZoneViewProps = {
   selectedCamera: string;
@@ -61,6 +62,8 @@ export default function MasksAndZonesView({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
+  const [activeLine, setActiveLine] = useState<number | undefined>();
+  const [snapPoints, setSnapPoints] = useState(false);
 
   const { addMessage } = useContext(StatusBarMessagesContext)!;
 
@@ -141,7 +144,7 @@ export default function MasksAndZonesView({
     }
   }, [scaledHeight, aspectRatio]);
 
-  const handleNewPolygon = (type: PolygonType) => {
+  const handleNewPolygon = (type: PolygonType, coordinates?: number[][]) => {
     if (!cameraConfig) {
       return;
     }
@@ -160,8 +163,9 @@ export default function MasksAndZonesView({
     setEditingPolygons([
       ...(allPolygons || []),
       {
-        points: [],
-        isFinished: false,
+        points: coordinates ?? [],
+        distances: [],
+        isFinished: coordinates ? true : false,
         type,
         typeIndex: 9999,
         name: "",
@@ -238,6 +242,8 @@ export default function MasksAndZonesView({
             scaledWidth,
             scaledHeight,
           ),
+          distances:
+            zoneData.distances?.map((distance) => parseFloat(distance)) ?? [],
           isFinished: true,
           color: zoneData.color,
         }),
@@ -267,6 +273,7 @@ export default function MasksAndZonesView({
           scaledWidth,
           scaledHeight,
         ),
+        distances: [],
         isFinished: true,
         color: [0, 0, 255],
       }));
@@ -290,6 +297,7 @@ export default function MasksAndZonesView({
           scaledWidth,
           scaledHeight,
         ),
+        distances: [],
         isFinished: true,
         color: [128, 128, 128],
       }));
@@ -316,6 +324,7 @@ export default function MasksAndZonesView({
                 scaledWidth,
                 scaledHeight,
               ),
+              distances: [],
               isFinished: true,
               color: [128, 128, 128],
             };
@@ -366,6 +375,48 @@ export default function MasksAndZonesView({
     }
   }, [selectedCamera]);
 
+  useSearchEffect("object_mask", (coordinates: string) => {
+    if (!scaledWidth || !scaledHeight || isLoading) {
+      return false;
+    }
+    // convert box points string to points array
+    const points = coordinates.split(",").map((p) => parseFloat(p));
+
+    const [x1, y1, w, h] = points;
+
+    // bottom center
+    const centerX = x1 + w / 2;
+    const bottomY = y1 + h;
+
+    const centerXAbs = centerX * scaledWidth;
+    const bottomYAbs = bottomY * scaledHeight;
+
+    // padding and clamp
+    const minPadding = 0.1 * w * scaledWidth;
+    const maxPadding = 0.3 * w * scaledWidth;
+    const padding = Math.min(
+      Math.max(minPadding, 0.15 * w * scaledWidth),
+      maxPadding,
+    );
+
+    const top = Math.max(0, bottomYAbs - padding);
+    const bottom = Math.min(scaledHeight, bottomYAbs + padding);
+    const left = Math.max(0, centerXAbs - padding);
+    const right = Math.min(scaledWidth, centerXAbs + padding);
+
+    const paddedBox = [
+      [left, top],
+      [right, top],
+      [right, bottom],
+      [left, bottom],
+    ];
+
+    setEditPane("object_mask");
+    setActivePolygonIndex(undefined);
+    handleNewPolygon("object_mask", paddedBox);
+    return true;
+  });
+
   useEffect(() => {
     document.title = "Mask and Zone Editor - Frigate";
   }, []);
@@ -391,6 +442,9 @@ export default function MasksAndZonesView({
                 setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
+                setActiveLine={setActiveLine}
+                snapPoints={snapPoints}
+                setSnapPoints={setSnapPoints}
               />
             )}
             {editPane == "motion_mask" && (
@@ -404,6 +458,8 @@ export default function MasksAndZonesView({
                 setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
+                snapPoints={snapPoints}
+                setSnapPoints={setSnapPoints}
               />
             )}
             {editPane == "object_mask" && (
@@ -417,6 +473,8 @@ export default function MasksAndZonesView({
                 setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
+                snapPoints={snapPoints}
+                setSnapPoints={setSnapPoints}
               />
             )}
             {editPane === undefined && (
@@ -459,6 +517,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                              aria-label="Add a new zone"
                               onClick={() => {
                                 setEditPane("zone");
                                 handleNewPolygon("zone");
@@ -527,6 +586,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                              aria-label="Add a new motion mask"
                               onClick={() => {
                                 setEditPane("motion_mask");
                                 handleNewPolygon("motion_mask");
@@ -596,6 +656,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
+                              aria-label="Add a new object mask"
                               onClick={() => {
                                 setEditPane("object_mask");
                                 handleNewPolygon("object_mask");
@@ -650,6 +711,8 @@ export default function MasksAndZonesView({
                   activePolygonIndex={activePolygonIndex}
                   hoveredPolygonIndex={hoveredPolygonIndex}
                   selectedZoneMask={selectedZoneMask}
+                  activeLine={activeLine}
+                  snapPoints={true}
                 />
               ) : (
                 <Skeleton className="size-full" />

@@ -6,6 +6,7 @@ const SEARCH_FILTERS = [
   "zone",
   "sub",
   "source",
+  "sort",
 ] as const;
 export type SearchFilters = (typeof SEARCH_FILTERS)[number];
 export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
@@ -16,9 +17,17 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
   "zone",
   "sub",
   "source",
+  "sort",
 ];
 
 export type SearchSource = "similarity" | "thumbnail" | "description";
+
+export type SearchSortType =
+  | "date_asc"
+  | "date_desc"
+  | "score_asc"
+  | "score_desc"
+  | "relevance";
 
 export type SearchResult = {
   id: string;
@@ -35,6 +44,7 @@ export type SearchResult = {
   zones: string[];
   search_source: SearchSource;
   search_distance: number;
+  top_score: number; // for old events
   data: {
     top_score: number;
     score: number;
@@ -45,6 +55,9 @@ export type SearchResult = {
     ratio: number;
     type: "object" | "audio" | "manual";
     description?: string;
+    average_estimated_speed: number;
+    velocity_angle: number;
+    path_data: [number[], number][];
   };
 };
 
@@ -56,9 +69,17 @@ export type SearchFilter = {
   zones?: string[];
   before?: number;
   after?: number;
+  min_score?: number;
+  max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
+  has_snapshot?: number;
+  has_clip?: number;
+  is_submitted?: number;
   time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;
+  sort?: SearchSortType;
 };
 
 export const DEFAULT_TIME_RANGE_AFTER = "00:00";
@@ -71,6 +92,10 @@ export type SearchQueryParams = {
   zones?: string[];
   before?: string;
   after?: string;
+  min_score?: number;
+  max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
   search_type?: string;
   limit?: number;
   in_progress?: number;
@@ -78,6 +103,7 @@ export type SearchQueryParams = {
   query?: string;
   page?: number;
   time_range?: string;
+  sort?: SearchSortType;
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;

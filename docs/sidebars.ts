@@ -26,16 +26,18 @@ const sidebars: SidebarsConfig = {
         {
           type: 'link',
           label: 'Go2RTC Configuration Reference',
-          href: 'https://github.com/AlexxIT/go2rtc/tree/v1.9.4#configuration',
+          href: 'https://github.com/AlexxIT/go2rtc/tree/v1.9.2#configuration',
         } as PropSidebarItemLink,
       ],
       Detectors: [
         'configuration/object_detectors',
         'configuration/audio_detectors',
       ],
-      'Semantic Search': [
+      Classifiers: [
         'configuration/semantic_search',
         'configuration/genai',
+        'configuration/face_recognition',
+        'configuration/license_plate_recognition',
       ],
       Cameras: [
         'configuration/cameras',
@@ -82,6 +84,7 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       'integrations/mqtt',
+      'configuration/metrics',
       'integrations/third_party_extensions',
     ],
     'Frigate+': [

@@ -5,7 +5,7 @@ from typing import Any, Callable
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-from frigate.comms.dispatcher import Communicator
+from frigate.comms.base_communicator import Communicator
 from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         self.mqtt_config = config.mqtt
-        self.connected: bool = False
+        self.connected = False
 
     def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -27,11 +27,14 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         if not self.connected:
-            logger.error(f"Unable to publish to {topic}: client is not connected")
+            logger.debug(f"Unable to publish to {topic}: client is not connected")
             return
 
         self.client.publish(
-            f"{self.mqtt_config.topic_prefix}/{topic}", payload, retain=retain
+            f"{self.mqtt_config.topic_prefix}/{topic}",
+            payload,
+            qos=self.config.mqtt.qos,
+            retain=retain,
         )
 
     def stop(self) -> None:
@@ -40,6 +43,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
         for camera_name, camera in self.config.cameras.items():
+            self.publish(
+                f"{camera_name}/enabled/state",
+                "ON" if camera.enabled_in_config else "OFF",
+                retain=True,
+            )
             self.publish(
                 f"{camera_name}/recordings/state",
                 "ON" if camera.record.enabled_in_config else "OFF",
@@ -104,6 +112,16 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 ),
                 retain=True,
             )
+            self.publish(
+                f"{camera_name}/review_alerts/state",
+                "ON" if camera.review.alerts.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/review_detections/state",
+                "ON" if camera.review.detections.enabled_in_config else "OFF",
+                retain=True,
+            )
 
         if self.config.notifications.enabled_in_config:
             self.publish(
@@ -133,7 +151,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         """Mqtt connection callback."""
         threading.current_thread().name = "mqtt"
         if reason_code != 0:
-            if reason_code == "Server Unavailable":
+            if reason_code == "Server unavailable":
                 logger.error(
                     "Unable to connect to MQTT server: MQTT Server unavailable"
                 )
@@ -151,7 +169,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         self.connected = True
         logger.debug("MQTT connected")
-        client.subscribe(f"{self.mqtt_config.topic_prefix}/#")
+        client.subscribe(f"{self.mqtt_config.topic_prefix}/#", qos=self.config.mqtt.qos)
         self._set_initial_topics()
 
     def _on_disconnect(
@@ -173,6 +191,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             client_id=self.mqtt_config.client_id,
         )
         self.client.on_connect = self._on_connect
+        self.client.on_disconnect = self._on_disconnect
         self.client.will_set(
             self.mqtt_config.topic_prefix + "/available",
             payload="offline",
@@ -182,6 +201,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         # register callbacks
         callback_types = [
+            "enabled",
             "recordings",
             "snapshots",
             "detect",
@@ -197,14 +217,6 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         for name in self.config.cameras.keys():
             for callback in callback_types:
-                # We need to pre-clear existing set topics because in previous
-                # versions the webUI retained on the /set topic but this is
-                # no longer the case.
-                self.client.publish(
-                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
-                    None,
-                    retain=True,
-                )
                 self.client.message_callback_add(
                     f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
                     self.on_mqtt_command,

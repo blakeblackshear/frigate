@@ -3,7 +3,7 @@ id: improving_model
 title: Improving your model
 ---
 
-You may find that Frigate+ models result in more false positives initially, but by submitting true and false positives, the model will improve. Because a limited number of users submitted images to Frigate+ prior to this launch, you may need to submit several hundred images per camera to see good results. With all the new images now being submitted, future base models will improve as more and more users (including you) submit examples to Frigate+. Note that only verified images will be used when training your model. Submitting an image from Frigate as a true or false positive will not verify the image. You still must verify the image in Frigate+ in order for it to be used in training.
+You may find that Frigate+ models result in more false positives initially, but by submitting true and false positives, the model will improve. With all the new images now being submitted by subscribers, future base models will improve as more and more examples are incorporated. Note that only images with at least one verified label will be used when training your model. Submitting an image from Frigate as a true or false positive will not verify the image. You still must verify the image in Frigate+ in order for it to be used in training.
 
 - **Submit both true positives and false positives**. This will help the model differentiate between what is and isn't correct. You should aim for a target of 80% true positive submissions and 20% false positives across all of your images. If you are experiencing false positives in a specific area, submitting true positives for any object type near that area in similar lighting conditions will help teach the model what that area looks like when no objects are present.
 - **Lower your thresholds a little in order to generate more false/true positives near the threshold value**. For example, if you have some false positives that are scoring at 68% and some true positives scoring at 72%, you can try lowering your threshold to 65% and submitting both true and false positives within that range. This will help the model learn and widen the gap between true and false positive scores.
@@ -13,7 +13,7 @@ You may find that Frigate+ models result in more false positives initially, but 
 
 For the best results, follow the following guidelines.
 
-**Label every object in the image**: It is important that you label all objects in each image before verifying. If you don't label a car for example, the model will be taught that part of the image is _not_ a car and it will start to get confused.
+**Label every object in the image**: It is important that you label all objects in each image before verifying. If you don't label a car for example, the model will be taught that part of the image is _not_ a car and it will start to get confused. You can exclude labels that you don't want detected on any of your cameras.
 
 **Make tight bounding boxes**: Tighter bounding boxes improve the recognition and ensure that accurate bounding boxes are predicted at runtime.
 
@@ -21,7 +21,7 @@ For the best results, follow the following guidelines.
 
 **Label objects hard to identify as difficult**: When objects are truly difficult to make out, such as a car barely visible through a bush, or a dog that is hard to distinguish from the background at night, flag it as 'difficult'. This is not used in the model training as of now, but will in the future.
 
-**`amazon`, `ups`, and `fedex` should label the logo**: For a Fedex truck, label the truck as a `car` and make a different bounding box just for the Fedex logo. If there are multiple logos, label each of them.
+**Delivery logos such as `amazon`, `ups`, and `fedex` should label the logo**: For a Fedex truck, label the truck as a `car` and make a different bounding box just for the Fedex logo. If there are multiple logos, label each of them.
 
 ![Fedex Logo](/img/plus/fedex-logo.jpg)
 
@@ -36,18 +36,17 @@ Misidentified objects should have a correct label added. For example, if a perso
 
 ## Shortcuts for a faster workflow
 
-|Shortcut Key|Description|
-|-----|--------|
-|`?`|Show all keyboard shortcuts|
-|`w`|Add box|
-|`d`|Toggle difficult|
-|`s`|Switch to the next label|
-|`tab`|Select next largest box|
-|`del`|Delete current box|
-|`esc`|Deselect/Cancel|
-|`← ↑ → ↓`|Move box|
-|`Shift + ← ↑ → ↓`|Resize box|
-|`-`|Zoom out|
-|`=`|Zoom in|
-|`f`|Hide/show all but current box|
-|`spacebar`|Verify and save|
+| Shortcut Key      | Description                   |
+| ----------------- | ----------------------------- |
+| `?`               | Show all keyboard shortcuts   |
+| `w`               | Add box                       |
+| `d`               | Toggle difficult              |
+| `s`               | Switch to the next label      |
+| `tab`             | Select next largest box       |
+| `del`             | Delete current box            |
+| `esc`             | Deselect/Cancel               |
+| `← ↑ → ↓`         | Move box                      |
+| `Shift + ← ↑ → ↓` | Resize box                    |
+| `scrollwheel`     | Zoom in/out                   |
+| `f`               | Hide/show all but current box |
+| `spacebar`        | Verify and save               |

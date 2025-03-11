@@ -1,5 +1,6 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
@@ -42,12 +43,14 @@ export function CameraLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      const date = new Date(updateTimes[Math.round(val as number)] * 1000);
-      return date.toLocaleTimeString([], {
-        hour12: config?.ui.time_format != "24hour",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.round(val as number)],
+        {
+          timezone: config?.ui.timezone,
+          strftime_fmt:
+            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+        },
+      );
     },
     [config, updateTimes],
   );

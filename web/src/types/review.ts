@@ -42,14 +42,16 @@ type ReviewSummaryDay = {
   day: string;
   reviewed_alert: number;
   reviewed_detection: number;
-  reviewed_motion: number;
   total_alert: number;
   total_detection: number;
-  total_motion: number;
 };
 
 export type ReviewSummary = {
   [day: string]: ReviewSummaryDay;
+};
+
+export type RecordingsSummary = {
+  [day: string]: boolean;
 };
 
 export type MotionData = {
@@ -62,3 +64,12 @@ export type MotionData = {
 export const REVIEW_PADDING = 4;
 
 export type ReviewDetailPaneType = "overview" | "details";
+
+export type ConsolidatedSegmentData = {
+  startTime: number;
+  endTime: number;
+  severity: ReviewSeverity | "empty";
+  reviewed: boolean;
+};
+
+export type TimelineZoomDirection = "in" | "out" | null;

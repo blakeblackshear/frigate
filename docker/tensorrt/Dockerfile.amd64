@@ -3,37 +3,17 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Make this a separate target so it can be built/cached optionally
-FROM wheels as trt-wheels
-ARG DEBIAN_FRONTEND
-ARG TARGETARCH
-
-# Add TensorRT wheels to another folder
-COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
-RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
-
-# Build CuDNN
-FROM wget AS cudnn-deps
-
-ARG COMPUTE_LEVEL
-
-RUN apt-get update \
-    && apt-get install -y git build-essential
-
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.1-1_all.deb \
-&& dpkg -i cuda-keyring_1.1-1_all.deb \
-&& apt-get update \
-&& apt-get -y install cuda-toolkit \
-&& rm -rf /var/lib/apt/lists/*
+# Globally set pip break-system-packages option to avoid having to specify it every time
+ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
 FROM tensorrt-base AS frigate-tensorrt
-ENV TRT_VER=8.5.3
-RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl && \
-    ldconfig
-COPY --from=cudnn-deps /usr/local/cuda-12.6 /usr/local/cuda
+ARG PIP_BREAK_SYSTEM_PACKAGES
+ENV TRT_VER=8.6.1
 
-ENV LD_LIBRARY_PATH=/usr/local/lib/python3.9/dist-packages/tensorrt:/usr/local/cuda/lib64:/usr/local/lib/python3.9/dist-packages/nvidia/cufft/lib
+# Install TensorRT wheels
+COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
+RUN pip3 install -U -r /requirements-tensorrt.txt && ldconfig
+
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
@@ -42,7 +22,7 @@ FROM devcontainer AS devcontainer-trt
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY --from=cudnn-deps /usr/local/cuda-12.6 /usr/local/cuda
+COPY --from=trt-deps /usr/local/cuda-12.1 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \

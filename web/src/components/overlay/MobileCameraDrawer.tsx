@@ -23,7 +23,11 @@ export default function MobileCameraDrawer({
   return (
     <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
       <DrawerTrigger asChild>
-        <Button className="rounded-lg capitalize" size="sm">
+        <Button
+          className="rounded-lg capitalize"
+          aria-label="Cameras"
+          size="sm"
+        >
           <FaVideo className="text-secondary-foreground" />
         </Button>
       </DrawerTrigger>

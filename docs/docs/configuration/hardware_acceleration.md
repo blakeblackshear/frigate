@@ -175,6 +175,16 @@ For more information on the various values across different distributions, see h
 
 Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=2 >> /etc/sysctl.d/local.conf'`
 
+#### Stats for SR-IOV devices
+
+When using virtualized GPUs via SR-IOV, additional args are needed for GPU stats to function. This can be enabled with the following config:
+
+```yaml
+telemetry:
+  stats:
+    sriov: True
+```
+
 ## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
@@ -231,28 +241,11 @@ docker run -d \
 
 ### Setup Decoder
 
-The decoder you need to pass in the `hwaccel_args` will depend on the input video.
-
-A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the container to get the ones your card supports)
-
-```
- V..... h263_cuvid           Nvidia CUVID H263 decoder (codec h263)
- V..... h264_cuvid           Nvidia CUVID H264 decoder (codec h264)
- V..... hevc_cuvid           Nvidia CUVID HEVC decoder (codec hevc)
- V..... mjpeg_cuvid          Nvidia CUVID MJPEG decoder (codec mjpeg)
- V..... mpeg1_cuvid          Nvidia CUVID MPEG1VIDEO decoder (codec mpeg1video)
- V..... mpeg2_cuvid          Nvidia CUVID MPEG2VIDEO decoder (codec mpeg2video)
- V..... mpeg4_cuvid          Nvidia CUVID MPEG4 decoder (codec mpeg4)
- V..... vc1_cuvid            Nvidia CUVID VC1 decoder (codec vc1)
- V..... vp8_cuvid            Nvidia CUVID VP8 decoder (codec vp8)
- V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
-```
-
-For example, for H264 video, you'll select `preset-nvidia-h264`.
+Using `preset-nvidia` ffmpeg will automatically select the necessary profile for the incoming video, and will log an error if the profile is not supported by your GPU.
 
 ```yaml
 ffmpeg:
-  hwaccel_args: preset-nvidia-h264
+  hwaccel_args: preset-nvidia
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
@@ -302,10 +295,8 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 ## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano\*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
 
 A separate set of docker images is available that is based on Jetpack/L4T. They come with an `ffmpeg` build
-with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 4.6, use the
-`stable-tensorrt-jp4` tagged image, or if your Jetson host is running Jetpack 5.0+, use the `stable-tensorrt-jp5`
-tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform,
-but the image will still allow hardware decoding and tensorrt object detection.
+with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 5.0+ use the `stable-tensorrt-jp5`
+tagged image, or if your Jetson host is running Jetpack 6.0+ use the `stable-tensorrt-jp6` tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform, but the image will still allow hardware decoding and tensorrt object detection.
 
 You will need to use the image with the nvidia container runtime:
 

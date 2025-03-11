@@ -3,8 +3,10 @@
 import datetime
 import logging
 import subprocess as sp
+import threading
 from abc import ABC, abstractmethod
-from multiprocessing import shared_memory
+from multiprocessing import resource_tracker as _mprt
+from multiprocessing import shared_memory as _mpshm
 from string import printable
 from typing import AnyStr, Optional
 
@@ -34,6 +36,72 @@ def transliterate_to_latin(text: str) -> str:
         'fregate'
     """
     return unidecode(text)
+
+
+def on_edge(box, frame_shape):
+    if (
+        box[0] == 0
+        or box[1] == 0
+        or box[2] == frame_shape[1] - 1
+        or box[3] == frame_shape[0] - 1
+    ):
+        return True
+
+
+def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
+    max_new_attr = max(
+        [0]
+        + [area(a["box"]) for a in new_obj["attributes"] if a["label"] == attr_label]
+    )
+    max_current_attr = max(
+        [0]
+        + [
+            area(a["box"])
+            for a in current_thumb["attributes"]
+            if a["label"] == attr_label
+        ]
+    )
+
+    # if the thumb has a higher scoring attr
+    return max_new_attr > max_current_attr
+
+
+def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
+    # larger is better
+    # cutoff images are less ideal, but they should also be smaller?
+    # better scores are obviously better too
+
+    # check face on person
+    if label == "person":
+        if has_better_attr(current_thumb, new_obj, "face"):
+            return True
+        # if the current thumb has a face attr, dont update unless it gets better
+        if any([a["label"] == "face" for a in current_thumb["attributes"]]):
+            return False
+
+    # check license_plate on car
+    if label == "car":
+        if has_better_attr(current_thumb, new_obj, "license_plate"):
+            return True
+        # if the current thumb has a license_plate attr, dont update unless it gets better
+        if any([a["label"] == "license_plate" for a in current_thumb["attributes"]]):
+            return False
+
+    # if the new_thumb is on an edge, and the current thumb is not
+    if on_edge(new_obj["box"], frame_shape) and not on_edge(
+        current_thumb["box"], frame_shape
+    ):
+        return False
+
+    # if the score is better by more than 5%
+    if new_obj["score"] > current_thumb["score"] + 0.05:
+        return True
+
+    # if the area is 10% larger
+    if new_obj["area"] > current_thumb["area"] * 1.1:
+        return True
+
+    return False
 
 
 def draw_timestamp(
@@ -151,19 +219,35 @@ def draw_box_with_label(
     text_width = size[0][0]
     text_height = size[0][1]
     line_height = text_height + size[1]
+    # get frame height
+    frame_height = frame.shape[0]
     # set the text start position
     if position == "ul":
         text_offset_x = x_min
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "ur":
-        text_offset_x = x_max - (text_width + 8)
-        text_offset_y = 0 if y_min < line_height else y_min - (line_height + 8)
+        text_offset_x = max(0, x_max - (text_width + 8))
+        text_offset_y = max(0, y_min - (line_height + 8))
     elif position == "bl":
         text_offset_x = x_min
-        text_offset_y = y_max
+        text_offset_y = min(frame_height - line_height, y_max)
     elif position == "br":
-        text_offset_x = x_max - (text_width + 8)
-        text_offset_y = y_max
+        text_offset_x = max(0, x_max - (text_width + 8))
+        text_offset_y = min(frame_height - line_height, y_max)
+    # Adjust position if it overlaps with the box or goes out of frame
+    if position in {"ul", "ur"}:
+        if text_offset_y < y_min + thickness:  # Label overlaps with the box
+            if y_min - (line_height + 8) < 0 and y_max + line_height <= frame_height:
+                # Not enough space above, and there is space below
+                text_offset_y = y_max
+            elif y_min - (line_height + 8) >= 0:
+                # Enough space above, keep the label at the top
+                text_offset_y = max(0, y_min - (line_height + 8))
+    elif position in {"bl", "br"}:
+        if text_offset_y + line_height > frame_height:
+            # If there's not enough space below, try above the box
+            text_offset_y = max(0, y_min - (line_height + 8))
+
     # make the coords of the box with a small padding of two pixels
     textbox_coords = (
         (text_offset_x, text_offset_y),
@@ -548,6 +632,22 @@ def copy_yuv_to_position(
         )
 
 
+def get_blank_yuv_frame(width: int, height: int) -> np.ndarray:
+    """Creates a black YUV 4:2:0 frame."""
+    yuv_height = height * 3 // 2
+    yuv_frame = np.zeros((yuv_height, width), dtype=np.uint8)
+
+    uv_height = height // 2
+
+    # The U and V planes are stored after the Y plane.
+    u_start = height  # U plane starts right after Y plane
+    v_start = u_start + uv_height // 2  # V plane starts after U plane
+    yuv_frame[u_start : u_start + uv_height, :width] = 128
+    yuv_frame[v_start : v_start + uv_height, :width] = 128
+
+    return yuv_frame
+
+
 def yuv_region_2_yuv(frame, region):
     try:
         # TODO: does this copy the numpy array?
@@ -649,57 +749,109 @@ def clipped(obj, frame_shape):
 
 class FrameManager(ABC):
     @abstractmethod
-    def create(self, name, size) -> AnyStr:
+    def create(self, name: str, size: int) -> AnyStr:
         pass
 
     @abstractmethod
-    def get(self, name, timeout_ms=0):
+    def write(self, name: str) -> memoryview:
         pass
 
     @abstractmethod
-    def close(self, name):
+    def get(self, name: str, timeout_ms: int = 0):
         pass
 
     @abstractmethod
-    def delete(self, name):
+    def close(self, name: str):
+        pass
+
+    @abstractmethod
+    def delete(self, name: str):
+        pass
+
+    @abstractmethod
+    def cleanup(self):
         pass
 
 
-class DictFrameManager(FrameManager):
-    def __init__(self):
-        self.frames = {}
+class UntrackedSharedMemory(_mpshm.SharedMemory):
+    # https://github.com/python/cpython/issues/82300#issuecomment-2169035092
 
-    def create(self, name, size) -> AnyStr:
-        mem = bytearray(size)
-        self.frames[name] = mem
-        return mem
+    __lock = threading.Lock()
 
-    def get(self, name, shape):
-        mem = self.frames[name]
-        return np.ndarray(shape, dtype=np.uint8, buffer=mem)
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        create: bool = False,
+        size: int = 0,
+        *,
+        track: bool = False,
+    ) -> None:
+        self._track = track
 
-    def close(self, name):
-        pass
+        # if tracking, normal init will suffice
+        if track:
+            return super().__init__(name=name, create=create, size=size)
 
-    def delete(self, name):
-        del self.frames[name]
+        # lock so that other threads don't attempt to use the
+        # register function during this time
+        with self.__lock:
+            # temporarily disable registration during initialization
+            orig_register = _mprt.register
+            _mprt.register = self.__tmp_register
+
+            # initialize; ensure original register function is
+            # re-instated
+            try:
+                super().__init__(name=name, create=create, size=size)
+            finally:
+                _mprt.register = orig_register
+
+    @staticmethod
+    def __tmp_register(*args, **kwargs) -> None:
+        return
+
+    def unlink(self) -> None:
+        if _mpshm._USE_POSIX and self._name:
+            _mpshm._posixshmem.shm_unlink(self._name)
+            if self._track:
+                _mprt.unregister(self._name, "shared_memory")
 
 
 class SharedMemoryFrameManager(FrameManager):
     def __init__(self):
-        self.shm_store: dict[str, shared_memory.SharedMemory] = {}
+        self.shm_store: dict[str, UntrackedSharedMemory] = {}
 
     def create(self, name: str, size) -> AnyStr:
-        shm = shared_memory.SharedMemory(name=name, create=True, size=size)
+        try:
+            shm = UntrackedSharedMemory(
+                name=name,
+                create=True,
+                size=size,
+            )
+        except FileExistsError:
+            shm = UntrackedSharedMemory(name=name)
+
         self.shm_store[name] = shm
         return shm.buf
+
+    def write(self, name: str) -> memoryview:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+            return shm.buf
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return None
 
     def get(self, name: str, shape) -> Optional[np.ndarray]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
             else:
-                shm = shared_memory.SharedMemory(name=name)
+                shm = UntrackedSharedMemory(name=name)
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
@@ -722,8 +874,17 @@ class SharedMemoryFrameManager(FrameManager):
             del self.shm_store[name]
         else:
             try:
-                shm = shared_memory.SharedMemory(name=name)
+                shm = UntrackedSharedMemory(name=name)
                 shm.close()
+                shm.unlink()
+            except FileNotFoundError:
+                pass
+
+    def cleanup(self) -> None:
+        for shm in self.shm_store.values():
+            shm.close()
+
+            try:
                 shm.unlink()
             except FileNotFoundError:
                 pass
@@ -804,3 +965,32 @@ def get_image_from_recording(
         return process.stdout
     else:
         return None
+
+
+def get_histogram(image, x_min, y_min, x_max, y_max):
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
+    image_bgr = image_bgr[y_min:y_max, x_min:x_max]
+
+    hist = cv2.calcHist(
+        [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]
+    )
+    return cv2.normalize(hist, hist).flatten()
+
+
+def ensure_jpeg_bytes(image_data):
+    """Ensure image data is jpeg bytes for genai"""
+    try:
+        img_array = np.frombuffer(image_data, dtype=np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+        if img is None:
+            return image_data
+
+        success, encoded_img = cv2.imencode(".jpg", img)
+
+        if success:
+            return encoded_img.tobytes()
+    except Exception as e:
+        logger.warning(f"Error when converting thumbnail to jpeg for genai: {e}")
+
+    return image_data
