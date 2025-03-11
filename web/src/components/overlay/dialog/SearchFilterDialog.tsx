@@ -558,8 +558,8 @@ export function SpeedFilterContent({
         {t("estimatedSpeed", {
           unit:
             config?.ui.unit_system == "metric"
-              ? t("unit.speed.kph")
-              : t("unit.speed.mph"),
+              ? t("unit.speed.kph", { ns: "common" })
+              : t("unit.speed.mph", { ns: "common" }),
         })}
       </div>
       <div className="flex items-center gap-1">
