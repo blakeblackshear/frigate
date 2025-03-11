@@ -10,7 +10,7 @@ slowapi == 0.1.*
 imutils == 0.5.*
 joserfc == 1.0.*
 pathvalidate == 3.2.*
-markupsafe == 2.1.*
+markupsafe == 3.0.*
 python-multipart == 0.0.12
 # General
 mypy == 1.6.1
