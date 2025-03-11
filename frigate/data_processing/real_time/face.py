@@ -192,6 +192,22 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
         )
 
+    def __get_blur_factor(self, input: np.ndarray) -> float:
+        """Calculates the factor for the confidence based on the blur of the image."""
+        if not self.face_config.blur_confidence_filter:
+            return 1.0
+
+        variance = cv2.Laplacian(input, cv2.CV_64F).var()
+
+        if variance < 60:  # image is very blurry
+            return 0.96
+        elif variance < 70:  # image moderately blurry
+            return 0.98
+        elif variance < 80:  # image is slightly blurry
+            return 0.99
+        else:
+            return 1.0
+
     def __clear_classifier(self) -> None:
         self.face_recognizer = None
         self.label_map = {}
@@ -232,14 +248,21 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if not self.recognizer:
                 return None
 
+        # face recognition is best run on grayscale images
         img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+
+        # get blur factor before aligning face
+        blur_factor = self.__get_blur_factor(img)
+        logger.debug(f"face detected with bluriness {blur_factor}")
+
+        # align face and run recognition
         img = self.__align_face(img, img.shape[1], img.shape[0])
         index, distance = self.recognizer.predict(img)
 
         if index == -1:
             return None
 
-        score = 1.0 - (distance / 1000)
+        score = (1.0 - (distance / 1000)) * blur_factor
         return self.label_map[index], round(score, 2)
 
     def __update_metrics(self, duration: float) -> None:
