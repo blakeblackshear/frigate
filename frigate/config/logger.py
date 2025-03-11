@@ -37,3 +37,5 @@ class LoggerConfig(FrigateBaseModel):
 
             for log, level in log_levels.items():
                 logging.getLogger(log).setLevel(level.value.upper())
+
+        return self
