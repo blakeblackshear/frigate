@@ -12,31 +12,21 @@ import cv2
 try:
     from hailo_platform import (
         HEF,
-        ConfigureParams,
         FormatType,
-        HailoRTException,
-        HailoStreamInterface,
-        InputVStreamParams,
-        OutputVStreamParams,
         VDevice,
         HailoSchedulingAlgorithm,
     )
 except ModuleNotFoundError:
     pass
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
-    ModelTypeEnum,
-    InputTensorEnum,
-    PixelFormatEnum,
-    InputDTypeEnum,
 )
-from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger(__name__)
 
