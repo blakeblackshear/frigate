@@ -253,6 +253,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         # get blur factor before aligning face
         blur_factor = self.__get_blur_factor(img)
+        logger.debug(f"face detected with bluriness {blur_factor}")
 
         # align face and run recognition
         img = self.__align_face(img, img.shape[1], img.shape[0])
