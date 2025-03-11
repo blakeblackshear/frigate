@@ -1,20 +1,21 @@
 import logging
 import os
-import subprocess
-import urllib.request
-import numpy as np
 import queue
+import subprocess
 import threading
+import urllib.request
 from functools import partial
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List, Optional, Tuple
+
 import cv2
+import numpy as np
 
 try:
     from hailo_platform import (
         HEF,
         FormatType,
-        VDevice,
         HailoSchedulingAlgorithm,
+        VDevice,
     )
 except ModuleNotFoundError:
     pass
