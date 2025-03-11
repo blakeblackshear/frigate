@@ -3,6 +3,8 @@
 import datetime
 import logging
 import os
+import random
+import string
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
@@ -43,9 +45,8 @@ from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
-from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.object_processing import TrackedObject, TrackedObjectProcessor
+from frigate.track.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -1201,6 +1202,22 @@ def create_event(
             content=({"success": False, "message": f"{label} must be set."}),
             status_code=404,
         )
+
+    now = datetime.datetime.now().timestamp()
+    rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    event_id = f"{now}-{rand_id}"
+
+    (
+        camera_name,
+        label,
+        event_id,
+        body.include_recording,
+        body.score,
+        body.sub_label,
+        body.duration,
+        body.source_type,
+        body.draw,
+    )
 
     try:
         frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor

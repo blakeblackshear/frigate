@@ -57,7 +57,7 @@ from frigate.models import (
     User,
 )
 from frigate.object_detection import ObjectDetectProcess
-from frigate.object_processing import TrackedObjectProcessor
+from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.output.output import output_frames
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
