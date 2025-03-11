@@ -46,7 +46,7 @@ from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.track.object_processing import TrackedObject, TrackedObjectProcessor
+from frigate.track.object_processing import TrackedObject
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
