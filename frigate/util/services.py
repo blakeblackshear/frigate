@@ -362,7 +362,7 @@ def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
                     if video_frame is not None:
                         video[key].append(float(video_frame))
 
-        if render["global"]:
+        if render["global"] and video["global"]:
             results["gpu"] = (
                 f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
             )

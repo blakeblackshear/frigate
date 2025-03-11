@@ -255,6 +255,8 @@ ffmpeg:
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
 detect:
+  # Optional: enables detection for the camera (default: shown below)
+  enabled: False
   # Optional: width of the frame for the input with the detect role (default: use native stream resolution)
   width: 1280
   # Optional: height of the frame for the input with the detect role (default: use native stream resolution)
@@ -262,8 +264,6 @@ detect:
   # Optional: desired fps for your camera for the input with the detect role (default: shown below)
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
-  # Optional: enables detection for the camera (default: True)
-  enabled: True
   # Optional: Number of consecutive detection hits required for an object to be initialized in the tracker. (default: 1/2 the frame rate)
   min_initialized: 2
   # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
@@ -813,6 +813,12 @@ cameras:
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
       required_zones: []
+      # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
+      send_triggers:
+        # Once the object is no longer tracked
+        tracked_object_end: True
+        # Optional: After X many significant updates are received (default: shown below)
+        after_significant_updates: None
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
       debug_save_thumbnails: False
 

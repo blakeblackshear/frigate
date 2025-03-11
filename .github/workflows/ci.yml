@@ -175,6 +175,7 @@ jobs:
           files: docker/rocm/rocm.hcl
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
             *.cache-from=type=gha
   arm64_extra_builds:
     runs-on: ubuntu-22.04-arm

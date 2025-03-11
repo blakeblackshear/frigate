@@ -29,7 +29,7 @@ import { MdCircle } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAlertsState, useDetectionsState } from "@/api/ws";
+import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -108,6 +108,8 @@ export default function CameraSettingsView({
   const watchedAlertsZones = form.watch("alerts_zones");
   const watchedDetectionsZones = form.watch("detections_zones");
 
+  const { payload: enabledState, send: sendEnabled } =
+    useEnabledState(selectedCamera);
   const { payload: alertsState, send: sendAlerts } =
     useAlertsState(selectedCamera);
   const { payload: detectionsState, send: sendDetections } =
@@ -169,10 +171,13 @@ export default function CameraSettingsView({
           }
         })
         .catch((error) => {
-          toast.error(
-            `Failed to save config changes: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(`Failed to save config changes: ${errorMessage}`, {
+            position: "top-center",
+          });
         })
         .finally(() => {
           setIsLoading(false);
@@ -251,6 +256,31 @@ export default function CameraSettingsView({
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            Streams
+          </Heading>
+
+          <div className="flex flex-row items-center">
+            <Switch
+              id="camera-enabled"
+              className="mr-3"
+              checked={enabledState === "ON"}
+              onCheckedChange={(isChecked) => {
+                sendEnabled(isChecked ? "ON" : "OFF");
+              }}
+            />
+            <div className="space-y-0.5">
+              <Label htmlFor="camera-enabled">Enable</Label>
+            </div>
+          </div>
+          <div className="mt-3 text-sm text-muted-foreground">
+            Disabling a camera completely stops Frigate's processing of this
+            camera's streams. Detection, recording, and debugging will be
+            unavailable.
+            <br /> <em>Note: This does not disable go2rtc restreams.</em>
+          </div>
+          <Separator className="mb-2 mt-4 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
             Review

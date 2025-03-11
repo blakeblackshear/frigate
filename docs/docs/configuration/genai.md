@@ -5,7 +5,7 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptive text based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate to provide more context about your tracked objects. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
 
-Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle. Descriptions can also be regenerated manually via the Frigate UI.
+Requests for a description are sent off automatically to your AI provider at the end of the tracked object's lifecycle, or can optionally be sent earlier after a number of significantly changed frames, for example in use in more real-time notifications. Descriptions can also be regenerated manually via the Frigate UI. Note that if you are manually entering a description for tracked objects prior to its end, this will be overwritten by the generated response.
 
 ## Configuration
 
@@ -147,6 +147,15 @@ While generating simple descriptions of detected objects is useful, understandin
 ### Using GenAI for notifications
 
 Frigate provides an [MQTT topic](/integrations/mqtt), `frigate/tracked_object_update`, that is updated with a JSON payload containing `event_id` and `description` when your AI provider returns a description for a tracked object. This description could be used directly in notifications, such as sending alerts to your phone or making audio announcements. If additional details from the tracked object are needed, you can query the [HTTP API](/integrations/api/event-events-event-id-get) using the `event_id`, eg: `http://frigate_ip:5000/api/events/<event_id>`.
+
+If looking to get notifications earlier than when an object ceases to be tracked, an additional send trigger can be configured of `after_significant_updates`.
+
+```yaml
+genai:
+  send_triggers:
+    tracked_object_end: true # default
+    after_significant_updates: 3 # how many updates to a tracked object before we should send an image
+```
 
 ## Custom Prompts
 

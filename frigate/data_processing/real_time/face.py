@@ -11,11 +11,14 @@ from typing import Optional
 
 import cv2
 import numpy as np
-import requests
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.config import FrigateConfig
-from frigate.const import FACE_DIR, FRIGATE_LOCALHOST, MODEL_CACHE_DIR
+from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.util.image import area
 
 from ..types import DataProcessorMetrics
@@ -28,9 +31,15 @@ MIN_MATCHING_FACES = 2
 
 
 class FaceRealTimeProcessor(RealTimeProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        sub_label_publisher: EventMetadataPublisher,
+        metrics: DataProcessorMetrics,
+    ):
         super().__init__(config, metrics)
         self.face_config = config.face_recognition
+        self.sub_label_publisher = sub_label_publisher
         self.face_detector: cv2.FaceDetectorYN = None
         self.landmark_detector: cv2.face.FacemarkLBF = None
         self.recognizer: cv2.face.LBPHFaceRecognizer = None
@@ -349,18 +358,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
 
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": sub_label,
-                "subLabelScore": score,
-            },
+        self.sub_label_publisher.publish(
+            EventMetadataTypeEnum.sub_label, (id, sub_label, score)
         )
-
-        if resp.status_code == 200:
-            self.detected_faces[id] = face_score
-
+        self.detected_faces[id] = face_score
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:

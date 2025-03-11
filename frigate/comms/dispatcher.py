@@ -55,6 +55,7 @@ class Dispatcher:
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
             "detect": self._on_detect_command,
+            "enabled": self._on_enabled_command,
             "improve_contrast": self._on_motion_improve_contrast_command,
             "ptz_autotracker": self._on_ptz_autotracker_command,
             "motion": self._on_motion_command,
@@ -167,6 +168,7 @@ class Dispatcher:
             for camera in camera_status.keys():
                 camera_status[camera]["config"] = {
                     "detect": self.config.cameras[camera].detect.enabled,
+                    "enabled": self.config.cameras[camera].enabled,
                     "snapshots": self.config.cameras[camera].snapshots.enabled,
                     "record": self.config.cameras[camera].record.enabled,
                     "audio": self.config.cameras[camera].audio.enabled,
@@ -277,6 +279,27 @@ class Dispatcher:
 
         self.config_updater.publish(f"config/detect/{camera_name}", detect_settings)
         self.publish(f"{camera_name}/detect/state", payload, retain=True)
+
+    def _on_enabled_command(self, camera_name: str, payload: str) -> None:
+        """Callback for camera topic."""
+        camera_settings = self.config.cameras[camera_name]
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].enabled_in_config:
+                logger.error(
+                    "Camera must be enabled in the config to be turned on via MQTT."
+                )
+                return
+            if not camera_settings.enabled:
+                logger.info(f"Turning on camera {camera_name}")
+                camera_settings.enabled = True
+        elif payload == "OFF":
+            if camera_settings.enabled:
+                logger.info(f"Turning off camera {camera_name}")
+                camera_settings.enabled = False
+
+        self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)
+        self.publish(f"{camera_name}/enabled/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
         """Callback for motion topic."""

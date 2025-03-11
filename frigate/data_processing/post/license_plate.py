@@ -8,6 +8,7 @@ import numpy as np
 from peewee import DoesNotExist
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.config import FrigateConfig
 from frigate.data_processing.common.license_plate.mixin import (
     WRITE_DEBUG_IMAGES,
@@ -30,6 +31,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
+        sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
         detected_license_plates: dict[str, dict[str, any]],
@@ -38,6 +40,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.model_runner = model_runner
         self.lpr_config = config.lpr
         self.config = config
+        self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics, model_runner)
 
     def process_data(
