@@ -220,7 +220,7 @@ class AudioEventMaintainer(threading.Thread):
             self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
 
             self.event_metadata_publisher.publish(
-                EventMetadataTypeEnum.manual_event_end,
+                EventMetadataTypeEnum.manual_event_create,
                 (
                     now,
                     self.config.name,
