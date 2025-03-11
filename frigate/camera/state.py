@@ -10,9 +10,6 @@ from typing import Callable
 import cv2
 import numpy as np
 
-from frigate.comms.event_metadata_updater import (
-    EventMetadataTypeEnum,
-)
 from frigate.config import (
     FrigateConfig,
     ZoomingModeEnum,
