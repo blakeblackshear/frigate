@@ -5,10 +5,13 @@ import os
 
 import cv2
 import numpy as np
-import requests
 
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.config import FrigateConfig
-from frigate.const import FRIGATE_LOCALHOST, MODEL_CACHE_DIR
+from frigate.const import MODEL_CACHE_DIR
 from frigate.util.object import calculate_region
 
 from ..types import DataProcessorMetrics
@@ -23,9 +26,15 @@ logger = logging.getLogger(__name__)
 
 
 class BirdRealTimeProcessor(RealTimeProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        sub_label_publisher: EventMetadataPublisher,
+        metrics: DataProcessorMetrics,
+    ):
         super().__init__(config, metrics)
         self.interpreter: Interpreter = None
+        self.sub_label_publisher = sub_label_publisher
         self.tensor_input_details: dict[str, any] = None
         self.tensor_output_details: dict[str, any] = None
         self.detected_birds: dict[str, float] = {}
@@ -134,17 +143,10 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             logger.debug(f"Score {score} is worse than previous score {previous_score}")
             return
 
-        resp = requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{obj_data['id']}/sub_label",
-            json={
-                "camera": obj_data.get("camera"),
-                "subLabel": self.labelmap[best_id],
-                "subLabelScore": score,
-            },
+        self.sub_label_publisher.publish(
+            EventMetadataTypeEnum.sub_label, (id, self.labelmap[best_id], score)
         )
-
-        if resp.status_code == 200:
-            self.detected_birds[obj_data["id"]] = score
+        self.detected_birds[obj_data["id"]] = score
 
     def handle_request(self, topic, request_data):
         return None

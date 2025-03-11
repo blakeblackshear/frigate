@@ -136,7 +136,7 @@ def get_jwt_secret() -> str:
             logger.debug("Using jwt secret from .jwt_secret file in config directory.")
             with open(jwt_secret_file) as f:
                 try:
-                    jwt_secret = f.readline()
+                    jwt_secret = f.readline().strip()
                 except Exception:
                     logger.warning(
                         "Unable to read jwt token from .jwt_secret file in config directory. A new jwt token will be created at each startup."
@@ -259,17 +259,24 @@ def auth(request: Request):
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
         user_header = proxy_config.header_map.user
-        role_header = proxy_config.header_map.get("role", "Remote-Role")
+        role_header = proxy_config.header_map.role
         success_response.headers["remote-user"] = (
             request.headers.get(user_header, default="anonymous")
             if user_header
             else "anonymous"
         )
-        success_response.headers["remote-role"] = (
+        role_header = proxy_config.header_map.role
+        role = (
             request.headers.get(role_header, default="viewer")
             if role_header
             else "viewer"
         )
+
+        # if comma-separated with "admin", use "admin", else "viewer"
+        success_response.headers["remote-role"] = (
+            "admin" if role and "admin" in role else "viewer"
+        )
+
         return success_response
 
     # now apply authentication
@@ -359,14 +366,8 @@ def auth(request: Request):
 @router.get("/profile")
 def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
-    if username != "anonymous":
-        try:
-            user = User.get_by_id(username)
-            role = getattr(user, "role", "viewer")
-        except DoesNotExist:
-            role = "viewer"  # Fallback if user deleted
-    else:
-        role = None
+    role = request.headers.get("remote-role", "viewer")
+
     return JSONResponse(content={"username": username, "role": role})
 
 

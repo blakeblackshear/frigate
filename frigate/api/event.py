@@ -40,6 +40,7 @@ from frigate.api.defs.response.event_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
+from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
@@ -969,27 +970,16 @@ def set_sub_label(
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
-        if not body.camera:
-            return JSONResponse(
-                content=(
-                    {
-                        "success": False,
-                        "message": "Event "
-                        + event_id
-                        + " not found and camera is not provided.",
-                    }
-                ),
-                status_code=404,
-            )
-
         event = None
 
     if request.app.detected_frames_processor:
-        tracked_obj: TrackedObject = (
-            request.app.detected_frames_processor.camera_states[
-                event.camera if event else body.camera
-            ].tracked_objects.get(event_id)
-        )
+        tracked_obj: TrackedObject = None
+
+        for state in request.app.detected_frames_processor.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
     else:
         tracked_obj = None
 
@@ -1008,23 +998,9 @@ def set_sub_label(
         new_sub_label = None
         new_score = None
 
-    if tracked_obj:
-        tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
-
-        # update timeline items
-        Timeline.update(
-            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
-        ).where(Timeline.source_id == event_id).execute()
-
-    if event:
-        event.sub_label = new_sub_label
-        data = event.data
-        if new_sub_label is None:
-            data["sub_label_score"] = None
-        elif new_score is not None:
-            data["sub_label_score"] = new_score
-        event.data = data
-        event.save()
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+    )
 
     return JSONResponse(
         content={
@@ -1105,7 +1081,9 @@ def regenerate_description(
     camera_config = request.app.frigate_config.cameras[event.camera]
 
     if camera_config.genai.enabled:
-        request.app.event_metadata_updater.publish((event.id, params.source))
+        request.app.event_metadata_updater.publish(
+            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+        )
 
         return JSONResponse(
             content=(
