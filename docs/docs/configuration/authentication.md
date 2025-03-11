@@ -135,3 +135,31 @@ Frigate gracefully performs login page redirection that should work with most au
 ### Custom logout url
 
 If your reverse proxy has a dedicated logout url, you can specify using the `logout_url` config option. This will update the link for the `Logout` link in the UI.
+
+## User Roles
+
+Frigate supports user roles to control access to certain features in the UI and API, such as managing users or modifying configuration settings. Roles are assigned to users in the database or through proxy headers and are enforced when accessing the UI or API through the authenticated port (`8971`).
+
+### Supported Roles
+
+- **admin**: Full access to all features, including user management and configuration.
+- **viewer**: Read-only access to the UI and API, including viewing cameras, review items, and historical footage. Configuration editor and settings in the UI are inaccessible.
+
+### Role Enforcement
+
+When using the authenticated port (`8971`), roles are validated via the JWT token or proxy headers (e.g., `remote-role`).
+
+On the internal **unauthenticated** port (`5000`), roles are **not enforced**. All requests are treated as **anonymous**, granting access equivalent to the **admin** role without restrictions.
+
+To use role-based access control, you must connect to Frigate via the **authenticated port (`8971`)** directly or through a reverse proxy.
+
+### Role Visibility in the UI
+
+- When logged in via port `8971`, your **username and role** are displayed in the **account menu** (bottom corner).
+- When using port `5000`, the UI will always display "anonymous" for the username and "admin" for the role.
+
+### Managing User Roles
+
+1. Log in as an **admin** user via port `8971`.
+2. Navigate to **Settings > Users**.
+3. Edit a user’s role by selecting **admin** or **viewer**.
