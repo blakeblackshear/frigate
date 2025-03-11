@@ -63,7 +63,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
 
         self.requestor = InterProcessRequestor()
-        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all)
         self.event_sender = EventUpdatePublisher()
         self.event_end_subscriber = EventEndSubscriber()
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)
@@ -404,7 +404,8 @@ class TrackedObjectProcessor(threading.Thread):
                         "event_id": event_id,
                         "end_time": end_time,
                     },
-                )
+                ),
+                DetectionTypeEnum.api.value,
             )
 
     def end_manual_event(self, payload: tuple) -> None:
@@ -430,7 +431,8 @@ class TrackedObjectProcessor(threading.Thread):
                         "event_id": event_id,
                         "end_time": end_time,
                     },
-                )
+                ),
+                DetectionTypeEnum.api.value,
             )
             self.ongoing_manual_events.pop(event_id)
 
@@ -508,8 +510,7 @@ class TrackedObjectProcessor(threading.Thread):
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
-                    camera_name = payload[0]
-                    self.camera_states[camera_name].process_manual_event(topic, payload)
+                    self.end_manual_event(payload)
 
             try:
                 (
@@ -548,7 +549,8 @@ class TrackedObjectProcessor(threading.Thread):
                     tracked_objects,
                     motion_boxes,
                     regions,
-                )
+                ),
+                DetectionTypeEnum.video.value,
             )
 
             # cleanup event finished queue

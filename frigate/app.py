@@ -317,9 +317,6 @@ class FrigateApp:
             # Create a client for other processes to use
             self.embeddings = EmbeddingsContext(self.db)
 
-    def init_external_event_processor(self) -> None:
-        self.external_event_processor = ExternalEventProcessor(self.config)
-
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
@@ -656,7 +653,6 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.start_audio_processor()
         self.start_storage_maintainer()
-        self.init_external_event_processor()
         self.start_stats_emitter()
         self.start_timeline_processor()
         self.start_event_processor()
@@ -675,7 +671,6 @@ class FrigateApp:
                     self.detected_frames_processor,
                     self.storage_maintainer,
                     self.onvif_controller,
-                    self.external_event_processor,
                     self.stats_emitter,
                     self.event_metadata_updater,
                 ),
@@ -747,7 +742,6 @@ class FrigateApp:
         self.review_segment_process.terminate()
         self.review_segment_process.join()
 
-        self.external_event_processor.stop()
         self.dispatcher.stop()
         self.ptz_autotracker_thread.join()
 
