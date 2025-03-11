@@ -97,14 +97,34 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 ### Header mapping
 
-If you have disabled Frigate's authentication and your proxy supports passing a header with the authenticated username, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` value. Header names are not case sensitive.
+If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive.
 
 ```yaml
 proxy:
   ...
   header_map:
     user: x-forwarded-user
+    role: x-forwarded-role
 ```
+
+Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
+
+#### Port Considerations
+
+**Authenticated Port (8971)**
+
+- Header mapping is **fully supported**.
+- The `remote-role` header determines the user’s privileges:
+  - **admin** → Full access (user management, configuration changes).
+  - **viewer** → Read-only access.
+- Ensure your **proxy sends both user and role headers** for proper role enforcement.
+
+**Unauthenticated Port (5000)**
+
+- Headers are **ignored** for role enforcement.
+- All requests are treated as **anonymous**.
+- The `remote-role` value is **overridden** to **admin-level access**.
+- This design ensures **unauthenticated internal use** within a trusted network.
 
 Note that only the following list of headers are permitted by default:
 
@@ -125,8 +145,6 @@ X-authentik-uid
 ```
 
 If you would like to add more options, you can overwrite the default file with a docker bind mount at `/usr/local/nginx/conf/proxy_trusted_headers.conf`. Reference the source code for the default file formatting.
-
-Future versions of Frigate may leverage group and role headers for authorization in Frigate as well.
 
 ### Login page redirection
 
