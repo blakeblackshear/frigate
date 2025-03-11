@@ -555,7 +555,7 @@ export function SpeedFilterContent({
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">
-        {t("filter.estimatedSpeed", {
+        {t("estimatedSpeed", {
           unit:
             config?.ui.unit_system == "metric"
               ? t("unit.speed.kph")
