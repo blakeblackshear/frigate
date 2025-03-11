@@ -111,6 +111,7 @@
     "restart": "Restart Frigate",
     "live": "Live",
     "live.allCameras": "All Cameras",
+    "live.cameras": "Cameras",
     "review": "Review",
     "explore": "Explore",
     "export": "Export",

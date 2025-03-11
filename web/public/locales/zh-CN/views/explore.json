@@ -1,4 +1,32 @@
 {
+  "exploreIsUnavailable": {
+    "title": "探索功能不可用",
+    "embeddingsReindexing": {
+      "context": "跟踪对象嵌入重新索引完成后，可以使用探索功能。",
+      "startingUp": "启动中...",
+      "estimatedTime": "预计剩余时间：",
+      "finishingShortly": "即将完成",
+      "step": {
+        "thumbnailsEmbedded": "缩略图嵌入：",
+        "descriptionsEmbedded": "描述嵌入：",
+        "trackedObjectsProcessed": "跟踪对象已处理："
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate正在下载支持语义搜索功能所需的嵌入模型。根据网络连接速度，这可能需要几分钟。",
+      "setup": {
+        "visionModel": "视觉模型",
+        "visionModelFeatureExtractor": "视觉模型特征提取器",
+        "textModel": "文本模型",
+        "textTokenizer": "文本分词器"
+      },
+      "tips": {
+        "context": "模型下载完成后，您可能需要重新索引跟踪对象的嵌入。",
+        "documentation": "阅读文档（英文）"
+      },
+      "error": "发生错误。请检查Frigate日志。"
+    }
+  },
   "trackedObjectDetails": "探测对象详情",
   "type": {
     "details": "详情",

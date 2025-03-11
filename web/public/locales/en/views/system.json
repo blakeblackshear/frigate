@@ -69,6 +69,7 @@
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} has high FFMPEG CPU usage ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
-    "healthy": "System is healthy"
+    "healthy": "System is healthy",
+    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
   }
 }

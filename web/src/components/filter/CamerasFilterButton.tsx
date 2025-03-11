@@ -38,7 +38,7 @@ export function CamerasFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return "Cameras";
+      return t("menu.live.cameras", { ns: "common" });
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {

@@ -110,6 +110,7 @@
     "documentation": "文档",
     "live": "实时监控",
     "live.allCameras": "所有摄像头",
+    "live.cameras": "摄像头",
     "review": "回放",
     "explore": "探测",
     "export": "导出",

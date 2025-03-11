@@ -109,7 +109,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             {t("menu.user.current", {
               user: profile?.username || t("menu.user.anonymous"),
             })}{" "}
-            {t("role." + profile?.role) && `(${t("role." + profile.role)})`}
+            {t("role." + profile?.role) && `(${t("role." + profile?.role)})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
           {profile?.username && profile.username !== "anonymous" && (

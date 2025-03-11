@@ -54,14 +54,19 @@ export default function Statusbar() {
         clearMessages("embeddings-reindex");
         addMessage(
           "embeddings-reindex",
-          `Reindexing embeddings (${Math.floor((reindexState.processed_objects / reindexState.total_objects) * 100)}% complete)`,
+          t("stats.reindexingEmbeddings", {
+            processed: Math.floor(
+              (reindexState.processed_objects / reindexState.total_objects) *
+                100,
+            ),
+          }),
         );
       }
       if (reindexState.status === "completed") {
         clearMessages("embeddings-reindex");
       }
     }
-  }, [reindexState, addMessage, clearMessages]);
+  }, [reindexState, addMessage, clearMessages, t]);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight bg-background_alt px-4 dark:text-secondary-foreground">
