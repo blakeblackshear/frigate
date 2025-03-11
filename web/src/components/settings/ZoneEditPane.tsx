@@ -330,7 +330,7 @@ export default function ZoneEditPane({
           // Wait for the config to be updated
           mutatedConfig = await updateConfig();
         } catch (error) {
-          toast.error(t("toast.save.error.noMessage"), {
+          toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
             position: "top-center",
           });
           return;
@@ -422,7 +422,10 @@ export default function ZoneEditPane({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", { errorMessage: res.statusText }),
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
               {
                 position: "top-center",
               },
@@ -437,6 +440,7 @@ export default function ZoneEditPane({
           toast.error(
             t("toast.save.error", {
               errorMessage,
+              ns: "common",
             }),
             {
               position: "top-center",

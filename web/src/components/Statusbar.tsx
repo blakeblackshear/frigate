@@ -4,8 +4,8 @@ import {
   StatusMessage,
 } from "@/context/statusbar-provider";
 import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
-import { t } from "i18next";
 import { useContext, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
@@ -13,6 +13,8 @@ import { MdCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 export default function Statusbar() {
+  const { t } = useTranslation(["views/system"]);
+
   const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,
   )!;
@@ -131,7 +133,7 @@ export default function Statusbar() {
         {Object.entries(messages).length === 0 ? (
           <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
-            {t("stats.healthy", { ns: "views/system" })}
+            {t("stats.healthy")}
           </div>
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (

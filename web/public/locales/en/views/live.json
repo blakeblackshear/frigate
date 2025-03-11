@@ -1,6 +1,7 @@
 {
   "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "lowBandwidthMode": "Low-bandwidth Mode",
   "twoWayTalk": {
     "enable": "Enable Two Way Talk",
     "disable": "Disable Two Way Talk"
@@ -42,6 +43,10 @@
     "enable": "Enable Camera",
     "disable": "Disable Camera"
   },
+  "muteCameras": {
+    "enable": "Mute All Cameras",
+    "disable": "Unmute All Cameras"
+  },
   "detect": {
     "enable": "Enable Detect",
     "disable": "Disable Detect"
@@ -62,6 +67,10 @@
     "enable": "Enable Autotracking",
     "disable": "Disable Autotracking"
   },
+  "streamStats": {
+    "enable": "Show Stream Stats",
+    "disable": "Hide Stream Stats"
+  },
   "manualRecording": {
     "start": "Start on-demand recording",
     "started": "Started manual on-demand recording.",
@@ -70,5 +79,11 @@
     "end": "End on-demand recording",
     "ended": "Ended manual on-demand recording.",
     "failedToEnd": "Failed to end manual on-demand recording."
+  },
+  "streamingSettings": "Streaming Settings",
+  "notifications": "Notifications",
+  "audio": "Audio",
+  "suspend:": {
+    "forTime": "Suspend for: "
   }
 }

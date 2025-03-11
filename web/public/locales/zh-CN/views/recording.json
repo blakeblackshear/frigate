@@ -1,0 +1,11 @@
+{
+    "export": "导出",
+    "calendar": "日历",
+    "filter": "筛选",
+    "toast": {
+        "error": {
+            "noValidTimeSelected": "未选择有效的时间范围",
+            "endTimeMustAfterStartTime": "结束时间必须晚于开始时间"
+        }
+    }
+}

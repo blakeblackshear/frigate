@@ -20,7 +20,7 @@ import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
 
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
@@ -70,6 +70,7 @@ export default function MobileReviewSettingsDrawer({
   setMode,
   setShowExportPreview,
 }: MobileReviewSettingsDrawerProps) {
+  const { t } = useTranslation(["views/recording"]);
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
 
   // exports
@@ -77,12 +78,14 @@ export default function MobileReviewSettingsDrawer({
   const [name, setName] = useState("");
   const onStartExport = useCallback(() => {
     if (!range) {
-      toast.error("No valid time range selected", { position: "top-center" });
+      toast.error(t("toast.error.noValidTimeSelected"), {
+        position: "top-center",
+      });
       return;
     }
 
     if (range.before < range.after) {
-      toast.error("End time must be after start time", {
+      toast.error(t("toast.error.endTimeMustAfterStartTime"), {
         position: "top-center",
       });
       return;
@@ -114,11 +117,17 @@ export default function MobileReviewSettingsDrawer({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to start export: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("export.toast.error.failed", {
+            ns: "components/dialog",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
-  }, [camera, name, range, setRange, setName, setMode]);
+  }, [camera, name, range, setRange, setName, setMode, t]);
 
   // filters
 
@@ -147,7 +156,7 @@ export default function MobileReviewSettingsDrawer({
             }}
           >
             <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
-            Export
+            {t("export")}
           </Button>
         )}
         {features.includes("calendar") && (
@@ -160,7 +169,7 @@ export default function MobileReviewSettingsDrawer({
             <FaCalendarAlt
               className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
-            Calendar
+            {t("calendar")}
           </Button>
         )}
         {features.includes("filter") && (
@@ -173,7 +182,7 @@ export default function MobileReviewSettingsDrawer({
             <FaFilter
               className={`${filter?.labels || filter?.zones ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
-            Filter
+            {t("filter")}
           </Button>
         )}
       </div>
@@ -210,10 +219,10 @@ export default function MobileReviewSettingsDrawer({
             className="absolute left-0 text-selected"
             onClick={() => setDrawerMode("select")}
           >
-            Back
+            {t("button.back", { ns: "common" })}
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
-            Calendar
+            {t("calendar")}
           </div>
         </div>
         <div className="flex w-full flex-row justify-center">
@@ -260,7 +269,7 @@ export default function MobileReviewSettingsDrawer({
             className="absolute left-0 text-selected"
             onClick={() => setDrawerMode("select")}
           >
-            Back
+            {t("button.back", { ns: "common" })}
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
             Filter

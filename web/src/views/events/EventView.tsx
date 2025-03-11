@@ -214,7 +214,7 @@ export default function EventView({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            t("export.toast.error", {
+            t("export.toast.error.failed", {
               ns: "components/dialog",
               message: errorMessage,
             }),

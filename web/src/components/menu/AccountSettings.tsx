@@ -50,9 +50,12 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
-          toast.success("Password updated successfully.", {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.updatePassword", { ns: "views/settings" }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -60,9 +63,15 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Error setting password: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.setPasswordFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -85,7 +94,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent side="right">
-              <p>Account</p>
+              <p>{t("menu.user.account")}</p>
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>
@@ -100,7 +109,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             {t("menu.user.current", {
               user: profile?.username || t("menu.user.anonymous"),
             })}{" "}
-            {profile?.role && `(${profile.role})`}
+            {t("role." + profile?.role) && `(${t("role." + profile.role)})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
           {profile?.username && profile.username !== "anonymous" && (
@@ -112,7 +121,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               onClick={() => setPasswordDialogOpen(true)}
             >
               <LuSquarePen className="mr-2 size-4" />
-              <span>Set Password</span>
+              <span>{t("menu.user.setPassword")}</span>
             </MenuItem>
           )}
           <MenuItem

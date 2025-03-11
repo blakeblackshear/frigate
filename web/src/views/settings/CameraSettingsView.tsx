@@ -27,8 +27,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { MdCircle } from "react-icons/md";
 import { cn } from "@/lib/utils";
-import { Trans } from "react-i18next";
-import { t } from "i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
@@ -47,6 +46,8 @@ export default function CameraSettingsView({
   selectedCamera,
   setUnsavedChanges,
 }: CameraSettingsViewProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -81,7 +82,7 @@ export default function CameraSettingsView({
           .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
-  }, [cameraConfig]);
+  }, [cameraConfig, t]);
 
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
@@ -89,7 +90,7 @@ export default function CameraSettingsView({
           .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
-  }, [cameraConfig]);
+  }, [cameraConfig, t]);
 
   // form
 
@@ -165,7 +166,10 @@ export default function CameraSettingsView({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", { errorMessage: res.statusText }),
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
               {
                 position: "top-center",
               },
@@ -180,6 +184,7 @@ export default function CameraSettingsView({
           toast.error(
             t("toast.save.error", {
               errorMessage,
+              ns: "common",
             }),
             {
               position: "top-center",
@@ -190,7 +195,7 @@ export default function CameraSettingsView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading, selectedCamera, cameraConfig],
+    [updateConfig, setIsLoading, selectedCamera, cameraConfig, t],
   );
 
   const onCancel = useCallback(() => {
@@ -461,7 +466,6 @@ export default function CameraSettingsView({
                                 cameraName: capitalizeFirstLetter(
                                   cameraConfig?.name ?? "",
                                 ).replaceAll("_", " "),
-                                ns: "views/settings",
                               },
                             )
                           : t("camera.reviewClassification.objectAlertsTips", {
@@ -469,7 +473,6 @@ export default function CameraSettingsView({
                               cameraName: capitalizeFirstLetter(
                                 cameraConfig?.name ?? "",
                               ).replaceAll("_", " "),
-                              ns: "views/settings",
                             })}
                       </div>
                     </FormItem>

@@ -37,13 +37,13 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import SearchSettingsView from "@/views/settings/SearchSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
-import { t } from "i18next";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { isInIframe } from "@/utils/isIFrame";
 import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useTranslation } from "react-i18next";
 
 const allSettingsViews = [
   "uiSettings",
@@ -58,6 +58,7 @@ const allSettingsViews = [
 type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
+  const { t } = useTranslation(["views/settings"]);
   const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -164,7 +165,7 @@ export default function Settings() {
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
-      if (!isAdmin && !["UI settings", "debug"].includes(page)) {
+      if (!isAdmin && !["uiSettings", "debug"].includes(page)) {
         setPage("uiSettings");
       } else {
         setPage(page as SettingsType);
@@ -200,7 +201,7 @@ export default function Settings() {
               onValueChange={(value: SettingsType) => {
                 if (value) {
                   // Restrict viewer navigation
-                  if (!isAdmin && !["UI settings", "debug"].includes(value)) {
+                  if (!isAdmin && !["uiSettings", "debug"].includes(value)) {
                     setPageToggle("uiSettings");
                   } else {
                     setPageToggle(value);
@@ -216,9 +217,7 @@ export default function Settings() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">
-                    {t("menu." + item, { ns: "views/settings" })}
-                  </div>
+                  <div className="capitalize">{t("menu." + item)}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>

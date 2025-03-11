@@ -1,6 +1,7 @@
 {
   "documentTitle": "实时监控 - Frigate",
   "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
+  "lowBandwidthMode": "低带宽模式",
   "twoWayTalk": {
     "enable": "开启双向对话",
     "disable": "关闭双向对话"
@@ -42,6 +43,10 @@
     "enable": "开启摄像头",
     "disable": "关闭摄像头"
   },
+  "muteCameras": {
+    "enable": "屏蔽所有摄像头",
+    "disable": "取消屏蔽所有摄像头"
+  },
   "detect": {
     "enable": "启用检测",
     "disable": "关闭检测"
@@ -62,6 +67,10 @@
     "enable": "启用自动追踪",
     "disable": "关闭自动追踪"
   },
+  "streamStats": {
+    "enable": "显示视频流统计信息",
+    "disable": "隐藏视频流统计信息"
+  },
   "manualRecording": {
     "start": "开始手动按需录制",
     "started": "已启用手动按需录制",
@@ -70,5 +79,11 @@
     "end": "停止手动按需录制",
     "ended": "已完成手动按需录制",
     "failedToEnd": "停止手动录制失败"
+  },
+  "streamingSettings": "视频流设置",
+  "notifications": "通知",
+  "audio": "音频",
+  "suspend": {
+    "forTime": "暂停时长："
   }
 }

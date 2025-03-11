@@ -258,7 +258,8 @@
     "toast": {
       "success": {
         "createUser": "用户 {{user}} 创建成功",
-        "deleteUser": "用户 {{user}} 删除成功"
+        "deleteUser": "用户 {{user}} 删除成功",
+        "updatePassword": "已成功修改密码"
       },
       "error": {
         "setPasswordFailed": "保存密码出现错误：{{errorMessage}}",
@@ -317,7 +318,7 @@
         "title": "更改用户权限组",
         "desc": "更新 <span className=\"font-medium\">{{username}}</span> 的权限",
         "roleInfo": "<p>请选择此用户的适当角色：</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">管理员 (Admin)：</span> 拥有所有功能的完整访问权限。</li><li> • <span className=\"font-medium\">查看者 (Viewer)：</span> 仅限访问实时监控、回放、探测和导出功能。</li></ul>"
-    }
+      }
     }
   },
   "notification": {

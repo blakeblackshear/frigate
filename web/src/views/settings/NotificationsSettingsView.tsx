@@ -641,17 +641,19 @@ export function CameraNotificationSwitch({
   };
 
   const formatSuspendedUntil = (timestamp: string) => {
-    if (timestamp === "0") return "Frigate restarts.";
+    // Some languages require a change in word order
+    if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
 
-    return formatUnixTimestampToDateTime(parseInt(timestamp), {
+    const time = formatUnixTimestampToDateTime(parseInt(timestamp), {
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
       strftime_fmt:
         config?.ui.time_format == "24hour"
-          ? t("time.formattedTimestampExcludeSeconds.24hour")
-          : t("time.formattedTimestampExcludeSeconds"),
+          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
+          : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
     });
+    return t("time.untilForTime", { ns: "common", time });
   };
 
   return (
@@ -677,7 +679,7 @@ export function CameraNotificationSwitch({
               </div>
             ) : (
               <div className="flex flex-row items-center gap-2 text-sm text-danger">
-                Notifications suspended until{" "}
+                Notifications suspended{" "}
                 {formatSuspendedUntil(notificationSuspendUntil)}
               </div>
             )}

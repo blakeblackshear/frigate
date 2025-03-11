@@ -743,7 +743,10 @@ export function CameraGroupEdit({
             setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(
-              t("toast.save.error", { errorMessage: res.statusText }),
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
               {
                 position: "top-center",
               },
@@ -758,6 +761,7 @@ export function CameraGroupEdit({
           toast.error(
             t("toast.save.error", {
               errorMessage,
+              ns: "common",
             }),
             { position: "top-center" },
           );

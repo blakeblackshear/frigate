@@ -1,10 +1,10 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { t } from "i18next";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -24,6 +24,7 @@ export function CameraLineGraph({
   updateTimes,
   data,
 }: CameraLineGraphProps) {
+  const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -128,7 +129,7 @@ export function CameraLineGraph({
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
               <div className="text-xs text-muted-foreground">
-                {t("cameras.label." + label, { ns: "views/settings" })}
+                {t("cameras.label." + label)}
               </div>
               <div className="text-xs text-primary">
                 {lastValues[labelIdx]}

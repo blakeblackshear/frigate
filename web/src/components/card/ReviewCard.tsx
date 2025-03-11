@@ -35,7 +35,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { buttonVariants } from "../ui/button";
-import { t } from "i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -47,6 +47,7 @@ export default function ReviewCard({
   currentTime,
   onClick,
 }: ReviewCardProps) {
+  const { t } = useTranslation(["components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
   const formattedDate = useFormattedTimestamp(
@@ -83,28 +84,20 @@ export default function ReviewCard({
       )
       .then((response) => {
         if (response.status == 200) {
-          toast.success(
-            t("export.toast.success", { ns: "components/dialog" }),
-            {
-              position: "top-center",
-            },
-          );
-        }
-      })
-      .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(`Failed to start export: ${error.message}`, {
+          toast.success(t("export.toast.success"), {
             position: "top-center",
           });
         }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message || error.message || "Unknown error";
+        toast.error(t("export.toast.error.failed", { error: errorMessage }), {
+          position: "top-center",
+        });
       });
     setOptionsOpen(false);
-  }, [event]);
+  }, [event, t]);
 
   const onDelete = useCallback(async () => {
     await axios.post(`reviews/delete`, { ids: [event.id] });
@@ -219,24 +212,24 @@ export default function ReviewCard({
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("recording.confirmDelete.title")}
+              </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
-              Are you sure you want to delete all recorded video associated with
-              this review item?
-              <br />
-              <br />
-              Hold the <em>Shift</em> key to bypass this dialog in the future.
+              <Trans ns="components/dialog">
+                recording.confirmDelete.title
+              </Trans>
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
-                Cancel
+                {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction
                 className={buttonVariants({ variant: "destructive" })}
                 onClick={onDelete}
               >
-                Delete
+                {t("button.delete", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -250,7 +243,9 @@ export default function ReviewCard({
                 onClick={onExport}
               >
                 <FaCompactDisc className="text-secondary-foreground" />
-                <div className="text-primary">Export</div>
+                <div className="text-primary">
+                  {t("recording.button.export")}
+                </div>
               </div>
             </ContextMenuItem>
             {!event.has_been_reviewed && (
@@ -260,7 +255,9 @@ export default function ReviewCard({
                   onClick={onMarkAsReviewed}
                 >
                   <FaCircleCheck className="text-secondary-foreground" />
-                  <div className="text-primary">Mark as reviewed</div>
+                  <div className="text-primary">
+                    {t("recording.button.markAsReviewed")}
+                  </div>
                 </div>
               </ContextMenuItem>
             )}
@@ -271,7 +268,9 @@ export default function ReviewCard({
               >
                 <HiTrash className="text-secondary-foreground" />
                 <div className="text-primary">
-                  {bypassDialogRef.current ? "Delete Now" : "Delete"}
+                  {bypassDialogRef.current
+                    ? t("recording.button.deleteNow")
+                    : t("button.delete", { ns: "common" })}
                 </div>
               </div>
             </ContextMenuItem>

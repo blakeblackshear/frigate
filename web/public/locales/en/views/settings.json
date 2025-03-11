@@ -258,7 +258,8 @@
     "toast": {
       "success": {
         "createUser": "User {{user}} created successfully",
-        "deleteUser": "User {{user}} deleted successfully"
+        "deleteUser": "User {{user}} deleted successfully",
+        "updatePassword": "Password updated successfully."
       },
       "error": {
         "setPasswordFailed": "Failed to save password: {{errorMessage}}",

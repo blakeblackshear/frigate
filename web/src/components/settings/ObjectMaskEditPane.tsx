@@ -211,6 +211,7 @@ export default function ObjectMaskEditPane({
             toast.error(
               t("toast.save.error", {
                 errorMessage: res.statusText,
+                ns: "common",
               }),
               {
                 position: "top-center",
@@ -226,6 +227,7 @@ export default function ObjectMaskEditPane({
           toast.error(
             t("toast.save.error", {
               errorMessage,
+              ns: "common",
             }),
             {
               position: "top-center",

@@ -1,5 +1,8 @@
 {
   "time": {
+    "untilForTime": "Until {{time}}",
+    "untilForRestart": "Until Frigate restarts.",
+    "untilRestart": "Until restart",
     "ago": "{{timeAgo}} ago",
     "justNow": "Just now",
     "today": "Today",
@@ -11,6 +14,12 @@
     "lastWeek": "Last Week",
     "thisMonth": "This Month",
     "lastMonth": "Last Month",
+    "5minutes": "5 minutes",
+    "10minutes": "10 minutes",
+    "30minutes": "30 minutes",
+    "1hour": "1 hour",
+    "12hours": "12 hours",
+    "24hours": "24 hours",
     "pm": "pm",
     "am": "am",
     "yr": "{{time}}yr",
@@ -43,6 +52,9 @@
     "apply": "Apply",
     "reset": "Reset",
     "enabled": "Enabled",
+    "enable": "Enable",
+    "disabled": "Disabled",
+    "disable": "Disable",
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
@@ -61,7 +73,9 @@
     "yes": "Yes",
     "no": "No",
     "download": "Download",
-    "info": "Info"
+    "info": "Info",
+    "suspended": "Suspended",
+    "unsuspended": "Unsuspend"
   },
   "menu": {
     "system": "System",
@@ -103,9 +117,11 @@
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
     "user": {
+      "account": "Account",
       "current": "Current User: {{user}}",
       "anonymous": "anonymous",
-      "logout": "Logout"
+      "logout": "Logout",
+      "setPassword": "Set Password"
     }
   },
   "toast": {

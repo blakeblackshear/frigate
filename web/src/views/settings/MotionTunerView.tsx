@@ -125,15 +125,22 @@ export default function MotionTunerView({
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(t("toast.save.error", { errorMessage: res.statusText }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage: res.statusText,
+              ns: "common",
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
         toast.error(
           t("toast.save.error", {
             errorMessage: error.response.data.message,
+            ns: "common",
           }),
           { position: "top-center" },
         );

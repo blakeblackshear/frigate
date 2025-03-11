@@ -100,9 +100,15 @@ export default function ExploreSettingsView({
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(t("toast.save.error", { errorMessage: res.statusText }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage: res.statusText,
+              ns: "common",
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -113,6 +119,7 @@ export default function ExploreSettingsView({
         toast.error(
           t("toast.save.error", {
             errorMessage,
+            ns: "common",
           }),
           {
             position: "top-center",

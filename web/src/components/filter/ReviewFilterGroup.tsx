@@ -23,8 +23,7 @@ import { FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
-
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -265,6 +264,7 @@ function ShowReviewFilter({
   showReviewed,
   setShowReviewed,
 }: ShowReviewedFilterProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [showReviewedSwitch, setShowReviewedSwitch] = useOptimisticState(
     showReviewed,
     setShowReviewed,
@@ -280,7 +280,7 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          {t("review.showReviewed", { ns: "components/filter" })}
+          {t("review.showReviewed")}
         </Label>
       </div>
 
@@ -322,6 +322,7 @@ function GeneralFilterButton({
   selectedZones,
   onUpdateFilter,
 }: GeneralFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<GeneralFilter>({
     labels: selectedLabels,
@@ -366,7 +367,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        {t("label", { ns: "components/filter" })}
+        {t("filter")}
       </div>
     </Button>
   );
@@ -441,6 +442,7 @@ export function GeneralFilterContent({
   onReset,
   onClose,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
@@ -474,7 +476,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            {t("labels.all", { ns: "components/filter" })}
+            {t("labels.all")}
           </Label>
           <Switch
             className="ml-1"
@@ -521,7 +523,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                {t("zones.all", { ns: "components/filter" })}
+                {t("zones.all")}
               </Label>
               <Switch
                 className="ml-1"
@@ -595,6 +597,7 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
+  const { t } = useTranslation(["views/events"]);
   const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
     motionOnly,
     setMotionOnly,
@@ -613,7 +616,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          {t("motion.only", { ns: "views/events" })}
+          {t("motion.only")}
         </Label>
       </div>
 

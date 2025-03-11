@@ -72,5 +72,16 @@
       "overwrite": "{{searchName}} already exists. Saving will overwrite the existing value.",
       "success": "Search ({{searchName}}) has been saved."
     }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "desc": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
+    },
+    "button": {
+      "export": "Export",
+      "markAsReviewed": "Mark as reviewed",
+      "deleteNow": "Delete Now"
+    }
   }
 }
