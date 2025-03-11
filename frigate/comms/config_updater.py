@@ -32,7 +32,9 @@ class ConfigPublisher:
 class ConfigSubscriber:
     """Simplifies receiving an updated config."""
 
-    def __init__(self, topic: str) -> None:
+    def __init__(self, topic: str, exact=False) -> None:
+        self.topic = topic
+        self.exact = exact
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
@@ -42,7 +44,12 @@ class ConfigSubscriber:
         """Returns updated config or None if no update."""
         try:
             topic = self.socket.recv_string(flags=zmq.NOBLOCK)
-            return (topic, self.socket.recv_pyobj())
+            obj = self.socket.recv_pyobj()
+
+            if not self.exact or self.topic == topic:
+                return (topic, obj)
+            else:
+                return (None, None)
         except zmq.ZMQError:
             return (None, None)
 

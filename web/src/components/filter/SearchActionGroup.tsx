@@ -44,8 +44,12 @@ export default function SearchActionGroup({
           pullLatestData();
         }
       })
-      .catch(() => {
-        toast.error("Failed to delete tracked objects.", {
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete tracked objects.: ${errorMessage}`, {
           position: "top-center",
         });
       });

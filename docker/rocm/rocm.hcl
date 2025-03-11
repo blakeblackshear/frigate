@@ -2,7 +2,7 @@ variable "AMDGPU" {
   default = "gfx900"
 }
 variable "ROCM" {
-  default = "5.7.3"
+  default = "6.3.3"
 }
 variable "HSA_OVERRIDE_GFX_VERSION" {
   default = ""
@@ -10,6 +10,13 @@ variable "HSA_OVERRIDE_GFX_VERSION" {
 variable "HSA_OVERRIDE" {
   default = "1"
 }
+
+target wget {
+  dockerfile = "docker/main/Dockerfile"
+  platforms = ["linux/amd64"]
+  target = "wget"
+}
+
 target deps {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/amd64"]
@@ -26,6 +33,7 @@ target rocm {
   dockerfile = "docker/rocm/Dockerfile"
   contexts = {
     deps = "target:deps",
+    wget = "target:wget",
     rootfs = "target:rootfs"
   }
   platforms = ["linux/amd64"]

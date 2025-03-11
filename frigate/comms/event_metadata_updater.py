@@ -2,9 +2,6 @@
 
 import logging
 from enum import Enum
-from typing import Optional
-
-from frigate.events.types import RegenerateDescriptionEnum
 
 from .zmq_proxy import Publisher, Subscriber
 
@@ -14,6 +11,7 @@ logger = logging.getLogger(__name__)
 class EventMetadataTypeEnum(str, Enum):
     all = ""
     regenerate_description = "regenerate_description"
+    sub_label = "sub_label"
 
 
 class EventMetadataPublisher(Publisher):
@@ -21,12 +19,11 @@ class EventMetadataPublisher(Publisher):
 
     topic_base = "event_metadata/"
 
-    def __init__(self, topic: EventMetadataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+    def __init__(self) -> None:
+        super().__init__()
 
-    def publish(self, payload: tuple[str, RegenerateDescriptionEnum]) -> None:
-        super().publish(payload)
+    def publish(self, topic: EventMetadataTypeEnum, payload: any) -> None:
+        super().publish(payload, topic.value)
 
 
 class EventMetadataSubscriber(Subscriber):
@@ -35,17 +32,14 @@ class EventMetadataSubscriber(Subscriber):
     topic_base = "event_metadata/"
 
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+        super().__init__(topic.value)
 
-    def check_for_update(
-        self, timeout: float = 1
-    ) -> Optional[tuple[EventMetadataTypeEnum, str, RegenerateDescriptionEnum]]:
+    def check_for_update(self, timeout: float = 1) -> tuple | None:
         return super().check_for_update(timeout)
 
-    def _return_object(self, topic: str, payload: any) -> any:
+    def _return_object(self, topic: str, payload: tuple) -> tuple:
         if payload is None:
-            return (None, None, None)
+            return (None, None)
+
         topic = EventMetadataTypeEnum[topic[len(self.topic_base) :]]
-        event_id, source = payload
-        return (topic, event_id, RegenerateDescriptionEnum(source))
+        return (topic, payload)

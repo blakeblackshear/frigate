@@ -2,17 +2,23 @@ import { Polygon } from "@/types/canvas";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
 import { Button } from "../ui/button";
+import { TbPolygon, TbPolygonOff } from "react-icons/tb";
+import { cn } from "@/lib/utils";
 
 type PolygonEditControlsProps = {
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | undefined;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function PolygonEditControls({
   polygons,
   setPolygons,
   activePolygonIndex,
+  snapPoints,
+  setSnapPoints,
 }: PolygonEditControlsProps) {
   const undo = () => {
     if (activePolygonIndex === undefined || !polygons) {
@@ -96,6 +102,25 @@ export default function PolygonEditControls({
           </Button>
         </TooltipTrigger>
         <TooltipContent>Reset</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={snapPoints ? "select" : "default"}
+            className={cn("size-6 rounded-md p-1")}
+            aria-label="Snap points"
+            onClick={() => setSnapPoints((prev) => !prev)}
+          >
+            {snapPoints ? (
+              <TbPolygon className="text-primary" />
+            ) : (
+              <TbPolygonOff className="text-secondary-foreground" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {snapPoints ? "Don't snap points" : "Snap points"}
+        </TooltipContent>
       </Tooltip>
     </div>
   );

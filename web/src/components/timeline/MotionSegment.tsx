@@ -1,14 +1,7 @@
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { ReviewSegment } from "@/types/review";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import scrollIntoView from "scroll-into-view-if-needed";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 import { isMobile } from "react-device-detect";
@@ -27,6 +20,7 @@ type MotionSegmentProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   dense: boolean;
 };
 
@@ -42,6 +36,7 @@ export function MotionSegment({
   minimapStartTime,
   minimapEndTime,
   setHandlebarTime,
+  scrollToSegment,
   dense,
 }: MotionSegmentProps) {
   const severityType = "all";
@@ -72,7 +67,10 @@ export function MotionSegment({
   );
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
-  const segmentKey = useMemo(() => segmentTime, [segmentTime]);
+  const segmentKey = useMemo(
+    () => `${segmentTime}_${segmentDuration}`,
+    [segmentTime, segmentDuration],
+  );
 
   const maxSegmentWidth = useMemo(() => {
     return isMobile ? 30 : 50;
@@ -122,10 +120,7 @@ export function MotionSegment({
     // Check if the first segment is out of view
     const firstSegment = firstMinimapSegmentRef.current;
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
-      scrollIntoView(firstSegment, {
-        scrollMode: "if-needed",
-        behavior: "smooth",
-      });
+      scrollToSegment(alignedMinimapStartTime);
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,44 +158,6 @@ export function MotionSegment({
     }
   }, [segmentTime, setHandlebarTime]);
 
-  const [segmentRendered, setSegmentRendered] = useState(false);
-  const segmentObserverRef = useRef<IntersectionObserver | null>(null);
-  const segmentRef = useRef(null);
-
-  useEffect(() => {
-    const segmentObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !segmentRendered) {
-          setSegmentRendered(true);
-        }
-      },
-      { threshold: 0 },
-    );
-
-    if (segmentRef.current) {
-      segmentObserver.observe(segmentRef.current);
-    }
-
-    segmentObserverRef.current = segmentObserver;
-
-    return () => {
-      if (segmentObserverRef.current) {
-        segmentObserverRef.current.disconnect();
-      }
-    };
-  }, [segmentRendered]);
-
-  if (!segmentRendered) {
-    return (
-      <div
-        key={segmentKey}
-        ref={segmentRef}
-        data-segment-id={segmentKey}
-        className={`segment ${segmentClasses}`}
-      />
-    );
-  }
-
   return (
     <>
       {(((firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0) &&
@@ -209,8 +166,7 @@ export function MotionSegment({
         !motionOnly) && (
         <div
           key={segmentKey}
-          data-segment-id={segmentKey}
-          ref={segmentRef}
+          data-segment-id={segmentTime}
           className={cn(
             "segment",
             {

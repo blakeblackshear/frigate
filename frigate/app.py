@@ -17,12 +17,10 @@ import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
-from frigate.comms.dispatcher import Communicator, Dispatcher
-from frigate.comms.event_metadata_updater import (
-    EventMetadataPublisher,
-    EventMetadataTypeEnum,
-)
+from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
@@ -34,10 +32,13 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     EXPORT_DIR,
+    FACE_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
     SHM_FRAMES_VAR,
+    THUMB_DIR,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
@@ -88,6 +89,15 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.embeddings_metrics: DataProcessorMetrics | None = (
+            DataProcessorMetrics()
+            if (
+                config.semantic_search.enabled
+                or config.lpr.enabled
+                or config.face_recognition.enabled
+            )
+            else None
+        )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
@@ -96,14 +106,20 @@ class FrigateApp:
         self.config = config
 
     def ensure_dirs(self) -> None:
-        for d in [
+        dirs = [
             CONFIG_DIR,
             RECORD_DIR,
+            THUMB_DIR,
             f"{CLIPS_DIR}/cache",
             CACHE_DIR,
             MODEL_CACHE_DIR,
             EXPORT_DIR,
-        ]:
+        ]
+
+        if self.config.face_recognition.enabled:
+            dirs.append(FACE_DIR)
+
+        for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -223,13 +239,25 @@ class FrigateApp:
         logger.info(f"Review process started: {review_segment_process.pid}")
 
     def init_embeddings_manager(self) -> None:
-        if not self.config.semantic_search.enabled:
+        genai_cameras = [
+            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
+        ]
+
+        if (
+            not self.config.semantic_search.enabled
+            and not genai_cameras
+            and not self.config.lpr.enabled
+            and not self.config.face_recognition.enabled
+        ):
             return
 
         embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
-            args=(self.config,),
+            args=(
+                self.config,
+                self.embeddings_metrics,
+            ),
         )
         embedding_process.daemon = True
         self.embedding_process = embedding_process
@@ -277,7 +305,16 @@ class FrigateApp:
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_embeddings_client(self) -> None:
-        if self.config.semantic_search.enabled:
+        genai_cameras = [
+            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
+        ]
+
+        if (
+            self.config.semantic_search.enabled
+            or self.config.lpr.enabled
+            or genai_cameras
+            or self.config.face_recognition.enabled
+        ):
             # Create a client for other processes to use
             self.embeddings = EmbeddingsContext(self.db)
 
@@ -287,9 +324,7 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
-        self.event_metadata_updater = EventMetadataPublisher(
-            EventMetadataTypeEnum.regenerate_description
-        )
+        self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_onvif(self) -> None:
@@ -301,8 +336,14 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        if self.config.notifications.enabled_in_config:
-            comms.append(WebPushClient(self.config))
+        notification_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.notifications.enabled_in_config
+        ]
+
+        if notification_cameras:
+            comms.append(WebPushClient(self.config, self.stop_event))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)
@@ -491,7 +532,11 @@ class FrigateApp:
         self.stats_emitter = StatsEmitter(
             self.config,
             stats_init(
-                self.config, self.camera_metrics, self.detectors, self.processes
+                self.config,
+                self.camera_metrics,
+                self.embeddings_metrics,
+                self.detectors,
+                self.processes,
             ),
             self.stop_event,
         )
@@ -550,6 +595,7 @@ class FrigateApp:
                 User.insert(
                     {
                         User.username: "admin",
+                        User.role: "admin",
                         User.password_hash: password_hash,
                         User.notification_tokens: [],
                     }
@@ -570,6 +616,7 @@ class FrigateApp:
                 )
                 User.replace(
                     username="admin",
+                    role="admin",
                     password_hash=password_hash,
                     notification_tokens=[],
                 ).execute()

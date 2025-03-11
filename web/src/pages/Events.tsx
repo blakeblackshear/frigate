@@ -7,6 +7,7 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -286,6 +287,16 @@ export default function Events() {
     updateSummary();
   }, [updateSummary]);
 
+  // recordings summary
+
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
+    "recordings/summary",
+    {
+      timezone: timezone,
+      cameras: reviewSearchParams["cameras"] ?? null,
+    },
+  ]);
+
   // preview videos
   const previewTimes = useMemo(() => {
     const startDate = new Date(selectedTimeRange.after * 1000);
@@ -475,6 +486,7 @@ export default function Events() {
         reviewItems={reviewItems}
         currentReviewItems={currentItems}
         reviewSummary={reviewSummary}
+        recordingsSummary={recordingsSummary}
         relevantPreviews={allPreviews}
         timeRange={selectedTimeRange}
         filter={reviewFilter}

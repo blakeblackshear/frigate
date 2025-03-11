@@ -52,6 +52,7 @@ export type ObjectType = {
 };
 
 export interface FrigateCameraState {
+  enabled: boolean;
   motion: boolean;
   objects: ObjectType[];
 }

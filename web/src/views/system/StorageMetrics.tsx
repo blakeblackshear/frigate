@@ -8,7 +8,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useSWR from "swr";
-import { LuAlertCircle } from "react-icons/lu";
+import { CiCircleAlert } from "react-icons/ci";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { useTimezone } from "@/hooks/use-date-utils";
+import { RecordingsSummary } from "@/types/review";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type CameraStorage = {
   [key: string]: {
@@ -26,6 +30,11 @@ export default function StorageMetrics({
 }: StorageMetricsProps) {
   const { data: cameraStorage } = useSWR<CameraStorage>("recordings/storage");
   const { data: stats } = useSWR<FrigateStats>("stats");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const timezone = useTimezone(config);
 
   const totalStorage = useMemo(() => {
     if (!cameraStorage || !stats) {
@@ -44,7 +53,23 @@ export default function StorageMetrics({
     return totalStorage;
   }, [cameraStorage, stats, setLastUpdated]);
 
-  if (!cameraStorage || !stats || !totalStorage) {
+  // recordings summary
+
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
+    "recordings/summary",
+    {
+      timezone: timezone,
+    },
+  ]);
+
+  const earliestDate = useMemo(() => {
+    const keys = Object.keys(recordingsSummary || {});
+    return keys.length
+      ? new Date(keys[keys.length - 1]).getTime() / 1000
+      : null;
+  }, [recordingsSummary]);
+
+  if (!cameraStorage || !stats || !totalStorage || !config) {
     return;
   }
 
@@ -61,7 +86,7 @@ export default function StorageMetrics({
                   className="focus:outline-none"
                   aria-label="Unused Storage Information"
                 >
-                  <LuAlertCircle
+                  <CiCircleAlert
                     className="size-5"
                     aria-label="Unused Storage Information"
                   />
@@ -81,6 +106,16 @@ export default function StorageMetrics({
             used={totalStorage.used}
             total={totalStorage.total}
           />
+          {earliestDate && (
+            <div className="mt-2 text-xs text-primary-variant">
+              <span className="font-medium">Earliest recording available:</span>{" "}
+              {formatUnixTimestampToDateTime(earliestDate, {
+                timezone: timezone,
+                strftime_fmt:
+                  config.ui.time_format == "24hour" ? "%d %b %Y" : "%B %d, %Y",
+              })}
+            </div>
+          )}
         </div>
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5">/tmp/cache</div>
