@@ -47,5 +47,18 @@
   },
   "review": {
     "showReviewed": "Show Reviewed"
+  },
+  "explore": {
+    "settings": {
+      "title": "Settings",
+      "defaultView": "Default View",
+      "defaultView.desc": "When no filters are selected, display a summary of the most recent tracked objects per label, or display an unfiltered grid.",
+      "defaultView.summary": "Summary",
+      "defaultView.unfilteredGrid": "Unfiltered Grid",
+      "gridColumns": "Grid Columns",
+      "gridColumns.desc": "Select the number of columns in the grid view.",
+      "searchSource": "Search Source",
+      "searchSource.desc": "Choose whether to search the thumbnails or descriptions of your tracked objects."
+    }
   }
 }
