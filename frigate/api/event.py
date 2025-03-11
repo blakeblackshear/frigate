@@ -1207,40 +1207,21 @@ def create_event(
     rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
     event_id = f"{now}-{rand_id}"
 
-    (
-        camera_name,
-        label,
-        event_id,
-        body.include_recording,
-        body.score,
-        body.sub_label,
-        body.duration,
-        body.source_type,
-        body.draw,
-    )
-
-    try:
-        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
-        external_processor: ExternalEventProcessor = request.app.external_processor
-
-        frame = frame_processor.get_current_frame(camera_name)
-        event_id = external_processor.create_manual_event(
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.manual_event_create,
+        (
+            now,
             camera_name,
             label,
-            body.source_type,
-            body.sub_label,
-            body.score,
-            body.duration,
+            event_id,
             body.include_recording,
+            body.score,
+            body.sub_label,
+            body.duration,
+            body.source_type,
             body.draw,
-            frame,
-        )
-    except Exception as e:
-        logger.error(e)
-        return JSONResponse(
-            content=({"success": False, "message": "An unknown error occurred"}),
-            status_code=500,
-        )
+        ),
+    )
 
     return JSONResponse(
         content=(
@@ -1262,7 +1243,9 @@ def create_event(
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()
-        request.app.external_processor.finish_manual_event(event_id, end_time)
+        request.app.event_metadata_updater.publish(
+            EventMetadataTypeEnum.manual_event_end, (event_id, end_time)
+        )
     except Exception:
         return JSONResponse(
             content=(

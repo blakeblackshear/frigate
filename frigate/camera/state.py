@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import os
 import threading
 from collections import defaultdict
 from typing import Callable
@@ -16,6 +17,7 @@ from frigate.config import (
     FrigateConfig,
     ZoomingModeEnum,
 )
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
@@ -406,22 +408,58 @@ class CameraState:
 
             self.previous_frame_id = frame_name
 
-    def process_manual_event(self, topic: str, payload: tuple) -> None:
-        if topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
-            (
-                camera_name,
-                label,
-                event_id,
-                include_recording,
-                score,
-                sub_label,
-                duration,
-                source_type,
-                draw,
-            ) = payload
+    def save_manual_event_image(
+        self, event_id: str, label: str, draw: dict[str, list[dict]]
+    ) -> None:
+        img_frame = self.get_current_frame()
 
-        else:
-            pass
+        # write clean snapshot if enabled
+        if self.camera_config.snapshots.clean_copy:
+            ret, png = cv2.imencode(".png", img_frame)
+
+            if ret:
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        f"{self.camera_config.name}-{event_id}-clean.png",
+                    ),
+                    "wb",
+                ) as p:
+                    p.write(png.tobytes())
+
+        # write jpg snapshot with optional annotations
+        if draw.get("boxes") and isinstance(draw.get("boxes"), list):
+            for box in draw.get("boxes"):
+                x = int(box["box"][0] * self.camera_config.detect.width)
+                y = int(box["box"][1] * self.camera_config.detect.height)
+                width = int(box["box"][2] * self.camera_config.detect.width)
+                height = int(box["box"][3] * self.camera_config.detect.height)
+
+                draw_box_with_label(
+                    img_frame,
+                    x,
+                    y,
+                    x + width,
+                    y + height,
+                    label,
+                    f"{box.get('score', '-')}% {int(width * height)}",
+                    thickness=2,
+                    color=box.get("color", (255, 0, 0)),
+                )
+
+        ret, jpg = cv2.imencode(".jpg", img_frame)
+        with open(
+            os.path.join(CLIPS_DIR, f"{self.camera_config.name}-{event_id}.jpg"),
+            "wb",
+        ) as j:
+            j.write(jpg.tobytes())
+
+        # create thumbnail with max height of 175 and save
+        width = int(175 * img_frame.shape[1] / img_frame.shape[0])
+        thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
+        cv2.imwrite(
+            os.path.join(THUMB_DIR, self.camera_config.name, f"{event_id}.webp"), thumb
+        )
 
     def shutdown(self) -> None:
         for obj in self.tracked_objects.values():

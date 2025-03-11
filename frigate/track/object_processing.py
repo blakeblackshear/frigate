@@ -4,6 +4,7 @@ import logging
 import queue
 import threading
 from collections import defaultdict
+from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 
 import numpy as np
@@ -34,6 +35,12 @@ from frigate.util.image import SharedMemoryFrameManager
 logger = logging.getLogger(__name__)
 
 
+class ManualEventState(str, Enum):
+    complete = "complete"
+    start = "start"
+    end = "end"
+
+
 class TrackedObjectProcessor(threading.Thread):
     def __init__(
         self,
@@ -62,6 +69,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)
 
         self.camera_activity: dict[str, dict[str, any]] = {}
+        self.ongoing_manual_events: dict[str, str] = {}
 
         # {
         #   'zone_name': {
@@ -338,6 +346,94 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def create_manual_event(self, payload: tuple) -> None:
+        (
+            frame_time,
+            camera_name,
+            label,
+            event_id,
+            include_recording,
+            score,
+            sub_label,
+            duration,
+            source_type,
+            draw,
+        ) = payload
+
+        # save the snapshot image
+        self.camera_states[camera_name].save_manual_event_image(event_id, label, draw)
+        end_time = frame_time + duration if duration is not None else None
+
+        # send event to event maintainer
+        self.event_sender.publish(
+            (
+                EventTypeEnum.api,
+                EventStateEnum.start,
+                camera_name,
+                "",
+                {
+                    "id": event_id,
+                    "label": label,
+                    "sub_label": sub_label,
+                    "score": score,
+                    "camera": camera_name,
+                    "start_time": frame_time
+                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    "end_time": end_time,
+                    "has_clip": self.config.cameras[camera_name].record.enabled
+                    and include_recording,
+                    "has_snapshot": True,
+                    "type": source_type,
+                },
+            )
+        )
+
+        if source_type == "api":
+            self.ongoing_manual_events[event_id] = camera_name
+            self.detection_publisher.publish(
+                (
+                    camera_name,
+                    frame_time,
+                    {
+                        "state": (
+                            ManualEventState.complete
+                            if end_time
+                            else ManualEventState.start
+                        ),
+                        "label": f"{label}: {sub_label}" if sub_label else label,
+                        "event_id": event_id,
+                        "end_time": end_time,
+                    },
+                )
+            )
+
+    def end_manual_event(self, payload: tuple) -> None:
+        (event_id, end_time) = payload
+
+        self.event_sender.publish(
+            (
+                EventTypeEnum.api,
+                EventStateEnum.end,
+                None,
+                "",
+                {"id": event_id, "end_time": end_time},
+            )
+        )
+
+        if event_id in self.ongoing_manual_events:
+            self.detection_publisher.publish(
+                (
+                    self.ongoing_manual_events[event_id],
+                    end_time,
+                    {
+                        "state": ManualEventState.end,
+                        "event_id": event_id,
+                        "end_time": end_time,
+                    },
+                )
+            )
+            self.ongoing_manual_events.pop(event_id)
+
     def force_end_all_events(self, camera: str, camera_state: CameraState):
         """Ends all active events on camera when disabling."""
         last_frame_name = camera_state.previous_frame_id
@@ -409,9 +505,9 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
-                elif topic.endswith(
-                    EventMetadataTypeEnum.manual_event_create.value
-                ) or topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
+                elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
+                    self.create_manual_event(payload)
+                elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
                     camera_name = payload[0]
                     self.camera_states[camera_name].process_manual_event(topic, payload)
 

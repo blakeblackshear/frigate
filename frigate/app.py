@@ -43,7 +43,6 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
-from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.models import (
     Event,
@@ -57,7 +56,6 @@ from frigate.models import (
     User,
 )
 from frigate.object_detection import ObjectDetectProcess
-from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.output.output import output_frames
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
@@ -69,6 +67,7 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
+from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
