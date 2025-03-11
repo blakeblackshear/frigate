@@ -200,11 +200,11 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         variance = cv2.Laplacian(input, cv2.CV_64F).var()
 
         if variance < 60:  # image is very blurry
-            return 0.85
-        elif variance < 70:  # image is kind of blurry
-            return 0.9
-        elif variance < 80:
-            return 0.95
+            return 0.96
+        elif variance < 70:  # image moderately blurry
+            return 0.98
+        elif variance < 80:  # image is slightly blurry
+            return 0.99
         else:
             return 1.0
 
@@ -248,8 +248,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if not self.recognizer:
                 return None
 
+        # face recognition is best run on grayscale images
         img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+
+        # get blur factor before aligning face
         blur_factor = self.__get_blur_factor(img)
+
+        # align face and run recognition
         img = self.__align_face(img, img.shape[1], img.shape[0])
         index, distance = self.recognizer.predict(img)
 
