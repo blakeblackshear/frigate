@@ -7,6 +7,19 @@
     "object_lifecycle": "对象生命周期"
   },
   "details": {
+    "item": {
+      "title": "回放项目详情",
+      "desc": "回放项目详情",
+      "button": {
+        "share": "分享该回放",
+        "viewInExplore": "在探测中查看"
+      },
+      "tips": {
+        "mismatch_one": "检测到 {{count}} 个不可用的对象，并已包含在此审核项中。这些对象可能未达到警告或检测标准，或者已被清理/删除。",
+        "mismatch_other": "检测到 {{count}} 个不可用的对象，并已包含在此审核项中。这些对象可能未达到警告或检测标准，或者已被清理/删除。",
+        "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪对象，请调整您的配置：<em>{{objects}}</em>"
+      }
+    },
     "label": "标签",
     "editSubLable": "编辑子标签",
     "editSubLable.desc": "为 {{label}} 输入新的子标签",
@@ -14,7 +27,9 @@
     "topScore": "最高得分",
     "topScore.info": "最高分是跟踪对象的最高中位数得分，因此可能与搜索结果缩略图上显示的得分不同。",
     "estimatedSpeed": "预计速度",
+    "objects": "对象",
     "camera": "摄像头",
+    "zones": "区域",
     "timestamp": "时间",
     "button": {
       "findSimilar": "查找相似项"
@@ -52,6 +67,10 @@
     "submitToPlus": {
       "label": "提交至 Frigate+",
       "aria": "提交至 Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "在历史记录中查看",
+      "aria": "在历史记录中查看"
     }
   },
   "dialog": {

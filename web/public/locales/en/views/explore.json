@@ -7,6 +7,19 @@
     "object_lifecycle": "object lifecycle"
   },
   "details": {
+    "item": {
+      "title": "Review Item Details",
+      "desc": "Review item details",
+      "button": {
+        "share": "Share this review item",
+        "viewInExplore": "View in Explore"
+      },
+      "tips": {
+        "mismatch_one": "{{count}} unavailable object was detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
+        "mismatch_other": "{{count}} unavailable objects were detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
+        "hasMissingObjects": "Adjust your configuration if you want Frigate to save tracked objects for the following labels: <em>{{objects}}</em>"
+      }
+    },
     "label": "Label",
     "editSubLable": "Edit sub label",
     "editSubLable.desc": "Enter a new sub label for this {{label}}",
@@ -14,7 +27,9 @@
     "topScore": "Top Score",
     "topScore.info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail.",
     "estimatedSpeed": "Estimated Speed",
+    "objects": "Objects",
     "camera": "Camera",
+    "zones": "Zones",
     "timestamp": "Timestamp",
     "button": {
       "findSimilar": "Find Similar"
@@ -52,6 +67,10 @@
     "submitToPlus": {
       "label": "Submit to Frigate+",
       "aria": "Submit to Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "View in History",
+      "aria": "View in History"
     }
   },
   "dialog": {

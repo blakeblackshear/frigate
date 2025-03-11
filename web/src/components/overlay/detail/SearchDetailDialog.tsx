@@ -578,8 +578,8 @@ function ObjectDetailsTab({
                   <div className="flex flex-row items-center gap-2">
                     {averageEstimatedSpeed}{" "}
                     {config?.ui.unit_system == "imperial"
-                      ? t("unit.speed.mph")
-                      : t("unit.speed.kph")}{" "}
+                      ? t("unit.speed.mph", { ns: "common" })
+                      : t("unit.speed.kph", { ns: "common" })}{" "}
                     {velocityAngle != undefined && (
                       <span className="text-primary/40">
                         <FaArrowRight
@@ -624,7 +624,7 @@ function ObjectDetailsTab({
           />
           {config?.semantic_search.enabled && search.data.type == "object" && (
             <Button
-              aria-label="Find similar tracked objects"
+              aria-label={t("itemMenu.findSimilar.aria")}
               onClick={() => {
                 setSearch(undefined);
 
@@ -633,7 +633,7 @@ function ObjectDetailsTab({
                 }
               }}
             >
-              Find Similar
+              {t("itemMenu.findSimilar.label")}
             </Button>
           )}
         </div>
@@ -855,12 +855,10 @@ export function ObjectSnapshotTab({
                           "text-lg font-semibold leading-none tracking-tight"
                         }
                       >
-                        Submit To Frigate+
+                        {t("explore.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Objects in locations you want to avoid are not false
-                        positives. Submitting them as false positives will
-                        confuse the model.
+                        {t("explore.submitToPlus.desc")}
                       </div>
                     </div>
 
@@ -875,9 +873,13 @@ export function ObjectSnapshotTab({
                               onSubmitToPlus(false);
                             }}
                           >
-                            This is{" "}
-                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
-                            {search?.label}
+                            {/^[aeiou]/i.test(search?.label || "")
+                              ? t("explore.plus.review.true_other", {
+                                  label: search?.label,
+                                })
+                              : t("explore.plus.review.true_one", {
+                                  label: search?.label,
+                                })}
                           </Button>
                           <Button
                             className="text-white"
@@ -888,9 +890,13 @@ export function ObjectSnapshotTab({
                               onSubmitToPlus(true);
                             }}
                           >
-                            This is not{" "}
-                            {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
-                            {search?.label}
+                            {/^[aeiou]/i.test(search?.label || "")
+                              ? t("explore.plus.review.false_other", {
+                                  label: search?.label,
+                                })
+                              : t("explore.plus.review.false_one", {
+                                  label: search?.label,
+                                })}
                           </Button>
                         </>
                       )}
@@ -898,7 +904,7 @@ export function ObjectSnapshotTab({
                       {state == "submitted" && (
                         <div className="flex flex-row items-center justify-center gap-2">
                           <FaCheckCircle className="text-success" />
-                          Submitted
+                          {t("explore.plus.review.state.submitted")}
                         </div>
                       )}
                     </div>
@@ -917,6 +923,7 @@ type VideoTabProps = {
 };
 
 export function VideoTab({ search }: VideoTabProps) {
+  const { t } = useTranslation(["views/explore"]);
   const navigate = useNavigate();
   const { data: reviewItem } = useSWR<ReviewSegment>([
     `review/event/${search.id}`,
@@ -951,7 +958,9 @@ export function VideoTab({ search }: VideoTabProps) {
               </Chip>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>View in History</TooltipContent>
+              <TooltipContent>
+                {t("itemMenu.viewInHistory.label")}
+              </TooltipContent>
             </TooltipPortal>
           </Tooltip>
           <Tooltip>
@@ -966,7 +975,9 @@ export function VideoTab({ search }: VideoTabProps) {
               </a>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>Download</TooltipContent>
+              <TooltipContent>
+                {t("button.download", { ns: "common" })}
+              </TooltipContent>
             </TooltipPortal>
           </Tooltip>
         </div>
