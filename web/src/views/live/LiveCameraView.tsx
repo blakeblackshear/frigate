@@ -1038,9 +1038,7 @@ function FrigateCameraFeatures({
               Started manual on-demand recording.
             </div>
             {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
-              <div>
-                {t("manualRecording.recordDisabledTips")}
-              </div>
+              <div>{t("manualRecording.recordDisabledTips")}</div>
             ) : (
               <OnDemandRetentionMessage camera={camera} />
             )}
@@ -1237,7 +1235,9 @@ function FrigateCameraFeatures({
                       <PopoverTrigger asChild>
                         <div className="cursor-pointer p-0">
                           <LuInfo className="size-4" />
-                          <span className="sr-only">{t("button.info", {ns: "common"})}</span>
+                          <span className="sr-only">
+                            {t("button.info", { ns: "common" })}
+                          </span>
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 text-xs">
@@ -1265,7 +1265,9 @@ function FrigateCameraFeatures({
               {isRestreamed &&
                 Object.values(camera.live.streams).length > 0 && (
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="streaming-method">{t("stream.title")}</Label>
+                    <Label htmlFor="streaming-method">
+                      {t("stream.title")}
+                    </Label>
                     <Select
                       value={streamName}
                       onValueChange={(value) => {
@@ -1310,7 +1312,9 @@ function FrigateCameraFeatures({
                               <PopoverTrigger asChild>
                                 <div className="cursor-pointer p-0">
                                   <LuInfo className="size-4" />
-                                  <span className="sr-only">{t("button.info", {ns:"common"})}</span>
+                                  <span className="sr-only">
+                                    {t("button.info", { ns: "common" })}
+                                  </span>
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent className="w-80 text-xs">
@@ -1339,21 +1343,19 @@ function FrigateCameraFeatures({
                           {supports2WayTalk ? (
                             <>
                               <LuCheck className="size-4 text-success" />
-                              <div>
-                                {t("stream.twoWayTalk.available")}
-                              </div>
+                              <div>{t("stream.twoWayTalk.available")}</div>
                             </>
                           ) : (
                             <>
                               <LuX className="size-4 text-danger" />
-                              <div>
-                                {t("stream.twoWayTalk.available")}
-                              </div>
+                              <div>{t("stream.twoWayTalk.available")}</div>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
-                                    <span className="sr-only">{t("button.info", {ns: "common"})}</span>
+                                    <span className="sr-only">
+                                      {t("button.info", { ns: "common" })}
+                                    </span>
                                   </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80 text-xs">
@@ -1365,7 +1367,9 @@ function FrigateCameraFeatures({
                                       rel="noopener noreferrer"
                                       className="inline"
                                     >
-                                      {t("stream.twoWayTalk.tips.documentation")}
+                                      {t(
+                                        "stream.twoWayTalk.tips.documentation",
+                                      )}
                                       <LuExternalLink className="ml-2 inline-flex size-3" />
                                     </Link>
                                   </div>
@@ -1550,7 +1554,9 @@ function FrigateCameraFeatures({
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
                       <LuInfo className="size-4" />
-                      <span className="sr-only">{t("button.info", {ns: "common"})}</span>
+                      <span className="sr-only">
+                        {t("button.info", { ns: "common" })}
+                      </span>
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 text-xs">
@@ -1621,7 +1627,9 @@ function FrigateCameraFeatures({
                         <PopoverTrigger asChild>
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
-                            <span className="sr-only">{t("button.info", {ns: "common"})}</span>
+                            <span className="sr-only">
+                              {t("button.info", { ns: "common" })}
+                            </span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-52 text-xs">
@@ -1660,7 +1668,9 @@ function FrigateCameraFeatures({
                           <PopoverTrigger asChild>
                             <div className="cursor-pointer p-0">
                               <LuInfo className="size-4" />
-                              <span className="sr-only">{t("button.info", {ns: "common"})}</span>
+                              <span className="sr-only">
+                                {t("button.info", { ns: "common" })}
+                              </span>
                             </div>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 text-xs">
@@ -1687,9 +1697,7 @@ function FrigateCameraFeatures({
                   <div className="flex flex-row items-center gap-2">
                     <IoIosWarning className="mr-1 size-8 text-danger" />
 
-                    <p className="text-sm">
-                      {t("stream.lowBandwidth.tips")}
-                    </p>
+                    <p className="text-sm">{t("stream.lowBandwidth.tips")}</p>
                   </div>
                   <Button
                     className={`flex items-center gap-2.5 rounded-lg`}
@@ -1699,7 +1707,9 @@ function FrigateCameraFeatures({
                     onClick={() => setLowBandwidth(false)}
                   >
                     <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                    <div className="text-primary-variant">{t("stream.lowBandwidth.resetStream")}</div>
+                    <div className="text-primary-variant">
+                      {t("stream.lowBandwidth.resetStream")}
+                    </div>
                   </Button>
                 </div>
               )}

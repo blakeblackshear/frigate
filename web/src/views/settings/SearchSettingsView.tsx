@@ -58,7 +58,7 @@ export default function ExploreSettingsView({
 
   useEffect(() => {
     if (config) {
-      if (ExploreSettings?.enabled == undefined) {
+      if (exploreSettings?.enabled == undefined) {
         setExploreSettings({
           enabled: config.semantic_search.enabled,
           reindex: config.semantic_search.reindex,
@@ -87,7 +87,7 @@ export default function ExploreSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${ExploreSettings.enabled ? "True" : "False"}&semantic_search.reindex=${ExploreSettings.reindex ? "True" : "False"}&semantic_search.model_size=${ExploreSettings.model_size}`,
+        `config/set?semantic_search.enabled=${exploreSettings.enabled ? "True" : "False"}&semantic_search.reindex=${exploreSettings.reindex ? "True" : "False"}&semantic_search.model_size=${exploreSettings.model_size}`,
         {
           requires_restart: 0,
         },
@@ -131,9 +131,9 @@ export default function ExploreSettingsView({
       });
   }, [
     updateConfig,
-    ExploreSettings.enabled,
-    ExploreSettings.reindex,
-    ExploreSettings.model_size,
+    exploreSettings.enabled,
+    exploreSettings.reindex,
+    exploreSettings.model_size,
     t,
   ]);
 
@@ -202,8 +202,8 @@ export default function ExploreSettingsView({
             <Switch
               id="enabled"
               className="mr-3"
-              disabled={ExploreSettings.enabled === undefined}
-              checked={ExploreSettings.enabled === true}
+              disabled={exploreSettings.enabled === undefined}
+              checked={exploreSettings.enabled === true}
               onCheckedChange={(isChecked) => {
                 handleSearchConfigChange({ enabled: isChecked });
               }}
@@ -219,8 +219,8 @@ export default function ExploreSettingsView({
               <Switch
                 id="reindex"
                 className="mr-3"
-                disabled={ExploreSettings.reindex === undefined}
-                checked={ExploreSettings.reindex === true}
+                disabled={exploreSettings.reindex === undefined}
+                checked={exploreSettings.reindex === true}
                 onCheckedChange={(isChecked) => {
                   handleSearchConfigChange({ reindex: isChecked });
                 }}
@@ -263,7 +263,7 @@ export default function ExploreSettingsView({
               </div>
             </div>
             <Select
-              value={ExploreSettings.model_size}
+              value={exploreSettings.model_size}
               onValueChange={(value) =>
                 handleSearchConfigChange({
                   model_size: value as SearchModelSize,
@@ -273,7 +273,7 @@ export default function ExploreSettingsView({
               <SelectTrigger className="w-20">
                 {t(
                   "explore.semanticSearch.modelSize." +
-                    ExploreSettings.model_size,
+                    exploreSettings.model_size,
                 )}
               </SelectTrigger>
               <SelectContent>

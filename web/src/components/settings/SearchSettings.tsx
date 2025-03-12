@@ -159,7 +159,9 @@ export function SearchTypeContent({
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
         <div className="space-y-0.5">
-          <div className="text-md">{t("explore.settings.searchSource.label")}</div>
+          <div className="text-md">
+            {t("explore.settings.searchSource.label")}
+          </div>
           <div className="space-y-1 text-xs text-muted-foreground">
             {t("explore.settings.searchSource.desc")}
           </div>
