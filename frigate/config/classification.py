@@ -67,6 +67,9 @@ class FaceRecognitionConfig(FrigateBaseModel):
     save_attempts: bool = Field(
         default=True, title="Save images of face detections for training."
     )
+    blur_confidence_filter: bool = Field(
+        default=True, title="Apply blur quality filter to face confidence."
+    )
 
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):

@@ -23,10 +23,9 @@ from frigate.const import (
     CLIPS_DIR,
     UPSERT_REVIEW_SEGMENT,
 )
-from frigate.events.external import ManualEventState
 from frigate.models import ReviewSegment
-from frigate.object_processing import TrackedObject
 from frigate.review.types import SeverityEnum
+from frigate.track.object_processing import ManualEventState, TrackedObject
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
 
 logger = logging.getLogger(__name__)
