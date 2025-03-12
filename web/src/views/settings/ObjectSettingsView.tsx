@@ -373,7 +373,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                   <div className="text-md mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
-                        Score
+                        {t("debug.objectShapeFilterDrawing.score")}
                       </p>
                       {obj.score
                         ? (obj.score * 100).toFixed(1).toString()
@@ -384,7 +384,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                   <div className="text-md mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
-                        Ratio
+                        {t("debug.objectShapeFilterDrawing.ratio")}
                       </p>
                       {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
                     </div>
@@ -392,7 +392,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                   <div className="text-md mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
-                        Area
+                        {t("debug.objectShapeFilterDrawing.area")}
                       </p>
                       {obj.area ? (
                         <>

@@ -246,7 +246,10 @@
       "title": "Object Shape Filter Drawing",
       "desc": "Draw a rectangle on the image to view area and ratio details",
       "tips": "Enable this option to draw a rectangle on the camera image to show its area and ratio. These values can then be used to set object shape filter parameters in your config.",
-      "document": "Read the documentation "
+      "document": "Read the documentation ",
+      "score": "Score",
+      "ratio": "Ratio",
+      "area": "Area"
     }
   },
   "users": {
