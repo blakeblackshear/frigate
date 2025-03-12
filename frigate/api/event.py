@@ -101,7 +101,7 @@ def events(params: EventsQueryParams = Depends()):
     min_length = params.min_length
     max_length = params.max_length
     event_id = params.event_id
-    identifier = params.identifier
+    recognized_license_plate = params.recognized_license_plate
 
     sort = params.sort
 
@@ -159,31 +159,44 @@ def events(params: EventsQueryParams = Depends()):
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append((sub_label_clause))
 
-    if identifier != "all":
-        # use matching so joined identifiers are included
-        # for example an identifier 'ABC123' would get events
-        # with identifiers 'ABC123' and 'ABC123, XYZ789'
-        identifier_clauses = []
-        filtered_identifiers = identifier.split(",")
+    if recognized_license_plate != "all":
+        # use matching so joined recognized_license_plates are included
+        # for example a recognized license plate 'ABC123' would get events
+        # with recognized license plates 'ABC123' and 'ABC123, XYZ789'
+        recognized_license_plate_clauses = []
+        filtered_recognized_license_plates = recognized_license_plate.split(",")
 
-        if "None" in filtered_identifiers:
-            filtered_identifiers.remove("None")
-            identifier_clauses.append((Event.data["identifier"].is_null()))
+        if "None" in filtered_recognized_license_plates:
+            filtered_recognized_license_plates.remove("None")
+            recognized_license_plate_clauses.append(
+                (Event.data["recognized_license_plate"].is_null())
+            )
 
-        for identifier in filtered_identifiers:
+        for recognized_license_plate in filtered_recognized_license_plates:
             # Exact matching plus list inclusion
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") == identifier)
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    == recognized_license_plate
+                )
             )
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") % f"*{identifier},*")
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*{recognized_license_plate},*"
+                )
             )
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*, {recognized_license_plate}*"
+                )
             )
 
-        identifier_clause = reduce(operator.or_, identifier_clauses)
-        clauses.append((identifier_clause))
+        recognized_license_plate_clause = reduce(
+            operator.or_, recognized_license_plate_clauses
+        )
+        clauses.append((recognized_license_plate_clause))
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -367,8 +380,8 @@ def events_explore(limit: int = 10):
                         "average_estimated_speed",
                         "velocity_angle",
                         "path_data",
-                        "identifier",
-                        "identifier_score",
+                        "recognized_license_plate",
+                        "recognized_license_plate_score",
                     ]
                 },
                 "event_count": label_counts[event.label],
@@ -426,7 +439,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
     is_submitted = params.is_submitted
-    identifier = params.identifier
+    recognized_license_plate = params.recognized_license_plate
 
     # for similarity search
     event_id = params.event_id
@@ -496,31 +509,44 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         event_filters.append((reduce(operator.or_, zone_clauses)))
 
-    if identifier != "all":
-        # use matching so joined identifiers are included
-        # for example an identifier 'ABC123' would get events
-        # with identifiers 'ABC123' and 'ABC123, XYZ789'
-        identifier_clauses = []
-        filtered_identifiers = identifier.split(",")
+    if recognized_license_plate != "all":
+        # use matching so joined recognized_license_plates are included
+        # for example an recognized_license_plate 'ABC123' would get events
+        # with recognized_license_plates 'ABC123' and 'ABC123, XYZ789'
+        recognized_license_plate_clauses = []
+        filtered_recognized_license_plates = recognized_license_plate.split(",")
 
-        if "None" in filtered_identifiers:
-            filtered_identifiers.remove("None")
-            identifier_clauses.append((Event.data["identifier"].is_null()))
+        if "None" in filtered_recognized_license_plates:
+            filtered_recognized_license_plates.remove("None")
+            recognized_license_plate_clauses.append(
+                (Event.data["recognized_license_plate"].is_null())
+            )
 
-        for identifier in filtered_identifiers:
+        for recognized_license_plate in filtered_recognized_license_plates:
             # Exact matching plus list inclusion
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") == identifier)
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    == recognized_license_plate
+                )
             )
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") % f"*{identifier},*")
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*{recognized_license_plate},*"
+                )
             )
-            identifier_clauses.append(
-                (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*, {recognized_license_plate}*"
+                )
             )
 
-        identifier_clause = reduce(operator.or_, identifier_clauses)
-        event_filters.append((identifier_clause))
+        recognized_license_plate_clause = reduce(
+            operator.or_, recognized_license_plate_clauses
+        )
+        event_filters.append((recognized_license_plate_clause))
 
     if after:
         event_filters.append((Event.start_time > after))
@@ -683,8 +709,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 "average_estimated_speed",
                 "velocity_angle",
                 "path_data",
-                "identifier",
-                "identifier_score",
+                "recognized_license_plate",
+                "recognized_license_plate_score",
             ]
         }
 
