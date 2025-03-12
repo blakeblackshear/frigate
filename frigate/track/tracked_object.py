@@ -153,8 +153,12 @@ class TrackedObject:
                     "current_estimated_speed": self.current_estimated_speed,
                     "velocity_angle": self.velocity_angle,
                     "path_data": self.path_data,
-                    "identifier": obj_data.get("identifier"),
-                    "identifier_score": obj_data.get("identifier_score"),
+                    "recognized_license_plate": obj_data.get(
+                        "recognized_license_plate"
+                    ),
+                    "recognized_license_plate_score": obj_data.get(
+                        "recognized_license_plate_score"
+                    ),
                 }
                 thumb_update = True
 
@@ -367,7 +371,7 @@ class TrackedObject:
             "average_estimated_speed": self.average_estimated_speed,
             "velocity_angle": self.velocity_angle,
             "path_data": self.path_data,
-            "identifier": self.obj_data.get("identifier"),
+            "recognized_license_plate": self.obj_data.get("recognized_license_plate"),
         }
 
         return event
