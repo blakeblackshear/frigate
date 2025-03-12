@@ -57,8 +57,14 @@
       "defaultView.unfilteredGrid": "未过滤网格",
       "gridColumns": "网格列数",
       "gridColumns.desc": "选择网格视图中的列数。",
-      "searchSource": "搜索源",
-      "searchSource.desc": "选择是搜索缩略图还是跟踪对象的描述。"
+      "searchSource": {
+        "label": "搜索源",
+        "desc": "选择是搜索缩略图还是跟踪对象的描述。",
+        "options": {
+          "thumbnailImage": "缩略图",
+          "description": "描述"
+        }
+      }
     }
   }
   

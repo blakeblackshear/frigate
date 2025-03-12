@@ -159,14 +159,14 @@ export function SearchTypeContent({
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
         <div className="space-y-0.5">
-          <div className="text-md">{t("explore.settings.searchSource")}</div>
+          <div className="text-md">{t("explore.settings.searchSource.label")}</div>
           <div className="space-y-1 text-xs text-muted-foreground">
             {t("explore.settings.searchSource.desc")}
           </div>
         </div>
         <div className="mt-2.5 flex flex-col gap-2.5">
           <FilterSwitch
-            label="Thumbnail Image"
+            label={t("explore.settings.searchSource.options.thumbnailImage")}
             isChecked={searchSources?.includes("thumbnail") ?? false}
             onCheckedChange={(isChecked) => {
               const updatedSources = searchSources ? [...searchSources] : [];
@@ -184,7 +184,7 @@ export function SearchTypeContent({
             }}
           />
           <FilterSwitch
-            label="Description"
+            label={t("explore.settings.searchSource.options.description")}
             isChecked={searchSources?.includes("description") ?? false}
             onCheckedChange={(isChecked) => {
               const updatedSources = searchSources ? [...searchSources] : [];

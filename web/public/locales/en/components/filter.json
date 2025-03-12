@@ -57,8 +57,14 @@
       "defaultView.unfilteredGrid": "Unfiltered Grid",
       "gridColumns": "Grid Columns",
       "gridColumns.desc": "Select the number of columns in the grid view.",
-      "searchSource": "Search Source",
-      "searchSource.desc": "Choose whether to search the thumbnails or descriptions of your tracked objects."
+      "searchSource": {
+        "label": "Search Source",
+        "desc": "Choose whether to search the thumbnaDils or descriptions of your tracked objects.",
+        "options": {
+          "thumbnailImage": "Thumbnail Image",
+          "description": "Description"
+        }
+      }
     }
   }
 }
