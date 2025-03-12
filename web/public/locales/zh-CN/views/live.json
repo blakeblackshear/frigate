@@ -72,6 +72,17 @@
     "disable": "隐藏视频流统计信息"
   },
   "manualRecording": {
+    "title": "按需录制",
+    "tips": "根据此摄像机的录制保留设置，手动启动事件。",
+    "playInBackground": {
+      "label": "后台播放",
+      "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "showStats": {
+      "label": "显示统计信息",
+      "desc": "启用此选项可在摄像机画面上叠加显示视频流统计信息。"
+    },
+    "debugView": "调试视图",
     "start": "开始手动按需录制",
     "started": "已启用手动按需录制",
     "failedToStart": "启动手动录制失败",
@@ -85,5 +96,37 @@
   "audio": "音频",
   "suspend": {
     "forTime": "暂停时长："
+  },
+  "stream": {
+    "title": "视频流",
+    "audio": {
+      "tips": "音频必须从摄像机输出并在 go2rtc 中配置为此视频流使用。",
+      "tips.documentation": "阅读文档 ",
+      "available": "此视频流支持音频",
+      "unavailable": "此视频流不支持音频"
+    },
+    "twoWayTalk": {
+      "tips": "您的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",
+      "tips.documentation": "阅读文档 ",
+      "available": "此视频流支持双向对讲",
+      "unavailable": "此视频流不支持双向对讲"
+    },
+    "lowBandwidth": {
+      "tips": "由于缓冲或视频流错误，实时视图处于低带宽模式。",
+      "resetStream": "重置视频流"
+    },
+    "playInBackground": {
+      "label": "后台播放",
+      "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} 设置",
+    "cameraEnabled": "摄像机已启用",
+    "objectDetection": "对象检测",
+    "recording": "录制",
+    "snapshots": "快照",
+    "audioDetection": "音频检测",
+    "autotracking": "自动跟踪"
   }
 }

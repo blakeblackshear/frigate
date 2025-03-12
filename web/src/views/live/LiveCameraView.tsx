@@ -1233,7 +1233,7 @@ function FrigateCameraFeatures({
                       <PopoverTrigger asChild>
                         <div className="cursor-pointer p-0">
                           <LuInfo className="size-4" />
-                          <span className="sr-only">Info</span>
+                          <span className="sr-only">{t("button.info", {ns: "common"})}</span>
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 text-xs">
@@ -1261,7 +1261,7 @@ function FrigateCameraFeatures({
               {isRestreamed &&
                 Object.values(camera.live.streams).length > 0 && (
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="streaming-method">Stream</Label>
+                    <Label htmlFor="streaming-method">{t("stream.title")}</Label>
                     <Select
                       value={streamName}
                       onValueChange={(value) => {
@@ -1296,22 +1296,21 @@ function FrigateCameraFeatures({
                         {supportsAudioOutput ? (
                           <>
                             <LuCheck className="size-4 text-success" />
-                            <div>Audio is available for this stream</div>
+                            <div>{t("stream.audio.available")}</div>
                           </>
                         ) : (
                           <>
                             <LuX className="size-4 text-danger" />
-                            <div>Audio is unavailable for this stream</div>
+                            <div>{t("stream.audio.unavailable")}</div>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <div className="cursor-pointer p-0">
                                   <LuInfo className="size-4" />
-                                  <span className="sr-only">Info</span>
+                                  <span className="sr-only">{t("button.info", {ns:"common"})}</span>
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent className="w-80 text-xs">
-                                Audio must be output from your camera and
-                                configured in go2rtc for this stream.
+                                {t("stream.audio.tips")}
                                 <div className="mt-2 flex items-center text-primary">
                                   <Link
                                     to="https://docs.frigate.video/configuration/live"
@@ -1319,7 +1318,7 @@ function FrigateCameraFeatures({
                                     rel="noopener noreferrer"
                                     className="inline"
                                   >
-                                    Read the documentation{" "}
+                                    {t("stream.audio.tips.documentation")}
                                     <LuExternalLink className="ml-2 inline-flex size-3" />
                                   </Link>
                                 </div>
@@ -1337,25 +1336,24 @@ function FrigateCameraFeatures({
                             <>
                               <LuCheck className="size-4 text-success" />
                               <div>
-                                Two-way talk is available for this stream
+                                {t("stream.twoWayTalk.available")}
                               </div>
                             </>
                           ) : (
                             <>
                               <LuX className="size-4 text-danger" />
                               <div>
-                                Two-way talk is unavailable for this stream
+                                {t("stream.twoWayTalk.available")}
                               </div>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
                                     <LuInfo className="size-4" />
-                                    <span className="sr-only">Info</span>
+                                    <span className="sr-only">{t("button.info", {ns: "common"})}</span>
                                   </div>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80 text-xs">
-                                  Your device must suppport the feature and
-                                  WebRTC must be configured for two-way talk.
+                                  {t("stream.twoWayTalk.tips")}
                                   <div className="mt-2 flex items-center text-primary">
                                     <Link
                                       to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
@@ -1363,7 +1361,7 @@ function FrigateCameraFeatures({
                                       rel="noopener noreferrer"
                                       className="inline"
                                     >
-                                      Read the documentation{" "}
+                                      {t("stream.twoWayTalk.tips.documentation")}
                                       <LuExternalLink className="ml-2 inline-flex size-3" />
                                     </Link>
                                   </div>
@@ -1380,20 +1378,19 @@ function FrigateCameraFeatures({
                           <IoIosWarning className="mr-1 size-8 text-danger" />
 
                           <p className="text-sm">
-                            Live view is in low-bandwidth mode due to buffering
-                            or stream errors.
+                            {t("stream.lowBandwidth.tips")}
                           </p>
                         </div>
                         <Button
                           className={`flex items-center gap-2.5 rounded-lg`}
-                          aria-label="Reset the stream"
+                          aria-label={t("stream.lowBandwidth.resetStream")}
                           variant="outline"
                           size="sm"
                           onClick={() => setLowBandwidth(false)}
                         >
                           <MdOutlineRestartAlt className="size-5 text-primary-variant" />
                           <div className="text-primary-variant">
-                            Reset stream
+                            {t("stream.lowBandwidth.resetStream")}
                           </div>
                         </Button>
                       </div>
@@ -1407,7 +1404,7 @@ function FrigateCameraFeatures({
                       className="mx-0 cursor-pointer text-primary"
                       htmlFor="backgroundplay"
                     >
-                      Play in background
+                      {t("stream.playInBackground.label")}
                     </Label>
                     <Switch
                       className="ml-1"
@@ -1419,8 +1416,7 @@ function FrigateCameraFeatures({
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Enable this option to continue streaming when the player is
-                    hidden.
+                    {t("stream.playInBackground.tips")}
                   </p>
                 </div>
               )}
@@ -1476,7 +1472,7 @@ function FrigateCameraFeatures({
           variant="primary"
           Icon={FaCog}
           isActive={false}
-          title={`${camera} Settings`}
+          title={t("cameraSettings.title", { camera })}
         />
       </DrawerTrigger>
       <DrawerContent className="rounded-2xl px-2 py-4">
@@ -1484,14 +1480,14 @@ function FrigateCameraFeatures({
           {isAdmin && (
             <>
               <FilterSwitch
-                label="Camera Enabled"
+                label={t("cameraSettings.cameraEnabled")}
                 isChecked={enabledState == "ON"}
                 onCheckedChange={() =>
                   sendEnabled(enabledState == "ON" ? "OFF" : "ON")
                 }
               />
               <FilterSwitch
-                label="Object Detection"
+                label={t("cameraSettings.objectDetection")}
                 isChecked={detectState == "ON"}
                 onCheckedChange={() =>
                   sendDetect(detectState == "ON" ? "OFF" : "ON")
@@ -1499,7 +1495,7 @@ function FrigateCameraFeatures({
               />
               {recordingEnabled && (
                 <FilterSwitch
-                  label="Recording"
+                  label={t("cameraSettings.recording")}
                   isChecked={recordState == "ON"}
                   onCheckedChange={() =>
                     sendRecord(recordState == "ON" ? "OFF" : "ON")
@@ -1507,7 +1503,7 @@ function FrigateCameraFeatures({
                 />
               )}
               <FilterSwitch
-                label="Snapshots"
+                label={t("cameraSettings.snapshots")}
                 isChecked={snapshotState == "ON"}
                 onCheckedChange={() =>
                   sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
@@ -1515,7 +1511,7 @@ function FrigateCameraFeatures({
               />
               {audioDetectEnabled && (
                 <FilterSwitch
-                  label="Audio Detection"
+                  label={t("cameraSettings.audioDetection")}
                   isChecked={audioState == "ON"}
                   onCheckedChange={() =>
                     sendAudio(audioState == "ON" ? "OFF" : "ON")
@@ -1524,7 +1520,7 @@ function FrigateCameraFeatures({
               )}
               {autotrackingEnabled && (
                 <FilterSwitch
-                  label="Autotracking"
+                  label={t("cameraSettings.autotracking")}
                   isChecked={autotrackingState == "ON"}
                   onCheckedChange={() =>
                     sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
@@ -1550,7 +1546,7 @@ function FrigateCameraFeatures({
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
                       <LuInfo className="size-4" />
-                      <span className="sr-only">Info</span>
+                      <span className="sr-only">{t("button.info", {ns: "common"})}</span>
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 text-xs">
@@ -1577,7 +1573,7 @@ function FrigateCameraFeatures({
           )}
           {isRestreamed && Object.values(camera.live.streams).length > 0 && (
             <div className="mt-1 p-2">
-              <div className="mb-1 text-sm">Stream</div>
+              <div className="mb-1 text-sm">{t("stream.title")}</div>
               <Select
                 value={streamName}
                 onValueChange={(value) => {
@@ -1611,22 +1607,21 @@ function FrigateCameraFeatures({
                   {supportsAudioOutput ? (
                     <>
                       <LuCheck className="size-4 text-success" />
-                      <div>Audio is available for this stream</div>
+                      <div>{t("stream.audio.available")}</div>
                     </>
                   ) : (
                     <>
                       <LuX className="size-4 text-danger" />
-                      <div>Audio is unavailable for this stream</div>
+                      <div>{t("stream.audio.unavailable")}</div>
                       <Popover>
                         <PopoverTrigger asChild>
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
-                            <span className="sr-only">Info</span>
+                            <span className="sr-only">{t("button.info", {ns: "common"})}</span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-52 text-xs">
-                          Audio must be output from your camera and configured
-                          in go2rtc for this stream.
+                          {t("stream.audio.tips")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
                               to="https://docs.frigate.video/configuration/live"
@@ -1634,7 +1629,7 @@ function FrigateCameraFeatures({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              Read the documentation{" "}
+                              {t("stream.audio.tips.documentation")}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>
@@ -1651,22 +1646,21 @@ function FrigateCameraFeatures({
                     {supports2WayTalk ? (
                       <>
                         <LuCheck className="size-4 text-success" />
-                        <div>Two-way talk is available for this stream</div>
+                        <div>{t("stream.twoWayTalk.available")}</div>
                       </>
                     ) : (
                       <>
                         <LuX className="size-4 text-danger" />
-                        <div>Two-way talk is unavailable for this stream</div>
+                        <div>{t("stream.twoWayTalk.unavailable")}</div>
                         <Popover>
                           <PopoverTrigger asChild>
                             <div className="cursor-pointer p-0">
                               <LuInfo className="size-4" />
-                              <span className="sr-only">Info</span>
+                              <span className="sr-only">{t("button.info", {ns: "common"})}</span>
                             </div>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 text-xs">
-                            Your device must suppport the feature and WebRTC
-                            must be configured for two-way talk.
+                            {t("stream.twoWayTalk.tips")}
                             <div className="mt-2 flex items-center text-primary">
                               <Link
                                 to="https://docs.frigate.video/configuration/live/#webrtc-extra-configuration"
@@ -1674,7 +1668,7 @@ function FrigateCameraFeatures({
                                 rel="noopener noreferrer"
                                 className="inline"
                               >
-                                Read the documentation{" "}
+                                {t("stream.twoWayTalk.tips.documentation")}
                                 <LuExternalLink className="ml-2 inline-flex size-3" />
                               </Link>
                             </div>
@@ -1690,8 +1684,7 @@ function FrigateCameraFeatures({
                     <IoIosWarning className="mr-1 size-8 text-danger" />
 
                     <p className="text-sm">
-                      Live view is in low-bandwidth mode due to buffering or
-                      stream errors.
+                      {t("stream.lowBandwidth.tips")}
                     </p>
                   </div>
                   <Button
@@ -1702,7 +1695,7 @@ function FrigateCameraFeatures({
                     onClick={() => setLowBandwidth(false)}
                   >
                     <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                    <div className="text-primary-variant">Reset stream</div>
+                    <div className="text-primary-variant">{t("stream.lowBandwidth.resetStream")}</div>
                   </Button>
                 </div>
               )}
@@ -1710,7 +1703,7 @@ function FrigateCameraFeatures({
           )}
           <div className="flex flex-col gap-1 px-2">
             <div className="mb-1 text-sm font-medium leading-none">
-              On-Demand Recording
+              {t("manualRecording.title")}
             </div>
             <Button
               onClick={handleEventButtonClick}
@@ -1722,43 +1715,40 @@ function FrigateCameraFeatures({
               {t("manualRecording." + isRecording ? "end" : "start")}
             </Button>
             <p className="text-sm text-muted-foreground">
-              Start a manual event based on this camera's recording retention
-              settings.
+              {t("manualRecording.tips")}
             </p>
           </div>
           {isRestreamed && (
             <>
               <div className="flex flex-col gap-2">
                 <FilterSwitch
-                  label="Play in Background"
+                  label={t("manualRecording.playInBackground.label")}
                   isChecked={playInBackground}
                   onCheckedChange={(checked) => {
                     setPlayInBackground(checked);
                   }}
                 />
                 <p className="mx-2 -mt-2 text-sm text-muted-foreground">
-                  Enable this option to continue streaming when the player is
-                  hidden.
+                  {t("manualRecording.playInBackground.desc")}
                 </p>
               </div>
               <div className="flex flex-col gap-2">
                 <FilterSwitch
-                  label="Show Stats"
+                  label={t("manualRecording.showStats.label")}
                   isChecked={showStats}
                   onCheckedChange={(checked) => {
                     setShowStats(checked);
                   }}
                 />
                 <p className="mx-2 -mt-2 text-sm text-muted-foreground">
-                  Enable this option to show stream statistics as an overlay on
-                  the camera feed.
+                  {t("manualRecording.showStats.desc")}
                 </p>
               </div>
             </>
           )}
           <div className="mb-3 flex flex-col gap-1 px-2">
             <div className="flex items-center justify-between text-sm font-medium leading-none">
-              Debug View
+              {t("manualRecording.debugView")}
               <LuExternalLink
                 onClick={() =>
                   navigate(`/settings?page=debug&camera=${camera.name}`)

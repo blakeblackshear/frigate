@@ -72,6 +72,17 @@
     "disable": "Hide Stream Stats"
   },
   "manualRecording": {
+    "title": "On-Demand Recording",
+    "tips": "Start a manual event based on this camera's recording retention settings.",
+    "playInBackground": {
+      "label": "Play in background",
+      "desc": "Enable this option to continue streaming when the player is hidden."
+    },
+    "showStats": {
+      "label": "Show Stats",
+      "desc": "Enable this option to show stream statistics as an overlay on the camera feed."
+    },
+    "debugView": "Debug View",
     "start": "Start on-demand recording",
     "started": "Started manual on-demand recording.",
     "failedToStart": "Failed to start manual on-demand recording.",
@@ -85,5 +96,38 @@
   "audio": "Audio",
   "suspend:": {
     "forTime": "Suspend for: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": "Audio must be output from your camera and configured in go2rtc for this stream.",
+      "tips.documentation": "Read the documentation ",
+      "available": "Audio is available for this stream",
+      "unavailable": "Audio is not available for this stream"
+    },
+    "twoWayTalk": {
+      "tips": "Your device must suppport the feature and WebRTC must be configured for two-way talk.",
+      "tips.documentation": "Read the documentation ",
+      "available": "Two-way talk is available for this stream",
+      "unavailable": "Two-way talk is unavailable for this stream"
+    },
+    "lowBandwidth": {
+      "tips": "Live view is in low-bandwidth mode due to buffering or stream errors.",
+      "resetStream": "Reset stream"
+    },
+    "playInBackground": {
+      "label": "Play in background",
+      "tips": "Enable this option to continue streaming when the player is hidden."
+    },
+    "": ""
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Settings",
+    "cameraEnabled": "Camera Enabled",
+    "objectDetection": "Object Detection",
+    "recording": "Recording",
+    "snapshots": "Snapshots",
+    "audioDetection": "Audio Detection",
+    "autotracking": "Autotracking"
   }
 }
