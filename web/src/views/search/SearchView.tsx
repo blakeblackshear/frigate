@@ -122,7 +122,7 @@ export default function SearchView({
 
   const { data: allSubLabels } = useSWR("sub_labels");
   const { data: allRecognizedLicensePlates } = useSWR(
-    "recognized_license_plate",
+    "recognized_license_plates",
   );
 
   const allZones = useMemo<string[]>(() => {
