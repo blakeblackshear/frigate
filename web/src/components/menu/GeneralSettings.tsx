@@ -302,7 +302,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Light mode"
+                    aria-label={t("menu.language.en")}
                     onClick={() => setLanguage("en")}
                   >
                     {language.trim() === "en" ? (
