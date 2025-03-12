@@ -80,24 +80,15 @@ if go2rtc_config["webrtc"].get("candidates") is None:
 
     go2rtc_config["webrtc"]["candidates"] = default_candidates
 
-# sets default RTSP response to be equivalent to ?video=h264,h265&audio=aac
-# this means user does not need to specify audio codec when using restream
-# as source for frigate and the integration supports HLS playback
-if go2rtc_config.get("rtsp") is None:
-    go2rtc_config["rtsp"] = {"default_query": "mp4"}
-else:
-    if go2rtc_config["rtsp"].get("default_query") is None:
-        go2rtc_config["rtsp"]["default_query"] = "mp4"
+if go2rtc_config["rtsp"].get("username") is not None:
+    go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
+        **FRIGATE_ENV_VARS
+    )
 
-    if go2rtc_config["rtsp"].get("username") is not None:
-        go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
-            **FRIGATE_ENV_VARS
-        )
-
-    if go2rtc_config["rtsp"].get("password") is not None:
-        go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
-            **FRIGATE_ENV_VARS
-        )
+if go2rtc_config["rtsp"].get("password") is not None:
+    go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
+        **FRIGATE_ENV_VARS
+    )
 
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")

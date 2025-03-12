@@ -21,7 +21,7 @@ __all__ = [
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "2"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
 
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
+RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic-audio-aac"
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-threads",
     "2",
