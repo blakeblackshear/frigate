@@ -1064,7 +1064,8 @@ class LicensePlateProcessingMixin:
             )
 
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.identifier, (id, top_plate, avg_confidence)
+            EventMetadataTypeEnum.recognized_license_plate,
+            (id, top_plate, avg_confidence),
         )
 
         self.detected_license_plates[id] = {

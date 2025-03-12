@@ -619,37 +619,39 @@ def get_sub_labels(split_joined: Optional[int] = None):
     return JSONResponse(content=sub_labels)
 
 
-@router.get("/identifiers")
-def get_identifiers(split_joined: Optional[int] = None):
+@router.get("/recognized_license_plates")
+def get_recognized_license_plates(split_joined: Optional[int] = None):
     try:
         events = Event.select(Event.data).distinct()
     except Exception:
         return JSONResponse(
-            content=({"success": False, "message": "Failed to get identifiers"}),
+            content=(
+                {"success": False, "message": "Failed to get recognized license plates"}
+            ),
             status_code=404,
         )
 
-    identifiers = []
+    recognized_license_plates = []
     for e in events:
-        if e.data is not None and "identifier" in e.data:
-            identifiers.append(e.data["identifier"])
+        if e.data is not None and "recognized_license_plate" in e.data:
+            recognized_license_plates.append(e.data["recognized_license_plate"])
 
-    while None in identifiers:
-        identifiers.remove(None)
+    while None in recognized_license_plates:
+        recognized_license_plates.remove(None)
 
     if split_joined:
-        original_identifiers = identifiers.copy()
-        for identifier in original_identifiers:
-            if identifier and "," in identifier:
-                identifiers.remove(identifier)
-                parts = identifier.split(",")
+        original_recognized_license_plates = recognized_license_plates.copy()
+        for recognized_license_plate in original_recognized_license_plates:
+            if recognized_license_plate and "," in recognized_license_plate:
+                recognized_license_plates.remove(recognized_license_plate)
+                parts = recognized_license_plate.split(",")
                 for part in parts:
-                    if part.strip() not in identifiers:
-                        identifiers.append(part.strip())
+                    if part.strip() not in recognized_license_plates:
+                        recognized_license_plates.append(part.strip())
 
-    identifiers = list(set(identifiers))
-    identifiers.sort()
-    return JSONResponse(content=identifiers)
+    recognized_license_plates = list(set(recognized_license_plates))
+    recognized_license_plates.sort()
+    return JSONResponse(content=recognized_license_plates)
 
 
 @router.get("/timeline")

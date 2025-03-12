@@ -141,8 +141,11 @@ class CameraState:
                     if (
                         obj.get("sub_label") and is_label_printable(obj["sub_label"][0])
                     )
-                    else obj.get("identifier", [None])[0]
-                    if (obj.get("identifier") and obj["identifier"][0])
+                    else obj.get("recognized_license_plate", [None])[0]
+                    if (
+                        obj.get("recognized_license_plate")
+                        and obj["recognized_license_plate"][0]
+                    )
                     else obj["label"]
                 )
                 draw_box_with_label(

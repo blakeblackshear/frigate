@@ -346,10 +346,10 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def set_identifier(
-        self, event_id: str, identifier: str | None, score: float | None
+    def set_recognized_license_plate(
+        self, event_id: str, recognized_license_plate: str | None, score: float | None
     ) -> None:
-        """Update identifier for given event id."""
+        """Update recognized license plate for given event id."""
         tracked_obj: TrackedObject = None
 
         for state in self.camera_states.values():
@@ -367,15 +367,18 @@ class TrackedObjectProcessor(threading.Thread):
             return
 
         if tracked_obj:
-            tracked_obj.obj_data["identifier"] = (identifier, score)
+            tracked_obj.obj_data["recognized_license_plate"] = (
+                recognized_license_plate,
+                score,
+            )
 
         if event:
             data = event.data
-            data["identifier"] = identifier
-            if identifier is None:
-                data["identifier_score"] = None
+            data["recognized_license_plate"] = recognized_license_plate
+            if recognized_license_plate is None:
+                data["recognized_license_plate_score"] = None
             elif score is not None:
-                data["identifier_score"] = score
+                data["recognized_license_plate_score"] = score
             event.data = data
             event.save()
 
@@ -542,9 +545,11 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
-                if topic.endswith(EventMetadataTypeEnum.identifier.value):
-                    (event_id, identifier, score) = payload
-                    self.set_identifier(event_id, identifier, score)
+                if topic.endswith(EventMetadataTypeEnum.recognized_license_plate.value):
+                    (event_id, recognized_license_plate, score) = payload
+                    self.set_recognized_license_plate(
+                        event_id, recognized_license_plate, score
+                    )
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
