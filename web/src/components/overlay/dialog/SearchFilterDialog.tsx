@@ -86,7 +86,7 @@ export default function SearchFilterDialog({
         (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
-        (currentFilter.identifier?.length ?? 0) > 0),
+        (currentFilter.recognized_license_plate?.length ?? 0) > 0),
     [currentFilter],
   );
 
@@ -128,10 +128,13 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
-      <IdentifierFilterContent
-        identifiers={currentFilter.identifier}
-        setIdentifiers={(identifiers) =>
-          setCurrentFilter({ ...currentFilter, identifier: identifiers })
+      <RecognizedLicensePlatesFilterContent
+        recognizedLicensePlates={currentFilter.recognized_license_plate}
+        setRecognizedLicensePlates={(plate) =>
+          setCurrentFilter({
+            ...currentFilter,
+            recognized_license_plate: plate,
+          })
         }
       />
       <ScoreFilterContent
@@ -207,7 +210,7 @@ export default function SearchFilterDialog({
               max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
-              identifier: undefined,
+              recognized_license_plate: undefined,
             }));
           }}
         >
@@ -847,97 +850,109 @@ export function SnapshotClipFilterContent({
   );
 }
 
-type IdentifierFilterContentProps = {
-  identifiers: string[] | undefined;
-  setIdentifiers: (identifiers: string[] | undefined) => void;
+type RecognizedLicensePlatesFilterContentProps = {
+  recognizedLicensePlates: string[] | undefined;
+  setRecognizedLicensePlates: (
+    recognizedLicensePlates: string[] | undefined,
+  ) => void;
 };
 
-export function IdentifierFilterContent({
-  identifiers,
-  setIdentifiers,
-}: IdentifierFilterContentProps) {
-  const { data: allIdentifiers, error } = useSWR<string[]>("identifiers", {
-    revalidateOnFocus: false,
-  });
-
-  const [selectedIdentifiers, setSelectedIdentifiers] = useState<string[]>(
-    identifiers || [],
+export function RecognizedLicensePlatesFilterContent({
+  recognizedLicensePlates,
+  setRecognizedLicensePlates,
+}: RecognizedLicensePlatesFilterContentProps) {
+  const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
+    "recognized_license_plates",
+    {
+      revalidateOnFocus: false,
+    },
   );
+
+  const [selectedRecognizedLicensePlates, setSelectedRecognizedLicensePlates] =
+    useState<string[]>(recognizedLicensePlates || []);
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    if (identifiers) {
-      setSelectedIdentifiers(identifiers);
+    if (recognizedLicensePlates) {
+      setSelectedRecognizedLicensePlates(recognizedLicensePlates);
     } else {
-      setSelectedIdentifiers([]);
+      setSelectedRecognizedLicensePlates([]);
     }
-  }, [identifiers]);
+  }, [recognizedLicensePlates]);
 
-  const handleSelect = (identifier: string) => {
-    const newSelected = selectedIdentifiers.includes(identifier)
-      ? selectedIdentifiers.filter((id) => id !== identifier) // Deselect
-      : [...selectedIdentifiers, identifier]; // Select
+  const handleSelect = (recognizedLicensePlate: string) => {
+    const newSelected = selectedRecognizedLicensePlates.includes(
+      recognizedLicensePlate,
+    )
+      ? selectedRecognizedLicensePlates.filter(
+          (id) => id !== recognizedLicensePlate,
+        ) // Deselect
+      : [...selectedRecognizedLicensePlates, recognizedLicensePlate]; // Select
 
-    setSelectedIdentifiers(newSelected);
+    setSelectedRecognizedLicensePlates(newSelected);
     if (newSelected.length === 0) {
-      setIdentifiers(undefined); // Clear filter if no identifiers selected
+      setRecognizedLicensePlates(undefined); // Clear filter if no plates selected
     } else {
-      setIdentifiers(newSelected);
+      setRecognizedLicensePlates(newSelected);
     }
   };
 
-  if (!allIdentifiers || allIdentifiers.length === 0) {
+  if (!allRecognizedLicensePlates || allRecognizedLicensePlates.length === 0) {
     return null;
   }
 
-  const filteredIdentifiers =
-    allIdentifiers?.filter((id) =>
+  const filteredRecognizedLicensePlates =
+    allRecognizedLicensePlates?.filter((id) =>
       id.toLowerCase().includes(inputValue.toLowerCase()),
     ) || [];
 
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Identifiers</div>
+      <div className="mb-3 text-lg">Recognized License Plates</div>
       {error ? (
-        <p className="text-sm text-red-500">Failed to load identifiers</p>
-      ) : !allIdentifiers ? (
-        <p className="text-sm text-muted-foreground">Loading identifiers...</p>
+        <p className="text-sm text-red-500">
+          Failed to load recognized license plates.
+        </p>
+      ) : !allRecognizedLicensePlates ? (
+        <p className="text-sm text-muted-foreground">
+          Loading recognized license plates...
+        </p>
       ) : (
         <>
           <Command className="border border-input bg-background">
             <CommandInput
-              placeholder="Type to search identifiers..."
+              placeholder="Type to search license plates..."
               value={inputValue}
               onValueChange={setInputValue}
             />
             <CommandList className="max-h-[200px] overflow-auto">
-              {filteredIdentifiers.length === 0 && inputValue && (
-                <CommandEmpty>No identifiers found.</CommandEmpty>
+              {filteredRecognizedLicensePlates.length === 0 && inputValue && (
+                <CommandEmpty>No license plates found.</CommandEmpty>
               )}
-              {filteredIdentifiers.map((identifier) => (
+              {filteredRecognizedLicensePlates.map((plate) => (
                 <CommandItem
-                  key={identifier}
-                  value={identifier}
-                  onSelect={() => handleSelect(identifier)}
+                  key={plate}
+                  value={plate}
+                  onSelect={() => handleSelect(plate)}
                   className="cursor-pointer"
                 >
                   <LuCheck
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedIdentifiers.includes(identifier)
+                      selectedRecognizedLicensePlates.includes(plate)
                         ? "opacity-100"
                         : "opacity-0",
                     )}
                   />
-                  {identifier}
+                  {plate}
                 </CommandItem>
               ))}
             </CommandList>
           </Command>
-          {selectedIdentifiers.length > 0 && (
+          {selectedRecognizedLicensePlates.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
-              {selectedIdentifiers.map((id) => (
+              {selectedRecognizedLicensePlates.map((id) => (
                 <span
                   key={id}
                   className="inline-flex items-center rounded bg-selected px-2 py-1 text-sm text-white"
@@ -956,7 +971,7 @@ export function IdentifierFilterContent({
         </>
       )}
       <p className="mt-1 text-sm text-muted-foreground">
-        Select one or more identifiers from the list.
+        Select one or more plates from the list.
       </p>
     </div>
   );

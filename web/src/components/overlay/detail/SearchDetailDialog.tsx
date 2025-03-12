@@ -333,13 +333,18 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
-  const identifierScore = useMemo(() => {
+  const recognizedLicensePlateScore = useMemo(() => {
     if (!search) {
       return undefined;
     }
 
-    if (search.data.identifier && search.data?.identifier_score) {
-      return Math.round((search.data?.identifier_score ?? 0) * 100);
+    if (
+      search.data.recognized_license_plate &&
+      search.data?.recognized_license_plate_score
+    ) {
+      return Math.round(
+        (search.data?.recognized_license_plate_score ?? 0) * 100,
+      );
     } else {
       return undefined;
     }
@@ -550,13 +555,16 @@ function ObjectDetailsTab({
               </Tooltip>
             </div>
           </div>
-          {search?.data.identifier && (
+          {search?.data.recognized_license_plate && (
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Identifier</div>
+              <div className="text-sm text-primary/40">
+                Recognized License Plate
+              </div>
               <div className="flex flex-col space-y-0.5 text-sm">
                 <div className="flex flex-row items-center gap-2">
-                  {search.data.identifier}{" "}
-                  {identifierScore && ` (${identifierScore}%)`}
+                  {search.data.recognized_license_plate}{" "}
+                  {recognizedLicensePlateScore &&
+                    ` (${recognizedLicensePlateScore}%)`}
                 </div>
               </div>
             </div>
