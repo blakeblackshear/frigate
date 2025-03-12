@@ -340,7 +340,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Use the system settings for light or dark mode"
+                    aria-label="Use the system settings for language"
                     onClick={() => setLanguage(systemLanguage)}
                   >
                     {language === systemLanguage ? (
