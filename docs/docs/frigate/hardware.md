@@ -146,6 +146,9 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
+| Name            | YoloV9 Inference Time | YOLO-NAS Inference Time   |
+| --------------- | --------------------- | ------------------------- |
+| AMD 780M        | ~ 14 ms               | ~ 60 ms                   |
 
 ## Community Supported Detectors
 
