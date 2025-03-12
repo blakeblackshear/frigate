@@ -59,7 +59,7 @@ export default function AuthenticationView() {
         .then((response) => {
           if (response.status === 200) {
             setShowSetPassword(false);
-            toast.success("Password updated successfully", {
+            toast.success(t("users.toast.success.updatePassword"), {
               position: "top-center",
             });
           }
