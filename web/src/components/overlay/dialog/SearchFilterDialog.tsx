@@ -33,6 +33,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { LuCheck } from "react-icons/lu";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -77,7 +85,8 @@ export default function SearchFilterDialog({
         (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
-        (currentFilter.sub_labels?.length ?? 0) > 0),
+        (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (currentFilter.identifier?.length ?? 0) > 0),
     [currentFilter],
   );
 
@@ -117,6 +126,12 @@ export default function SearchFilterDialog({
         subLabels={currentFilter.sub_labels}
         setSubLabels={(newSubLabels) =>
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
+        }
+      />
+      <IdentifierFilterContent
+        identifiers={currentFilter.identifier}
+        setIdentifiers={(identifiers) =>
+          setCurrentFilter({ ...currentFilter, identifier: identifiers })
         }
       />
       <ScoreFilterContent
@@ -192,6 +207,7 @@ export default function SearchFilterDialog({
               max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
+              identifier: undefined,
             }));
           }}
         >
@@ -827,6 +843,121 @@ export function SnapshotClipFilterContent({
           </ToggleGroup>
         </div>
       </div>
+    </div>
+  );
+}
+
+type IdentifierFilterContentProps = {
+  identifiers: string[] | undefined;
+  setIdentifiers: (identifiers: string[] | undefined) => void;
+};
+
+export function IdentifierFilterContent({
+  identifiers,
+  setIdentifiers,
+}: IdentifierFilterContentProps) {
+  const { data: allIdentifiers, error } = useSWR<string[]>("identifiers", {
+    revalidateOnFocus: false,
+  });
+
+  const [selectedIdentifiers, setSelectedIdentifiers] = useState<string[]>(
+    identifiers || [],
+  );
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    if (identifiers) {
+      setSelectedIdentifiers(identifiers);
+    } else {
+      setSelectedIdentifiers([]);
+    }
+  }, [identifiers]);
+
+  const handleSelect = (identifier: string) => {
+    const newSelected = selectedIdentifiers.includes(identifier)
+      ? selectedIdentifiers.filter((id) => id !== identifier) // Deselect
+      : [...selectedIdentifiers, identifier]; // Select
+
+    setSelectedIdentifiers(newSelected);
+    if (newSelected.length === 0) {
+      setIdentifiers(undefined); // Clear filter if no identifiers selected
+    } else {
+      setIdentifiers(newSelected);
+    }
+  };
+
+  if (!allIdentifiers || allIdentifiers.length === 0) {
+    return null;
+  }
+
+  const filteredIdentifiers =
+    allIdentifiers?.filter((id) =>
+      id.toLowerCase().includes(inputValue.toLowerCase()),
+    ) || [];
+
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">Identifiers</div>
+      {error ? (
+        <p className="text-sm text-red-500">Failed to load identifiers</p>
+      ) : !allIdentifiers ? (
+        <p className="text-sm text-muted-foreground">Loading identifiers...</p>
+      ) : (
+        <>
+          <Command className="border border-input bg-background">
+            <CommandInput
+              placeholder="Type to search identifiers..."
+              value={inputValue}
+              onValueChange={setInputValue}
+            />
+            <CommandList className="max-h-[200px] overflow-auto">
+              {filteredIdentifiers.length === 0 && inputValue && (
+                <CommandEmpty>No identifiers found.</CommandEmpty>
+              )}
+              {filteredIdentifiers.map((identifier) => (
+                <CommandItem
+                  key={identifier}
+                  value={identifier}
+                  onSelect={() => handleSelect(identifier)}
+                  className="cursor-pointer"
+                >
+                  <LuCheck
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedIdentifiers.includes(identifier)
+                        ? "opacity-100"
+                        : "opacity-0",
+                    )}
+                  />
+                  {identifier}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+          {selectedIdentifiers.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedIdentifiers.map((id) => (
+                <span
+                  key={id}
+                  className="inline-flex items-center rounded bg-selected px-2 py-1 text-sm text-white"
+                >
+                  {id}
+                  <button
+                    onClick={() => handleSelect(id)}
+                    className="ml-1 text-white hover:text-gray-200"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      <p className="mt-1 text-sm text-muted-foreground">
+        Select one or more identifiers from the list.
+      </p>
     </div>
   );
 }

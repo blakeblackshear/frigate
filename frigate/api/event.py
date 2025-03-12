@@ -163,7 +163,6 @@ def events(params: EventsQueryParams = Depends()):
         # use matching so joined identifiers are included
         # for example an identifier 'ABC123' would get events
         # with identifiers 'ABC123' and 'ABC123, XYZ789'
-        # also supports regex with slashes before and after the pattern
         identifier_clauses = []
         filtered_identifiers = identifier.split(",")
 
@@ -172,22 +171,16 @@ def events(params: EventsQueryParams = Depends()):
             identifier_clauses.append((Event.data["identifier"].is_null()))
 
         for identifier in filtered_identifiers:
-            if identifier.startswith("r:"):  # Regex pattern
-                pattern = identifier[2:]  # Strip the "r:" prefix
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text").regexp(pattern))
-                )
-                print(pattern)
-            else:  # Regular exact matching plus list inclusion
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") == identifier)
-                )
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") % f"*{identifier},*")
-                )
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") % f"*, {identifier}*")
-                )
+            # Exact matching plus list inclusion
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") == identifier)
+            )
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") % f"*{identifier},*")
+            )
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+            )
 
         identifier_clause = reduce(operator.or_, identifier_clauses)
         clauses.append((identifier_clause))
@@ -507,7 +500,6 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         # use matching so joined identifiers are included
         # for example an identifier 'ABC123' would get events
         # with identifiers 'ABC123' and 'ABC123, XYZ789'
-        # also supports regex with slashes before and after the pattern
         identifier_clauses = []
         filtered_identifiers = identifier.split(",")
 
@@ -516,22 +508,16 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             identifier_clauses.append((Event.data["identifier"].is_null()))
 
         for identifier in filtered_identifiers:
-            if identifier.startswith("r:"):  # Regex pattern
-                pattern = identifier[2:]  # Strip the "r:" prefix
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text").regexp(pattern))
-                )
-                print(pattern)
-            else:  # Regular exact matching plus list inclusion
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") == identifier)
-                )
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") % f"*{identifier},*")
-                )
-                identifier_clauses.append(
-                    (Event.data["identifier"].cast("text") % f"*, {identifier}*")
-                )
+            # Exact matching plus list inclusion
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") == identifier)
+            )
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") % f"*{identifier},*")
+            )
+            identifier_clauses.append(
+                (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+            )
 
         identifier_clause = reduce(operator.or_, identifier_clauses)
         event_filters.append((identifier_clause))
