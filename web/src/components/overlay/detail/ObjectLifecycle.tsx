@@ -464,7 +464,7 @@ export default function ObjectLifecycle({
                   className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
                   onClick={() =>
                     navigate(
-                      `/settings?page=masks%20/%20zones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
+                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
                     )
                   }
                 >
