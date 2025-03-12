@@ -301,22 +301,6 @@ export default function LivePlayer({
     player = <ActivityIndicator />;
   }
 
-  // if (cameraConfig.name == "lpr")
-  //   console.log(
-  //     cameraConfig.name,
-  //     "enabled",
-  //     cameraEnabled,
-  //     "prev enabled",
-  //     prevCameraEnabledRef.current,
-  //     "offline",
-  //     offline,
-  //     "show still",
-  //     showStillWithoutActivity,
-  //     "live ready",
-  //     liveReady,
-  //     player,
-  //   );
-
   return (
     <div
       ref={cameraRef ?? internalContainerRef}
