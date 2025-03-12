@@ -97,14 +97,34 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 ### Header mapping
 
-If you have disabled Frigate's authentication and your proxy supports passing a header with the authenticated username, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` value. Header names are not case sensitive.
+If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive.
 
 ```yaml
 proxy:
   ...
   header_map:
     user: x-forwarded-user
+    role: x-forwarded-role
 ```
+
+Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
+
+#### Port Considerations
+
+**Authenticated Port (8971)**
+
+- Header mapping is **fully supported**.
+- The `remote-role` header determines the user’s privileges:
+  - **admin** → Full access (user management, configuration changes).
+  - **viewer** → Read-only access.
+- Ensure your **proxy sends both user and role headers** for proper role enforcement.
+
+**Unauthenticated Port (5000)**
+
+- Headers are **ignored** for role enforcement.
+- All requests are treated as **anonymous**.
+- The `remote-role` value is **overridden** to **admin-level access**.
+- This design ensures **unauthenticated internal use** within a trusted network.
 
 Note that only the following list of headers are permitted by default:
 
@@ -126,8 +146,6 @@ X-authentik-uid
 
 If you would like to add more options, you can overwrite the default file with a docker bind mount at `/usr/local/nginx/conf/proxy_trusted_headers.conf`. Reference the source code for the default file formatting.
 
-Future versions of Frigate may leverage group and role headers for authorization in Frigate as well.
-
 ### Login page redirection
 
 Frigate gracefully performs login page redirection that should work with most authentication proxies. If your reverse proxy returns a `Location` header on `401`, `302`, or `307` unauthorized responses, Frigate's frontend will automatically detect it and redirect to that URL.
@@ -135,3 +153,31 @@ Frigate gracefully performs login page redirection that should work with most au
 ### Custom logout url
 
 If your reverse proxy has a dedicated logout url, you can specify using the `logout_url` config option. This will update the link for the `Logout` link in the UI.
+
+## User Roles
+
+Frigate supports user roles to control access to certain features in the UI and API, such as managing users or modifying configuration settings. Roles are assigned to users in the database or through proxy headers and are enforced when accessing the UI or API through the authenticated port (`8971`).
+
+### Supported Roles
+
+- **admin**: Full access to all features, including user management and configuration.
+- **viewer**: Read-only access to the UI and API, including viewing cameras, review items, and historical footage. Configuration editor and settings in the UI are inaccessible.
+
+### Role Enforcement
+
+When using the authenticated port (`8971`), roles are validated via the JWT token or proxy headers (e.g., `remote-role`).
+
+On the internal **unauthenticated** port (`5000`), roles are **not enforced**. All requests are treated as **anonymous**, granting access equivalent to the **admin** role without restrictions.
+
+To use role-based access control, you must connect to Frigate via the **authenticated port (`8971`)** directly or through a reverse proxy.
+
+### Role Visibility in the UI
+
+- When logged in via port `8971`, your **username and role** are displayed in the **account menu** (bottom corner).
+- When using port `5000`, the UI will always display "anonymous" for the username and "admin" for the role.
+
+### Managing User Roles
+
+1. Log in as an **admin** user via port `8971`.
+2. Navigate to **Settings > Users**.
+3. Edit a user’s role by selecting **admin** or **viewer**.

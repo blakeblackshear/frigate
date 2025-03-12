@@ -1034,9 +1034,13 @@ function FrigateCameraFeatures({
         setIsRecording(true);
         const toastId = toast.success(
           <div className="flex flex-col space-y-3">
-            <div className="font-semibold">{t("manualRecording.started")}</div>
-            {!camera.record.enabled || camera.record.retain.days == 0 ? (
-              <div>{t("manualRecording.recordDisabledTips")}</div>
+            <div className="font-semibold">
+              Started manual on-demand recording.
+            </div>
+            {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
+              <div>
+                {t("manualRecording.recordDisabledTips")}
+              </div>
             ) : (
               <OnDemandRetentionMessage camera={camera} />
             )}
