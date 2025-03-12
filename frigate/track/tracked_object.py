@@ -365,6 +365,7 @@ class TrackedObject:
             "average_estimated_speed": self.average_estimated_speed,
             "velocity_angle": self.velocity_angle,
             "path_data": self.path_data,
+            "identifier": self.obj_data.get("identifier"),
         }
 
         return event

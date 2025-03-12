@@ -340,6 +340,8 @@ def events_explore(limit: int = 10):
                         "average_estimated_speed",
                         "velocity_angle",
                         "path_data",
+                        "identifier",
+                        "identifier_score",
                     ]
                 },
                 "event_count": label_counts[event.label],
@@ -627,6 +629,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 "average_estimated_speed",
                 "velocity_angle",
                 "path_data",
+                "identifier",
+                "identifier_score",
             ]
         }
 

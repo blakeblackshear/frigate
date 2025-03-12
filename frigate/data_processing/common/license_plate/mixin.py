@@ -1054,13 +1054,20 @@ class LicensePlateProcessingMixin:
                     for plate in plates
                 )
             ),
-            top_plate,
+            None,
         )
 
-        # Send the result to the API
-        self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
-        )
+        # If it's a known plate, publish to sub_label
+        if sub_label is not None:
+            self.sub_label_publisher.publish(
+                EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
+            )
+        # If it's not a known plate, publish to identifier instead
+        else:
+            self.sub_label_publisher.publish(
+                EventMetadataTypeEnum.identifier, (id, top_plate, avg_confidence)
+            )
+
         self.detected_license_plates[id] = {
             "plate": top_plate,
             "char_confidences": top_char_confidences,
