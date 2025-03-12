@@ -41,7 +41,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - [Supports many model architectures](../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
   
-- [Google Coral EdgeTPU](##google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+- [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
   - [Supports primarily ssdlite and mobilenet model architectures](../configuration/object_detectors#edge-tpu-detector)
 
 **AMD**
