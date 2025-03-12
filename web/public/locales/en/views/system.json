@@ -71,5 +71,8 @@
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
+  },
+  "features": {
+    "title": "Features"
   }
 }

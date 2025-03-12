@@ -71,5 +71,8 @@
     "detectHighCpuUsage": "{{camera}} 的 探测 CPU 使用率较高（{{detectAvg}}%）",
     "healthy": "系统运行正常",
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）"
+  },
+  "features": {
+    "title": "功能"
   }
 }
