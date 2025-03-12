@@ -320,7 +320,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Dark mode"
+                    aria-label={t("menu.language.zhCN")}
                     onClick={() => setLanguage("zh-CN")}
                   >
                     {language === "zh-CN" ? (
