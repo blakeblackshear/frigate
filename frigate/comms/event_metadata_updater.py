@@ -14,6 +14,7 @@ class EventMetadataTypeEnum(str, Enum):
     manual_event_end = "manual_event_end"
     regenerate_description = "regenerate_description"
     sub_label = "sub_label"
+    identifier = "identifier"
 
 
 class EventMetadataPublisher(Publisher):

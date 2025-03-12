@@ -333,6 +333,18 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
+  const identifierScore = useMemo(() => {
+    if (!search) {
+      return undefined;
+    }
+
+    if (search.data.identifier && search.data?.identifier_score) {
+      return Math.round((search.data?.identifier_score ?? 0) * 100);
+    } else {
+      return undefined;
+    }
+  }, [search]);
+
   const averageEstimatedSpeed = useMemo(() => {
     if (!search || !search.data?.average_estimated_speed) {
       return undefined;
@@ -538,6 +550,17 @@ function ObjectDetailsTab({
               </Tooltip>
             </div>
           </div>
+          {search?.data.identifier && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">Identifier</div>
+              <div className="flex flex-col space-y-0.5 text-sm">
+                <div className="flex flex-row items-center gap-2">
+                  {search.data.identifier}{" "}
+                  {identifierScore && ` (${identifierScore}%)`}
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">

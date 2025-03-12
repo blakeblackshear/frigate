@@ -3,16 +3,16 @@ id: license_plate_recognition
 title: License Plate Recognition (LPR)
 ---
 
-Frigate can recognize license plates on vehicles and automatically add the detected characters or recognized name as a `sub_label` to objects that are of type `car`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
+Frigate can recognize license plates on vehicles and automatically add the detected characters to the `identifier` field or a known name as a `sub_label` to objects that are of type `car`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
 
 LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. However, LPR does not run on stationary vehicles.
 
-When a plate is recognized, the detected characters or recognized name is:
+When a plate is recognized, the recognized name is:
 
-- Added as a `sub_label` to the `car` tracked object.
+- Added to the `car` tracked object as a `sub_label` (if known) or the `identifier` field (if unknown)
 - Viewable in the Review Item Details pane in Review and the Tracked Object Details pane in Explore.
 - Filterable through the More Filters menu in Explore.
-- Published via the `frigate/events` MQTT topic as a `sub_label` for the tracked object.
+- Published via the `frigate/events` MQTT topic as a `sub_label` (known) or `identifier` (unknown) for the tracked object.
 
 ## Model Requirements
 
@@ -71,6 +71,7 @@ Fine-tune the LPR feature using these optional parameters:
 
 - **`known_plates`**: List of strings or regular expressions that assign custom a `sub_label` to `car` objects when a recognized plate matches a known value.
   - These labels appear in the UI, filters, and notifications.
+  - Unknown plates are still saved but are added to the `identifier` field rather than the `sub_label`.
 - **`match_distance`**: Allows for minor variations (missing/incorrect characters) when matching a detected plate to a known plate.
   - For example, setting `match_distance: 1` allows a plate `ABCDE` to match `ABCBE` or `ABCD`.
   - This parameter will _not_ operate on known plates that are defined as regular expressions. You should define the full string of your plate in `known_plates` in order to use `match_distance`.

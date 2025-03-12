@@ -27,6 +27,7 @@ class EventsQueryParams(BaseModel):
     max_score: Optional[float] = None
     min_speed: Optional[float] = None
     max_speed: Optional[float] = None
+    identifier: Optional[str] = "all"
     is_submitted: Optional[int] = None
     min_length: Optional[float] = None
     max_length: Optional[float] = None
@@ -55,6 +56,7 @@ class EventsSearchQueryParams(BaseModel):
     max_score: Optional[float] = None
     min_speed: Optional[float] = None
     max_speed: Optional[float] = None
+    identifier: Optional[str] = "all"
     sort: Optional[str] = None
 
 
