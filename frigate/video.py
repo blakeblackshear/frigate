@@ -606,23 +606,24 @@ def process_frames(
 
     startup_scan = True
     stationary_frame_counter = 0
+    camera_enabled = True
 
     region_min_size = get_min_region_size(model_config)
 
-    prev_enabled = None
-
     while not stop_event.is_set():
-        _, enabled_config = enabled_config_subscriber.check_for_update()
-        current_enabled = (
-            enabled_config.enabled
-            if enabled_config
-            else (prev_enabled if prev_enabled is not None else True)
-        )
-        if prev_enabled is None:
-            prev_enabled = current_enabled
+        _, updated_enabled_config = enabled_config_subscriber.check_for_update()
 
-        if prev_enabled and not current_enabled and camera_metrics.frame_queue.empty():
+        if updated_enabled_config:
+            prev_enabled = camera_enabled
+            camera_enabled = updated_enabled_config.enabled
+
+        if (
+            not camera_enabled
+            and prev_enabled != camera_enabled
+            and camera_metrics.frame_queue.empty()
+        ):
             logger.debug(f"Camera {camera_name} disabled, clearing tracked objects")
+            prev_enabled = camera_enabled
 
             # Clear norfair's dictionaries
             object_tracker.tracked_objects.clear()
@@ -638,9 +639,7 @@ def process_frames(
             for tracker in object_tracker.default_tracker.values():
                 tracker.tracked_objects = []
 
-        prev_enabled = current_enabled
-
-        if not current_enabled:
+        if not camera_enabled:
             time.sleep(0.1)
             continue
 
