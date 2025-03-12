@@ -1013,7 +1013,7 @@ function FrigateCameraFeatures({
             <div className="font-semibold">
               Started manual on-demand recording.
             </div>
-            {!camera.record.enabled || camera.record.retain.days == 0 ? (
+            {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
               <div>
                 Since recording is disabled or restricted in the config for this
                 camera, only a snapshot will be saved.
