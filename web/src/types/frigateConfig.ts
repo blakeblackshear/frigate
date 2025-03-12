@@ -155,15 +155,20 @@ export interface CameraConfig {
   record: {
     enabled: boolean;
     enabled_in_config: boolean;
-    events: {
-      objects: string[] | null;
+    alerts: {
       post_capture: number;
       pre_capture: number;
-      required_zones: string[];
       retain: {
-        default: number;
+        days: number;
         mode: string;
-        objects: Record<string, unknown>;
+      };
+    };
+    detections: {
+      post_capture: number;
+      pre_capture: number;
+      retain: {
+        days: number;
+        mode: string;
       };
     };
     expire_interval: number;
