@@ -38,34 +38,34 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
-  - [Supports many model architectures](../configuration/object_detectors#configuration)
+  - [Supports many model architectures](../../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
   
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
-  - [Supports primarily ssdlite and mobilenet model architectures](../configuration/object_detectors#edge-tpu-detector)
+  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
 **AMD**
 
 - [ROCm](#amd-gpus): ROCm can run on AMD Discrete GPUs to provide efficient object detection
-  - [Supports limited model architectures](../configuration/object_detectors#supported-models-1)
+  - [Supports limited model architectures](../../configuration/object_detectors#supported-models-1)
   - Runs best on discrete AMD GPUs
 
 **Intel**
 
 - [OpenVino](#openvino): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
-  - [Supports majority of model architectures](../configuration/object_detectors#supported-models)
+  - [Supports majority of model architectures](../../configuration/object_detectors#supported-models)
   - Runs best with tiny, small, or medium models
 
 **Nvidia**
 
 - [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs and Jetson devices.
-  - [Supports majority of model architectures via ONNX](../configuration/object_detectors#supported-models-2)
+  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#supported-models-2)
   - Runs well with any size models including large
 
 **Rockchip**
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs to provide efficient object detection.
-  - [Supports limited model architectures](../configuration/object_detectors#choosing-a-model)
+  - [Supports limited model architectures](../../configuration/object_detectors#choosing-a-model)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
