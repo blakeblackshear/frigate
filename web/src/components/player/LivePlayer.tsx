@@ -411,7 +411,7 @@ export default function LivePlayer({
         />
       </div>
 
-      {offline && !showStillWithoutActivity && (
+      {offline && !showStillWithoutActivity && cameraEnabled && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
             <p className="my-5 text-lg">Stream offline</p>
