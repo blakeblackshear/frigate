@@ -21,23 +21,77 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 ## Server
 
-My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Hailo8 or Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
-| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
-| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
+| Name                                                                                                          | Notes                                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
 
 ## Detectors
 
-A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the expectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically. As of 0.12, Frigate supports a handful of different detector types with varying inference speeds and performance.
+A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the expectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically.
+
+:::info
+
+Frigate supports multiple different detectors that work on different types of hardware:
+
+**Most Hardware**
+
+- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
+  - [Supports many model architectures](../../configuration/object_detectors#configuration)
+  - Runs best with tiny or small size models
+  
+- [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
+
+**AMD**
+
+- [ROCm](#amd-gpus): ROCm can run on AMD Discrete GPUs to provide efficient object detection
+  - [Supports limited model architectures](../../configuration/object_detectors#supported-models-1)
+  - Runs best on discrete AMD GPUs
+
+**Intel**
+
+- [OpenVino](#openvino): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+  - [Supports majority of model architectures](../../configuration/object_detectors#supported-models)
+  - Runs best with tiny, small, or medium models
+
+**Nvidia**
+
+- [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs and Jetson devices.
+  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#supported-models-2)
+  - Runs well with any size models including large
+
+**Rockchip**
+
+- [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs to provide efficient object detection.
+  - [Supports limited model architectures](../../configuration/object_detectors#choosing-a-model)
+  - Runs best with tiny or small size models
+  - Runs efficiently on low power hardware
+
+:::
+
+### Hailo-8
+
+
+Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
+
+**Default Model Configuration:**
+- **Hailo-8L:** Default model is **YOLOv6n**.
+- **Hailo-8:** Default model is **YOLOv6n**.
+
+In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
+
+| Name             | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
+| ---------------- | ---------------------- | ----------------------- |
+| ssd mobilenet v1 | ~ 6 ms                 | ~ 10 ms                 |
+| yolov6n          | ~ 7 ms                 | ~ 11 ms                 |
 
 ### Google Coral TPU
 
-It is strongly recommended to use a Google Coral. A $60 device will outperform $2000 CPU. Frigate should work with any supported Coral device from https://coral.ai
-
-The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
-
-The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
+Frigate supports both the USB and M.2 versions of the Google Coral. 
+- The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
+- The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
 
 A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
 
@@ -92,22 +146,9 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-### Hailo-8
-
-| Name            | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
-| --------------- | ---------------------- | ----------------------- |
-| ssd mobilenet v1| ~ 6 ms                 | ~ 10 ms                 |
-| yolov6n         | ~ 7 ms                 | ~ 11 ms                 |
-
-
-Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
-
-**Default Model Configuration:**
-- **Hailo-8L:** Default model is **YOLOv6n**.
-- **Hailo-8:** Default model is **YOLOv6n**.
-
-In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
-
+| Name            | YoloV9 Inference Time | YOLO-NAS Inference Time   |
+| --------------- | --------------------- | ------------------------- |
+| AMD 780M        | ~ 14 ms               | ~ 60 ms                   |
 
 ## Community Supported Detectors
 
