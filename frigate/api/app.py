@@ -619,6 +619,39 @@ def get_sub_labels(split_joined: Optional[int] = None):
     return JSONResponse(content=sub_labels)
 
 
+@router.get("/identifiers")
+def get_identifiers(split_joined: Optional[int] = None):
+    try:
+        events = Event.select(Event.data).distinct()
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Failed to get identifiers"}),
+            status_code=404,
+        )
+
+    identifiers = []
+    for e in events:
+        if e.data is not None and "identifier" in e.data:
+            identifiers.append(e.data["identifier"])
+
+    while None in identifiers:
+        identifiers.remove(None)
+
+    if split_joined:
+        original_identifiers = identifiers.copy()
+        for identifier in original_identifiers:
+            if identifier and "," in identifier:
+                identifiers.remove(identifier)
+                parts = identifier.split(",")
+                for part in parts:
+                    if part.strip() not in identifiers:
+                        identifiers.append(part.strip())
+
+    identifiers = list(set(identifiers))
+    identifiers.sort()
+    return JSONResponse(content=identifiers)
+
+
 @router.get("/timeline")
 def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
     clauses = []

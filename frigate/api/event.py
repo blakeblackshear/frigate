@@ -101,6 +101,7 @@ def events(params: EventsQueryParams = Depends()):
     min_length = params.min_length
     max_length = params.max_length
     event_id = params.event_id
+    identifier = params.identifier
 
     sort = params.sort
 
@@ -157,6 +158,39 @@ def events(params: EventsQueryParams = Depends()):
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append((sub_label_clause))
+
+    if identifier != "all":
+        # use matching so joined identifiers are included
+        # for example an identifier 'ABC123' would get events
+        # with identifiers 'ABC123' and 'ABC123, XYZ789'
+        # also supports regex with slashes before and after the pattern
+        identifier_clauses = []
+        filtered_identifiers = identifier.split(",")
+
+        if "None" in filtered_identifiers:
+            filtered_identifiers.remove("None")
+            identifier_clauses.append((Event.data["identifier"].is_null()))
+
+        for identifier in filtered_identifiers:
+            if identifier.startswith("r:"):  # Regex pattern
+                pattern = identifier[2:]  # Strip the "r:" prefix
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text").regexp(pattern))
+                )
+                print(pattern)
+            else:  # Regular exact matching plus list inclusion
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") == identifier)
+                )
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") % f"*{identifier},*")
+                )
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+                )
+
+        identifier_clause = reduce(operator.or_, identifier_clauses)
+        clauses.append((identifier_clause))
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -399,6 +433,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
     is_submitted = params.is_submitted
+    identifier = params.identifier
 
     # for similarity search
     event_id = params.event_id
@@ -467,6 +502,39 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
 
         event_filters.append((reduce(operator.or_, zone_clauses)))
+
+    if identifier != "all":
+        # use matching so joined identifiers are included
+        # for example an identifier 'ABC123' would get events
+        # with identifiers 'ABC123' and 'ABC123, XYZ789'
+        # also supports regex with slashes before and after the pattern
+        identifier_clauses = []
+        filtered_identifiers = identifier.split(",")
+
+        if "None" in filtered_identifiers:
+            filtered_identifiers.remove("None")
+            identifier_clauses.append((Event.data["identifier"].is_null()))
+
+        for identifier in filtered_identifiers:
+            if identifier.startswith("r:"):  # Regex pattern
+                pattern = identifier[2:]  # Strip the "r:" prefix
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text").regexp(pattern))
+                )
+                print(pattern)
+            else:  # Regular exact matching plus list inclusion
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") == identifier)
+                )
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") % f"*{identifier},*")
+                )
+                identifier_clauses.append(
+                    (Event.data["identifier"].cast("text") % f"*, {identifier}*")
+                )
+
+        identifier_clause = reduce(operator.or_, identifier_clauses)
+        event_filters.append((identifier_clause))
 
     if after:
         event_filters.append((Event.start_time > after))
@@ -685,6 +753,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
             Event.camera,
             Event.label,
             Event.sub_label,
+            Event.data,
             fn.strftime(
                 "%Y-%m-%d",
                 fn.datetime(
@@ -699,6 +768,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
             Event.camera,
             Event.label,
             Event.sub_label,
+            Event.data,
             (Event.start_time + seconds_offset).cast("int") / (3600 * 24),
             Event.zones,
         )
