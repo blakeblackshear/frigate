@@ -346,6 +346,41 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def set_identifier(
+        self, event_id: str, identifier: str | None, score: float | None
+    ) -> None:
+        """Update identifier for given event id."""
+        tracked_obj: TrackedObject = None
+
+        for state in self.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+
+        try:
+            event: Event = Event.get(Event.id == event_id)
+        except DoesNotExist:
+            event = None
+
+        if not tracked_obj and not event:
+            return
+
+        if tracked_obj:
+            tracked_obj.obj_data["identifier"] = (identifier, score)
+
+        if event:
+            data = event.data
+            data["identifier"] = identifier
+            if identifier is None:
+                data["identifier_score"] = None
+            elif score is not None:
+                data["identifier_score"] = score
+            event.data = data
+            event.save()
+
+        return True
+
     def create_manual_event(self, payload: tuple) -> None:
         (
             frame_time,
@@ -507,6 +542,9 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
+                if topic.endswith(EventMetadataTypeEnum.identifier.value):
+                    (event_id, identifier, score) = payload
+                    self.set_identifier(event_id, identifier, score)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):

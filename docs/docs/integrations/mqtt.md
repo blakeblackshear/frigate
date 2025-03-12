@@ -54,7 +54,9 @@ Message published for each changed tracked object. The first message is publishe
     }, // attributes with top score that have been identified on the object at any point
     "current_attributes": [], // detailed data about the current attributes in this frame
     "current_estimated_speed": 0.71, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
-    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "identifier": "ABC12345", // an identifier for this object - in this case, an unrecognized license plate
+    "identifier_score": 0.933451
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -93,7 +95,9 @@ Message published for each changed tracked object. The first message is publishe
       }
     ],
     "current_estimated_speed": 0.77, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
-    "velocity_angle": 180 // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "identifier": "ABC12345", // an identifier for this object - in this case, an unrecognized license plate
+    "identifier_score": 0.933451
   }
 }
 ```
