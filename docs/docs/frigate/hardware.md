@@ -21,15 +21,42 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 ## Server
 
-My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Hailo8 or Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
-| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
-| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
+| Name                                                                                                          | Notes                                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
 
 ## Detectors
 
-A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the expectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically. As of 0.12, Frigate supports a handful of different detector types with varying inference speeds and performance.
+A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the expectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically.
+
+:::info
+
+Frigate supports multiple different detectors that work on different types of hardware:
+
+**Most Hardware**
+
+- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices. The Hailo8 offers a wide range of compatibility with devices and model architectures including more advanced models.
+- [Coral EdgeTPU](##google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices. The Google Coral primarily runs smaller ssd models.
+
+**AMD**
+
+- [ROCm](#amd-gpus): ROCm can run on AMD Discrete GPUs to provide efficient object detection, however it has limited support for model architectures.
+
+**Intel**
+
+- [OpenVino](#openvino): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection with a wide range of compatibility with model architectures.
+
+**Nvidia**
+
+- [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs and Jetson devices, with support for a wide range of model architectures and the ability to run large and extra large models efficiently.
+
+**Rockchip**
+
+- [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs, providing efficient object detection with low power consumption.
+
+:::
 
 ### Google Coral TPU
 
