@@ -378,7 +378,9 @@ export default function LivePlayer({
                   {[
                     ...new Set([
                       ...(objects || []).map(({ label, sub_label }) =>
-                        label.endsWith("verified") ? sub_label : label,
+                        label.endsWith("verified")
+                          ? sub_label
+                          : label.replaceAll("_", " "),
                       ),
                     ]),
                   ]

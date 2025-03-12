@@ -22,7 +22,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Previews
-from frigate.object_processing import TrackedObject
+from frigate.track.object_processing import TrackedObject
 from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
 
 logger = logging.getLogger(__name__)
