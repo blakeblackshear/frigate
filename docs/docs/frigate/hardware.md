@@ -38,7 +38,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
-  - [Supports many model architectures including yolo models](../configuration/object_detectors#configuration)
+  - [Supports many model architectures](../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
   
 - [Google Coral EdgeTPU](##google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
