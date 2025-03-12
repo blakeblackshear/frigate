@@ -43,7 +43,6 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
-from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.models import (
     Event,
@@ -57,7 +56,6 @@ from frigate.models import (
     User,
 )
 from frigate.object_detection import ObjectDetectProcess
-from frigate.object_processing import TrackedObjectProcessor
 from frigate.output.output import output_frames
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
@@ -69,6 +67,7 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
+from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
@@ -317,9 +316,6 @@ class FrigateApp:
         ):
             # Create a client for other processes to use
             self.embeddings = EmbeddingsContext(self.db)
-
-    def init_external_event_processor(self) -> None:
-        self.external_event_processor = ExternalEventProcessor(self.config)
 
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
@@ -657,7 +653,6 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.start_audio_processor()
         self.start_storage_maintainer()
-        self.init_external_event_processor()
         self.start_stats_emitter()
         self.start_timeline_processor()
         self.start_event_processor()
@@ -676,7 +671,6 @@ class FrigateApp:
                     self.detected_frames_processor,
                     self.storage_maintainer,
                     self.onvif_controller,
-                    self.external_event_processor,
                     self.stats_emitter,
                     self.event_metadata_updater,
                 ),
@@ -748,7 +742,6 @@ class FrigateApp:
         self.review_segment_process.terminate()
         self.review_segment_process.join()
 
-        self.external_event_processor.stop()
         self.dispatcher.stop()
         self.ptz_autotracker_thread.join()
 

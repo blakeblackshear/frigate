@@ -117,7 +117,6 @@ class BaseTestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             stats,
             None,
         )

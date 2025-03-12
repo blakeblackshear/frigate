@@ -27,7 +27,6 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
-from frigate.events.external import ExternalEventProcessor
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
@@ -56,7 +55,6 @@ def create_fastapi_app(
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
-    external_processor: ExternalEventProcessor,
     stats_emitter: StatsEmitter,
     event_metadata_updater: EventMetadataPublisher,
 ):
@@ -129,7 +127,6 @@ def create_fastapi_app(
     app.onvif = onvif
     app.stats_emitter = stats_emitter
     app.event_metadata_updater = event_metadata_updater
-    app.external_processor = external_processor
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     return app

@@ -2,17 +2,22 @@
 
 import datetime
 import logging
+import random
+import string
 import threading
 import time
 from typing import Tuple
 
 import numpy as np
-import requests
 
 import frigate.util as util
 from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig
 from frigate.const import (
@@ -21,7 +26,6 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
-    FRIGATE_LOCALHOST,
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
@@ -139,6 +143,7 @@ class AudioEventMaintainer(threading.Thread):
             f"config/enabled/{camera.name}", True
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
+        self.event_metadata_publisher = EventMetadataPublisher()
 
         self.was_enabled = camera.enabled
 
@@ -207,24 +212,33 @@ class AudioEventMaintainer(threading.Thread):
                 datetime.datetime.now().timestamp()
             )
         else:
+            now = datetime.datetime.now().timestamp()
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            event_id = f"{now}-{rand_id}"
             self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
 
-            resp = requests.post(
-                f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None, "score": score, "source_type": "audio"},
+            self.event_metadata_publisher.publish(
+                EventMetadataTypeEnum.manual_event_create,
+                (
+                    now,
+                    self.config.name,
+                    label,
+                    event_id,
+                    True,
+                    score,
+                    None,
+                    None,
+                    "audio",
+                    {},
+                ),
             )
-
-            if resp.status_code == 200:
-                event_id = resp.json()["event_id"]
-                self.detections[label] = {
-                    "id": event_id,
-                    "label": label,
-                    "last_detection": datetime.datetime.now().timestamp(),
-                }
-            else:
-                self.logger.warning(
-                    f"Failed to create audio event with status code {resp.status_code}"
-                )
+            self.detections[label] = {
+                "id": event_id,
+                "label": label,
+                "last_detection": now,
+            }
 
     def expire_detections(self) -> None:
         now = datetime.datetime.now().timestamp()
@@ -241,17 +255,11 @@ class AudioEventMaintainer(threading.Thread):
                     f"{self.config.name}/audio/{detection['label']}", "OFF"
                 )
 
-                resp = requests.put(
-                    f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
-                    json={"end_time": detection["last_detection"]},
+                self.event_metadata_publisher.publish(
+                    EventMetadataTypeEnum.manual_event_end,
+                    (detection["id"], detection["last_detection"]),
                 )
-
-                if resp.status_code == 200:
-                    self.detections[detection["label"]] = None
-                else:
-                    self.logger.warning(
-                        f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
-                    )
+                self.detections[detection["label"]] = None
 
     def expire_all_detections(self) -> None:
         """Immediately end all current detections"""
@@ -259,16 +267,11 @@ class AudioEventMaintainer(threading.Thread):
         for label, detection in list(self.detections.items()):
             if detection:
                 self.requestor.send_data(f"{self.config.name}/audio/{label}", "OFF")
-                resp = requests.put(
-                    f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
-                    json={"end_time": now},
+                self.event_metadata_publisher.publish(
+                    EventMetadataTypeEnum.manual_event_end,
+                    (detection["id"], now),
                 )
-                if resp.status_code == 200:
-                    self.detections[label] = None
-                else:
-                    self.logger.warning(
-                        f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
-                    )
+                self.detections[label] = None
 
     def start_or_restart_ffmpeg(self) -> None:
         self.audio_listener = start_or_restart_ffmpeg(
