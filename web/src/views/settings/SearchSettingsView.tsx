@@ -43,7 +43,7 @@ export default function ExploreSettingsView({
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
-  const [ExploreSettings, setExploreSettings] = useState<ExploreSettings>({
+  const [exploreSettings, setExploreSettings] = useState<ExploreSettings>({
     enabled: undefined,
     reindex: undefined,
     model_size: undefined,
