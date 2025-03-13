@@ -157,16 +157,14 @@ class BaseTestHttp(unittest.TestCase):
         start_time: float = datetime.datetime.now().timestamp(),
         end_time: float = datetime.datetime.now().timestamp() + 20,
         severity: SeverityEnum = SeverityEnum.alert,
-        has_been_reviewed: bool = False,
         data: Json = {},
-    ) -> Event:
+    ) -> ReviewSegment:
         """Inserts a review segment model with a given id."""
         return ReviewSegment.insert(
             id=id,
             camera="front_door",
             start_time=start_time,
             end_time=end_time,
-            has_been_reviewed=has_been_reviewed,
             severity=severity,
             thumb_path=False,
             data=data,

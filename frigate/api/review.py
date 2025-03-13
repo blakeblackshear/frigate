@@ -409,7 +409,7 @@ async def set_multiple_reviewed(
                     review_segment=ReviewSegment.get(id=review_id),
                     has_been_reviewed=True,
                 )
-            except IntegrityError:
+            except (DoesNotExist, IntegrityError):
                 pass
 
     return JSONResponse(
