@@ -1,16 +1,29 @@
 from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
+from peewee import DoesNotExist
 
-from frigate.models import Event, Recordings, ReviewSegment
+from frigate.api.auth import get_current_user
+from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import BaseTestHttp
 
 
 class TestHttpReview(BaseTestHttp):
     def setUp(self):
-        super().setUp([Event, Recordings, ReviewSegment])
+        super().setUp([Event, Recordings, ReviewSegment, UserReviewStatus])
         self.app = super().create_app()
+        self.user_id = "admin"
+
+        # Mock get_current_user for all tests
+        async def mock_get_current_user():
+            return {"username": self.user_id, "role": "admin"}
+
+        self.app.dependency_overrides[get_current_user] = mock_get_current_user
+
+    def tearDown(self):
+        self.app.dependency_overrides.clear()
+        super().tearDown()
 
     def _get_reviews(self, ids: list[str]):
         return list(
@@ -22,6 +35,13 @@ class TestHttpReview(BaseTestHttp):
     def _get_recordings(self, ids: list[str]):
         return list(
             Recordings.select(Recordings.id).where(Recordings.id.in_(ids)).execute()
+        )
+
+    def _insert_user_review_status(self, review_id: str, reviewed: bool = True):
+        UserReviewStatus.create(
+            user_id=self.user_id,
+            review_segment=ReviewSegment.get(ReviewSegment.id == review_id),
+            has_been_reviewed=reviewed,
         )
 
     ####################################################################################################################
@@ -43,11 +63,14 @@ class TestHttpReview(BaseTestHttp):
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
-            super().insert_mock_review_segment("123456.random", now - 2, now - 1)
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 2, now - 1)
             response = client.get("/review")
             assert response.status_code == 200
             response_json = response.json()
             assert len(response_json) == 1
+            assert response_json[0]["id"] == id
+            assert response_json[0]["has_been_reviewed"] == False
 
     def test_get_review_with_time_filter_no_matches(self):
         now = datetime.now().timestamp()
@@ -391,37 +414,27 @@ class TestHttpReview(BaseTestHttp):
         with TestClient(self.app) as client:
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(10):
+                id = f"123456_{i}.random_alert_not_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_alert_not_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.alert,
-                    False,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert
                 )
             for i in range(10):
+                id = f"123456_{i}.random_alert_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_alert_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.alert,
-                    True,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert
                 )
+                self._insert_user_review_status(id, reviewed=True)
             for i in range(10):
+                id = f"123456_{i}.random_detection_not_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_detection_not_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.detection,
-                    False,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection
                 )
             for i in range(5):
+                id = f"123456_{i}.random_detection_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_detection_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.detection,
-                    True,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection
                 )
+                self._insert_user_review_status(id, reviewed=True)
             response = client.get("/review/summary")
             assert response.status_code == 200
             response_json = response.json()
@@ -447,6 +460,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
     ###################################  POST reviews/viewed Endpoint   ################################################
     ####################################################################################################################
+
     def test_post_reviews_viewed_no_body(self):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
@@ -473,12 +487,11 @@ class TestHttpReview(BaseTestHttp):
             assert response["success"] == True
             assert response["message"] == "Reviewed multiple items"
             # Verify that in DB the review segment was not changed
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.has_been_reviewed)
-                .where(ReviewSegment.id == id)
-                .get()
-            )
-            assert review_segment_in_db.has_been_reviewed == False
+            with self.assertRaises(DoesNotExist):
+                UserReviewStatus.get(
+                    UserReviewStatus.user_id == self.user_id,
+                    UserReviewStatus.review_segment == "1",
+                )
 
     def test_post_reviews_viewed(self):
         with TestClient(self.app) as client:
@@ -487,16 +500,15 @@ class TestHttpReview(BaseTestHttp):
             body = {"ids": [id]}
             response = client.post("/reviews/viewed", json=body)
             assert response.status_code == 200
-            response = response.json()
-            assert response["success"] == True
-            assert response["message"] == "Reviewed multiple items"
-            # Verify that in DB the review segment was changed
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.has_been_reviewed)
-                .where(ReviewSegment.id == id)
-                .get()
+            response_json = response.json()
+            assert response_json["success"] == True
+            assert response_json["message"] == "Reviewed multiple items"
+            # Verify UserReviewStatus was created
+            user_review = UserReviewStatus.get(
+                UserReviewStatus.user_id == self.user_id,
+                UserReviewStatus.review_segment == id,
             )
-            assert review_segment_in_db.has_been_reviewed == True
+            assert user_review.has_been_reviewed == True
 
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################
@@ -672,8 +684,7 @@ class TestHttpReview(BaseTestHttp):
                     "camera": "front_door",
                     "start_time": now + 1,
                     "end_time": now + 2,
-                    "has_been_reviewed": False,
-                    "severity": SeverityEnum.alert,
+                    "severity": "alert",
                     "thumb_path": "False",
                     "data": {"detections": {"event_id": event_id}},
                 },
@@ -708,8 +719,7 @@ class TestHttpReview(BaseTestHttp):
                     "camera": "front_door",
                     "start_time": now + 1,
                     "end_time": now + 2,
-                    "has_been_reviewed": False,
-                    "severity": SeverityEnum.alert,
+                    "severity": "alert",
                     "thumb_path": "False",
                     "data": {},
                 },
@@ -719,6 +729,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
     ###################################  DELETE /review/{review_id}/viewed Endpoint   ##################################
     ####################################################################################################################
+
     def test_delete_review_viewed_review_not_found(self):
         with TestClient(self.app) as client:
             review_id = "123456.random"
@@ -735,11 +746,10 @@ class TestHttpReview(BaseTestHttp):
 
         with TestClient(self.app) as client:
             review_id = "123456.review.random"
-            super().insert_mock_review_segment(
-                review_id, now + 1, now + 2, has_been_reviewed=True
-            )
-            review_before = ReviewSegment.get(ReviewSegment.id == review_id)
-            assert review_before.has_been_reviewed == True
+            super().insert_mock_review_segment(review_id, now + 1, now + 2)
+            self._insert_user_review_status(review_id, reviewed=True)
+            # Verify it’s reviewed before
+            response = client.get(f"/review/{review_id}")
 
             response = client.delete(f"/review/{review_id}/viewed")
             assert response.status_code == 200
@@ -749,5 +759,9 @@ class TestHttpReview(BaseTestHttp):
                 response_json,
             )
 
-            review_after = ReviewSegment.get(ReviewSegment.id == review_id)
-            assert review_after.has_been_reviewed == False
+            # Verify it’s unreviewed after
+            with self.assertRaises(DoesNotExist):
+                UserReviewStatus.get(
+                    UserReviewStatus.user_id == self.user_id,
+                    UserReviewStatus.review_segment == review_id,
+                )
