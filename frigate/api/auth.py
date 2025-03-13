@@ -189,21 +189,15 @@ def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, sec
 
 
 async def get_current_user(request: Request):
-    JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
-    encoded_token = request.cookies.get(JWT_COOKIE_NAME)
-    if not encoded_token:
-        return JSONResponse(content={"message": "No JWT token found"}, status_code=401)
+    username = request.headers.get("remote-user")
+    role = request.headers.get("remote-role")
 
-    try:
-        token = jwt.decode(encoded_token, request.app.jwt_token)
-        if "sub" not in token.claims or "role" not in token.claims:
-            return JSONResponse(
-                content={"message": "Invalid JWT token"}, status_code=401
-            )
-        return {"username": token.claims["sub"], "role": token.claims["role"]}
-    except Exception as e:
-        logger.error(f"Error parsing JWT: {e}")
-        return JSONResponse(content={"message": "Invalid JWT token"}, status_code=401)
+    if not username or not role:
+        return JSONResponse(
+            content={"message": "No authorization headers."}, status_code=401
+        )
+
+    return {"username": username, "role": role}
 
 
 def require_role(required_roles: List[str]):
