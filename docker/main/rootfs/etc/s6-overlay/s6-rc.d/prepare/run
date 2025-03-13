@@ -75,7 +75,7 @@ function migrate_addon_config_dir() {
         if [[ -d "${old_ffmpeg_path}" ]]; then
             local new_ffmpeg_dir
             new_ffmpeg_dir="$(dirname "${ffmpeg_path}")"
-            echo "[INFO] Migrating model from '${old_ffmpeg_path}' to '${ffmpeg_path}'..."
+            echo "[INFO] Migrating ffmpeg from '${old_ffmpeg_path}' to '${ffmpeg_path}'..."
             mkdir -vp "${new_ffmpeg_dir}"
             mv -vf "${old_ffmpeg_path}" "${ffmpeg_path}"
         fi
