@@ -167,7 +167,9 @@ export default function ExportDialog({
           >
             <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
             {isDesktop && (
-              <div className="text-primary">{t("menu.export")}</div>
+              <div className="text-primary">
+                {t("menu.export", { ns: "common" })}
+              </div>
             )}
           </Button>
         </Trigger>
