@@ -1,29 +1,20 @@
+"""Maintains state of camera."""
+
 import datetime
-import json
 import logging
-import queue
+import os
 import threading
 from collections import defaultdict
-from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable, Optional
+from typing import Callable
 
 import cv2
 import numpy as np
 
-from frigate.comms.config_updater import ConfigSubscriber
-from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
-from frigate.comms.dispatcher import Dispatcher
-from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
-from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
-    CameraMqttConfig,
     FrigateConfig,
-    RecordConfig,
-    SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import UPDATE_CAMERA_ACTIVITY
-from frigate.events.types import EventStateEnum, EventTypeEnum
+from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
@@ -37,7 +28,6 @@ from frigate.util.image import (
 logger = logging.getLogger(__name__)
 
 
-# Maintains the state of a camera
 class CameraState:
     def __init__(
         self,
@@ -147,12 +137,16 @@ class CameraState:
                 # draw the bounding boxes on the frame
                 box = obj["box"]
                 text = (
-                    obj["label"]
+                    obj["sub_label"][0]
                     if (
-                        not obj.get("sub_label")
-                        or not is_label_printable(obj["sub_label"][0])
+                        obj.get("sub_label") and is_label_printable(obj["sub_label"][0])
                     )
-                    else obj["sub_label"][0]
+                    else obj.get("recognized_license_plate", [None])[0]
+                    if (
+                        obj.get("recognized_license_plate")
+                        and obj["recognized_license_plate"][0]
+                    )
+                    else obj["label"]
                 )
                 draw_box_with_label(
                     frame_copy,
@@ -415,390 +409,60 @@ class CameraState:
 
             self.previous_frame_id = frame_name
 
+    def save_manual_event_image(
+        self, event_id: str, label: str, draw: dict[str, list[dict]]
+    ) -> None:
+        img_frame = self.get_current_frame()
+
+        # write clean snapshot if enabled
+        if self.camera_config.snapshots.clean_copy:
+            ret, png = cv2.imencode(".png", img_frame)
+
+            if ret:
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        f"{self.camera_config.name}-{event_id}-clean.png",
+                    ),
+                    "wb",
+                ) as p:
+                    p.write(png.tobytes())
+
+        # write jpg snapshot with optional annotations
+        if draw.get("boxes") and isinstance(draw.get("boxes"), list):
+            for box in draw.get("boxes"):
+                x = int(box["box"][0] * self.camera_config.detect.width)
+                y = int(box["box"][1] * self.camera_config.detect.height)
+                width = int(box["box"][2] * self.camera_config.detect.width)
+                height = int(box["box"][3] * self.camera_config.detect.height)
+
+                draw_box_with_label(
+                    img_frame,
+                    x,
+                    y,
+                    x + width,
+                    y + height,
+                    label,
+                    f"{box.get('score', '-')}% {int(width * height)}",
+                    thickness=2,
+                    color=box.get("color", (255, 0, 0)),
+                )
+
+        ret, jpg = cv2.imencode(".jpg", img_frame)
+        with open(
+            os.path.join(CLIPS_DIR, f"{self.camera_config.name}-{event_id}.jpg"),
+            "wb",
+        ) as j:
+            j.write(jpg.tobytes())
+
+        # create thumbnail with max height of 175 and save
+        width = int(175 * img_frame.shape[1] / img_frame.shape[0])
+        thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
+        cv2.imwrite(
+            os.path.join(THUMB_DIR, self.camera_config.name, f"{event_id}.webp"), thumb
+        )
+
     def shutdown(self) -> None:
         for obj in self.tracked_objects.values():
             if not obj.obj_data.get("end_time"):
                 obj.write_thumbnail_to_disk()
-
-
-class TrackedObjectProcessor(threading.Thread):
-    def __init__(
-        self,
-        config: FrigateConfig,
-        dispatcher: Dispatcher,
-        tracked_objects_queue,
-        ptz_autotracker_thread,
-        stop_event,
-    ):
-        super().__init__(name="detected_frames_processor")
-        self.config = config
-        self.dispatcher = dispatcher
-        self.tracked_objects_queue = tracked_objects_queue
-        self.stop_event: MpEvent = stop_event
-        self.camera_states: dict[str, CameraState] = {}
-        self.frame_manager = SharedMemoryFrameManager()
-        self.last_motion_detected: dict[str, float] = {}
-        self.ptz_autotracker_thread = ptz_autotracker_thread
-
-        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
-
-        self.requestor = InterProcessRequestor()
-        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
-        self.event_sender = EventUpdatePublisher()
-        self.event_end_subscriber = EventEndSubscriber()
-
-        self.camera_activity: dict[str, dict[str, any]] = {}
-
-        # {
-        #   'zone_name': {
-        #       'person': {
-        #           'camera_1': 2,
-        #           'camera_2': 1
-        #       }
-        #   }
-        # }
-        self.zone_data = defaultdict(lambda: defaultdict(dict))
-        self.active_zone_data = defaultdict(lambda: defaultdict(dict))
-
-        def start(camera: str, obj: TrackedObject, frame_name: str):
-            self.event_sender.publish(
-                (
-                    EventTypeEnum.tracked_object,
-                    EventStateEnum.start,
-                    camera,
-                    frame_name,
-                    obj.to_dict(),
-                )
-            )
-
-        def update(camera: str, obj: TrackedObject, frame_name: str):
-            obj.has_snapshot = self.should_save_snapshot(camera, obj)
-            obj.has_clip = self.should_retain_recording(camera, obj)
-            after = obj.to_dict()
-            message = {
-                "before": obj.previous,
-                "after": after,
-                "type": "new" if obj.previous["false_positive"] else "update",
-            }
-            self.dispatcher.publish("events", json.dumps(message), retain=False)
-            obj.previous = after
-            self.event_sender.publish(
-                (
-                    EventTypeEnum.tracked_object,
-                    EventStateEnum.update,
-                    camera,
-                    frame_name,
-                    obj.to_dict(),
-                )
-            )
-
-        def autotrack(camera: str, obj: TrackedObject, frame_name: str):
-            self.ptz_autotracker_thread.ptz_autotracker.autotrack_object(camera, obj)
-
-        def end(camera: str, obj: TrackedObject, frame_name: str):
-            # populate has_snapshot
-            obj.has_snapshot = self.should_save_snapshot(camera, obj)
-            obj.has_clip = self.should_retain_recording(camera, obj)
-
-            # write thumbnail to disk if it will be saved as an event
-            if obj.has_snapshot or obj.has_clip:
-                obj.write_thumbnail_to_disk()
-
-            # write the snapshot to disk
-            if obj.has_snapshot:
-                obj.write_snapshot_to_disk()
-
-            if not obj.false_positive:
-                message = {
-                    "before": obj.previous,
-                    "after": obj.to_dict(),
-                    "type": "end",
-                }
-                self.dispatcher.publish("events", json.dumps(message), retain=False)
-                self.ptz_autotracker_thread.ptz_autotracker.end_object(camera, obj)
-
-            self.event_sender.publish(
-                (
-                    EventTypeEnum.tracked_object,
-                    EventStateEnum.end,
-                    camera,
-                    frame_name,
-                    obj.to_dict(),
-                )
-            )
-
-        def snapshot(camera, obj: TrackedObject, frame_name: str):
-            mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
-            if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
-                jpg_bytes = obj.get_img_bytes(
-                    ext="jpg",
-                    timestamp=mqtt_config.timestamp,
-                    bounding_box=mqtt_config.bounding_box,
-                    crop=mqtt_config.crop,
-                    height=mqtt_config.height,
-                    quality=mqtt_config.quality,
-                )
-
-                if jpg_bytes is None:
-                    logger.warning(
-                        f"Unable to send mqtt snapshot for {obj.obj_data['id']}."
-                    )
-                else:
-                    self.dispatcher.publish(
-                        f"{camera}/{obj.obj_data['label']}/snapshot",
-                        jpg_bytes,
-                        retain=True,
-                    )
-
-        def camera_activity(camera, activity):
-            last_activity = self.camera_activity.get(camera)
-
-            if not last_activity or activity != last_activity:
-                self.camera_activity[camera] = activity
-                self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
-
-        for camera in self.config.cameras.keys():
-            camera_state = CameraState(
-                camera, self.config, self.frame_manager, self.ptz_autotracker_thread
-            )
-            camera_state.on("start", start)
-            camera_state.on("autotrack", autotrack)
-            camera_state.on("update", update)
-            camera_state.on("end", end)
-            camera_state.on("snapshot", snapshot)
-            camera_state.on("camera_activity", camera_activity)
-            self.camera_states[camera] = camera_state
-
-    def should_save_snapshot(self, camera, obj: TrackedObject):
-        if obj.false_positive:
-            return False
-
-        snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
-
-        if not snapshot_config.enabled:
-            return False
-
-        # object never changed position
-        if obj.obj_data["position_changes"] == 0:
-            return False
-
-        # if there are required zones and there is no overlap
-        required_zones = snapshot_config.required_zones
-        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
-            logger.debug(
-                f"Not creating snapshot for {obj.obj_data['id']} because it did not enter required zones"
-            )
-            return False
-
-        return True
-
-    def should_retain_recording(self, camera: str, obj: TrackedObject):
-        if obj.false_positive:
-            return False
-
-        record_config: RecordConfig = self.config.cameras[camera].record
-
-        # Recording is disabled
-        if not record_config.enabled:
-            return False
-
-        # object never changed position
-        if obj.obj_data["position_changes"] == 0:
-            return False
-
-        # If the object is not considered an alert or detection
-        if obj.max_severity is None:
-            return False
-
-        return True
-
-    def should_mqtt_snapshot(self, camera, obj: TrackedObject):
-        # object never changed position
-        if obj.obj_data["position_changes"] == 0:
-            return False
-
-        # if there are required zones and there is no overlap
-        required_zones = self.config.cameras[camera].mqtt.required_zones
-        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
-            logger.debug(
-                f"Not sending mqtt for {obj.obj_data['id']} because it did not enter required zones"
-            )
-            return False
-
-        return True
-
-    def update_mqtt_motion(self, camera, frame_time, motion_boxes):
-        # publish if motion is currently being detected
-        if motion_boxes:
-            # only send ON if motion isn't already active
-            if self.last_motion_detected.get(camera, 0) == 0:
-                self.dispatcher.publish(
-                    f"{camera}/motion",
-                    "ON",
-                    retain=False,
-                )
-
-            # always updated latest motion
-            self.last_motion_detected[camera] = frame_time
-        elif self.last_motion_detected.get(camera, 0) > 0:
-            mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
-
-            # If no motion, make sure the off_delay has passed
-            if frame_time - self.last_motion_detected.get(camera, 0) >= mqtt_delay:
-                self.dispatcher.publish(
-                    f"{camera}/motion",
-                    "OFF",
-                    retain=False,
-                )
-                # reset the last_motion so redundant `off` commands aren't sent
-                self.last_motion_detected[camera] = 0
-
-    def get_best(self, camera, label):
-        # TODO: need a lock here
-        camera_state = self.camera_states[camera]
-        if label in camera_state.best_objects:
-            best_obj = camera_state.best_objects[label]
-            best = best_obj.thumbnail_data.copy()
-            best["frame"] = camera_state.frame_cache.get(
-                best_obj.thumbnail_data["frame_time"]
-            )
-            return best
-        else:
-            return {}
-
-    def get_current_frame(
-        self, camera: str, draw_options: dict[str, any] = {}
-    ) -> Optional[np.ndarray]:
-        if camera == "birdseye":
-            return self.frame_manager.get(
-                "birdseye",
-                (self.config.birdseye.height * 3 // 2, self.config.birdseye.width),
-            )
-
-        if camera not in self.camera_states:
-            return None
-
-        return self.camera_states[camera].get_current_frame(draw_options)
-
-    def get_current_frame_time(self, camera) -> int:
-        """Returns the latest frame time for a given camera."""
-        return self.camera_states[camera].current_frame_time
-
-    def force_end_all_events(self, camera: str, camera_state: CameraState):
-        """Ends all active events on camera when disabling."""
-        last_frame_name = camera_state.previous_frame_id
-        for obj_id, obj in list(camera_state.tracked_objects.items()):
-            if "end_time" not in obj.obj_data:
-                logger.debug(f"Camera {camera} disabled, ending active event {obj_id}")
-                obj.obj_data["end_time"] = datetime.datetime.now().timestamp()
-                # end callbacks
-                for callback in camera_state.callbacks["end"]:
-                    callback(camera, obj, last_frame_name)
-
-                # camera activity callbacks
-                for callback in camera_state.callbacks["camera_activity"]:
-                    callback(
-                        camera,
-                        {"enabled": False, "motion": 0, "objects": []},
-                    )
-
-    def run(self):
-        while not self.stop_event.is_set():
-            # check for config updates
-            while True:
-                (
-                    updated_enabled_topic,
-                    updated_enabled_config,
-                ) = self.config_enabled_subscriber.check_for_update()
-
-                if not updated_enabled_topic:
-                    break
-
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                self.config.cameras[
-                    camera_name
-                ].enabled = updated_enabled_config.enabled
-
-                if self.camera_states[camera_name].prev_enabled is None:
-                    self.camera_states[
-                        camera_name
-                    ].prev_enabled = updated_enabled_config.enabled
-
-            # manage camera disabled state
-            for camera, config in self.config.cameras.items():
-                if not config.enabled_in_config:
-                    continue
-
-                current_enabled = config.enabled
-                camera_state = self.camera_states[camera]
-
-                if camera_state.prev_enabled and not current_enabled:
-                    logger.debug(f"Not processing objects for disabled camera {camera}")
-                    self.force_end_all_events(camera, camera_state)
-
-                camera_state.prev_enabled = current_enabled
-
-                if not current_enabled:
-                    continue
-
-            try:
-                (
-                    camera,
-                    frame_name,
-                    frame_time,
-                    current_tracked_objects,
-                    motion_boxes,
-                    regions,
-                ) = self.tracked_objects_queue.get(True, 1)
-            except queue.Empty:
-                continue
-
-            if not self.config.cameras[camera].enabled:
-                logger.debug(f"Camera {camera} disabled, skipping update")
-                continue
-
-            camera_state = self.camera_states[camera]
-
-            camera_state.update(
-                frame_name, frame_time, current_tracked_objects, motion_boxes, regions
-            )
-
-            self.update_mqtt_motion(camera, frame_time, motion_boxes)
-
-            tracked_objects = [
-                o.to_dict() for o in camera_state.tracked_objects.values()
-            ]
-
-            # publish info on this frame
-            self.detection_publisher.publish(
-                (
-                    camera,
-                    frame_name,
-                    frame_time,
-                    tracked_objects,
-                    motion_boxes,
-                    regions,
-                )
-            )
-
-            # cleanup event finished queue
-            while not self.stop_event.is_set():
-                update = self.event_end_subscriber.check_for_update(timeout=0.01)
-
-                if not update:
-                    break
-
-                event_id, camera, _ = update
-                self.camera_states[camera].finished(event_id)
-
-        # shut down camera states
-        for state in self.camera_states.values():
-            state.shutdown()
-
-        self.requestor.stop()
-        self.detection_publisher.stop()
-        self.event_sender.stop()
-        self.event_end_subscriber.stop()
-        self.config_enabled_subscriber.stop()
-
-        logger.info("Exiting object processor...")

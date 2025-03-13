@@ -13,7 +13,7 @@ Use of the bundled go2rtc is optional. You can still configure FFmpeg to connect
 
 # Setup a go2rtc stream
 
-First, you will want to configure go2rtc to connect to your camera stream by adding the stream you want to use for live view in your Frigate config file. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.2#module-streams), not just rtsp.
+First, you will want to configure go2rtc to connect to your camera stream by adding the stream you want to use for live view in your Frigate config file. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#module-streams), not just rtsp.
 
 :::tip
 
@@ -32,69 +32,74 @@ go2rtc:
 
 After adding this to the config, restart Frigate and try to watch the live stream for a single camera by clicking on it from the dashboard. It should look much clearer and more fluent than the original jsmpeg stream.
 
-
 ### What if my video doesn't play?
 
 - Check Logs:
-    - Access the go2rtc logs in the Frigate UI under Logs in the sidebar.
-    - If go2rtc is having difficulty connecting to your camera, you should see some error messages in the log.
+
+  - Access the go2rtc logs in the Frigate UI under Logs in the sidebar.
+  - If go2rtc is having difficulty connecting to your camera, you should see some error messages in the log.
 
 - Check go2rtc Web Interface: if you don't see any errors in the logs, try viewing the camera through go2rtc's web interface.
-    - Navigate to port 1984 in your browser to access go2rtc's web interface.
-        - If using Frigate through Home Assistant, enable the web interface at port 1984.
-        - If using Docker, forward port 1984 before accessing the web interface.
-    - Click `stream` for the specific camera to see if the camera's stream is being received.
+
+  - Navigate to port 1984 in your browser to access go2rtc's web interface.
+    - If using Frigate through Home Assistant, enable the web interface at port 1984.
+    - If using Docker, forward port 1984 before accessing the web interface.
+  - Click `stream` for the specific camera to see if the camera's stream is being received.
 
 - Check Video Codec:
-    - If the camera stream works in go2rtc but not in your browser, the video codec might be unsupported.
-    - If using H265, switch to H264. Refer to [video codec compatibility](https://github.com/AlexxIT/go2rtc/tree/v1.9.2#codecs-madness) in go2rtc documentation.
-    - If unable to switch from H265 to H264, or if the stream format is different (e.g., MJPEG), re-encode the video using [FFmpeg parameters](https://github.com/AlexxIT/go2rtc/tree/v1.9.2#source-ffmpeg). It supports rotating and resizing video feeds and hardware acceleration. Keep in mind that transcoding video from one format to another is a resource intensive task and you may be better off using the built-in jsmpeg view.
-        ```yaml
-        go2rtc:
-          streams:
-            back:
-              - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-              - "ffmpeg:back#video=h264#hardware"
-        ```
 
-- Switch to FFmpeg if needed: 
-    - Some camera streams may need to use the ffmpeg module in go2rtc. This has the downside of slower startup times, but has compatibility with more stream types.
-        ```yaml
-        go2rtc:
-          streams:
-            back:
-              - ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-        ```
+  - If the camera stream works in go2rtc but not in your browser, the video codec might be unsupported.
+  - If using H265, switch to H264. Refer to [video codec compatibility](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#codecs-madness) in go2rtc documentation.
+  - If unable to switch from H265 to H264, or if the stream format is different (e.g., MJPEG), re-encode the video using [FFmpeg parameters](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#source-ffmpeg). It supports rotating and resizing video feeds and hardware acceleration. Keep in mind that transcoding video from one format to another is a resource intensive task and you may be better off using the built-in jsmpeg view.
+    ```yaml
+    go2rtc:
+      streams:
+        back:
+          - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          - "ffmpeg:back#video=h264#hardware"
+    ```
 
-    - If you can see the video but do not have audio, this is most likely because your camera's audio stream codec is not AAC.
-    - If possible, update your camera's audio settings to AAC in your camera's firmware.
-    - If your cameras do not support AAC audio, you will need to tell go2rtc to re-encode the audio to AAC on demand if you want audio. This will use additional CPU and add some latency. To add AAC audio on demand, you can update your go2rtc config as follows:
-        ```yaml
-        go2rtc:
-          streams:
-            back:
-              - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-              - "ffmpeg:back#audio=aac"
-        ```
+- Switch to FFmpeg if needed:
 
-        If you need to convert **both** the audio and video streams, you can use the following:
+  - Some camera streams may need to use the ffmpeg module in go2rtc. This has the downside of slower startup times, but has compatibility with more stream types.
 
-        ```yaml
-        go2rtc:
-          streams:
-            back:
-              - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-              - "ffmpeg:back#video=h264#audio=aac#hardware"
-        ```
+    ```yaml
+    go2rtc:
+      streams:
+        back:
+          - ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+    ```
 
-        When using the ffmpeg module, you would add AAC audio like this:
+  - If you can see the video but do not have audio, this is most likely because your camera's audio stream codec is not AAC.
+  - If possible, update your camera's audio settings to AAC in your camera's firmware.
+  - If your cameras do not support AAC audio, you will need to tell go2rtc to re-encode the audio to AAC on demand if you want audio. This will use additional CPU and add some latency. To add AAC audio on demand, you can update your go2rtc config as follows:
 
-        ```yaml
-        go2rtc:
-          streams:
-            back:
-              - "ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#video=copy#audio=copy#audio=aac#hardware"
-        ```
+    ```yaml
+    go2rtc:
+      streams:
+        back:
+          - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          - "ffmpeg:back#audio=aac"
+    ```
+
+    If you need to convert **both** the audio and video streams, you can use the following:
+
+    ```yaml
+    go2rtc:
+      streams:
+        back:
+          - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          - "ffmpeg:back#video=h264#audio=aac#hardware"
+    ```
+
+    When using the ffmpeg module, you would add AAC audio like this:
+
+    ```yaml
+    go2rtc:
+      streams:
+        back:
+          - "ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#video=copy#audio=copy#audio=aac#hardware"
+    ```
 
 :::warning
 

@@ -100,9 +100,9 @@ By default, the Raspberry Pi limits the amount of memory available to the GPU. I
 
 Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
-### Hailo-8L
+### Hailo-8
 
-The Hailo-8L is an M.2 card typically connected to a carrier board for PCIe, which then connects to the Raspberry Pi 5 as part of the AI Kit. However, it can also be used on other boards equipped with an M.2 M key edge connector.
+The Hailo-8 and Hailo-8L AI accelerators are available in both M.2 and HAT form factors for the Raspberry Pi. The M.2 version typically connects to a carrier board for PCIe, which then interfaces with the Raspberry Pi 5 as part of the AI Kit. The HAT version can be mounted directly onto compatible Raspberry Pi models. Both form factors have been successfully tested on x86 platforms as well, making them versatile options for various computing environments.
 
 #### Installation
 
