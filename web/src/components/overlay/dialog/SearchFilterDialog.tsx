@@ -34,6 +34,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Trans, useTranslation } from "react-i18next";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { LuCheck } from "react-icons/lu";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -78,7 +86,8 @@ export default function SearchFilterDialog({
         (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
-        (currentFilter.sub_labels?.length ?? 0) > 0),
+        (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (currentFilter.recognized_license_plate?.length ?? 0) > 0),
     [currentFilter],
   );
 
@@ -118,6 +127,15 @@ export default function SearchFilterDialog({
         subLabels={currentFilter.sub_labels}
         setSubLabels={(newSubLabels) =>
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
+        }
+      />
+      <RecognizedLicensePlatesFilterContent
+        recognizedLicensePlates={currentFilter.recognized_license_plate}
+        setRecognizedLicensePlates={(plate) =>
+          setCurrentFilter({
+            ...currentFilter,
+            recognized_license_plate: plate,
+          })
         }
       />
       <ScoreFilterContent
@@ -193,6 +211,7 @@ export default function SearchFilterDialog({
               max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
+              recognized_license_plate: undefined,
             }));
           }}
         >
@@ -840,6 +859,133 @@ export function SnapshotClipFilterContent({
           </ToggleGroup>
         </div>
       </div>
+    </div>
+  );
+}
+
+type RecognizedLicensePlatesFilterContentProps = {
+  recognizedLicensePlates: string[] | undefined;
+  setRecognizedLicensePlates: (
+    recognizedLicensePlates: string[] | undefined,
+  ) => void;
+};
+
+export function RecognizedLicensePlatesFilterContent({
+  recognizedLicensePlates,
+  setRecognizedLicensePlates,
+}: RecognizedLicensePlatesFilterContentProps) {
+  const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
+    "recognized_license_plates",
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const [selectedRecognizedLicensePlates, setSelectedRecognizedLicensePlates] =
+    useState<string[]>(recognizedLicensePlates || []);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    if (recognizedLicensePlates) {
+      setSelectedRecognizedLicensePlates(recognizedLicensePlates);
+    } else {
+      setSelectedRecognizedLicensePlates([]);
+    }
+  }, [recognizedLicensePlates]);
+
+  const handleSelect = (recognizedLicensePlate: string) => {
+    const newSelected = selectedRecognizedLicensePlates.includes(
+      recognizedLicensePlate,
+    )
+      ? selectedRecognizedLicensePlates.filter(
+          (id) => id !== recognizedLicensePlate,
+        ) // Deselect
+      : [...selectedRecognizedLicensePlates, recognizedLicensePlate]; // Select
+
+    setSelectedRecognizedLicensePlates(newSelected);
+    if (newSelected.length === 0) {
+      setRecognizedLicensePlates(undefined); // Clear filter if no plates selected
+    } else {
+      setRecognizedLicensePlates(newSelected);
+    }
+  };
+
+  if (!allRecognizedLicensePlates || allRecognizedLicensePlates.length === 0) {
+    return null;
+  }
+
+  const filteredRecognizedLicensePlates =
+    allRecognizedLicensePlates?.filter((id) =>
+      id.toLowerCase().includes(inputValue.toLowerCase()),
+    ) || [];
+
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">Recognized License Plates</div>
+      {error ? (
+        <p className="text-sm text-red-500">
+          Failed to load recognized license plates.
+        </p>
+      ) : !allRecognizedLicensePlates ? (
+        <p className="text-sm text-muted-foreground">
+          Loading recognized license plates...
+        </p>
+      ) : (
+        <>
+          <Command className="border border-input bg-background">
+            <CommandInput
+              placeholder="Type to search license plates..."
+              value={inputValue}
+              onValueChange={setInputValue}
+            />
+            <CommandList className="max-h-[200px] overflow-auto">
+              {filteredRecognizedLicensePlates.length === 0 && inputValue && (
+                <CommandEmpty>No license plates found.</CommandEmpty>
+              )}
+              {filteredRecognizedLicensePlates.map((plate) => (
+                <CommandItem
+                  key={plate}
+                  value={plate}
+                  onSelect={() => handleSelect(plate)}
+                  className="cursor-pointer"
+                >
+                  <LuCheck
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedRecognizedLicensePlates.includes(plate)
+                        ? "opacity-100"
+                        : "opacity-0",
+                    )}
+                  />
+                  {plate}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+          {selectedRecognizedLicensePlates.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedRecognizedLicensePlates.map((id) => (
+                <span
+                  key={id}
+                  className="inline-flex items-center rounded bg-selected px-2 py-1 text-sm text-white"
+                >
+                  {id}
+                  <button
+                    onClick={() => handleSelect(id)}
+                    className="ml-1 text-white hover:text-gray-200"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      <p className="mt-1 text-sm text-muted-foreground">
+        Select one or more plates from the list.
+      </p>
     </div>
   );
 }

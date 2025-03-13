@@ -137,12 +137,16 @@ class CameraState:
                 # draw the bounding boxes on the frame
                 box = obj["box"]
                 text = (
-                    obj["label"]
+                    obj["sub_label"][0]
                     if (
-                        not obj.get("sub_label")
-                        or not is_label_printable(obj["sub_label"][0])
+                        obj.get("sub_label") and is_label_printable(obj["sub_label"][0])
                     )
-                    else obj["sub_label"][0]
+                    else obj.get("recognized_license_plate", [None])[0]
+                    if (
+                        obj.get("recognized_license_plate")
+                        and obj["recognized_license_plate"][0]
+                    )
+                    else obj["label"]
                 )
                 draw_box_with_label(
                     frame_copy,
