@@ -191,6 +191,12 @@ def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, sec
 async def get_current_user(request: Request):
     username = request.headers.get("remote-user")
     role = request.headers.get("remote-role")
+
+    if not username or not role:
+        return JSONResponse(
+            content={"message": "No authorization headers."}, status_code=401
+        )
+
     return {"username": username, "role": role}
 
 
