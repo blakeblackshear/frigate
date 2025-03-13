@@ -80,12 +80,12 @@ if go2rtc_config["webrtc"].get("candidates") is None:
 
     go2rtc_config["webrtc"]["candidates"] = default_candidates
 
-if go2rtc_config["rtsp"].get("username") is not None:
+if go2rtc_config.get("rtsp", {}).get("username") is not None:
     go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
         **FRIGATE_ENV_VARS
     )
 
-if go2rtc_config["rtsp"].get("password") is not None:
+if go2rtc_config.get("rtsp", {}).get("password") is not None:
     go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
         **FRIGATE_ENV_VARS
     )
