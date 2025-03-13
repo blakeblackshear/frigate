@@ -38,7 +38,7 @@ function migrate_addon_config_dir() {
     if [[ "${db_path}" == "null" ]]; then
         db_path="${config_dir}/frigate.db"
     fi
-    if [[ "${db_path}" == /config/* ]]; then
+    if [[ "${db_path}" == "${config_dir}/"* ]]; then
         # replace /config/ prefix with /homeassistant/
         local old_db_path="${home_assistant_config_dir}/${db_path:8}"
 
@@ -46,14 +46,14 @@ function migrate_addon_config_dir() {
             local new_db_dir
             new_db_dir="$(dirname "${db_path}")"
             echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
-            mkdir -p "${new_db_dir}"
+            mkdir -vp "${new_db_dir}"
             mv -vf "${old_db_path}"* "${new_db_dir}"
         fi
     fi
 
     local model_path
     model_path=$(yq eval '.model.path' "${old_config_file}")
-    if [[ "${model_path}" == /config/* ]]; then
+    if [[ "${model_path}" == "${config_dir}/"* ]]; then
         # replace /config/ prefix with /homeassistant/
         local old_model_path="${home_assistant_config_dir}/${model_path:8}"
 
@@ -61,8 +61,23 @@ function migrate_addon_config_dir() {
             local new_model_dir
             new_model_dir="$(dirname "${model_path}")"
             echo "[INFO] Migrating model from '${old_model_path}' to '${model_path}'..."
-            mkdir -p "${new_model_dir}"
+            mkdir -vp "${new_model_dir}"
             mv -vf "${old_model_path}" "${model_path}"
+        fi
+    fi
+
+    local ffmpeg_path
+    ffmpeg_path=$(yq eval '.ffmpeg.path' "${old_config_file}")
+    if [[ "${ffmpeg_path}" == "${config_dir}/"* ]]; then
+        # replace /config/ prefix with /homeassistant/
+        local old_ffmpeg_path="${home_assistant_config_dir}/${ffmpeg_path:8}"
+
+        if [[ -d "${old_ffmpeg_path}" ]]; then
+            local new_ffmpeg_dir
+            new_ffmpeg_dir="$(dirname "${ffmpeg_path}")"
+            echo "[INFO] Migrating model from '${old_ffmpeg_path}' to '${ffmpeg_path}'..."
+            mkdir -vp "${new_ffmpeg_dir}"
+            mv -vf "${old_ffmpeg_path}" "${ffmpeg_path}"
         fi
     fi
 
@@ -97,7 +112,6 @@ function migrate_db_from_media_to_config() {
     fi
     unset config_file_yaml
 
-    # Use yq to check if database.path is set
     local user_db_path
     user_db_path=$(yq eval '.database.path' "${config_file}")
 
