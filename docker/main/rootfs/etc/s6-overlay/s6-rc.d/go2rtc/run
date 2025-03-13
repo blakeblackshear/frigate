@@ -51,7 +51,7 @@ function set_libva_version() {
 }
 
 function migrate_addon_config_dir() {
-    if ! mountpoint --quiet /homeassistant_config; then
+    if ! mountpoint --quiet /homeassistant; then
         # Not running as a Home Assistant add-on
         return 0
     fi
@@ -64,7 +64,7 @@ function migrate_addon_config_dir() {
     fi
     unset new_config_file new_config_file_yaml
 
-    local old_config_file="/homeassistant_config/frigate.yml"
+    local old_config_file="/homeassistant/frigate.yml"
     local old_config_file_yaml="${old_config_file//.yml/.yaml}"
     local new_config_file="/config/config.yml"
     if [[ -f "${old_config_file_yaml}" ]]; then
@@ -82,8 +82,8 @@ function migrate_addon_config_dir() {
         db_path="/config/frigate.db"
     fi
     if [[ "${db_path}" == /config/* ]]; then
-        # replace /config/ prefix with /homeassistant_config/
-        local old_db_path="/homeassistant_config/${db_path:8}"
+        # replace /config/ prefix with /homeassistant/
+        local old_db_path="/homeassistant/${db_path:8}"
 
         if [[ -f "${old_db_path}" ]]; then
             local new_db_dir
@@ -97,8 +97,8 @@ function migrate_addon_config_dir() {
     local model_path
     model_path=$(yq eval '.model.path' "${old_config_file}")
     if [[ "${model_path}" == /config/* ]]; then
-        # replace /config/ prefix with /homeassistant_config/
-        local old_model_path="/homeassistant_config/${model_path:8}"
+        # replace /config/ prefix with /homeassistant/
+        local old_model_path="/homeassistant/${model_path:8}"
 
         if [[ -f "${old_model_path}" ]]; then
             local new_model_dir
