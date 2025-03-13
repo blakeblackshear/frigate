@@ -415,7 +415,11 @@ export function RecordingView({
             }}
           >
             <FaVideo className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">{t("menu.live")}</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("menu.live", { ns: "common" })}
+              </div>
+            )}
           </Button>
         </div>
         <div className="flex items-center justify-end gap-2">
