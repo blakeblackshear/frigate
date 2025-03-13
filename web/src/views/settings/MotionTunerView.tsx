@@ -216,7 +216,9 @@ export default function MotionTunerView({
                 {t("motionDetectionTuner.Threshold")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
-                <p>{t("motionDetectionTuner.Threshold.desc")}</p>
+                <Trans ns="views/settings">
+                  motionDetectionTuner.Threshold.desc
+                </Trans>
               </div>
             </div>
             <div className="flex flex-row justify-between">
