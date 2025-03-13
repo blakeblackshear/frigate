@@ -59,7 +59,7 @@
       "gridColumns.desc": "Select the number of columns in the grid view.",
       "searchSource": {
         "label": "Search Source",
-        "desc": "Choose whether to search the thumbnaDils or descriptions of your tracked objects.",
+        "desc": "Choose whether to search the thumbnails or descriptions of your tracked objects.",
         "options": {
           "thumbnailImage": "Thumbnail Image",
           "description": "Description"
