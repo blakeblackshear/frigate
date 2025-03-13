@@ -12,7 +12,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
-from frigate.models import Previews, Recordings, ReviewSegment
+from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
 
@@ -89,6 +89,10 @@ class RecordingCleanup(threading.Thread):
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]
+            ).execute()
+            UserReviewStatus.delete().where(
+                UserReviewStatus.review_segment
+                << deleted_reviews_list[i : i + max_deletes]
             ).execute()
 
     def expire_existing_camera_recordings(
