@@ -3,6 +3,7 @@ from peewee import (
     CharField,
     DateTimeField,
     FloatField,
+    ForeignKeyField,
     IntegerField,
     Model,
     TextField,
@@ -92,10 +93,18 @@ class ReviewSegment(Model):  # type: ignore[misc]
     camera = CharField(index=True, max_length=20)
     start_time = DateTimeField()
     end_time = DateTimeField()
-    has_been_reviewed = BooleanField(default=False)
     severity = CharField(max_length=30)  # alert, detection
     thumb_path = CharField(unique=True)
     data = JSONField()  # additional data about detection like list of labels, zone, areas of significant motion
+
+
+class UserReviewStatus(Model):  # type: ignore[misc]
+    user_id = CharField(max_length=30)
+    review_segment = ForeignKeyField(ReviewSegment, backref="user_reviews")
+    has_been_reviewed = BooleanField(default=False)
+
+    class Meta:
+        indexes = ((("user_id", "review_segment"), True),)
 
 
 class Previews(Model):  # type: ignore[misc]
