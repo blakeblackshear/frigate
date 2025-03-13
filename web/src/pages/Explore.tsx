@@ -200,7 +200,9 @@ export default function Explore() {
     revalidateAll: false,
     onError: (error) => {
       toast.error(
-        `Error fetching tracked objects: ${error.response.data.message}`,
+        t("fetchingTrackedObjectsFailed", {
+          errorMessage: error.response.data.message,
+        }),
         {
           position: "top-center",
         },

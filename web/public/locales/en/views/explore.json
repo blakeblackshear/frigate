@@ -149,5 +149,15 @@
       "desc": "Deleting this tracked object removes the snapshot, any saved embeddings, and any associated object lifecycle entries. Recorded footage of this tracked object in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?"
     }
   },
-  "noTrackedObjects": "No Tracked Objects Found"
+  "noTrackedObjects": "No Tracked Objects Found",
+  "fetchingTrackedObjectsFailed": "Error fetching tracked objects: {{errorMessage}}",
+  "trackedObjectsCount": "{{count}} tracked objects ",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Tracked object deleted successfully.",
+        "error": "Failed to delete tracked object: {{errorMessage}}"
+      }
+    }
+  }
 }

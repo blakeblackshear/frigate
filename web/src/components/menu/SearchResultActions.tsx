@@ -72,7 +72,7 @@ export default function SearchResultActions({
       .delete(`events/${searchResult.id}`)
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success("Tracked object deleted successfully.", {
+          toast.success(t("searchResult.deleteTrackedObject.toast.success"), {
             position: "top-center",
           });
           refreshResults();
@@ -83,9 +83,12 @@ export default function SearchResultActions({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to delete tracked object: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("searchResult.deleteTrackedObject.toast.error", { errorMessage }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 

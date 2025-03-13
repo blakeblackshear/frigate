@@ -21,6 +21,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import SearchResultActions from "@/components/menu/SearchResultActions";
 import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useTranslation } from "react-i18next";
 
 type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
@@ -137,6 +138,7 @@ function ThumbnailRow({
   setSimilaritySearch,
   onSelectSearch,
 }: ThumbnailRowType) {
+  const { t } = useTranslation(["views/explore"]);
   const navigate = useNavigate();
 
   const handleSearch = (label: string) => {
@@ -152,12 +154,10 @@ function ThumbnailRow({
         {objectType.replaceAll("_", " ")}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
-            (
-            {
+            {t("trackedObjectsCount", {
               // @ts-expect-error we know this is correct
-              searchResults[0].event_count
-            }{" "}
-            tracked objects){" "}
+              count: searchResults[0].event_count,
+            })}
           </span>
         )}
         {isValidating && <ActivityIndicator className="ml-2 size-4" />}

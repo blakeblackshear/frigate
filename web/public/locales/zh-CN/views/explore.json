@@ -149,5 +149,15 @@
       "desc": "删除此跟踪对象将移除快照、所有已保存的嵌入数据以及任何关联的对象生命周期条目。但在历史视图中的录制视频<em>不会</em>被删除。<br /><br />你确定要继续删除吗？"
     }
   },
-  "noTrackedObjects": "找不到探测的对象"
+  "noTrackedObjects": "找不到探测的对象",
+  "fetchingTrackedObjectsFailed": "获取跟踪对象失败：{{errorMessage}}",
+  "trackedObjectsCount": "{{count}} 个跟踪对象",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "跟踪对象删除成功。",
+        "error": "删除跟踪对象失败：{{errorMessage}}"
+      }
+    }
+  }
 }
