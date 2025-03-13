@@ -88,7 +88,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             os.path.join(MODEL_CACHE_DIR, "facedet/facedet.onnx"),
             config="",
             input_size=(320, 320),
-            score_threshold=0.8,
+            score_threshold=self.face_config.detection_threshold,
             nms_threshold=0.3,
         )
         self.landmark_detector = cv2.face.createFacemarkLBF()
@@ -367,9 +367,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, face_frame)
 
-        if score < self.config.face_recognition.threshold:
+        if score < self.config.face_recognition.recognition_threshold:
             logger.debug(
-                f"Recognized face distance {score} is less than threshold {self.config.face_recognition.threshold}"
+                f"Recognized face distance {score} is less than threshold {self.config.face_recognition.recognition_threshold}"
             )
             self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
