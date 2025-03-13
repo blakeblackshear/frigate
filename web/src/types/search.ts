@@ -58,6 +58,8 @@ export type SearchResult = {
     average_estimated_speed: number;
     velocity_angle: number;
     path_data: [number[], number][];
+    recognized_license_plate?: string;
+    recognized_license_plate_score?: number;
   };
 };
 
@@ -66,6 +68,7 @@ export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  recognized_license_plate?: string[];
   zones?: string[];
   before?: number;
   after?: number;
@@ -89,6 +92,7 @@ export type SearchQueryParams = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  recognized_license_plate?: string[];
   zones?: string[];
   before?: string;
   after?: string;

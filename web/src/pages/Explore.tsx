@@ -108,6 +108,8 @@ export default function Explore() {
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
           sub_labels: searchSearchParams["sub_labels"],
+          recognized_license_plate:
+            searchSearchParams["recognized_license_plate"],
           zones: searchSearchParams["zones"],
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
@@ -143,6 +145,8 @@ export default function Explore() {
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
         sub_labels: searchSearchParams["sub_labels"],
+        recognized_license_plate:
+          searchSearchParams["recognized_license_plate"],
         zones: searchSearchParams["zones"],
         before: searchSearchParams["before"],
         after: searchSearchParams["after"],

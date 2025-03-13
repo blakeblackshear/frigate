@@ -123,6 +123,9 @@ export default function SearchView({
   }, [config, searchFilter]);
 
   const { data: allSubLabels } = useSWR("sub_labels");
+  const { data: allRecognizedLicensePlates } = useSWR(
+    "recognized_license_plates",
+  );
 
   const allZones = useMemo<string[]>(() => {
     if (!config) {
@@ -162,12 +165,20 @@ export default function SearchView({
       max_score: ["100"],
       min_speed: ["1"],
       max_speed: ["150"],
+      recognized_license_plate: allRecognizedLicensePlates,
       has_clip: ["yes", "no"],
       has_snapshot: ["yes", "no"],
       ...(config?.plus?.enabled &&
         searchFilter?.has_snapshot && { is_submitted: ["yes", "no"] }),
     }),
-    [config, allLabels, allZones, allSubLabels, searchFilter],
+    [
+      config,
+      allLabels,
+      allZones,
+      allSubLabels,
+      allRecognizedLicensePlates,
+      searchFilter,
+    ],
   );
 
   // remove duplicate event ids

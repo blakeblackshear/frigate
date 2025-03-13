@@ -346,6 +346,44 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def set_recognized_license_plate(
+        self, event_id: str, recognized_license_plate: str | None, score: float | None
+    ) -> None:
+        """Update recognized license plate for given event id."""
+        tracked_obj: TrackedObject = None
+
+        for state in self.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+
+        try:
+            event: Event = Event.get(Event.id == event_id)
+        except DoesNotExist:
+            event = None
+
+        if not tracked_obj and not event:
+            return
+
+        if tracked_obj:
+            tracked_obj.obj_data["recognized_license_plate"] = (
+                recognized_license_plate,
+                score,
+            )
+
+        if event:
+            data = event.data
+            data["recognized_license_plate"] = recognized_license_plate
+            if recognized_license_plate is None:
+                data["recognized_license_plate_score"] = None
+            elif score is not None:
+                data["recognized_license_plate_score"] = score
+            event.data = data
+            event.save()
+
+        return True
+
     def create_manual_event(self, payload: tuple) -> None:
         (
             frame_time,
@@ -507,6 +545,11 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
+                if topic.endswith(EventMetadataTypeEnum.recognized_license_plate.value):
+                    (event_id, recognized_license_plate, score) = payload
+                    self.set_recognized_license_plate(
+                        event_id, recognized_license_plate, score
+                    )
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
