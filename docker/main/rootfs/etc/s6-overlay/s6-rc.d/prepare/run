@@ -81,20 +81,22 @@ function migrate_addon_config_dir() {
         fi
     fi
 
-    echo "[INFO] Migrating miscellaneous files '${home_assistant_config_dir}' to '${config_dir}'..."
-    local file
-    for file in .exports .jwt_secret .timeline .vacuum go2rtc; do
-        if [[ -f "${home_assistant_config_dir}/${file}" ]]; then
-            mv -vf "${home_assistant_config_dir}/${file}" "${config_dir}"
-        fi
-    done
-    file="${home_assistant_config_dir}/model_cache"
-    if [[ -d "${file}" ]]; then
-        echo "[INFO] Migrating '${file}' to '${config_dir}'..."
-        mv -f "${file}" "${config_dir}"
+    local old_model_cache_path="${home_assistant_config_dir}/model_cache"
+    if [[ -d "${old_model_cache_path}" ]]; then
+        echo "[INFO] Migrating '${old_model_cache_path}' to '${config_dir}'..."
+        mv -f "${old_model_cache_path}" "${config_dir}"
     fi
 
-    echo "[INFO] Migrating config from '${old_config_file}' to '${new_config_file}'..."
+    echo "[INFO] Migrating other files from '${home_assistant_config_dir}' to '${config_dir}'..."
+    local file
+    for file in .exports .jwt_secret .timeline .vacuum go2rtc; do
+        file="${home_assistant_config_dir}/${file}"
+        if [[ -f "${file}" ]]; then
+            mv -vf "${file}" "${config_dir}"
+        fi
+    done
+
+    echo "[INFO] Migrating config file from '${old_config_file}' to '${new_config_file}'..."
     mv -vf "${old_config_file}" "${new_config_file}"
 
     echo "[INFO] Migration from Home Assistant config dir to add-on config dir completed."
