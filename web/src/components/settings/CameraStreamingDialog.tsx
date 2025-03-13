@@ -279,7 +279,7 @@ export function CameraStreamingDialog({
           )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
-            {t("group.camera.setting.streamMethod")}
+            {t("group.camera.setting.streamMethod.label")}
           </Label>
           <Select
             value={streamType}
