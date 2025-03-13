@@ -59,7 +59,7 @@ export function CamerasFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 capitalize"
-      aria-label="Cameras Filter"
+      aria-label={t("cameras.label")}
       variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
@@ -228,7 +228,7 @@ export function CamerasFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           disabled={currentCameras?.length === 0}
           onClick={() => {
@@ -239,7 +239,7 @@ export function CamerasFilterContent({
           {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentCameras(undefined);
             updateCameraFilter(undefined);

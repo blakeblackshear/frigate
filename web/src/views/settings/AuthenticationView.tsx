@@ -202,7 +202,7 @@ export default function AuthenticationView() {
           </div>
           <Button
             className="flex items-center gap-2 self-start sm:self-auto"
-            aria-label="Add a new user"
+            aria-label={t("users.addUser")}
             variant="default"
             onClick={() => setShowCreate(true)}
           >

@@ -518,7 +518,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label="Add a new zone"
+                              aria-label={t("masksAndZones.zones.add")}
                               onClick={() => {
                                 setEditPane("zone");
                                 handleNewPolygon("zone");
@@ -586,7 +586,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label="Add a new motion mask"
+                              aria-label={t("masksAndZones.motionMasks.add")}
                               onClick={() => {
                                 setEditPane("motion_mask");
                                 handleNewPolygon("motion_mask");
@@ -654,7 +654,7 @@ export default function MasksAndZonesView({
                             <Button
                               variant="secondary"
                               className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                              aria-label="Add a new object mask"
+                              aria-label={t("masksAndZones.objectMasks.add")}
                               onClick={() => {
                                 setEditPane("object_mask");
                                 handleNewPolygon("object_mask");

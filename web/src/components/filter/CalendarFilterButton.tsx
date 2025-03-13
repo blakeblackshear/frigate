@@ -15,6 +15,7 @@ import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -28,16 +29,17 @@ export default function CalendarFilterButton({
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    t("time.formattedTimestampOnlyMonthAndDay"),
+    t("time.formattedTimestampOnlyMonthAndDay", { ns: "common" }),
   );
 
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="Select a date to filter by"
+      aria-label={t("date.selectDateBy.label")}
       variant={day == undefined ? "default" : "select"}
       size="sm"
     >
@@ -64,7 +66,7 @@ export default function CalendarFilterButton({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-center p-2">
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             updateSelectedDay(undefined);
           }}
@@ -107,7 +109,7 @@ export function CalendarRangeFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="Select a date to filter by"
+      aria-label={t("date.selectDateBy.label")}
       variant={range == undefined ? "default" : "select"}
       size="sm"
     >

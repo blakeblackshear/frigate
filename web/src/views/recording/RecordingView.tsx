@@ -395,7 +395,7 @@ export function RecordingView({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
-            aria-label="Go back"
+            aria-label={t("label.back", { ns: "common" })}
             size="sm"
             onClick={() => navigate(-1)}
           >
@@ -492,14 +492,14 @@ export function RecordingView({
               <ToggleGroupItem
                 className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
                 value="timeline"
-                aria-label="Select timeline"
+                aria-label={t("timeline.aria")}
               >
                 <div className="">{t("timeline")}</div>
               </ToggleGroupItem>
               <ToggleGroupItem
                 className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
                 value="events"
-                aria-label="Select events"
+                aria-label={t("events.aria")}
               >
                 <div className="">{t("events.label")}</div>
               </ToggleGroupItem>

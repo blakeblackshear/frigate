@@ -205,11 +205,15 @@ export function CombinedStorageGraph({
                       <PopoverTrigger asChild>
                         <button
                           className="focus:outline-none"
-                          aria-label="Unused Storage Information"
+                          aria-label={t(
+                            "storage.cameraStorage.unusedStorageInformation",
+                          )}
                         >
                           <CiCircleAlert
                             className="size-5"
-                            aria-label="Unused Storage Information"
+                            aria-label={t(
+                              "storage.cameraStorage.unusedStorageInformation",
+                            )}
                           />
                         </button>
                       </PopoverTrigger>

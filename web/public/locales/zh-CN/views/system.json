@@ -1,7 +1,23 @@
 {
   "title": "系统",
   "metrics": "系统指标",
-  "logs": "系统日志",
+  "logs": {
+    "download": {
+      "label": "下载日志"
+    },
+    "copy": {
+      "label": "复制到剪贴板",
+      "success": "已复制日志到剪贴板",
+      "error": "无法复制日志到剪贴板"
+    },
+    "type": {
+      "label": "类型",
+      "timestamp": "时间戳",
+      "tag": "标签",
+      "message": "消息"
+    },
+    "tips": "日志正在从服务器流式传输"
+  },
   "general": {
     "title": "常规",
     "detector": {
@@ -15,7 +31,24 @@
       "gpuUsage": "GPU使用率",
       "gpuMemory": "GPU显存",
       "gpuEncoder": "GPU编码",
-      "gpuDecoder": "GPU解码"
+      "gpuDecoder": "GPU解码",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo 输出",
+          "returnCode": "返回代码：{{code}}",
+          "processOutput": "进程输出：",
+          "processError": "进程错误："
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI 输出",
+          "name": "名称：{{name}}",
+          "driver": "驱动：{{driver}}",
+          "cudaComputerCapability": "CUDA计算能力：{{cuda_compute}}",
+          "vbios": "VBios信息：{{vbios}}"
+        },
+        "closeInfo.label": "关闭GPU信息",
+        "copyInfo.label": "复制GPU信息"
+      }
     },
     "otherProcesses": {
       "title": "其他进程",
@@ -28,12 +61,14 @@
     "overview": "概览",
     "recordings": {
       "title": "录制内容",
-      "tips": "该值表示 Frigate 数据库中录制内容所使用的总存储空间。Frigate 不会追踪磁盘上所有文件的存储使用情况。"
+      "tips": "该值表示 Frigate 数据库中录制内容所使用的总存储空间。Frigate 不会追踪磁盘上所有文件的存储使用情况。",
+      "earliestRecording": "最早的可用录制："
     },
     "cameraStorage": {
       "title": "摄像头存储",
       "camera": "摄像头",
       "unused": "未使用",
+      "unusedStorageInformation": "未使用存储信息",
       "storageUsed": "存储使用",
       "percentageOfTotalUsed": "总使用率",
       "bandwidth": "带宽",

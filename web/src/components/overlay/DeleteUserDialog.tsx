@@ -44,7 +44,7 @@ export default function DeleteUserDialog({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
-                aria-label="Cancel"
+                aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
                 type="button"
               >
@@ -52,7 +52,7 @@ export default function DeleteUserDialog({
               </Button>
               <Button
                 variant="destructive"
-                aria-label="Delete"
+                aria-label={t("button.delete", { ns: "common" })}
                 className="flex flex-1"
                 onClick={onDelete}
               >

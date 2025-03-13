@@ -2,6 +2,7 @@
     "export": "Export",
     "calendar": "Calendar",
     "filter": "Filter",
+    "filters": "Filters",
     "toast": {
         "error": {
             "noValidTimeSelected": "No valid time range selected",

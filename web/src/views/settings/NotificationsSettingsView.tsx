@@ -266,9 +266,15 @@ export default function NotificationView({
             });
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -276,7 +282,7 @@ export default function NotificationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to save config changes: ${errorMessage}`, {
+          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
             position: "top-center",
           });
         })
@@ -284,7 +290,7 @@ export default function NotificationView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading, allCameras],
+    [updateConfig, setIsLoading, allCameras, t],
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -474,7 +480,7 @@ export default function NotificationView({
                   <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
                     <Button
                       className="flex flex-1"
-                      aria-label="Cancel"
+                      aria-label={t("button.cancel", { ns: "common" })}
                       onClick={onCancel}
                       type="button"
                     >
@@ -484,7 +490,7 @@ export default function NotificationView({
                       variant="select"
                       disabled={isLoading}
                       className="flex flex-1"
-                      aria-label="Save"
+                      aria-label={t("button.save", { ns: "common" })}
                       type="submit"
                     >
                       {isLoading ? (

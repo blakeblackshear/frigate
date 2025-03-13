@@ -36,6 +36,8 @@
     "second": "{{time}} seconds",
     "formattedTimestamp": "%b %-d, %I:%M:%S %p",
     "formattedTimestamp.24hour": "%b %-d, %H:%M:%S",
+    "formattedTimestamp2": "%m/%d %I:%M:%S%P",
+    "formattedTimestamp2.24hour": "%d %b %H:%M:%S",
     "formattedTimestampExcludeSeconds": "%b %-d, %I:%M %p",
     "formattedTimestampExcludeSeconds.24hour": "%b %-d, %H:%M",
     "formattedTimestampWithYear": "%b %-d %Y, %I:%M %p",
@@ -47,6 +49,9 @@
       "mph": "mph",
       "kph": "kph"
     }
+  },
+  "label": {
+    "back": "Go back"
   },
   "button": {
     "apply": "Apply",
@@ -75,7 +80,11 @@
     "download": "Download",
     "info": "Info",
     "suspended": "Suspended",
-    "unsuspended": "Unsuspend"
+    "unsuspended": "Unsuspend",
+    "play": "Play",
+    "unselect": "Unselect",
+    "export": "Export",
+    "deleteNow": "Delete Now"
   },
   "menu": {
     "system": "System",
@@ -87,13 +96,15 @@
     "languages": "Languages",
     "language": {
       "en": "English",
-      "zhCN": "简体中文(Simplified Chinese)"
+      "zhCN": "简体中文(Simplified Chinese)",
+      "withSystem.label": "Use the system settings for languag"
     },
     "appearance": "Appearance",
     "darkMode": {
       "label": "Dark Mode",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "withSystem.label": "Use the system settings for light or dark mode"
     },
     "withSystem": "System",
     "theme": {
@@ -136,5 +147,13 @@
     "admin": "Admin",
     "viewer": "Viewer",
     "desc": "Admins have full access to all features in the Frigate UI. Viewers are limited to viewing cameras, review items, and historical footage in the UI."
+  },
+  "pagination": {
+    "label": "pagination",
+    "previous": "Previous",
+    "previous.label": "Go to previous page",
+    "next": "Next",
+    "next.label": "Go to next page",
+    "more": "More pages"
   }
 }

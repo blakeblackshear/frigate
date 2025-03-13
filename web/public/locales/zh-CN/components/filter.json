@@ -1,6 +1,7 @@
 {
   "filter": "过滤器",
   "labels": {
+    "label": "标签",
     "all": "所有标签",
     "all.short": "标签",
     "count": "{{count}} 个标签"
@@ -14,6 +15,7 @@
     "all.short": "日期"
   },
   "more": "更多筛选项",
+  "reset.label": "重置筛选器为默认值",
   "timeRange": "时间范围",
   "zones.label": "区域",
   "subLabels": {
@@ -42,11 +44,15 @@
     "relevance": "关联性"
   },
   "cameras": {
+    "label": "摄像头筛选",
     "all": "所有摄像头",
     "all.short": "摄像头"
   },
   "review": {
     "showReviewed": "显示已查看的项目"
+  },
+  "motion": {
+    "showMotionOnly": "仅显示运动"
   },
   "explore": {
     "settings": {
@@ -64,8 +70,31 @@
           "thumbnailImage": "缩略图",
           "description": "描述"
         }
+      },
+      "date": {
+        "selectDateBy": {
+          "label": "选择日期进行筛选"
+        }
       }
     }
+  },
+  "logSettings": {
+    "label": "日志级别筛选",
+    "filterBySeverity": "按严重程度筛选日志",
+    "loading": "加载中",
+    "loading.desc": "当日志面板滚动到底部时，新的日志会自动流式加载。",
+    "disableLogStreaming": "禁用日志流式加载",
+    "allLogs": "所有日志"
+  },
+  "trackedObjectDelete": {
+    "title": "确认删除",
+    "desc": "删除这 {{objectLength}} 个跟踪对象将移除快照、任何已保存的嵌入和任何相关的对象生命周期条目。历史视图中这些跟踪对象的录制片段将<em>不会</em>被删除。<br /><br />您确定要继续吗？<br /><br />按住 <em>Shift</em> 键可在将来跳过此对话框。",
+    "toast": {
+      "success": "跟踪对象删除成功。",
+      "error": "删除跟踪对象失败：{{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "按区域遮罩筛选"
   }
-  
 }

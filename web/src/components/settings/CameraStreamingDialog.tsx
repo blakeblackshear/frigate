@@ -358,14 +358,14 @@ export function CameraStreamingDialog({
         <div className="flex flex-row gap-2 pt-5">
           <Button
             className="flex flex-1"
-            aria-label="Cancel"
+            aria-label={t("button.cancel", { ns: "common" })}
             onClick={handleCancel}
           >
             {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             variant="select"
-            aria-label="Save"
+            aria-label={t("button.save", { ns: "common" })}
             disabled={isLoading}
             className="flex flex-1"
             onClick={handleSave}

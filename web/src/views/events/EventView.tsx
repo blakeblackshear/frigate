@@ -277,7 +277,7 @@ export default function EventView({
           <ToggleGroupItem
             className={cn(severityToggle != "alert" && "text-muted-foreground")}
             value="alert"
-            aria-label="Select alerts"
+            aria-label={t("alerts")}
           >
             {isMobileOnly ? (
               <div
@@ -311,7 +311,7 @@ export default function EventView({
               severityToggle != "detection" && "text-muted-foreground",
             )}
             value="detection"
-            aria-label="Select detections"
+            aria-label={t("detections")}
           >
             {isMobileOnly ? (
               <div
@@ -348,7 +348,7 @@ export default function EventView({
               severityToggle != "significant_motion" && "text-muted-foreground",
             )}
             value="significant_motion"
-            aria-label="Select motion"
+            aria-label={t("motion.label")}
           >
             {isMobileOnly ? (
               <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
@@ -792,14 +792,14 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
-                  aria-label="Mark these items as reviewed"
+                  aria-label={t("markTheseItemsAsReviewed")}
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
                     markAllItemsAsReviewed(currentItems ?? []);
                   }}
                 >
-                  Mark these items as reviewed
+                  {t("markTheseItemsAsReviewed")}
                 </Button>
               </div>
             )}

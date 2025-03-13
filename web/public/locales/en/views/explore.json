@@ -34,6 +34,43 @@
     "video": "video",
     "object_lifecycle": "object lifecycle"
   },
+  "objectLifecycle": {
+    "title": "Object Lifecycle",
+    "noImageFound": "No image found for this timestamp.",
+    "createObjectMask": "Create Object Mask",
+    "adjustAnnotationSettings": "Adjust annotation settings",
+    "scrollViewTips": "Scroll to view the significant moments of this object's lifecycle.",
+    "autoTrackingTips": "Bounding box positions will be inaccurate for autotracking cameras.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detected",
+      "entered_zone": "{{label}} entered {{zones}}",
+      "active": "{{label}} became active",
+      "stationary": "{{label}} became stationary",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detected for {{label}}",
+        "other": "{{label}} recognized as {{attribute}}"
+      },
+      "gone": "{{label}} left",
+      "heard": "{{label}} heard",
+      "external": "{{label}} detected"
+    },
+    "annotationSettings": {
+      "title": "Annotation Settings",
+      "showAllZones": "Show All Zones",
+      "showAllZones.desc": "Always show zones on frames where objects have entered a zone.",
+      "offset": {
+        "label": "Annotation Offset",
+        "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. However, the <code>annotation_offset</code> field can be used to adjust this.",
+        "documentation": "Read the documentation ",
+        "millisecondsToOffset": "Milliseconds to offset detect annotations by. <em>Default: 0</em>",
+        "tips": "TIP: Imagine there is an event clip with a person walking from left to right. If the event timeline bounding box is consistently to the left of the person then the value should be decreased. Similarly, if a person is walking from left to right and the bounding box is consistently ahead of the person then the value should be increased."
+      }
+    },
+    "carousel": {
+      "previous": "Previous slide",
+      "next": "Next slide"
+    }
+  },
   "details": {
     "item": {
       "title": "Review Item Details",
@@ -68,6 +105,8 @@
       "aiTips": "Frigate will not request a description from your Generative AI provider until the tracked object's lifecycle has ended."
     },
     "button.regenerate": "Regenerate",
+    "button.regenerate.label": "Regenerate tracked object description",
+    "expandRegenerationMenu": "Expand regeneration menu",
     "regenerateFromSnapshot": "Regenerate from Snapshot",
     "regenerateFromThumbnails": "Regenerate from Thumbnails",
     "tips": {
@@ -99,6 +138,9 @@
     "viewInHistory": {
       "label": "View in History",
       "aria": "View in History"
+    },
+    "deleteTrackedObject": {
+      "label": "Delete this tracked object"
     }
   },
   "dialog": {

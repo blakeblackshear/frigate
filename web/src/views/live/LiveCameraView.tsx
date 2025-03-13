@@ -118,7 +118,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -430,7 +430,7 @@ export default function LiveCameraView({
             >
               <Button
                 className={`flex items-center gap-2.5 rounded-lg`}
-                aria-label="Go back"
+                aria-label={t("label.back", { ns: "common" })}
                 size="sm"
                 onClick={() => navigate(-1)}
               >
@@ -443,7 +443,7 @@ export default function LiveCameraView({
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
-                aria-label="Show historical footage"
+                aria-label={t("history.label")}
                 size="sm"
                 onClick={() => {
                   navigate("review", {
@@ -476,7 +476,7 @@ export default function LiveCameraView({
               {fullscreen && (
                 <Button
                   className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
-                  aria-label="Go back"
+                  aria-label={t("label.back", { ns: "common" })}
                   size="sm"
                   onClick={() => navigate(-1)}
                 >
@@ -876,14 +876,19 @@ function PtzControlPanel({
             <TooltipTrigger asChild>
               <Button
                 className={`${clickOverlay ? "text-selected" : "text-primary"}`}
-                aria-label="Click in the frame to center the camera"
+                aria-label={t("ptz.move.clickMove.label")}
                 onClick={() => setClickOverlay(!clickOverlay)}
               >
                 <TbViewfinder />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{clickOverlay ? "Disable" : "Enable"} click to move</p>
+              <p>
+                {clickOverlay
+                  ? t("ptz.move.clickMove.disable")
+                  : t("ptz.move.clickMove.enable")}{" "}
+                click to move
+              </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -894,7 +899,7 @@ function PtzControlPanel({
             <TooltipTrigger asChild>
               <DropdownMenu modal={!isDesktop}>
                 <DropdownMenuTrigger asChild>
-                  <Button aria-label="PTZ camera presets">
+                  <Button aria-label={t("ptz.presets")}>
                     <BsThreeDotsVertical />
                   </Button>
                 </DropdownMenuTrigger>
@@ -916,7 +921,7 @@ function PtzControlPanel({
               </DropdownMenu>
             </TooltipTrigger>
             <TooltipContent>
-              <p>PTZ camera presets</p>
+              <p>{t("ptz.presets")}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -926,6 +931,7 @@ function PtzControlPanel({
 }
 
 function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
+  const { t } = useTranslation(["views/live"]);
   const rankMap = { all: 0, motion: 1, active_objects: 2 };
   const getValidMode = (retain?: { mode?: string }): keyof typeof rankMap => {
     const mode = retain?.mode;
@@ -940,13 +946,25 @@ function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
       ? recordRetainMode
       : alertsRetainMode;
 
-  const source = effectiveRetainMode === recordRetainMode ? "camera" : "alerts";
+  const source =
+    effectiveRetainMode === recordRetainMode
+      ? t("camera", { ns: "views/events" })
+      : t("alerts", { ns: "views/events" });
 
   return effectiveRetainMode !== "all" ? (
     <div>
-      Your {source} recording retention configuration is set to{" "}
-      <code>mode: {effectiveRetainMode}</code>, so this on-demand recording will
-      only keep segments with {effectiveRetainMode.replaceAll("_", " ")}.
+      <Trans
+        ns="views/live"
+        values={{
+          source,
+          effectiveRetainMode,
+          effectiveRetainModeName: t(
+            "effectiveRetainMode.modes." + effectiveRetainMode,
+          ),
+        }}
+      >
+        effectiveRetainMode.notAllTips
+      </Trans>
     </div>
   ) : null;
 }
@@ -1034,9 +1052,7 @@ function FrigateCameraFeatures({
         setIsRecording(true);
         const toastId = toast.success(
           <div className="flex flex-col space-y-3">
-            <div className="font-semibold">
-              Started manual on-demand recording.
-            </div>
+            <div className="font-semibold">{t("manualRecording.started")}</div>
             {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
               <div>{t("manualRecording.recordDisabledTips")}</div>
             ) : (

@@ -295,7 +295,7 @@ export default function MotionTunerView({
           <div className="flex flex-row gap-2 pt-5">
             <Button
               className="flex flex-1"
-              aria-label="Reset"
+              aria-label={t("button.reset", { ns: "common" })}
               onClick={onCancel}
             >
               {t("button.reset", { ns: "common" })}
@@ -304,7 +304,7 @@ export default function MotionTunerView({
               variant="select"
               disabled={!changedValue || isLoading}
               className="flex flex-1"
-              aria-label="Save"
+              aria-label={t("button.save", { ns: "common" })}
               onClick={saveToConfig}
             >
               {isLoading ? (

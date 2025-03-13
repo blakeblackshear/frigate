@@ -420,7 +420,7 @@ export function DateRangePicker({
       <div className="mx-auto flex w-64 items-center justify-evenly gap-2 py-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             setIsOpen(false);
             if (
@@ -440,7 +440,7 @@ export function DateRangePicker({
             onReset?.();
           }}
           variant="ghost"
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
         >
           {t("button.reset", { ns: "common"})}
         </Button>

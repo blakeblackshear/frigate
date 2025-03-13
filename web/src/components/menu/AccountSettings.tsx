@@ -117,7 +117,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               className={
                 isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
-              aria-label="Set Password"
+              aria-label={t("menu.user.setPassword")}
               onClick={() => setPasswordDialogOpen(true)}
             >
               <LuSquarePen className="mr-2 size-4" />
@@ -128,7 +128,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             className={
               isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
             }
-            aria-label="Log out"
+            aria-label={t("menu.user.logout")}
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />

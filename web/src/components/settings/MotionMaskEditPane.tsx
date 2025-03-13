@@ -176,9 +176,15 @@ export default function MotionMaskEditPane({
           );
           updateConfig();
         } else {
-          toast.error(`Failed to save config changes: ${res.statusText}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage: res.statusText,
+              ns: "common",
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -186,7 +192,7 @@ export default function MotionMaskEditPane({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to save config changes: ${errorMessage}`, {
+        toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
           position: "top-center",
         });
       })
@@ -323,14 +329,14 @@ export default function MotionMaskEditPane({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
-                aria-label="Cancel"
+                aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
               >
                 {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
-                aria-label="Save"
+                aria-label={t("button.save", { ns: "common" })}
                 disabled={isLoading}
                 className="flex flex-1"
                 type="submit"

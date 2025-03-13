@@ -1,5 +1,9 @@
 {
     "noRecordingsFoundForThisTime": "找不到此次录制",
     "noPreviewFound": "没有找到预览",
-    "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览"
+    "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览",
+    "submitFrigatePlus": {
+        "title": "提交此帧到 Frigate+？",
+        "submit": "提交"
+    }
 }

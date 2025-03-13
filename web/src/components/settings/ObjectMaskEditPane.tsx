@@ -364,7 +364,7 @@ export default function ObjectMaskEditPane({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
-                aria-label="Cancel"
+                aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
               >
                 {t("button.cancel", { ns: "common" })}
@@ -373,7 +373,7 @@ export default function ObjectMaskEditPane({
                 variant="select"
                 disabled={isLoading}
                 className="flex flex-1"
-                aria-label="Save"
+                aria-label={t("button.save", { ns: "common" })}
                 type="submit"
               >
                 {isLoading ? (

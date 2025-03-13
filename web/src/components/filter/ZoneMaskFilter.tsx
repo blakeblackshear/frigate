@@ -23,7 +23,7 @@ export function ZoneMaskFilterButton({
       size="sm"
       variant={selectedZoneMask?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
-      aria-label="Filter by zone mask"
+      aria-label={t("zoneMask.filterBy")}
     >
       <FaFilter
         className={`${selectedZoneMask?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -31,7 +31,7 @@ export function ZoneMaskFilterButton({
       <div
         className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {t("label")}
+        {t("filter")}
       </div>
     </Button>
   );

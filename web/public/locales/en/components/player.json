@@ -1,5 +1,9 @@
 {
     "noRecordingsFoundForThisTime": "No recordings found for this time",
     "noPreviewFound": "No Preview Found",
-    "noPreviewFoundFor": "No Preview Found for {{cameraName}}"
+    "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
+    "submitFrigatePlus": {
+        "title": "Submit this frame to Frigate+?",
+        "submit": "Submit"
+    }
 }

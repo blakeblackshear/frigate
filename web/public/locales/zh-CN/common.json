@@ -48,6 +48,14 @@
       "kph": "英里/小时"
     }
   },
+  "pagination": {
+    "label": "分页",
+    "previous": "上一页",
+    "previous.label": "转到上一页",
+    "next": "下一页",
+    "next.label": "转到下一页",
+    "more": "更多页面"
+  },
   "button": {
     "apply": "应用",
     "reset": "重置",
@@ -75,7 +83,11 @@
     "download": "下载",
     "info": "信息",
     "suspended": "已暂停",
-    "unsuspended": "取消暂停"
+    "unsuspended": "取消暂停",
+    "play": "播放",
+    "unselect": "取消选择",
+    "export": "导出",
+    "deleteNow": "立即删除"
   },
   "menu": {
     "system": "系统",
@@ -87,13 +99,15 @@
     "languages": "languages / 语言",
     "language": {
       "en": "English",
-      "zhCN": "简体中文"
+      "zhCN": "简体中文",
+      "withSystem.label": "使用系统语言设置"
     },
     "appearance": "外观",
     "darkMode": {
       "label": "深色模式",
       "light": "浅色",
-      "dark": "深色"
+      "dark": "深色",
+      "withSystem.label": "使用系统深色模式设置"
     },
     "withSystem": "跟随系统",
     "theme": {

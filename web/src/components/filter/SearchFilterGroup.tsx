@@ -253,7 +253,6 @@ function GeneralFilterButton({
 
     return t("labels.count", {
       count: selectedLabels.length,
-      ns: "components/filter",
     });
   }, [selectedLabels, t]);
 
@@ -270,7 +269,7 @@ function GeneralFilterButton({
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
-      aria-label="Labels"
+      aria-label={t("labels.label")}
     >
       <MdLabel
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -381,7 +380,7 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             if (selectedLabels != currentLabels) {
@@ -394,7 +393,7 @@ export function GeneralFilterContent({
           {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
@@ -442,7 +441,7 @@ function SortTypeButton({
           : "default"
       }
       className="flex items-center gap-2 capitalize"
-      aria-label="Labels"
+      aria-label={t("labels.label")}
     >
       <MdSort
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -557,7 +556,7 @@ export function SortTypeContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             if (selectedSortType != currentSortType) {
@@ -570,7 +569,7 @@ export function SortTypeContent({
           {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentSortType(undefined);
             updateSortType(undefined);

@@ -122,6 +122,17 @@
       "inertia.error.mustBeAboveZero": "Inertia must be above 0.",
       "loiteringTime.error.mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0.",
       "polygonDrawing": {
+        "removeLastPoint": "Remove last point",
+        "reset.label": "Clear all points",
+        "snapPoints": {
+          "true": "Snap points",
+          "false": "Don't Snap points"
+        },
+        "delete": {
+          "title": "Confirm Delete",
+          "desc": "Are you sure you want to delete the {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} has been deleted."
+        },
         "error": {
           "mustBeFinished": "Polygon drawing must be finished before saving."
         }

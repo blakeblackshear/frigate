@@ -34,6 +34,43 @@
     "video": "视频",
     "object_lifecycle": "对象生命周期"
   },
+  "objectLifecycle": {
+    "title": "对象生命周期",
+    "noImageFound": "未找到此时间戳的图像。",
+    "createObjectMask": "创建对象遮罩",
+    "adjustAnnotationSettings": "调整标注设置",
+    "scrollViewTips": "滚动查看此对象生命周期的重要时刻。",
+    "autoTrackingTips": "自动跟踪摄像头的边界框位置可能不准确。",
+    "lifecycleItemDesc": {
+      "visible": "检测到 {{label}}",
+      "entered_zone": "{{label}} 进入 {{zones}}",
+      "active": "{{label}} 变为活动状态",
+      "stationary": "{{label}} 变为静止状态",
+      "attribute": {
+        "faceOrLicense_plate": "检测到 {{label}} 的 {{attribute}}",
+        "other": "{{label}} 识别为 {{attribute}}"
+      },
+      "gone": "{{label}} 离开",
+      "heard": "听到 {{label}}",
+      "external": "检测到 {{label}}"
+    },
+    "annotationSettings": {
+      "title": "标注设置",
+      "showAllZones": "显示所有区域",
+      "showAllZones.desc": "在对象进入区域的帧上始终显示区域。",
+      "offset": {
+        "label": "标注偏移",
+        "desc": "这些数据来自摄像头的检测源，但是叠加在录制源的图像上。这两个流不太可能完全同步。因此，边界框和录像不会完全对齐。但是，可以使用 <code>annotation_offset</code> 字段来调整这个问题。",
+        "documentation": "阅读文档（英文） ",
+        "millisecondsToOffset": "检测标注的偏移毫秒数。<em>默认值：0</em>",
+        "tips": "提示：假设有一个人从左向右走的事件片段。如果事件时间线上的边界框始终在人的左侧，则应该减小该值。同样，如果一个人从左向右走，而边界框始终在人的前面，则应该增加该值。"
+      }
+    },
+    "carousel": {
+      "previous": "上一张",
+      "next": "下一张"
+    }
+  },
   "details": {
     "item": {
       "title": "回放项目详情",
@@ -68,6 +105,8 @@
       "aiTips": "在跟踪对象的生命周期结束之前，Frigate 不会向您的生成式 AI 提供商请求描述。"
     },
     "button.regenerate": "重新生成",
+    "button.regenerate.label": "重新生成跟踪对象描述",
+    "expandRegenerationMenu": "展开重新生成菜单",
     "regenerateFromSnapshot": "从快照重新生成",
     "regenerateFromThumbnails": "从缩略图重新生成",
     "tips": {
@@ -99,6 +138,9 @@
     "viewInHistory": {
       "label": "在历史记录中查看",
       "aria": "在历史记录中查看"
+    },
+    "deleteTrackedObject": {
+      "label": "删除此跟踪对象"
     }
   },
   "dialog": {

@@ -256,7 +256,7 @@ export default function CreateUserDialog({
                 <div className="flex flex-row gap-2 pt-5">
                   <Button
                     className="flex flex-1"
-                    aria-label="Cancel"
+                    aria-label={t("button.cancel", { ns: "common" })}
                     disabled={isLoading}
                     onClick={handleCancel}
                     type="button"
@@ -265,7 +265,7 @@ export default function CreateUserDialog({
                   </Button>
                   <Button
                     variant="select"
-                    aria-label="Save"
+                    aria-label={t("button.save", { ns: "common" })}
                     disabled={isLoading || !form.formState.isValid}
                     className="flex flex-1"
                     type="submit"

@@ -151,7 +151,7 @@ export default function ExportDialog({
         <Trigger asChild>
           <Button
             className="flex items-center gap-2"
-            aria-label="Export"
+            aria-label={t("menu.export", { ns: "common" })}
             size="sm"
             onClick={() => {
               const now = new Date(latestTime * 1000);
@@ -327,7 +327,7 @@ export function ExportContent({
         </div>
         <Button
           className={isDesktop ? "" : "w-full"}
-          aria-label="Select or export"
+          aria-label={t("export.selectOrExport")}
           variant="select"
           size="sm"
           onClick={() => {
@@ -444,7 +444,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label="Start time"
+            aria-label={t("export.time.start")}
             variant={startOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
@@ -510,7 +510,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label="End time"
+            aria-label={t("export.time.end")}
             variant={endOpen ? "select" : "default"}
             size="sm"
             onClick={() => {

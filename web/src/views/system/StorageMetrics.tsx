@@ -87,11 +87,15 @@ export default function StorageMetrics({
               <PopoverTrigger asChild>
                 <button
                   className="focus:outline-none"
-                  aria-label="Unused Storage Information"
+                  aria-label={t(
+                    "storage.cameraStorage.unusedStorageInformation",
+                  )}
                 >
                   <CiCircleAlert
                     className="size-5"
-                    aria-label="Unused Storage Information"
+                    aria-label={t(
+                      "storage.cameraStorage.unusedStorageInformation",
+                    )}
                   />
                 </button>
               </PopoverTrigger>
@@ -107,7 +111,9 @@ export default function StorageMetrics({
           />
           {earliestDate && (
             <div className="mt-2 text-xs text-primary-variant">
-              <span className="font-medium">Earliest recording available:</span>{" "}
+              <span className="font-medium">
+                {t("storage.recordings.earliestRecording")}
+              </span>{" "}
               {formatUnixTimestampToDateTime(earliestDate, {
                 timezone: timezone,
                 strftime_fmt:

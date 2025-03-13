@@ -12,6 +12,11 @@
   },
   "ptz": {
     "move": {
+      "clickMove": {
+        "label": "点击画面以使摄像头居中",
+        "enable": "启用点击移动",
+        "disable": "禁用点击移动"
+      },
       "left": {
         "label": "PTZ摄像头向左移动"
       },
@@ -37,7 +42,8 @@
       "center": {
         "label": "点击将PTZ摄像头画面居中"
       }
-    }
+    },
+    "presets": "PTZ摄像头预设"
   },
   "camera": {
     "enable": "开启摄像头",
@@ -128,5 +134,16 @@
     "snapshots": "快照",
     "audioDetection": "音频检测",
     "autotracking": "自动跟踪"
+  },
+  "history": {
+    "label": "显示历史录像"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "全部",
+      "motion": "运动",
+      "active_objects": "活动对象"
+    },
+    "notAllTips": "您的 {{source}} 录制保留配置设置为 <code>mode: {{effectiveRetainMode}}</code>，因此此按需录制将仅保留包含 {{effectiveRetainModeName}} 的片段。"
   }
 }

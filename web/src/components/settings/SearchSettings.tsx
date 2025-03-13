@@ -48,7 +48,7 @@ export default function ExploreSettings({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="Explore Settings"
+      aria-label={t("explore.settings.title")}
       size="sm"
     >
       <FaCog className="text-secondary-foreground" />

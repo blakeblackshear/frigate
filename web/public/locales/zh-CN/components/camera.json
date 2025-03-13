@@ -4,6 +4,7 @@
     "add": "添加摄像头组",
     "edit": "编辑摄像头组",
     "delete": {
+      "label": "删除摄像头组",
       "confirm": "确认删除",
       "confirm.desc": "你确定要删除摄像头组 <em>{{name}}</em> 吗？"
     },
@@ -25,6 +26,7 @@
     "success": "摄像头组（{{name}}）保存成功。",
     "camera": {
       "setting": {
+        "label": "摄像头视频流设置",
         "title": "{{cameraName}} 视频流设置",
         "desc": "更改此摄像头组仪表板的实时视频流选项。<em>这些设置特定于设备/浏览器。</em>",
         "audioIsAvailable": "此视频流支持音频",
@@ -57,5 +59,19 @@
         }
       }
     }
+  },
+  "debug": {
+    "options": {
+      "label": "设置",
+      "title": "选项",
+      "showOptions": "显示选项",
+      "hideOptions": "隐藏选项"
+    },
+    "boundingBox": "边界框",
+    "timestamp": "时间戳",
+    "zones": "区域",
+    "mask": "遮罩",
+    "motion": "运动",
+    "regions": "区域"
   }
 }

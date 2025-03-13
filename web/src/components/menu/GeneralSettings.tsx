@@ -182,7 +182,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Set Password"
+                    aria-label={t("menu.user.setPassword")}
                     onClick={() => setPasswordDialogOpen(true)}
                   >
                     <LuSquarePen className="mr-2 size-4" />
@@ -195,7 +195,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex items-center p-2 text-sm"
                   }
-                  aria-label="Log out"
+                  aria-label={t("menu.user.logout", { ns: "common" })}
                 >
                   <a className="flex" href={logoutUrl}>
                     <LuLogOut className="mr-2 size-4" />
@@ -216,7 +216,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="System metrics"
+                      aria-label={t("menu.systemMetrics")}
                     >
                       <LuActivity className="mr-2 size-4" />
                       <span>{t("menu.systemMetrics")}</span>
@@ -229,7 +229,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="System logs"
+                      aria-label={t("menu.systemLogs")}
                     >
                       <LuList className="mr-2 size-4" />
                       <span>{t("menu.systemLogs")}</span>
@@ -252,7 +252,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
-                  aria-label="Settings"
+                  aria-label={t("menu.settings")}
                 >
                   <LuSettings className="mr-2 size-4" />
                   <span>{t("menu.settings")}</span>
@@ -267,7 +267,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="Configuration editor"
+                      aria-label={t("menu.configurationEditor")}
                     >
                       <LuSquarePen className="mr-2 size-4" />
                       <span>{t("menu.configurationEditor")}</span>
@@ -340,7 +340,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Use the system settings for language"
+                    aria-label={t("menu.language.withSystem.label")}
                     onClick={() => setLanguage(systemLanguage)}
                   >
                     {language === systemLanguage ? (
@@ -377,7 +377,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Light mode"
+                    aria-label={t("menu.darkMode.light")}
                     onClick={() => setTheme("light")}
                   >
                     {theme === "light" ? (
@@ -397,7 +397,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Dark mode"
+                    aria-label={t("menu.darkMode.dark")}
                     onClick={() => setTheme("dark")}
                   >
                     {theme === "dark" ? (
@@ -417,7 +417,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Use the system settings for light or dark mode"
+                    aria-label={t("menu.darkMode.withSystem.label")}
                     onClick={() => setTheme("system")}
                   >
                     {theme === "system" ? (
@@ -514,7 +514,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex items-center p-2 text-sm"
                   }
-                  aria-label="Restart Frigate"
+                  aria-label={t("menu.restart")}
                   onClick={() => setRestartDialogOpen(true)}
                 >
                   <LuRotateCw className="mr-2 size-4" />

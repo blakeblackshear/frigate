@@ -542,7 +542,7 @@ export default function GeneralMetrics({
               {canGetGpuInfo && (
                 <Button
                   className="cursor-pointer"
-                  aria-label="Hardware information"
+                  aria-label={t("general.hardwareInfo.title")}
                   size="sm"
                   onClick={() => setShowVainfo(true)}
                 >

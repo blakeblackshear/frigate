@@ -85,7 +85,7 @@ export default function SearchFilterDialog({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="More Filters"
+      aria-label={t("more")}
       size="sm"
       variant={moreFiltersSelected ? "select" : "default"}
     >
@@ -167,7 +167,7 @@ export default function SearchFilterDialog({
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             if (currentFilter != filter) {
               onUpdateFilter(currentFilter);
@@ -179,7 +179,7 @@ export default function SearchFilterDialog({
           {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset filters to default values"
+          aria-label={t("reset.label")}
           onClick={() => {
             setCurrentFilter((prevFilter) => ({
               ...prevFilter,
@@ -287,7 +287,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"} `}
-              aria-label="Select Start Time"
+              aria-label={t("export.time.start.label", {
+                ns: "components/dialog",
+              })}
               variant={startOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -325,7 +327,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-              aria-label="Select End Time"
+              aria-label={t("export.time.end.label", {
+                ns: "components/dialog",
+              })}
               variant={endOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -688,14 +692,14 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               {t("button.no", { ns: "common" })}
@@ -766,14 +770,14 @@ export function SnapshotClipFilterContent({
             >
               <ToggleGroupItem
                 value="yes"
-                aria-label="Yes"
+                aria-label={t("button.yes", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
                 {t("button.yes", { ns: "common" })}
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
-                aria-label="No"
+                aria-label={t("button.no", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
                 {t("button.no", { ns: "common" })}
@@ -821,14 +825,14 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               {t("button.no", { ns: "common" })}

@@ -149,7 +149,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            aria-label="Export"
+            aria-label={t("export")}
             onClick={() => {
               setDrawerMode("export");
               setMode("select");
@@ -162,7 +162,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            aria-label="Calendar"
+            aria-label={t("calendar")}
             variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
@@ -175,7 +175,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("filter") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            aria-label="Filter"
+            aria-label={t("filter")}
             variant={filter?.labels || filter?.zones ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
@@ -247,7 +247,7 @@ export default function MobileReviewSettingsDrawer({
         <SelectSeparator />
         <div className="flex items-center justify-center p-2">
           <Button
-            aria-label="Reset"
+            aria-label={t("button.reset", { ns: "common" })}
             onClick={() => {
               onUpdateFilter({
                 ...filter,
@@ -272,7 +272,7 @@ export default function MobileReviewSettingsDrawer({
             {t("button.back", { ns: "common" })}
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
-            Filter
+            {t("filter")}
           </div>
         </div>
         <GeneralFilterContent
@@ -326,7 +326,7 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
-            aria-label="Filters"
+            aria-label={t("filters")}
             variant={
               filter?.labels || filter?.after || filter?.zones
                 ? "select"

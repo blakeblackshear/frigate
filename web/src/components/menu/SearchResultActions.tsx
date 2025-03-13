@@ -150,7 +150,7 @@ export default function SearchResultActions({
           </MenuItem>
         )}
       <MenuItem
-        aria-label="Delete this tracked object"
+        aria-label={t("itemMenu.deleteTrackedObject.label")}
         onClick={() => setDeleteDialogOpen(true)}
       >
         <LuTrash2 className="mr-2 size-4" />

@@ -15,10 +15,12 @@
         "desc": "Objects in locations you want to avoid are not false positives. Submitting them as false positives will confuse the model."
       },
       "review": {
+        "true.label": "Confirm this label for Frigate Plus",
         "true_one": "This is a {{label}}",
         "true_other": "This is an {{label}}",
         "false_one": "This is not a {{label}}",
         "false_other": "This is not an {{label}}",
+        "false.label": "Do not confirm this label for Frigate Plus",
         "state.submitted": "Submitted"
       }
     },
@@ -31,13 +33,18 @@
       "fromTimeline": "Select from Timeline",
       "lastHour_one": "Last Hour",
       "lastHour_other": "Last {{count}} Hours",
-      "custom": "Custom"
+      "custom": "Custom",
+      "start": "Start Time",
+      "start.label": "Select Start Time",
+      "end": "End Time",
+      "end.label": "Select End Time"
     },
     "name": {
       "placeholder": "Name the Export"
     },
     "select": "Select",
     "export": "Export",
+    "selectOrExport": "Select or Export",
     "toast": {
       "success": "Successfully started export. View the file in the /exports folder.",
       "error": {
@@ -70,13 +77,15 @@
       "desc": "Provide a name for this saved search.",
       "placeholder": "Enter a name for your search",
       "overwrite": "{{searchName}} already exists. Saving will overwrite the existing value.",
-      "success": "Search ({{searchName}}) has been saved."
+      "success": "Search ({{searchName}}) has been saved.",
+      "button.save.label": "Save this search"
     }
   },
   "recording": {
     "confirmDelete": {
       "title": "Confirm Delete",
-      "desc": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
+      "desc": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future.",
+      "desc.selected": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
     },
     "button": {
       "export": "Export",

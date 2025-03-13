@@ -12,6 +12,11 @@
   },
   "ptz": {
     "move": {
+      "clickMove": {
+        "label": "Click in the frame to center the camera",
+        "enable": "Enable click to move",
+        "disable": "Disable click to move"
+      },
       "left": {
         "label": "Move PTZ camera to the left"
       },
@@ -37,7 +42,8 @@
       "center": {
         "label": "Click in the frame to center the PTZ camera"
       }
-    }
+    },
+    "presets": "PTZ camera presets"
   },
   "camera": {
     "enable": "Enable Camera",
@@ -118,8 +124,7 @@
     "playInBackground": {
       "label": "Play in background",
       "tips": "Enable this option to continue streaming when the player is hidden."
-    },
-    "": ""
+    }
   },
   "cameraSettings": {
     "title": "{{camera}} Settings",
@@ -129,5 +134,16 @@
     "snapshots": "Snapshots",
     "audioDetection": "Audio Detection",
     "autotracking": "Autotracking"
+  },
+  "history": {
+    "label": "Show historical footage"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "All",
+      "motion": "Motion",
+      "active_objects": "Active Objects"
+    },
+    "notAllTips": "Your {{source}} recording retention configuration is set to <code>mode: {{effectiveRetainMode}}</code>, so this on-demand recording will only keep segments with {{effectiveRetainModeName}}."
   }
 }

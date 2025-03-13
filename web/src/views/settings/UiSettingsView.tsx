@@ -142,7 +142,7 @@ export default function UiSettingsView() {
                 </div>
               </div>
               <Button
-                aria-label="Clear all saved layouts"
+                aria-label={t("general.storedLayouts.clearAll")}
                 onClick={clearStoredLayouts}
               >
                 {t("general.storedLayouts.clearAll")}
@@ -159,7 +159,7 @@ export default function UiSettingsView() {
                 </div>
               </div>
               <Button
-                aria-label="Clear all group streaming settings"
+                aria-label={t("general.cameraGroupStreaming.clearAll")}
                 onClick={clearStreamingSettings}
               >
                 {t("general.cameraGroupStreaming.clearAll")}

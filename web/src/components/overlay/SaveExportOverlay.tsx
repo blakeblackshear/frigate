@@ -30,7 +30,7 @@ export default function SaveExportOverlay({
       >
         <Button
           className="flex items-center gap-1 text-primary"
-          aria-label="Cancel"
+          aria-label={t("button.cancel", { ns: "common" })}
           size="sm"
           onClick={onCancel}
         >
@@ -39,7 +39,7 @@ export default function SaveExportOverlay({
         </Button>
         <Button
           className="flex items-center gap-1"
-          aria-label="Preview export"
+          aria-label={t("export.fromTimeline.previewExport")}
           size="sm"
           onClick={onPreview}
         >
@@ -48,13 +48,13 @@ export default function SaveExportOverlay({
         </Button>
         <Button
           className="flex items-center gap-1"
-          aria-label="Save export"
+          aria-label={t("export.fromTimeline.saveExport")}
           variant="select"
           size="sm"
           onClick={onSave}
         >
           <FaCompactDisc />
-          {t("export.fromTimeline.saveExport", { ns: "components/dialog" })}
+          {t("export.fromTimeline.saveExport")}
         </Button>
       </div>
     </div>

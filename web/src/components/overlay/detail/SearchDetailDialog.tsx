@@ -677,7 +677,7 @@ function ObjectDetailsTab({
             <div className="flex items-start">
               <Button
                 className="rounded-r-none border-r-0"
-                aria-label="Regenerate tracked object description"
+                aria-label={t("details.button.regenerate.label")}
                 onClick={() => regenerateDescription("thumbnails")}
               >
                 {t("details.button.regenerate")}
@@ -687,7 +687,7 @@ function ObjectDetailsTab({
                   <DropdownMenuTrigger asChild>
                     <Button
                       className="rounded-l-none border-l-0 px-2"
-                      aria-label="Expand regeneration menu"
+                      aria-label={t("details.expandRegenerationMenu")}
                     >
                       <FaChevronDown className="size-3" />
                     </Button>
@@ -695,14 +695,14 @@ function ObjectDetailsTab({
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      aria-label="Regenerate from snapshot"
+                      aria-label={t("details.regenerateFromSnapshot")}
                       onClick={() => regenerateDescription("snapshot")}
                     >
                       {t("details.regenerateFromSnapshot")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      aria-label="Regenerate from thumbnails"
+                      aria-label={t("details.regenerateFromThumbnails")}
                       onClick={() => regenerateDescription("thumbnails")}
                     >
                       {t("details.regenerateFromThumbnails")}
@@ -716,7 +716,7 @@ function ObjectDetailsTab({
             !config?.cameras[search.camera].genai.enabled) && (
             <Button
               variant="select"
-              aria-label="Save"
+              aria-label={t("button.save", { ns: "common" })}
               onClick={updateDescription}
             >
               {t("button.save", { ns: "common" })}
@@ -867,7 +867,7 @@ export function ObjectSnapshotTab({
                         <>
                           <Button
                             className="bg-success"
-                            aria-label="Confirm this label for Frigate Plus"
+                            aria-label={t("explore.plus.review.true.label")}
                             onClick={() => {
                               setState("uploading");
                               onSubmitToPlus(false);
@@ -883,7 +883,7 @@ export function ObjectSnapshotTab({
                           </Button>
                           <Button
                             className="text-white"
-                            aria-label="Do not confirm this label for Frigate Plus"
+                            aria-label={t("explore.plus.review.false.label")}
                             variant="destructive"
                             onClick={() => {
                               setState("uploading");

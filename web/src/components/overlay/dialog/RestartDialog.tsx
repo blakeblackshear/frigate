@@ -116,7 +116,7 @@ export default function RestartDialog({
             <Button
               size="lg"
               className="mt-5"
-              aria-label="Force reload now"
+              aria-label={t("restart.restarting.button")}
               onClick={handleForceReload}
             >
               {t("restart.restarting.button")}

@@ -193,7 +193,7 @@ export default function ReviewDetailDialog({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      aria-label="Share this review item"
+                      aria-label={t("details.item.button.share")}
                       size="sm"
                       onClick={() =>
                         shareOrCopy(`${baseUrl}review?id=${review.id}`)

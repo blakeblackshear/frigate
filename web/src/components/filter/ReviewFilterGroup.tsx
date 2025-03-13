@@ -286,7 +286,7 @@ function ShowReviewFilter({
 
       <Button
         className="block duration-0 md:hidden"
-        aria-label="Show reviewed"
+        aria-label={t("review.showReviewed")}
         variant={showReviewedSwitch ? "select" : "default"}
         size="sm"
         onClick={() =>
@@ -351,7 +351,7 @@ function GeneralFilterButton({
         selectedLabels?.length || selectedZones?.length ? "select" : "default"
       }
       className="flex items-center gap-2 capitalize"
-      aria-label="Filter"
+      aria-label={t("filter")}
     >
       <FaFilter
         className={`${
@@ -572,7 +572,7 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             onApply();
@@ -581,7 +581,10 @@ export function GeneralFilterContent({
         >
           {t("button.apply", { ns: "common" })}
         </Button>
-        <Button aria-label="Reset" onClick={onReset}>
+        <Button
+          aria-label={t("button.reset", { ns: "common" })}
+          onClick={onReset}
+        >
           {t("button.reset", { ns: "common" })}
         </Button>
       </div>
@@ -624,7 +627,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
-          aria-label="Show Motion Only"
+          aria-label={t("motion.showMotionOnly", { ns: "components/filter" })}
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
