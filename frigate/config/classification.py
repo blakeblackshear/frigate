@@ -55,7 +55,13 @@ class FaceRecognitionConfig(FrigateBaseModel):
         gt=0.0,
         le=1.0,
     )
-    threshold: float = Field(
+    detection_threshold: float = Field(
+        default=0.7,
+        title="Minimum face detection score required to be considered a face.",
+        gt=0.0,
+        le=1.0,
+    )
+    recognition_threshold: float = Field(
         default=0.9,
         title="Minimum face distance score required to be considered a match.",
         gt=0.0,
