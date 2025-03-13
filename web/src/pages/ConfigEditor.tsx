@@ -6,7 +6,7 @@ import { useApiHost } from "@/api";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import copy from "copy-to-clipboard";
 import { useTheme } from "@/context/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -15,8 +15,14 @@ import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useTranslation } from "react-i18next";
+import { useRestart } from "@/api/ws";
 
 type SaveOptions = "saveonly" | "restart";
+
+type ApiErrorResponse = {
+  message?: string;
+  detail?: string;
+};
 
 function ConfigEditor() {
   const { t } = useTranslation(["views/configEditor"]);
@@ -37,37 +43,40 @@ function ConfigEditor() {
   const schemaConfiguredRef = useRef(false);
 
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
 
   const onHandleSaveConfig = useCallback(
-    async (save_option: SaveOptions) => {
+    async (save_option: SaveOptions): Promise<void> => {
       if (!editorRef.current) {
         return;
       }
 
-      axios
-        .post(
+      try {
+        const response = await axios.post(
           `config/save?save_option=${save_option}`,
           editorRef.current.getValue(),
           {
             headers: { "Content-Type": "text/plain" },
           },
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            setError("");
-            toast.success(response.data.message, { position: "top-center" });
-          }
-        })
-        .catch((error) => {
-          toast.error("Error saving config", { position: "top-center" });
+        );
 
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
+        if (response.status === 200) {
+          setError("");
+          setHasChanges(false);
+          toast.success(response.data.message, { position: "top-center" });
+        }
+      } catch (error) {
+        toast.error("Error saving config", { position: "top-center" });
 
-          setError(errorMessage);
-        });
+        const axiosError = error as AxiosError<ApiErrorResponse>;
+        const errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.response?.data?.detail ||
+          "Unknown error";
+
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     },
     [editorRef],
   );
@@ -80,6 +89,15 @@ function ConfigEditor() {
     copy(editorRef.current.getValue());
     toast.success("Config copied to clipboard.", { position: "top-center" });
   }, [editorRef]);
+
+  const handleSaveAndRestart = useCallback(async () => {
+    try {
+      await onHandleSaveConfig("saveonly");
+      setRestartDialogOpen(true);
+    } catch (error) {
+      // If save fails, error is already set in onHandleSaveConfig, no dialog opens
+    }
+  }, [onHandleSaveConfig]);
 
   useEffect(() => {
     if (!config) {
@@ -208,7 +226,7 @@ function ConfigEditor() {
               size="sm"
               className="flex items-center gap-2"
               aria-label={t("saveAndRestart")}
-              onClick={() => setRestartDialogOpen(true)}
+              onClick={handleSaveAndRestart}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
@@ -240,7 +258,7 @@ function ConfigEditor() {
       <RestartDialog
         isOpen={restartDialogOpen}
         onClose={() => setRestartDialogOpen(false)}
-        onRestart={() => onHandleSaveConfig("restart")}
+        onRestart={() => sendRestart("restart")}
       />
     </div>
   );
