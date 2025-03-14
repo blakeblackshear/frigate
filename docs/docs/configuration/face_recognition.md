@@ -3,7 +3,7 @@ id: face_recognition
 title: Face Recognition
 ---
 
-Face recognition allows known people to be crated and assigned faces. When a known person is recognized their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+Face recognition allows known people to be created and assigned faces. When a known person is recognized their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
 ## Model Requirements
 
