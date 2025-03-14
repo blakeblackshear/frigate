@@ -255,6 +255,19 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   </Link>
                 </>
               )}
+              {isAdmin && isMobile && (
+                <>
+                  <Link to="/faces">
+                    <MenuItem
+                      className="flex w-full items-center p-2 text-sm"
+                      aria-label="Face Library"
+                    >
+                      <LuSquarePen className="mr-2 size-4" />
+                      <span>Configuration editor</span>
+                    </MenuItem>
+                  </Link>
+                </>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
               Appearance

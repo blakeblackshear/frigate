@@ -937,12 +937,6 @@ class LicensePlateProcessingMixin:
             if not license_plate:
                 return
 
-            if license_plate.get("score") < self.lpr_config.detection_threshold:
-                logger.debug(
-                    f"Plate detection score is less than the threshold ({license_plate['score']:0.2f} < {self.lpr_config.detection_threshold})"
-                )
-                return
-
             license_plate_box = license_plate.get("box")
 
             # check that license plate is valid
