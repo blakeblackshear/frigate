@@ -78,7 +78,10 @@ export default function AutoUpdatingCameraImage({
     let baseParam = "";
 
     if (periodicCache && !isCached) {
-      baseParam = "store=1";
+      const date = new Date(key);
+      date.setMinutes(date.getMinutes() - (date.getMinutes() % 10), 0, 0);
+
+      baseParam = `store=1&cache=${date.getTime() / 1000}`;
     } else {
       baseParam = `cache=${key}`;
     }
