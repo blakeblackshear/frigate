@@ -115,10 +115,10 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             x:x2,
         ]
 
-        cv2.imwrite("/media/frigate/test_class.png", input)
+        if input.shape != (224, 224):
+            input = cv2.resize(input, (224, 224))
 
         input = np.expand_dims(input, axis=0)
-
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(

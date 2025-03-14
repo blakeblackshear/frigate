@@ -27,6 +27,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
+from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
@@ -106,10 +107,10 @@ def imagestream(
 
 
 @router.get("/{camera_name}/ptz/info")
-def camera_ptz_info(request: Request, camera_name: str):
+async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
         return JSONResponse(
-            content=request.app.onvif.get_camera_info(camera_name),
+            content=await request.app.onvif.get_camera_info(camera_name),
         )
     else:
         return JSONResponse(
@@ -765,12 +766,15 @@ def event_snapshot(
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
-            camera_states = request.app.detected_frames_processor.camera_states.values()
+            camera_states: list[CameraState] = (
+                request.app.detected_frames_processor.camera_states.values()
+            )
             for camera_state in camera_states:
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        jpg_bytes = tracked_obj.get_jpg_bytes(
+                        jpg_bytes = tracked_obj.get_img_bytes(
+                            ext="jpg",
                             timestamp=params.timestamp,
                             bounding_box=params.bbox,
                             crop=params.crop,
@@ -779,17 +783,19 @@ def event_snapshot(
                         )
         except Exception:
             return JSONResponse(
-                content={"success": False, "message": "Event not found"},
+                content={"success": False, "message": "Ongoing event not found"},
                 status_code=404,
             )
     except Exception:
         return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
+            content={"success": False, "message": "Unknown error occurred"},
+            status_code=404,
         )
 
     if jpg_bytes is None:
         return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
+            content={"success": False, "message": "Live frame not available"},
+            status_code=404,
         )
 
     headers = {

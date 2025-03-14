@@ -584,19 +584,31 @@ class PtzAutoTracker:
 
         # Extract areas and calculate weighted average
         # grab the largest dimension of the bounding box and create a square from that
+        # Filter out the initial frame and use a recent time window
+        current_time = obj.obj_data["frame_time"]
+        time_window = 1.5  # seconds
+        history = [
+            entry
+            for entry in self.tracked_object_history[camera]
+            if not entry.get("is_initial_frame", False)
+            and current_time - entry["frame_time"] <= time_window
+        ]
+        if not history:  # Fallback to latest if no recent entries
+            history = [self.tracked_object_history[camera][-1]]
+
         areas = [
             {
-                "frame_time": obj["frame_time"],
-                "box": obj["box"],
+                "frame_time": entry["frame_time"],
+                "box": entry["box"],
                 "area": max(
-                    obj["box"][2] - obj["box"][0], obj["box"][3] - obj["box"][1]
+                    entry["box"][2] - entry["box"][0], entry["box"][3] - entry["box"][1]
                 )
                 ** 2,
             }
-            for obj in self.tracked_object_history[camera]
+            for entry in history
         ]
 
-        filtered_areas = remove_outliers(areas) if len(areas) >= 2 else areas
+        filtered_areas = remove_outliers(areas) if len(areas) > 3 else areas
 
         # Filter entries that are not touching the frame edge
         filtered_areas_not_touching_edge = [
