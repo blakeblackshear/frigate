@@ -27,6 +27,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
+from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
@@ -765,31 +766,36 @@ def event_snapshot(
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
-            camera_states = request.app.detected_frames_processor.camera_states.values()
+            camera_states: list[CameraState] = (
+                request.app.detected_frames_processor.camera_states.values()
+            )
             for camera_state in camera_states:
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        jpg_bytes = tracked_obj.get_jpg_bytes(
+                        jpg_bytes = tracked_obj.get_img_bytes(
+                            ext="jpg",
                             timestamp=params.timestamp,
                             bounding_box=params.bbox,
                             crop=params.crop,
                             height=params.height,
                             quality=params.quality,
                         )
-        except Exception:
+        except Exception as e:
             return JSONResponse(
-                content={"success": False, "message": "Event not found"},
+                content={"success": False, "message": f"Ongoing event not found: {e}"},
                 status_code=404,
             )
-    except Exception:
+    except Exception as e:
         return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
+            content={"success": False, "message": f"Unknown error occurred: {e}"},
+            status_code=404,
         )
 
     if jpg_bytes is None:
         return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
+            content={"success": False, "message": "Live frame not available"},
+            status_code=404,
         )
 
     headers = {
