@@ -34,14 +34,6 @@ services:
       - ./config:/config
       - ./debug:/media/frigate
       - /dev/bus/usb:/dev/bus/usb
-    ports:
-      - "8971:8971"
-      - "5000:5000"
-      - "5001:5001"
-      - "5173:5173"
-      - "8554:8554"
-      - "8555:8555"
-
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6
