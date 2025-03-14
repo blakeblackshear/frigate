@@ -52,7 +52,8 @@ def main() -> None:
     # Load the configuration.
     try:
         config = FrigateConfig.load(install=True)
-    except ValidationError as e:
+    except (ValidationError, ScannerError) as e:
+
         print("*************************************************************")
         print("*************************************************************")
         print("***    Your config file is not valid!                     ***")
