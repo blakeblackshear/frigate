@@ -318,123 +318,130 @@ export default function ClassificationSettingsView({
           </div>
         </div>
 
-        <Separator className="my-2 flex bg-secondary" />
+        <div className="my-2 space-y-6">
+          <Separator className="my-2 flex bg-secondary" />
 
-        <Heading as="h4" className="my-2">
-          Face Recognition
-        </Heading>
-        <div className="max-w-6xl">
-          <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-            <p>
-              Face recognition allows people to be assigned names and when their
-              face is recognized Frigate will assign the person's name as a sub
-              label. This information is included in the UI, filters, as well as
-              in notifications.
-            </p>
+          <Heading as="h4" className="my-2">
+            Face Recognition
+          </Heading>
+          <div className="max-w-6xl">
+            <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+              <p>
+                Face recognition allows people to be assigned names and when
+                their face is recognized Frigate will assign the person's name
+                as a sub label. This information is included in the UI, filters,
+                as well as in notifications.
+              </p>
 
-            <div className="flex items-center text-primary">
-              <Link
-                to="https://docs.frigate.video/configuration/face_recognition"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                Read the Documentation
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex w-full max-w-lg flex-col space-y-6">
-          <div className="flex flex-row items-center">
-            <Switch
-              id="enabled"
-              className="mr-3"
-              disabled={classificationSettings.face.enabled === undefined}
-              checked={classificationSettings.face.enabled === true}
-              onCheckedChange={(isChecked) => {
-                handleClassificationConfigChange({
-                  face: { enabled: isChecked },
-                });
-              }}
-            />
-            <div className="space-y-0.5">
-              <Label htmlFor="enabled">Enabled</Label>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="my-2 flex bg-secondary" />
-
-        <Heading as="h4" className="my-2">
-          License Plate Recognition
-        </Heading>
-        <div className="max-w-6xl">
-          <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-            <p>
-              Frigate can recognize license plates on vehicles and automatically
-              add the detected characters to the recognized_license_plate field
-              or a known name as a sub_label to objects that are of type car. A
-              common use case may be to read the license plates of cars pulling
-              into a driveway or cars passing by on a street.
-            </p>
-
-            <div className="flex items-center text-primary">
-              <Link
-                to="https://docs.frigate.video/configuration/license_plate_recognition"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                Read the Documentation
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex w-full max-w-lg flex-col space-y-6">
-          <div className="flex flex-row items-center">
-            <Switch
-              id="enabled"
-              className="mr-3"
-              disabled={classificationSettings.lpr.enabled === undefined}
-              checked={classificationSettings.lpr.enabled === true}
-              onCheckedChange={(isChecked) => {
-                handleClassificationConfigChange({
-                  lpr: { enabled: isChecked },
-                });
-              }}
-            />
-            <div className="space-y-0.5">
-              <Label htmlFor="enabled">Enabled</Label>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="my-2 flex bg-secondary" />
-
-        <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
-          <Button className="flex flex-1" aria-label="Reset" onClick={onCancel}>
-            Reset
-          </Button>
-          <Button
-            variant="select"
-            disabled={!changedValue || isLoading}
-            className="flex flex-1"
-            aria-label="Save"
-            onClick={saveToConfig}
-          >
-            {isLoading ? (
-              <div className="flex flex-row items-center gap-2">
-                <ActivityIndicator />
-                <span>Saving...</span>
+              <div className="flex items-center text-primary">
+                <Link
+                  to="https://docs.frigate.video/configuration/face_recognition"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  Read the Documentation
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
               </div>
-            ) : (
-              "Save"
-            )}
-          </Button>
+            </div>
+          </div>
+
+          <div className="flex w-full max-w-lg flex-col space-y-6">
+            <div className="flex flex-row items-center">
+              <Switch
+                id="enabled"
+                className="mr-3"
+                disabled={classificationSettings.face.enabled === undefined}
+                checked={classificationSettings.face.enabled === true}
+                onCheckedChange={(isChecked) => {
+                  handleClassificationConfigChange({
+                    face: { enabled: isChecked },
+                  });
+                }}
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="enabled">Enabled</Label>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            License Plate Recognition
+          </Heading>
+          <div className="max-w-6xl">
+            <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+              <p>
+                Frigate can recognize license plates on vehicles and
+                automatically add the detected characters to the
+                recognized_license_plate field or a known name as a sub_label to
+                objects that are of type car. A common use case may be to read
+                the license plates of cars pulling into a driveway or cars
+                passing by on a street.
+              </p>
+
+              <div className="flex items-center text-primary">
+                <Link
+                  to="https://docs.frigate.video/configuration/license_plate_recognition"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  Read the Documentation
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full max-w-lg flex-col space-y-6">
+            <div className="flex flex-row items-center">
+              <Switch
+                id="enabled"
+                className="mr-3"
+                disabled={classificationSettings.lpr.enabled === undefined}
+                checked={classificationSettings.lpr.enabled === true}
+                onCheckedChange={(isChecked) => {
+                  handleClassificationConfigChange({
+                    lpr: { enabled: isChecked },
+                  });
+                }}
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="enabled">Enabled</Label>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="my-2 flex bg-secondary" />
+
+          <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
+            <Button
+              className="flex flex-1"
+              aria-label="Reset"
+              onClick={onCancel}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="select"
+              disabled={!changedValue || isLoading}
+              className="flex flex-1"
+              aria-label="Save"
+              onClick={saveToConfig}
+            >
+              {isLoading ? (
+                <div className="flex flex-row items-center gap-2">
+                  <ActivityIndicator />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
