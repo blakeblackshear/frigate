@@ -58,9 +58,9 @@ Fine-tune the LPR feature using these optional parameters:
 
 ### Recognition
 
-- **`recognition_threshold`**: Recognition confidence score required to add the plate to the object as a sub label.
+- **`recognition_threshold`**: Recognition confidence score required to add the plate to the object as a `recognized_license_plate` and/or `sub_label`.
   - Default: `0.9`.
-- **`min_plate_length`**: Specifies the minimum number of characters a detected license plate must have to be added as a sub label to an object.
+- **`min_plate_length`**: Specifies the minimum number of characters a detected license plate must have to be added as a `recognized_license_plate` and/or `sub_label` to an object.
   - Use this to filter out short, incomplete, or incorrect detections.
 - **`format`**: A regular expression defining the expected format of detected plates. Plates that do not match this format will be discarded.
   - `"^[A-Z]{1,3} [A-Z]{1,2} [0-9]{1,4}$"` matches plates like "B AB 1234" or "M X 7"
