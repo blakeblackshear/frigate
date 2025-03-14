@@ -40,7 +40,7 @@ Fine-tune face recognition with these optional parameters:
 
 - `detection_threshold`: Face detection confidence score required before recognition runs:
   - Default: `0.7`
-  - Note: If you are using a Frigate+ model and you set the `min_score` in your objects config for `face` higher than this value, recognition will never run. It's best to ensure these values match, or this `detection_threshold` is lower than your object config `min_score`.
+  - Note: This is field only applies to the standalone face detection model, `min_score` should be used to filter for models that have face detection built in.
 - `min_area`: Defines the minimum size (in pixels) a face must be before recognition runs.
   - Default: `500` pixels.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant faces.
