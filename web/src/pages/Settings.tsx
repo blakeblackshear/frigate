@@ -35,7 +35,7 @@ import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
-import ClassificationSettingsView from "@/views/settings/SearchSettingsView";
+import ClassificationSettingsView from "@/views/settings/ClassificationSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";

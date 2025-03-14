@@ -27,6 +27,9 @@ type ClassificationSettings = {
     reindex?: boolean;
     model_size?: SearchModelSize;
   };
+  face: {
+    enabled?: boolean;
+  };
 };
 
 type ClassificationSettingsViewProps = {
@@ -49,6 +52,9 @@ export default function ClassificationSettingsView({
         reindex: undefined,
         model_size: undefined,
       },
+      face: {
+        enabled: undefined,
+      },
     });
 
   const [origSearchSettings, setOrigSearchSettings] =
@@ -57,6 +63,9 @@ export default function ClassificationSettingsView({
         enabled: undefined,
         reindex: undefined,
         model_size: undefined,
+      },
+      face: {
+        enabled: undefined,
       },
     });
 
@@ -69,6 +78,9 @@ export default function ClassificationSettingsView({
             reindex: config.semantic_search.reindex,
             model_size: config.semantic_search.model_size,
           },
+          face: {
+            enabled: config.face_recognition.enabled,
+          },
         });
       }
 
@@ -78,13 +90,16 @@ export default function ClassificationSettingsView({
           reindex: config.semantic_search.reindex,
           model_size: config.semantic_search.model_size,
         },
+        face: {
+          enabled: config.face_recognition.enabled,
+        },
       });
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
-  const handleSearchConfigChange = (
+  const handleClassificationConfigChange = (
     newConfig: Partial<ClassificationSettings>,
   ) => {
     setClassificationSettings((prevConfig) => ({
@@ -92,6 +107,7 @@ export default function ClassificationSettingsView({
         ...prevConfig.search,
         ...newConfig.search,
       },
+      face: { ...prevConfig.face, ...newConfig.face },
     }));
     setUnsavedChanges(true);
     setChangedValue(true);
@@ -204,7 +220,9 @@ export default function ClassificationSettingsView({
               disabled={classificationSettings.search.enabled === undefined}
               checked={classificationSettings.search.enabled === true}
               onCheckedChange={(isChecked) => {
-                handleSearchConfigChange({ search: { enabled: isChecked } });
+                handleClassificationConfigChange({
+                  search: { enabled: isChecked },
+                });
               }}
             />
             <div className="space-y-0.5">
@@ -219,7 +237,9 @@ export default function ClassificationSettingsView({
                 disabled={classificationSettings.search.reindex === undefined}
                 checked={classificationSettings.search.reindex === true}
                 onCheckedChange={(isChecked) => {
-                  handleSearchConfigChange({ search: { reindex: isChecked } });
+                  handleClassificationConfigChange({
+                    search: { reindex: isChecked },
+                  });
                 }}
               />
               <div className="space-y-0.5">
@@ -255,7 +275,7 @@ export default function ClassificationSettingsView({
             <Select
               value={classificationSettings.search.model_size}
               onValueChange={(value) =>
-                handleSearchConfigChange({
+                handleClassificationConfigChange({
                   search: {
                     model_size: value as SearchModelSize,
                   },
@@ -281,6 +301,54 @@ export default function ClassificationSettingsView({
             </Select>
           </div>
         </div>
+
+        <Separator className="my-2 flex bg-secondary" />
+
+        <Heading as="h4" className="my-2">
+          Face Recognition
+        </Heading>
+        <div className="max-w-6xl">
+          <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+            <p>
+              Face recognition allows people to be assigned names and when their
+              face is recognized Frigate will assign the person's name as a sub
+              label. This information is included in the UI, filters, as well as
+              in notifications.
+            </p>
+
+            <div className="flex items-center text-primary">
+              <Link
+                to="https://docs.frigate.video/configuration/face_recognition"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Read the Documentation
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex w-full max-w-lg flex-col space-y-6">
+          <div className="flex flex-row items-center">
+            <Switch
+              id="enabled"
+              className="mr-3"
+              disabled={classificationSettings.face.enabled === undefined}
+              checked={classificationSettings.face.enabled === true}
+              onCheckedChange={(isChecked) => {
+                handleClassificationConfigChange({
+                  face: { enabled: isChecked },
+                });
+              }}
+            />
+            <div className="space-y-0.5">
+              <Label htmlFor="enabled">Enabled</Label>
+            </div>
+          </div>
+        </div>
+
         <Separator className="my-2 flex bg-secondary" />
 
         <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
