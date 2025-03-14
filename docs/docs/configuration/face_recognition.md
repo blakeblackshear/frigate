@@ -3,18 +3,54 @@ id: face_recognition
 title: Face Recognition
 ---
 
-Face recognition allows people to be assigned names and when their face is recognized Frigate will assign the person's name as a sub label. This information is included in the UI, filters, as well as in notifications.
+Face recognition allows known people to be crated and assigned faces. When a known person is recognized their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+
+## Model Requirements
 
 Frigate has support for CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally. A lightweight face landmark detection model is also used to align faces before running them through the face recognizer.
 
+Users running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
+
+Users without a model that detects faces can still run face recognition. Frigate uses a lightweight DNN face detection model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
+
+:::note
+
+Frigate needs to first detect a `face` before it can recognize a face.
+
+:::
+
+## Minimum System Requirements
+
+Face recognition is lightweight and runs on the CPU, there are no significantly different system requirements than running Frigate itself.
+
 ## Configuration
 
-Face recognition is disabled by default, face recognition must be enabled in your config file before it can be used. Face recognition is a global configuration setting.
+Face recognition is disabled by default, face recognition must be enabled in the UI or in your config file before it can be used. Face recognition is a global configuration setting.
 
 ```yaml
 face_recognition:
   enabled: true
 ```
+
+## Advanced Configuration
+
+Fine-tune face recognition with these optional parameters:
+
+### Detection
+
+- `detection_threshold`: Face detection confidence score required before recognition runs:
+  - Default: `0.7`
+  - Note: If you are using a Frigate+ model and you set the `min_score` in your objects config for `face` higher than this value, recognition will never run. It's best to ensure these values match, or this `detection_threshold` is lower than your object config `min_score`.
+- `min_area`: Defines the minimum size (in pixels) a face must be before recognition runs.
+  - Default: `500` pixels.
+  - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant faces.
+
+### Recognition
+
+- `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
+  - Default: `0.9`.
+- `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
+  - Default: `True`.
 
 ## Dataset
 
