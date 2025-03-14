@@ -27,5 +27,13 @@
         "droppedFrames.short.value": "{{droppedFrames}} 帧",
         "decodedFrames": "解码帧数：",
         "droppedFrameRate": "丢帧率："
+    },
+    "toast": {
+        "success": {
+            "submittedFrigatePlus": "已成功提交帧到 Frigate+"
+        },
+        "error": {
+            "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
+        }
     }
 }

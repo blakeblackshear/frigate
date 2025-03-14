@@ -1,4 +1,5 @@
 {
+  "generativeAI": "生成式 AI",
   "exploreIsUnavailable": {
     "title": "探索功能不可用",
     "embeddingsReindexing": {
@@ -83,6 +84,16 @@
         "mismatch_one": "检测到 {{count}} 个不可用的对象，并已包含在此审核项中。这些对象可能未达到警告或检测标准，或者已被清理/删除。",
         "mismatch_other": "检测到 {{count}} 个不可用的对象，并已包含在此审核项中。这些对象可能未达到警告或检测标准，或者已被清理/删除。",
         "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪对象，请调整您的配置：<em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
+          "updatedSublabel": "成功更新子标签。"
+        },
+        "error": {
+          "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
+          "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}"
+        }
       }
     },
     "label": "标签",

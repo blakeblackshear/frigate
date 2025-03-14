@@ -1,4 +1,5 @@
 {
+  "generativeAI": "Generative AI",
   "exploreIsUnavailable": {
     "title": "Explore is Unavailable",
     "embeddingsReindexing": {
@@ -83,7 +84,18 @@
         "mismatch_one": "{{count}} unavailable object was detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
         "mismatch_other": "{{count}} unavailable objects were detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
         "hasMissingObjects": "Adjust your configuration if you want Frigate to save tracked objects for the following labels: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
+          "updatedSublabel": "Successfully updated sub label."
+        },
+        "error": {
+          "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
+          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}"
+        }
       }
+
     },
     "label": "Label",
     "editSubLable": "Edit sub label",

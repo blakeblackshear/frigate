@@ -137,6 +137,7 @@
     }
   },
   "toast": {
+    "copyUrlToClipboard": "Copied URL to clipboard.",
     "save": {
       "error": "Failed to save config changes: {{errorMessage}}",
       "error.noMessage": "Failed to save config changes"

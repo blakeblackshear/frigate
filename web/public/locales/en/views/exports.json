@@ -8,6 +8,11 @@
         "title": "Rename Export",
         "desc": "Enter a new name for this export.",
         "saveExport": "Save Export"
+    },
+    "toast": {
+        "error": {
+            "renameExportFailed": "Failed to rename export: {{errorMessage}}"
+        }
     }
     
 }

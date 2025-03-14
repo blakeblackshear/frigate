@@ -16,7 +16,13 @@
       "tag": "Tag",
       "message": "Message"
     },
-    "tips": "Logs are streaming from the server"
+    "tips": "Logs are streaming from the server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error fetching logs: {{errorMessage}}",
+        "whileStreamingLogs": "Error while streaming logs: {{errorMessage}}"
+      }
+    }
   },
   "general": {
     "title": "General",
@@ -47,7 +53,10 @@
           "vbios": "VBios Info: {{vbios}}"
         },
         "closeInfo.label": "Close GPU info",
-        "copyInfo.label": "Close GPU info"
+        "copyInfo.label": "Copy GPU info",
+        "toast": {
+          "success": "Copied GPU info to clipboard"
+        }
       }
     },
     "otherProcesses": {
@@ -98,6 +107,14 @@
       "skipped": "skipped",
       "ffmpeg": "ffmpeg",
       "capture": "capture"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Copied probe data to clipboard."
+      },
+      "error": {
+        "unableToProbeCamera": "Unable to probe camera: {{errorMessage}}"
+      }
     }
   },
   "lastRefreshed": "Last refreshed: ",

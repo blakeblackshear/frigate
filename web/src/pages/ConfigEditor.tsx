@@ -66,7 +66,7 @@ function ConfigEditor() {
           toast.success(response.data.message, { position: "top-center" });
         }
       } catch (error) {
-        toast.error("Error saving config", { position: "top-center" });
+        toast.error(t("toast.error.savingError"), { position: "top-center" });
 
         const axiosError = error as AxiosError<ApiErrorResponse>;
         const errorMessage =
@@ -78,7 +78,7 @@ function ConfigEditor() {
         throw new Error(errorMessage);
       }
     },
-    [editorRef],
+    [editorRef, t],
   );
 
   const handleCopyConfig = useCallback(async () => {
@@ -87,8 +87,10 @@ function ConfigEditor() {
     }
 
     copy(editorRef.current.getValue());
-    toast.success("Config copied to clipboard.", { position: "top-center" });
-  }, [editorRef]);
+    toast.success(t("toast.success.copyToClipboard"), {
+      position: "top-center",
+    });
+  }, [editorRef, t]);
 
   const handleSaveAndRestart = useCallback(async () => {
     try {

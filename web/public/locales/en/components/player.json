@@ -27,5 +27,13 @@
         "droppedFrames.short.value": "{{droppedFrames}} frames",
         "decodedFrames": "Decoded Frames:",
         "droppedFrameRate": "Dropped Frame Rate:"
+    },
+    "toast": {
+        "success": {
+            "submittedFrigatePlus": "Successfully submitted frame to Frigate+"
+        },
+        "error": {
+            "submitFrigatePlusFailed": "Failed to submit frame to Frigate+"
+        }
     }
 }

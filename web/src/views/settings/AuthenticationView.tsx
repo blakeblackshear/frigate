@@ -163,7 +163,7 @@ export default function AuthenticationView() {
               ),
             false,
           );
-          toast.success(`Role updated for ${user}`, {
+          toast.success(t("users.toast.success.roleUpdated", { user }), {
             position: "top-center",
           });
         }
@@ -173,9 +173,14 @@ export default function AuthenticationView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to update role: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.roleUpdateFailed", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 

@@ -443,7 +443,12 @@ function ObjectDetailsTab({
         .then((resp) => {
           if (resp.status == 200) {
             toast.success(
-              `A new description has been requested from ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
+              t("details.item.toast.success.regenerate", {
+                provider: capitalizeAll(
+                  config?.genai.provider.replaceAll("_", " ") ??
+                    t("generativeAI"),
+                ),
+              }),
               {
                 position: "top-center",
                 duration: 7000,
@@ -457,12 +462,18 @@ function ObjectDetailsTab({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description: ${errorMessage}`,
+            t("details.item.toast.error.regenerate", {
+              provider: capitalizeAll(
+                config?.genai.provider.replaceAll("_", " ") ??
+                  t("generativeAI"),
+              ),
+              errorMessage,
+            }),
             { position: "top-center" },
           );
         });
     },
-    [search, config],
+    [search, config, t],
   );
 
   const handleSubLabelSave = useCallback(
@@ -481,7 +492,7 @@ function ObjectDetailsTab({
         })
         .then((response) => {
           if (response.status === 200) {
-            toast.success("Successfully updated sub label.", {
+            toast.success(t("details.item.toast.success.updatedSublabel"), {
               position: "top-center",
             });
 
@@ -529,12 +540,17 @@ function ObjectDetailsTab({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to update sub label: ${errorMessage}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("details.item.toast.error.updatedSublabelFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         });
     },
-    [search, apiHost, mutate, setSearch],
+    [search, apiHost, mutate, setSearch, t],
   );
 
   return (

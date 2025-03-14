@@ -47,6 +47,16 @@
         "sunday": "星期天",
         "monday": "星期一"
       }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "已清除 {{cameraName}} 的存储布局",
+        "clearStreamingSettings": "已清除所有摄像头组的视频流设置。"
+      },
+      "error": {
+        "clearStoredLayoutFailed": "清除存储布局失败：{{errorMessage}}",
+        "clearStreamingSettingsFailed": "清除视频流设置失败：{{errorMessage}}"
+      }
     }
   },
   "explore": {
@@ -107,6 +117,14 @@
     "filter": {
       "all": "所有遮罩和区域"
     },
+    "toast": {
+      "success": {
+        "copyCoordinates": "已复制 {{polyName}} 的坐标到剪贴板。"
+      },
+      "error": {
+        "copyCoordinatesFailed": "无法复制坐标到剪贴板。"
+      }
+    },
     "form": {
       "zoneName": {
         "error": {
@@ -122,6 +140,12 @@
       "inertia.error.mustBeAboveZero": "惯性必须大于 0。",
       "loiteringTime.error.mustBeGreaterOrEqualZero": "徘徊时间必须大于或等于 0。",
       "polygonDrawing": {
+        "removeLastPoint": "删除最后一个点",
+        "reset.label": "清除所有点",
+        "snapPoints": {
+          "true": "启用点对齐",
+          "false": "禁用点对齐"
+        },
         "error": {
           "mustBeFinished": "多边形绘制必须完成闭合后才能保存。"
         }
@@ -262,12 +286,14 @@
       "success": {
         "createUser": "用户 {{user}} 创建成功",
         "deleteUser": "用户 {{user}} 删除成功",
-        "updatePassword": "已成功修改密码"
+        "updatePassword": "已成功修改密码",
+        "roleUpdated": "已更新 {{user}} 的权限组"
       },
       "error": {
         "setPasswordFailed": "保存密码出现错误：{{errorMessage}}",
         "createUserFailed": "创建用户失败：{{errorMessage}}",
-        "deleteUserFailed": "删除用户失败：{{errorMessage}}"
+        "deleteUserFailed": "删除用户失败：{{errorMessage}}",
+        "roleUpdateFailed": "更新权限组失败：{{errorMessage}}"
       }
     },
     "table": {
@@ -326,9 +352,16 @@
   },
   "notification": {
     "title": "通知",
-    "notificationSettings": "通知设置",
-    "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向您的设备发送推送通知。",
-    "documentation": "阅读文档（英文）",
+    "notificationSettings": {
+      "title": "通知设置",
+      "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向您的设备发送推送通知。",
+      "documentation": "阅读文档（英文）"
+    },
+    "notificationUnavailable": {
+      "title": "通知功能不可用",
+      "desc": "网页推送通知需要安全连接（<code>https://...</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
+      "documentation": "阅读文档（英文）"
+    },
     "email": "电子邮箱",
     "email.placeholder": "例如：example@email.com",
     "email.desc": "需要输入有效的电子邮件，在推送服务出现问题时，将使用此电子邮件进行通知。",
@@ -337,6 +370,15 @@
     "cameras.desc": "选择要启用通知的摄像头。",
     "deviceSpecific": "设备专用设置",
     "registerDevice": "注册该设备",
-    "unregisterDevice": "取消注册该设备"
+    "unregisterDevice": "取消注册该设备",
+    "toast": {
+      "success": {
+        "registered": "已成功注册通知。需要重启 Frigate 才能发送任何通知（包括测试通知）。",
+        "settingSaved": "通知设置已保存。"
+      },
+      "error": {
+        "registerFailed": "通知注册失败。"
+      }
+    }
   }
 }

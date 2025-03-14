@@ -8,5 +8,10 @@
         "title": "重命名导出",
         "desc": "为此导出项目输入新名称。",
         "saveExport": "保存导出"
+    },
+    "toast": {
+        "error": {
+            "renameExportFailed": "重命名导出失败：{{errorMessage}}"
+        }
     }
 }

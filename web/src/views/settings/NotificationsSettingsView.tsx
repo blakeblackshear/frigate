@@ -43,7 +43,7 @@ import {
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -143,23 +143,20 @@ export default function NotificationView({
                 sub: pushSubscription,
               })
               .catch(() => {
-                toast.error("Failed to save notification registration.", {
+                toast.error(t("notification.toast.error.registerFailed"), {
                   position: "top-center",
                 });
                 pushSubscription.unsubscribe();
                 registration.unregister();
                 setRegistration(null);
               });
-            toast.success(
-              "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",
-              {
-                position: "top-center",
-              },
-            );
+            toast.success(t("notification.toast.success.registered"), {
+              position: "top-center",
+            });
           });
       }
     },
-    [publicKey, addMessage],
+    [publicKey, addMessage, t],
   );
 
   // notification state
@@ -261,7 +258,7 @@ export default function NotificationView({
         )
         .then((res) => {
           if (res.status === 200) {
-            toast.success("Notification settings have been saved.", {
+            toast.success(t("notification.toast.success.settingSaved"), {
               position: "top-center",
             });
             updateConfig();
@@ -304,14 +301,11 @@ export default function NotificationView({
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-1">
             <Heading as="h3" className="my-2">
-              Notification Settings
+              {t("notification.notificationSettings.title")}
             </Heading>
             <div className="max-w-6xl">
               <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                <p>
-                  Frigate can natively send push notifications to your device
-                  when it is running in the browser or installed as a PWA.
-                </p>
+                <p>{t("notification.notificationSettings.desc")}</p>
                 <div className="flex items-center text-primary">
                   <Link
                     to="https://docs.frigate.video/configuration/notifications"
@@ -319,7 +313,9 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    Read the Documentation{" "}
+                    <p>
+                      {t("notification.notificationSettings.documentation")}
+                    </p>{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -327,12 +323,13 @@ export default function NotificationView({
             </div>
             <Alert variant="destructive">
               <CiCircleAlert className="size-5" />
-              <AlertTitle>Notifications Unavailable</AlertTitle>
-
+              <AlertTitle>
+                {t("notification.notificationUnavailable.title")}
+              </AlertTitle>
               <AlertDescription>
-                Web push notifications require a secure context (
-                <code>https://...</code>). This is a browser limitation. Access
-                Frigate securely to use notifications.
+                <Trans ns="views/settings">
+                  notification.notificationUnavailable.desc
+                </Trans>
                 <div className="mt-3 flex items-center">
                   <Link
                     to="https://docs.frigate.video/configuration/authentication"
@@ -340,7 +337,9 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    Read the Documentation{" "}
+                    <p>
+                      {t("notification.notificationUnavailable.documentation")}
+                    </p>{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -360,12 +359,12 @@ export default function NotificationView({
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
               <Heading as="h3" className="my-2">
-                {t("notification.notificationSettings")}
+                {t("notification.notificationSettings.title")}
               </Heading>
 
               <div className="max-w-6xl">
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                  <p>{t("notification.desc")}</p>
+                  <p>{t("notification.notificationSettings.desc")}</p>
                   <div className="flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/notifications"
@@ -373,7 +372,7 @@ export default function NotificationView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("notification.documentation")}{" "}
+                      {t("notification.notificationSettings.documentation")}{" "}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>

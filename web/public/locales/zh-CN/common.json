@@ -36,6 +36,8 @@
     "second": "{{time}}秒",
     "formattedTimestamp": "%m月%-d日 %I:%M:%S %p",
     "formattedTimestamp.24hour": "%m月%-d日 %H:%M:%S",
+    "formattedTimestamp2": "%m/%d %I:%M:%S%P",
+    "formattedTimestamp2.24hour": "%d日%m月 %H:%M:%S",
     "formattedTimestampExcludeSeconds": "%m月%-d日 %I:%M %p",
     "formattedTimestampExcludeSeconds.24hour": "%m月%-d日 %H:%M",
     "formattedTimestampWithYear": "%Y年%m月%-d日 %I:%M:%S %p",
@@ -44,9 +46,12 @@
   },
   "unit": {
     "speed": {
-      "mph": "公里/小时",
-      "kph": "英里/小时"
+      "mph": "英里/小时",
+      "kph": "公里/小时"
     }
+  },
+  "label": {
+    "back": "返回"
   },
   "pagination": {
     "label": "分页",
@@ -140,6 +145,7 @@
     "restart": "重启 Frigate"
   },
   "toast": {
+    "copyUrlToClipboard": "已复制链接到剪贴板。",
     "save": {
       "error": "保存配置信息失败： {{errorMessage}}",
       "error.noMessage": "保存配置信息失败"

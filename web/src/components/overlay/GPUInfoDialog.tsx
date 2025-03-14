@@ -38,7 +38,7 @@ export default function GPUInfoDialog({
         .replace(/\\t/g, "\t")
         .replace(/\\n/g, "\n"),
     );
-    toast.success("Copied GPU info to clipboard.");
+    toast.success(t("general.hardwareInfo.gpuInfo.toast.success"));
   };
 
   if (gpuType == "vainfo") {

@@ -106,13 +106,16 @@ function Logs() {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "An unknown error occurred";
-        toast.error(`Error fetching logs: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("logs.toast.error.fetchingLogsFailed", { errorMessage }),
+          {
+            position: "top-center",
+          },
+        );
       }
       return [];
     },
-    [logService, filterLines],
+    [logService, filterLines, t],
   );
 
   const fetchInitialLogs = useCallback(async () => {
@@ -134,13 +137,13 @@ function Logs() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred";
-      toast.error(`Error fetching logs: ${errorMessage}`, {
+      toast.error(t("logs.toast.error.fetchingLogsFailed", { errorMessage }), {
         position: "top-center",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [logService, filterLines, filterSeverity]);
+  }, [logService, filterLines, filterSeverity, t]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -205,10 +208,12 @@ function Logs() {
             error instanceof Error
               ? error.message
               : "An unknown error occurred";
-          toast.error(`Error while streaming logs: ${errorMessage}`);
+          toast.error(
+            t("logs.toast.error.whileStreamingLogs", { errorMessage }),
+          );
         }
       });
-  }, [logService, filterSeverity]);
+  }, [logService, filterSeverity, t]);
 
   useEffect(() => {
     setIsLoading(true);

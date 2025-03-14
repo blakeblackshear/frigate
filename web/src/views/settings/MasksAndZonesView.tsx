@@ -221,12 +221,16 @@ export default function MasksAndZonesView({
             .map((point) => `${point[0]},${point[1]}`)
             .join(","),
         );
-        toast.success(`Copied coordinates for ${poly.name} to clipboard.`);
+        toast.success(
+          t("masksAndZones.toast.success.copyCoordinates", {
+            polyName: poly.name,
+          }),
+        );
       } else {
-        toast.error("Could not copy coordinates to clipboard.");
+        toast.error(t("masksAndZones.toast.error.copyCoordinatesFailed"));
       }
     },
-    [allPolygons, scaledHeight, scaledWidth],
+    [allPolygons, scaledHeight, scaledWidth, t],
   );
 
   useEffect(() => {

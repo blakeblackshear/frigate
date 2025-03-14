@@ -47,6 +47,16 @@
         "sunday": "Sunday",
         "monday": "Monday"
       }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Cleared stored layout for {{cameraName}}",
+        "clearStreamingSettings": "Cleared streaming settings for all camera groups."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Failed to clear stored layout: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Failed to clear streaming settings: {{errorMessage}}"
+      }
     }
   },
   "explore": {
@@ -106,6 +116,14 @@
   "masksAndZones": {
     "filter": {
       "all": "All Masks and Zones"
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Could not copy coordinates to clipboard."
+      }
     },
     "form": {
       "zoneName": {
@@ -273,12 +291,14 @@
       "success": {
         "createUser": "User {{user}} created successfully",
         "deleteUser": "User {{user}} deleted successfully",
-        "updatePassword": "Password updated successfully."
+        "updatePassword": "Password updated successfully.",
+        "roleUpdated": "Role updated for {{user}}"
       },
       "error": {
         "setPasswordFailed": "Failed to save password: {{errorMessage}}",
         "createUserFailed": "Failed to create user: {{errorMessage}}",
-        "deleteUserFailed": "Failed to delete user: {{errorMessage}}"
+        "deleteUserFailed": "Failed to delete user: {{errorMessage}}",
+        "roleUpdateFailed": "Failed to update role: {{errorMessage}}"
       }
     },
     "table": {
@@ -335,9 +355,17 @@
   },
   "notification": {
     "title": "Notifications",
-    "notificationSettings": "Notification Settings",
-    "desc": "Frigate can send native push notifications to your device when running in the browser or installed as a PWA.",
-    "documentation": "Read the Documentation",
+    "notificationSettings": {
+      "title": "Notification Settings",
+      "desc": "Frigate can natively send push notifications to your device when it is running in the browser or installed as a PWA.",
+      "documentation": "Read the Documentation"
+    },
+    "notificationUnavailable": {
+      "title": "Notifications Unavailable",
+      "desc": "Web push notifications require a secure context (<code>https://...</code>). This is a browser limitation. Access Frigate securely to use notifications.",
+      "documentation": "Read the Documentation"
+    },
+    
     "email": "Email",
     "email.placeholder": "e.g. example@email.com",
     "email.desc": "A valid email is required and will be used to notify you if there are any issues with the push service.",
@@ -346,6 +374,15 @@
     "cameras.desc": "Select which cameras to enable notifications for.",
     "deviceSpecific": "Device Specific Settings",
     "registerDevice": "Register This Device",
-    "unregisterDevice": "Unregister This Device"
+    "unregisterDevice": "Unregister This Device",
+    "toast": {
+      "success": {
+        "registered": "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",
+        "settingSaved": "Notification settings have been saved."
+      },
+      "error": {
+        "registerFailed": "Failed to save notification registration."
+      }
+    }
   }
 }

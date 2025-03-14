@@ -16,7 +16,13 @@
       "tag": "标签",
       "message": "消息"
     },
-    "tips": "日志正在从服务器流式传输"
+    "tips": "日志正在从服务器流式传输",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "获取日志出错：{{errorMessage}}",
+        "whileStreamingLogs": "流式传输日志时出错：{{errorMessage}}"
+      }
+    }
   },
   "general": {
     "title": "常规",
@@ -47,7 +53,10 @@
           "vbios": "VBios信息：{{vbios}}"
         },
         "closeInfo.label": "关闭GPU信息",
-        "copyInfo.label": "复制GPU信息"
+        "copyInfo.label": "复制GPU信息",
+        "toast": {
+          "success": "已复制GPU信息到剪贴板"
+        }
       }
     },
     "otherProcesses": {
@@ -98,6 +107,14 @@
       "skipped": "跳过",
       "ffmpeg": "ffmpeg编码器",
       "capture": "捕获"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "已复制探测数据到剪贴板。"
+      },
+      "error": {
+        "unableToProbeCamera": "无法探测摄像头：{{errorMessage}}"
+      }
     }
   },
   "lastRefreshed": "最后刷新时间：",

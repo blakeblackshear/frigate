@@ -34,21 +34,29 @@ export default function UiSettingsView() {
     Object.entries(config.camera_groups).forEach(async (value) => {
       await delData(`${value[0]}-draggable-layout`)
         .then(() => {
-          toast.success(`Cleared stored layout for ${value[0]}`, {
-            position: "top-center",
-          });
+          toast.success(
+            t("general.toast.success.clearStoredLayout", {
+              cameraName: value[0],
+            }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .catch((error) => {
           const errorMessage =
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to clear stored layout: ${errorMessage}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("general.toast.error.clearStoredLayoutFailed", { errorMessage }),
+            {
+              position: "top-center",
+            },
+          );
         });
     });
-  }, [config]);
+  }, [config, t]);
 
   const clearStreamingSettings = useCallback(async () => {
     if (!config) {
@@ -57,7 +65,7 @@ export default function UiSettingsView() {
 
     await delData(`streaming-settings`)
       .then(() => {
-        toast.success(`Cleared streaming settings for all camera groups.`, {
+        toast.success(t("general.toast.success.clearStreamingSettings"), {
           position: "top-center",
         });
       })
@@ -66,11 +74,16 @@ export default function UiSettingsView() {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to clear streaming settings: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("general.toast.error.clearStreamingSettingsFailed", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
-  }, [config]);
+  }, [config, t]);
 
   useEffect(() => {
     document.title = "General Settings - Frigate";

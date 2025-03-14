@@ -101,12 +101,12 @@ function Exports() {
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to rename export: ${errorMessage}`, {
+          toast.error(t("toast.error.renameExportFailed", { errorMessage }), {
             position: "top-center",
           });
         });
     },
-    [mutate],
+    [mutate, t],
   );
 
   return (

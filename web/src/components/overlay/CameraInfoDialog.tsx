@@ -41,15 +41,25 @@ export default function CameraInfoDialog({
         if (res.status === 200) {
           setFfprobeInfo(res.data);
         } else {
-          toast.error(`Unable to probe camera: ${res.statusText}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("cameras.toast.success.copyToClipboard", {
+              errorMessage: res.statusText,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
-        toast.error(`Unable to probe camera: ${error.response.data.message}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("cameras.toast.success.copyToClipboard", {
+            errorMessage: error.response.data.message,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,7 +67,7 @@ export default function CameraInfoDialog({
 
   const onCopyFfprobe = async () => {
     copy(JSON.stringify(ffprobeInfo));
-    toast.success("Copied probe data to clipboard.");
+    toast.success(t("cameras.toast.success.copyToClipboard"));
   };
 
   function gcd(a: number, b: number): number {

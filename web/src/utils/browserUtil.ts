@@ -1,4 +1,5 @@
 import copy from "copy-to-clipboard";
+import { t } from "i18next";
 import { toast } from "sonner";
 
 export function shareOrCopy(url: string, title?: string) {
@@ -9,7 +10,7 @@ export function shareOrCopy(url: string, title?: string) {
     });
   } else {
     copy(url);
-    toast.success("Copied URL to clipboard.", {
+    toast.success(t("toast.copyUrlToClipboard"), {
       position: "top-center",
     });
   }
