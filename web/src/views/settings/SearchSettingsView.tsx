@@ -21,19 +21,20 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 
-type SearchSettingsViewProps = {
+type ClassificationSettings = {
+  search: {
+    enabled?: boolean;
+    reindex?: boolean;
+    model_size?: SearchModelSize;
+  };
+};
+
+type ClassificationSettingsViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
-
-type SearchSettings = {
-  enabled?: boolean;
-  reindex?: boolean;
-  model_size?: SearchModelSize;
-};
-
-export default function SearchSettingsView({
+export default function ClassificationSettingsView({
   setUnsavedChanges,
-}: SearchSettingsViewProps) {
+}: ClassificationSettingsViewProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -41,40 +42,55 @@ export default function SearchSettingsView({
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
-  const [searchSettings, setSearchSettings] = useState<SearchSettings>({
-    enabled: undefined,
-    reindex: undefined,
-    model_size: undefined,
-  });
+  const [classificationSettings, setClassificationSettings] =
+    useState<ClassificationSettings>({
+      search: {
+        enabled: undefined,
+        reindex: undefined,
+        model_size: undefined,
+      },
+    });
 
-  const [origSearchSettings, setOrigSearchSettings] = useState<SearchSettings>({
-    enabled: undefined,
-    reindex: undefined,
-    model_size: undefined,
-  });
+  const [origSearchSettings, setOrigSearchSettings] =
+    useState<ClassificationSettings>({
+      search: {
+        enabled: undefined,
+        reindex: undefined,
+        model_size: undefined,
+      },
+    });
 
   useEffect(() => {
     if (config) {
-      if (searchSettings?.enabled == undefined) {
-        setSearchSettings({
-          enabled: config.semantic_search.enabled,
-          reindex: config.semantic_search.reindex,
-          model_size: config.semantic_search.model_size,
+      if (classificationSettings?.search.enabled == undefined) {
+        setClassificationSettings({
+          search: {
+            enabled: config.semantic_search.enabled,
+            reindex: config.semantic_search.reindex,
+            model_size: config.semantic_search.model_size,
+          },
         });
       }
 
       setOrigSearchSettings({
-        enabled: config.semantic_search.enabled,
-        reindex: config.semantic_search.reindex,
-        model_size: config.semantic_search.model_size,
+        search: {
+          enabled: config.semantic_search.enabled,
+          reindex: config.semantic_search.reindex,
+          model_size: config.semantic_search.model_size,
+        },
       });
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
-  const handleSearchConfigChange = (newConfig: Partial<SearchSettings>) => {
-    setSearchSettings((prevConfig) => ({ ...prevConfig, ...newConfig }));
+  const handleSearchConfigChange = (
+    newConfig: Partial<ClassificationSettings>,
+  ) => {
+    setClassificationSettings((prevConfig) => ({
+      ...prevConfig,
+      ...newConfig,
+    }));
     setUnsavedChanges(true);
     setChangedValue(true);
   };
@@ -84,14 +100,14 @@ export default function SearchSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${searchSettings.enabled ? "True" : "False"}&semantic_search.reindex=${searchSettings.reindex ? "True" : "False"}&semantic_search.model_size=${searchSettings.model_size}`,
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}`,
         {
           requires_restart: 0,
         },
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Explore settings have been saved.", {
+          toast.success("Classification settings have been saved.", {
             position: "top-center",
           });
           setChangedValue(false);
@@ -114,15 +130,10 @@ export default function SearchSettingsView({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [
-    updateConfig,
-    searchSettings.enabled,
-    searchSettings.reindex,
-    searchSettings.model_size,
-  ]);
+  }, [updateConfig, classificationSettings.search]);
 
   const onCancel = useCallback(() => {
-    setSearchSettings(origSearchSettings);
+    setClassificationSettings(origSearchSettings);
     setChangedValue(false);
     removeMessage("search_settings", "search_settings");
   }, [origSearchSettings, removeMessage]);
@@ -131,7 +142,7 @@ export default function SearchSettingsView({
     if (changedValue) {
       addMessage(
         "search_settings",
-        `Unsaved Explore settings changes`,
+        `Unsaved Classification settings changes`,
         undefined,
         "search_settings",
       );
@@ -143,7 +154,7 @@ export default function SearchSettingsView({
   }, [changedValue]);
 
   useEffect(() => {
-    document.title = "Explore Settings - Frigate";
+    document.title = "Classification Settings - Frigate";
   }, []);
 
   if (!config) {
@@ -155,7 +166,7 @@ export default function SearchSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <Heading as="h3" className="my-2">
-          Explore Settings
+          Classification Settings
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
         <Heading as="h4" className="my-2">
@@ -188,10 +199,10 @@ export default function SearchSettingsView({
             <Switch
               id="enabled"
               className="mr-3"
-              disabled={searchSettings.enabled === undefined}
-              checked={searchSettings.enabled === true}
+              disabled={classificationSettings.search.enabled === undefined}
+              checked={classificationSettings.search.enabled === true}
               onCheckedChange={(isChecked) => {
-                handleSearchConfigChange({ enabled: isChecked });
+                handleSearchConfigChange({ search: { enabled: isChecked } });
               }}
             />
             <div className="space-y-0.5">
@@ -203,10 +214,10 @@ export default function SearchSettingsView({
               <Switch
                 id="reindex"
                 className="mr-3"
-                disabled={searchSettings.reindex === undefined}
-                checked={searchSettings.reindex === true}
+                disabled={classificationSettings.search.reindex === undefined}
+                checked={classificationSettings.search.reindex === true}
                 onCheckedChange={(isChecked) => {
-                  handleSearchConfigChange({ reindex: isChecked });
+                  handleSearchConfigChange({ search: { reindex: isChecked } });
                 }}
               />
               <div className="space-y-0.5">
@@ -240,15 +251,17 @@ export default function SearchSettingsView({
               </div>
             </div>
             <Select
-              value={searchSettings.model_size}
+              value={classificationSettings.search.model_size}
               onValueChange={(value) =>
                 handleSearchConfigChange({
-                  model_size: value as SearchModelSize,
+                  search: {
+                    model_size: value as SearchModelSize,
+                  },
                 })
               }
             >
               <SelectTrigger className="w-20">
-                {searchSettings.model_size}
+                {classificationSettings.search.model_size}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
