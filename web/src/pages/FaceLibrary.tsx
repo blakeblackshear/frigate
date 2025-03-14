@@ -344,7 +344,7 @@ function TrainingGrid({
           key={image}
           image={image}
           faceNames={faceNames}
-          threshold={config.face_recognition.threshold}
+          threshold={config.face_recognition.recognition_threshold}
           selected={selectedFaces.includes(image)}
           onClick={() => onClickFace(image)}
           onRefresh={onRefresh}

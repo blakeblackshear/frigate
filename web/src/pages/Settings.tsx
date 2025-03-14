@@ -35,7 +35,7 @@ import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
-import SearchSettingsView from "@/views/settings/SearchSettingsView";
+import ClassificationSettingsView from "@/views/settings/ClassificationSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
@@ -46,7 +46,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const allSettingsViews = [
   "UI settings",
-  "explore settings",
+  "classification settings",
   "camera settings",
   "masks / zones",
   "motion tuner",
@@ -245,8 +245,8 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
         {page == "UI settings" && <UiSettingsView />}
-        {page == "explore settings" && (
-          <SearchSettingsView setUnsavedChanges={setUnsavedChanges} />
+        {page == "classification settings" && (
+          <ClassificationSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
