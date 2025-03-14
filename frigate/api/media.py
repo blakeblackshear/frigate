@@ -781,14 +781,14 @@ def event_snapshot(
                             height=params.height,
                             quality=params.quality,
                         )
-        except Exception as e:
+        except Exception:
             return JSONResponse(
-                content={"success": False, "message": f"Ongoing event not found: {e}"},
+                content={"success": False, "message": "Ongoing event not found"},
                 status_code=404,
             )
-    except Exception as e:
+    except Exception:
         return JSONResponse(
-            content={"success": False, "message": f"Unknown error occurred: {e}"},
+            content={"success": False, "message": "Unknown error occurred"},
             status_code=404,
         )
 
