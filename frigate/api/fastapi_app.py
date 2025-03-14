@@ -130,3 +130,42 @@ def create_fastapi_app(
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     return app
+
+
+
+
+def create_config_editor_app(
+        frigate_config: FrigateConfig,
+        database: SqliteQueueDatabase,
+) -> FastAPI:
+
+    app = FastAPI(
+        debug=True,
+        swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
+    )
+
+    app.add_middleware(
+        middleware.ContextMiddleware,
+        plugins=(plugins.ForwardedForPlugin(),),
+    )
+
+    @app.on_event("startup")
+    async def startup():
+        logger.info("FastAPI started")
+
+    # Rate limiter (used for login endpoint)
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
+    else:
+        auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit)
+
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    # Routes
+    app.include_router(auth.router)
+    app.include_router(main_app.router)
+    app.frigate_config = frigate_config
+    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
+
+    return app

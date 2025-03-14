@@ -2,8 +2,8 @@
 
 import json
 import os
-
 from ruamel.yaml import YAML
+from ruamel.yaml.scanner import ScannerError
 
 yaml = YAML()
 
@@ -22,7 +22,7 @@ try:
         config: dict[str, any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
         config: dict[str, any] = json.loads(raw_config)
-except FileNotFoundError:
+except (FileNotFoundError, ScannerError):
     config: dict[str, any] = {}
 
 tls_config: dict[str, any] = config.get("tls", {"enabled": True})

@@ -7,6 +7,7 @@ import shutil
 from typing import Optional, Union
 
 from ruamel.yaml import YAML
+from ruamel.yaml.scanner import ScannerError
 
 from frigate.const import CONFIG_DIR, EXPORT_DIR
 from frigate.util.services import get_video_properties
@@ -37,7 +38,11 @@ def migrate_frigate_config(config_file: str):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
     with open(config_file, "r") as f:
-        config: dict[str, dict[str, any]] = yaml.load(f)
+        try:
+            config: dict[str, dict[str, any]] = yaml.load(f)
+        except ScannerError:
+            logger.debug(f"Failed to parse config at {config_file}")
+            return
 
     if config is None:
         logger.error(f"Failed to load config at {config_file}")
