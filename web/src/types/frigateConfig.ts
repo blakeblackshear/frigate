@@ -435,6 +435,10 @@ export interface FrigateConfig {
     enabled: boolean;
   };
 
+  proxy: {
+    logout_url?: string;
+  };
+
   record: {
     enabled: boolean;
     enabled_in_config: boolean | null;
