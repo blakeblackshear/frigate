@@ -254,11 +254,13 @@ function TimeRangeFilterContent({
   const [endOpen, setEndOpen] = useState(false);
 
   const [afterHour, beforeHour] = useMemo(() => {
-    if (!timeRange || !timeRange.includes(",")) {
-      return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
+    if (Array.isArray(timeRange) && timeRange.length === 2) {
+      return timeRange;
     }
-
-    return timeRange.split(",");
+    if (typeof timeRange === "string" && timeRange.includes(",")) {
+      return timeRange.split(",");
+    }
+    return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
   }, [timeRange]);
 
   const [selectedAfterHour, setSelectedAfterHour] = useState(afterHour);
