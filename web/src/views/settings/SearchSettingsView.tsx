@@ -88,8 +88,10 @@ export default function ClassificationSettingsView({
     newConfig: Partial<ClassificationSettings>,
   ) => {
     setClassificationSettings((prevConfig) => ({
-      ...prevConfig,
-      ...newConfig,
+      search: {
+        ...prevConfig.search,
+        ...newConfig.search,
+      },
     }));
     setUnsavedChanges(true);
     setChangedValue(true);
