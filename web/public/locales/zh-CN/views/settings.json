@@ -59,8 +59,8 @@
       }
     }
   },
-  "explore": {
-    "title": "探测设置",
+  "classification": {
+    "title": "分类设置",
     "semanticSearch": {
       "title": "语义搜索",
       "desc": "Frigate的语义搜索能够让你使用自然语言根据图像本身、自定义的文本描述或自动生成的描述来搜索视频。",
@@ -78,8 +78,19 @@
         "large.desc": "使用 <strong>大</strong>模型。该模型采用了完整的Jina模型，并在适用的情况下使用GPU。"
       }
     },
+    "faceRecognition": {
+      "title": "人脸识别",
+      "desc": "人脸识别功能允许为人物分配名称，当识别到他们的面孔时，Frigate 会将人物的名字作为子标签进行分配。这些信息会显示在界面、过滤器以及通知中。",
+      "readTheDocumentation": "阅读文档（英文）"
+    },
+    "licensePlateRecognition": {
+      "title": "车牌识别",
+      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知名称作为子标签添加到汽车类型的对象中。常见的使用场景可能是读取驶入车道的汽车车牌或经过街道的汽车车牌。",
+      "readTheDocumentation": "阅读文档（英文）"
+    },
     "toast": {
-      "success": "探测设置已保存。"
+      "success": "分类设置已保存。",
+      "error": "保存配置更改失败：{{errorMessage}}"
     }
   },
   "camera": {
@@ -145,6 +156,11 @@
         "snapPoints": {
           "true": "启用点对齐",
           "false": "禁用点对齐"
+        },
+        "delete": {
+          "title": "确认删除",
+          "desc": "你确定要删除{{type}} <em>{{name}}</em> 吗？",
+          "success": "{{name}} 已被删除。"
         },
         "error": {
           "mustBeFinished": "多边形绘制必须完成闭合后才能保存。"
