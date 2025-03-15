@@ -876,6 +876,8 @@ export function RecognizedLicensePlatesFilterContent({
   recognizedLicensePlates,
   setRecognizedLicensePlates,
 }: RecognizedLicensePlatesFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+
   const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
     "recognized_license_plates",
     {
@@ -924,26 +926,28 @@ export function RecognizedLicensePlatesFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Recognized License Plates</div>
+      <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
       {error ? (
         <p className="text-sm text-red-500">
-          Failed to load recognized license plates.
+          {t("recognizedLicensePlates.loadFailed")}
         </p>
       ) : !allRecognizedLicensePlates ? (
         <p className="text-sm text-muted-foreground">
-          Loading recognized license plates...
+          {t("recognizedLicensePlates.loading")}
         </p>
       ) : (
         <>
           <Command className="border border-input bg-background">
             <CommandInput
-              placeholder="Type to search license plates..."
+              placeholder={t("recognizedLicensePlates.placeholder")}
               value={inputValue}
               onValueChange={setInputValue}
             />
             <CommandList className="max-h-[200px] overflow-auto">
               {filteredRecognizedLicensePlates.length === 0 && inputValue && (
-                <CommandEmpty>No license plates found.</CommandEmpty>
+                <CommandEmpty>
+                  {t("recognizedLicensePlates.noLicensePlatesFound")}
+                </CommandEmpty>
               )}
               {filteredRecognizedLicensePlates.map((plate) => (
                 <CommandItem
@@ -986,7 +990,7 @@ export function RecognizedLicensePlatesFilterContent({
         </>
       )}
       <p className="mt-1 text-sm text-muted-foreground">
-        Select one or more plates from the list.
+        {t("recognizedLicensePlates.selectPlatesFromList")}
       </p>
     </div>
   );
