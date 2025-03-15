@@ -415,9 +415,15 @@ export default function InputWithTags({
       filterType === "has_snapshot" ||
       filterType === "is_submitted"
     ) {
-      return filterValues ? "Yes" : "No";
+      return filterValues
+        ? t("button.yes", { ns: "common" })
+        : t("button.no", { ns: "common" });
+    } else if (filterType === "labels") {
+      return t(filterValues as string, { ns: "objects" });
+    } else if (filterType === "search_type") {
+      return t("filter.searchType." + (filterValues as string));
     } else {
-      return filterValues as string;
+      return (filterValues as string).replaceAll("_", " ");
     }
   }
 
@@ -653,7 +659,7 @@ export default function InputWithTags({
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
             className="text-md h-9 pr-32"
-            placeholder="Search..."
+            placeholder={t("placeholder.search")}
           />
           <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
             {(search || Object.keys(filters).length > 0) && (
@@ -775,7 +781,7 @@ export default function InputWithTags({
           )}
           {(Object.keys(filters).filter((key) => key !== "query").length > 0 ||
             isSimilaritySearch) && (
-            <CommandGroup heading="Active Filters">
+            <CommandGroup heading={t("filter.header.activeFilters")}>
               <div className="my-2 flex flex-wrap gap-2 px-2">
                 {isSimilaritySearch && (
                   <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
@@ -799,8 +805,8 @@ export default function InputWithTags({
                             key={`${filterType}-${index}`}
                             className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                           >
-                            {filterType.replaceAll("_", " ")}:{" "}
-                            {value.replaceAll("_", " ")}
+                            {t("filter.label." + filterType)}:{" "}
+                            {formatFilterValues(filterType, value)}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)
@@ -821,7 +827,7 @@ export default function InputWithTags({
                             ? "Tracked Object ID"
                             : filterType === "is_submitted"
                               ? "Submitted to Frigate+"
-                              : filterType.replaceAll("_", " ")}
+                              : t("filter.label." + filterType)}
                           : {formatFilterValues(filterType, filterValues)}
                           <button
                             onClick={() =>
@@ -875,7 +881,11 @@ export default function InputWithTags({
               </CommandGroup>
             )}
           <CommandGroup
-            heading={currentFilterType ? "Filter Values" : "Filters"}
+            heading={
+              currentFilterType
+                ? t("filter.header.currentFilterType")
+                : t("filter.header.noFilters")
+            }
           >
             {filterSuggestions(suggestions)
               .filter(
@@ -888,7 +898,12 @@ export default function InputWithTags({
                   className="cursor-pointer"
                   onSelect={() => handleSuggestionClick(suggestion)}
                 >
+                  {currentFilterType
+                    ? formatFilterValues(currentFilterType, suggestion)
+                    : t("filter.label." + suggestion)}
+                  {" ("}
                   {suggestion}
+                  {")"}
                 </CommandItem>
               ))}
           </CommandGroup>
