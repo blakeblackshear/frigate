@@ -13,6 +13,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [DeGirum](#degirum): Service for using hardware devices in the cloud or locally. Hardware and models provided on the cloud on [their website](https://hub.degirum.com).
 
 **AMD**
 
@@ -239,6 +240,67 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 > The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
 
 ---
+
+
+
+## DeGirum
+DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). You can connect directly to DeGirum's cloud platform to run inference with just an internet connection after signing up, or use DeGirum with local hardware through a [AI server](#ai-server). You can view their official docs site page for their cloud platform [here](https://docs.degirum.com/ai-hub/quickstart).
+
+### Configuration
+#### AI Hub Cloud Inference
+DeGirum is designed to support very easy cloud inference. To set it up, you need to:
+1. Sign up at [DeGirum's AI Hub](hub.degirum.com).
+2. Get an access token.
+3. Create a DeGirum detector in your config.yml file.
+```yaml
+degirum_detector:
+    type: degirum
+    location: "@cloud" # For accessing AI Hub devices and models
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
+
+```
+Once `degirum_detector` is setup, you can choose a model through 'model' section in the config.yml file.
+```yaml
+model:
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+```
+
+#### AI Server Inference
+Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your docker-compose.yml to get started:
+```yaml
+degirum_detector:
+    container_name: degirum
+    image: degirum/aiserver:latest
+    privileged: true
+    ports:
+      - "8778:8778"
+```
+All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
+Once completed, changing the config.yml file is much the same as the process for cloud.
+```yaml
+degirum_detector:
+    type: degirum
+    location: degirum # Set to service name (degirum_detector), container_name (degirum), or a host:port (192.168.29.4:8778)
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start. If you aren't pulling a model from the AI Hub, leave this and 'token' blank.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the AI Hub (https://hub.degirum.com). Leave blank if you aren't going to pull a model from the AI Hub.
+```
+Setting up a model in the .yml is similar to setting up an AI server.
+You can set it to:
+- A model listed on the [AI Hub](https://hub.degirum.com), given that the correct zoo name is listed in your detector
+    - If this is what you choose to do, the correct model will be downloaded onto your machine before running.
+- A local directory acting as a zoo. See DeGirum's docs site [for more information](https://docs.degirum.com/pysdk/user-guide-pysdk/organizing-models#model-zoo-directory-structure).
+- A path to some model.json.
+```yaml
+model:
+    path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+```
+
+
 
 ## OpenVINO Detector
 

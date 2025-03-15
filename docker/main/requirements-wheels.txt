@@ -79,3 +79,5 @@ sherpa-onnx==1.12.*
 faster-whisper==1.1.*
 librosa==0.11.*
 soundfile==0.13.*
+# DeGirum detector
+degirum_headless == 0.15.*
