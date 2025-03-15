@@ -159,9 +159,9 @@
     "next.label": "Go to next page",
     "more": "More pages"
   },
-  "accessDefined": {
-    "documentTitle": "Access Defined - Frigate",
-    "title": "Access Defined",
+  "accessDenied": {
+    "documentTitle": "Access Denied - Frigate",
+    "title": "Access Denied",
     "desc": "You don't have permission to view this page."
   },
   "notFound": {

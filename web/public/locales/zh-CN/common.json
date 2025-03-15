@@ -159,7 +159,7 @@
     "viewer": "查看者",
     "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
   },
-  "accessDefined": {
+  "accessDenied": {
     "documentTitle": "没有权限 - Frigate",
     "title": "没有权限",
     "desc": "您没有权限查看此页面。"
