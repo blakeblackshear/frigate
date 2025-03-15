@@ -12,7 +12,6 @@ import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import FeatureMetrics from "@/views/system/FeatureMetrics";
@@ -54,9 +53,9 @@ function System() {
 
   useEffect(() => {
     if (pageToggle) {
-      document.title = `${capitalizeFirstLetter(pageToggle)} Stats - Frigate`;
+      document.title = t("documentTitle." + pageToggle);
     }
-  }, [pageToggle]);
+  }, [pageToggle, t]);
 
   // stats collection
 

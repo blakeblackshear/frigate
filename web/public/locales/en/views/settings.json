@@ -1,13 +1,33 @@
 {
+  "documentTitle": {
+    "default": "Settings - Frigate",
+    "authentication": "Authentication Settings - Frigate",
+    "camera": "Camera Settings - Frigate",
+    "classification": "Classification Settings - Frigate",
+    "masksAndZones": "Mask and Zone Editor - Frigate",
+    "motionTuner": "Motion Tuner - Frigate",
+    "object": "Object Settings - Frigate",
+    "general": "General Settings - Frigate"
+  },
   "menu": {
     "uiSettings": "UI Settings",
-    "exploreSettings": "Explore Settings",
+    "classificationSettings": "Classification Settings",
     "cameraSettings": "Camera Settings",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "debug": "Debug",
     "users": "Users",
     "notifications": "Notifications"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "You have unsaved changes.",
+      "desc": "Do you want to save your changes before continuing?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Camera",
+    "noCamera": "No Camera"
   },
   "general": {
     "title": "General Settings",
@@ -376,7 +396,10 @@
       "desc": "Web push notifications require a secure context (<code>https://...</code>). This is a browser limitation. Access Frigate securely to use notifications.",
       "documentation": "Read the Documentation"
     },
-    
+    "globalSettings": {
+      "title": "Global Settings",
+      "desc": "Temporarily suspend notifications for specific cameras on all registered devices."
+    },
     "email": "Email",
     "email.placeholder": "e.g. example@email.com",
     "email.desc": "A valid email is required and will be used to notify you if there are any issues with the push service.",
@@ -386,6 +409,19 @@
     "deviceSpecific": "Device Specific Settings",
     "registerDevice": "Register This Device",
     "unregisterDevice": "Unregister This Device",
+    "sendTestNotification": "Send a test notification",
+    "active": "Notifications Active",
+    "suspended": "Notifications suspended {{time}}",
+    "suspendTime": {
+      "5minutes": "Suspend for 5 minutes",
+      "10minutes": "Suspend for 10 minutes",
+      "30minutes": "Suspend for 30 minutes",
+      "1hour": "Suspend for 1 hour",
+      "12hours": "Suspend for 12 hours",
+      "24hours": "Suspend for 24 hours",
+      "untilRestart": "Suspend until restart"
+    },
+    "cancelSuspension": "Cancel Suspension",
     "toast": {
       "success": {
         "registered": "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",

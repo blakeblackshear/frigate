@@ -179,8 +179,8 @@ export default function MotionTunerView({
   }, [changedValue, selectedCamera]);
 
   useEffect(() => {
-    document.title = "Motion Tuner - Frigate";
-  }, []);
+    document.title = t("documentTitle.motionTuner");
+  }, [t]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;

@@ -1,15 +1,16 @@
 import Heading from "@/components/ui/heading";
+import { t } from "i18next";
 import { useEffect } from "react";
 
 function NoMatch() {
   useEffect(() => {
-    document.title = "Not Found - Frigate";
+    document.title = t("notFound.documentTitle");
   }, []);
 
   return (
     <>
-      <Heading as="h2">404</Heading>
-      <p>Page not found</p>
+      <Heading as="h2">{t("notFound.title")}</Heading>
+      <p>{t("notFound.desc")}</p>
     </>
   );
 }

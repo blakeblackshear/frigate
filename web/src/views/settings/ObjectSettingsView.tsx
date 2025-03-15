@@ -136,8 +136,8 @@ export default function ObjectSettingsView({
   }, [options, optionsLoaded]);
 
   useEffect(() => {
-    document.title = "Object Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.object");
+  }, [t]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;

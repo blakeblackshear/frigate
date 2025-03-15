@@ -38,8 +38,8 @@ export default function FaceLibrary() {
   // title
 
   useEffect(() => {
-    document.title = "Face Library - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);

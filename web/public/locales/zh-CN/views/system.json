@@ -1,4 +1,15 @@
 {
+  "documentTitle": {
+    "cameras": "摄像头统计 - Frigate",
+    "storage": "存储统计 - Frigate",
+    "general": "常规统计 - Frigate",
+    "features": "功能统计 - Frigate",
+    "logs": {
+      "frigate": "Frigate 日志 - Frigate",
+      "go2rtc": "Go2RTC 日志 - Frigate",
+      "nginx": "Nginx 日志 - Frigate"
+    }
+  },
   "title": "系统",
   "metrics": "系统指标",
   "logs": {

@@ -44,8 +44,12 @@ export function CamerasFilterButton({
     if (!selectedCameras || selectedCameras.length == 0) {
       return t("menu.live.allCameras", { ns: "common" });
     }
-
-    return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
+    return t("menu.live.cameras.count", {
+      count: selectedCameras.includes("birdseye")
+        ? selectedCameras.length - 1
+        : selectedCameras.length,
+      ns: "common",
+    });
   }, [selectedCameras, t]);
 
   // ui

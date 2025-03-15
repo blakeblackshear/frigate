@@ -49,8 +49,8 @@ function Logs() {
   const lastFetchedIndexRef = useRef(-1);
 
   useEffect(() => {
-    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
-  }, [logService]);
+    document.title = t("documentTitle.logs." + logService);
+  }, [logService, t]);
 
   useEffect(() => {
     if (tabsRef.current) {

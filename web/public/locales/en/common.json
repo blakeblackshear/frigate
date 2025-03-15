@@ -123,6 +123,8 @@
     "live": "Live",
     "live.allCameras": "All Cameras",
     "live.cameras": "Cameras",
+    "live.cameras.count_one": "{{count}} Camera",
+    "live.cameras.count_other": "{{count}} Cameras",
     "review": "Review",
     "explore": "Explore",
     "export": "Export",
@@ -156,5 +158,16 @@
     "next": "Next",
     "next.label": "Go to next page",
     "more": "More pages"
-  }
+  },
+  "accessDefined": {
+    "documentTitle": "Access Defined - Frigate",
+    "title": "Access Defined",
+    "desc": "You don't have permission to view this page."
+  },
+  "notFound": {
+    "documentTitle": "Not Found - Frigate",
+    "title": "404",
+    "desc": "Page not found"
+  },
+  "selectItem": "Select {{item}}"
 }

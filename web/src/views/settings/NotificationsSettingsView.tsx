@@ -560,10 +560,10 @@ export default function NotificationView({
                   </Button>
                   {registration != null && registration.active && (
                     <Button
-                      aria-label="Send a test notification"
+                      aria-label={t("notification.sendTestNotification")}
                       onClick={() => sendTestNotification("notification_test")}
                     >
-                      Send a test notification
+                      {t("notification.sendTestNotification")}
                     </Button>
                   )}
                 </div>
@@ -573,14 +573,11 @@ export default function NotificationView({
                   <div className="space-y-3">
                     <Separator className="my-2 flex bg-secondary" />
                     <Heading as="h4" className="my-2">
-                      Global Settings
+                      {t("notification.globalSettings.title")}
                     </Heading>
                     <div className="max-w-xl">
                       <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
-                        <p>
-                          Temporarily suspend notifications for specific cameras
-                          on all registered devices.
-                        </p>
+                        <p>{t("notification.globalSettings.desc")}</p>
                       </div>
                     </div>
 
@@ -680,12 +677,13 @@ export function CameraNotificationSwitch({
 
             {!isSuspended ? (
               <div className="flex flex-row items-center gap-2 text-sm text-success">
-                Notifications Active
+                {t("notification.active")}
               </div>
             ) : (
               <div className="flex flex-row items-center gap-2 text-sm text-danger">
-                Notifications suspended{" "}
-                {formatSuspendedUntil(notificationSuspendUntil)}
+                {t("notification.suspended", {
+                  time: formatSuspendedUntil(notificationSuspendUntil),
+                })}
               </div>
             )}
           </div>
@@ -698,13 +696,27 @@ export function CameraNotificationSwitch({
             <SelectValue placeholder="Suspend" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="5">Suspend for 5 minutes</SelectItem>
-            <SelectItem value="10">Suspend for 10 minutes</SelectItem>
-            <SelectItem value="30">Suspend for 30 minutes</SelectItem>
-            <SelectItem value="60">Suspend for 1 hour</SelectItem>
-            <SelectItem value="840">Suspend for 12 hours</SelectItem>
-            <SelectItem value="1440">Suspend for 24 hours</SelectItem>
-            <SelectItem value="off">Suspend until restart</SelectItem>
+            <SelectItem value="5">
+              {t("notification.suspendTime.5minutes")}
+            </SelectItem>
+            <SelectItem value="10">
+              {t("notification.suspendTime.10minutes")}
+            </SelectItem>
+            <SelectItem value="30">
+              {t("notification.suspendTime.30minutes")}
+            </SelectItem>
+            <SelectItem value="60">
+              {t("notification.suspendTime.1hour")}
+            </SelectItem>
+            <SelectItem value="840">
+              {t("notification.suspendTime.12hour")}
+            </SelectItem>
+            <SelectItem value="1440">
+              {t("notification.suspendTime.24hour")}
+            </SelectItem>
+            <SelectItem value="off">
+              {t("notification.suspendTime.untilRestart")}
+            </SelectItem>
           </SelectContent>
         </Select>
       ) : (
@@ -713,7 +725,7 @@ export function CameraNotificationSwitch({
           size="sm"
           onClick={handleCancelSuspension}
         >
-          Cancel Suspension
+          {t("notification.cancelSuspension")}
         </Button>
       )}
     </div>

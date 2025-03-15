@@ -36,11 +36,12 @@ export default function ExploreView({
   setSimilaritySearch,
   onSelectSearch,
 }: ExploreViewProps) {
+  const { t } = useTranslation(["views/explore"]);
   // title
 
   useEffect(() => {
-    document.title = "Explore - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   // data
 

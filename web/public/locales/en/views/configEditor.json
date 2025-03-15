@@ -1,4 +1,5 @@
 {
+    "documentTitle": "Config Editor - Frigate",
     "configEditor": "Config Editor",
     "copyConfig": "Copy Config",
     "saveAndRestart": "Save & Restart",

@@ -1,4 +1,5 @@
 {
+    "documentTitle": "Face Library - Frigate",
     "uploadFaceImage": {
         "title": "Upload Face Image",
         "desc": "Upload an image to scan for faces and include for {{pageToggle}}"

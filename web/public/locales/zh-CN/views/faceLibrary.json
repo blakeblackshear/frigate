@@ -1,4 +1,5 @@
 {
+    "documentTitle": "人脸库 - Frigate",
     "uploadFaceImage": {
         "title": "上传人脸图片",
         "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"

@@ -185,8 +185,8 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    document.title = "Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.default");
+  }, [t]);
 
   return (
     <div className="flex size-full flex-col p-2">
@@ -215,7 +215,10 @@ export default function Settings() {
                   className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "uiSettings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
-                  aria-label={`Select ${item}`}
+                  aria-label={t("selectItem", {
+                    item: t("menu." + item),
+                    ns: "common",
+                  })}
                 >
                   <div className="capitalize">{t("menu." + item)}</div>
                 </ToggleGroupItem>
@@ -284,17 +287,19 @@ export default function Settings() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>You have unsaved changes.</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("dialog.unsavedChanges.title")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Do you want to save your changes before continuing?
+                {t("dialog.unsavedChanges.desc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => handleDialog(false)}>
-                Cancel
+                {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction onClick={() => handleDialog(true)}>
-                Save
+                {t("button.save", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -319,6 +324,8 @@ function CameraSelectButton({
   cameraEnabledStates,
   currentPage,
 }: CameraSelectButtonProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const [open, setOpen] = useState(false);
 
   if (!allCameras.length) {
@@ -334,7 +341,7 @@ function CameraSelectButton({
       <FaVideo className="text-background dark:text-primary" />
       <div className="hidden text-background dark:text-primary md:block">
         {selectedCamera == undefined
-          ? "No Camera"
+          ? t("cameraSetting.noCamera")
           : selectedCamera.replaceAll("_", " ")}
       </div>
     </Button>
@@ -344,7 +351,7 @@ function CameraSelectButton({
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            Camera
+            {t("cameraSetting.camera")}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>

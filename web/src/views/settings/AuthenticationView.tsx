@@ -49,8 +49,8 @@ export default function AuthenticationView() {
   >();
 
   useEffect(() => {
-    document.title = "Authentication Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.authentication");
+  }, [t]);
 
   const onSavePassword = useCallback(
     (user: string, password: string) => {

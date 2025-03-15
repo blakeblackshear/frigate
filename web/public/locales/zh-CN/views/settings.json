@@ -1,7 +1,23 @@
 {
+  "documentTitle": {
+    "default": "设置 - Frigate",
+    "authentication": "身份验证设置 - Frigate",
+    "camera": "摄像头设置 - Frigate",
+    "classification": "分类设置 - Frigate",
+    "masksAndZones": "遮罩和区域编辑器 - Frigate",
+    "motionTuner": "运动调整器 - Frigate",
+    "object": "对象设置 - Frigate",
+    "general": "常规设置 - Frigate"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "你有未保存的更改。",
+      "desc": "是否要在继续之前保存更改？"
+    }
+  },
   "menu": {
     "uiSettings": "界面设置",
-    "exploreSettings": "搜索设置",
+    "classificationSettings": "分类设置",
     "cameraSettings": "摄像头设置",
     "masksAndZones": "遮罩/ 区域",
     "motionTuner": "运动调整器",
@@ -373,6 +389,10 @@
       "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向您的设备发送推送通知。",
       "documentation": "阅读文档（英文）"
     },
+    "globalSettings": {
+      "title": "全局设置",
+      "desc": "临时暂停所有已注册设备上特定摄像头的通知。"
+    },
     "notificationUnavailable": {
       "title": "通知功能不可用",
       "desc": "网页推送通知需要安全连接（<code>https://...</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
@@ -387,6 +407,19 @@
     "deviceSpecific": "设备专用设置",
     "registerDevice": "注册该设备",
     "unregisterDevice": "取消注册该设备",
+    "sendTestNotification": "发送测试通知",
+    "active": "通知已启用",
+    "suspended": "通知已暂停 {{time}}",
+    "suspendTime": {
+      "5minutes": "暂停 5 分钟",
+      "10minutes": "暂停 10 分钟",
+      "30minutes": "暂停 30 分钟",
+      "1hour": "暂停 1 小时",
+      "12hours": "暂停 12 小时",
+      "24hours": "暂停 24 小时",
+      "untilRestart": "暂停直到重启"
+    },
+    "cancelSuspension": "取消暂停",
     "toast": {
       "success": {
         "registered": "已成功注册通知。需要重启 Frigate 才能发送任何通知（包括测试通知）。",

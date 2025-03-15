@@ -288,24 +288,22 @@ export default function ReviewCard({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("recording.confirmDelete.title")}
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            Are you sure you want to delete all recorded video associated with
-            this review item?
-            <br />
-            <br />
-            Hold the <em>Shift</em> key to bypass this dialog in the future.
+            <Trans ns="components/dialog">recording.confirmDelete.desc</Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
-              Cancel
+              {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={onDelete}
             >
-              Delete
+              {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -318,7 +316,7 @@ export default function ReviewCard({
             onClick={onExport}
           >
             <FaCompactDisc className="text-secondary-foreground" />
-            <div className="text-primary">Export</div>
+            <div className="text-primary">{t("recording.button.export")}</div>
           </div>
           {!event.has_been_reviewed && (
             <div
@@ -326,7 +324,9 @@ export default function ReviewCard({
               onClick={onMarkAsReviewed}
             >
               <FaCircleCheck className="text-secondary-foreground" />
-              <div className="text-primary">Mark as reviewed</div>
+              <div className="text-primary">
+                {t("recording.button.markAsReviewed")}
+              </div>
             </div>
           )}
           <div
@@ -335,7 +335,9 @@ export default function ReviewCard({
           >
             <HiTrash className="text-secondary-foreground" />
             <div className="text-primary">
-              {bypassDialogRef.current ? "Delete Now" : "Delete"}
+              {bypassDialogRef.current
+                ? t("recording.button.deleteNow")
+                : t("button.delete", { ns: "common" })}
             </div>
           </div>
         </DrawerContent>

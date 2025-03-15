@@ -130,6 +130,8 @@
     "live": "实时监控",
     "live.allCameras": "所有摄像头",
     "live.cameras": "摄像头",
+    "live.cameras.count_one": "{{count}} 个摄像头",
+    "live.cameras.count_other": "{{count}} 个摄像头",
     "review": "回放",
     "explore": "探测",
     "export": "导出",
@@ -156,5 +158,16 @@
     "admin": "管理员",
     "viewer": "查看者",
     "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
-  }
+  },
+  "accessDefined": {
+    "documentTitle": "没有权限 - Frigate",
+    "title": "没有权限",
+    "desc": "您没有权限查看此页面。"
+  },
+  "notFound": {
+    "documentTitle": "没有找到页面 - Frigate",
+    "title": "404",
+    "desc": "页面未找到"
+  },
+  "selectItem": "选择 {{item}}"
 }

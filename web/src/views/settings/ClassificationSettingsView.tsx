@@ -193,8 +193,8 @@ export default function ClassificationSettingsView({
   }, [changedValue]);
 
   useEffect(() => {
-    document.title = "Classification Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.classification");
+  }, [t]);
 
   if (!config) {
     return <ActivityIndicator />;

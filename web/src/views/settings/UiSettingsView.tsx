@@ -86,8 +86,8 @@ export default function UiSettingsView() {
   }, [config, t]);
 
   useEffect(() => {
-    document.title = "General Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.general");
+  }, [t]);
 
   // settings
 
