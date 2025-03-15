@@ -1,0 +1,15 @@
+{
+    "documentTitle": "配置编辑器 - Frigate",
+    "configEditor": "配置编辑器",
+    "copyConfig": "复制配置",
+    "saveAndRestart": "保存并重启",
+    "saveOnly": "只保存",
+    "toast": {
+        "success": {
+            "copyToClipboard": "配置已复制到剪贴板。"
+        },
+        "error": {
+            "savingError": "保存配置时出错"
+        }
+    }
+}

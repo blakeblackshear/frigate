@@ -20,6 +20,8 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
 import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
+import { t } from "i18next";
+
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -48,9 +50,12 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
-          toast.success("Password updated successfully.", {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.updatePassword", { ns: "views/settings" }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -58,9 +63,15 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Error setting password: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.setPasswordFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -83,7 +94,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent side="right">
-              <p>Account</p>
+              <p>{t("menu.user.account")}</p>
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>
@@ -95,8 +106,10 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       >
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
           <DropdownMenuLabel>
-            Current User: {profile?.username || "anonymous"}{" "}
-            {profile?.role && `(${profile.role})`}
+            {t("menu.user.current", {
+              user: profile?.username || t("menu.user.anonymous"),
+            })}{" "}
+            {t("role." + profile?.role) && `(${t("role." + profile?.role)})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
           {profile?.username && profile.username !== "anonymous" && (
@@ -104,22 +117,22 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               className={
                 isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
-              aria-label="Set Password"
+              aria-label={t("menu.user.setPassword")}
               onClick={() => setPasswordDialogOpen(true)}
             >
               <LuSquarePen className="mr-2 size-4" />
-              <span>Set Password</span>
+              <span>{t("menu.user.setPassword")}</span>
             </MenuItem>
           )}
           <MenuItem
             className={
               isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
             }
-            aria-label="Log out"
+            aria-label={t("menu.user.logout")}
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />
-              <span>Logout</span>
+              <span>{t("menu.user.logout")}</span>
             </a>
           </MenuItem>
         </div>

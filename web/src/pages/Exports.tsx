@@ -17,18 +17,22 @@ import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
+
 import { LuFolderX } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 function Exports() {
+  const { t } = useTranslation(["views/exports"]);
   const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
-    document.title = "Export - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   // Search
 
@@ -97,12 +101,12 @@ function Exports() {
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to rename export: ${errorMessage}`, {
+          toast.error(t("toast.error.renameExportFailed", { errorMessage }), {
             position: "top-center",
           });
         });
     },
-    [mutate],
+    [mutate, t],
   );
 
   return (
@@ -115,20 +119,22 @@ function Exports() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Export</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteExport")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {deleteClip?.exportName}?
+              {t("deleteExport.desc", { exportName: deleteClip?.exportName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <Button
               className="text-white"
               aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >
-              Delete
+              {t("button.delete", { ns: "common" })}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -176,7 +182,7 @@ function Exports() {
         <div className="flex w-full items-center justify-center p-2">
           <Input
             className="text-md w-full bg-muted md:w-1/3"
-            placeholder="Search"
+            placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -204,7 +210,7 @@ function Exports() {
         ) : (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderX className="size-16" />
-            No exports found
+            {t("noExports")}
           </div>
         )}
       </div>

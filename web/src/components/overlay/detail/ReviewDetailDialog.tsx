@@ -42,6 +42,7 @@ import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Trans, useTranslation } from "react-i18next";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -51,6 +52,7 @@ export default function ReviewDetailDialog({
   review,
   setReview,
 }: ReviewDetailDialogProps) {
+  const { t } = useTranslation(["views/explore"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -95,8 +97,8 @@ export default function ReviewDetailDialog({
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? "%b %-d %Y, %H:%M"
-      : "%b %-d %Y, %I:%M %p",
+      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
+      : t("time.formattedTimestampWithYear", { ns: "common" }),
     config?.ui.timezone,
   );
 
@@ -177,8 +179,10 @@ export default function ReviewDetailDialog({
           <span tabIndex={0} className="sr-only" />
           {pane == "overview" && (
             <Header className="justify-center">
-              <Title>Review Item Details</Title>
-              <Description className="sr-only">Review item details</Description>
+              <Title>{t("details.item.title")}</Title>
+              <Description className="sr-only">
+                {t("details.item.desc")}
+              </Description>
               <div
                 className={cn(
                   "absolute flex gap-2 lg:flex-col",
@@ -189,7 +193,7 @@ export default function ReviewDetailDialog({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      aria-label="Share this review item"
+                      aria-label={t("details.item.button.share")}
                       size="sm"
                       onClick={() =>
                         shareOrCopy(`${baseUrl}review?id=${review.id}`)
@@ -199,7 +203,9 @@ export default function ReviewDetailDialog({
                     </Button>
                   </TooltipTrigger>
                   <TooltipPortal>
-                    <TooltipContent>Share this review item</TooltipContent>
+                    <TooltipContent>
+                      {t("details.item.button.share")}
+                    </TooltipContent>
                   </TooltipPortal>
                 </Tooltip>
                 <Tooltip>
@@ -211,7 +217,9 @@ export default function ReviewDetailDialog({
                     />
                   </TooltipTrigger>
                   <TooltipPortal>
-                    <TooltipContent>Download</TooltipContent>
+                    <TooltipContent>
+                      {t("button.download", { ns: "common" })}
+                    </TooltipContent>
                   </TooltipPortal>
                 </Tooltip>
               </div>
@@ -222,19 +230,25 @@ export default function ReviewDetailDialog({
               <div className="flex w-full flex-row">
                 <div className="flex w-full flex-col gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <div className="text-sm text-primary/40">Camera</div>
+                    <div className="text-sm text-primary/40">
+                      {t("details.camera")}
+                    </div>
                     <div className="text-sm capitalize">
                       {review.camera.replaceAll("_", " ")}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <div className="text-sm text-primary/40">Timestamp</div>
+                    <div className="text-sm text-primary/40">
+                      {t("details.timestamp")}
+                    </div>
                     <div className="text-sm">{formattedDate}</div>
                   </div>
                 </div>
                 <div className="flex w-full flex-col items-center gap-2">
                   <div className="flex w-full flex-col gap-1.5 lg:pr-8">
-                    <div className="text-sm text-primary/40">Objects</div>
+                    <div className="text-sm text-primary/40">
+                      {t("details.objects")}
+                    </div>
                     <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm capitalize">
                       {events?.map((event) => {
                         return (
@@ -260,7 +274,9 @@ export default function ReviewDetailDialog({
                                 </div>
                               </TooltipTrigger>
                               <TooltipPortal>
-                                <TooltipContent>View in Explore</TooltipContent>
+                                <TooltipContent>
+                                  {t("details.item.button.viewInExplore")}
+                                </TooltipContent>
                               </TooltipPortal>
                             </Tooltip>
                           </div>
@@ -270,7 +286,9 @@ export default function ReviewDetailDialog({
                   </div>
                   {review.data.zones.length > 0 && (
                     <div className="scrollbar-container flex max-h-32 w-full flex-col gap-1.5">
-                      <div className="text-sm text-primary/40">Zones</div>
+                      <div className="text-sm text-primary/40">
+                        {t("details.zones")}
+                      </div>
                       <div className="flex flex-col items-start gap-2 text-sm capitalize">
                         {review.data.zones.map((zone) => {
                           return (
@@ -294,18 +312,23 @@ export default function ReviewDetailDialog({
                       (events?.length ?? 0) -
                         (review?.data.detections.length ?? 0),
                     );
-                    const objectLabel =
-                      detectedCount === 1 ? "object was" : "objects were";
 
-                    return `${detectedCount} unavailable ${objectLabel} detected and included in this review item.`;
-                  })()}{" "}
-                  Those objects either did not qualify as an alert or detection
-                  or have already been cleaned up/deleted.
+                    return t("details.item.tips.mismatch", {
+                      count: detectedCount,
+                    });
+                  })()}
                   {missingObjects.length > 0 && (
                     <div className="mt-2">
-                      Adjust your configuration if you want Frigate to save
-                      tracked objects for the following labels:{" "}
-                      {missingObjects.join(", ")}
+                      <Trans
+                        ns="views/explore"
+                        values={{
+                          objects: missingObjects
+                            .map((x) => t(x, { ns: "objects" }))
+                            .join(", "),
+                        }}
+                      >
+                        details.item.tips.hasMissingObjects
+                      </Trans>
                     </div>
                   )}
                 </div>
@@ -348,6 +371,8 @@ function EventItem({
   setSelectedEvent,
   setUpload,
 }: EventItemProps) {
+  const { t } = useTranslation(["views/explore"]);
+
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -417,7 +442,9 @@ function EventItem({
                     </Chip>
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Download</TooltipContent>
+                <TooltipContent>
+                  {t("button.download", { ns: "common" })}
+                </TooltipContent>
               </Tooltip>
 
               {event.has_snapshot &&
@@ -435,7 +462,9 @@ function EventItem({
                         <FrigatePlusIcon className="size-4 text-white" />
                       </Chip>
                     </TooltipTrigger>
-                    <TooltipContent>Submit to Frigate+</TooltipContent>
+                    <TooltipContent>
+                      {t("itemMenu.submitToPlus.label")}
+                    </TooltipContent>
                   </Tooltip>
                 )}
 
@@ -452,7 +481,9 @@ function EventItem({
                       <FaArrowsRotate className="size-4 text-white" />
                     </Chip>
                   </TooltipTrigger>
-                  <TooltipContent>View Object Lifecycle</TooltipContent>
+                  <TooltipContent>
+                    {t("itemMenu.viewObjectLifecycle.label")}
+                  </TooltipContent>
                 </Tooltip>
               )}
 
@@ -470,7 +501,9 @@ function EventItem({
                       <FaImages className="size-4 text-white" />
                     </Chip>
                   </TooltipTrigger>
-                  <TooltipContent>Find Similar</TooltipContent>
+                  <TooltipContent>
+                    {t("itemMenu.findSimilar.label")}
+                  </TooltipContent>
                 </Tooltip>
               )}
             </div>

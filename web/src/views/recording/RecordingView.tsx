@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTranslation } from "react-i18next";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -72,6 +73,7 @@ export function RecordingView({
   filter,
   updateFilter,
 }: RecordingViewProps) {
+  const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -393,12 +395,16 @@ export function RecordingView({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
-            aria-label="Go back"
+            aria-label={t("label.back", { ns: "common" })}
             size="sm"
             onClick={() => navigate(-1)}
           >
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Back</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("button.back", { ns: "common" })}
+              </div>
+            )}
           </Button>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
@@ -409,7 +415,11 @@ export function RecordingView({
             }}
           >
             <FaVideo className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Live</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("menu.live", { ns: "common" })}
+              </div>
+            )}
           </Button>
         </div>
         <div className="flex items-center justify-end gap-2">
@@ -482,16 +492,16 @@ export function RecordingView({
               <ToggleGroupItem
                 className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
                 value="timeline"
-                aria-label="Select timeline"
+                aria-label={t("timeline.aria")}
               >
-                <div className="">Timeline</div>
+                <div className="">{t("timeline")}</div>
               </ToggleGroupItem>
               <ToggleGroupItem
                 className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
                 value="events"
-                aria-label="Select events"
+                aria-label={t("events.aria")}
               >
-                <div className="">Events</div>
+                <div className="">{t("events.label")}</div>
               </ToggleGroupItem>
             </ToggleGroup>
           ) : (
@@ -689,6 +699,7 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
+  const { t } = useTranslation(["views/events"]);
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
 
@@ -798,7 +809,7 @@ function Timeline({
           >
             {mainCameraReviewItems.length === 0 ? (
               <div className="mt-5 text-center text-primary">
-                No events found for this time period.
+                {t("events.noFoundForTimePeriod")}
               </div>
             ) : (
               mainCameraReviewItems.map((review) => {

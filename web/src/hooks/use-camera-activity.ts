@@ -54,7 +54,7 @@ export function useCameraActivity(
   // handle camera activity
 
   const hasActiveObjects = useMemo(
-    () => objects.filter((obj) => !obj.stationary).length > 0,
+    () => objects?.filter((obj) => !obj?.stationary)?.length > 0,
     [objects],
   );
 

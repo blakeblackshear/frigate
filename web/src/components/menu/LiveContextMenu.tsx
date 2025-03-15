@@ -44,6 +44,7 @@ import {
   useNotifications,
   useNotificationSuspend,
 } from "@/api/ws";
+import { useTranslation } from "react-i18next";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -85,6 +86,7 @@ export default function LiveContextMenu({
   config,
   children,
 }: LiveContextMenuProps) {
+  const { t } = useTranslation("views/live");
   const [showSettings, setShowSettings] = useState(false);
 
   // camera enabled
@@ -209,7 +211,7 @@ export default function LiveContextMenu({
   // notifications
 
   const notificationsEnabledInConfig =
-    config?.cameras[camera].notifications.enabled_in_config;
+    config?.cameras[camera]?.notifications?.enabled_in_config;
 
   const { payload: notificationState, send: sendNotification } =
     useNotifications(camera);
@@ -234,14 +236,19 @@ export default function LiveContextMenu({
   };
 
   const formatSuspendedUntil = (timestamp: string) => {
-    if (timestamp === "0") return "Frigate restarts.";
+    // Some languages require a change in word order
+    if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
 
-    return formatUnixTimestampToDateTime(Number.parseInt(timestamp), {
+    const time = formatUnixTimestampToDateTime(Number.parseInt(timestamp), {
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
+      strftime_fmt:
+        config?.ui.time_format == "24hour"
+          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
+          : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
     });
+    return t("time.untilForTime", { ns: "common", time });
   };
 
   return (
@@ -256,7 +263,7 @@ export default function LiveContextMenu({
             {preferredLiveMode == "jsmpeg" && isRestreamed && (
               <div className="flex flex-row items-center gap-1">
                 <IoIosWarning className="mr-1 size-4 text-danger" />
-                <p className="mr-2 text-xs">Low-bandwidth mode</p>
+                <p className="mr-2 text-xs">{t("lowBandwidthMode")}</p>
               </div>
             )}
           </div>
@@ -265,7 +272,7 @@ export default function LiveContextMenu({
               <ContextMenuSeparator className="mb-1" />
               <div className="p-2 text-sm">
                 <div className="flex w-full flex-col gap-1">
-                  <p>Audio</p>
+                  <p>{t("audio")}</p>
                   <div className="flex flex-row items-center gap-1">
                     <VolumeIcon
                       className="size-5"
@@ -292,7 +299,7 @@ export default function LiveContextMenu({
               onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
             >
               <div className="text-primary">
-                {isEnabled ? "Disable" : "Enable"} Camera
+                {isEnabled ? t("camera.disable") : t("camera.enable")}
               </div>
             </div>
           </ContextMenuItem>
@@ -302,7 +309,7 @@ export default function LiveContextMenu({
               className="flex w-full cursor-pointer items-center justify-start gap-2"
               onClick={isEnabled ? muteAll : undefined}
             >
-              <div className="text-primary">Mute All Cameras</div>
+              <div className="text-primary">{t("muteCameras.enable")}</div>
             </div>
           </ContextMenuItem>
           <ContextMenuItem disabled={!isEnabled}>
@@ -310,7 +317,7 @@ export default function LiveContextMenu({
               className="flex w-full cursor-pointer items-center justify-start gap-2"
               onClick={isEnabled ? unmuteAll : undefined}
             >
-              <div className="text-primary">Unmute All Cameras</div>
+              <div className="text-primary">{t("muteCameras.disable")}</div>
             </div>
           </ContextMenuItem>
           <ContextMenuSeparator />
@@ -320,7 +327,9 @@ export default function LiveContextMenu({
               onClick={isEnabled ? toggleStats : undefined}
             >
               <div className="text-primary">
-                {statsState ? "Hide" : "Show"} Stream Stats
+                {statsState
+                  ? t("streamStats.disable")
+                  : t("streamStats.enable")}
               </div>
             </div>
           </ContextMenuItem>
@@ -333,7 +342,9 @@ export default function LiveContextMenu({
                   : undefined
               }
             >
-              <div className="text-primary">Debug View</div>
+              <div className="text-primary">
+                {t("streaming.debugView", { ns: "components/dialog" })}
+              </div>
             </div>
           </ContextMenuItem>
           {cameraGroup && cameraGroup !== "default" && (
@@ -344,7 +355,7 @@ export default function LiveContextMenu({
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
                   onClick={isEnabled ? () => setShowSettings(true) : undefined}
                 >
-                  <div className="text-primary">Streaming Settings</div>
+                  <div className="text-primary">{t("streamingSettings")}</div>
                 </div>
               </ContextMenuItem>
             </>
@@ -357,7 +368,9 @@ export default function LiveContextMenu({
                   className="flex w-full cursor-pointer items-center justify-start gap-2"
                   onClick={isEnabled ? resetPreferredLiveMode : undefined}
                 >
-                  <div className="text-primary">Reset</div>
+                  <div className="text-primary">
+                    {t("button.reset", { ns: "common" })}
+                  </div>
                 </div>
               </ContextMenuItem>
             </>
@@ -368,7 +381,7 @@ export default function LiveContextMenu({
               <ContextMenuSub>
                 <ContextMenuSubTrigger disabled={!isEnabled}>
                   <div className="flex items-center gap-2">
-                    <span>Notifications</span>
+                    <span>{t("notifications")}</span>
                   </div>
                 </ContextMenuSubTrigger>
                 <ContextMenuSubContent>
@@ -379,25 +392,29 @@ export default function LiveContextMenu({
                           {isSuspended ? (
                             <>
                               <IoIosNotificationsOff className="size-5 text-muted-foreground" />
-                              <span>Suspended</span>
+                              <span>
+                                {t("button.suspended", { ns: "common" })}
+                              </span>
                             </>
                           ) : (
                             <>
                               <IoIosNotifications className="size-5 text-muted-foreground" />
-                              <span>Enabled</span>
+                              <span>
+                                {t("button.enabled", { ns: "common" })}
+                              </span>
                             </>
                           )}
                         </>
                       ) : (
                         <>
                           <IoIosNotificationsOff className="size-5 text-danger" />
-                          <span>Disabled</span>
+                          <span>{t("button.disabled", { ns: "common" })}</span>
                         </>
                       )}
                     </div>
                     {isSuspended && (
                       <span className="text-xs text-primary-variant">
-                        Until {formatSuspendedUntil(notificationSuspendUntil)}
+                        {formatSuspendedUntil(notificationSuspendUntil)}
                       </span>
                     )}
                   </div>
@@ -418,9 +435,11 @@ export default function LiveContextMenu({
                       >
                         <div className="flex w-full flex-col gap-2">
                           {notificationState === "ON" ? (
-                            <span>Unsuspend</span>
+                            <span>
+                              {t("button.unsuspended", { ns: "common" })}
+                            </span>
                           ) : (
-                            <span>Enable</span>
+                            <span>{t("button.enable", { ns: "common" })}</span>
                           )}
                         </div>
                       </ContextMenuItem>
@@ -431,7 +450,7 @@ export default function LiveContextMenu({
                         <ContextMenuSeparator />
                         <div className="px-2 py-1.5">
                           <p className="mb-2 text-sm font-medium text-muted-foreground">
-                            Suspend for:
+                            {t("suspend.forTime")}
                           </p>
                           <div className="space-y-1">
                             <ContextMenuItem
@@ -440,7 +459,7 @@ export default function LiveContextMenu({
                                 isEnabled ? () => handleSuspend("5") : undefined
                               }
                             >
-                              5 minutes
+                              {t("time.5minutes", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -450,7 +469,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              10 minutes
+                              {t("time.10minutes", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -460,7 +479,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              30 minutes
+                              {t("time.30minutes", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -470,7 +489,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              1 hour
+                              {t("time.1hour", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -480,7 +499,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              12 hours
+                              {t("time.12hours", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -490,7 +509,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              24 hours
+                              {t("time.24hours", { ns: "common" })}
                             </ContextMenuItem>
                             <ContextMenuItem
                               disabled={!isEnabled}
@@ -500,7 +519,7 @@ export default function LiveContextMenu({
                                   : undefined
                               }
                             >
-                              Until restart
+                              {t("time.untilRestart", { ns: "common" })}
                             </ContextMenuItem>
                           </div>
                         </div>

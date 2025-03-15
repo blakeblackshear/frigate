@@ -1,0 +1,65 @@
+{
+    "search": "Search",
+    "savedSearches": "Saved Searches",
+    "searchFor": "Search for {{inputValue}}",
+    "button": {
+        "clear": "Clear search",
+        "save": "Save search",
+        "delete": "Delete saved search",
+        "filterInformation": "Filter information",
+        "filterActive": "Filters active"
+    },
+    "trackedObjectId": "Tracked Object ID",
+    "filter": {
+        "label": {
+            "cameras": "Cameras",
+            "labels": "Labels",
+            "zones": "Zones",
+            "sub_labels": "Sub Labels",
+            "search_type": "Search Type",
+            "time_range": "Time Range",
+            "before": "Before",
+            "after": "After",
+            "min_score": "Min Score",
+            "max_score": "Max Score",
+            "min_speed": "Min Speed",
+            "max_speed": "Max Speed",
+            "recognized_license_plate": "Recognized License Plate",
+            "has_clip": "Has Clip",
+            "has_snapshot": "Has Snapshot"
+        },
+        "searchType": {
+            "thumbnail": "Thumbnail", 
+            "description": "Description"
+        },
+        "toast": {
+            "error": {
+                "beforeDateBeLaterAfter": "The 'before' date must be later than the 'after' date.",
+                "afterDatebeEarlierBefore": "The 'after' date must be earlier than the 'before' date.",
+                "minScoreMustBeLessOrEqualMaxScore": "The 'min_score' must be less than or equal to the 'max_score'.",
+                "maxScoreMustBeGreaterOrEqualMinScore": "The 'max_score' must be greater than or equal to the 'min_score'.",
+                "minSpeedMustBeLessOrEqualMaxSpeed": "The 'min_speed' must be less than or equal to the 'max_speed'.",
+                "maxSpeedMustBeGreaterOrEqualMinSpeed": "The 'max_speed' must be greater than or equal to the 'min_speed'."
+            }
+        },
+        "tips": {
+            "title": "How to use text filters",
+            "desc": "Filters help you narrow down your search results. Here's how to use them in the input field:",
+            "desc.step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Type a filter name followed by a colon (e.g., \"cameras:\").</li><li>Select a value from the suggestions or type your own.</li><li>Use multiple filters by adding them one after another with a space in between.</li><li>Date filters (before: and after:) use <em>{{DateFormat}}</em> format.</li><li>Time range filter uses <em>{{exampleTime}}</em> format.</li><li>Remove filters by clicking the 'x' next to them.</li></ul>",
+            "desc.example": "Example: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>"
+        },
+        "header": {
+            "currentFilterType": "Filter Values",
+            "noFilters": "Filters",
+            "activeFilters": "Active Filters"
+        }
+    },
+    "similaritySearch": {
+        "title": "Similarity Search",
+        "active": "Similarity search active",
+        "clear": "Clear similarity search"
+    },
+    "placeholder": {
+        "search": "Search..."
+    }
+}

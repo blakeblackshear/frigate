@@ -16,7 +16,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
+
 import { CiCircleAlert } from "react-icons/ci";
+import { useTranslation } from "react-i18next";
 
 type CameraStorage = {
   [key: string]: {
@@ -41,6 +43,8 @@ export function CombinedStorageGraph({
   cameraStorage,
   totalStorage,
 }: CombinedStorageGraphProps) {
+  const { t } = useTranslation(["views/system"]);
+
   const { theme, systemTheme } = useTheme();
 
   const entities = Object.keys(cameraStorage);
@@ -176,10 +180,12 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Camera</TableHead>
-              <TableHead>Storage Used</TableHead>
-              <TableHead>Percentage of Total Used</TableHead>
-              <TableHead>Bandwidth</TableHead>
+              <TableHead>{t("storage.cameraStorage.camera")}</TableHead>
+              <TableHead>{t("storage.cameraStorage.storageUsed")}</TableHead>
+              <TableHead>
+                {t("storage.cameraStorage.percentageOfTotalUsed")}
+              </TableHead>
+              <TableHead>{t("storage.cameraStorage.bandwidth")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -191,26 +197,29 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name.replaceAll("_", " ")}
+                  {item.name === "Unused"
+                    ? t("storage.cameraStorage.unused")
+                    : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
                           className="focus:outline-none"
-                          aria-label="Unused Storage Information"
+                          aria-label={t(
+                            "storage.cameraStorage.unusedStorageInformation",
+                          )}
                         >
                           <CiCircleAlert
                             className="size-5"
-                            aria-label="Unused Storage Information"
+                            aria-label={t(
+                              "storage.cameraStorage.unusedStorageInformation",
+                            )}
                           />
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80">
                         <div className="space-y-2">
-                          This value may not accurately represent the free space
-                          available to Frigate if you have other files stored on
-                          your drive beyond Frigate's recordings. Frigate does
-                          not track storage usage outside of its recordings.
+                          {t("storage.cameraStorage.unused.tips")}
                         </div>
                       </PopoverContent>
                     </Popover>

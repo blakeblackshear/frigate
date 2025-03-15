@@ -1,0 +1,10 @@
+{
+    "button": {
+        "downloadVideo": {
+            "label": "下载视频",
+            "toast": {
+                "success": "下载成功"
+            }
+        }
+    }
+}

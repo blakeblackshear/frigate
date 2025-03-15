@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { Trans, useTranslation } from "react-i18next";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -37,6 +38,7 @@ export default function MotionTunerView({
   selectedCamera,
   setUnsavedChanges,
 }: MotionTunerViewProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -117,20 +119,29 @@ export default function MotionTunerView({
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Motion settings have been saved.", {
+          toast.success(t("motionDetectionTuner.toast.success"), {
             position: "top-center",
           });
           setChangedValue(false);
           updateConfig();
         } else {
-          toast.error(`Failed to save config changes: ${res.statusText}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error", {
+              errorMessage: res.statusText,
+              ns: "common",
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
         toast.error(
-          `Failed to save config changes: ${error.response.data.message}`,
+          t("toast.save.error", {
+            errorMessage: error.response.data.message,
+            ns: "common",
+          }),
           { position: "top-center" },
         );
       })
@@ -143,6 +154,7 @@ export default function MotionTunerView({
     motionSettings.contour_area,
     motionSettings.improve_contrast,
     selectedCamera,
+    t,
   ]);
 
   const onCancel = useCallback(() => {
@@ -167,8 +179,8 @@ export default function MotionTunerView({
   }, [changedValue, selectedCamera]);
 
   useEffect(() => {
-    document.title = "Motion Tuner - Frigate";
-  }, []);
+    document.title = t("documentTitle.motionTuner");
+  }, [t]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
@@ -179,14 +191,10 @@ export default function MotionTunerView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
-          Motion Detection Tuner
+          {t("motionDetectionTuner.title")}
         </Heading>
         <div className="my-3 space-y-3 text-sm text-muted-foreground">
-          <p>
-            Frigate uses motion detection as a first line check to see if there
-            is anything happening in the frame worth checking with object
-            detection.
-          </p>
+          <p>{t("motionDetectionTuner.desc")}</p>
 
           <div className="flex items-center text-primary">
             <Link
@@ -195,7 +203,7 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              Read the Motion Tuning Guide{" "}
+              {t("motionDetectionTuner.desc.documentation")}{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -205,14 +213,12 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                Threshold
+                {t("motionDetectionTuner.Threshold")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  The threshold value dictates how much of a change in a pixel's
-                  luminance is required to be considered motion.{" "}
-                  <em>Default: 30</em>
-                </p>
+                <Trans ns="views/settings">
+                  motionDetectionTuner.Threshold.desc
+                </Trans>
               </div>
             </div>
             <div className="flex flex-row justify-between">
@@ -236,12 +242,13 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                Contour Area
+                {t("motionDetectionTuner.contourArea")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  The contour area value is used to decide which groups of
-                  changed pixels qualify as motion. <em>Default: 10</em>
+                  <Trans ns="views/settings">
+                    motionDetectionTuner.contourArea.desc
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -266,9 +273,13 @@ export default function MotionTunerView({
           <Separator className="my-2 flex bg-secondary" />
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="improve-contrast">Improve Contrast</Label>
+              <Label htmlFor="improve-contrast">
+                {t("motionDetectionTuner.improveContrast")}
+              </Label>
               <div className="text-sm text-muted-foreground">
-                Improve contrast for darker scenes. <em>Default: ON</em>
+                <Trans ns="views/settings">
+                  motionDetectionTuner.improveContrast.desc
+                </Trans>
               </div>
             </div>
             <Switch
@@ -286,25 +297,25 @@ export default function MotionTunerView({
           <div className="flex flex-row gap-2 pt-5">
             <Button
               className="flex flex-1"
-              aria-label="Reset"
+              aria-label={t("button.reset", { ns: "common" })}
               onClick={onCancel}
             >
-              Reset
+              {t("button.reset", { ns: "common" })}
             </Button>
             <Button
               variant="select"
               disabled={!changedValue || isLoading}
               className="flex flex-1"
-              aria-label="Save"
+              aria-label={t("button.save", { ns: "common" })}
               onClick={saveToConfig}
             >
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
                   <ActivityIndicator />
-                  <span>Saving...</span>
+                  <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (
-                "Save"
+                t("button.save", { ns: "common" })
               )}
             </Button>
           </div>

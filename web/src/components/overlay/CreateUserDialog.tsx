@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ import {
 } from "../ui/select";
 import { Shield, User } from "lucide-react";
 import { LuCheck, LuX } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
 
 type CreateUserOverlayProps = {
   show: boolean;
@@ -43,22 +45,23 @@ export default function CreateUserDialog({
   onCreate,
   onCancel,
 }: CreateUserOverlayProps) {
+  const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const formSchema = z
     .object({
       user: z
         .string()
-        .min(1, "Username is required")
+        .min(1, t("users.dialog.form.usernameIsRequired"))
         .regex(/^[A-Za-z0-9._]+$/, {
-          message: "Username may only include letters, numbers, . or _",
+          message: t("users.dialog.createUser.usernameOnlyInclude"),
         }),
       password: z.string().min(1, "Password is required"),
       confirmPassword: z.string().min(1, "Please confirm your password"),
       role: z.enum(["admin", "viewer"]),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords don't match",
+      message: t("users.dialog.form.password.notMatch"),
       path: ["confirmPassword"],
     });
 
@@ -109,10 +112,9 @@ export default function CreateUserDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>{t("users.dialog.createUser.title")}</DialogTitle>
           <DialogDescription>
-            Add a new user account and specify an role for access to areas of
-            the Frigate UI.
+            {t("users.dialog.createUser.desc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -126,17 +128,17 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    Username
+                    {t("users.dialog.form.user")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter username"
+                      placeholder={t("users.dialog.form.user.placeholder")}
                       className="h-10"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-muted-foreground">
-                    Only letters, numbers, periods and underscores allowed.
+                    {t("users.dialog.form.user.desc")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -148,11 +150,11 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    Password
+                    {t("users.dialog.form.password")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter password"
+                      placeholder={t("users.dialog.form.password.placeholder")}
                       type="password"
                       className="h-10"
                       {...field}
@@ -168,11 +170,13 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    Confirm Password
+                    {t("users.dialog.form.password.confirm")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Confirm password"
+                      placeholder={t(
+                        "users.dialog.form.password.confirm.placeholder",
+                      )}
                       type="password"
                       className="h-10"
                       {...field}
@@ -184,14 +188,14 @@ export default function CreateUserDialog({
                         <>
                           <LuCheck className="size-3.5 text-green-500" />
                           <span className="text-green-600">
-                            Passwords match
+                            {t("users.dialog.form.password.match")}
                           </span>
                         </>
                       ) : (
                         <>
                           <LuX className="size-3.5 text-red-500" />
                           <span className="text-red-600">
-                            Passwords don't match
+                            {t("users.dialog.form.password.notMatch")}
                           </span>
                         </>
                       )}
@@ -206,7 +210,9 @@ export default function CreateUserDialog({
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Role</FormLabel>
+                  <FormLabel className="text-sm font-medium">
+                    {t("role.title", { ns: "common" })}
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -223,7 +229,7 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <Shield className="h-4 w-4 text-primary" />
-                          <span>Admin</span>
+                          <span>{t("role.admin", { ns: "common" })}</span>
                         </div>
                       </SelectItem>
                       <SelectItem
@@ -232,15 +238,13 @@ export default function CreateUserDialog({
                       >
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span>Viewer</span>
+                          <span>{t("role.viewer", { ns: "common" })}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription className="text-xs text-muted-foreground">
-                    Admins have full access to all features in the Frigate UI.
-                    Viewers are limited to viewing cameras, review items, and
-                    historical footage in the UI.
+                    {t("role.desc", { ns: "common" })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -252,16 +256,16 @@ export default function CreateUserDialog({
                 <div className="flex flex-row gap-2 pt-5">
                   <Button
                     className="flex flex-1"
-                    aria-label="Cancel"
+                    aria-label={t("button.cancel", { ns: "common" })}
                     disabled={isLoading}
                     onClick={handleCancel}
                     type="button"
                   >
-                    Cancel
+                    {t("button.cancel", { ns: "common" })}
                   </Button>
                   <Button
                     variant="select"
-                    aria-label="Save"
+                    aria-label={t("button.save", { ns: "common" })}
                     disabled={isLoading || !form.formState.isValid}
                     className="flex flex-1"
                     type="submit"
@@ -269,10 +273,10 @@ export default function CreateUserDialog({
                     {isLoading ? (
                       <div className="flex flex-row items-center gap-2">
                         <ActivityIndicator />
-                        <span>Saving...</span>
+                        <span>{t("button.saving", { ns: "common" })}</span>
                       </div>
                     ) : (
-                      "Save"
+                      t("button.save", { ns: "common" })
                     )}
                   </Button>
                 </div>

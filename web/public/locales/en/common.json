@@ -1,0 +1,173 @@
+{
+  "time": {
+    "untilForTime": "Until {{time}}",
+    "untilForRestart": "Until Frigate restarts.",
+    "untilRestart": "Until restart",
+    "ago": "{{timeAgo}} ago",
+    "justNow": "Just now",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7": "Last 7 days",
+    "last14": "Last 14 days",
+    "last30": "Last 30 days",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "5minutes": "5 minutes",
+    "10minutes": "10 minutes",
+    "30minutes": "30 minutes",
+    "1hour": "1 hour",
+    "12hours": "12 hours",
+    "24hours": "24 hours",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}yr",
+    "year": "{{time}} years",
+    "mo": "{{time}}mo",
+    "month": "{{time}} months",
+    "d": "{{time}}d",
+    "day": "{{time}} days",
+    "h": "{{time}}h",
+    "hour": "{{time}} hours",
+    "m": "{{time}}m",
+    "minute": "{{time}} minutes",
+    "s": "s",
+    "second": "{{time}} seconds",
+    "formattedTimestamp": "%b %-d, %I:%M:%S %p",
+    "formattedTimestamp.24hour": "%b %-d, %H:%M:%S",
+    "formattedTimestamp2": "%m/%d %I:%M:%S%P",
+    "formattedTimestamp2.24hour": "%d %b %H:%M:%S",
+    "formattedTimestampExcludeSeconds": "%b %-d, %I:%M %p",
+    "formattedTimestampExcludeSeconds.24hour": "%b %-d, %H:%M",
+    "formattedTimestampWithYear": "%b %-d %Y, %I:%M %p",
+    "formattedTimestampWithYear.24hour": "%b %-d %Y, %H:%M",
+    "formattedTimestampOnlyMonthAndDay": "%b %-d"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "kph"
+    }
+  },
+  "label": {
+    "back": "Go back"
+  },
+  "button": {
+    "apply": "Apply",
+    "reset": "Reset",
+    "enabled": "Enabled",
+    "enable": "Enable",
+    "disabled": "Disabled",
+    "disable": "Disable",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "copy": "Copy",
+    "back": "Back",
+    "history": "History",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "pictureInPicture": "Picture in Picture",
+    "on": "ON",
+    "off": "OFF",
+    "edit": "Edit",
+    "copyCoordinates": "Copy coordinates",
+    "delete": "Delete",
+    "yes": "Yes",
+    "no": "No",
+    "download": "Download",
+    "info": "Info",
+    "suspended": "Suspended",
+    "unsuspended": "Unsuspend",
+    "play": "Play",
+    "unselect": "Unselect",
+    "export": "Export",
+    "deleteNow": "Delete Now"
+  },
+  "menu": {
+    "system": "System",
+    "systemMetrics": "System metrics",
+    "configuration": "Configuration",
+    "systemLogs": "System logs",
+    "settings": "Settings",
+    "configurationEditor": "Configuration Editor",
+    "languages": "Languages",
+    "language": {
+      "en": "English",
+      "zhCN": "简体中文(Simplified Chinese)",
+      "withSystem.label": "Use the system settings for languag"
+    },
+    "appearance": "Appearance",
+    "darkMode": {
+      "label": "Dark Mode",
+      "light": "Light",
+      "dark": "Dark",
+      "withSystem.label": "Use the system settings for light or dark mode"
+    },
+    "withSystem": "System",
+    "theme": {
+        "label": "Theme",
+        "blue": "Blue",
+        "green": "Green",
+        "nord": "Nord",
+        "red": "Red",
+        "contrast": "High Contrast",
+        "default": "Default"
+    },
+    "help": "Help",
+    "documentation.label": "Frigate documentation",
+    "documentation": "Documentation",
+    "restart": "Restart Frigate",
+    "live": "Live",
+    "live.allCameras": "All Cameras",
+    "live.cameras": "Cameras",
+    "live.cameras.count_one": "{{count}} Camera",
+    "live.cameras.count_other": "{{count}} Cameras",
+    "review": "Review",
+    "explore": "Explore",
+    "export": "Export",
+    "uiPlayground": "UI Playground",
+    "faceLibrary": "Face Library",
+    "user": {
+      "account": "Account",
+      "current": "Current User: {{user}}",
+      "anonymous": "anonymous",
+      "logout": "Logout",
+      "setPassword": "Set Password"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "Copied URL to clipboard.",
+    "save": {
+      "error": "Failed to save config changes: {{errorMessage}}",
+      "error.noMessage": "Failed to save config changes"
+    }
+  },
+  "role": {
+    "title": "Role",
+    "admin": "Admin",
+    "viewer": "Viewer",
+    "desc": "Admins have full access to all features in the Frigate UI. Viewers are limited to viewing cameras, review items, and historical footage in the UI."
+  },
+  "pagination": {
+    "label": "pagination",
+    "previous": "Previous",
+    "previous.label": "Go to previous page",
+    "next": "Next",
+    "next.label": "Go to next page",
+    "more": "More pages"
+  },
+  "accessDenied": {
+    "documentTitle": "Access Denied - Frigate",
+    "title": "Access Denied",
+    "desc": "You don't have permission to view this page."
+  },
+  "notFound": {
+    "documentTitle": "Not Found - Frigate",
+    "title": "404",
+    "desc": "Page not found"
+  },
+  "selectItem": "Select {{item}}"
+}

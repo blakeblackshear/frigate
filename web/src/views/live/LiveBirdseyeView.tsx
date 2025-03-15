@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { t } from "i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   isDesktop,
@@ -144,12 +145,14 @@ export default function LiveBirdseyeView({
           {!fullscreen ? (
             <Button
               className={`flex items-center gap-2 rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-              aria-label="Go Back"
+              aria-label={t("label.back", { ns: "common" })}
               size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
               <IoMdArrowBack className="size-5" />
-              {isDesktop && <div className="text-primary">Back</div>}
+              {isDesktop && (
+                <div className="text-primary">{t("button.back")}</div>
+              )}
             </Button>
           ) : (
             <div />

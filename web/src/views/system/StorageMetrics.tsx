@@ -13,6 +13,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useTranslation } from "react-i18next";
 
 type CameraStorage = {
   [key: string]: {
@@ -33,7 +34,7 @@ export default function StorageMetrics({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
-
+  const { t } = useTranslation(["views/system"]);
   const timezone = useTimezone(config);
 
   const totalStorage = useMemo(() => {
@@ -75,29 +76,31 @@ export default function StorageMetrics({
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
-      <div className="text-sm font-medium text-muted-foreground">Overview</div>
+      <div className="text-sm font-medium text-muted-foreground">
+        {t("storage.overview")}
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
           <div className="mb-5 flex flex-row items-center justify-between">
-            Recordings
+            {t("storage.recordings.title")}
             <Popover>
               <PopoverTrigger asChild>
                 <button
                   className="focus:outline-none"
-                  aria-label="Unused Storage Information"
+                  aria-label={t(
+                    "storage.cameraStorage.unusedStorageInformation",
+                  )}
                 >
                   <CiCircleAlert
                     className="size-5"
-                    aria-label="Unused Storage Information"
+                    aria-label={t(
+                      "storage.cameraStorage.unusedStorageInformation",
+                    )}
                   />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
-                <div className="space-y-2">
-                  This value represents the total storage used by the recordings
-                  in Frigate's database. Frigate does not track storage usage
-                  for all files on your disk.
-                </div>
+                <div className="space-y-2">{t("storage.recordings.tips")}</div>
               </PopoverContent>
             </Popover>
           </div>
@@ -108,7 +111,9 @@ export default function StorageMetrics({
           />
           {earliestDate && (
             <div className="mt-2 text-xs text-primary-variant">
-              <span className="font-medium">Earliest recording available:</span>{" "}
+              <span className="font-medium">
+                {t("storage.recordings.earliestRecording")}
+              </span>{" "}
               {formatUnixTimestampToDateTime(earliestDate, {
                 timezone: timezone,
                 strftime_fmt:
@@ -135,7 +140,7 @@ export default function StorageMetrics({
         </div>
       </div>
       <div className="mt-4 text-sm font-medium text-muted-foreground">
-        Camera Storage
+        {t("storage.cameraStorage.title")}
       </div>
       <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
         <CombinedStorageGraph

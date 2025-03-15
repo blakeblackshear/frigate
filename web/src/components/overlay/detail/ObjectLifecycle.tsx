@@ -54,6 +54,7 @@ import { useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { IoPlayCircleOutline } from "react-icons/io5";
+import { useTranslation } from "react-i18next";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -68,6 +69,8 @@ export default function ObjectLifecycle({
   fullscreen = false,
   setPane,
 }: ObjectLifecycleProps) {
+  const { t } = useTranslation(["views/explore"]);
+
   const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
     "timeline",
     {
@@ -334,12 +337,16 @@ export default function ObjectLifecycle({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
-            aria-label="Go back"
+            aria-label={t("label.back", { ns: "common" })}
             size="sm"
             onClick={() => setPane("overview")}
           >
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Back</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("button.back", { ns: "common" })}
+              </div>
+            )}
           </Button>
         </div>
       )}
@@ -361,7 +368,7 @@ export default function ObjectLifecycle({
           <div className="relative aspect-video">
             <div className="flex flex-col items-center justify-center p-20 text-center">
               <LuFolderX className="size-16" />
-              No image found for this timestamp.
+              {t("objectLifecycle.noImageFound")}
             </div>
           </div>
         )}
@@ -464,11 +471,13 @@ export default function ObjectLifecycle({
                   className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
                   onClick={() =>
                     navigate(
-                      `/settings?page=masks%20/%20zones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
+                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
                     )
                   }
                 >
-                  <div className="text-primary">Create Object Mask</div>
+                  <div className="text-primary">
+                    {t("objectLifecycle.createObjectMask")}
+                  </div>
                 </div>
               </ContextMenuItem>
             </ContextMenuContent>
@@ -477,7 +486,7 @@ export default function ObjectLifecycle({
       </div>
 
       <div className="mt-3 flex flex-row items-center justify-between">
-        <Heading as="h4">Object Lifecycle</Heading>
+        <Heading as="h4">{t("objectLifecycle.title")}</Heading>
 
         <div className="flex flex-row gap-2">
           <Tooltip>
@@ -485,7 +494,7 @@ export default function ObjectLifecycle({
               <Button
                 variant={showControls ? "select" : "default"}
                 className="size-7 p-1.5"
-                aria-label="Adjust annotation settings"
+                aria-label={t("objectLifecycle.adjustAnnotationSettings")}
               >
                 <LuSettings
                   className="size-5"
@@ -494,14 +503,16 @@ export default function ObjectLifecycle({
               </Button>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>Adjust annotation settings</TooltipContent>
+              <TooltipContent>
+                {t("objectLifecycle.adjustAnnotationSettings")}
+              </TooltipContent>
             </TooltipPortal>
           </Tooltip>
         </div>
       </div>
       <div className="flex flex-row items-center justify-between">
         <div className="mb-2 text-sm text-muted-foreground">
-          Scroll to view the significant moments of this object's lifecycle.
+          {t("objectLifecycle.scrollViewTips")}
         </div>
         <div className="min-w-20 text-right text-sm text-muted-foreground">
           {current + 1} of {eventSequence.length}
@@ -509,7 +520,7 @@ export default function ObjectLifecycle({
       </div>
       {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
         <div className="-mt-2 mb-2 text-sm text-danger">
-          Bounding box positions will be inaccurate for autotracking cameras.
+          {t("objectLifecycle.autoTrackingTips")}
         </div>
       )}
       {showControls && (
@@ -559,8 +570,8 @@ export default function ObjectLifecycle({
                             timezone: config.ui.timezone,
                             strftime_fmt:
                               config.ui.time_format == "24hour"
-                                ? "%d %b %H:%M:%S"
-                                : "%m/%d %I:%M:%S%P",
+                                ? t("time.formattedTimestamp2.24hour")
+                                : t("time.formattedTimestamp2"),
                             time_style: "medium",
                             date_style: "medium",
                           })}

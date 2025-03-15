@@ -18,6 +18,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { FaCircleCheck } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -29,6 +30,7 @@ export function AnimatedEventCard({
   selectedGroup,
   updateEvents,
 }: AnimatedEventCardProps) {
+  const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const apiHost = useApiHost();
 
@@ -121,7 +123,7 @@ export function AnimatedEventCard({
                 <Button
                   className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   size="xs"
-                  aria-label="Mark as Reviewed"
+                  aria-label={t("markAsReviewed")}
                   onClick={async () => {
                     await axios.post(`reviews/viewed`, { ids: [event.id] });
                     updateEvents();
@@ -130,7 +132,7 @@ export function AnimatedEventCard({
                   <FaCircleCheck className="size-3 text-white" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Mark as Reviewed</TooltipContent>
+              <TooltipContent>{t("markAsReviewed")}</TooltipContent>
             </Tooltip>
           )}
           {previews != undefined && (

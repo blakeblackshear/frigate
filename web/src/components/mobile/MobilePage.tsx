@@ -5,6 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
 import { Button } from "@/components/ui/button";
+import { t } from "i18next";
 
 const MobilePageContext = createContext<{
   open: boolean;
@@ -160,7 +161,7 @@ export function MobilePageHeader({
     >
       <Button
         className="absolute left-0 rounded-lg"
-        aria-label="Go back"
+        aria-label={t("label.back", { ns: "common" })}
         size="sm"
         onClick={handleClose}
       >

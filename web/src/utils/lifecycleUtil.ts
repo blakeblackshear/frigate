@@ -1,8 +1,10 @@
 import { ObjectLifecycleSequence } from "@/types/timeline";
+import { t } from "i18next";
 
 export function getLifecycleItemDescription(
   lifecycleItem: ObjectLifecycleSequence,
 ) {
+  // can't use useTranslation here
   const label = (
     (Array.isArray(lifecycleItem.data.sub_label)
       ? lifecycleItem.data.sub_label[0]
@@ -11,37 +13,63 @@ export function getLifecycleItemDescription(
 
   switch (lifecycleItem.class_type) {
     case "visible":
-      return `${label} detected`;
+      return t("objectLifecycle.lifecycleItemDesc.visible", {
+        label,
+        ns: "views/explore",
+      });
     case "entered_zone":
-      return `${label} entered ${lifecycleItem.data.zones
-        .join(" and ")
-        .replaceAll("_", " ")}`;
+      return t("objectLifecycle.lifecycleItemDesc.entered_zone", {
+        label,
+        ns: "views/explore",
+        zones: lifecycleItem.data.zones.join(" and ").replaceAll("_", " "),
+      });
     case "active":
-      return `${label} became active`;
+      return t("objectLifecycle.lifecycleItemDesc.active", {
+        label,
+        ns: "views/explore",
+      });
     case "stationary":
-      return `${label} became stationary`;
+      return t("objectLifecycle.lifecycleItemDesc.stationary", {
+        label,
+        ns: "views/explore",
+      });
     case "attribute": {
       let title = "";
       if (
         lifecycleItem.data.attribute == "face" ||
         lifecycleItem.data.attribute == "license_plate"
       ) {
-        title = `${lifecycleItem.data.attribute.replaceAll(
-          "_",
-          " ",
-        )} detected for ${label}`;
+        title = t(
+          "objectLifecycle.lifecycleItemDesc.attribute.faceOrLicense_plate",
+          {
+            label,
+            attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
+            ns: "views/explore",
+          },
+        );
       } else {
-        title = `${
-          lifecycleItem.data.label
-        } recognized as ${lifecycleItem.data.attribute.replaceAll("_", " ")}`;
+        title = t("objectLifecycle.lifecycleItemDesc.attribute.other", {
+          label: lifecycleItem.data.label,
+          attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
+          ns: "views/explore",
+        });
       }
       return title;
     }
     case "gone":
-      return `${label} left`;
+      return t("objectLifecycle.lifecycleItemDesc.gone", {
+        label,
+        ns: "views/explore",
+      });
     case "heard":
-      return `${label} heard`;
+      return t("objectLifecycle.lifecycleItemDesc.heard", {
+        label,
+        ns: "views/explore",
+      });
     case "external":
-      return `${label} detected`;
+      return t("objectLifecycle.lifecycleItemDesc.external", {
+        label,
+        ns: "views/explore",
+      });
   }
 }

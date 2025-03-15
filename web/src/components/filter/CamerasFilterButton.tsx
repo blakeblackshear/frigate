@@ -12,6 +12,7 @@ import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import FilterSwitch from "./FilterSwitch";
 import { FaVideo } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 type CameraFilterButtonProps = {
   allCameras: string[];
@@ -29,6 +30,7 @@ export function CamerasFilterButton({
   mainCamera,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
     selectedCameras,
@@ -36,15 +38,19 @@ export function CamerasFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return "Cameras";
+      return t("menu.live.cameras", { ns: "common" });
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
-      return "All Cameras";
+      return t("menu.live.allCameras", { ns: "common" });
     }
-
-    return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
-  }, [selectedCameras]);
+    return t("menu.live.cameras.count", {
+      count: selectedCameras.includes("birdseye")
+        ? selectedCameras.length - 1
+        : selectedCameras.length,
+      ns: "common",
+    });
+  }, [selectedCameras, t]);
 
   // ui
 
@@ -57,7 +63,7 @@ export function CamerasFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 capitalize"
-      aria-label="Cameras Filter"
+      aria-label={t("cameras.label")}
       variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
@@ -138,12 +144,13 @@ export function CamerasFilterContent({
   setOpen,
   updateCameraFilter,
 }: CamerasFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            Cameras
+            {t("cameras.all.short")}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -151,7 +158,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label="All Cameras"
+          label={t("cameras.all")}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);
@@ -225,7 +232,7 @@ export function CamerasFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           disabled={currentCameras?.length === 0}
           onClick={() => {
@@ -233,16 +240,16 @@ export function CamerasFilterContent({
             setOpen(false);
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentCameras(undefined);
             updateCameraFilter(undefined);
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>

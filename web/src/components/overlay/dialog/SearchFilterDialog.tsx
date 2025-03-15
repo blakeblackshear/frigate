@@ -33,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Trans, useTranslation } from "react-i18next";
 import {
   Command,
   CommandEmpty,
@@ -60,7 +61,7 @@ export default function SearchFilterDialog({
   onUpdateFilter,
 }: SearchFilterDialogProps) {
   // data
-
+  const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
@@ -93,7 +94,7 @@ export default function SearchFilterDialog({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="More Filters"
+      aria-label={t("more")}
       size="sm"
       variant={moreFiltersSelected ? "select" : "default"}
     >
@@ -102,7 +103,7 @@ export default function SearchFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      More Filters
+      {t("more")}
     </Button>
   );
   const content = (
@@ -184,7 +185,7 @@ export default function SearchFilterDialog({
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             if (currentFilter != filter) {
               onUpdateFilter(currentFilter);
@@ -193,10 +194,10 @@ export default function SearchFilterDialog({
             setOpen(false);
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset filters to default values"
+          aria-label={t("reset.label")}
           onClick={() => {
             setCurrentFilter((prevFilter) => ({
               ...prevFilter,
@@ -214,7 +215,7 @@ export default function SearchFilterDialog({
             }));
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </div>
@@ -250,6 +251,7 @@ function TimeRangeFilterContent({
   timeRange,
   updateTimeRange,
 }: TimeRangeFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
 
@@ -293,7 +295,7 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <div className="text-lg">Time Range</div>
+      <div className="text-lg">{t("timeRange")}</div>
       <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
@@ -306,7 +308,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"} `}
-              aria-label="Select Start Time"
+              aria-label={t("export.time.start.label", {
+                ns: "components/dialog",
+              })}
               variant={startOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -344,7 +348,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-              aria-label="Select End Time"
+              aria-label={t("export.time.end.label", {
+                ns: "components/dialog",
+              })}
               variant={endOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -387,11 +393,12 @@ export function ZoneFilterContent({
   zones,
   updateZones,
 }: ZoneFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <div className="text-lg">Zones</div>
+        <div className="text-lg">{t("zones.label")}</div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -399,7 +406,7 @@ export function ZoneFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                {t("zones.all")}
               </Label>
               <Switch
                 className="ml-1"
@@ -454,13 +461,14 @@ export function SubFilterContent({
   subLabels,
   setSubLabels,
 }: SubFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="text-lg">Sub Labels</div>
+      <div className="text-lg">{t("subLabels.label")}</div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
-          All Sub Labels
+          {t("subLabels.all")}
         </Label>
         <Switch
           className="ml-1"
@@ -512,10 +520,11 @@ export function ScoreFilterContent({
   maxScore,
   setScoreRange,
 }: ScoreFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Score</div>
+      <div className="mb-3 text-lg">{t("score")}</div>
       <div className="flex items-center gap-1">
         <Input
           className="w-14 text-center"
@@ -566,11 +575,17 @@ export function SpeedFilterContent({
   maxSpeed,
   setSpeedRange,
 }: SpeedFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">
-        Estimated Speed ({config?.ui.unit_system == "metric" ? "kph" : "mph"})
+        {t("estimatedSpeed", {
+          unit:
+            config?.ui.unit_system == "metric"
+              ? t("unit.speed.kph", { ns: "common" })
+              : t("unit.speed.mph", { ns: "common" }),
+        })}
       </div>
       <div className="flex items-center gap-1">
         <Input
@@ -629,6 +644,7 @@ export function SnapshotClipFilterContent({
   submittedToFrigatePlus,
   setSnapshotClip,
 }: SnapshotClipContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [isSnapshotFilterActive, setIsSnapshotFilterActive] = useState(
     hasSnapshot !== undefined,
   );
@@ -657,7 +673,7 @@ export function SnapshotClipFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Features</div>
+      <div className="mb-3 text-lg">{t("features.label")}</div>
 
       <div className="my-2.5 space-y-1">
         <div className="flex items-center justify-between">
@@ -679,7 +695,7 @@ export function SnapshotClipFilterContent({
               htmlFor="snapshot-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a snapshot
+              {t("features.hasSnapshot")}
             </Label>
           </div>
           <ToggleGroup
@@ -697,17 +713,17 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -741,12 +757,9 @@ export function SnapshotClipFilterContent({
                       side="left"
                       sideOffset={5}
                     >
-                      You must first filter on tracked objects that have a
-                      snapshot.
-                      <br />
-                      <br />
-                      Tracked objects without a snapshot cannot be submitted to
-                      Frigate+.
+                      <Trans ns="components/filter">
+                        features.submittedToFrigatePlus.tips
+                      </Trans>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -755,7 +768,7 @@ export function SnapshotClipFilterContent({
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
               >
-                Submitted to Frigate+
+                {t("features.submittedToFrigatePlus.label")}
               </Label>
             </div>
             <ToggleGroup
@@ -778,17 +791,17 @@ export function SnapshotClipFilterContent({
             >
               <ToggleGroupItem
                 value="yes"
-                aria-label="Yes"
+                aria-label={t("button.yes", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                Yes
+                {t("button.yes", { ns: "common" })}
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
-                aria-label="No"
+                aria-label={t("button.no", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                No
+                {t("button.no", { ns: "common" })}
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -817,7 +830,7 @@ export function SnapshotClipFilterContent({
               htmlFor="clip-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a video clip
+              {t("features.hasVideoClip")}
             </Label>
           </div>
           <ToggleGroup
@@ -833,17 +846,17 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -863,6 +876,8 @@ export function RecognizedLicensePlatesFilterContent({
   recognizedLicensePlates,
   setRecognizedLicensePlates,
 }: RecognizedLicensePlatesFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+
   const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
     "recognized_license_plates",
     {
@@ -911,26 +926,28 @@ export function RecognizedLicensePlatesFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Recognized License Plates</div>
+      <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
       {error ? (
         <p className="text-sm text-red-500">
-          Failed to load recognized license plates.
+          {t("recognizedLicensePlates.loadFailed")}
         </p>
       ) : !allRecognizedLicensePlates ? (
         <p className="text-sm text-muted-foreground">
-          Loading recognized license plates...
+          {t("recognizedLicensePlates.loading")}
         </p>
       ) : (
         <>
           <Command className="border border-input bg-background">
             <CommandInput
-              placeholder="Type to search license plates..."
+              placeholder={t("recognizedLicensePlates.placeholder")}
               value={inputValue}
               onValueChange={setInputValue}
             />
             <CommandList className="max-h-[200px] overflow-auto">
               {filteredRecognizedLicensePlates.length === 0 && inputValue && (
-                <CommandEmpty>No license plates found.</CommandEmpty>
+                <CommandEmpty>
+                  {t("recognizedLicensePlates.noLicensePlatesFound")}
+                </CommandEmpty>
               )}
               {filteredRecognizedLicensePlates.map((plate) => (
                 <CommandItem
@@ -973,7 +990,7 @@ export function RecognizedLicensePlatesFilterContent({
         </>
       )}
       <p className="mt-1 text-sm text-muted-foreground">
-        Select one or more plates from the list.
+        {t("recognizedLicensePlates.selectPlatesFromList")}
       </p>
     </div>
   );

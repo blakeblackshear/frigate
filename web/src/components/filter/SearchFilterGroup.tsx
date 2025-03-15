@@ -25,6 +25,8 @@ import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { useTranslation } from "react-i18next";
+
 type SearchFilterGroupProps = {
   className: string;
   filters?: SearchFilters[];
@@ -39,6 +41,7 @@ export default function SearchFilterGroup({
   filterList,
   onUpdateFilter,
 }: SearchFilterGroupProps) {
+  const { t } = useTranslation(["components/filter"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -195,7 +198,7 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText={isMobile ? "Dates" : "All Dates"}
+          defaultText={isMobile ? t("dates.all.short") : t("dates.all")}
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
@@ -229,6 +232,7 @@ function GeneralFilterButton({
   selectedLabels,
   updateLabelFilter,
 }: GeneralFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
@@ -236,19 +240,21 @@ function GeneralFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return "Labels";
+      return t("labels.all.short");
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return "All Labels";
+      return t("labels.all");
     }
 
     if (selectedLabels.length == 1) {
-      return selectedLabels[0];
+      return t(selectedLabels[0], { ns: "objects" });
     }
 
-    return `${selectedLabels.length} Labels`;
-  }, [selectedLabels]);
+    return t("labels.count", {
+      count: selectedLabels.length,
+    });
+  }, [selectedLabels, t]);
 
   // ui
 
@@ -263,7 +269,7 @@ function GeneralFilterButton({
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
-      aria-label="Labels"
+      aria-label={t("labels.label")}
     >
       <MdLabel
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -323,6 +329,7 @@ export function GeneralFilterContent({
   setCurrentLabels,
   onClose,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="overflow-x-hidden">
@@ -331,7 +338,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Labels
+            {t("labels.all")}
           </Label>
           <Switch
             className="ml-1"
@@ -348,7 +355,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={item.replaceAll("_", " ")}
+              label={t(item, { ns: "objects" })}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -373,7 +380,7 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             if (selectedLabels != currentLabels) {
@@ -383,16 +390,16 @@ export function GeneralFilterContent({
             onClose();
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>
@@ -411,6 +418,7 @@ function SortTypeButton({
   selectedSortType,
   updateSortType,
 }: SortTypeButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentSortType, setCurrentSortType] = useState<
     SearchSortType | undefined
@@ -433,7 +441,7 @@ function SortTypeButton({
           : "default"
       }
       className="flex items-center gap-2 capitalize"
-      aria-label="Labels"
+      aria-label={t("labels.label")}
     >
       <MdSort
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -441,7 +449,7 @@ function SortTypeButton({
       <div
         className={`${selectedSortType != defaultSortType && selectedSortType != undefined ? "text-selected-foreground" : "text-primary"}`}
       >
-        Sort
+        {t("sort.label")}
       </div>
     </Button>
   );
@@ -496,16 +504,16 @@ export function SortTypeContent({
   setCurrentSortType,
   onClose,
 }: SortTypeContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   const sortLabels = {
-    date_asc: "Date (Ascending)",
-    date_desc: "Date (Descending)",
-    score_asc: "Object Score (Ascending)",
-    score_desc: "Object Score (Descending)",
-    speed_asc: "Estimated Speed (Ascending)",
-    speed_desc: "Estimated Speed (Descending)",
-    relevance: "Relevance",
+    date_asc: t("sort.dateAsc"),
+    date_desc: t("sort.dateDesc"),
+    score_asc: t("sort.scoreAsc"),
+    score_desc: t("sort.scoreDesc"),
+    speed_asc: t("sort.speedAsc"),
+    speed_desc: t("sort.speedDesc"),
+    relevance: t("sort.relevance"),
   };
-
   return (
     <>
       <div className="overflow-x-hidden">
@@ -548,7 +556,7 @@ export function SortTypeContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             if (selectedSortType != currentSortType) {
@@ -558,16 +566,16 @@ export function SortTypeContent({
             onClose();
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             setCurrentSortType(undefined);
             updateSortType(undefined);
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>

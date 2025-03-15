@@ -11,7 +11,10 @@ import useDeepMemo from "./use-deep-memo";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { useFrigateStats } from "@/api/ws";
 
+import { useTranslation } from "react-i18next";
+
 export default function useStats(stats: FrigateStats | undefined) {
+  const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const memoizedStats = useDeepMemo(stats);
@@ -72,7 +75,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
-          text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
+          text: t("stats.ffmpegHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            ffmpegAvg,
+          }),
           color: "text-danger",
           relevantLink: "/system#cameras",
         });
@@ -80,7 +86,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
-          text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
+          text: t("stats.detectHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            detectAvg,
+          }),
           color: "text-danger",
           relevantLink: "/system#cameras",
         });
@@ -88,7 +97,7 @@ export default function useStats(stats: FrigateStats | undefined) {
     });
 
     return problems;
-  }, [config, memoizedStats]);
+  }, [config, memoizedStats, t]);
 
   return { potentialProblems };
 }

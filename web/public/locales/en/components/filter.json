@@ -1,0 +1,108 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Labels",
+    "all": "All Labels",
+    "all.short": "Labels",
+    "count": "{{count}} Labels"
+  },
+  "zones": {
+    "all": "All Zones",
+    "all.short": "Zones"
+  },
+  "dates": {
+    "all": "All Dates",
+    "all.short": "Dates"
+  },
+  "more": "More Filters",
+  "reset.label": "Reset filters to default values",
+  "timeRange": "Time Range",
+  "zones.label": "Zones",
+  "subLabels": {
+    "label": "Sub Labels",
+    "all": "All Sub Labels"
+  },
+  "score": "Score",
+  "estimatedSpeed": "Estimated Speed ({{unit}})",
+  "features": {
+    "label": "Features",
+    "hasSnapshot": "Has a snapshot",
+    "hasVideoClip": "Has a video clip",
+    "submittedToFrigatePlus": {
+      "label": "Submitted to Frigate+",
+      "tips": "You must first filter on tracked objects that have a snapshot.<br /><br />Tracked objects without a snapshot cannot be submitted to Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sort",
+    "dateAsc": "Date (Ascending)",
+    "dateDesc": "Date (Descending)",
+    "scoreAsc": "Object Score (Ascending)",
+    "scoreDesc": "Object Score (Descending)",
+    "speedAsc": "Estimated Speed (Ascending)",
+    "speedDesc": "Estimated Speed (Descending)",
+    "relevance": "Relevance"
+  },
+  "cameras": {
+    "label": "Cameras Filter",
+    "all": "All Cameras",
+    "all.short": "Cameras"
+  },
+  "review": {
+    "showReviewed": "Show Reviewed"
+  },
+  "motion": {
+    "showMotionOnly": "Show Motion Only"
+  },
+  "explore": {
+    "settings": {
+      "title": "Settings",
+      "defaultView": "Default View",
+      "defaultView.desc": "When no filters are selected, display a summary of the most recent tracked objects per label, or display an unfiltered grid.",
+      "defaultView.summary": "Summary",
+      "defaultView.unfilteredGrid": "Unfiltered Grid",
+      "gridColumns": "Grid Columns",
+      "gridColumns.desc": "Select the number of columns in the grid view.",
+      "searchSource": {
+        "label": "Search Source",
+        "desc": "Choose whether to search the thumbnails or descriptions of your tracked objects.",
+        "options": {
+          "thumbnailImage": "Thumbnail Image",
+          "description": "Description"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Select a date to filter by"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filter log level",
+    "filterBySeverity": "Filter logs by severity",
+    "loading": "Loading",
+    "loading.desc": "When the log pane is scrolled to the bottom, new logs automatically stream as they are added.",
+    "disableLogStreaming": "Disable log streaming",
+    "allLogs": "All logs"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirm Delete",
+    "desc": "Deleting these {{objectLength}} tracked objects removes the snapshot, any saved embeddings, and any associated object lifecycle entries. Recorded footage of these tracked objects in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future.",
+    "toast": {
+      "success": "Tracked objects deleted successfully.",
+      "error": "Failed to delete tracked objects: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filter by zone mask"
+  },
+  "recognizedLicensePlates": {
+    "title": "Recognized License Plates",
+    "loadFailed": "Failed to load recognized license plates.",
+    "loading": "Loading recognized license plates...",
+    "placeholder": "Type to search license plates...",
+    "noLicensePlatesFound": "No license plates found.",
+    "selectPlatesFromList": "Select one or more plates from the list."
+  }
+}
