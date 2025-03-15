@@ -9,6 +9,7 @@
         "filterInformation": "Filter information",
         "filterActive": "Filters active"
     },
+    "trackedObjectId": "Tracked Object ID",
     "filter": {
         "label": {
             "cameras": "Cameras",

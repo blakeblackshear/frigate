@@ -824,9 +824,11 @@ export default function InputWithTags({
                           className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                         >
                           {filterType === "event_id"
-                            ? "Tracked Object ID"
+                            ? t("trackedObjectId")
                             : filterType === "is_submitted"
-                              ? "Submitted to Frigate+"
+                              ? t("features.submittedToFrigatePlus.label", {
+                                  ns: "components/filter",
+                                })
                               : t("filter.label." + filterType)}
                           : {formatFilterValues(filterType, filterValues)}
                           <button
