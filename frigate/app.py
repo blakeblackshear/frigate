@@ -15,7 +15,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 import frigate.util as util
 from frigate.api.auth import hash_password
-from frigate.api.fastapi_app import create_fastapi_app
+from frigate.api.fastapi_app import create_config_editor_app, create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigPublisher
@@ -623,6 +623,37 @@ class FrigateApp:
                 logger.info(f"***    Password: {password}   ***")
                 logger.info("********************************************************")
                 logger.info("********************************************************")
+
+
+    def start_config_editor(self) -> None:
+        logger.info(f"Starting Frigate in Config Editor Mode  ({VERSION})")
+        self.ensure_dirs()
+        self.init_database()
+        self.bind_database()
+        self.init_auth()
+
+        def stop_config_editor() -> None:
+            logger.info("Stopping...")
+            os._exit(os.EX_OK)
+
+        try:
+            uvicorn.run(
+                create_config_editor_app(
+                    self.config,
+                    self.db,
+                ),
+                host="127.0.0.1",
+                port=5001,
+                log_level="error",
+            )
+        finally:
+            stop_config_editor()
+
+
+
+
+
+
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")

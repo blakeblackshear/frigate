@@ -2,13 +2,19 @@ import { useContext } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { AuthContext } from "@/context/auth-context";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { useConfigValidator } from "@/hooks/use-config-validator";
+
+interface ProtectedRouteProps {
+  requiredRoles: ("admin" | "viewer")[];
+  configGuard?: boolean;
+}
 
 export default function ProtectedRoute({
   requiredRoles,
-}: {
-  requiredRoles: ("admin" | "viewer")[];
-}) {
+  configGuard = true,
+}: ProtectedRouteProps) {
   const { auth } = useContext(AuthContext);
+  const invalidConfig = useConfigValidator(); // Use the hook to check config validity
 
   if (auth.isLoading) {
     return (
@@ -16,24 +22,24 @@ export default function ProtectedRoute({
     );
   }
 
-  // Unauthenticated mode
   if (!auth.isAuthenticated) {
     return <Outlet />;
   }
 
-  // Authenticated mode (8971): require login
   if (!auth.user) {
     return <Navigate to="/login" replace />;
   }
 
-  // If role is null (shouldn’t happen if isAuthenticated, but type safety), fallback
-  // though isAuthenticated should catch this
   if (auth.user.role === null) {
     return <Outlet />;
   }
 
   if (!requiredRoles.includes(auth.user.role)) {
     return <Navigate to="/unauthorized" replace />;
+  }
+
+  if (configGuard && invalidConfig) {
+    return <Navigate to="/config" replace />;
   }
 
   return <Outlet />;
