@@ -253,12 +253,12 @@ def auth(request: Request):
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
         user_header = proxy_config.header_map.user
-        role_header = proxy_config.header_map.role
         success_response.headers["remote-user"] = (
             request.headers.get(user_header, default="anonymous")
             if user_header
             else "anonymous"
         )
+
         role_header = proxy_config.header_map.role
         role = (
             request.headers.get(role_header, default="viewer")
