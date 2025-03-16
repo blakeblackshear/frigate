@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { t } from "i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   isDesktop,
@@ -15,6 +14,7 @@ import {
   isSafari,
   useMobileOrientation,
 } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
 import { LuPictureInPicture } from "react-icons/lu";
@@ -33,6 +33,7 @@ export default function LiveBirdseyeView({
   fullscreen,
   toggleFullscreen,
 }: LiveBirdseyeViewProps) {
+  const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
@@ -151,7 +152,9 @@ export default function LiveBirdseyeView({
             >
               <IoMdArrowBack className="size-5" />
               {isDesktop && (
-                <div className="text-primary">{t("button.back")}</div>
+                <div className="text-primary">
+                  {t("button.back", { ns: "common" })}
+                </div>
               )}
             </Button>
           ) : (
@@ -167,7 +170,11 @@ export default function LiveBirdseyeView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={fullscreen ? FaCompress : FaExpand}
                   isActive={fullscreen}
-                  title={fullscreen ? "Close" : "Fullscreen"}
+                  title={
+                    fullscreen
+                      ? t("button.close", { ns: "common" })
+                      : t("button.fullscreen", { ns: "common" })
+                  }
                   onClick={toggleFullscreen}
                 />
               )}
@@ -177,7 +184,11 @@ export default function LiveBirdseyeView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={LuPictureInPicture}
                   isActive={pip}
-                  title={pip ? "Close" : "Picture in Picture"}
+                  title={
+                    pip
+                      ? t("button.close", { ns: "common" })
+                      : t("button.pictureInPicture", { ns: "common" })
+                  }
                   onClick={() => {
                     if (!pip) {
                       setPip(true);

@@ -10,7 +10,6 @@ import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import FilterSwitch from "./FilterSwitch";
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
 
 type LogSettingsButtonProps = {
   selectedLabels?: LogSeverity[];
@@ -101,6 +100,7 @@ export function GeneralFilterContent({
   selectedLabels,
   updateLabelFilter,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">

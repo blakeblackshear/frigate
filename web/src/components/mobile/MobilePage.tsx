@@ -5,7 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
 import { Button } from "@/components/ui/button";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const MobilePageContext = createContext<{
   open: boolean;
@@ -139,6 +139,7 @@ export function MobilePageHeader({
   onClose,
   ...props
 }: MobilePageHeaderProps) {
+  const { t } = useTranslation(["common"]);
   const context = useContext(MobilePageContext);
   if (!context)
     throw new Error("MobilePageHeader must be used within MobilePage");

@@ -12,7 +12,7 @@ import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -23,6 +23,7 @@ export default function SearchThumbnail({
   searchResult,
   onClick,
 }: SearchThumbnailProps) {
+  const { t } = useTranslation(["views/search"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();

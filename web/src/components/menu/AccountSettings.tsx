@@ -20,18 +20,19 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
 import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
-import { t } from "i18next";
 
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import SetPasswordDialog from "../overlay/SetPasswordDialog";
+import { useTranslation } from "react-i18next";
 
 type AccountSettingsProps = {
   className?: string;
 };
 
 export default function AccountSettings({ className }: AccountSettingsProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR("config");
   const logoutUrl = config?.proxy?.logout_url || `${baseUrl}api/logout`;
@@ -50,12 +51,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
-          toast.success(
-            t("users.toast.success.updatePassword", { ns: "views/settings" }),
-            {
-              position: "top-center",
-            },
-          );
+          toast.success(t("users.toast.success.updatePassword"), {
+            position: "top-center",
+          });
         }
       })
       .catch((error) => {
@@ -65,7 +63,6 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           "Unknown error";
         toast.error(
           t("users.toast.error.setPasswordFailed", {
-            ns: "views/settings",
             errorMessage,
           }),
           {
@@ -94,7 +91,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent side="right">
-              <p>{t("menu.user.account")}</p>
+              <p>{t("menu.user.account", { ns: "common" })}</p>
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>
@@ -107,9 +104,12 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
           <DropdownMenuLabel>
             {t("menu.user.current", {
-              user: profile?.username || t("menu.user.anonymous"),
+              ns: "common",
+              user:
+                profile?.username || t("menu.user.anonymous", { ns: "common" }),
             })}{" "}
-            {t("role." + profile?.role) && `(${t("role." + profile?.role)})`}
+            {t("role." + profile?.role) &&
+              `(${t("role." + profile?.role, { ns: "common" })})`}
           </DropdownMenuLabel>
           <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
           {profile?.username && profile.username !== "anonymous" && (
@@ -117,22 +117,22 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               className={
                 isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
-              aria-label={t("menu.user.setPassword")}
+              aria-label={t("menu.user.setPassword", { ns: "common" })}
               onClick={() => setPasswordDialogOpen(true)}
             >
               <LuSquarePen className="mr-2 size-4" />
-              <span>{t("menu.user.setPassword")}</span>
+              <span>{t("menu.user.setPassword", { ns: "common" })}</span>
             </MenuItem>
           )}
           <MenuItem
             className={
               isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
             }
-            aria-label={t("menu.user.logout")}
+            aria-label={t("menu.user.logout", { ns: "common" })}
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />
-              <span>{t("menu.user.logout")}</span>
+              <span>{t("menu.user.logout", { ns: "common" })}</span>
             </a>
           </MenuItem>
         </div>

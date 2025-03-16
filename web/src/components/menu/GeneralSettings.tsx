@@ -54,7 +54,6 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import useSWR from "swr";
 import RestartDialog from "../overlay/dialog/RestartDialog";
-import { t } from "i18next";
 
 import { useLanguage } from "@/context/language-provider";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -62,12 +61,14 @@ import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useTranslation } from "react-i18next";
 
 type GeneralSettingsProps = {
   className?: string;
 };
 
 export default function GeneralSettings({ className }: GeneralSettingsProps) {
+  const { t } = useTranslation(["common"]);
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";

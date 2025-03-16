@@ -41,9 +41,9 @@ import {
 import { FaCompress, FaExpand } from "react-icons/fa";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { t } from "i18next";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
+import { useTranslation } from "react-i18next";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -61,6 +61,8 @@ export default function LiveDashboardView({
   fullscreen,
   toggleFullscreen,
 }: LiveDashboardViewProps) {
+  const { t } = useTranslation(["views/live"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // layout

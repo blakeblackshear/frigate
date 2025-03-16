@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { baseUrl } from "@/api/baseUrl";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -42,6 +42,7 @@ export default function PreviewThumbnailPlayer({
   onClick,
   onTimeUpdate,
 }: PreviewPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -169,8 +170,8 @@ export default function PreviewThumbnailPlayer({
   const formattedDate = useFormattedTimestamp(
     review.start_time,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampExcludeSeconds.24hour")
-      : t("time.formattedTimestampExcludeSeconds"),
+      ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
+      : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
     config?.ui?.timezone,
   );
 

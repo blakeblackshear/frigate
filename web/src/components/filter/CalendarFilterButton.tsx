@@ -14,7 +14,6 @@ import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
-import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 
 type CalendarFilterButtonProps = {
@@ -98,12 +97,13 @@ export function CalendarRangeFilterButton({
   defaultText,
   updateSelectedRange,
 }: CalendarRangeFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
 
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    t("time.formattedTimestampOnlyMonthAndDay"),
+    t("time.formattedTimestampOnlyMonthAndDay", { ns: "common" }),
   );
 
   const trigger = (

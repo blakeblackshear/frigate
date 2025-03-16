@@ -12,7 +12,9 @@ import {
 import { Switch } from "./switch";
 import { cn } from "@/lib/utils";
 import { LuCheck } from "react-icons/lu";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
+
+const { t } = useTranslation(["common"]);
 
 
 export interface DateRangePickerProps {

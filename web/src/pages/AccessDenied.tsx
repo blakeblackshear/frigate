@@ -1,12 +1,13 @@
 import Heading from "@/components/ui/heading";
-import { t } from "i18next";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaExclamationTriangle } from "react-icons/fa";
 
 export default function AccessDenied() {
+  const { t } = useTranslation(["common"]);
   useEffect(() => {
     document.title = t("accessDenied.documentTitle");
-  }, []);
+  }, [t]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center text-center">
