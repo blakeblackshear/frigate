@@ -1,8 +1,8 @@
 {
   "group": {
     "label": "Camera Groups",
-    "add": "Add camera groups",
-    "edit": "Edit camera groups",
+    "add": "Add Camera Group",
+    "edit": "Edit Camera Group",
     "delete": {
       "label": "Delete Camera Group",
       "confirm": "Confirm Delete",

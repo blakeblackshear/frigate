@@ -226,7 +226,7 @@ export default function SearchDetailDialog({
                   {item == "object_lifecycle" && (
                     <FaRotate className="size-4" />
                   )}
-                  <div className="capitalize">{t("type.{item}")}</div>
+                  <div className="capitalize">{t(`type.${item}`)}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -310,8 +310,8 @@ function ObjectDetailsTab({
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampWithYear.24hour")
-      : t("time.formattedTimestampWithYear"),
+      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
+      : t("time.formattedTimestampWithYear", { ns: "common" }),
     config?.ui.timezone,
   );
 
@@ -902,10 +902,10 @@ export function ObjectSnapshotTab({
                           "text-lg font-semibold leading-none tracking-tight"
                         }
                       >
-                        {t("explore.submitToPlus.label")}
+                        {t("explore.plus.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {t("explore.submitToPlus.desc")}
+                        {t("explore.plus.submitToPlus.desc")}
                       </div>
                     </div>
 

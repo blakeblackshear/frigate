@@ -570,8 +570,12 @@ export default function ObjectLifecycle({
                             timezone: config.ui.timezone,
                             strftime_fmt:
                               config.ui.time_format == "24hour"
-                                ? t("time.formattedTimestamp2.24hour")
-                                : t("time.formattedTimestamp2"),
+                                ? t("time.formattedTimestamp2.24hour", {
+                                    ns: "common",
+                                  })
+                                : t("time.formattedTimestamp2", {
+                                    ns: "common",
+                                  }),
                             time_style: "medium",
                             date_style: "medium",
                           })}

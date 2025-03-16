@@ -74,7 +74,7 @@ export default function InputWithTags({
   setSearch,
   allSuggestions,
 }: InputWithTagsProps) {
-  const { t } = useTranslation(["views/search"]);
+  const { t, i18n } = useTranslation(["views/search"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -900,12 +900,17 @@ export default function InputWithTags({
                   className="cursor-pointer"
                   onSelect={() => handleSuggestionClick(suggestion)}
                 >
-                  {currentFilterType
-                    ? formatFilterValues(currentFilterType, suggestion)
-                    : t("filter.label." + suggestion)}
-                  {" ("}
-                  {suggestion}
-                  {")"}
+                  {i18n.language === "en" ? (
+                    suggestion
+                  ) : (
+                    <>
+                      {suggestion} {" ("}
+                      {currentFilterType
+                        ? formatFilterValues(currentFilterType, suggestion)
+                        : t("filter.label." + suggestion)}
+                      {")"}
+                    </>
+                  )}
                 </CommandItem>
               ))}
           </CommandGroup>
