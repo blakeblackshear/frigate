@@ -1,0 +1,435 @@
+{
+  "documentTitle": {
+    "default": "Settings - Frigate",
+    "authentication": "Authentication Settings - Frigate",
+    "camera": "Camera Settings - Frigate",
+    "classification": "Classification Settings - Frigate",
+    "masksAndZones": "Mask and Zone Editor - Frigate",
+    "motionTuner": "Motion Tuner - Frigate",
+    "object": "Object Settings - Frigate",
+    "general": "General Settings - Frigate"
+  },
+  "menu": {
+    "uiSettings": "UI Settings",
+    "classificationSettings": "Classification Settings",
+    "cameraSettings": "Camera Settings",
+    "masksAndZones": "Masks / Zones",
+    "motionTuner": "Motion Tuner",
+    "debug": "Debug",
+    "users": "Users",
+    "notifications": "Notifications"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "You have unsaved changes.",
+      "desc": "Do you want to save your changes before continuing?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Camera",
+    "noCamera": "No Camera"
+  },
+  "general": {
+    "title": "General Settings",
+    "liveDashboard": {
+      "title": "Live Dashboard",
+      "automaticLiveView": {
+        "label": "Automatic Live View",
+        "desc": "Automatically switch to a camera's live view when activity is detected. Disabling this option causes static camera images on the Live dashboard to only update once per minute."
+      },
+      "playAlertVideos": {
+        "label": "Play Alert Videos",
+        "desc": "By default, recent alerts on the Live dashboard play as small looping videos. Disable this option to only show a static image of recent alerts on this device/browser."
+      }
+    },
+    "storedLayouts": {
+      "title": "Stored Layouts",
+      "desc": "The layout of cameras in a camera group can be dragged/resized. The positions are stored in your browser's local storage.",
+      "clearAll": "Clear All Layouts"
+    },
+    "cameraGroupStreaming": {
+      "title": "Camera Group Streaming Settings",
+      "desc": "Streaming settings for each camera group are stored in your browser's local storage.",
+      "clearAll": "Clear All Streaming Settings"
+    },
+    "recordingsViewer": {
+      "title": "Recordings Viewer",
+      "defaultPlaybackRate": {
+        "label": "Default Playback Rate",
+        "desc": "Default playback rate for recordings playback."
+      }
+    },
+    "calendar": {
+      "title": "Calendar",
+      "firstWeekday": {
+        "label": "First Weekday",
+        "desc": "The day that the weeks of the review calendar begin on.",
+        "sunday": "Sunday",
+        "monday": "Monday"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Cleared stored layout for {{cameraName}}",
+        "clearStreamingSettings": "Cleared streaming settings for all camera groups."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Failed to clear stored layout: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Failed to clear streaming settings: {{errorMessage}}"
+      }
+    }
+  },
+  "classification": {
+    "title": "Classification Settings",
+    "semanticSearch": {
+      "title": "Semantic Search",
+      "desc": "Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one.",
+      "readTheDocumentation": "Read the Documentation",
+      "reindexOnStartup": {
+        "label": "Re-Index On Startup",
+        "desc": "Re-indexing will reprocess all thumbnails and descriptions (if enabled) and apply the embeddings on each startup. <em>Don't forget to disable the option after restarting!</em>"
+      },
+      "modelSize": {
+        "label": "Model Size",
+        "desc": "The size of the model used for semantic search embeddings.",
+        "small": "small",
+        "large": "large",
+        "small.desc": "Using <em>small</em> employs a quantized version of the model that uses less RAM and runs faster on CPU with a very negligible difference in embedding quality.",
+        "large.desc": "Using <em>large</em> employs the full Jina model and will automatically run on the GPU if applicable."
+      }
+    },
+    "faceRecognition": {
+      "title": "Face Recognition",
+      "desc": "Face recognition allows people to be assigned names and when their face is recognized Frigate will assign the person's name as a sub label. This information is included in the UI, filters, as well as in notifications.",
+      "readTheDocumentation": "Read the Documentation"
+    },
+    "licensePlateRecognition": {
+      "title": "License Plate Recognition",
+      "desc": "Frigate can recognize license plates on vehicles and automatically add the detected characters to the recognized_license_plate field or a known name as a sub_label to objects that are of type car. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.",
+      "readTheDocumentation": "Read the Documentation"
+    },
+    "toast": {
+      "success": "Classification settings have been saved.",
+      "error": "Failed to save config changes: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Camera Settings",
+    "streams": {
+      "title": "Streams",
+      "desc": "Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
+    },
+    "review": {
+      "title": "Review",
+      "desc": "Enable/disable alerts and detections for this camera. When disabled, no new review items will be generated.",
+      "alerts": "Alerts ",
+      "detections": "Detections "
+    },
+    "reviewClassification": {
+      "title": "Review Classification",
+      "desc": "Frigate categorizes review items as Alerts and Detections. By default, all <em>person</em> and <em>car</em> objects are considered Alerts. You can refine categorization of your review items by configuring required zones for them.",
+      "readTheDocumentation": "Read the Documentation",
+      "noDefinedZones": "No zones are defined for this camera.",
+      "objectAlertsTips": "All {{alertsLabels}} objects on {{cameraName}} will be shown as Alerts.",
+      "zoneObjectAlertsTips": "All {{alertsLabels}} objects detected in {{zone}} on {{cameraName}} will be shown as Alerts.",
+      "objectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
+      "zoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized in {{zone}} on {{cameraName}} will be shown as Detections.",
+      "zoneObjectDetectionsTips.notSelectDetections": "All {{detectionsLabels}} objects detected in {{zone}} on {{cameraName}} not categorized as Alerts will be shown as Detections regardless of which zone they are in.",
+      "zoneObjectDetectionsTips.regardlessOfZoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
+      "selectAlertsZones": "Select zones for Alerts",
+      "selectDetectionsZones": "Select zones for Detections",
+      "limitDetections": "Limit detections to specific zones",
+      "toast": {
+        "success": "Review classification configuration has been saved. Restart Frigate to apply changes."
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "All Masks and Zones"
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Copied coordinates for {{polyName}} to clipboard."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Could not copy coordinates to clipboard."
+      }
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Zone name must be at least 2 characters.",
+          "mustNotBeSameWithCamera": "Zone name must not be the same as camera name.",
+          "alreadyExists": "A zone with this name already exists for this camera.",
+          "mustNotContainPeriod": "Zone name must not contain periods.",
+          "hasIllegalCharacter": "Zone name contains illegal characters."
+        }
+      },
+      "distance.error": "Distance must be greater than or equal to 0.1.",
+      "distance.error.mustBeFilled": "All distance fields must be filled to use speed estimation.",
+      "inertia.error.mustBeAboveZero": "Inertia must be above 0.",
+      "loiteringTime.error.mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0.",
+      "polygonDrawing": {
+        "removeLastPoint": "Remove last point",
+        "reset.label": "Clear all points",
+        "snapPoints": {
+          "true": "Snap points",
+          "false": "Don't Snap points"
+        },
+        "delete": {
+          "title": "Confirm Delete",
+          "desc": "Are you sure you want to delete the {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} has been deleted."
+        },
+        "error": {
+          "mustBeFinished": "Polygon drawing must be finished before saving."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zones",
+      "documentTitle": "Edit Zone - Frigate",
+      "desc": "Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
+      "desc.documentation": "Documentation",
+      "add": "Add Zone",
+      "edit": "Edit Zone",
+      "point_one": "{{count}} point",
+      "point_other": "{{count}} points",
+      "clickDrawPolygon": "Click to draw a polygon on the image.",
+      "name": "Name",
+      "name.inputPlaceHolder": "Enter a name...",
+      "name.tips": "Name must be at least 2 characters and must not be the name of a camera or another zone.",
+      "inertia": "Inertia",
+      "inertia.desc": "Specifies how many frames that an object must be in a zone before they are considered in the zone. <em>Default: 3</em>",
+      "loiteringTime": "Loitering Time",
+      "loiteringTime.desc": "Sets a minimum amount of time in seconds that the object must be in the zone for it to activate. <em>Default: 0</em>",
+      "objects": "Objects",
+      "objects.desc": "List of objects that apply to this zone.",
+      "allObjects": "All Objects",
+      "speedEstimation": "Speed Estimation",
+      "speedEstimation.desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points.",
+      "speedThreshold": "Speed Threshold ({{unit}})",
+      "speedThreshold.desc": "Specifies a minimum speed for objects to be considered in this zone.",
+      "speedThreshold.toast.error.pointLengthError": "Speed estimation has been disabled for this zone. Zones with speed estimation must have exactly 4 points.",
+      "speedThreshold.toast.error.loiteringTimeError": "Zones with loitering times greater than 0 should not be used with speed estimation.",
+      "toast.success": "Zone ({{zoneName}}) has been saved. Restart Frigate to apply changes."
+    },
+    "motionMasks": {
+      "label": "Motion Mask",
+      "documentTitle": "Edit Motion Mask - Frigate",
+      "desc": "Motion masks are used to prevent unwanted types of motion from triggering detection. Over masking will make it more difficult for objects to be tracked.",
+      "desc.documentation": "Documentation",
+      "add": "New Motion Mask",
+      "edit": "Edit Motion Mask",
+      "context": "Motion masks are used to prevent unwanted types of motion from triggering detection (example: tree branches, camera timestamps). Motion masks should be used <em>very sparingly</em>, over-masking will make it more difficult for objects to be tracked.",
+      "context.documentation": "Read the documentation",
+      "point_one": "{{count}} point",
+      "point_other": "{{count}} points",
+      "clickDrawPolygon": "Click to draw a polygon on the image.",
+      "polygonAreaTooLarge": "The motion mask is covering {{polygonArea}}% of the camera frame. Large motion masks are not recommended.",
+      "polygonAreaTooLarge.tips": "Motion masks do not prevent objects from being detected. You should use a required zone instead.",
+      "polygonAreaTooLarge.documentation": "Read the documentation",
+      "toast.success": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
+      "toast.success.noName": "Motion Mask has been saved. Restart Frigate to apply changes."
+    },
+    "objectMasks": {
+      "label": "Object Masks",
+      "documentTitle": "Edit Object Mask - Frigate",
+      "desc": "Object filter masks are used to filter out false positives for a given object type based on location.",
+      "documentation": "Documentation",
+      "add": "Add Object Mask",
+      "edit": "Edit Object Mask",
+      "context": "Object filter masks are used to filter out false positives for a given object type based on location.",
+      "point_one": "{{count}} point",
+      "point_other": "{{count}} points",
+      "clickDrawPolygon": "Click to draw a polygon on the image.",
+      "objects": "Objects",
+      "objects.desc": "The object type that that applies to this object mask.",
+      "objects.allObjectTypes": "All object types",
+      "toast.success": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
+      "toast.success.noName": "Object Mask has been saved. Restart Frigate to apply changes."
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Motion Detection Tuner",
+    "desc": "Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.",
+    "desc.documentation": "Read the Motion Tuning Guide",
+    "Threshold": "Threshold",
+    "Threshold.desc": "The threshold value dictates how much of a change in a pixel's luminance is required to be considered motion. <em>Default: 30</em>",
+    "contourArea": "Contour Area",
+    "contourArea.desc": "The contour area value is used to decide which groups of changed pixels qualify as motion. <em>Default: 10</em>",
+    "improveContrast": "Improve Contrast",
+    "improveContrast.desc": "Improve contrast for darker scenes. <em>Default: ON</em>",
+    "toast": {
+      "success": "Motion settings have been saved."
+    }
+  },
+  "debug": {
+    "title": "Debug",
+    "detectorDesc": "Frigate uses your detectors ({{detectors}}) to detect objects in your camera's video stream.",
+    "desc": "Debugging view shows a real-time view of tracked objects and their statistics. The object list shows a time-delayed summary of detected objects.",
+    "debugging": "Debugging",
+    "objectList": "Object List",
+    "noObjects": "No objects",
+    "boundingBoxes": {
+      "title": "Bounding boxes",
+      "desc": "Show bounding boxes around tracked objects",
+      "colors": {
+        "label": "Object Bounding Box Colors",
+        "info": "<li>At startup, different colors will be assigned to each object label</li><li>A dark blue thin line indicates that object is not detected at this current point in time</li><li>A gray thin line indicates that object is detected as being stationary</li><li>A thick line indicates that object is the subject of autotracking (when enabled)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "desc": "Overlay a timestamp on the image"
+    },
+    "zones": {
+      "title": "Zones",
+      "desc": "Show an outline of any defined zones"
+    },
+    "mask": {
+      "title": "Motion masks",
+      "desc": "Show motion mask polygons"
+    },
+    "motion": {
+      "title": "Motion boxes",
+      "desc": "Show boxes around areas where motion is detected",
+      "tips": "<p className=\"mb-2\"><strong>Motion Boxes</strong></p><br><p>Red boxes will be overlaid on areas of the frame where motion is currently being detected</p>"
+    },
+    "regions": {
+      "title": "Regions",
+      "desc": "Show a box of the region of interest sent to the object detector",
+      "tips": "<p className=\"mb-2\"><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Object Shape Filter Drawing",
+      "desc": "Draw a rectangle on the image to view area and ratio details",
+      "tips": "Enable this option to draw a rectangle on the camera image to show its area and ratio. These values can then be used to set object shape filter parameters in your config.",
+      "document": "Read the documentation ",
+      "score": "Score",
+      "ratio": "Ratio",
+      "area": "Area"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "management": "Users Management",
+    "management.desc": "Manage this Frigate instance's user accounts.",
+    "addUser": "Add User",
+    "updatePassword": "Update Password",
+    "toast": {
+      "success": {
+        "createUser": "User {{user}} created successfully",
+        "deleteUser": "User {{user}} deleted successfully",
+        "updatePassword": "Password updated successfully.",
+        "roleUpdated": "Role updated for {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Failed to save password: {{errorMessage}}",
+        "createUserFailed": "Failed to create user: {{errorMessage}}",
+        "deleteUserFailed": "Failed to delete user: {{errorMessage}}",
+        "roleUpdateFailed": "Failed to update role: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Username",
+      "actions": "Actions",
+      "role": "Role",
+      "noUsers": "No users found.",
+      "changeRole": "Change user role",
+      "password": "Password",
+      "deleteUser": "Delete user"
+    },
+    "dialog": {
+      "form": {
+        "user": "Username",
+        "user.desc": "Only letters, numbers, periods and underscores allowed.",
+        "user.placeholder": "Enter username",
+        "password": "Password",
+        "password.placeholder": "Enter password",
+        "password.confirm": "Confirm Password",
+        "password.confirm.placeholder": "Confirm Password",
+        "password.strength": "password strength: ",
+        "password.strength.weak": "Weak",
+        "password.strength.medium": "Medium",
+        "password.strength.strong": "Strong",
+        "password.strength.veryStrong": "Very strong",
+        "password.match": "Passwords match",
+        "password.notMatch": "Passwords don't match",
+        "newPassword": "New Password",
+        "newPassword.placeholder": "Enter new password",
+        "newPassword.confirm.placeholder": "Re-enter new password",
+        "usernameIsRequired": "Username is required"
+      },
+      "createUser": {
+        "title": "Create New User",
+        "desc": "Add a new user account and specify an role for access to areas of the Frigate UI.",
+        "usernameOnlyInclude": "Username may only include letters, numbers, . or _"
+      },
+      "deleteUser": {
+        "title": "Delete User",
+        "desc": "This action cannot be undone. This will permanently delete the user account and remove all associated data.",
+        "warn": "Are you sure you want to delete <span className=\"font-bold\">{{username}}</span>?"
+      },
+      "passwordSetting": {
+        "updatePassword": "Update Password for {{username}}",
+        "setPassword": "Set Password",
+        "desc": "Create a strong password to secure this account."
+      },
+      "changeRole": {
+        "title": "Change User Role",
+        "desc": "Update permissions for <span className=\"font-medium\">{{username}}</span>",
+        "roleInfo": "<p>Select the appropriate role for this user:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Admin:</span> Full access to all features. </li><li> • <span className=\"font-medium\">Viewer:</span> Limited to Live dashboards, Review, Explore, and Exports only.</li></ul>"
+      }
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "notificationSettings": {
+      "title": "Notification Settings",
+      "desc": "Frigate can natively send push notifications to your device when it is running in the browser or installed as a PWA.",
+      "documentation": "Read the Documentation"
+    },
+    "notificationUnavailable": {
+      "title": "Notifications Unavailable",
+      "desc": "Web push notifications require a secure context (<code>https://...</code>). This is a browser limitation. Access Frigate securely to use notifications.",
+      "documentation": "Read the Documentation"
+    },
+    "globalSettings": {
+      "title": "Global Settings",
+      "desc": "Temporarily suspend notifications for specific cameras on all registered devices."
+    },
+    "email": "Email",
+    "email.placeholder": "e.g. example@email.com",
+    "email.desc": "A valid email is required and will be used to notify you if there are any issues with the push service.",
+    "cameras": "Cameras",
+    "cameras.noCameras": "No cameras available",
+    "cameras.desc": "Select which cameras to enable notifications for.",
+    "deviceSpecific": "Device Specific Settings",
+    "registerDevice": "Register This Device",
+    "unregisterDevice": "Unregister This Device",
+    "sendTestNotification": "Send a test notification",
+    "active": "Notifications Active",
+    "suspended": "Notifications suspended {{time}}",
+    "suspendTime": {
+      "5minutes": "Suspend for 5 minutes",
+      "10minutes": "Suspend for 10 minutes",
+      "30minutes": "Suspend for 30 minutes",
+      "1hour": "Suspend for 1 hour",
+      "12hours": "Suspend for 12 hours",
+      "24hours": "Suspend for 24 hours",
+      "untilRestart": "Suspend until restart"
+    },
+    "cancelSuspension": "Cancel Suspension",
+    "toast": {
+      "success": {
+        "registered": "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",
+        "settingSaved": "Notification settings have been saved."
+      },
+      "error": {
+        "registerFailed": "Failed to save notification registration."
+      }
+    }
+  }
+}

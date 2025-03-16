@@ -9,6 +9,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { NavData } from "@/types/navigation";
 import { IconType } from "react-icons";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const variants = {
   primary: {
@@ -34,6 +35,7 @@ export default function NavItem({
   Icon,
   onClick,
 }: NavItemProps) {
+  const { t } = useTranslation(["common"]);
   if (item.enabled == false) {
     return;
   }
@@ -60,7 +62,7 @@ export default function NavItem({
         <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
-            <p>{item.title}</p>
+            <p>{t(item.title)}</p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>

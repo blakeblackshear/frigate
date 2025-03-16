@@ -1,0 +1,176 @@
+{
+  "documentTitle": "Explore - Frigate",
+  "generativeAI": "Generative AI",
+  "exploreIsUnavailable": {
+    "title": "Explore is Unavailable",
+    "embeddingsReindexing": {
+      "context": "Explore can be used after tracked object embeddings have finished reindexing.",
+      "startingUp": "Starting up...",
+      "estimatedTime": "Estimated time remaining:",
+      "finishingShortly": "Finishing shortly",
+      "step": {
+        "thumbnailsEmbedded": "Thumbnails embedded: ",
+        "descriptionsEmbedded": "Descriptions embedded: ",
+        "trackedObjectsProcessed": "Tracked objects processed: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate is downloading the necessary embeddings models to support the Semantic Search feature. This may take several minutes depending on the speed of your network connection.",
+      "setup": {
+        "visionModel": "Vision model",
+        "visionModelFeatureExtractor": "Vision model feature extractor",
+        "textModel": "Text model",
+        "textTokenizer": "Text tokenizer"
+      },
+      "tips": {
+        "context": "You may want to reindex the embeddings of your tracked objects once the models are downloaded.",
+        "documentation": "Read the documentation"
+      },
+      "error": "An error has occurred. Check Frigate logs."
+    }
+  },
+  "trackedObjectDetails": "Tracked Object Details",
+  "type": {
+    "details": "details",
+    "snapshot": "snapshot",
+    "video": "video",
+    "object_lifecycle": "object lifecycle"
+  },
+  "objectLifecycle": {
+    "title": "Object Lifecycle",
+    "noImageFound": "No image found for this timestamp.",
+    "createObjectMask": "Create Object Mask",
+    "adjustAnnotationSettings": "Adjust annotation settings",
+    "scrollViewTips": "Scroll to view the significant moments of this object's lifecycle.",
+    "autoTrackingTips": "Bounding box positions will be inaccurate for autotracking cameras.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detected",
+      "entered_zone": "{{label}} entered {{zones}}",
+      "active": "{{label}} became active",
+      "stationary": "{{label}} became stationary",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detected for {{label}}",
+        "other": "{{label}} recognized as {{attribute}}"
+      },
+      "gone": "{{label}} left",
+      "heard": "{{label}} heard",
+      "external": "{{label}} detected"
+    },
+    "annotationSettings": {
+      "title": "Annotation Settings",
+      "showAllZones": "Show All Zones",
+      "showAllZones.desc": "Always show zones on frames where objects have entered a zone.",
+      "offset": {
+        "label": "Annotation Offset",
+        "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. However, the <code>annotation_offset</code> field can be used to adjust this.",
+        "documentation": "Read the documentation ",
+        "millisecondsToOffset": "Milliseconds to offset detect annotations by. <em>Default: 0</em>",
+        "tips": "TIP: Imagine there is an event clip with a person walking from left to right. If the event timeline bounding box is consistently to the left of the person then the value should be decreased. Similarly, if a person is walking from left to right and the bounding box is consistently ahead of the person then the value should be increased."
+      }
+    },
+    "carousel": {
+      "previous": "Previous slide",
+      "next": "Next slide"
+    }
+  },
+  "details": {
+    "item": {
+      "title": "Review Item Details",
+      "desc": "Review item details",
+      "button": {
+        "share": "Share this review item",
+        "viewInExplore": "View in Explore"
+      },
+      "tips": {
+        "mismatch_one": "{{count}} unavailable object was detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
+        "mismatch_other": "{{count}} unavailable objects were detected and included in this review item. Those objects either did not qualify as an alert or detection or have already been cleaned up/deleted.",
+        "hasMissingObjects": "Adjust your configuration if you want Frigate to save tracked objects for the following labels: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
+          "updatedSublabel": "Successfully updated sub label."
+        },
+        "error": {
+          "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
+          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}"
+        }
+      }
+
+    },
+    "label": "Label",
+    "editSubLable": "Edit sub label",
+    "editSubLable.desc": "Enter a new sub label for this {{label}}",
+    "editSubLable.desc.noLabel": "Enter a new sub label for this tracked object",
+    "topScore": "Top Score",
+    "topScore.info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail.",
+    "estimatedSpeed": "Estimated Speed",
+    "objects": "Objects",
+    "camera": "Camera",
+    "zones": "Zones",
+    "timestamp": "Timestamp",
+    "button": {
+      "findSimilar": "Find Similar"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description of the tracked object",
+      "aiTips": "Frigate will not request a description from your Generative AI provider until the tracked object's lifecycle has ended."
+    },
+    "button.regenerate": "Regenerate",
+    "button.regenerate.label": "Regenerate tracked object description",
+    "expandRegenerationMenu": "Expand regeneration menu",
+    "regenerateFromSnapshot": "Regenerate from Snapshot",
+    "regenerateFromThumbnails": "Regenerate from Thumbnails",
+    "tips": {
+      "descriptionSaved": "Successfully saved description",
+      "saveDescriptionFailed": "Failed to update the description: {{errorMessage}}"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Download video",
+      "aria": "Download video"
+    },
+    "downloadSnapshot": {
+      "label": "Download snapshot",
+      "aria": "Download snapshot"
+    },
+    "viewObjectLifecycle": {
+      "label": "View object lifecycle",
+      "aria": "Show the object lifecycle"
+    },
+    "findSimilar": {
+      "label": "Find similar",
+      "aria": "Find similar tracked objects"
+    },
+    "submitToPlus": {
+      "label": "Submit to Frigate+",
+      "aria": "Submit to Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "View in History",
+      "aria": "View in History"
+    },
+    "deleteTrackedObject": {
+      "label": "Delete this tracked object"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "desc": "Deleting this tracked object removes the snapshot, any saved embeddings, and any associated object lifecycle entries. Recorded footage of this tracked object in History view will <em>NOT</em> be deleted.<br /><br />Are you sure you want to proceed?"
+    }
+  },
+  "noTrackedObjects": "No Tracked Objects Found",
+  "fetchingTrackedObjectsFailed": "Error fetching tracked objects: {{errorMessage}}",
+  "trackedObjectsCount": "{{count}} tracked objects ",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Tracked object deleted successfully.",
+        "error": "Failed to delete tracked object: {{errorMessage}}"
+      }
+    }
+  }
+}

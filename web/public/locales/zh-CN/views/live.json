@@ -1,0 +1,154 @@
+{
+  "documentTitle": "实时监控 - Frigate",
+  "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
+  "lowBandwidthMode": "低带宽模式",
+  "twoWayTalk": {
+    "enable": "开启双向对话",
+    "disable": "关闭双向对话"
+  },
+  "cameraAudio": {
+    "enable": "开启摄像头音频",
+    "disable": "关闭摄像头音频"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "点击画面以使摄像头居中",
+        "enable": "启用点击移动",
+        "disable": "禁用点击移动"
+      },
+      "left": {
+        "label": "PTZ摄像头向左移动"
+      },
+      "up": {
+        "label": "PTZ摄像头向上移动"
+      },
+      "down": {
+        "label": "PTZ摄像头向下移动"
+      },
+      "right": {
+        "label": "PTZ摄像头向右移动"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ摄像头放大"
+      },
+      "out": {
+        "label": "PTZ摄像头缩小"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "点击将PTZ摄像头画面居中"
+      }
+    },
+    "presets": "PTZ摄像头预设"
+  },
+  "camera": {
+    "enable": "开启摄像头",
+    "disable": "关闭摄像头"
+  },
+  "muteCameras": {
+    "enable": "屏蔽所有摄像头",
+    "disable": "取消屏蔽所有摄像头"
+  },
+  "detect": {
+    "enable": "启用检测",
+    "disable": "关闭检测"
+  },
+  "recording": {
+    "enable": "启用录制",
+    "disable": "关闭录制"
+  },
+  "snapshots": {
+    "enable": "启用快照",
+    "disable": "关闭快照"
+  },
+  "audioDetect": {
+    "enable": "启用音频检测",
+    "disable": "关闭音频检测"
+  },
+  "autotracking": {
+    "enable": "启用自动追踪",
+    "disable": "关闭自动追踪"
+  },
+  "streamStats": {
+    "enable": "显示视频流统计信息",
+    "disable": "隐藏视频流统计信息"
+  },
+  "manualRecording": {
+    "title": "按需录制",
+    "tips": "根据此摄像机的录制保留设置，手动启动事件。",
+    "playInBackground": {
+      "label": "后台播放",
+      "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "showStats": {
+      "label": "显示统计信息",
+      "desc": "启用此选项可在摄像机画面上叠加显示视频流统计信息。"
+    },
+    "debugView": "调试视图",
+    "start": "开始手动按需录制",
+    "started": "已启用手动按需录制",
+    "failedToStart": "启动手动录制失败",
+    "recordDisabledTips": "由于此摄像头的配置中禁用了录制或对其进行了限制，将只会保存快照。",
+    "end": "停止手动按需录制",
+    "ended": "已完成手动按需录制",
+    "failedToEnd": "停止手动录制失败"
+  },
+  "streamingSettings": "视频流设置",
+  "notifications": "通知",
+  "audio": "音频",
+  "suspend": {
+    "forTime": "暂停时长："
+  },
+  "stream": {
+    "title": "视频流",
+    "audio": {
+      "tips": "音频必须从摄像机输出并在 go2rtc 中配置为此视频流使用。",
+      "tips.documentation": "阅读文档 ",
+      "available": "此视频流支持音频",
+      "unavailable": "此视频流不支持音频"
+    },
+    "twoWayTalk": {
+      "tips": "您的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",
+      "tips.documentation": "阅读文档 ",
+      "available": "此视频流支持双向对讲",
+      "unavailable": "此视频流不支持双向对讲"
+    },
+    "lowBandwidth": {
+      "tips": "由于缓冲或视频流错误，实时视图处于低带宽模式。",
+      "resetStream": "重置视频流"
+    },
+    "playInBackground": {
+      "label": "后台播放",
+      "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} 设置",
+    "cameraEnabled": "摄像机已启用",
+    "objectDetection": "对象检测",
+    "recording": "录制",
+    "snapshots": "快照",
+    "audioDetection": "音频检测",
+    "autotracking": "自动跟踪"
+  },
+  "history": {
+    "label": "显示历史录像"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "全部",
+      "motion": "运动",
+      "active_objects": "活动对象"
+    },
+    "notAllTips": "您的 {{source}} 录制保留配置设置为 <code>mode: {{effectiveRetainMode}}</code>，因此此按需录制将仅保留包含 {{effectiveRetainModeName}} 的片段。"
+  },
+  "editLayout": {
+    "label": "编辑布局",
+    "group.label": "编辑摄像机分组",
+    "exitEdit": "退出编辑"
+}
+}

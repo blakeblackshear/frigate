@@ -15,6 +15,7 @@ import { formatSecondsToDuration } from "@/utils/dateUtil";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
 import { Link } from "react-router-dom";
@@ -26,6 +27,8 @@ const API_LIMIT = 25;
 
 export default function Explore() {
   // search field handler
+
+  const { t } = useTranslation(["views/explore"]);
 
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -201,7 +204,9 @@ export default function Explore() {
     revalidateAll: false,
     onError: (error) => {
       toast.error(
-        `Error fetching tracked objects: ${error.response.data.message}`,
+        t("fetchingTrackedObjectsFailed", {
+          errorMessage: error.response.data.message,
+        }),
         {
           position: "top-center",
         },
@@ -357,13 +362,12 @@ export default function Explore() {
           <div className="flex max-w-96 flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
             <div className="my-5 flex flex-col items-center gap-2 text-xl">
               <TbExclamationCircle className="mb-3 size-10" />
-              <div>Explore is Unavailable</div>
+              <div>{t("exploreIsUnavailable.title")}</div>
             </div>
             {embeddingsReindexing && allModelsLoaded && (
               <>
                 <div className="text-center text-primary-variant">
-                  Explore can be used after tracked object embeddings have
-                  finished reindexing.
+                  {t("exploreIsUnavailable.embeddingsReindexing.context")}
                 </div>
                 <div className="pt-5 text-center">
                   <AnimatedCircularProgressBar
@@ -379,29 +383,35 @@ export default function Explore() {
                     <div className="mb-3 flex flex-col items-center justify-center gap-1">
                       <div className="text-primary-variant">
                         {reindexState.time_remaining === -1
-                          ? "Starting up..."
-                          : "Estimated time remaining:"}
+                          ? t(
+                              "exploreIsUnavailable.embeddingsReindexing.startingUp",
+                            )
+                          : t(
+                              "exploreIsUnavailable.embeddingsReindexing.estimatedTime",
+                            )}
                       </div>
                       {reindexState.time_remaining >= 0 &&
                         (formatSecondsToDuration(reindexState.time_remaining) ||
-                          "Finishing shortly")}
+                          t(
+                            "exploreIsUnavailable.embeddingsReindexing.finishingShortly",
+                          ))}
                     </div>
                   )}
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      Thumbnails embedded:
+                      t("exploreIsUnavailable.embeddingsReindexing.step.thumbnailsEmbedded")
                     </span>
                     {reindexState.thumbnails}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      Descriptions embedded:
+                      t("exploreIsUnavailable.embeddingsReindexing.step.descriptionsEmbedded")
                     </span>
                     {reindexState.descriptions}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      Tracked objects processed:
+                      t("exploreIsUnavailable.embeddingsReindexing.step.trackedObjectsProcessed")
                     </span>
                     {reindexState.processed_objects} /{" "}
                     {reindexState.total_objects}
@@ -412,26 +422,32 @@ export default function Explore() {
             {!allModelsLoaded && (
               <>
                 <div className="text-center text-primary-variant">
-                  Frigate is downloading the necessary embeddings models to
-                  support the Semantic Search feature. This may take several
-                  minutes depending on the speed of your network connection.
+                  {t("exploreIsUnavailable.downloadingModels.context")}
                 </div>
                 <div className="flex w-96 flex-col gap-2 py-5">
                   <div className="flex flex-row items-center justify-center gap-2">
                     {renderModelStateIcon(visionModelState)}
-                    Vision model
+                    {t(
+                      "exploreIsUnavailable.downloadingModels.setup.visionModel",
+                    )}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-2">
                     {renderModelStateIcon(visionFeatureExtractorState)}
-                    Vision model feature extractor
+                    {t(
+                      "exploreIsUnavailable.downloadingModels.setup.visionModelFeatureExtractor",
+                    )}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-2">
                     {renderModelStateIcon(textModelState)}
-                    Text model
+                    {t(
+                      "exploreIsUnavailable.downloadingModels.setup.textModel",
+                    )}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-2">
                     {renderModelStateIcon(textTokenizerState)}
-                    Text tokenizer
+                    {t(
+                      "exploreIsUnavailable.downloadingModels.setup.textTokenizer",
+                    )}
                   </div>
                 </div>
                 {(textModelState === "error" ||
@@ -439,12 +455,11 @@ export default function Explore() {
                   visionModelState === "error" ||
                   visionFeatureExtractorState === "error") && (
                   <div className="my-3 max-w-96 text-center text-danger">
-                    An error has occurred. Check Frigate logs.
+                    {t("exploreIsUnavailable.downloadingModels.error")}
                   </div>
                 )}
                 <div className="text-center text-primary-variant">
-                  You may want to reindex the embeddings of your tracked objects
-                  once the models are downloaded.
+                  {t("exploreIsUnavailable.downloadingModels.tips.context")}
                 </div>
                 <div className="flex items-center text-primary-variant">
                   <Link
@@ -453,7 +468,9 @@ export default function Explore() {
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    Read the documentation{" "}
+                    {t(
+                      "exploreIsUnavailable.downloadingModels.tips.documentation",
+                    )}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>

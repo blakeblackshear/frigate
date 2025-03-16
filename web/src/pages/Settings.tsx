@@ -43,13 +43,14 @@ import { useInitialCameraState } from "@/api/ws";
 import { isInIframe } from "@/utils/isIFrame";
 import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useTranslation } from "react-i18next";
 
 const allSettingsViews = [
-  "UI settings",
-  "classification settings",
-  "camera settings",
-  "masks / zones",
-  "motion tuner",
+  "uiSettings",
+  "classificationSettings",
+  "cameraSettings",
+  "masksAndZones",
+  "motionTuner",
   "debug",
   "users",
   "notifications",
@@ -57,7 +58,8 @@ const allSettingsViews = [
 type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
-  const [page, setPage] = useState<SettingsType>("UI settings");
+  const { t } = useTranslation(["views/settings"]);
+  const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
@@ -69,7 +71,7 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
-  const allowedViewsForViewer: SettingsType[] = ["UI settings", "debug"];
+  const allowedViewsForViewer: SettingsType[] = ["uiSettings", "debug"];
   const visibleSettingsViews = !isAdmin
     ? allowedViewsForViewer
     : allSettingsViews;
@@ -133,7 +135,7 @@ export default function Settings() {
         setSelectedCamera(firstEnabledCamera.name);
       } else if (
         !cameraEnabledStates[selectedCamera] &&
-        page !== "camera settings"
+        page !== "cameraSettings"
       ) {
         // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
         const firstEnabledCamera =
@@ -163,8 +165,8 @@ export default function Settings() {
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
-      if (!isAdmin && !["UI settings", "debug"].includes(page)) {
-        setPage("UI settings");
+      if (!isAdmin && !["uiSettings", "debug"].includes(page)) {
+        setPage("uiSettings");
       } else {
         setPage(page as SettingsType);
       }
@@ -183,8 +185,8 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    document.title = "Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.default");
+  }, [t]);
 
   return (
     <div className="flex size-full flex-col p-2">
@@ -199,8 +201,8 @@ export default function Settings() {
               onValueChange={(value: SettingsType) => {
                 if (value) {
                   // Restrict viewer navigation
-                  if (!isAdmin && !["UI settings", "debug"].includes(value)) {
-                    setPageToggle("UI settings");
+                  if (!isAdmin && !["uiSettings", "debug"].includes(value)) {
+                    setPageToggle("uiSettings");
                   } else {
                     setPageToggle(value);
                   }
@@ -210,12 +212,15 @@ export default function Settings() {
               {visibleSettingsViews.map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "UI settings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "uiSettings" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
-                  aria-label={`Select ${item}`}
+                  aria-label={t("selectItem", {
+                    item: t("menu." + item),
+                    ns: "common",
+                  })}
                 >
-                  <div className="capitalize">{item}</div>
+                  <div className="capitalize">{t("menu." + item)}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -223,11 +228,11 @@ export default function Settings() {
           </div>
         </ScrollArea>
         {(page == "debug" ||
-          page == "camera settings" ||
-          page == "masks / zones" ||
-          page == "motion tuner") && (
+          page == "cameraSettings" ||
+          page == "masksAndZones" ||
+          page == "motionTuner") && (
           <div className="ml-2 flex flex-shrink-0 items-center gap-2">
-            {page == "masks / zones" && (
+            {page == "masksAndZones" && (
               <ZoneMaskFilterButton
                 selectedZoneMask={filterZoneMask}
                 updateZoneMaskFilter={setFilterZoneMask}
@@ -244,27 +249,27 @@ export default function Settings() {
         )}
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "UI settings" && <UiSettingsView />}
-        {page == "classification settings" && (
+        {page == "uiSettings" && <UiSettingsView />}
+        {page == "classificationSettings" && (
           <ClassificationSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
         )}
-        {page == "camera settings" && (
+        {page == "cameraSettings" && (
           <CameraSettingsView
             selectedCamera={selectedCamera}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "masks / zones" && (
+        {page == "masksAndZones" && (
           <MasksAndZonesView
             selectedCamera={selectedCamera}
             selectedZoneMask={filterZoneMask}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "motion tuner" && (
+        {page == "motionTuner" && (
           <MotionTunerView
             selectedCamera={selectedCamera}
             setUnsavedChanges={setUnsavedChanges}
@@ -282,17 +287,19 @@ export default function Settings() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>You have unsaved changes.</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("dialog.unsavedChanges.title")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Do you want to save your changes before continuing?
+                {t("dialog.unsavedChanges.desc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => handleDialog(false)}>
-                Cancel
+                {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction onClick={() => handleDialog(true)}>
-                Save
+                {t("button.save", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -317,6 +324,8 @@ function CameraSelectButton({
   cameraEnabledStates,
   currentPage,
 }: CameraSelectButtonProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const [open, setOpen] = useState(false);
 
   if (!allCameras.length) {
@@ -332,7 +341,7 @@ function CameraSelectButton({
       <FaVideo className="text-background dark:text-primary" />
       <div className="hidden text-background dark:text-primary md:block">
         {selectedCamera == undefined
-          ? "No Camera"
+          ? t("cameraSetting.noCamera")
           : selectedCamera.replaceAll("_", " ")}
       </div>
     </Button>
@@ -342,7 +351,7 @@ function CameraSelectButton({
       {isMobile && (
         <>
           <DropdownMenuLabel className="flex justify-center">
-            Camera
+            {t("cameraSetting.camera")}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </>
@@ -351,7 +360,7 @@ function CameraSelectButton({
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => {
             const isEnabled = cameraEnabledStates[item.name];
-            const isCameraSettingsPage = currentPage === "camera settings";
+            const isCameraSettingsPage = currentPage === "cameraSettings";
             return (
               <FilterSwitch
                 key={item.name}

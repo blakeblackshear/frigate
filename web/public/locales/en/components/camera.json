@@ -1,0 +1,77 @@
+{
+  "group": {
+    "label": "Camera Groups",
+    "add": "Add camera groups",
+    "edit": "Edit camera groups",
+    "delete": {
+      "label": "Delete Camera Group",
+      "confirm": "Confirm Delete",
+      "confirm.desc": "Are you sure you want to delete the camera group <em>{{name}}</em>?"
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "Enter a name...",
+      "error": {
+        "mustLeastCharacters": "Camera group name must be at least 2 characters.",
+        "exists": "Camera group name already exists.",
+        "nameMustNotPeriod": "Camera group name must not contain a period.",
+        "invalid": "Invalid camera group name."
+      }
+    },
+    "cameras": {
+      "label": "Cameras",
+      "desc": "Select cameras for this group."
+    },
+    "icon": "Icon",
+    "success": "Camera group ({{name}}) has been saved.",
+    "camera": {
+      "setting": {
+        "label": "Camera Streaming Settings",
+        "title": "{{cameraName}} Streaming Settings",
+        "desc": "Change the live streaming options for this camera group's dashboard. <em>These settings are device/browser-specific.</em>",
+        "audioIsAvailable": "Audio is available for this stream",
+        "audioIsUnavailable": "Audio is available for this stream",
+        "audio": {
+          "tips": "Audio must be output from your camera and configured in go2rtc for this stream.",
+          "tips.document": "Read the documentation "
+        },
+        "streamMethod": {
+          "label": "Streaming Method",
+          "method": {
+            "noStreaming": {
+              "label": "No Streaming",
+              "desc": "Camera images will only update once per minute and no live streaming will occur."
+            },
+            "smartStreaming": {
+              "label": "Smart Streaming (recommended)",
+              "desc": "Smart streaming will update your camera image once per minute when no detectable activity is occurring to conserve bandwidth and resources. When activity is detected, the image seamlessly switches to a live stream."
+            },
+            "continuousStreaming": {
+              "label": "Continuous Streaming",
+              "desc": "Camera image will always be a live stream when visible on the dashboard, even if no activity is being detected.",
+              "desc.warning": "Continuous streaming may cause high bandwidth usage and performance issues. Use with caution."
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Compatibility mode",
+          "desc": "Enable this option only if your camera's live stream is displaying color artifacts and has a diagonal line on the right side of the image."
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Settings",
+      "title": "Options",
+      "showOptions": "Show Options",
+      "hideOptions": "Hide Options"
+    },
+    "boundingBox": "Bounding Box",
+    "timestamp": "Timestamp",
+    "zones": "Zones",
+    "mask": "Mask",
+    "motion": "Motion",
+    "regions": "Regions"
+  }
+}

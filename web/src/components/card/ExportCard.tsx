@@ -20,6 +20,7 @@ import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
+import { useTranslation } from "react-i18next";
 
 type ExportProps = {
   className: string;
@@ -36,6 +37,7 @@ export default function ExportCard({
   onRename,
   onDelete,
 }: ExportProps) {
+  const { t } = useTranslation(["views/exports"]);
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
@@ -89,10 +91,8 @@ export default function ExportCard({
             }
           }}
         >
-          <DialogTitle>Rename Export</DialogTitle>
-          <DialogDescription>
-            Enter a new name for this export.
-          </DialogDescription>
+          <DialogTitle>{t("editExport.title")}</DialogTitle>
+          <DialogDescription>{t("editExport.desc")}</DialogDescription>
           {editName && (
             <>
               <Input
@@ -113,13 +113,13 @@ export default function ExportCard({
               />
               <DialogFooter>
                 <Button
-                  aria-label="Save Export"
+                  aria-label={t("editExport.saveExport")}
                   size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => submitRename()}
                 >
-                  Save
+                  {t("button.save", { ns: "common" })}
                 </Button>
               </DialogFooter>
             </>
@@ -207,7 +207,7 @@ export default function ExportCard({
             {!exportedRecording.in_progress && (
               <Button
                 className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
-                aria-label="Play"
+                aria-label={t("button.play", { ns: "common" })}
                 variant="ghost"
                 onClick={() => {
                   onSelect(exportedRecording);

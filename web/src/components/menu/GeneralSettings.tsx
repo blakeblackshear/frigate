@@ -1,6 +1,7 @@
 import {
   LuActivity,
   LuGithub,
+  LuLanguages,
   LuLifeBuoy,
   LuList,
   LuLogOut,
@@ -10,6 +11,7 @@ import {
   LuSettings,
   LuSun,
   LuSunMoon,
+  LuEarth,
 } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -52,21 +54,28 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import useSWR from "swr";
 import RestartDialog from "../overlay/dialog/RestartDialog";
+
+import { useLanguage } from "@/context/language-provider";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useTranslation } from "react-i18next";
 
 type GeneralSettingsProps = {
   className?: string;
 };
 
 export default function GeneralSettings({ className }: GeneralSettingsProps) {
+  const { t } = useTranslation(["common"]);
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
 
+  // settings
+
+  const { language, setLanguage, systemLanguage } = useLanguage();
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -90,9 +99,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
-          toast.success("Password updated successfully.", {
-            position: "top-center",
-          });
+          toast.success(
+            t("users.toast.success.updatePassword", { ns: "views/settings" }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .catch((error) => {
@@ -100,9 +112,15 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Error setting password: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("users.toast.error.setPasswordFailed", {
+            ns: "views/settings",
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -126,7 +144,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="right">
-                <p>Settings</p>
+                <p>{t("menu.settings")}</p>
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -150,8 +168,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             {isMobile && (
               <div className="mb-2">
                 <DropdownMenuLabel>
-                  Current User: {profile?.username || "anonymous"}{" "}
-                  {profile?.role && `(${profile.role})`}
+                  {t("menu.user.current", {
+                    user: profile?.username || t("menu.user.anonymous"),
+                  })}{" "}
+                  {t("role." + profile?.role) &&
+                    `(${t("role." + profile?.role)})`}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator
                   className={isDesktop ? "mt-3" : "mt-1"}
@@ -163,11 +184,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Set Password"
+                    aria-label={t("menu.user.setPassword")}
                     onClick={() => setPasswordDialogOpen(true)}
                   >
                     <LuSquarePen className="mr-2 size-4" />
-                    <span>Set Password</span>
+                    <span>{t("menu.user.setPassword")}</span>
                   </MenuItem>
                 )}
                 <MenuItem
@@ -176,18 +197,18 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex items-center p-2 text-sm"
                   }
-                  aria-label="Log out"
+                  aria-label={t("menu.user.logout", { ns: "common" })}
                 >
                   <a className="flex" href={logoutUrl}>
                     <LuLogOut className="mr-2 size-4" />
-                    <span>Logout</span>
+                    <span>{t("menu.user.logout", { ns: "common" })}</span>
                   </a>
                 </MenuItem>
               </div>
             )}
             {isAdmin && (
               <>
-                <DropdownMenuLabel>System</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("menu.system")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
                   <Link to="/system#general">
@@ -197,10 +218,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="System metrics"
+                      aria-label={t("menu.systemMetrics")}
                     >
                       <LuActivity className="mr-2 size-4" />
-                      <span>System metrics</span>
+                      <span>{t("menu.systemMetrics")}</span>
                     </MenuItem>
                   </Link>
                   <Link to="/logs">
@@ -210,10 +231,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="System logs"
+                      aria-label={t("menu.systemLogs")}
                     >
                       <LuList className="mr-2 size-4" />
-                      <span>System logs</span>
+                      <span>{t("menu.systemLogs")}</span>
                     </MenuItem>
                   </Link>
                 </DropdownMenuGroup>
@@ -222,7 +243,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             <DropdownMenuLabel
               className={isDesktop && isAdmin ? "mt-3" : "mt-1"}
             >
-              Configuration
+              {t("menu.configuration")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -233,10 +254,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
-                  aria-label="Settings"
+                  aria-label={t("menu.settings")}
                 >
                   <LuSettings className="mr-2 size-4" />
-                  <span>Settings</span>
+                  <span>{t("menu.settings")}</span>
                 </MenuItem>
               </Link>
               {isAdmin && (
@@ -248,10 +269,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex w-full items-center p-2 text-sm"
                       }
-                      aria-label="Configuration editor"
+                      aria-label={t("menu.configurationEditor")}
                     >
                       <LuSquarePen className="mr-2 size-4" />
-                      <span>Configuration editor</span>
+                      <span>{t("menu.configurationEditor")}</span>
                     </MenuItem>
                   </Link>
                 </>
@@ -271,7 +292,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               )}
             </DropdownMenuGroup>
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
-              Appearance
+              {t("menu.appearance")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <SubItem>
@@ -280,8 +301,8 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
               >
-                <LuSunMoon className="mr-2 size-4" />
-                <span>Dark Mode</span>
+                <LuLanguages className="mr-2 size-4" />
+                <span>{t("menu.languages")}</span>
               </SubItemTrigger>
               <Portal>
                 <SubItemContent
@@ -296,16 +317,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Light mode"
-                    onClick={() => setTheme("light")}
+                    aria-label={t("menu.language.en")}
+                    onClick={() => setLanguage("en")}
                   >
-                    {theme === "light" ? (
+                    {language.trim() === "en" ? (
                       <>
-                        <LuSun className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                        Light
+                        <LuLanguages className="mr-2 size-4" />
+                        {t("menu.language.en")}
                       </>
                     ) : (
-                      <span className="ml-6 mr-2">Light</span>
+                      <span className="ml-6 mr-2">{t("menu.language.en")}</span>
                     )}
                   </MenuItem>
                   <MenuItem
@@ -314,16 +335,18 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Dark mode"
-                    onClick={() => setTheme("dark")}
+                    aria-label={t("menu.language.zhCN")}
+                    onClick={() => setLanguage("zh-CN")}
                   >
-                    {theme === "dark" ? (
+                    {language === "zh-CN" ? (
                       <>
-                        <LuMoon className="mr-2 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                        Dark
+                        <LuLanguages className="mr-2 size-4" />
+                        {t("menu.language.zhCN")}
                       </>
                     ) : (
-                      <span className="ml-6 mr-2">Dark</span>
+                      <span className="ml-6 mr-2">
+                        {t("menu.language.zhCN")}
+                      </span>
                     )}
                   </MenuItem>
                   <MenuItem
@@ -332,16 +355,16 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label="Use the system settings for light or dark mode"
-                    onClick={() => setTheme("system")}
+                    aria-label={t("menu.language.withSystem.label")}
+                    onClick={() => setLanguage(systemLanguage)}
                   >
-                    {theme === "system" ? (
+                    {language === systemLanguage ? (
                       <>
-                        <CgDarkMode className="mr-2 size-4 scale-100 transition-all" />
-                        System
+                        <LuEarth className="mr-2 size-4 scale-100 transition-all" />
+                        {t("menu.withSystem")}
                       </>
                     ) : (
-                      <span className="ml-6 mr-2">System</span>
+                      <span className="ml-6 mr-2">{t("menu.withSystem")}</span>
                     )}
                   </MenuItem>
                 </SubItemContent>
@@ -354,7 +377,84 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 }
               >
                 <LuSunMoon className="mr-2 size-4" />
-                <span>Theme</span>
+                <span>{t("menu.darkMode.label")}</span>
+              </SubItemTrigger>
+              <Portal>
+                <SubItemContent
+                  className={
+                    isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                  }
+                >
+                  <span tabIndex={0} className="sr-only" />
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label={t("menu.darkMode.light")}
+                    onClick={() => setTheme("light")}
+                  >
+                    {theme === "light" ? (
+                      <>
+                        <LuSun className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        {t("menu.darkMode.light")}
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">
+                        {t("menu.darkMode.light")}
+                      </span>
+                    )}
+                  </MenuItem>
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label={t("menu.darkMode.dark")}
+                    onClick={() => setTheme("dark")}
+                  >
+                    {theme === "dark" ? (
+                      <>
+                        <LuMoon className="mr-2 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                        {t("menu.darkMode.dark")}
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">
+                        {t("menu.darkMode.dark")}
+                      </span>
+                    )}
+                  </MenuItem>
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label={t("menu.darkMode.withSystem.label")}
+                    onClick={() => setTheme("system")}
+                  >
+                    {theme === "system" ? (
+                      <>
+                        <CgDarkMode className="mr-2 size-4 scale-100 transition-all" />
+                        {t("menu.withSystem")}
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">{t("menu.withSystem")}</span>
+                    )}
+                  </MenuItem>
+                </SubItemContent>
+              </Portal>
+            </SubItem>
+            <SubItem>
+              <SubItemTrigger
+                className={
+                  isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
+                }
+              >
+                <LuSunMoon className="mr-2 size-4" />
+                <span>{t("menu.theme.label")}</span>
               </SubItemTrigger>
               <Portal>
                 <SubItemContent
@@ -377,11 +477,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       {scheme === colorScheme ? (
                         <>
                           <IoColorPalette className="mr-2 size-4 rotate-0 scale-100 transition-all" />
-                          {friendlyColorSchemeName(scheme)}
+                          {t(friendlyColorSchemeName(scheme))}
                         </>
                       ) : (
                         <span className="ml-6 mr-2">
-                          {friendlyColorSchemeName(scheme)}
+                          {t(friendlyColorSchemeName(scheme))}
                         </span>
                       )}
                     </MenuItem>
@@ -390,7 +490,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               </Portal>
             </SubItem>
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
-              Help
+              {t("menu.help")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <a href="https://docs.frigate.video" target="_blank">
@@ -398,10 +498,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
-                aria-label="Frigate documentation"
+                aria-label={t("menu.documentation.label")}
               >
                 <LuLifeBuoy className="mr-2 size-4" />
-                <span>Documentation</span>
+                <span>{t("menu.documentation")}</span>
               </MenuItem>
             </a>
             <a
@@ -429,11 +529,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex items-center p-2 text-sm"
                   }
-                  aria-label="Restart Frigate"
+                  aria-label={t("menu.restart")}
                   onClick={() => setRestartDialogOpen(true)}
                 >
                   <LuRotateCw className="mr-2 size-4" />
-                  <span>Restart Frigate</span>
+                  <span>{t("menu.restart")}</span>
                 </MenuItem>
               </>
             )}

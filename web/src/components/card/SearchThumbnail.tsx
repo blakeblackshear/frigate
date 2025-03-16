@@ -8,11 +8,11 @@ import Chip from "@/components/indicators/Chip";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
+import { useTranslation } from "react-i18next";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -23,6 +23,7 @@ export default function SearchThumbnail({
   searchResult,
   onClick,
 }: SearchThumbnailProps) {
+  const { t } = useTranslation(["views/search"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -113,7 +114,7 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => capitalizeFirstLetter(text))
+                  .map((text) => t(text, { ns: "objects" }))
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}

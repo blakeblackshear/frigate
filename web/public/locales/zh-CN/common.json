@@ -1,0 +1,173 @@
+{
+  "time": {
+    "untilForTime": "直到 {{time}}",
+    "untilForRestart": "直到 Frigate 重启。",
+    "untilRestart": "直到重启",
+    "ago": "{{timeAgo}} 前",
+    "justNow": "刚才",
+    "today": "今天",
+    "yesterday": "昨天",
+    "last7": "最后 7 天",
+    "last14": "最后 14 天",
+    "last30": "最后 30 天",
+    "thisWeek": "本周",
+    "lastWeek": "上个周",
+    "thisMonth": "本月",
+    "lastMonth": "上个月",
+    "5minutes": "5 分钟",
+    "10minutes": "10 分钟",
+    "30minutes": "30 分钟",
+    "1hour": "1 小时",
+    "12hours": "12 小时",
+    "24hours": "24 小时",
+    "pm": "上午",
+    "am": "下午",
+    "yr": "{{time}}年",
+    "year": "{{time}}年",
+    "mo": "{{time}}月",
+    "month": "{{time}}月",
+    "d": "{{time}}天",
+    "day": "{{time}}天",
+    "h": "{{time}}小时",
+    "hour": "{{time}}小时",
+    "m": "{{time}}分钟",
+    "minute": "{{time}}分钟",
+    "s": "{{time}}秒",
+    "second": "{{time}}秒",
+    "formattedTimestamp": "%m月%-d日 %I:%M:%S %p",
+    "formattedTimestamp.24hour": "%m月%-d日 %H:%M:%S",
+    "formattedTimestamp2": "%m/%d %I:%M:%S%P",
+    "formattedTimestamp2.24hour": "%d日%m月 %H:%M:%S",
+    "formattedTimestampExcludeSeconds": "%m月%-d日 %I:%M %p",
+    "formattedTimestampExcludeSeconds.24hour": "%m月%-d日 %H:%M",
+    "formattedTimestampWithYear": "%Y年%m月%-d日 %I:%M:%S %p",
+    "formattedTimestampWithYear.24hour": "%Y年%m月%-d日 %H:%M",
+    "formattedTimestampOnlyMonthAndDay": "%m月%-d日"
+  },
+  "unit": {
+    "speed": {
+      "mph": "英里/小时",
+      "kph": "公里/小时"
+    }
+  },
+  "label": {
+    "back": "返回"
+  },
+  "pagination": {
+    "label": "分页",
+    "previous": "上一页",
+    "previous.label": "转到上一页",
+    "next": "下一页",
+    "next.label": "转到下一页",
+    "more": "更多页面"
+  },
+  "button": {
+    "apply": "应用",
+    "reset": "重置",
+    "enabled": "启用",
+    "enable": "启用",
+    "disabled": "禁用",
+    "disable": "禁用",
+    "save": "保存",
+    "saving": "保存中……",
+    "cancel": "取消",
+    "close": "关闭",
+    "copy": "复制",
+    "back": "返回",
+    "history": "历史",
+    "fullscreen": "全屏",
+    "exitFullscreen": "全屏",
+    "pictureInPicture": "画中画",
+    "on": "开",
+    "off": "关",
+    "edit": "编辑",
+    "copyCoordinates": "复制坐标",
+    "delete": "删除",
+    "yes": "是",
+    "no": "否",
+    "download": "下载",
+    "info": "信息",
+    "suspended": "已暂停",
+    "unsuspended": "取消暂停",
+    "play": "播放",
+    "unselect": "取消选择",
+    "export": "导出",
+    "deleteNow": "立即删除"
+  },
+  "menu": {
+    "system": "系统",
+    "systemMetrics": "系统信息",
+    "configuration": "配置",
+    "systemLogs": "系统日志",
+    "settings": "设置",
+    "configurationEditor": "配置编辑器",
+    "languages": "languages / 语言",
+    "language": {
+      "en": "English",
+      "zhCN": "简体中文",
+      "withSystem.label": "使用系统语言设置"
+    },
+    "appearance": "外观",
+    "darkMode": {
+      "label": "深色模式",
+      "light": "浅色",
+      "dark": "深色",
+      "withSystem.label": "使用系统深色模式设置"
+    },
+    "withSystem": "跟随系统",
+    "theme": {
+        "label": "主题",
+        "blue": "蓝色",
+        "green": "绿色",
+        "nord": "Nord",
+        "red": "红色",
+        "contrast": "高对比度",
+        "default": "默认"
+    },
+    "help": "帮助",
+    "documentation.label": "Frigate 的官方文档",
+    "documentation": "文档",
+    "live": "实时监控",
+    "live.allCameras": "所有摄像头",
+    "live.cameras": "摄像头",
+    "live.cameras.count_one": "{{count}} 个摄像头",
+    "live.cameras.count_other": "{{count}} 个摄像头",
+    "review": "回放",
+    "explore": "探测",
+    "export": "导出",
+    "uiPlayground": "UI Playground",
+    "faceLibrary": "人脸管理",
+    "user": {
+      "account": "账号",
+      "current": "当前用户：{{user}}",
+      "anonymous": "匿名",
+      "logout": "登出",
+      "setPassword": "设置密码"
+    },
+    "restart": "重启 Frigate"
+  },
+  "toast": {
+    "copyUrlToClipboard": "已复制链接到剪贴板。",
+    "save": {
+      "error": "保存配置信息失败： {{errorMessage}}",
+      "error.noMessage": "保存配置信息失败"
+    }
+  },
+  "role": {
+    "title": "权限组",
+    "admin": "管理员",
+    "viewer": "查看者",
+    "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
+  },
+  "accessDenied": {
+    "documentTitle": "没有权限 - Frigate",
+    "title": "没有权限",
+    "desc": "您没有权限查看此页面。"
+  },
+  "notFound": {
+    "documentTitle": "没有找到页面 - Frigate",
+    "title": "404",
+    "desc": "页面未找到"
+  },
+  "selectItem": "选择 {{item}}"
+}

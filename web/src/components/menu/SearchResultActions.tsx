@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
 
+import { Trans, useTranslation } from "react-i18next";
+
 type SearchResultActionsProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
@@ -59,6 +61,8 @@ export default function SearchResultActions({
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
+  const { t } = useTranslation(["views/explore"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -68,7 +72,7 @@ export default function SearchResultActions({
       .delete(`events/${searchResult.id}`)
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success("Tracked object deleted successfully.", {
+          toast.success(t("searchResult.deleteTrackedObject.toast.success"), {
             position: "top-center",
           });
           refreshResults();
@@ -79,9 +83,12 @@ export default function SearchResultActions({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to delete tracked object: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("searchResult.deleteTrackedObject.toast.error", { errorMessage }),
+          {
+            position: "top-center",
+          },
+        );
       });
   };
 
@@ -90,45 +97,45 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem aria-label="Download video">
+        <MenuItem aria-label={t("itemMenu.downloadVideo.aria")}>
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
             download={`${searchResult.camera}_${searchResult.label}.mp4`}
           >
             <LuDownload className="mr-2 size-4" />
-            <span>Download video</span>
+            <span>{t("itemMenu.downloadVideo")}</span>
           </a>
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
-        <MenuItem aria-label="Download snapshot">
+        <MenuItem aria-label={t("itemMenu.downloadSnapshot.aria")}>
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
             <LuCamera className="mr-2 size-4" />
-            <span>Download snapshot</span>
+            <span>{t("itemMenu.downloadSnapshot.label")}</span>
           </a>
         </MenuItem>
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label="Show the object lifecycle"
+          aria-label={t("itemMenu.viewObjectLifecycle.aria")}
           onClick={showObjectLifecycle}
         >
           <FaArrowsRotate className="mr-2 size-4" />
-          <span>View object lifecycle</span>
+          <span>{t("itemMenu.viewObjectLifecycle.label")}</span>
         </MenuItem>
       )}
       {config?.semantic_search?.enabled && isContextMenu && (
         <MenuItem
-          aria-label="Find similar tracked objects"
+          aria-label={t("itemMenu.findSimilar.aria")}
           onClick={findSimilar}
         >
           <MdImageSearch className="mr-2 size-4" />
-          <span>Find similar</span>
+          <span>{t("itemMenu.findSimilar.label")}</span>
         </MenuItem>
       )}
       {isMobileOnly &&
@@ -137,17 +144,20 @@ export default function SearchResultActions({
         searchResult.end_time &&
         searchResult.data.type == "object" &&
         !searchResult.plus_id && (
-          <MenuItem aria-label="Submit to Frigate Plus" onClick={showSnapshot}>
+          <MenuItem
+            aria-label={t("itemMenu.submitToPlus.aria")}
+            onClick={showSnapshot}
+          >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
-            <span>Submit to Frigate+</span>
+            <span>{t("itemMenu.submitToPlus")}</span>
           </MenuItem>
         )}
       <MenuItem
-        aria-label="Delete this tracked object"
+        aria-label={t("itemMenu.deleteTrackedObject.label")}
         onClick={() => setDeleteDialogOpen(true)}
       >
         <LuTrash2 className="mr-2 size-4" />
-        <span>Delete</span>
+        <span>{t("button.delete", { ns: "common" })}</span>
       </MenuItem>
     </>
   );
@@ -160,24 +170,20 @@ export default function SearchResultActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialog.confirmDelete")}</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            Deleting this tracked object removes the snapshot, any saved
-            embeddings, and any associated object lifecycle entries. Recorded
-            footage of this tracked object in History view will <em>NOT</em> be
-            deleted.
-            <br />
-            <br />
-            Are you sure you want to proceed?
+            <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
-              Delete
+              {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -198,7 +204,9 @@ export default function SearchResultActions({
                     onClick={findSimilar}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Find similar</TooltipContent>
+                <TooltipContent>
+                  {t("itemMenu.findSimilar.label")}
+                </TooltipContent>
               </Tooltip>
             )}
 
@@ -215,7 +223,9 @@ export default function SearchResultActions({
                     onClick={showSnapshot}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Submit to Frigate+</TooltipContent>
+                <TooltipContent>
+                  {t("itemMenu.submitToPlus.label")}
+                </TooltipContent>
               </Tooltip>
             )}
 

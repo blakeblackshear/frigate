@@ -36,6 +36,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { buttonVariants } from "../ui/button";
+import { Trans, useTranslation } from "react-i18next";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -56,6 +57,7 @@ export default function PolygonItem({
   setEditPane,
   handleCopyCoordinates,
 }: PolygonItemProps) {
+  const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -175,14 +177,25 @@ export default function PolygonItem({
         .put(`config/set?${url}`, { requires_restart: 0 })
         .then((res) => {
           if (res.status === 200) {
-            toast.success(`${polygon?.name} has been deleted.`, {
-              position: "top-center",
-            });
+            toast.success(
+              t("masksAndZones.form.polygonDrawing.delete.success", {
+                name: polygon?.name,
+              }),
+              {
+                position: "top-center",
+              },
+            );
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -190,7 +203,7 @@ export default function PolygonItem({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to save config changes: ${errorMessage}`, {
+          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
             position: "top-center",
           });
         })
@@ -198,7 +211,7 @@ export default function PolygonItem({
           setIsLoading(false);
         });
     },
-    [updateConfig, cameraConfig],
+    [updateConfig, cameraConfig, t],
   );
 
   const handleDelete = () => {
@@ -253,19 +266,30 @@ export default function PolygonItem({
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("masksAndZones.form.polygonDrawing.delete.title")}
+              </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
-              Are you sure you want to delete the{" "}
-              {polygon.type.replace("_", " ")} <em>{polygon.name}</em>?
+              <Trans
+                ns="views/settings"
+                values={{
+                  type: polygon.type.replace("_", " "),
+                  name: polygon.name,
+                }}
+              >
+                masksAndZones.form.polygonDrawing.delete.desc
+              </Trans>
             </AlertDialogDescription>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>
+                {t("button.cancel", { ns: "common" })}
+              </AlertDialogCancel>
               <AlertDialogAction
                 className={buttonVariants({ variant: "destructive" })}
                 onClick={handleDelete}
               >
-                Delete
+                {t("button.delete", { ns: "common" })}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -279,26 +303,26 @@ export default function PolygonItem({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  aria-label="Edit"
+                  aria-label={t("button.edit", { ns: "common" })}
                   onClick={() => {
                     setActivePolygonIndex(index);
                     setEditPane(polygon.type);
                   }}
                 >
-                  Edit
+                  {t("button.edit", { ns: "common" })}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  aria-label="Copy"
+                  aria-label={t("button.copy", { ns: "common" })}
                   onClick={() => handleCopyCoordinates(index)}
                 >
-                  Copy
+                  {t("button.copy", { ns: "common" })}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  aria-label="Delete"
+                  aria-label={t("button.delete", { ns: "common" })}
                   disabled={isLoading}
                   onClick={() => setDeleteDialogOpen(true)}
                 >
-                  Delete
+                  {t("button.delete", { ns: "common" })}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -317,7 +341,9 @@ export default function PolygonItem({
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
+              <TooltipContent>
+                {t("button.edit", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -330,7 +356,9 @@ export default function PolygonItem({
                   onClick={() => handleCopyCoordinates(index)}
                 />
               </TooltipTrigger>
-              <TooltipContent>Copy coordinates</TooltipContent>
+              <TooltipContent>
+                {t("button.copyCoordinates", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -344,7 +372,9 @@ export default function PolygonItem({
                   onClick={() => !isLoading && setDeleteDialogOpen(true)}
                 />
               </TooltipTrigger>
-              <TooltipContent>Delete</TooltipContent>
+              <TooltipContent>
+                {t("button.delete", { ns: "common" })}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}

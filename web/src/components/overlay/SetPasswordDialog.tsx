@@ -11,8 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+
 import { Label } from "../ui/label";
 import { LuCheck, LuX } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
 
 type SetPasswordProps = {
   show: boolean;
@@ -27,6 +29,7 @@ export default function SetPasswordDialog({
   onCancel,
   username,
 }: SetPasswordProps) {
+  const { t } = useTranslation(["views/settings"]);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
@@ -77,10 +80,13 @@ export default function SetPasswordDialog({
 
   const getStrengthLabel = () => {
     if (!password) return "";
-    if (passwordStrength <= 1) return "Weak";
-    if (passwordStrength === 2) return "Medium";
-    if (passwordStrength === 3) return "Strong";
-    return "Very Strong";
+    if (passwordStrength <= 1)
+      return t("users.dialog.form.password.strength.weak");
+    if (passwordStrength === 2)
+      return t("users.dialog.form.password.strength.medium");
+    if (passwordStrength === 3)
+      return t("users.dialog.form.password.strength.strong");
+    return t("users.dialog.form.password.strength.veryStrong");
   };
 
   const getStrengthColor = () => {
@@ -96,16 +102,23 @@ export default function SetPasswordDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-2">
           <DialogTitle>
-            {username ? `Update Password for ${username}` : "Set Password"}
+            {username
+              ? t("users.dialog.passwordSetting.updatePassword", {
+                  username,
+                  ns: "views/settings",
+                })
+              : t("users.dialog.passwordSetting.setPassword")}
           </DialogTitle>
           <DialogDescription>
-            Create a strong password to secure this account.
+            {t("users.dialog.passwordSetting.desc")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password">
+              {t("users.dialog.form.newPassword")}
+            </Label>
             <Input
               id="password"
               className="h-10"
@@ -115,7 +128,7 @@ export default function SetPasswordDialog({
                 setPassword(event.target.value);
                 setError(null);
               }}
-              placeholder="Enter new password"
+              placeholder={t("users.dialog.form.newPassword.placeholder")}
               autoFocus
             />
 
@@ -129,7 +142,7 @@ export default function SetPasswordDialog({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Password strength:{" "}
+                  {t("users.dialog.form.password.strength")}
                   <span className="font-medium">{getStrengthLabel()}</span>
                 </p>
               </div>
@@ -137,7 +150,9 @@ export default function SetPasswordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirm-password">
+              {t("users.dialog.form.password.confirm")}
+            </Label>
             <Input
               id="confirm-password"
               className="h-10"
@@ -147,7 +162,9 @@ export default function SetPasswordDialog({
                 setConfirmPassword(event.target.value);
                 setError(null);
               }}
-              placeholder="Confirm new password"
+              placeholder={t(
+                "users.dialog.form.newPassword.confirm.placeholder",
+              )}
             />
 
             {/* Password match indicator */}
@@ -156,12 +173,16 @@ export default function SetPasswordDialog({
                 {password === confirmPassword ? (
                   <>
                     <LuCheck className="size-3.5 text-green-500" />
-                    <span className="text-green-600">Passwords match</span>
+                    <span className="text-green-600">
+                      {t("users.dialog.form.password.match")}
+                    </span>
                   </>
                 ) : (
                   <>
                     <LuX className="size-3.5 text-red-500" />
-                    <span className="text-red-600">Passwords don't match</span>
+                    <span className="text-red-600">
+                      {t("users.dialog.form.password.notMatch")}
+                    </span>
                   </>
                 )}
               </div>
@@ -180,20 +201,20 @@ export default function SetPasswordDialog({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
-                aria-label="Cancel"
+                aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
                 type="button"
               >
-                Cancel
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
-                aria-label="Save"
+                aria-label={t("button.save", { ns: "common" })}
                 className="flex flex-1"
                 onClick={handleSave}
                 disabled={!password || password !== confirmPassword}
               >
-                Save
+                {t("button.save", { ns: "common" })}
               </Button>
             </div>
           </div>
