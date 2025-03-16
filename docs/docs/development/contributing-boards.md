@@ -13,7 +13,7 @@ The community support boards framework allows a user in the community to be the 
 
 ## Getting Started
 
-1. Follow the steps from [the main contributing docs](development/contributing.md).
+1. Follow the steps from [the main contributing docs](/development/contributing.md).
 2. Create a new build type under `docker/`
 3. Get build working as expected, all board-specific changes should be done inside of the board specific docker file.
 
