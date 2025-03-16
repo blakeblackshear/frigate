@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { Separator } from "@/components/ui/separator";
 import { isDesktop } from "react-device-detect";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
