@@ -12,8 +12,8 @@ from prometheus_client.core import (
 
 class CustomCollector(object):
     def __init__(self, _url):
-        self.complete_stats = {}    # Store complete stats data
-        self.process_stats = {}     # Keep for CPU processing
+        self.complete_stats = {}  # Store complete stats data
+        self.process_stats = {}  # Keep for CPU processing
         self.previous_event_id = None
         self.previous_event_start_time = None
         self.all_events = {}
@@ -53,7 +53,7 @@ class CustomCollector(object):
     def collect(self):
         # Work with a copy of the complete stats
         stats = self.complete_stats.copy()
-        
+
         # Create a local copy of CPU usages to work with
         cpu_usages = {}
         try:
@@ -146,7 +146,14 @@ class CustomCollector(object):
                 cpu_usages,
             )
             self.add_metric_process(
-                cpu_usages_metric, camera_stats, camera_name, "pid", "detect", "cpu", "Camera", cpu_usages
+                cpu_usages_metric,
+                camera_stats,
+                camera_name,
+                "pid",
+                "detect",
+                "cpu",
+                "Camera",
+                cpu_usages,
             )
 
             self.add_metric_process(
@@ -170,7 +177,14 @@ class CustomCollector(object):
                 cpu_usages,
             )
             self.add_metric_process(
-                mem_usages, camera_stats, camera_name, "pid", "detect", "mem", "Camera", cpu_usages
+                mem_usages,
+                camera_stats,
+                camera_name,
+                "pid",
+                "detect",
+                "mem",
+                "Camera",
+                cpu_usages,
             )
 
         yield audio_dBFS
@@ -252,7 +266,7 @@ class CustomCollector(object):
                     stats["detectors"],
                     detector_name,
                     "pid",
-                    "detect", 
+                    "detect",
                     "cpu",
                     "Detector",
                     cpu_usages,
@@ -494,10 +508,10 @@ def update_metrics(stats):
     try:
         # Store the complete stats for later use by collect()
         collector.complete_stats = stats.copy()
-        
+
         # For backwards compatibility
         collector.process_stats = stats.copy()
-        
+
         # No need to call collect() here - it will be called by get_metrics()
     except Exception as e:
         logging.error(f"Error updating metrics: {e}")
