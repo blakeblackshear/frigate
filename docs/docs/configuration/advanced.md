@@ -172,6 +172,38 @@ listen [::]:8971 ipv6only=off ssl;
 listen [::]:5000 ipv6only=off;
 ```
 
+## Base path
+
+By default, Frigate runs at the root path (`/`). However some setups require to run Frigate under a custom path prefix (e.g. `/frigate`), especially when Frigate is located behind a reverse proxy that requires path-based routing.
+
+### Set Base Path via HTTP Header
+The preferred way to configure the base path is through the `X-Ingress-Path` HTTP header, which needs to be set to the desired base path in an upstream reverse proxy.
+
+For example, in Nginx:
+```
+location /frigate {
+    proxy_set_header X-Ingress-Path /frigate;
+    proxy_pass http://frigate_backend;
+}
+```
+
+### Set Base Path via Environment Variable
+When it is not feasible to set the base path via a HTTP header, it can also be set via the `FRIGATE_BASE_PATH` environment variable in the Docker Compose file.
+
+For example:
+```
+services:
+  frigate:
+    image: blakeblackshear/frigate:latest
+    environment:
+      - FRIGATE_BASE_PATH=/frigate
+```
+
+This can be used for example to access Frigate via a Tailscale agent (https), by simply forwarding all requests to the base path (http):
+```
+tailscale serve --https=443 --bg --set-path /frigate http://localhost:5000/frigate
+```
+
 ## Custom Dependencies
 
 ### Custom ffmpeg build
