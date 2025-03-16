@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 from pydantic import Field
@@ -45,9 +46,17 @@ class EdgeTpuTfl(DetectionApi):
                 experimental_delegates=[edge_tpu_delegate],
             )
         except ValueError:
-            logger.error(
-                "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
-            )
+            _, ext = os.path.splitext(detector_config.model.path)
+
+            if ext and ext != ".tflite":
+                logger.error(
+                    "Incorrect model used with EdgeTPU. Only .tflite models can be used with a Coral EdgeTPU."
+                )
+            else:
+                logger.error(
+                    "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
+                )
+
             raise
 
         self.interpreter.allocate_tensors()
