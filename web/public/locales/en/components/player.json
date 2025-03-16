@@ -1,39 +1,39 @@
 {
-    "noRecordingsFoundForThisTime": "No recordings found for this time",
-    "noPreviewFound": "No Preview Found",
-    "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
-    "submitFrigatePlus": {
-        "title": "Submit this frame to Frigate+?",
-        "submit": "Submit"
+  "noRecordingsFoundForThisTime": "No recordings found for this time",
+  "noPreviewFound": "No Preview Found",
+  "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Submit this frame to Frigate+?",
+    "submit": "Submit"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
+  "streamOffline": {
+    "title": "Stream Offline",
+    "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
+  },
+  "cameraDisabled": "Camera is disabled",
+  "stats": {
+    "streamType": "Stream Type:",
+    "streamType.short": "Type",
+    "bandwidth": "Bandwidth:",
+    "bandwidth.short": "Bandwidth",
+    "latency": "Latency:",
+    "latency.short": "Latency",
+    "latency.value": "{{seconds}} seconds",
+    "latency.short.value": "{{seconds}} sec",
+    "totalFrames": "Total Frames:",
+    "droppedFrames": "Dropped Frames:",
+    "droppedFrames.short": "Dropped",
+    "droppedFrames.short.value": "{{droppedFrames}} frames",
+    "decodedFrames": "Decoded Frames:",
+    "droppedFrameRate": "Dropped Frame Rate:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Successfully submitted frame to Frigate+"
     },
-    "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
-    "streamOffline": {
-        "title": "Stream Offline",
-        "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
-    },
-    "cameraDisabled": "Camera is disabled",
-    "stats": {
-        "streamType": "Stream Type:",
-        "streamType.short": "Type",
-        "bandwidth": "Bandwidth:",
-        "bandwidth.short": "Bandwidth",
-        "latency": "Latency:",
-        "latency.short": "Latency",
-        "latency.value": "{{secounds}} seconds",
-        "latency.short.value": "{{secounds}} sec",
-        "totalFrames": "Total Frames:",
-        "droppedFrames": "Dropped Frames:",
-        "droppedFrames.short": "Dropped",
-        "droppedFrames.short.value": "{{droppedFrames}} frames",
-        "decodedFrames": "Decoded Frames:",
-        "droppedFrameRate": "Dropped Frame Rate:"
-    },
-    "toast": {
-        "success": {
-            "submittedFrigatePlus": "Successfully submitted frame to Frigate+"
-        },
-        "error": {
-            "submitFrigatePlusFailed": "Failed to submit frame to Frigate+"
-        }
+    "error": {
+      "submitFrigatePlusFailed": "Failed to submit frame to Frigate+"
     }
+  }
 }

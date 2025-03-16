@@ -101,7 +101,7 @@
     "systemLogs": "系统日志",
     "settings": "设置",
     "configurationEditor": "配置编辑器",
-    "languages": "languages / 语言",
+    "languages": "Languages / 语言",
     "language": {
       "en": "English",
       "zhCN": "简体中文",
@@ -116,13 +116,13 @@
     },
     "withSystem": "跟随系统",
     "theme": {
-        "label": "主题",
-        "blue": "蓝色",
-        "green": "绿色",
-        "nord": "Nord",
-        "red": "红色",
-        "contrast": "高对比度",
-        "default": "默认"
+      "label": "主题",
+      "blue": "蓝色",
+      "green": "绿色",
+      "nord": "Nord",
+      "red": "红色",
+      "contrast": "高对比度",
+      "default": "默认"
     },
     "help": "帮助",
     "documentation.label": "Frigate 的官方文档",

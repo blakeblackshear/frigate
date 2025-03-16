@@ -1,39 +1,39 @@
 {
-    "noRecordingsFoundForThisTime": "找不到此次录制",
-    "noPreviewFound": "没有找到预览",
-    "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览",
-    "submitFrigatePlus": {
-        "title": "提交此帧到 Frigate+？",
-        "submit": "提交"
+  "noRecordingsFoundForThisTime": "找不到此次录制",
+  "noPreviewFound": "没有找到预览",
+  "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览",
+  "submitFrigatePlus": {
+    "title": "提交此帧到 Frigate+？",
+    "submit": "提交"
+  },
+  "livePlayerRequiredIOSVersion": "此直播流类型需要 iOS 17.1 或更高版本。",
+  "streamOffline": {
+    "title": "视频流离线",
+    "desc": "未在 {{cameraName}} 的 <code>detect</code> 流上接收到任何帧，请检查错误日志"
+  },
+  "cameraDisabled": "摄像机已禁用",
+  "stats": {
+    "streamType": "流类型：",
+    "streamType.short": "类型",
+    "bandwidth": "带宽：",
+    "bandwidth.short": "带宽",
+    "latency": "延迟：",
+    "latency.short": "延迟",
+    "latency.value": "{{seconds}} 秒",
+    "latency.short.value": "{{seconds}} 秒",
+    "totalFrames": "总帧数：",
+    "droppedFrames": "丢帧数：",
+    "droppedFrames.short": "丢帧",
+    "droppedFrames.short.value": "{{droppedFrames}} 帧",
+    "decodedFrames": "解码帧数：",
+    "droppedFrameRate": "丢帧率："
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "已成功提交帧到 Frigate+"
     },
-    "livePlayerRequiredIOSVersion": "此直播流类型需要 iOS 17.1 或更高版本。",
-    "streamOffline": {
-        "title": "视频流离线",
-        "desc": "未在 {{cameraName}} 的 <code>detect</code> 流上接收到任何帧，请检查错误日志"
-    },
-    "cameraDisabled": "摄像机已禁用",
-    "stats": {
-        "streamType": "流类型：",
-        "streamType.short": "类型",
-        "bandwidth": "带宽：",
-        "bandwidth.short": "带宽",
-        "latency": "延迟：",
-        "latency.short": "延迟",
-        "latency.value": "{{secounds}} 秒",
-        "latency.short.value": "{{secounds}} 秒",
-        "totalFrames": "总帧数：",
-        "droppedFrames": "丢帧数：",
-        "droppedFrames.short": "丢帧",
-        "droppedFrames.short.value": "{{droppedFrames}} 帧",
-        "decodedFrames": "解码帧数：",
-        "droppedFrameRate": "丢帧率："
-    },
-    "toast": {
-        "success": {
-            "submittedFrigatePlus": "已成功提交帧到 Frigate+"
-        },
-        "error": {
-            "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
-        }
+    "error": {
+      "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
     }
+  }
 }
