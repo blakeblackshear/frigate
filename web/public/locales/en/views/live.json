@@ -145,5 +145,10 @@
       "active_objects": "Active Objects"
     },
     "notAllTips": "Your {{source}} recording retention configuration is set to <code>mode: {{effectiveRetainMode}}</code>, so this on-demand recording will only keep segments with {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Edit Layout",
+    "group.label": "Edit Camera Group",
+    "exitEdit": "Exit Editing"
   }
 }

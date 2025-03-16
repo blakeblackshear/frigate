@@ -272,7 +272,9 @@ export default function CameraMetrics({
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>Camera Probe Info</TooltipContent>
+                        <TooltipContent>
+                          {t("cameras.info.tips.title")}
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                     <div

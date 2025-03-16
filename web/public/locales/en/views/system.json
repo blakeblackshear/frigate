@@ -109,7 +109,10 @@
       "fps": "FPS:",
       "unknown": "Unknown",
       "audio": "Audio:",
-      "error": "Error: {{error}}"
+      "error": "Error: {{error}}",
+      "tips": {
+        "title": "Camera Probe Info"
+      }
     },
     "framesAndDetections": "Frames / Detections",
     "label": {

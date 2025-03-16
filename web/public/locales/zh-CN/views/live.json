@@ -145,5 +145,10 @@
       "active_objects": "活动对象"
     },
     "notAllTips": "您的 {{source}} 录制保留配置设置为 <code>mode: {{effectiveRetainMode}}</code>，因此此按需录制将仅保留包含 {{effectiveRetainModeName}} 的片段。"
-  }
+  },
+  "editLayout": {
+    "label": "编辑布局",
+    "group.label": "编辑摄像机分组",
+    "exitEdit": "退出编辑"
+}
 }
