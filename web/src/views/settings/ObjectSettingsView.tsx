@@ -87,7 +87,7 @@ export default function ObjectSettingsView({
       param: "regions",
       title: t("debug.regions.title"),
       description: t("debug.regions.desc"),
-      info: <>{t("debug.regions.tips")}</>,
+      info: <Trans ns="views/settings">debug.regions.tips</Trans>,
     },
   ];
 
