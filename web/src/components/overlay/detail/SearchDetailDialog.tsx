@@ -902,10 +902,10 @@ export function ObjectSnapshotTab({
                           "text-lg font-semibold leading-none tracking-tight"
                         }
                       >
-                        {t("explore.submitToPlus.label")}
+                        {t("explore.plus.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {t("explore.submitToPlus.desc")}
+                        {t("explore.plus.submitToPlus.desc")}
                       </div>
                     </div>
 
