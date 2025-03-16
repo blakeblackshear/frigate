@@ -1,0 +1,35 @@
+{
+  "alerts": "Alerts",
+  "detections": "Detections",
+  "motion": {
+    "label": "Motion",
+    "only": "Motion only"
+  },
+  "allCameras": "All Cameras",
+  "empty": {
+    "alert": "There are no alerts to review",
+    "detection": "There are no detections to review",
+    "motion": "No motion data found"
+  },
+  "timeline": "Timeline",
+  "timeline.aria": "Select timeline",
+  "events": {
+    "label": "Events",
+    "aria": "Select events",
+    "noFoundForTimePeriod": "No events found for this time period."
+  },
+  "documentTitle": "Review - Frigate",
+  "recordings": {
+    "documentTitle": "Recordings - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Last 24 Hours"
+  },
+  "markAsReviewed": "Mark as Reviewed",
+  "markTheseItemsAsReviewed": "Mark these items as reviewed",
+  "newReviewItems": {
+    "label": "View new review items",
+    "button": "New Items To Review"
+  },
+  "camera": "Camera"
+}

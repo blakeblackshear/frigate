@@ -9,6 +9,7 @@ import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import FilterSwitch from "./FilterSwitch";
+import { useTranslation } from "react-i18next";
 
 type LogSettingsButtonProps = {
   selectedLabels?: LogSeverity[];
@@ -22,23 +23,26 @@ export function LogSettingsButton({
   logSettings,
   setLogSettings,
 }: LogSettingsButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const trigger = (
     <Button
       size="sm"
       className="flex items-center gap-2"
-      aria-label="Filter log level"
+      aria-label={t("logSettings.label")}
     >
       <FaCog className="text-secondary-foreground" />
-      <div className="hidden text-primary md:block">Settings</div>
+      <div className="hidden text-primary md:block">
+        {t("menu.settings", { ns: "common" })}
+      </div>
     </Button>
   );
   const content = (
     <div className={cn("my-3 space-y-3 py-3 md:mt-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">Filter</div>
+          <div className="text-md">{t("filter")}</div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            Filter logs by severity.
+            {t("logSettings.filterBySeverity")}
           </div>
         </div>
         <GeneralFilterContent
@@ -49,14 +53,13 @@ export function LogSettingsButton({
       <DropdownMenuSeparator />
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">Loading</div>
+          <div className="text-md">{t("logSettings.loading")}</div>
           <div className="mt-2.5 flex flex-col gap-2.5">
             <div className="space-y-1 text-xs text-muted-foreground">
-              When the log pane is scrolled to the bottom, new logs
-              automatically stream as they are added.
+              {t("logSettings.loading.desc")}
             </div>
             <FilterSwitch
-              label="Disable log streaming"
+              label={t("logSettings.disableLogStreaming")}
               isChecked={logSettings?.disableStreaming ?? false}
               onCheckedChange={(isChecked) => {
                 setLogSettings({
@@ -97,6 +100,7 @@ export function GeneralFilterContent({
   selectedLabels,
   updateLabelFilter,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
@@ -105,7 +109,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Logs
+            {t("logSettings.allLogs")}
           </Label>
           <Switch
             className="ml-1"

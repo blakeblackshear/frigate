@@ -18,8 +18,10 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { CiCircleAlert } from "react-icons/ci";
 import { Link } from "react-router-dom";
@@ -41,6 +43,7 @@ import {
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Trans, useTranslation } from "react-i18next";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -56,6 +59,8 @@ type NotificationsSettingsViewProps = {
 export default function NotificationView({
   setUnsavedChanges,
 }: NotificationsSettingsViewProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
     "config",
     {
@@ -138,23 +143,20 @@ export default function NotificationView({
                 sub: pushSubscription,
               })
               .catch(() => {
-                toast.error("Failed to save notification registration.", {
+                toast.error(t("notification.toast.error.registerFailed"), {
                   position: "top-center",
                 });
                 pushSubscription.unsubscribe();
                 registration.unregister();
                 setRegistration(null);
               });
-            toast.success(
-              "Successfully registered for notifications. Restarting Frigate is required before any notifications (including a test notification) can be sent.",
-              {
-                position: "top-center",
-              },
-            );
+            toast.success(t("notification.toast.success.registered"), {
+              position: "top-center",
+            });
           });
       }
     },
-    [publicKey, addMessage],
+    [publicKey, addMessage, t],
   );
 
   // notification state
@@ -256,14 +258,20 @@ export default function NotificationView({
         )
         .then((res) => {
           if (res.status === 200) {
-            toast.success("Notification settings have been saved.", {
+            toast.success(t("notification.toast.success.settingSaved"), {
               position: "top-center",
             });
             updateConfig();
           } else {
-            toast.error(`Failed to save config changes: ${res.statusText}`, {
-              position: "top-center",
-            });
+            toast.error(
+              t("toast.save.error", {
+                errorMessage: res.statusText,
+                ns: "common",
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -271,7 +279,7 @@ export default function NotificationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to save config changes: ${errorMessage}`, {
+          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
             position: "top-center",
           });
         })
@@ -279,7 +287,7 @@ export default function NotificationView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading, allCameras],
+    [updateConfig, setIsLoading, allCameras, t],
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -293,14 +301,11 @@ export default function NotificationView({
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-1">
             <Heading as="h3" className="my-2">
-              Notification Settings
+              {t("notification.notificationSettings.title")}
             </Heading>
             <div className="max-w-6xl">
               <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                <p>
-                  Frigate can natively send push notifications to your device
-                  when it is running in the browser or installed as a PWA.
-                </p>
+                <p>{t("notification.notificationSettings.desc")}</p>
                 <div className="flex items-center text-primary">
                   <Link
                     to="https://docs.frigate.video/configuration/notifications"
@@ -308,7 +313,9 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    Read the Documentation{" "}
+                    <p>
+                      {t("notification.notificationSettings.documentation")}
+                    </p>{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -316,12 +323,13 @@ export default function NotificationView({
             </div>
             <Alert variant="destructive">
               <CiCircleAlert className="size-5" />
-              <AlertTitle>Notifications Unavailable</AlertTitle>
-
+              <AlertTitle>
+                {t("notification.notificationUnavailable.title")}
+              </AlertTitle>
               <AlertDescription>
-                Web push notifications require a secure context (
-                <code>https://...</code>). This is a browser limitation. Access
-                Frigate securely to use notifications.
+                <Trans ns="views/settings">
+                  notification.notificationUnavailable.desc
+                </Trans>
                 <div className="mt-3 flex items-center">
                   <Link
                     to="https://docs.frigate.video/configuration/authentication"
@@ -329,7 +337,9 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    Read the Documentation{" "}
+                    <p>
+                      {t("notification.notificationUnavailable.documentation")}
+                    </p>{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -349,15 +359,12 @@ export default function NotificationView({
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
               <Heading as="h3" className="my-2">
-                Notification Settings
+                {t("notification.notificationSettings.title")}
               </Heading>
 
               <div className="max-w-6xl">
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-                  <p>
-                    Frigate can natively send push notifications to your device
-                    when it is running in the browser or installed as a PWA.
-                  </p>
+                  <p>{t("notification.notificationSettings.desc")}</p>
                   <div className="flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/notifications"
@@ -365,7 +372,7 @@ export default function NotificationView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      Read the Documentation{" "}
+                      {t("notification.notificationSettings.documentation")}{" "}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -382,17 +389,16 @@ export default function NotificationView({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t("notification.email")}</FormLabel>
                         <FormControl>
                           <Input
                             className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                            placeholder="example@email.com"
+                            placeholder={t("notification.email.placeholder")}
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          Entering a valid email is required, as this is used by
-                          the push server in case problems occur.
+                          {t("notification.email.desc")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -408,7 +414,7 @@ export default function NotificationView({
                           <>
                             <div className="mb-2">
                               <FormLabel className="flex flex-row items-center text-base">
-                                Cameras
+                                {t("notification.cameras")}
                               </FormLabel>
                             </div>
                             <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
@@ -417,7 +423,9 @@ export default function NotificationView({
                                 name="allEnabled"
                                 render={({ field }) => (
                                   <FilterSwitch
-                                    label="All Cameras"
+                                    label={t("cameras.all", {
+                                      ns: "components/filter",
+                                    })}
                                     isChecked={field.value}
                                     onCheckedChange={(checked) => {
                                       setChangedValue(true);
@@ -456,13 +464,13 @@ export default function NotificationView({
                           </>
                         ) : (
                           <div className="font-normal text-destructive">
-                            No cameras available.
+                            {t("notification.cameras.noCameras")}
                           </div>
                         )}
 
                         <FormMessage />
                         <FormDescription>
-                          Select the cameras to enable notifications for.
+                          {t("notification.cameras.desc")}
                         </FormDescription>
                       </FormItem>
                     )}
@@ -471,26 +479,26 @@ export default function NotificationView({
                   <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
                     <Button
                       className="flex flex-1"
-                      aria-label="Cancel"
+                      aria-label={t("button.cancel", { ns: "common" })}
                       onClick={onCancel}
                       type="button"
                     >
-                      Cancel
+                      {t("button.cancel", { ns: "common" })}
                     </Button>
                     <Button
                       variant="select"
                       disabled={isLoading}
                       className="flex flex-1"
-                      aria-label="Save"
+                      aria-label={t("button.save", { ns: "common" })}
                       type="submit"
                     >
                       {isLoading ? (
                         <div className="flex flex-row items-center gap-2">
                           <ActivityIndicator />
-                          <span>Saving...</span>
+                          <span>{t("button.saving", { ns: "common" })}</span>
                         </div>
                       ) : (
-                        "Save"
+                        t("button.save", { ns: "common" })
                       )}
                     </Button>
                   </div>
@@ -503,7 +511,7 @@ export default function NotificationView({
                 <div className="flex flex-col gap-2 md:max-w-[50%]">
                   <Separator className="my-2 flex bg-secondary md:hidden" />
                   <Heading as="h4" className="my-2">
-                    Device-Specific Settings
+                    {t("notification.deviceSpecific")}
                   </Heading>
                   <Button
                     aria-label="Register or unregister notifications for this device"
@@ -546,14 +554,16 @@ export default function NotificationView({
                       }
                     }}
                   >
-                    {`${registration != null ? "Unregister" : "Register"} this device`}
+                    {registration != null
+                      ? t("notification.unregisterDevice")
+                      : t("notification.registerDevice")}
                   </Button>
                   {registration != null && registration.active && (
                     <Button
-                      aria-label="Send a test notification"
+                      aria-label={t("notification.sendTestNotification")}
                       onClick={() => sendTestNotification("notification_test")}
                     >
-                      Send a test notification
+                      {t("notification.sendTestNotification")}
                     </Button>
                   )}
                 </div>
@@ -563,14 +573,11 @@ export default function NotificationView({
                   <div className="space-y-3">
                     <Separator className="my-2 flex bg-secondary" />
                     <Heading as="h4" className="my-2">
-                      Global Settings
+                      {t("notification.globalSettings.title")}
                     </Heading>
                     <div className="max-w-xl">
                       <div className="mb-5 mt-2 flex flex-col gap-2 text-sm text-primary-variant">
-                        <p>
-                          Temporarily suspend notifications for specific cameras
-                          on all registered devices.
-                        </p>
+                        <p>{t("notification.globalSettings.desc")}</p>
                       </div>
                     </div>
 
@@ -606,6 +613,7 @@ export function CameraNotificationSwitch({
   config,
   camera,
 }: CameraNotificationSwitchProps) {
+  const { t } = useTranslation(["views/settings"]);
   const { payload: notificationState, send: sendNotification } =
     useNotifications(camera);
   const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
@@ -635,14 +643,19 @@ export function CameraNotificationSwitch({
   };
 
   const formatSuspendedUntil = (timestamp: string) => {
-    if (timestamp === "0") return "Frigate restarts.";
+    // Some languages require a change in word order
+    if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
 
-    return formatUnixTimestampToDateTime(parseInt(timestamp), {
+    const time = formatUnixTimestampToDateTime(parseInt(timestamp), {
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt: `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
+      strftime_fmt:
+        config?.ui.time_format == "24hour"
+          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
+          : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
     });
+    return t("time.untilForTime", { ns: "common", time });
   };
 
   return (
@@ -664,12 +677,13 @@ export function CameraNotificationSwitch({
 
             {!isSuspended ? (
               <div className="flex flex-row items-center gap-2 text-sm text-success">
-                Notifications Active
+                {t("notification.active")}
               </div>
             ) : (
               <div className="flex flex-row items-center gap-2 text-sm text-danger">
-                Notifications suspended until{" "}
-                {formatSuspendedUntil(notificationSuspendUntil)}
+                {t("notification.suspended", {
+                  time: formatSuspendedUntil(notificationSuspendUntil),
+                })}
               </div>
             )}
           </div>
@@ -682,13 +696,27 @@ export function CameraNotificationSwitch({
             <SelectValue placeholder="Suspend" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="5">Suspend for 5 minutes</SelectItem>
-            <SelectItem value="10">Suspend for 10 minutes</SelectItem>
-            <SelectItem value="30">Suspend for 30 minutes</SelectItem>
-            <SelectItem value="60">Suspend for 1 hour</SelectItem>
-            <SelectItem value="840">Suspend for 12 hours</SelectItem>
-            <SelectItem value="1440">Suspend for 24 hours</SelectItem>
-            <SelectItem value="off">Suspend until restart</SelectItem>
+            <SelectItem value="5">
+              {t("notification.suspendTime.5minutes")}
+            </SelectItem>
+            <SelectItem value="10">
+              {t("notification.suspendTime.10minutes")}
+            </SelectItem>
+            <SelectItem value="30">
+              {t("notification.suspendTime.30minutes")}
+            </SelectItem>
+            <SelectItem value="60">
+              {t("notification.suspendTime.1hour")}
+            </SelectItem>
+            <SelectItem value="840">
+              {t("notification.suspendTime.12hour")}
+            </SelectItem>
+            <SelectItem value="1440">
+              {t("notification.suspendTime.24hour")}
+            </SelectItem>
+            <SelectItem value="off">
+              {t("notification.suspendTime.untilRestart")}
+            </SelectItem>
           </SelectContent>
         </Select>
       ) : (
@@ -697,7 +725,7 @@ export function CameraNotificationSwitch({
           size="sm"
           onClick={handleCancelSuspension}
         >
-          Cancel Suspension
+          {t("notification.cancelSuspension")}
         </Button>
       )}
     </div>

@@ -1,0 +1,108 @@
+{
+  "filter": "过滤器",
+  "labels": {
+    "label": "标签",
+    "all": "所有标签",
+    "all.short": "标签",
+    "count": "{{count}} 个标签"
+  },
+  "zones": {
+    "all": "所有区域",
+    "all.short": "区域"
+  },
+  "dates": {
+    "all": "所有日期",
+    "all.short": "日期"
+  },
+  "more": "更多筛选项",
+  "reset.label": "重置筛选器为默认值",
+  "timeRange": "时间范围",
+  "zones.label": "区域",
+  "subLabels": {
+    "label": "子标签",
+    "all": "所有子标签"
+  },
+  "score": "分值",
+  "estimatedSpeed": "预计速度（{{unit}}）",
+  "features": {
+    "label": "特性",
+    "hasSnapshot": "包含快照",
+    "hasVideoClip": "包含视频片段",
+    "submittedToFrigatePlus": {
+      "label": "提交至 Frigate+",
+      "tips": "你必须要先筛选具有快照的探测对象。<br /><br />没有快照的跟踪对象无法提交至 Frigate+."
+    }
+  },
+  "sort": {
+    "label": "排序",
+    "dateAsc": "日期 (正序)",
+    "dateDesc": "日期 (倒序)",
+    "scoreAsc": "对象分值 (正序)",
+    "scoreDesc": "对象分值 (倒序)",
+    "speedAsc": "预计速度 (正序)",
+    "speedDesc": "预计速度 (倒序)",
+    "relevance": "关联性"
+  },
+  "cameras": {
+    "label": "摄像头筛选",
+    "all": "所有摄像头",
+    "all.short": "摄像头"
+  },
+  "review": {
+    "showReviewed": "显示已查看的项目"
+  },
+  "motion": {
+    "showMotionOnly": "仅显示运动"
+  },
+  "explore": {
+    "settings": {
+      "title": "设置",
+      "defaultView": "默认视图",
+      "defaultView.desc": "当未选择任何过滤器时，显示每个标签最近跟踪对象的摘要，或显示未过滤的网格。",
+      "defaultView.summary": "摘要",
+      "defaultView.unfilteredGrid": "未过滤网格",
+      "gridColumns": "网格列数",
+      "gridColumns.desc": "选择网格视图中的列数。",
+      "searchSource": {
+        "label": "搜索源",
+        "desc": "选择是搜索缩略图还是跟踪对象的描述。",
+        "options": {
+          "thumbnailImage": "缩略图",
+          "description": "描述"
+        }
+      },
+      "date": {
+        "selectDateBy": {
+          "label": "选择日期进行筛选"
+        }
+      }
+    }
+  },
+  "logSettings": {
+    "label": "日志级别筛选",
+    "filterBySeverity": "按严重程度筛选日志",
+    "loading": "加载中",
+    "loading.desc": "当日志面板滚动到底部时，新的日志会自动流式加载。",
+    "disableLogStreaming": "禁用日志流式加载",
+    "allLogs": "所有日志"
+  },
+  "trackedObjectDelete": {
+    "title": "确认删除",
+    "desc": "删除这 {{objectLength}} 个跟踪对象将移除快照、任何已保存的嵌入和任何相关的对象生命周期条目。历史视图中这些跟踪对象的录制片段将<em>不会</em>被删除。<br /><br />您确定要继续吗？<br /><br />按住 <em>Shift</em> 键可在将来跳过此对话框。",
+    "toast": {
+      "success": "跟踪对象删除成功。",
+      "error": "删除跟踪对象失败：{{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "按区域遮罩筛选"
+  },
+  "recognizedLicensePlates": {
+    "title": "识别的车牌",
+    "loadFailed": "加载识别的车牌失败。",
+    "loading": "正在加载识别的车牌...",
+    "placeholder": "输入以搜索车牌...",
+    "noLicensePlatesFound": "未找到车牌。",
+    "selectPlatesFromList": "从列表中选择一个或多个车牌。"
+  }
+}

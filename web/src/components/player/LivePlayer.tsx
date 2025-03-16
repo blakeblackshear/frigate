@@ -23,6 +23,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
 import { LuVideoOff } from "react-icons/lu";
+import { Trans, useTranslation } from "react-i18next";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -71,6 +72,8 @@ export default function LivePlayer({
   onError,
   onResetLiveMode,
 }: LivePlayerProps) {
+  const { t } = useTranslation(["components/player"]);
+
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
   // stats
@@ -272,7 +275,7 @@ export default function LivePlayer({
     } else {
       player = (
         <div className="w-5xl text-center text-sm">
-          iOS 17.1 or greater is required for this live stream type.
+          {t("livePlayerRequiredIOSVersion")}
         </div>
       );
     }
@@ -400,12 +403,17 @@ export default function LivePlayer({
       {offline && !showStillWithoutActivity && cameraEnabled && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
-            <p className="my-5 text-lg">Stream offline</p>
+            <p className="my-5 text-lg">{t("streamOffline.title")}</p>
             <TbExclamationCircle className="mb-3 size-10" />
             <p className="max-w-96 text-center">
-              No frames have been received on the{" "}
-              {capitalizeFirstLetter(cameraConfig.name)} <code>detect</code>{" "}
-              stream, check error logs
+              <Trans
+                values={{
+                  cameraName: capitalizeFirstLetter(cameraConfig.name),
+                  ns: "components/player",
+                }}
+              >
+                streamOffline.desc
+              </Trans>
             </p>
           </div>
         </div>
@@ -416,7 +424,7 @@ export default function LivePlayer({
           <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
             <LuVideoOff className="mb-2 size-8 md:size-10" />
             <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
-              Camera is disabled
+              {t("cameraDisabled")}
             </p>
           </div>
         </div>

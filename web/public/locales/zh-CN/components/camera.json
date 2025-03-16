@@ -1,0 +1,77 @@
+{
+  "group": {
+    "label": "摄像头组",
+    "add": "添加摄像头组",
+    "edit": "编辑摄像头组",
+    "delete": {
+      "label": "删除摄像头组",
+      "confirm": "确认删除",
+      "confirm.desc": "你确定要删除摄像头组 <em>{{name}}</em> 吗？"
+    },
+    "name": {
+      "label": "名称",
+      "placeholder": "请输入名称",
+      "error": {
+        "mustLeastCharacters": "摄像头组的名称必须至少有 2 个字符。",
+        "exists": "摄像头组名称已存在。",
+        "nameMustNotPeriod": "摄像头组名称不能包含英文句号(.)。",
+        "invalid": "无效的摄像头组名称。"
+      }
+    },
+    "cameras": {
+      "label": "摄像头",
+      "desc": "选择添加至该组的摄像头。"
+    },
+    "icon": "图标",
+    "success": "摄像头组（{{name}}）保存成功。",
+    "camera": {
+      "setting": {
+        "label": "摄像头视频流设置",
+        "title": "{{cameraName}} 视频流设置",
+        "desc": "更改此摄像头组仪表板的实时视频流选项。<em>这些设置特定于设备/浏览器。</em>",
+        "audioIsAvailable": "此视频流支持音频",
+        "audioIsUnavailable": "此视频流不支持音频",
+        "audio": {
+          "tips": "音频必须从您的摄像头输出并在 go2rtc 中配置此流。",
+          "tips.document": "阅读文档（英文） "
+        },
+        "streamMethod": {
+          "label": "视频流方法",
+          "method": {
+            "noStreaming": {
+              "label": "无视频流",
+              "desc": "摄像头图像每分钟仅更新一次，不会进行实时视频流播放。"
+            },
+            "smartStreaming": {
+              "label": "智能视频流（推荐）",
+              "desc": "智能视频流在没有检测到活动时，每分钟更新一次摄像头图像，以节省带宽和资源。当检测到活动时，图像会无缝切换到实时视频流。"
+            },
+            "continuousStreaming": {
+              "label": "持续视频流",
+              "desc": "当摄像头画面在仪表板上可见时，始终为实时视频流，即使未检测到活动。",
+              "desc.warning": "持续视频流可能会导致高带宽使用和性能问题，请谨慎使用。"
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "兼容模式",
+          "desc": "仅在摄像头的实时视频流显示颜色伪影，并且图像右侧有一条对角线时启用此选项。"
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "设置",
+      "title": "选项",
+      "showOptions": "显示选项",
+      "hideOptions": "隐藏选项"
+    },
+    "boundingBox": "边界框",
+    "timestamp": "时间戳",
+    "zones": "区域",
+    "mask": "遮罩",
+    "motion": "运动",
+    "regions": "区域"
+  }
+}

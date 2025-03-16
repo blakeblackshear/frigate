@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -32,6 +33,7 @@ export default function RoleChangeDialog({
   onSave,
   onCancel,
 }: RoleChangeDialogProps) {
+  const { t } = useTranslation(["views/settings"]);
   const [selectedRole, setSelectedRole] = useState<"admin" | "viewer">(
     currentRole,
   );
@@ -41,27 +43,16 @@ export default function RoleChangeDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            Change User Role
+            {t("users.dialog.changeRole.title")}
           </DialogTitle>
           <DialogDescription>
-            Update permissions for{" "}
-            <span className="font-medium">{username}</span>
+            {t("users.dialog.changeRole.desc", { username })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-6">
           <div className="mb-4 text-sm text-muted-foreground">
-            <p>Select the appropriate role for this user:</p>
-            <ul className="mt-2 space-y-1 pl-5">
-              <li>
-                • <span className="font-medium">Admin:</span> Full access to all
-                features.
-              </li>
-              <li>
-                • <span className="font-medium">Viewer:</span> Limited to Live
-                dashboards, Review, Explore, and Exports only.
-              </li>
-            </ul>
+            <Trans ns="views/settings">users.dialog.changeRole.roleInfo</Trans>
           </div>
 
           <Select
@@ -77,13 +68,13 @@ export default function RoleChangeDialog({
               <SelectItem value="admin" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuShield className="size-4 text-primary" />
-                  <span>Admin</span>
+                  <span>{t("role.admin")}</span>
                 </div>
               </SelectItem>
               <SelectItem value="viewer" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuUser className="size-4 text-primary" />
-                  <span>Viewer</span>
+                  <span>{t("role.viewer")}</span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -95,20 +86,20 @@ export default function RoleChangeDialog({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
-                aria-label="Cancel"
+                aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
                 type="button"
               >
-                Cancel
+                {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="select"
-                aria-label="Save"
+                aria-label={t("button.save", { ns: "common" })}
                 className="flex flex-1"
                 onClick={() => onSave(selectedRole)}
                 disabled={selectedRole === currentRole}
               >
-                Save
+                {t("button.save", { ns: "common" })}
               </Button>
             </div>
           </div>

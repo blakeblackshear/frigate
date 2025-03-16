@@ -6,6 +6,7 @@ import { SearchResult } from "@/types/search";
 import ActivityIndicator from "../indicators/activity-indicator";
 import SearchResultActions from "../menu/SearchResultActions";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -24,12 +25,15 @@ export default function SearchThumbnailFooter({
   showObjectLifecycle,
   showSnapshot,
 }: SearchThumbnailProps) {
+  const { t } = useTranslation(["views/search"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // date
   const formattedDate = useFormattedTimestamp(
     searchResult.start_time,
-    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
+    config?.ui.time_format == "24hour"
+      ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
+      : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
     config?.ui.timezone,
   );
 

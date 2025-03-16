@@ -3,6 +3,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaVideo } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 
 type MobileCameraDrawerProps = {
   allCameras: string[];
@@ -14,6 +15,7 @@ export default function MobileCameraDrawer({
   selected,
   onSelectCamera,
 }: MobileCameraDrawerProps) {
+  const { t } = useTranslation(["common"]);
   const [cameraDrawer, setCameraDrawer] = useState(false);
 
   if (!isMobile) {
@@ -25,7 +27,7 @@ export default function MobileCameraDrawer({
       <DrawerTrigger asChild>
         <Button
           className="rounded-lg capitalize"
-          aria-label="Cameras"
+          aria-label={t("menu.live.cameras")}
           size="sm"
         >
           <FaVideo className="text-secondary-foreground" />

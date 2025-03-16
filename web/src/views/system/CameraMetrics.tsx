@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
+import { useTranslation } from "react-i18next";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -22,7 +23,7 @@ export default function CameraMetrics({
   setLastUpdated,
 }: CameraMetricsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-
+  const { t } = useTranslation(["views/system"]);
   // camera info dialog
 
   const [showCameraInfoDialog, setShowCameraInfoDialog] = useState(false);
@@ -223,11 +224,13 @@ export default function CameraMetrics({
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
-      <div className="text-sm font-medium text-muted-foreground">Overview</div>
+      <div className="text-sm font-medium text-muted-foreground">
+        {t("cameras.overview")}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
           <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-            <div className="mb-5">Frames / Detections</div>
+            <div className="mb-5">{t("cameras.framesAndDetections")}</div>
             <CameraLineGraph
               graphId="overall-stats"
               unit=""
@@ -269,7 +272,9 @@ export default function CameraMetrics({
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>Camera Probe Info</TooltipContent>
+                        <TooltipContent>
+                          {t("cameras.info.tips.title")}
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                     <div
@@ -294,7 +299,9 @@ export default function CameraMetrics({
                       )}
                       {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                          <div className="mb-5">Frames / Detections</div>
+                          <div className="mb-5">
+                            {t("cameras.framesAndDetections")}
+                          </div>
                           <CameraLineGraph
                             graphId={`${camera.name}-dps`}
                             unit=""

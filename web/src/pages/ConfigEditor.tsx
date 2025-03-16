@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
 
 type SaveOptions = "saveonly" | "restart";
@@ -24,11 +25,12 @@ type ApiErrorResponse = {
 };
 
 function ConfigEditor() {
+  const { t } = useTranslation(["views/configEditor"]);
   const apiHost = useApiHost();
 
   useEffect(() => {
-    document.title = "Config Editor - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   const { data: config } = useSWR<string>("config/raw");
 
@@ -64,7 +66,7 @@ function ConfigEditor() {
           toast.success(response.data.message, { position: "top-center" });
         }
       } catch (error) {
-        toast.error("Error saving config", { position: "top-center" });
+        toast.error(t("toast.error.savingError"), { position: "top-center" });
 
         const axiosError = error as AxiosError<ApiErrorResponse>;
         const errorMessage =
@@ -76,7 +78,7 @@ function ConfigEditor() {
         throw new Error(errorMessage);
       }
     },
-    [editorRef],
+    [editorRef, t],
   );
 
   const handleCopyConfig = useCallback(async () => {
@@ -85,8 +87,10 @@ function ConfigEditor() {
     }
 
     copy(editorRef.current.getValue());
-    toast.success("Config copied to clipboard.", { position: "top-center" });
-  }, [editorRef]);
+    toast.success(t("toast.success.copyToClipboard"), {
+      position: "top-center",
+    });
+  }, [editorRef, t]);
 
   const handleSaveAndRestart = useCallback(async () => {
     try {
@@ -208,38 +212,38 @@ function ConfigEditor() {
       <div className="relative h-full overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            Config Editor
+            {t("configEditor")}
           </Heading>
           <div className="flex flex-row gap-1">
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Copy config"
+              aria-label={t("copyConfig")}
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
-              <span className="hidden md:block">Copy Config</span>
+              <span className="hidden md:block">{t("copyConfig")}</span>
             </Button>
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Save and restart"
+              aria-label={t("saveAndRestart")}
               onClick={handleSaveAndRestart}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
-              <span className="hidden md:block">Save & Restart</span>
+              <span className="hidden md:block">{t("saveAndRestart")}</span>
             </Button>
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Save only without restarting"
+              aria-label={t("saveOnly")}
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block">Save Only</span>
+              <span className="hidden md:block">{t("saveOnly")}</span>
             </Button>
           </div>
         </div>

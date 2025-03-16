@@ -1,0 +1,144 @@
+{
+  "documentTitle": {
+    "cameras": "Cameras Stats - Frigate",
+    "storage": "Storage Stats - Frigate",
+    "general": "General Stats - Frigate",
+    "features": "Features Stats- Frigate",
+    "logs": {
+      "frigate": "Frigate Logs - Frigate",
+      "go2rtc": "Go2RTC Logs - Frigate",
+      "nginx": "Nginx Logs - Frigate"
+    }
+  },
+  "title": "System",
+  "metrics": "System metrics",
+  "logs": {
+    "download": {
+      "label": "Download Logs"
+    },
+    "copy": {
+      "label": "Copy to Clipboard",
+      "success": "Copied logs to clipboard",
+      "error": "Could not copy logs to clipboard"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Timestamp",
+      "tag": "Tag",
+      "message": "Message"
+    },
+    "tips": "Logs are streaming from the server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error fetching logs: {{errorMessage}}",
+        "whileStreamingLogs": "Error while streaming logs: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "General",
+    "detector": {
+      "title": "Detectors",
+      "inferenceSpeed": "Detector Inference Speed",
+      "cpuUsage": "Detector CPU Usage",
+      "memoryUsage": "Detector Memory Usage"
+    },
+    "hardwareInfo": {
+      "title": "Hardware Info",
+      "gpuUsage": "GPU Usage",
+      "gpuMemory": "GPU Memory",
+      "gpuEncoder": "GPU Encoder",
+      "gpuDecoder": "GPU Decoder",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo Output",
+          "returnCode": "Return Code: {{code}}",
+          "processOutput": "Process Output:",
+          "processError": "Process Error:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI Output",
+          "name": "Name: {{name}}",
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "CUDA Compute Capability: {{cuda_compute}}",
+          "vbios": "VBios Info: {{vbios}}"
+        },
+        "closeInfo.label": "Close GPU info",
+        "copyInfo.label": "Copy GPU info",
+        "toast": {
+          "success": "Copied GPU info to clipboard"
+        }
+      }
+    },
+    "otherProcesses": {
+      "title": "Other Processes",
+      "processCpuUsage": "Process CPU Usage",
+      "processMemoryUsage": "Process Memory Usage"
+    }
+  },
+  "storage": {
+    "title": "Storage",
+    "overview": "Overview",
+    "recordings": {
+      "title": "Recordings",
+      "tips": "This value represents the total storage used by the recordings in Frigate's database. Frigate does not track storage usage for all files on your disk.",
+      "earliestRecording": "Earliest recording available:"
+    },
+    "cameraStorage": {
+      "title": "Camera Storage",
+      "camera": "Camera",
+      "unused": "Unused",
+      "unusedStorageInformation": "Unused Storage Information",
+      "storageUsed": "Storage Used",
+      "percentageOfTotalUsed": "Percentage of Total Used",
+      "bandwidth": "Bandwidth",
+      "unused.tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."
+    }
+  },
+  "cameras": {
+    "title": "Cameras",
+    "overview": "Overview",
+    "info": {
+      "cameraProbeInfo": "{{camera}} Camera Probe Info",
+      "streamDataFromFFPROBE": "Stream data is obtained with <code>ffprobe</code>.",
+      "fetching": "Fetching Camera Data",
+      "stream": "Stream {{idx}}",
+      "video": "Video:",
+      "codec": "Codec:",
+      "resolution": "Resolution:",
+      "fps": "FPS:",
+      "unknown": "Unknown",
+      "audio": "Audio:",
+      "error": "Error: {{error}}",
+      "tips": {
+        "title": "Camera Probe Info"
+      }
+    },
+    "framesAndDetections": "Frames / Detections",
+    "label": {
+      "camera": "camera",
+      "detect": "detect",
+      "skipped": "skipped",
+      "ffmpeg": "ffmpeg",
+      "capture": "capture"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Copied probe data to clipboard."
+      },
+      "error": {
+        "unableToProbeCamera": "Unable to probe camera: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Last refreshed: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} has high FFMPEG CPU usage ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
+    "healthy": "System is healthy",
+    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
+  },
+  "features": {
+    "title": "Features"
+  }
+}

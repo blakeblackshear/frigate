@@ -12,6 +12,10 @@ import {
 import { Switch } from "./switch";
 import { cn } from "@/lib/utils";
 import { LuCheck } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
+
+const { t } = useTranslation(["common"]);
+
 
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
@@ -59,15 +63,15 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: "today", label: "Today" },
-  { name: "yesterday", label: "Yesterday" },
-  { name: "last7", label: "Last 7 days" },
-  { name: "last14", label: "Last 14 days" },
-  { name: "last30", label: "Last 30 days" },
-  { name: "thisWeek", label: "This Week" },
-  { name: "lastWeek", label: "Last Week" },
-  { name: "thisMonth", label: "This Month" },
-  { name: "lastMonth", label: "Last Month" },
+  { name: "today", label: t("time.today") },
+  { name: "yesterday", label: t("time.yesterday") },
+  { name: "last7", label: t("time.last7") },
+  { name: "last14", label: t("time.last14") },
+  { name: "last30", label: t("time.last30") },
+  { name: "thisWeek", label: t("time.thisWeek") },
+  { name: "lastWeek", label: t("time.lastWeek") },
+  { name: "thisMonth", label: t("time.thisMonth") },
+  { name: "lastMonth", label: t("time.lastMonth") },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -418,7 +422,7 @@ export function DateRangePicker({
       <div className="mx-auto flex w-64 items-center justify-evenly gap-2 py-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             setIsOpen(false);
             if (
@@ -429,7 +433,7 @@ export function DateRangePicker({
             }
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common"})}
         </Button>
         <Button
           onClick={() => {
@@ -438,9 +442,9 @@ export function DateRangePicker({
             onReset?.();
           }}
           variant="ghost"
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
         >
-          Reset
+          {t("button.reset", { ns: "common"})}
         </Button>
       </div>
     </div>
