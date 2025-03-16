@@ -54,7 +54,7 @@ export default function ObjectSettingsView({
       info: (
         <>
           <p className="mb-2">
-            <strong>{t("debug.boundingBoxes.colors")}</strong>
+            <strong>{t("debug.boundingBoxes.colors.label")}</strong>
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <Trans ns="views/settings">debug.boundingBoxes.colors.info</Trans>
