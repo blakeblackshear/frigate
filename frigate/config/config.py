@@ -608,6 +608,11 @@ class FrigateConfig(FrigateBaseModel):
         self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
 
+        if self.plus_api and not self.snapshots.clean_copy:
+            logger.warning(
+                "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
+            )
+
         for key, detector in self.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
             model_dict = (
