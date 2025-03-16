@@ -83,14 +83,14 @@
   },
   "recording": {
     "confirmDelete": {
-        "title": "确认删除",
-        "desc": "您确定要删除与此审核项相关的所有录制视频吗？<br /><br />提示：按住 <em>Shift</em> 键点击删除可跳过此对话框。",
-        "desc.selected": "您确定要删除与此审核项相关的所有录制视频吗？<br /><br />提示：按住 <em>Shift</em> 键点击删除可跳过此对话框。"
+      "title": "确认删除",
+      "desc": "您确定要删除与此审核项相关的所有录制视频吗？<br /><br />提示：按住 <em>Shift</em> 键点击删除可跳过此对话框。",
+      "desc.selected": "您确定要删除与此审核项相关的所有录制视频吗？<br /><br />提示：按住 <em>Shift</em> 键点击删除可跳过此对话框。"
     },
     "button": {
-        "export": "导出",
-        "markAsReviewed": "标记为已审核",
-        "deleteNow": "立即删除"
+      "export": "导出",
+      "markAsReviewed": "标记为已审核",
+      "deleteNow": "立即删除"
     }
   }
 }

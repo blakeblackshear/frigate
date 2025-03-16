@@ -77,7 +77,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           });
         }
       } else {
-        toast.error(t("form.errors.webUnkownError"), {
+        toast.error(t("form.errors.webUnknownError"), {
           position: "top-center",
         });
       }

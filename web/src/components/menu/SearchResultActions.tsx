@@ -104,7 +104,7 @@ export default function SearchResultActions({
             download={`${searchResult.camera}_${searchResult.label}.mp4`}
           >
             <LuDownload className="mr-2 size-4" />
-            <span>{t("itemMenu.downloadVideo")}</span>
+            <span>{t("itemMenu.downloadVideo.label")}</span>
           </a>
         </MenuItem>
       )}

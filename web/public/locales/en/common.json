@@ -96,8 +96,8 @@
     "languages": "Languages",
     "language": {
       "en": "English",
-      "zhCN": "简体中文(Simplified Chinese)",
-      "withSystem.label": "Use the system settings for languag"
+      "zhCN": "简体中文 (Simplified Chinese)",
+      "withSystem.label": "Use the system settings for language"
     },
     "appearance": "Appearance",
     "darkMode": {
@@ -108,13 +108,13 @@
     },
     "withSystem": "System",
     "theme": {
-        "label": "Theme",
-        "blue": "Blue",
-        "green": "Green",
-        "nord": "Nord",
-        "red": "Red",
-        "contrast": "High Contrast",
-        "default": "Default"
+      "label": "Theme",
+      "blue": "Blue",
+      "green": "Green",
+      "nord": "Nord",
+      "red": "Red",
+      "contrast": "High Contrast",
+      "default": "Default"
     },
     "help": "Help",
     "documentation.label": "Frigate documentation",

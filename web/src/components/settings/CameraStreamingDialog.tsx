@@ -290,14 +290,18 @@ export function CameraStreamingDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="no-streaming">
-                {t("group.camera.setting.streamMethod.method.noStreaming")}
+                {t(
+                  "group.camera.setting.streamMethod.method.noStreaming.label",
+                )}
               </SelectItem>
               <SelectItem value="smart">
-                {t("group.camera.setting.streamMethod.method.smartStreaming")}
+                {t(
+                  "group.camera.setting.streamMethod.method.smartStreaming.label",
+                )}
               </SelectItem>
               <SelectItem value="continuous">
                 {t(
-                  "group.camera.setting.streamMethod.method.continuousStreaming",
+                  "group.camera.setting.streamMethod.method.continuousStreaming.label",
                 )}
               </SelectItem>
             </SelectContent>
@@ -344,7 +348,7 @@ export function CameraStreamingDialog({
               htmlFor="compatibility"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              {t("group.camera.setting.compatibilityMode")}
+              {t("group.camera.setting.compatibilityMode.label")}
             </Label>
           </div>
           <div className="flex flex-col gap-2 leading-none">
