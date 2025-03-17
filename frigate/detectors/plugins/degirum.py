@@ -90,6 +90,17 @@ class DGDetector(DetectionApi):
         self.dg_model = self._zoo.load_model(
             detector_config.model.path, non_blocking_batch_predict=True
         )
+        # Openvino tends to have multidevice, and they default to CPU rather than GPU or NPU
+        types = self.dg_model.supported_device_types
+        for type in types:
+            # If openvino is supported, prioritize using gpu, then npu, then cpu
+            if "OPENVINO" in type:
+                self.dg_model.device_type = [
+                    "OPENVINO/GPU",
+                    "OPENVINO/NPU",
+                    "OPENVINO/CPU",
+                ]
+            break
         self.model_height = detector_config.model.height
         self.model_width = detector_config.model.width
         self.predict_batch = self.dg_model.predict_batch(self._queue)
