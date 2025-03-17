@@ -325,7 +325,7 @@ export default function ClassificationSettingsView({
                       {t(
                         "classification.semanticSearch.modelSize." +
                           size +
-                          "title",
+                          ".title",
                       )}
                     </SelectItem>
                   ))}
