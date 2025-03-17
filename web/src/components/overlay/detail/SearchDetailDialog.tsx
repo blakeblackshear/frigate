@@ -564,7 +564,7 @@ function ObjectDetailsTab({
       return false;
     }
 
-    return search.data.attributes.find((attr) => attr.label == "face");
+    return search.data.attributes?.find((attr) => attr.label == "face");
   }, [config, search]);
 
   const { data: faceData } = useSWR(hasFace ? "faces" : null);
