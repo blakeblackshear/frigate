@@ -70,11 +70,11 @@
           "thumbnailImage": "缩略图",
           "description": "描述"
         }
-      },
-      "date": {
-        "selectDateBy": {
-          "label": "选择日期进行筛选"
-        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "选择日期进行筛选"
       }
     }
   },

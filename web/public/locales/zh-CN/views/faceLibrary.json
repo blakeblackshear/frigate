@@ -17,10 +17,10 @@
         "deleteFaceAttempts": "尝试删除人脸",
         "addFace": "添加人脸",
         "uploadImage": "上传图片",
-        "reprocessFace:": "重新处理人脸"
+        "reprocessFace": "重新处理人脸"
     },
-    "trainFaceAs:": "将人脸训练为：",
-    "trainFaceAsPerson:": "将人脸训练为人物",
+    "trainFaceAs": "将人脸训练为：",
+    "trainFaceAsPerson": "将人脸训练为人物",
     
     "toast": {
         "success": {

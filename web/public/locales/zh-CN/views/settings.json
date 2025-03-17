@@ -256,7 +256,7 @@
     "contourArea": "轮廓面积",
     "contourArea.desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>",
     "improveContrast": "提高对比度",
-    "improveContrast.desc": "提高较暗场景的对比度。默认值：开启",
+    "improveContrast.desc": "提高较暗场景的对比度。<em>默认值：启用</em>",
     "toast": {
       "success": "运动设置已保存。"
     }
