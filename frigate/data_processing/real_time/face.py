@@ -227,6 +227,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             scale_factor = MAX_DETECTION_HEIGHT / input.shape[0]
             new_width = int(scale_factor * input.shape[1])
             input = cv2.resize(input, (new_width, MAX_DETECTION_HEIGHT))
+        else:
+            scale_factor = 1
 
         self.face_detector.setInputSize((input.shape[1], input.shape[0]))
         faces = self.face_detector.detect(input)
@@ -241,10 +243,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 continue
 
             raw_bbox = potential_face[0:4].astype(np.uint16)
-            x: int = max(raw_bbox[0], 0)
-            y: int = max(raw_bbox[1], 0)
-            w: int = raw_bbox[2]
-            h: int = raw_bbox[3]
+            x: int = int(max(raw_bbox[0], 0) / scale_factor)
+            y: int = int(max(raw_bbox[1], 0) / scale_factor)
+            w: int = int(raw_bbox[2] / scale_factor)
+            h: int = int(raw_bbox[3] / scale_factor)
             bbox = (x, y, x + w, y + h)
 
             if face is None or area(bbox) > area(face):

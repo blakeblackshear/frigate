@@ -1,7 +1,8 @@
 import { baseUrl } from "@/api/baseUrl";
+import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isDesktop } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -115,42 +117,16 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces, t],
   );
 
-  const onAddName = useCallback(
-    (name: string) => {
-      axios
-        .post(`faces/${name}/create`, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((resp) => {
-          if (resp.status == 200) {
-            setAddFace(false);
-            refreshFaces();
-            toast.success(t("toast.success.addFaceLibrary"), {
-              position: "top-center",
-            });
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(t("toast.error.addFaceLibraryFailed", { errorMessage }), {
-            position: "top-center",
-          });
-        });
-    },
-    [refreshFaces, t],
-  );
-
   // face multiselect
 
   const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
 
   const onClickFace = useCallback(
-    (imageId: string) => {
+    (imageId: string, ctrl: boolean) => {
+      if (selectedFaces.length == 0 && !ctrl) {
+        return;
+      }
+
       const index = selectedFaces.indexOf(imageId);
 
       if (index != -1) {
@@ -172,33 +148,42 @@ export default function FaceLibrary() {
     [selectedFaces, setSelectedFaces],
   );
 
-  const onDelete = useCallback(() => {
-    axios
-      .post(`/faces/train/delete`, { ids: selectedFaces })
-      .then((resp) => {
-        setSelectedFaces([]);
+  const onDelete = useCallback(
+    (name: string, ids: string[]) => {
+      axios
+        .post(`/faces/${name}/delete`, { ids })
+        .then((resp) => {
+          setSelectedFaces([]);
 
-        if (resp.status == 200) {
-          toast.success(t("toast.success.deletedFace"), {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.deletedFace"), {
+              position: "top-center",
+            });
+
+            if (faceImages.length == 1) {
+              // face has been deleted
+              setPageToggle("");
+            }
+
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
             position: "top-center",
           });
-          refreshFaces();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
-          position: "top-center",
         });
-      });
-  }, [selectedFaces, refreshFaces, t]);
+    },
+    [faceImages, refreshFaces, setPageToggle, t],
+  );
 
   // keyboard
 
-  useKeyboardListener(["a"], (key, modifiers) => {
+  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
     if (modifiers.repeat || !modifiers.down) {
       return;
     }
@@ -208,6 +193,9 @@ export default function FaceLibrary() {
         if (modifiers.ctrl) {
           setSelectedFaces([...trainImages]);
         }
+        break;
+      case "Escape":
+        setSelectedFaces([]);
         break;
     }
   });
@@ -228,12 +216,10 @@ export default function FaceLibrary() {
         onSave={onUploadImage}
       />
 
-      <TextEntryDialog
-        title={t("createFaceLibrary.title")}
-        description={t("createFaceLibrary.desc")}
+      <CreateFaceWizardDialog
         open={addFace}
         setOpen={setAddFace}
-        onSave={onAddName}
+        onFinish={refreshFaces}
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
@@ -283,21 +269,24 @@ export default function FaceLibrary() {
         </ScrollArea>
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
-            <Button className="flex gap-2" onClick={() => onDelete()}>
+            <Button
+              className="flex gap-2"
+              onClick={() => onDelete("train", selectedFaces)}
+            >
               <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
-              {t("button.deleteFaceAttempts")}
+              {isDesktop && t("button.deleteFaceAttempts")}
             </Button>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2">
             <Button className="flex gap-2" onClick={() => setAddFace(true)}>
               <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
-              {t("button.addFace")}
+              {isDesktop && t("button.addFace")}
             </Button>
             {pageToggle != "train" && (
               <Button className="flex gap-2" onClick={() => setUpload(true)}>
                 <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-                {t("button.uploadImage")}
+                {isDesktop && t("button.uploadImage")}
               </Button>
             )}
           </div>
@@ -317,7 +306,7 @@ export default function FaceLibrary() {
           <FaceGrid
             faceImages={faceImages}
             pageToggle={pageToggle}
-            onRefresh={refreshFaces}
+            onDelete={onDelete}
           />
         ))}
     </div>
@@ -329,7 +318,7 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
-  onClickFace: (image: string) => void;
+  onClickFace: (image: string, ctrl: boolean) => void;
   onRefresh: () => void;
 };
 function TrainingGrid({
@@ -349,7 +338,7 @@ function TrainingGrid({
           faceNames={faceNames}
           threshold={config.face_recognition.recognition_threshold}
           selected={selectedFaces.includes(image)}
-          onClick={() => onClickFace(image)}
+          onClick={(meta) => onClickFace(image, meta)}
           onRefresh={onRefresh}
         />
       ))}
@@ -362,7 +351,7 @@ type FaceAttemptProps = {
   faceNames: string[];
   threshold: number;
   selected: boolean;
-  onClick: () => void;
+  onClick: (meta: boolean) => void;
   onRefresh: () => void;
 };
 function FaceAttempt({
@@ -378,6 +367,7 @@ function FaceAttempt({
     const parts = image.split("-");
 
     return {
+      timestamp: Number.parseFloat(parts[0]),
       eventId: `${parts[0]}-${parts[1]}`,
       name: parts[2],
       score: parts[3],
@@ -439,10 +429,13 @@ function FaceAttempt({
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
-      onClick={onClick}
+      onClick={(e) => onClick(e.metaKey || e.ctrlKey)}
     >
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="size-40" src={`${baseUrl}clips/faces/train/${image}`} />
+      <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="size-44" src={`${baseUrl}clips/faces/train/${image}`} />
+        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+          <TimeAgo time={data.timestamp * 1000} dense />
+        </div>
       </div>
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -500,9 +493,9 @@ function FaceAttempt({
 type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
-  onRefresh: () => void;
+  onDelete: (name: string, ids: string[]) => void;
 };
-function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
+function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
   return (
     <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
       {faceImages.map((image: string) => (
@@ -510,7 +503,7 @@ function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
           key={image}
           name={pageToggle}
           image={image}
-          onRefresh={onRefresh}
+          onDelete={onDelete}
         />
       ))}
     </div>
@@ -520,31 +513,10 @@ function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
 type FaceImageProps = {
   name: string;
   image: string;
-  onRefresh: () => void;
+  onDelete: (name: string, ids: string[]) => void;
 };
-function FaceImage({ name, image, onRefresh }: FaceImageProps) {
+function FaceImage({ name, image, onDelete }: FaceImageProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
-  const onDelete = useCallback(() => {
-    axios
-      .post(`/faces/${name}/delete`, { ids: [image] })
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(t("toast.success.deletedFace"), {
-            position: "top-center",
-          });
-          onRefresh();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
-          position: "top-center",
-        });
-      });
-  }, [name, image, onRefresh, t]);
 
   return (
     <div className="relative flex flex-col rounded-lg">
@@ -561,7 +533,7 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
               <TooltipTrigger>
                 <LuTrash2
                   className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={onDelete}
+                  onClick={() => onDelete(name, [image])}
                 />
               </TooltipTrigger>
               <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
