@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
@@ -378,6 +379,7 @@ function FaceAttempt({
     const parts = image.split("-");
 
     return {
+      timestamp: Number.parseFloat(parts[0]),
       eventId: `${parts[0]}-${parts[1]}`,
       name: parts[2],
       score: parts[3],
@@ -441,8 +443,11 @@ function FaceAttempt({
       )}
       onClick={onClick}
     >
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="size-40" src={`${baseUrl}clips/faces/train/${image}`} />
+      <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img className="size-44" src={`${baseUrl}clips/faces/train/${image}`} />
+        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+          <TimeAgo time={data.timestamp * 1000} dense />
+        </div>
       </div>
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
