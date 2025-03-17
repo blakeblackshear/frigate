@@ -76,14 +76,14 @@ export default function FeatureMetrics({
         const key = rawKey.replaceAll("_", " ");
 
         if (!(key in series)) {
-          series[key] = { name: key, data: [] };
+          series[key] = { name: t("features.embeddings." + rawKey), data: [] };
         }
 
         series[key].data.push({ x: statsIdx + 1, y: stat });
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   return (
     <>

@@ -79,14 +79,14 @@
   },
   "manualRecording": {
     "title": "按需录制",
-    "tips": "根据此摄像机的录制保留设置，手动启动事件。",
+    "tips": "根据此摄像头的录制保留设置，手动启动事件。",
     "playInBackground": {
       "label": "后台播放",
       "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
     },
     "showStats": {
       "label": "显示统计信息",
-      "desc": "启用此选项可在摄像机画面上叠加显示视频流统计信息。"
+      "desc": "启用此选项可在摄像头画面上叠加显示视频流统计信息。"
     },
     "debugView": "调试视图",
     "start": "开始手动按需录制",
@@ -107,7 +107,7 @@
     "title": "视频流",
     "audio": {
       "tips": {
-        "title": "音频必须从摄像机输出并在 go2rtc 中配置为此视频流使用。",
+        "title": "音频必须从摄像头输出并在 go2rtc 中配置为此视频流使用。",
         "documentation": "阅读文档 "
       },
       "available": "此视频流支持音频",
@@ -130,7 +130,7 @@
   },
   "cameraSettings": {
     "title": "{{camera}} 设置",
-    "cameraEnabled": "摄像机已启用",
+    "cameraEnabled": "摄像头已启用",
     "objectDetection": "对象检测",
     "recording": "录制",
     "snapshots": "快照",

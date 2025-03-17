@@ -34,12 +34,12 @@
     },
     "toast": {
       "error": {
-        "beforeDateBeLaterAfter": "“之前”日期必须晚于“之后”日期。",
-        "afterDatebeEarlierBefore": "“之后”日期必须早于“之前”日期。",
-        "minScoreMustBeLessOrEqualMaxScore": "最小分值 必须小于或等于 最大分值。",
-        "maxScoreMustBeGreaterOrEqualMinScore": "最大分值 必须大于或等于 最小分值",
-        "minSpeedMustBeLessOrEqualMaxSpeed": "最低速度 必须小于或等于 最高速度",
-        "maxSpeedMustBeGreaterOrEqualMinSpeed": "最高速度 必须大于或等于 最低速度"
+        "beforeDateBeLaterAfter": "结束日期必须晚于开始日期。",
+        "afterDatebeEarlierBefore": "开始日期必须早于结束日期。",
+        "minScoreMustBeLessOrEqualMaxScore": "最低分数必须小于或等于最高分数。",
+        "maxScoreMustBeGreaterOrEqualMinScore": "最高分数必须大于或等于最低分数。",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "最低速度必须小于或等于最高速度。",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "最高速度必须大于或等于最低速度。"
       }
     },
     "tips": {

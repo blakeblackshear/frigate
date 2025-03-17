@@ -29,7 +29,7 @@
       "error": "发生错误。请检查Frigate日志。"
     }
   },
-  "trackedObjectDetails": "探测对象详情",
+  "trackedObjectDetails": "跟踪对象详情",
   "type": {
     "details": "详情",
     "snapshot": "快照",
@@ -169,7 +169,7 @@
       "desc": "删除此跟踪对象将移除快照、所有已保存的嵌入数据以及任何关联的对象生命周期条目。但在历史视图中的录制视频<em>不会</em>被删除。<br /><br />你确定要继续删除吗？"
     }
   },
-  "noTrackedObjects": "找不到探测的对象",
+  "noTrackedObjects": "未找到跟踪对象",
   "fetchingTrackedObjectsFailed": "获取跟踪对象失败：{{errorMessage}}",
   "trackedObjectsCount": "{{count}} 个跟踪对象",
   "searchResult": {

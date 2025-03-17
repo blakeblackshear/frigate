@@ -71,7 +71,7 @@
   "streaming": {
     "label": "视频流",
     "restreaming": {
-      "disabled": "重新流式传输未启用。",
+      "disabled": "此摄像头未启用视频流转发功能。",
       "desc": {
         "title": "为此摄像头设置 go2rtc，以获取额外的实时预览选项和音频支持。",
         "readTheDocumentation": "阅读文档（英文） "
