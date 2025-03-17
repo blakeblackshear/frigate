@@ -2,7 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -116,36 +116,6 @@ export default function FaceLibrary() {
     [pageToggle, refreshFaces, t],
   );
 
-  const onAddName = useCallback(
-    (name: string) => {
-      axios
-        .post(`faces/${name}/create`, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((resp) => {
-          if (resp.status == 200) {
-            setAddFace(false);
-            refreshFaces();
-            toast.success(t("toast.success.addFaceLibrary"), {
-              position: "top-center",
-            });
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(t("toast.error.addFaceLibraryFailed", { errorMessage }), {
-            position: "top-center",
-          });
-        });
-    },
-    [refreshFaces, t],
-  );
-
   // face multiselect
 
   const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
@@ -183,6 +153,12 @@ export default function FaceLibrary() {
           toast.success(t("toast.success.deletedFace"), {
             position: "top-center",
           });
+
+          if (faceImages.length == 1) {
+            // face has been deleted
+            setPageToggle("");
+          }
+
           refreshFaces();
         }
       })
@@ -195,7 +171,7 @@ export default function FaceLibrary() {
           position: "top-center",
         });
       });
-  }, [selectedFaces, refreshFaces, t]);
+  }, [faceImages, selectedFaces, refreshFaces, setPageToggle, t]);
 
   // keyboard
 
@@ -229,12 +205,10 @@ export default function FaceLibrary() {
         onSave={onUploadImage}
       />
 
-      <TextEntryDialog
-        title={t("createFaceLibrary.title")}
-        description={t("createFaceLibrary.desc")}
+      <CreateFaceWizardDialog
         open={addFace}
         setOpen={setAddFace}
-        onSave={onAddName}
+        onFinish={refreshFaces}
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
