@@ -249,7 +249,7 @@ DeGirum is a detector that can use any type of hardware listed on [their website
 ### Configuration
 #### AI Hub Cloud Inference
 DeGirum is designed to support very easy cloud inference. To set it up, you need to:
-1. Sign up at [DeGirum's AI Hub](hub.degirum.com).
+1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
 2. Get an access token.
 3. Create a DeGirum detector in your config.yml file.
 ```yaml
