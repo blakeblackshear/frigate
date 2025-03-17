@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
+from pathlib import Path as FilePath
 from typing import Any, Optional
 
 import aiofiles
@@ -173,6 +174,18 @@ def config(request: Request):
     config["model"]["colormap"] = config_obj.model.colormap
     config["model"]["all_attributes"] = config_obj.model.all_attributes
     config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
+
+    # Add model plus data if plus is enabled
+    if config["plus"]["enabled"]:
+        model_json_path = FilePath(config["model"]["path"]).with_suffix(".json")
+        try:
+            with open(model_json_path, "r") as f:
+                model_plus_data = json.load(f)
+            config["model"]["plus"] = model_plus_data
+        except FileNotFoundError:
+            config["model"]["plus"] = None
+        except json.JSONDecodeError:
+            config["model"]["plus"] = None
 
     # use merged labelamp
     for detector_config in config["detectors"].values():
