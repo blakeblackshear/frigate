@@ -246,7 +246,7 @@ export default function LiveContextMenu({
       strftime_fmt:
         config?.ui.time_format == "24hour"
           ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-          : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
+          : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
     });
     return t("time.untilForTime", { ns: "common", time });
   };
@@ -343,7 +343,9 @@ export default function LiveContextMenu({
               }
             >
               <div className="text-primary">
-                {t("streaming.debugView", { ns: "components/dialog" })}
+                {t("streaming.debugView", {
+                  ns: "components/dialog",
+                })}
               </div>
             </div>
           </ContextMenuItem>

@@ -134,7 +134,7 @@ export default function LiveCameraView({
   fullscreen,
   toggleFullscreen,
 }: LiveCameraViewProps) {
-  const { t } = useTranslation(["views/live"]);
+  const { t } = useTranslation(["views/live", "components/dialog"]);
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
@@ -530,7 +530,13 @@ export default function LiveCameraView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={mic ? FaMicrophone : FaMicrophoneSlash}
                   isActive={mic}
-                  title={`${mic ? "Disable" : "Enable"} Two Way Talk`}
+                  title={
+                    (mic
+                      ? t("button.disable", { ns: "common" })
+                      : t("button.enable", { ns: "common" })) +
+                    " " +
+                    t("button.twoWayTalk", { ns: "common" })
+                  }
                   onClick={() => {
                     setMic(!mic);
                     if (!mic && !audio) {
@@ -546,7 +552,13 @@ export default function LiveCameraView({
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={audio ? GiSpeaker : GiSpeakerOff}
                   isActive={audio ?? false}
-                  title={`${audio ? "Disable" : "Enable"} Camera Audio`}
+                  title={
+                    (audio
+                      ? t("button.disable", { ns: "common" })
+                      : t("button.enable", { ns: "common" })) +
+                    " " +
+                    t("button.cameraAudio", { ns: "common" })
+                  }
                   onClick={() => setAudio(!audio)}
                   disabled={!cameraEnabled}
                 />
@@ -931,7 +943,7 @@ function PtzControlPanel({
 }
 
 function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
-  const { t } = useTranslation(["views/live"]);
+  const { t } = useTranslation(["views/live", "views/events"]);
   const rankMap = { all: 0, motion: 1, active_objects: 2 };
   const getValidMode = (retain?: { mode?: string }): keyof typeof rankMap => {
     const mode = retain?.mode;
@@ -946,10 +958,7 @@ function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
       ? recordRetainMode
       : alertsRetainMode;
 
-  const source =
-    effectiveRetainMode === recordRetainMode
-      ? t("camera", { ns: "views/events" })
-      : t("alerts", { ns: "views/events" });
+  const source = effectiveRetainMode === recordRetainMode ? "camera" : "alerts";
 
   return effectiveRetainMode !== "all" ? (
     <div>
@@ -1007,7 +1016,7 @@ function FrigateCameraFeatures({
   supports2WayTalk,
   cameraEnabled,
 }: FrigateCameraFeaturesProps) {
-  const { t } = useTranslation(["views/live"]);
+  const { t } = useTranslation(["views/live", "components/dialog"]);
 
   const { payload: detectState, send: sendDetect } = useDetectState(
     camera.name,
@@ -1243,7 +1252,7 @@ function FrigateCameraFeatures({
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                     <LuX className="size-4 text-danger" />
                     <div>
-                      {t("streaming.restreaming.NotEnabled", {
+                      {t("streaming.restreaming.disabled", {
                         ns: "components/dialog",
                       })}
                     </div>
@@ -1257,7 +1266,7 @@ function FrigateCameraFeatures({
                         </div>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 text-xs">
-                        {t("streaming.restreaming.desc", {
+                        {t("streaming.restreaming.desc.title", {
                           ns: "components/dialog",
                         })}
                         <div className="mt-2 flex items-center text-primary">
@@ -1267,9 +1276,12 @@ function FrigateCameraFeatures({
                             rel="noopener noreferrer"
                             className="inline"
                           >
-                            {t("streaming.restreaming.readTheDocumentation", {
-                              ns: "components/dialog",
-                            })}
+                            {t(
+                              "streaming.restreaming.desc.readTheDocumentation",
+                              {
+                                ns: "components/dialog",
+                              },
+                            )}
                             <LuExternalLink className="ml-2 inline-flex size-3" />
                           </Link>
                         </div>
@@ -1334,7 +1346,7 @@ function FrigateCameraFeatures({
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent className="w-80 text-xs">
-                                {t("stream.audio.tips")}
+                                {t("stream.audio.tips.title")}
                                 <div className="mt-2 flex items-center text-primary">
                                   <Link
                                     to="https://docs.frigate.video/configuration/live"
@@ -1462,12 +1474,16 @@ function FrigateCameraFeatures({
                   />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {t("streaming.showStats.desc", { ns: "components/dialog" })}
+                  {t("streaming.showStats.desc", {
+                    ns: "components/dialog",
+                  })}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-sm font-medium leading-none">
-                  {t("streaming.debugView", { ns: "components/dialog" })}
+                  {t("streaming.debugView", {
+                    ns: "components/dialog",
+                  })}
                   <LuExternalLink
                     onClick={() =>
                       navigate(`/settings?page=debug&camera=${camera.name}`)
@@ -1558,7 +1574,7 @@ function FrigateCameraFeatures({
         <div className="mt-3 flex flex-col gap-5">
           {!isRestreamed && (
             <div className="flex flex-col gap-2 p-2">
-              <Label>{t("streaming", { ns: "components/dialog" })}</Label>
+              <Label>{t("streaming.title", { ns: "components/dialog" })}</Label>
               <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                 <LuX className="size-4 text-danger" />
                 <div>
@@ -1649,7 +1665,7 @@ function FrigateCameraFeatures({
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-52 text-xs">
-                          {t("stream.audio.tips")}
+                          {t("stream.audio.tips.title")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
                               to="https://docs.frigate.video/configuration/live"
@@ -1717,7 +1733,7 @@ function FrigateCameraFeatures({
                   </div>
                   <Button
                     className={`flex items-center gap-2.5 rounded-lg`}
-                    aria-label="Reset the stream"
+                    aria-label={t("stream.lowBandwidth.resetStream")}
                     variant="outline"
                     size="sm"
                     onClick={() => setLowBandwidth(false)}

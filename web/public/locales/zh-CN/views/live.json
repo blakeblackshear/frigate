@@ -106,8 +106,10 @@
   "stream": {
     "title": "视频流",
     "audio": {
-      "tips": "音频必须从摄像机输出并在 go2rtc 中配置为此视频流使用。",
-      "tips.documentation": "阅读文档 ",
+      "tips": {
+        "title": "音频必须从摄像机输出并在 go2rtc 中配置为此视频流使用。",
+        "documentation": "阅读文档 "
+      },
       "available": "此视频流支持音频",
       "unavailable": "此视频流不支持音频"
     },
@@ -148,7 +150,9 @@
   },
   "editLayout": {
     "label": "编辑布局",
-    "group.label": "编辑摄像机分组",
+    "group": {
+      "label": "编辑摄像机分组"
+    },
     "exitEdit": "退出编辑"
-}
+  }
 }

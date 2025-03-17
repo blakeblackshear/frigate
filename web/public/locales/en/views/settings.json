@@ -92,10 +92,14 @@
       "modelSize": {
         "label": "Model Size",
         "desc": "The size of the model used for semantic search embeddings.",
-        "small": "small",
-        "large": "large",
-        "small.desc": "Using <em>small</em> employs a quantized version of the model that uses less RAM and runs faster on CPU with a very negligible difference in embedding quality.",
-        "large.desc": "Using <em>large</em> employs the full Jina model and will automatically run on the GPU if applicable."
+        "small": {
+          "title": "small",
+          "desc": "Using <em>small</em> employs a quantized version of the model that uses less RAM and runs faster on CPU with a very negligible difference in embedding quality."
+        },
+        "large": {
+          "title": "large",
+          "desc": "Using <em>large</em> employs the full Jina model and will automatically run on the GPU if applicable."
+        }
       }
     },
     "faceRecognition": {
@@ -133,9 +137,11 @@
       "objectAlertsTips": "All {{alertsLabels}} objects on {{cameraName}} will be shown as Alerts.",
       "zoneObjectAlertsTips": "All {{alertsLabels}} objects detected in {{zone}} on {{cameraName}} will be shown as Alerts.",
       "objectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
-      "zoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized in {{zone}} on {{cameraName}} will be shown as Detections.",
-      "zoneObjectDetectionsTips.notSelectDetections": "All {{detectionsLabels}} objects detected in {{zone}} on {{cameraName}} not categorized as Alerts will be shown as Detections regardless of which zone they are in.",
-      "zoneObjectDetectionsTips.regardlessOfZoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in.",
+      "zoneObjectDetectionsTips": {
+        "text": "All {{detectionsLabels}} objects not categorized in {{zone}} on {{cameraName}} will be shown as Detections.",
+        "notSelectDetections": "All {{detectionsLabels}} objects detected in {{zone}} on {{cameraName}} not categorized as Alerts will be shown as Detections regardless of which zone they are in.",
+        "regardlessOfZoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in."
+      },
       "selectAlertsZones": "Select zones for Alerts",
       "selectDetectionsZones": "Select zones for Detections",
       "limitDetections": "Limit detections to specific zones",
@@ -166,13 +172,27 @@
           "hasIllegalCharacter": "Zone name contains illegal characters."
         }
       },
-      "distance.error": "Distance must be greater than or equal to 0.1.",
-      "distance.error.mustBeFilled": "All distance fields must be filled to use speed estimation.",
-      "inertia.error.mustBeAboveZero": "Inertia must be above 0.",
-      "loiteringTime.error.mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0.",
+      "distance": {
+        "error": {
+          "text": "Distance must be greater than or equal to 0.1.",
+          "mustBeFilled": "All distance fields must be filled to use speed estimation."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Inertia must be above 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0."
+        }
+      },
       "polygonDrawing": {
         "removeLastPoint": "Remove last point",
-        "reset.label": "Clear all points",
+        "reset": {
+          "label": "Clear all points"
+        },
         "snapPoints": {
           "true": "Snap points",
           "false": "Don't Snap points"
@@ -190,77 +210,123 @@
     "zones": {
       "label": "Zones",
       "documentTitle": "Edit Zone - Frigate",
-      "desc": "Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
-      "desc.documentation": "Documentation",
+      "desc": {
+        "title": "Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
+        "documentation": "Documentation"
+      },
       "add": "Add Zone",
       "edit": "Edit Zone",
       "point_one": "{{count}} point",
       "point_other": "{{count}} points",
       "clickDrawPolygon": "Click to draw a polygon on the image.",
-      "name": "Name",
-      "name.inputPlaceHolder": "Enter a name...",
-      "name.tips": "Name must be at least 2 characters and must not be the name of a camera or another zone.",
-      "inertia": "Inertia",
-      "inertia.desc": "Specifies how many frames that an object must be in a zone before they are considered in the zone. <em>Default: 3</em>",
-      "loiteringTime": "Loitering Time",
-      "loiteringTime.desc": "Sets a minimum amount of time in seconds that the object must be in the zone for it to activate. <em>Default: 0</em>",
-      "objects": "Objects",
-      "objects.desc": "List of objects that apply to this zone.",
+      "name": {
+        "title": "Name",
+        "inputPlaceHolder": "Enter a name...",
+        "tips": "Name must be at least 2 characters and must not be the name of a camera or another zone."
+      },
+      "inertia": {
+        "title": "Inertia",
+        "desc": "Specifies how many frames that an object must be in a zone before they are considered in the zone. <em>Default: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Loitering Time",
+        "desc": "Sets a minimum amount of time in seconds that the object must be in the zone for it to activate. <em>Default: 0</em>"
+      },
+      "objects": {
+        "title": "Objects",
+        "desc": "List of objects that apply to this zone."
+      },
       "allObjects": "All Objects",
-      "speedEstimation": "Speed Estimation",
-      "speedEstimation.desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points.",
-      "speedThreshold": "Speed Threshold ({{unit}})",
-      "speedThreshold.desc": "Specifies a minimum speed for objects to be considered in this zone.",
-      "speedThreshold.toast.error.pointLengthError": "Speed estimation has been disabled for this zone. Zones with speed estimation must have exactly 4 points.",
-      "speedThreshold.toast.error.loiteringTimeError": "Zones with loitering times greater than 0 should not be used with speed estimation.",
-      "toast.success": "Zone ({{zoneName}}) has been saved. Restart Frigate to apply changes."
+      "speedEstimation": {
+        "title": "Speed Estimation",
+        "desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points."
+      },
+      "speedThreshold": {
+        "title": "Speed Threshold ({{unit}})",
+        "desc": "Specifies a minimum speed for objects to be considered in this zone.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Speed estimation has been disabled for this zone. Zones with speed estimation must have exactly 4 points.",
+            "loiteringTimeError": "Zones with loitering times greater than 0 should not be used with speed estimation."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zone ({{zoneName}}) has been saved. Restart Frigate to apply changes."
+      }
     },
     "motionMasks": {
       "label": "Motion Mask",
       "documentTitle": "Edit Motion Mask - Frigate",
-      "desc": "Motion masks are used to prevent unwanted types of motion from triggering detection. Over masking will make it more difficult for objects to be tracked.",
-      "desc.documentation": "Documentation",
+      "desc": {
+        "title": "Motion masks are used to prevent unwanted types of motion from triggering detection. Over masking will make it more difficult for objects to be tracked.",
+        "documentation": "Documentation"
+      },
       "add": "New Motion Mask",
       "edit": "Edit Motion Mask",
-      "context": "Motion masks are used to prevent unwanted types of motion from triggering detection (example: tree branches, camera timestamps). Motion masks should be used <em>very sparingly</em>, over-masking will make it more difficult for objects to be tracked.",
-      "context.documentation": "Read the documentation",
+      "context": {
+        "title": "Motion masks are used to prevent unwanted types of motion from triggering detection (example: tree branches, camera timestamps). Motion masks should be used <em>very sparingly</em>, over-masking will make it more difficult for objects to be tracked.",
+        "documentation": "Read the documentation"
+      },
       "point_one": "{{count}} point",
       "point_other": "{{count}} points",
       "clickDrawPolygon": "Click to draw a polygon on the image.",
-      "polygonAreaTooLarge": "The motion mask is covering {{polygonArea}}% of the camera frame. Large motion masks are not recommended.",
-      "polygonAreaTooLarge.tips": "Motion masks do not prevent objects from being detected. You should use a required zone instead.",
-      "polygonAreaTooLarge.documentation": "Read the documentation",
-      "toast.success": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
-      "toast.success.noName": "Motion Mask has been saved. Restart Frigate to apply changes."
+      "polygonAreaTooLarge": {
+        "title": "The motion mask is covering {{polygonArea}}% of the camera frame. Large motion masks are not recommended.",
+        "tips": "Motion masks do not prevent objects from being detected. You should use a required zone instead.",
+        "documentation": "Read the documentation"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
+          "noName": "Motion Mask has been saved. Restart Frigate to apply changes."
+        }
+      }
     },
     "objectMasks": {
       "label": "Object Masks",
       "documentTitle": "Edit Object Mask - Frigate",
-      "desc": "Object filter masks are used to filter out false positives for a given object type based on location.",
-      "documentation": "Documentation",
+      "desc": {
+        "title": "Object filter masks are used to filter out false positives for a given object type based on location.",
+        "documentation": "Documentation"
+      },
       "add": "Add Object Mask",
       "edit": "Edit Object Mask",
       "context": "Object filter masks are used to filter out false positives for a given object type based on location.",
       "point_one": "{{count}} point",
       "point_other": "{{count}} points",
       "clickDrawPolygon": "Click to draw a polygon on the image.",
-      "objects": "Objects",
-      "objects.desc": "The object type that that applies to this object mask.",
-      "objects.allObjectTypes": "All object types",
-      "toast.success": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
-      "toast.success.noName": "Object Mask has been saved. Restart Frigate to apply changes."
+      "objects": {
+        "title": "Objects",
+        "desc": "The object type that that applies to this object mask.",
+        "allObjectTypes": "All object types"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
+          "noName": "Object Mask has been saved. Restart Frigate to apply changes."
+        }
+      }
     }
   },
   "motionDetectionTuner": {
     "title": "Motion Detection Tuner",
-    "desc": "Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.",
-    "desc.documentation": "Read the Motion Tuning Guide",
-    "Threshold": "Threshold",
-    "Threshold.desc": "The threshold value dictates how much of a change in a pixel's luminance is required to be considered motion. <em>Default: 30</em>",
-    "contourArea": "Contour Area",
-    "contourArea.desc": "The contour area value is used to decide which groups of changed pixels qualify as motion. <em>Default: 10</em>",
-    "improveContrast": "Improve Contrast",
-    "improveContrast.desc": "Improve contrast for darker scenes. <em>Default: ON</em>",
+    "desc": {
+      "title": "Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.",
+      "documentation": "Read the Motion Tuning Guide"
+    },
+    "Threshold": {
+      "title": "Threshold",
+      "desc": "The threshold value dictates how much of a change in a pixel's luminance is required to be considered motion. <em>Default: 30</em>"
+    },
+    "contourArea": {
+      "title": "Contour Area",
+      "desc": "The contour area value is used to decide which groups of changed pixels qualify as motion. <em>Default: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Improve Contrast",
+      "desc": "Improve contrast for darker scenes. <em>Default: ON</em>"
+    },
     "toast": {
       "success": "Motion settings have been saved."
     }
@@ -314,8 +380,10 @@
   },
   "users": {
     "title": "Users",
-    "management": "Users Management",
-    "management.desc": "Manage this Frigate instance's user accounts.",
+    "management": {
+      "title": "User Management",
+      "desc": "Manage this Frigate instance's user accounts."
+    },
     "addUser": "Add User",
     "updatePassword": "Update Password",
     "toast": {
@@ -343,23 +411,35 @@
     },
     "dialog": {
       "form": {
-        "user": "Username",
-        "user.desc": "Only letters, numbers, periods and underscores allowed.",
-        "user.placeholder": "Enter username",
-        "password": "Password",
-        "password.placeholder": "Enter password",
-        "password.confirm": "Confirm Password",
-        "password.confirm.placeholder": "Confirm Password",
-        "password.strength": "password strength: ",
-        "password.strength.weak": "Weak",
-        "password.strength.medium": "Medium",
-        "password.strength.strong": "Strong",
-        "password.strength.veryStrong": "Very strong",
-        "password.match": "Passwords match",
-        "password.notMatch": "Passwords don't match",
-        "newPassword": "New Password",
-        "newPassword.placeholder": "Enter new password",
-        "newPassword.confirm.placeholder": "Re-enter new password",
+        "user": {
+          "title": "Username",
+          "desc": "Only letters, numbers, periods and underscores allowed.",
+          "placeholder": "Enter username"
+        },
+        "password": {
+          "title": "Password",
+          "placeholder": "Enter password",
+          "confirm": {
+            "title": "Confirm Password",
+            "placeholder": "Confirm Password"
+          },
+          "strength": {
+            "title": "Password strength: ",
+            "weak": "Weak",
+            "medium": "Medium",
+            "strong": "Strong",
+            "veryStrong": "Very Strong"
+          },
+          "match": "Passwords match",
+          "notMatch": "Passwords don't match"
+        },
+        "newPassword": {
+          "title": "New Password",
+          "placeholder": "Enter new password",
+          "confirm": {
+            "placeholder": "Re-enter new password"
+          }
+        },
         "usernameIsRequired": "Username is required"
       },
       "createUser": {
@@ -400,12 +480,16 @@
       "title": "Global Settings",
       "desc": "Temporarily suspend notifications for specific cameras on all registered devices."
     },
-    "email": "Email",
-    "email.placeholder": "e.g. example@email.com",
-    "email.desc": "A valid email is required and will be used to notify you if there are any issues with the push service.",
-    "cameras": "Cameras",
-    "cameras.noCameras": "No cameras available",
-    "cameras.desc": "Select which cameras to enable notifications for.",
+    "email": {
+      "title": "Email",
+      "placeholder": "e.g. example@email.com",
+      "desc": "A valid email is required and will be used to notify you if there are any issues with the push service."
+    },
+    "cameras": {
+      "title": "Cameras",
+      "noCameras": "No cameras available",
+      "desc": "Select which cameras to enable notifications for."
+    },
     "deviceSpecific": "Device Specific Settings",
     "registerDevice": "Register This Device",
     "unregisterDevice": "Unregister This Device",

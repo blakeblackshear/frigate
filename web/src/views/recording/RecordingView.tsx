@@ -417,7 +417,7 @@ export function RecordingView({
             <FaVideo className="size-5 text-secondary-foreground" />
             {isDesktop && (
               <div className="text-primary">
-                {t("menu.live", { ns: "common" })}
+                {t("menu.live.title", { ns: "common" })}
               </div>
             )}
           </Button>

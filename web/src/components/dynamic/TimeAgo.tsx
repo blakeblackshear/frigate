@@ -41,7 +41,7 @@ const timeAgo = ({
 
   const elapsed: number = elapsedTime / 1000;
   if (elapsed < 10) {
-    return t("time.justNow");
+    return t("time.justNow", { ns: "common" });
   }
 
   for (let i = 0; i < timeUnits.length; i++) {
@@ -66,6 +66,7 @@ const timeAgo = ({
       if (monthDiff > 0) {
         const unitAmount = monthDiff;
         return t("time.ago", {
+          ns: "common",
           timeAgo: t(`time.${dense ? timeUnits[i].unit : timeUnits[i].full}`, {
             time: unitAmount,
           }),
@@ -74,6 +75,7 @@ const timeAgo = ({
     } else if (elapsed >= timeUnits[i].value) {
       const unitAmount: number = Math.floor(elapsed / timeUnits[i].value);
       return t("time.ago", {
+        ns: "common",
         timeAgo: t(`time.${dense ? timeUnits[i].unit : timeUnits[i].full}`, {
           time: unitAmount,
         }),

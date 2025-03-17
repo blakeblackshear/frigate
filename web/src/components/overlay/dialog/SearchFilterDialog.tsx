@@ -251,7 +251,7 @@ function TimeRangeFilterContent({
   timeRange,
   updateTimeRange,
 }: TimeRangeFilterContentProps) {
-  const { t } = useTranslation(["components/filter"]);
+  const { t } = useTranslation(["components/filter", "components/dialog"]);
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
 
@@ -406,7 +406,7 @@ export function ZoneFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                {t("zones.all")}
+                {t("zones.all.title")}
               </Label>
               <Switch
                 className="ml-1"
@@ -581,6 +581,7 @@ export function SpeedFilterContent({
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">
         {t("estimatedSpeed", {
+          ns: "components/filter",
           unit:
             config?.ui.unit_system == "metric"
               ? t("unit.speed.kph", { ns: "common" })

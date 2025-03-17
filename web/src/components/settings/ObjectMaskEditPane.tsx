@@ -109,7 +109,7 @@ export default function ObjectMaskEditPane({
       polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
+      message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -198,7 +198,7 @@ export default function ObjectMaskEditPane({
           if (res.status === 200) {
             toast.success(
               polygon.name
-                ? t("masksAndZones.objectMasks.toast.success", {
+                ? t("masksAndZones.objectMasks.toast.success.title", {
                     polygonName: polygon.name,
                   })
                 : t("masksAndZones.objectMasks.toast.success.noName"),
@@ -209,7 +209,7 @@ export default function ObjectMaskEditPane({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -225,7 +225,7 @@ export default function ObjectMaskEditPane({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage,
               ns: "common",
             }),
@@ -327,7 +327,7 @@ export default function ObjectMaskEditPane({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {t("masksAndZones.objectMasks.objects")}
+                    {t("masksAndZones.objectMasks.objects.title")}
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}

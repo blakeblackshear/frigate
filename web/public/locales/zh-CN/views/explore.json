@@ -58,8 +58,10 @@
     },
     "annotationSettings": {
       "title": "标注设置",
-      "showAllZones": "显示所有区域",
-      "showAllZones.desc": "在对象进入区域的帧上始终显示区域。",
+      "showAllZones": {
+        "title": "显示所有区域",
+        "desc": "在对象进入区域的帧上始终显示区域。"
+      },
       "offset": {
         "label": "标注偏移",
         "desc": "这些数据来自摄像头的检测源，但是叠加在录制源的图像上。这两个流不太可能完全同步。因此，边界框和录像不会完全对齐。但是，可以使用 <code>annotation_offset</code> 字段来调整这个问题。",
@@ -98,26 +100,32 @@
       }
     },
     "label": "标签",
-    "editSubLable": "编辑子标签",
-    "editSubLable.desc": "为 {{label}} 输入新的子标签",
-    "editSubLable.desc.noLabel": "为此跟踪对象输入新的子标签",
-    "topScore": "最高得分",
-    "topScore.info": "最高分是跟踪对象的最高中位数得分，因此可能与搜索结果缩略图上显示的得分不同。",
+    "editSubLabel": {
+      "title": "编辑子标签",
+      "desc": "为 {{label}} 输入新的子标签",
+      "descNoLabel": "为此跟踪对象输入新的子标签"
+    },
+    "topScore": {
+      "label": "最高得分",
+      "info": "最高分是跟踪对象的最高中位数得分，因此可能与搜索结果缩略图上显示的得分不同。"
+    },
     "estimatedSpeed": "预计速度",
     "objects": "对象",
     "camera": "摄像头",
     "zones": "区域",
     "timestamp": "时间",
     "button": {
-      "findSimilar": "查找相似项"
+      "findSimilar": "查找相似项",
+      "regenerate": {
+        "title": "重新生成",
+        "label": "重新生成跟踪对象描述"
+      }
     },
     "description": {
       "label": "描述",
       "placeholder": "跟踪对象的描述",
       "aiTips": "在跟踪对象的生命周期结束之前，Frigate 不会向您的生成式 AI 提供商请求描述。"
     },
-    "button.regenerate": "重新生成",
-    "button.regenerate.label": "重新生成跟踪对象描述",
     "expandRegenerationMenu": "展开重新生成菜单",
     "regenerateFromSnapshot": "从快照重新生成",
     "regenerateFromThumbnails": "从缩略图重新生成",

@@ -128,7 +128,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    {t("users.dialog.form.user")}
+                    {t("users.dialog.form.user.title")}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -150,7 +150,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    {t("users.dialog.form.password")}
+                    {t("users.dialog.form.password.title")}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -170,7 +170,7 @@ export default function CreateUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium">
-                    {t("users.dialog.form.password.confirm")}
+                    {t("users.dialog.form.password.confirm.title")}
                   </FormLabel>
                   <FormControl>
                     <Input

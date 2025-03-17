@@ -14,24 +14,24 @@ export function getLifecycleItemDescription(
   switch (lifecycleItem.class_type) {
     case "visible":
       return t("objectLifecycle.lifecycleItemDesc.visible", {
-        label,
         ns: "views/explore",
+        label,
       });
     case "entered_zone":
       return t("objectLifecycle.lifecycleItemDesc.entered_zone", {
-        label,
         ns: "views/explore",
+        label,
         zones: lifecycleItem.data.zones.join(" and ").replaceAll("_", " "),
       });
     case "active":
       return t("objectLifecycle.lifecycleItemDesc.active", {
-        label,
         ns: "views/explore",
+        label,
       });
     case "stationary":
       return t("objectLifecycle.lifecycleItemDesc.stationary", {
-        label,
         ns: "views/explore",
+        label,
       });
     case "attribute": {
       let title = "";
@@ -42,34 +42,34 @@ export function getLifecycleItemDescription(
         title = t(
           "objectLifecycle.lifecycleItemDesc.attribute.faceOrLicense_plate",
           {
+            ns: "views/explore",
             label,
             attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
-            ns: "views/explore",
           },
         );
       } else {
         title = t("objectLifecycle.lifecycleItemDesc.attribute.other", {
+          ns: "views/explore",
           label: lifecycleItem.data.label,
           attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
-          ns: "views/explore",
         });
       }
       return title;
     }
     case "gone":
       return t("objectLifecycle.lifecycleItemDesc.gone", {
-        label,
         ns: "views/explore",
+        label,
       });
     case "heard":
       return t("objectLifecycle.lifecycleItemDesc.heard", {
-        label,
         ns: "views/explore",
+        label,
       });
     case "external":
       return t("objectLifecycle.lifecycleItemDesc.external", {
-        label,
         ns: "views/explore",
+        label,
       });
   }
 }

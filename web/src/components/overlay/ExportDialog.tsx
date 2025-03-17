@@ -267,7 +267,7 @@ export function ExportContent({
       {isDesktop && (
         <>
           <DialogHeader>
-            <DialogTitle>{t("menu.export")}</DialogTitle>
+            <DialogTitle>{t("menu.export", { ns: "common" })}</DialogTitle>
           </DialogHeader>
           <SelectSeparator className="my-4 bg-secondary" />
         </>
@@ -404,14 +404,14 @@ function CustomTimeSelector({
   const formattedStart = useFormattedTimestamp(
     startTime,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestamp.24hour")
-      : t("time.formattedTimestamp"),
+      ? t("time.formattedTimestamp.24hour", { ns: "common" })
+      : t("time.formattedTimestamp.12hour", { ns: "common" }),
   );
   const formattedEnd = useFormattedTimestamp(
     endTime,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestamp.24hour")
-      : t("time.formattedTimestamp"),
+      ? t("time.formattedTimestamp.24hour", { ns: "common" })
+      : t("time.formattedTimestamp.12hour", { ns: "common" }),
   );
 
   const startClock = useMemo(() => {
@@ -444,7 +444,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label={t("export.time.start")}
+            aria-label={t("export.time.start.title")}
             variant={startOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
@@ -510,7 +510,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label={t("export.time.end")}
+            aria-label={t("export.time.end.title")}
             variant={endOpen ? "select" : "default"}
             size="sm"
             onClick={() => {

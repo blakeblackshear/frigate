@@ -33,7 +33,7 @@ export default function SearchThumbnailFooter({
     searchResult.start_time,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-      : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
+      : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
 

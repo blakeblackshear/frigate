@@ -188,9 +188,9 @@ export default function PolygonItem({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
-                errorMessage: res.statusText,
+              t("toast.save.error.title", {
                 ns: "common",
+                errorMessage: res.statusText,
               }),
               {
                 position: "top-center",
@@ -203,9 +203,12 @@ export default function PolygonItem({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);

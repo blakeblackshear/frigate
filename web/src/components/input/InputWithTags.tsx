@@ -248,7 +248,7 @@ export default function InputWithTags({
                 filters.before &&
                 timestamp >= filters.before * 1000
               ) {
-                toast.error(t("afterDatebeEarlierBefore"), {
+                toast.error(t("filter.toast.error.afterDatebeEarlierBefore"), {
                   position: "top-center",
                 });
                 return;
@@ -727,7 +727,7 @@ export default function InputWithTags({
                 <div className="space-y-2">
                   <h3 className="font-medium">{t("filter.tips.title")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t("filter.tips.desc")}
+                    {t("filter.tips.desc.text")}
                   </p>
                   <Trans
                     ns="views/search"
@@ -826,9 +826,12 @@ export default function InputWithTags({
                           {filterType === "event_id"
                             ? t("trackedObjectId")
                             : filterType === "is_submitted"
-                              ? t("features.submittedToFrigatePlus.label", {
-                                  ns: "components/filter",
-                                })
+                              ? t(
+                                  "components/filter.features.submittedToFrigatePlus.label",
+                                  {
+                                    ns: "components/filter",
+                                  },
+                                )
                               : t("filter.label." + filterType)}
                           : {formatFilterValues(filterType, filterValues)}
                           <button

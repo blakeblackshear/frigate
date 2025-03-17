@@ -13,18 +13,30 @@
   },
   "cameraDisabled": "Camera is disabled",
   "stats": {
-    "streamType": "Stream Type:",
-    "streamType.short": "Type",
-    "bandwidth": "Bandwidth:",
-    "bandwidth.short": "Bandwidth",
-    "latency": "Latency:",
-    "latency.short": "Latency",
-    "latency.value": "{{seconds}} seconds",
-    "latency.short.value": "{{seconds}} sec",
+    "streamType": {
+      "title": "Stream Type:",
+      "short": "Type"
+    },
+    "bandwidth": {
+      "title": "Bandwidth:",
+      "short": "Bandwidth"
+    },
+    "latency": {
+      "title": "Latency:",
+      "value": "{{seconds}} seconds",
+      "short": {
+        "title": "Latency",
+        "value": "{{seconds}} sec"
+      }
+    },
     "totalFrames": "Total Frames:",
-    "droppedFrames": "Dropped Frames:",
-    "droppedFrames.short": "Dropped",
-    "droppedFrames.short.value": "{{droppedFrames}} frames",
+    "droppedFrames": {
+      "title": "Dropped Frames:",
+      "short": {
+        "title": "Dropped",
+        "value": "{{droppedFrames}} frames"
+      }
+    },
     "decodedFrames": "Decoded Frames:",
     "droppedFrameRate": "Dropped Frame Rate:"
   },
