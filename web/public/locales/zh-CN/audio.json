@@ -86,6 +86,7 @@
   "duck": "鸭子",
   "quack": "嘎嘎",
   "goose": "鹅",
+  "honk": "鸣笛/鹅叫声",
   "wild_animals": "野生动物",
   "roaring_cats": "吼叫的猫科动物",
   "roar": "吼叫",
@@ -280,7 +281,6 @@
   "ship": "轮船",
   "motor_vehicle": "机动车",
   "car": "汽车",
-  "honk": "喇叭声",
   "toot": "鸣笛",
   "car_alarm": "汽车警报",
   "power_windows": "电动车窗",
@@ -424,5 +424,6 @@
   "pink_noise": "粉红噪音",
   "television": "电视",
   "radio": "收音机",
-  "field_recording": "实地录音"
+  "field_recording": "实地录音",
+  "scream": "尖叫"
 }
