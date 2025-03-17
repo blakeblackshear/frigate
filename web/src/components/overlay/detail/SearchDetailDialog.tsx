@@ -57,6 +57,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -69,11 +70,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuInfo } from "react-icons/lu";
+import { LuInfo, LuSearch } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { useTranslation } from "react-i18next";
+import { TbFaceId } from "react-icons/tb";
 
 const SEARCH_TABS = [
   "details",
@@ -99,7 +101,7 @@ export default function SearchDetailDialog({
   setSimilarity,
   setInputFocused,
 }: SearchDetailDialogProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -555,6 +557,48 @@ function ObjectDetailsTab({
     [search, apiHost, mutate, setSearch, t],
   );
 
+  // face training
+
+  const hasFace = useMemo(() => {
+    if (!config?.face_recognition.enabled || !search) {
+      return false;
+    }
+
+    return search.data.attributes?.find((attr) => attr.label == "face");
+  }, [config, search]);
+
+  const { data: faceData } = useSWR(hasFace ? "faces" : null);
+
+  const faceNames = useMemo<string[]>(
+    () =>
+      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
+    [faceData],
+  );
+
+  const onTrainFace = useCallback(
+    (trainName: string) => {
+      axios
+        .post(`/faces/train/${trainName}/classify`, { event_id: search.id })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.trainedFace"), {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.trainFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [search, t],
+  );
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -673,20 +717,53 @@ function ObjectDetailsTab({
             draggable={false}
             src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
           />
-          {config?.semantic_search.enabled && search.data.type == "object" && (
-            <Button
-              aria-label={t("itemMenu.findSimilar.aria")}
-              onClick={() => {
-                setSearch(undefined);
+          <div className="flex w-full flex-row gap-2">
+            {config?.semantic_search.enabled &&
+              search.data.type == "object" && (
+                <Button
+                  className="w-full"
+                  aria-label={t("itemMenu.findSimilar.aria")}
+                  onClick={() => {
+                    setSearch(undefined);
 
-                if (setSimilarity) {
-                  setSimilarity();
-                }
-              }}
-            >
-              {t("itemMenu.findSimilar.label")}
-            </Button>
-          )}
+                    if (setSimilarity) {
+                      setSimilarity();
+                    }
+                  }}
+                >
+                  <div className="flex gap-1">
+                    <LuSearch />
+                    {t("itemMenu.findSimilar.label")}
+                  </div>
+                </Button>
+              )}
+            {hasFace && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full">
+                    <div className="flex gap-1">
+                      <TbFaceId />
+                      {t("trainFace", { ns: "views/faceLibrary" })}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>
+                    {t("trainFaceAs", { ns: "views/faceLibrary" })}
+                  </DropdownMenuLabel>
+                  {faceNames.map((faceName) => (
+                    <DropdownMenuItem
+                      key={faceName}
+                      className="cursor-pointer capitalize"
+                      onClick={() => onTrainFace(faceName)}
+                    >
+                      {faceName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">

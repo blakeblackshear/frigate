@@ -472,7 +472,7 @@ function FaceAttempt({
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <TooltipContent>{t("trainFaceAsPerson")}</TooltipContent>
+              <TooltipContent>{t("trainFace")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger>

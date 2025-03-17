@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 MAX_DETECTION_HEIGHT = 1080
+MAX_FACE_ATTEMPTS = 100
 MIN_MATCHING_FACES = 2
 
 
@@ -481,6 +482,16 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     folder, f"{id}-{sub_label}-{score}-{face_score}.webp"
                 )
                 shutil.move(current_file, new_file)
+
+                files = sorted(
+                    os.listdir(folder),
+                    key=lambda f: os.path.getctime(os.path.join(folder, f)),
+                    reverse=True,
+                )
+
+                # delete oldest face image if maximum is reached
+                if len(files) > MAX_FACE_ATTEMPTS:
+                    os.unlink(os.path.join(folder, files[-1]))
 
     def expire_object(self, object_id: str):
         if object_id in self.detected_faces:
