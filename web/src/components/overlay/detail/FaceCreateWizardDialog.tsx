@@ -101,7 +101,7 @@ export default function CreateFaceWizardDialog({
       }}
     >
       <Content
-        className={cn("flex flex-col gap-4 p-2", isDesktop && "max-w-[50%]")}
+        className={cn("flex flex-col gap-4", isDesktop ? "max-w-[50%]" : "p-4")}
       >
         <Header>
           <Title>{t("button.addFace")}</Title>
