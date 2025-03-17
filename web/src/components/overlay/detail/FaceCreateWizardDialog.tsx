@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import axios from "axios";
 import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
@@ -99,10 +100,12 @@ export default function CreateFaceWizardDialog({
         }
       }}
     >
-      <Content>
+      <Content
+        className={cn("flex flex-col gap-4 p-2", isDesktop && "max-w-[50%]")}
+      >
         <Header>
           <Title>{t("button.addFace")}</Title>
-          <Description>{t("description.addFace")}</Description>
+          {isDesktop && <Description>{t("description.addFace")}</Description>}
         </Header>
         <StepIndicator steps={STEPS} currentStep={step} />
         {step == 0 && (
@@ -115,7 +118,7 @@ export default function CreateFaceWizardDialog({
           >
             <div className="flex justify-end py-2">
               <Button variant="select" type="submit">
-                {t("button.save", { ns: "common" })}
+                {t("button.next", { ns: "common" })}
               </Button>
             </div>
           </TextEntry>
@@ -124,7 +127,7 @@ export default function CreateFaceWizardDialog({
           <ImageEntry onSave={onUploadImage}>
             <div className="flex justify-end py-2">
               <Button variant="select" type="submit">
-                {t("button.save", { ns: "common" })}
+                {t("button.next", { ns: "common" })}
               </Button>
             </div>
           </ImageEntry>

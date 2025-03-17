@@ -95,7 +95,8 @@
     "play": "Play",
     "unselect": "Unselect",
     "export": "Export",
-    "deleteNow": "Delete Now"
+    "deleteNow": "Delete Now",
+    "next": "Next"
   },
   "menu": {
     "system": "System",
