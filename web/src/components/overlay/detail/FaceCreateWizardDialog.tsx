@@ -134,7 +134,11 @@ export default function CreateFaceWizardDialog({
         )}
         {step == 2 && (
           <div>
-            <div className="text-s my-4 flex items-center text-secondary-foreground">
+            {t("toast.success.addFaceLibrary", { name })}
+            <p className="py-4 text-sm text-secondary-foreground">
+              {t("createFaceLibrary.nextSteps")}
+            </p>
+            <div className="text-s my-4 flex items-center text-primary">
               <Link
                 to="https://docs.frigate.video/configuration/face_recognition"
                 target="_blank"
