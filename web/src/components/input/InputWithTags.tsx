@@ -826,12 +826,9 @@ export default function InputWithTags({
                           {filterType === "event_id"
                             ? t("trackedObjectId")
                             : filterType === "is_submitted"
-                              ? t(
-                                  "components/filter.features.submittedToFrigatePlus.label",
-                                  {
-                                    ns: "components/filter",
-                                  },
-                                )
+                              ? t("features.submittedToFrigatePlus.label", {
+                                  ns: "components/filter",
+                                })
                               : t("filter.label." + filterType)}
                           : {formatFilterValues(filterType, filterValues)}
                           <button
