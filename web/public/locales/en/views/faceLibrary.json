@@ -25,7 +25,7 @@
   },
   "readTheDocs": "Read the documentation to view more details on refining images for the Face Library",
   "trainFaceAs": "Train Face as:",
-  "trainFaceAsPerson": "Train Face as Person",
+  "trainFace": "Train Face",
   "toast": {
     "success": {
       "uploadedImage": "Successfully uploaded image.",
