@@ -145,6 +145,12 @@
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）"
   },
   "features": {
-    "title": "功能"
+    "title": "功能",
+    "embeddings": {
+      "image_embedding_speed": "图像特征提取速度",
+      "face_embedding_speed": "人脸特征提取速度",
+      "plate_recognition_speed": "车牌识别速度",
+      "text_embedding_speed": "文本编码速度"
+    }
   }
 }
