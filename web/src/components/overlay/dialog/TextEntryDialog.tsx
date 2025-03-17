@@ -29,7 +29,7 @@ export default function TextEntryDialog({
   defaultValue = "",
   allowEmpty = false,
 }: TextEntryDialogProps) {
-  const { t } = useTranslation("components/dialog");
+  const { t } = useTranslation("common");
 
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
@@ -45,10 +45,10 @@ export default function TextEntryDialog({
         >
           <DialogFooter className="pt-4">
             <Button type="button" onClick={() => setOpen(false)}>
-              {t("button.cancel", { ns: "common" })}
+              {t("button.cancel")}
             </Button>
             <Button variant="select" type="submit">
-              {t("button.save", { ns: "common" })}
+              {t("button.save")}
             </Button>
           </DialogFooter>
         </TextEntry>

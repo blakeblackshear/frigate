@@ -100,10 +100,8 @@ export default function CreateFaceWizardDialog({
     >
       <Content>
         <Header>
-          <Title>Add New Face</Title>
-          <Description>
-            Walk through adding a new face to the Face Library.
-          </Description>
+          <Title>{t("button.addFace")}</Title>
+          <Description>{t("description.addFace")}</Description>
         </Header>
         <StepIndicator steps={STEPS} currentStep={step} />
         {step == 0 && (
@@ -132,7 +130,6 @@ export default function CreateFaceWizardDialog({
         )}
         {step == 2 && (
           <div>
-            {name} has successfully been added to the Face Library!
             <div className="text-s my-4 flex items-center text-secondary-foreground">
               <Link
                 to="https://docs.frigate.video/configuration/face_recognition"
@@ -140,16 +137,13 @@ export default function CreateFaceWizardDialog({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                {t("classification.faceRecognition.readTheDocumentation", {
-                  ns: "views/settings",
-                })}{" "}
-                to view more details on refining images for the Face Library
+                {t("readTheDocs")}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
             <div className="flex justify-end">
               <Button variant="select" onClick={() => handleReset()}>
-                Done
+                {t("button.done", { ns: "common" })}
               </Button>
             </div>
           </div>

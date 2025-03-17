@@ -1,4 +1,7 @@
 {
+  "description": {
+    "addFace": "Walk through adding a new face to the Face Library."
+  },
   "documentTitle": "Face Library - Frigate",
   "uploadFaceImage": {
     "title": "Upload Face Image",
@@ -19,12 +22,13 @@
     "uploadImage": "Upload Image",
     "reprocessFace": "Reprocess Face"
   },
+  "readTheDocs": "Read the documentation to view more details on refining images for the Face Library",
   "trainFaceAs": "Train Face as:",
   "trainFaceAsPerson": "Train Face as Person",
   "toast": {
     "success": {
       "uploadedImage": "Successfully uploaded image.",
-      "addFaceLibrary": "Successfully add face library.",
+      "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
       "deletedFace": "Successfully deleted face.",
       "trainedFace": "Successfully trained face.",
       "updatedFaceScore": "Successfully updated face score."

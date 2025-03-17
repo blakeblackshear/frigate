@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 type UploadImageDialogProps = {
   open: boolean;
@@ -23,6 +24,8 @@ export default function UploadImageDialog({
   setOpen,
   onSave,
 }: UploadImageDialogProps) {
+  const { t } = useTranslation("common");
+
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
       <DialogContent>
@@ -32,9 +35,9 @@ export default function UploadImageDialog({
         </DialogHeader>
         <ImageEntry onSave={onSave}>
           <DialogFooter className="pt-4">
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={() => setOpen(false)}>{t("button.cancel")}</Button>
             <Button variant="select" type="submit">
-              Save
+              {t("button.save")}
             </Button>
           </DialogFooter>
         </ImageEntry>

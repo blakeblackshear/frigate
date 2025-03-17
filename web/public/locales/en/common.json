@@ -64,6 +64,7 @@
   "button": {
     "apply": "Apply",
     "reset": "Reset",
+    "done": "Done",
     "enabled": "Enabled",
     "enable": "Enable",
     "disabled": "Disabled",
