@@ -37,6 +37,7 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import ClassificationSettingsView from "@/views/settings/ClassificationSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
@@ -54,6 +55,7 @@ const allSettingsViews = [
   "debug",
   "users",
   "notifications",
+  "frigateplus",
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
@@ -279,6 +281,7 @@ export default function Settings() {
         {page == "notifications" && (
           <NotificationView setUnsavedChanges={setUnsavedChanges} />
         )}
+        {page == "frigateplus" && <FrigatePlusSettingsView />}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
