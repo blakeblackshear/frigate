@@ -34,6 +34,7 @@ type CreateFaceWizardDialogProps = {
 export default function CreateFaceWizardDialog({
   open,
   setOpen,
+  onFinish,
 }: CreateFaceWizardDialogProps) {
   const { t } = useTranslation("views/faceLibrary");
 
@@ -142,7 +143,13 @@ export default function CreateFaceWizardDialog({
               </Link>
             </div>
             <div className="flex justify-end">
-              <Button variant="select" onClick={() => handleReset()}>
+              <Button
+                variant="select"
+                onClick={() => {
+                  onFinish();
+                  handleReset();
+                }}
+              >
                 {t("button.done", { ns: "common" })}
               </Button>
             </div>
