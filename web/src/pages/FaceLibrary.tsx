@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isDesktop } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -273,19 +274,19 @@ export default function FaceLibrary() {
               onClick={() => onDelete("train", selectedFaces)}
             >
               <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
-              {t("button.deleteFaceAttempts")}
+              {isDesktop && t("button.deleteFaceAttempts")}
             </Button>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2">
             <Button className="flex gap-2" onClick={() => setAddFace(true)}>
               <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
-              {t("button.addFace")}
+              {isDesktop && t("button.addFace")}
             </Button>
             {pageToggle != "train" && (
               <Button className="flex gap-2" onClick={() => setUpload(true)}>
                 <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-                {t("button.uploadImage")}
+                {isDesktop && t("button.uploadImage")}
               </Button>
             )}
           </div>
