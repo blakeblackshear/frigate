@@ -27,6 +27,7 @@ from .api import RealTimeProcessorApi
 logger = logging.getLogger(__name__)
 
 
+MAX_DETECTION_HEIGHT = 1080
 MIN_MATCHING_FACES = 2
 
 
@@ -88,7 +89,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             os.path.join(MODEL_CACHE_DIR, "facedet/facedet.onnx"),
             config="",
             input_size=(320, 320),
-            score_threshold=self.face_config.detection_threshold,
+            score_threshold=0.5,
             nms_threshold=0.3,
         )
         self.landmark_detector = cv2.face.createFacemarkLBF()
@@ -212,10 +213,20 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.face_recognizer = None
         self.label_map = {}
 
-    def __detect_face(self, input: np.ndarray) -> tuple[int, int, int, int]:
+    def __detect_face(
+        self, input: np.ndarray, threshold: float
+    ) -> tuple[int, int, int, int]:
         """Detect faces in input image."""
         if not self.face_detector:
             return None
+
+        # YN face detector fails at extreme definitions
+        # this rescales to a size that can properly detect faces
+        # still retaining plenty of detail
+        if input.shape[0] > MAX_DETECTION_HEIGHT:
+            scale_factor = MAX_DETECTION_HEIGHT / input.shape[0]
+            new_width = int(scale_factor * input.shape[1])
+            input = cv2.resize(input, (new_width, MAX_DETECTION_HEIGHT))
 
         self.face_detector.setInputSize((input.shape[1], input.shape[0]))
         faces = self.face_detector.detect(input)
@@ -226,6 +237,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         face = None
 
         for _, potential_face in enumerate(faces[1]):
+            if potential_face[-1] < threshold:
+                continue
+
             raw_bbox = potential_face[0:4].astype(np.uint16)
             x: int = max(raw_bbox[0], 0)
             y: int = max(raw_bbox[1], 0)
@@ -300,7 +314,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
             left, top, right, bottom = person_box
             person = rgb[top:bottom, left:right]
-            face_box = self.__detect_face(person)
+            face_box = self.__detect_face(person, self.face_config.detection_threshold)
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
@@ -406,7 +420,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     ),
                     cv2.IMREAD_COLOR,
                 )
-                face_box = self.__detect_face(img)
+
+                # detect faces with lower confidence since we expect the face
+                # to be visible in uploaded images
+                face_box = self.__detect_face(img, 0.5)
 
                 if not face_box:
                     return {
