@@ -117,7 +117,7 @@ export default function SetPasswordDialog({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="password">
-              {t("users.dialog.form.newPassword")}
+              {t("users.dialog.form.newPassword.title")}
             </Label>
             <Input
               id="password"
@@ -142,7 +142,7 @@ export default function SetPasswordDialog({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t("users.dialog.form.password.strength")}
+                  {t("users.dialog.form.password.strength.title")}
                   <span className="font-medium">{getStrengthLabel()}</span>
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function SetPasswordDialog({
 
           <div className="space-y-2">
             <Label htmlFor="confirm-password">
-              {t("users.dialog.form.password.confirm")}
+              {t("users.dialog.form.password.confirm.title")}
             </Label>
             <Input
               id="confirm-password"

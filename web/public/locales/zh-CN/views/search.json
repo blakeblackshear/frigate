@@ -1,65 +1,67 @@
 {
-    "search": "搜索",
-    "savedSearches": "已保存的搜索",
-    "searchFor": "搜索 {{inputValue}}",
-    "button": {
-        "clear": "清除搜索",
-        "save": "保存搜索",
-        "delete": "删除已保存的搜索",
-        "filterInformation": "筛选信息",
-        "filterActive": "筛选器已激活"
+  "search": "搜索",
+  "savedSearches": "已保存的搜索",
+  "searchFor": "搜索 {{inputValue}}",
+  "button": {
+    "clear": "清除搜索",
+    "save": "保存搜索",
+    "delete": "删除已保存的搜索",
+    "filterInformation": "筛选信息",
+    "filterActive": "筛选器已激活"
+  },
+  "trackedObjectId": "跟踪对象 ID",
+  "filter": {
+    "label": {
+      "cameras": "摄像机",
+      "labels": "标签",
+      "zones": "区域",
+      "sub_labels": "子标签",
+      "search_type": "搜索类型",
+      "time_range": "时间范围",
+      "before": "之前",
+      "after": "之后",
+      "min_score": "最低分数",
+      "max_score": "最高分数",
+      "min_speed": "最低速度",
+      "max_speed": "最高速度",
+      "recognized_license_plate": "识别的车牌",
+      "has_clip": "包含片段",
+      "has_snapshot": "包含快照"
     },
-    "trackedObjectId": "跟踪对象 ID",
-    "filter": {
-        "label": {
-            "cameras": "摄像机",
-            "labels": "标签",
-            "zones": "区域",
-            "sub_labels": "子标签",
-            "search_type": "搜索类型",
-            "time_range": "时间范围",
-            "before": "之前",
-            "after": "之后",
-            "min_score": "最低分数",
-            "max_score": "最高分数",
-            "min_speed": "最低速度",
-            "max_speed": "最高速度",
-            "recognized_license_plate": "识别的车牌",
-            "has_clip": "包含片段",
-            "has_snapshot": "包含快照"
-        },
-        "searchType": {
-            "thumbnail": "缩略图", 
-            "description": "描述"
-        },
-        "toast": {
-            "error": {
-                "beforeDateBeLaterAfter": "“之前”日期必须晚于“之后”日期。",
-                "afterDatebeEarlierBefore": "“之后”日期必须早于“之前”日期。",
-                "minScoreMustBeLessOrEqualMaxScore": "最小分值 必须小于或等于 最大分值。",
-                "maxScoreMustBeGreaterOrEqualMinScore": "最大分值 必须大于或等于 最小分值",
-                "minSpeedMustBeLessOrEqualMaxSpeed": "最低速度 必须小于或等于 最高速度",
-                "maxSpeedMustBeGreaterOrEqualMinSpeed": "最高速度 必须大于或等于 最低速度"
-            }
-        },
-        "tips": {
-            "title": "如何使用文本筛选器（英文）",
-            "desc": "筛选器可帮助您缩小搜索范围。注意，目前还暂不支持中文搜索。以下是在输入字段中使用筛选器的方法：",
-            "desc.step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>输入筛选器名称后跟一个冒号（例如：“cameras:”）。</li><li>从建议中选择一个值或输入您自己的值。</li><li>使用多个筛选器时，可以在它们之间用空格分隔。</li><li>日期筛选器（before: 和 after:）使用 <em>{{DateFormat}}</em> 格式。</li><li>时间范围筛选器使用 <em>{{exampleTime}}</em> 格式。</li><li>点击筛选器旁边的“x”即可移除筛选条件。</li></ul>",
-            "desc.example": "示例：<code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM</code>"
-        },
-        "header": {
-            "currentFilterType": "筛选值",
-            "noFilters": "筛选条件",
-            "activeFilters": "激活的筛选项"
-        }
+    "searchType": {
+      "thumbnail": "缩略图",
+      "description": "描述"
     },
-    "similaritySearch": {
-        "title": "相似搜索",
-        "active": "相似搜索已激活",
-        "clear": "清除相似搜索"
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "“之前”日期必须晚于“之后”日期。",
+        "afterDatebeEarlierBefore": "“之后”日期必须早于“之前”日期。",
+        "minScoreMustBeLessOrEqualMaxScore": "最小分值 必须小于或等于 最大分值。",
+        "maxScoreMustBeGreaterOrEqualMinScore": "最大分值 必须大于或等于 最小分值",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "最低速度 必须小于或等于 最高速度",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "最高速度 必须大于或等于 最低速度"
+      }
     },
-    "placeholder": {
-        "search": "搜索..."
+    "tips": {
+      "title": "如何使用文本筛选器（英文）",
+      "desc": {
+        "text": "筛选器可帮助您缩小搜索范围。注意，目前还暂不支持中文搜索。以下是在输入字段中使用筛选器的方法：",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>输入筛选器名称后跟一个冒号（例如：“cameras:”）。</li><li>从建议中选择一个值或输入您自己的值。</li><li>使用多个筛选器时，可以在它们之间用空格分隔。</li><li>日期筛选器（before: 和 after:）使用 <em>{{DateFormat}}</em> 格式。</li><li>时间范围筛选器使用 <em>{{exampleTime}}</em> 格式。</li><li>点击筛选器旁边的“x”即可移除筛选条件。</li></ul>",
+        "example": "示例：<code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM</code>"
+      }
+    },
+    "header": {
+      "currentFilterType": "筛选值",
+      "noFilters": "筛选条件",
+      "activeFilters": "激活的筛选项"
     }
+  },
+  "similaritySearch": {
+    "title": "相似搜索",
+    "active": "相似搜索已激活",
+    "clear": "清除相似搜索"
+  },
+  "placeholder": {
+    "search": "搜索..."
+  }
 }

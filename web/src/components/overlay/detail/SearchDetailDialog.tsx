@@ -195,7 +195,9 @@ export default function SearchDetailDialog({
       >
         <Header>
           <Title>{t("trackedObjectDetails")}</Title>
-          <Description className="sr-only">{t("details")}</Description>
+          <Description className="sr-only">
+            {t("trackedObjectDetails")}
+          </Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -311,7 +313,7 @@ function ObjectDetailsTab({
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
-      : t("time.formattedTimestampWithYear", { ns: "common" }),
+      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
 
@@ -575,7 +577,9 @@ function ObjectDetailsTab({
                   </span>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>{t("details.editSubLable")}</TooltipContent>
+                  <TooltipContent>
+                    {t("details.editSubLabel.title")}
+                  </TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             </div>
@@ -597,7 +601,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">
-                {t("details.topScore")}
+                {t("details.topScore.label")}
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
@@ -727,7 +731,7 @@ function ObjectDetailsTab({
                 aria-label={t("details.button.regenerate.label")}
                 onClick={() => regenerateDescription("thumbnails")}
               >
-                {t("details.button.regenerate")}
+                {t("details.button.regenerate.title")}
               </Button>
               {search.has_snapshot && (
                 <DropdownMenu>
@@ -772,13 +776,13 @@ function ObjectDetailsTab({
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title={t("details.editSubLable")}
+            title={t("details.editSubLabel.title")}
             description={
               search.label
-                ? t("details.editSubLable.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                ? t("details.editSubLabel.desc", {
+                    label: t(search.label, { an: "objects" }),
                   })
-                : t("details.editSubLable.desc.noLabel")
+                : t("details.editSubLabel.descNoLabel")
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
@@ -921,10 +925,10 @@ export function ObjectSnapshotTab({
                             }}
                           >
                             {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.true_other", {
+                              ? t("explore.plus.review.true.true_other", {
                                   label: search?.label,
                                 })
-                              : t("explore.plus.review.true_one", {
+                              : t("explore.plus.review.true.true_one", {
                                   label: search?.label,
                                 })}
                           </Button>
@@ -938,10 +942,10 @@ export function ObjectSnapshotTab({
                             }}
                           >
                             {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.false_other", {
+                              ? t("explore.plus.review.false.false_other", {
                                   label: search?.label,
                                 })
-                              : t("explore.plus.review.false_one", {
+                              : t("explore.plus.review.false.false_one", {
                                   label: search?.label,
                                 })}
                           </Button>

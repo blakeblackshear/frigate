@@ -2,22 +2,30 @@
   "filter": "Filter",
   "labels": {
     "label": "Labels",
-    "all": "All Labels",
-    "all.short": "Labels",
+    "all": {
+      "title": "All Labels",
+      "short": "Labels"
+    },
     "count": "{{count}} Labels"
   },
   "zones": {
-    "all": "All Zones",
-    "all.short": "Zones"
+    "label": "Zones",
+    "all": {
+      "title": "All Zones",
+      "short": "Zones"
+    }
   },
   "dates": {
-    "all": "All Dates",
-    "all.short": "Dates"
+    "all": {
+      "title": "All Dates",
+      "short": "Dates"
+    }
   },
   "more": "More Filters",
-  "reset.label": "Reset filters to default values",
+  "reset": {
+    "label": "Reset filters to default values"
+  },
   "timeRange": "Time Range",
-  "zones.label": "Zones",
   "subLabels": {
     "label": "Sub Labels",
     "all": "All Sub Labels"
@@ -45,8 +53,10 @@
   },
   "cameras": {
     "label": "Cameras Filter",
-    "all": "All Cameras",
-    "all.short": "Cameras"
+    "all": {
+      "title": "All Cameras",
+      "short": "Cameras"
+    }
   },
   "review": {
     "showReviewed": "Show Reviewed"
@@ -57,12 +67,16 @@
   "explore": {
     "settings": {
       "title": "Settings",
-      "defaultView": "Default View",
-      "defaultView.desc": "When no filters are selected, display a summary of the most recent tracked objects per label, or display an unfiltered grid.",
-      "defaultView.summary": "Summary",
-      "defaultView.unfilteredGrid": "Unfiltered Grid",
-      "gridColumns": "Grid Columns",
-      "gridColumns.desc": "Select the number of columns in the grid view.",
+      "defaultView": {
+        "title": "Default View",
+        "desc": "When no filters are selected, display a summary of the most recent tracked objects per label, or display an unfiltered grid.",
+        "summary": "Summary",
+        "unfilteredGrid": "Unfiltered Grid"
+      },
+      "gridColumns": {
+        "title": "Grid Columns",
+        "desc": "Select the number of columns in the grid view."
+      },
       "searchSource": {
         "label": "Search Source",
         "desc": "Choose whether to search the thumbnails or descriptions of your tracked objects.",
@@ -81,8 +95,10 @@
   "logSettings": {
     "label": "Filter log level",
     "filterBySeverity": "Filter logs by severity",
-    "loading": "Loading",
-    "loading.desc": "When the log pane is scrolled to the bottom, new logs automatically stream as they are added.",
+    "loading": {
+      "title": "Loading",
+      "desc": "When the log pane is scrolled to the bottom, new logs automatically stream as they are added."
+    },
     "disableLogStreaming": "Disable log streaming",
     "allLogs": "All logs"
   },

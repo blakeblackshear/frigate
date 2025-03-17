@@ -2,22 +2,30 @@
   "filter": "过滤器",
   "labels": {
     "label": "标签",
-    "all": "所有标签",
-    "all.short": "标签",
+    "all": {
+      "title": "所有标签",
+      "short": "标签"
+    },
     "count": "{{count}} 个标签"
   },
   "zones": {
-    "all": "所有区域",
-    "all.short": "区域"
+    "all": {
+      "title": "所有区域",
+      "short": "区域"
+    },
+    "label": "区域"
   },
   "dates": {
-    "all": "所有日期",
-    "all.short": "日期"
+    "all": {
+      "title": "所有日期",
+      "short": "日期"
+    }
   },
   "more": "更多筛选项",
-  "reset.label": "重置筛选器为默认值",
+  "reset": {
+    "label": "重置筛选器为默认值"
+  },
   "timeRange": "时间范围",
-  "zones.label": "区域",
   "subLabels": {
     "label": "子标签",
     "all": "所有子标签"
@@ -45,8 +53,10 @@
   },
   "cameras": {
     "label": "摄像头筛选",
-    "all": "所有摄像头",
-    "all.short": "摄像头"
+    "all": {
+      "title": "所有摄像头",
+      "short": "摄像头"
+    }
   },
   "review": {
     "showReviewed": "显示已查看的项目"
@@ -57,12 +67,16 @@
   "explore": {
     "settings": {
       "title": "设置",
-      "defaultView": "默认视图",
-      "defaultView.desc": "当未选择任何过滤器时，显示每个标签最近跟踪对象的摘要，或显示未过滤的网格。",
-      "defaultView.summary": "摘要",
-      "defaultView.unfilteredGrid": "未过滤网格",
-      "gridColumns": "网格列数",
-      "gridColumns.desc": "选择网格视图中的列数。",
+      "defaultView": {
+        "title": "默认视图",
+        "desc": "当未选择任何过滤器时，显示每个标签最近跟踪对象的摘要，或显示未过滤的网格。",
+        "summary": "摘要",
+        "unfilteredGrid": "未过滤网格"
+      },
+      "gridColumns": {
+        "title": "网格列数",
+        "desc": "选择网格视图中的列数。"
+      },
       "searchSource": {
         "label": "搜索源",
         "desc": "选择是搜索缩略图还是跟踪对象的描述。",
@@ -70,19 +84,21 @@
           "thumbnailImage": "缩略图",
           "description": "描述"
         }
-      },
-      "date": {
-        "selectDateBy": {
-          "label": "选择日期进行筛选"
-        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "选择日期进行筛选"
       }
     }
   },
   "logSettings": {
     "label": "日志级别筛选",
     "filterBySeverity": "按严重程度筛选日志",
-    "loading": "加载中",
-    "loading.desc": "当日志面板滚动到底部时，新的日志会自动流式加载。",
+    "loading": {
+      "title": "加载中",
+      "desc": "当日志面板滚动到底部时，新的日志会自动流式加载。"
+    },
     "disableLogStreaming": "禁用日志流式加载",
     "allLogs": "所有日志"
   },

@@ -199,7 +199,7 @@ export default function AuthenticationView() {
         <div className="mb-5 flex flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start">
             <Heading as="h3" className="my-2">
-              {t("users.management")}
+              {t("users.management.title")}
             </Heading>
             <p className="text-sm text-muted-foreground">
               {t("users.management.desc")}

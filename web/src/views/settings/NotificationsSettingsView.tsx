@@ -264,7 +264,7 @@ export default function NotificationView({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -279,9 +279,12 @@ export default function NotificationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -389,7 +392,7 @@ export default function NotificationView({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("notification.email")}</FormLabel>
+                        <FormLabel>{t("notification.email.title")}</FormLabel>
                         <FormControl>
                           <Input
                             className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
@@ -414,7 +417,7 @@ export default function NotificationView({
                           <>
                             <div className="mb-2">
                               <FormLabel className="flex flex-row items-center text-base">
-                                {t("notification.cameras")}
+                                {t("notification.cameras.title")}
                               </FormLabel>
                             </div>
                             <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
@@ -423,7 +426,7 @@ export default function NotificationView({
                                 name="allEnabled"
                                 render={({ field }) => (
                                   <FilterSwitch
-                                    label={t("cameras.all", {
+                                    label={t("cameras.all.title", {
                                       ns: "components/filter",
                                     })}
                                     isChecked={field.value}
@@ -514,7 +517,7 @@ export default function NotificationView({
                     {t("notification.deviceSpecific")}
                   </Heading>
                   <Button
-                    aria-label="Register or unregister notifications for this device"
+                    aria-label={t("notification.registerDevice")}
                     disabled={
                       !config?.notifications.enabled || publicKey == undefined
                     }
@@ -653,7 +656,7 @@ export function CameraNotificationSwitch({
       strftime_fmt:
         config?.ui.time_format == "24hour"
           ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-          : t("time.formattedTimestampExcludeSeconds", { ns: "common" }),
+          : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
     });
     return t("time.untilForTime", { ns: "common", time });
   };
@@ -709,10 +712,10 @@ export function CameraNotificationSwitch({
               {t("notification.suspendTime.1hour")}
             </SelectItem>
             <SelectItem value="840">
-              {t("notification.suspendTime.12hour")}
+              {t("notification.suspendTime.12hours")}
             </SelectItem>
             <SelectItem value="1440">
-              {t("notification.suspendTime.24hour")}
+              {t("notification.suspendTime.24hours")}
             </SelectItem>
             <SelectItem value="off">
               {t("notification.suspendTime.untilRestart")}

@@ -58,8 +58,10 @@
     },
     "annotationSettings": {
       "title": "Annotation Settings",
-      "showAllZones": "Show All Zones",
-      "showAllZones.desc": "Always show zones on frames where objects have entered a zone.",
+      "showAllZones": {
+        "title": "Show All Zones",
+        "desc": "Always show zones on frames where objects have entered a zone."
+      },
       "offset": {
         "label": "Annotation Offset",
         "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. However, the <code>annotation_offset</code> field can be used to adjust this.",
@@ -96,29 +98,34 @@
           "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}"
         }
       }
-
     },
     "label": "Label",
-    "editSubLable": "Edit sub label",
-    "editSubLable.desc": "Enter a new sub label for this {{label}}",
-    "editSubLable.desc.noLabel": "Enter a new sub label for this tracked object",
-    "topScore": "Top Score",
-    "topScore.info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail.",
+    "editSubLabel": {
+      "title": "Edit sub label",
+      "desc": "Enter a new sub label for this {{label}}",
+      "descNoLabel": "Enter a new sub label for this tracked object"
+    },
+    "topScore": {
+      "label": "Top Score",
+      "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
+    },
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",
     "zones": "Zones",
     "timestamp": "Timestamp",
     "button": {
-      "findSimilar": "Find Similar"
+      "findSimilar": "Find Similar",
+      "regenerate": {
+        "title": "Regenerate",
+        "label": "Regenerate tracked object description"
+      }
     },
     "description": {
       "label": "Description",
       "placeholder": "Description of the tracked object",
       "aiTips": "Frigate will not request a description from your Generative AI provider until the tracked object's lifecycle has ended."
     },
-    "button.regenerate": "Regenerate",
-    "button.regenerate.label": "Regenerate tracked object description",
     "expandRegenerationMenu": "Expand regeneration menu",
     "regenerateFromSnapshot": "Regenerate from Snapshot",
     "regenerateFromThumbnails": "Regenerate from Thumbnails",

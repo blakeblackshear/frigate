@@ -63,8 +63,12 @@
           "cudaComputerCapability": "CUDA计算能力：{{cuda_compute}}",
           "vbios": "VBios信息：{{vbios}}"
         },
-        "closeInfo.label": "关闭GPU信息",
-        "copyInfo.label": "复制GPU信息",
+        "closeInfo": {
+          "label": "关闭GPU信息"
+        },
+        "copyInfo": {
+          "label": "复制GPU信息"
+        },
         "toast": {
           "success": "已复制GPU信息到剪贴板"
         }
@@ -87,12 +91,14 @@
     "cameraStorage": {
       "title": "摄像头存储",
       "camera": "摄像头",
-      "unused": "未使用",
       "unusedStorageInformation": "未使用存储信息",
       "storageUsed": "存储使用",
       "percentageOfTotalUsed": "总使用率",
       "bandwidth": "带宽",
-      "unused.tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
+      "unused": {
+        "title": "未使用",
+        "tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
+      }
     }
   },
   "cameras": {

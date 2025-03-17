@@ -126,7 +126,7 @@ export default function MotionTunerView({
           updateConfig();
         } else {
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage: res.statusText,
               ns: "common",
             }),
@@ -138,7 +138,7 @@ export default function MotionTunerView({
       })
       .catch((error) => {
         toast.error(
-          t("toast.save.error", {
+          t("toast.save.error.title", {
             errorMessage: error.response.data.message,
             ns: "common",
           }),
@@ -194,7 +194,7 @@ export default function MotionTunerView({
           {t("motionDetectionTuner.title")}
         </Heading>
         <div className="my-3 space-y-3 text-sm text-muted-foreground">
-          <p>{t("motionDetectionTuner.desc")}</p>
+          <p>{t("motionDetectionTuner.desc.title")}</p>
 
           <div className="flex items-center text-primary">
             <Link
@@ -213,7 +213,7 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                {t("motionDetectionTuner.Threshold")}
+                {t("motionDetectionTuner.Threshold.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <Trans ns="views/settings">
@@ -242,7 +242,7 @@ export default function MotionTunerView({
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
               <Label htmlFor="motion-threshold" className="text-md">
-                {t("motionDetectionTuner.contourArea")}
+                {t("motionDetectionTuner.contourArea.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
@@ -274,7 +274,7 @@ export default function MotionTunerView({
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="improve-contrast">
-                {t("motionDetectionTuner.improveContrast")}
+                {t("motionDetectionTuner.improveContrast.title")}
               </Label>
               <div className="text-sm text-muted-foreground">
                 <Trans ns="views/settings">

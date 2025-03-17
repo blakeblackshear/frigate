@@ -88,10 +88,14 @@
       "modelSize": {
         "label": "模型大小",
         "desc": "用于语义搜索的语言模型大小",
-        "small": "小",
-        "large": "大",
-        "small.desc": "使用 <strong>小</strong>模型。该模型将使用较少的内存，在CPU上也能较快的运行。质量较好。",
-        "large.desc": "使用 <strong>大</strong>模型。该模型采用了完整的Jina模型，并在适用的情况下使用GPU。"
+        "small": {
+          "title": "小",
+          "desc": "使用 <strong>小</strong>模型。该模型将使用较少的内存，在CPU上也能较快的运行。质量较好。"
+        },
+        "large": {
+          "title": "大",
+          "desc": "使用 <strong>大</strong>模型。该模型采用了完整的Jina模型，并在适用的情况下使用GPU。"
+        }
       }
     },
     "faceRecognition": {
@@ -129,9 +133,11 @@
       "objectAlertsTips": "所有的 {{alertsLabels}} 对象在 {{cameraName}} 都将显示为警告。",
       "zoneObjectAlertsTips": "所有的 {{alertsLabels}} 对象在 {{cameraName}} 的 {{zone}} 区域都将显示为警告。",
       "objectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。",
-      "zoneObjectDetectionsTips": "所有未在 {{cameraName}} 上归类为 {{detectionsLabels}} 的对象在 {{zone}} 区域都将显示为检测。",
-      "zoneObjectDetectionsTips.notSelectDetections": "所有在 {{cameraName}} 的 {{zone}} 上检测到的未归类为警告的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。",
-      "zoneObjectDetectionsTips.regardlessOfZoneObjectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。",
+      "zoneObjectDetectionsTips": {
+        "text": "所有未在 {{cameraName}} 上归类为 {{detectionsLabels}} 的对象在 {{zone}} 区域都将显示为检测。",
+        "notSelectDetections": "所有在 {{cameraName}} 的 {{zone}} 上检测到的未归类为警告的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。",
+        "regardlessOfZoneObjectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。"
+      },
       "selectAlertsZones": "选择要显示为警告的区域",
       "selectDetectionsZones": "选择检测区域",
       "limitDetections": "限制仅在特定区域内进行检测",
@@ -162,13 +168,27 @@
           "hasIllegalCharacter": "区域名称包含非法字符。"
         }
       },
-      "distance.error": "距离必须大于或等于 0.1。",
-      "distance.error.mustBeFilled": "所有距离字段必须填写才能使用速度估算。",
-      "inertia.error.mustBeAboveZero": "惯性必须大于 0。",
-      "loiteringTime.error.mustBeGreaterOrEqualZero": "徘徊时间必须大于或等于 0。",
+      "distance": {
+        "error": {
+          "text": "距离必须大于或等于 0.1。",
+          "mustBeFilled": "所有距离字段必须填写才能使用速度估算。"
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "惯性必须大于 0。"
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "徘徊时间必须大于或等于 0。"
+        }
+      },
       "polygonDrawing": {
         "removeLastPoint": "删除最后一个点",
-        "reset.label": "清除所有点",
+        "reset": {
+          "label": "清除所有点"
+        },
         "snapPoints": {
           "true": "启用点对齐",
           "false": "禁用点对齐"
@@ -186,77 +206,123 @@
     "zones": {
       "label": "区域",
       "documentTitle": "编辑区域 - Frigate",
-      "desc": "该功能允许你定义特定区域，以便你可以确定特定对象是否在该区域内。",
-      "desc.documentation": "文档（英文）",
+      "desc": {
+        "title": "该功能允许你定义特定区域，以便你可以确定特定对象是否在该区域内。",
+        "documentation": "文档（英文）"
+      },
       "add": "添加区域",
       "edit": "编辑区域",
       "point_one": "{{count}} 点",
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
-      "name": "区域名称",
-      "name.inputPlaceHolder": "请输入名称",
-      "name.tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。<br>当前仅支持英文与数字组合",
-      "inertia": "惯性",
-      "inertia.desc": "识别指定对象前该对象必须在这个区域内出现了多少帧。<em>默认值：3</em>",
-      "loiteringTime": "停留时间",
-      "loiteringTime.desc": "设置对象必须在区域中活动的最小时间（单位为秒）。<em>默认值：0</em>",
-      "objects": "对象",
-      "objects.desc": "将在此区域应用的对象列表。",
+      "name": {
+        "title": "区域名称",
+        "inputPlaceHolder": "请输入名称",
+        "tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。<br>当前仅支持英文与数字组合"
+      },
+      "inertia": {
+        "title": "惯性",
+        "desc": "识别指定对象前该对象必须在这个区域内出现了多少帧。<em>默认值：3</em>"
+      },
+      "loiteringTime": {
+        "title": "停留时间",
+        "desc": "设置对象必须在区域中活动的最小时间（单位为秒）。<em>默认值：0</em>"
+      },
+      "objects": {
+        "title": "对象",
+        "desc": "将在此区域应用的对象列表。"
+      },
       "allObjects": "所有对象",
-      "speedEstimation": "速度估算",
-      "speedEstimation.desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。",
-      "speedThreshold": "速度阈值 ({{unit}})",
-      "speedThreshold.desc": "指定物体在此区域内被视为有效的最低速度。",
-      "speedThreshold.toast.error.pointLengthError": "此区域的速度估算已禁用。启用速度估算的区域必须恰好包含 4 个点。",
-      "speedThreshold.toast.error.loiteringTimeError": "徘徊时间大于 0 的区域不应与速度估算一起使用。",
-      "toast.success": "区域 ({{zoneName}}) 已保存。请重启 Frigate 以应用更改。"
+      "speedEstimation": {
+        "title": "速度估算",
+        "desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。"
+      },
+      "speedThreshold": {
+        "title": "速度阈值 ({{unit}})",
+        "desc": "指定物体在此区域内被视为有效的最低速度。",
+        "toast": {
+          "error": {
+            "pointLengthError": "此区域的速度估算已禁用。启用速度估算的区域必须恰好包含 4 个点。",
+            "loiteringTimeError": "徘徊时间大于 0 的区域不应与速度估算一起使用。"
+          }
+        }
+      },
+      "toast": {
+        "success": "区域 ({{zoneName}}) 已保存。请重启 Frigate 以应用更改。"
+      }
     },
     "motionMasks": {
       "label": "运动遮罩",
       "documentTitle": "编辑运动遮罩 - Frigate",
-      "desc": "运动遮罩用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪",
-      "desc.documentation": "文档（英文）",
+      "desc": {
+        "title": "运动遮罩用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪",
+        "documentation": "文档（英文）"
+      },
       "add": "添加运动遮罩",
       "edit": "编辑运动遮罩",
-      "context": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
-      "context.documentation": "阅读文档（英文）",
+      "context": {
+        "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
+        "documentation": "阅读文档（英文）"
+      },
       "point_one": "{{count}} 点",
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
-      "polygonAreaTooLarge": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
-      "polygonAreaTooLarge.tips": "运动遮罩不会阻止检测到对象，你应该使用区域来限制检测对象。",
-      "polygonAreaTooLarge.documentation": "阅读文档（英文）",
-      "toast.success": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-      "toast.success.noName": "运动遮罩已保存。请重启 Frigate 以应用更改。"
+      "polygonAreaTooLarge": {
+        "title": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
+        "tips": "运动遮罩不会阻止检测到对象，你应该使用区域来限制检测对象。",
+        "documentation": "阅读文档（英文）"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
+          "noName": "运动遮罩已保存。请重启 Frigate 以应用更改。"
+        }
+      }
     },
     "objectMasks": {
       "label": "对象遮罩",
       "documentTitle": "编辑对象遮罩 - Frigate",
-      "desc": "对象过滤器用于防止特定位置的指定对象被误报。",
-      "documentation": "文档（英文）",
+      "desc": {
+        "title": "对象过滤器用于防止特定位置的指定对象被误报。",
+        "documentation": "文档（英文）"
+      },
       "add": "添加对象遮罩",
       "edit": "编辑对象遮罩",
       "context": "对象过滤器用于防止特定位置的指定对象被误报。",
       "point_one": "{{count}} 点",
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
-      "objects": "对象",
-      "objects.desc": "将应用于此对象遮罩的对象列表。",
-      "objects.allObjectTypes": "所有对象类型",
-      "toast.success": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-      "toast.success.noName": "对象遮罩已保存。请重启 Frigate 以应用更改。"
+      "objects": {
+        "title": "对象",
+        "desc": "将应用于此对象遮罩的对象列表。",
+        "allObjectTypes": "所有对象类型"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
+          "noName": "对象遮罩已保存。请重启 Frigate 以应用更改。"
+        }
+      }
     }
   },
   "motionDetectionTuner": {
     "title": "运动检测调整器",
-    "desc": "Frigate 将使用运动检测作为首个步骤，以确认一帧画面中是否有对象需要使用对象检测。",
-    "desc.documentation": "阅读有关运动检测的文档（英文）",
-    "Threshold": "阈值",
-    "Threshold.desc": "阈值决定像素亮度高于多少时会被认为是运动。<em>默认值：30</em>",
-    "contourArea": "轮廓面积",
-    "contourArea.desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>",
-    "improveContrast": "提高对比度",
-    "improveContrast.desc": "提高较暗场景的对比度。默认值：开启",
+    "desc": {
+      "title": "Frigate 将使用运动检测作为首个步骤，以确认一帧画面中是否有对象需要使用对象检测。",
+      "documentation": "阅读有关运动检测的文档（英文）"
+    },
+    "Threshold": {
+      "title": "阈值",
+      "desc": "阈值决定像素亮度高于多少时会被认为是运动。<em>默认值：30</em>"
+    },
+    "contourArea": {
+      "title": "轮廓面积",
+      "desc": "轮廓面积决定哪些变化的像素组符合运动条件。<em>默认值：10</em>"
+    },
+    "improveContrast": {
+      "title": "提高对比度",
+      "desc": "提高较暗场景的对比度。默认值：开启"
+    },
     "toast": {
       "success": "运动设置已保存。"
     }
@@ -310,8 +376,10 @@
   },
   "users": {
     "title": "用户",
-    "management": "用户管理",
-    "management.desc": "管理此 Frigate 实例的用户账户。",
+    "management": {
+      "title": "用户管理",
+      "desc": "管理此 Frigate 实例的用户账户。"
+    },
     "addUser": "添加用户",
     "updatePassword": "修改密码",
     "toast": {
@@ -339,30 +407,40 @@
     },
     "dialog": {
       "form": {
-        "user": "用户名",
-        "user.desc": "仅允许使用字母、数字、句点和下划线。",
-        "user.placeholder": "请输入用户名",
-        "password": "密码",
-        "password.placeholder": "请输入密码",
-        "password.confirm": "确认密码",
-        "password.confirm.placeholder": "请再次输入密码",
-        "password.strength": "密码强度：",
-        "password.strength.weak": "弱",
-        "password.strength.medium": "中等",
-        "password.strength.strong": "强",
-        "password.strength.veryStrong": "非常强",
-        "password.match": "密码匹配",
-        "password.notMatch": "密码不匹配",
-        "newPassword": "新密码",
-        "newPassword.placeholder": "请输入新密码",
-        "newPassword.confirm.placeholder": "请再次输入新密码",
+        "user": {
+          "title": "用户名",
+          "desc": "仅允许使用字母、数字、句点和下划线。",
+          "placeholder": "请输入用户名"
+        },
+        "password": {
+          "title": "密码",
+          "placeholder": "请输入密码",
+          "confirm": {
+            "title": "确认密码",
+            "placeholder": "请再次输入密码"
+          },
+          "strength": {
+            "title": "密码强度：",
+            "weak": "弱",
+            "medium": "中等",
+            "strong": "强",
+            "veryStrong": "非常强"
+          },
+          "match": "密码匹配",
+          "notMatch": "密码不匹配"
+        },
+        "newPassword": {
+          "title": "新密码",
+          "placeholder": "请输入新密码",
+          "confirm": {
+            "placeholder": "请再次输入新密码"
+          }
+        },
         "usernameIsRequired": "用户名为必填项"
       },
       "createUser": {
         "title": "创建新用户",
         "desc": "创建一个新用户账户，并指定一个角色以控制访问 Frigate UI 的权限。",
-        "user": "用户",
-        "password": "密码",
         "usernameOnlyInclude": "用户名只能包含字母、数字和 _"
       },
       "deleteUser": {
@@ -398,12 +476,16 @@
       "desc": "网页推送通知需要安全连接（<code>https://...</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
       "documentation": "阅读文档（英文）"
     },
-    "email": "电子邮箱",
-    "email.placeholder": "例如：example@email.com",
-    "email.desc": "需要输入有效的电子邮件，在推送服务出现问题时，将使用此电子邮件进行通知。",
-    "cameras": "摄像头",
-    "cameras.noCameras": "没有可用的摄像头",
-    "cameras.desc": "选择要启用通知的摄像头。",
+    "email": {
+      "title": "电子邮箱",
+      "placeholder": "例如：example@email.com",
+      "desc": "需要输入有效的电子邮件，在推送服务出现问题时，将使用此电子邮件进行通知。"
+    },
+    "cameras": {
+      "title": "摄像头",
+      "noCameras": "没有可用的摄像头",
+      "desc": "选择要启用通知的摄像头。"
+    },
     "deviceSpecific": "设备专用设置",
     "registerDevice": "注册该设备",
     "unregisterDevice": "取消注册该设备",
@@ -429,5 +511,9 @@
         "registerFailed": "通知注册失败。"
       }
     }
+  },
+  "cameraSetting": {
+    "camera": "相机",
+    "noCamera": "没有相机"
   }
 }

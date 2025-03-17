@@ -34,14 +34,22 @@
     "minute": "{{time}} minutes",
     "s": "s",
     "second": "{{time}} seconds",
-    "formattedTimestamp": "%b %-d, %I:%M:%S %p",
-    "formattedTimestamp.24hour": "%b %-d, %H:%M:%S",
-    "formattedTimestamp2": "%m/%d %I:%M:%S%P",
-    "formattedTimestamp2.24hour": "%d %b %H:%M:%S",
-    "formattedTimestampExcludeSeconds": "%b %-d, %I:%M %p",
-    "formattedTimestampExcludeSeconds.24hour": "%b %-d, %H:%M",
-    "formattedTimestampWithYear": "%b %-d %Y, %I:%M %p",
-    "formattedTimestampWithYear.24hour": "%b %-d %Y, %H:%M",
+    "formattedTimestamp": {
+      "12hour": "%b %-d, %I:%M:%S %p",
+      "24hour": "%b %-d, %H:%M:%S"
+    },
+    "formattedTimestamp2": {
+      "12hour": "%m/%d %I:%M:%S%P",
+      "24hour": "%d %b %H:%M:%S"
+    },
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
+    },
+    "formattedTimestampWithYear": {
+      "12hour": "%b %-d %Y, %I:%M %p",
+      "24hour": "%b %-d %Y, %H:%M"
+    },
     "formattedTimestampOnlyMonthAndDay": "%b %-d"
   },
   "unit": {
@@ -70,6 +78,8 @@
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit Fullscreen",
     "pictureInPicture": "Picture in Picture",
+    "twoWayTalk": "Two Way Talk",
+    "cameraAudio": "Camera Audio",
     "on": "ON",
     "off": "OFF",
     "edit": "Edit",
@@ -97,14 +107,18 @@
     "language": {
       "en": "English",
       "zhCN": "简体中文 (Simplified Chinese)",
-      "withSystem.label": "Use the system settings for language"
+      "withSystem": {
+        "label": "Use the system settings for language"
+      }
     },
     "appearance": "Appearance",
     "darkMode": {
       "label": "Dark Mode",
       "light": "Light",
       "dark": "Dark",
-      "withSystem.label": "Use the system settings for light or dark mode"
+      "withSystem": {
+        "label": "Use the system settings for light or dark mode"
+      }
     },
     "withSystem": "System",
     "theme": {
@@ -117,20 +131,27 @@
       "default": "Default"
     },
     "help": "Help",
-    "documentation.label": "Frigate documentation",
-    "documentation": "Documentation",
+    "documentation": {
+      "title": "Documentation",
+      "label": "Frigate documentation"
+    },
     "restart": "Restart Frigate",
-    "live": "Live",
-    "live.allCameras": "All Cameras",
-    "live.cameras": "Cameras",
-    "live.cameras.count_one": "{{count}} Camera",
-    "live.cameras.count_other": "{{count}} Cameras",
+    "live": {
+      "title": "Live",
+      "allCameras": "All Cameras",
+      "cameras": {
+        "title": "Cameras",
+        "count_one": "{{count}} Camera",
+        "count_other": "{{count}} Cameras"
+      }
+    },
     "review": "Review",
     "explore": "Explore",
     "export": "Export",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
     "user": {
+      "title": "User",
       "account": "Account",
       "current": "Current User: {{user}}",
       "anonymous": "anonymous",
@@ -141,8 +162,11 @@
   "toast": {
     "copyUrlToClipboard": "Copied URL to clipboard.",
     "save": {
-      "error": "Failed to save config changes: {{errorMessage}}",
-      "error.noMessage": "Failed to save config changes"
+      "title": "Save",
+      "error": {
+        "title": "Failed to save config changes: {{errorMessage}}",
+        "noMessage": "Failed to save config changes"
+      }
     }
   },
   "role": {
@@ -153,10 +177,14 @@
   },
   "pagination": {
     "label": "pagination",
-    "previous": "Previous",
-    "previous.label": "Go to previous page",
-    "next": "Next",
-    "next.label": "Go to next page",
+    "previous": {
+      "title": "Previous",
+      "label": "Go to previous page"
+    },
+    "next": {
+      "title": "Next",
+      "label": "Go to next page"
+    },
     "more": "More pages"
   },
   "accessDenied": {
