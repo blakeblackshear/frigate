@@ -27,7 +27,7 @@ export default function SearchActionGroup({
   setSelectedObjects,
   pullLatestData,
 }: SearchActionGroupProps) {
-  const { t } = useTranslation(["views/filter"]);
+  const { t } = useTranslation(["components/filter"]);
   const onClearSelected = useCallback(() => {
     setSelectedObjects([]);
   }, [setSelectedObjects]);

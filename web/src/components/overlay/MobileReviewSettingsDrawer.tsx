@@ -19,7 +19,6 @@ import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isIOS, isMobile } from "react-device-detect";
-
 import { useTranslation } from "react-i18next";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
@@ -70,7 +69,7 @@ export default function MobileReviewSettingsDrawer({
   setMode,
   setShowExportPreview,
 }: MobileReviewSettingsDrawerProps) {
-  const { t } = useTranslation(["views/recording"]);
+  const { t } = useTranslation(["views/recording", "components/dialog"]);
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
 
   // exports

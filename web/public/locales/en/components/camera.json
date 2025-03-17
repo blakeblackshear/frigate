@@ -5,13 +5,15 @@
     "edit": "Edit Camera Group",
     "delete": {
       "label": "Delete Camera Group",
-      "confirm": "Confirm Delete",
-      "confirm.desc": "Are you sure you want to delete the camera group <em>{{name}}</em>?"
+      "confirm": {
+        "title": "Confirm Delete",
+        "desc": "Are you sure you want to delete the camera group <em>{{name}}</em>?"
+      }
     },
     "name": {
       "label": "Name",
       "placeholder": "Enter a name...",
-      "error": {
+      "errorMessage": {
         "mustLeastCharacters": "Camera group name must be at least 2 characters.",
         "exists": "Camera group name already exists.",
         "nameMustNotPeriod": "Camera group name must not contain a period.",
@@ -30,10 +32,12 @@
         "title": "{{cameraName}} Streaming Settings",
         "desc": "Change the live streaming options for this camera group's dashboard. <em>These settings are device/browser-specific.</em>",
         "audioIsAvailable": "Audio is available for this stream",
-        "audioIsUnavailable": "Audio is available for this stream",
+        "audioIsUnavailable": "Audio is unavailable for this stream",
         "audio": {
-          "tips": "Audio must be output from your camera and configured in go2rtc for this stream.",
-          "tips.document": "Read the documentation "
+          "tips": {
+            "title": "Audio must be output from your camera and configured in go2rtc for this stream.",
+            "document": "Read the documentation "
+          }
         },
         "streamMethod": {
           "label": "Streaming Method",
@@ -48,8 +52,10 @@
             },
             "continuousStreaming": {
               "label": "Continuous Streaming",
-              "desc": "Camera image will always be a live stream when visible on the dashboard, even if no activity is being detected.",
-              "desc.warning": "Continuous streaming may cause high bandwidth usage and performance issues. Use with caution."
+              "desc": {
+                "title": "Camera image will always be a live stream when visible on the dashboard, even if no activity is being detected.",
+                "warning": "Continuous streaming may cause high bandwidth usage and performance issues. Use with caution."
+              }
             }
           }
         },

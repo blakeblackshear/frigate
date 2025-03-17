@@ -107,7 +107,7 @@ export default function MotionMaskEditPane({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
-      message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
+      message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       path: ["polygon.isFinished"],
     });
 
@@ -166,7 +166,7 @@ export default function MotionMaskEditPane({
         if (res.status === 200) {
           toast.success(
             polygon.name
-              ? t("masksAndZones.motionMasks.toast.success", {
+              ? t("masksAndZones.motionMasks.toast.success.title", {
                   polygonName: polygon.name,
                 })
               : t("masksAndZones.motionMasks.toast.success.noName"),
@@ -177,7 +177,7 @@ export default function MotionMaskEditPane({
           updateConfig();
         } else {
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage: res.statusText,
               ns: "common",
             }),
@@ -192,9 +192,12 @@ export default function MotionMaskEditPane({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-          position: "top-center",
-        });
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          {
+            position: "top-center",
+          },
+        );
       })
       .finally(() => {
         setIsLoading(false);
@@ -283,7 +286,7 @@ export default function MotionMaskEditPane({
       {polygonArea && polygonArea >= 0.35 && (
         <>
           <div className="mb-3 text-sm text-danger">
-            {t("masksAndZones.motionMasks.polygonAreaTooLarge", {
+            {t("masksAndZones.motionMasks.polygonAreaTooLarge.title", {
               polygonArea: Math.round(polygonArea * 100),
             })}
           </div>

@@ -279,7 +279,7 @@ function NewGroupDialog({
             setOpen(false);
             setEditState("none");
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -296,9 +296,12 @@ function NewGroupDialog({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -485,9 +488,7 @@ export function EditGroupDialog({
           <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
             <Header className="mt-2" onClose={() => setOpen(false)}>
               <Title>{t("group.edit")}</Title>
-              <Description className="sr-only">
-                {t("group.edit.desc")}
-              </Description>
+              <Description className="sr-only">{t("group.edit")}</Description>
             </Header>
 
             <CameraGroupEdit
@@ -538,7 +539,9 @@ export function CameraGroupRow({
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{t("group.delete.confirm")}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("group.delete.confirm.title")}
+              </AlertDialogTitle>
             </AlertDialogHeader>
             <AlertDialogDescription>
               <Trans ns="components/camera" values={{ name: group[0] }}>
@@ -734,7 +737,7 @@ export function CameraGroupEdit({
         .then(async (res) => {
           if (res.status === 200) {
             toast.success(
-              t("group.toast.success", {
+              t("group.success", {
                 name: values.name,
               }),
               {
@@ -748,7 +751,7 @@ export function CameraGroupEdit({
             setAllGroupsStreamingSettings(updatedSettings);
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -764,7 +767,7 @@ export function CameraGroupEdit({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage,
               ns: "common",
             }),

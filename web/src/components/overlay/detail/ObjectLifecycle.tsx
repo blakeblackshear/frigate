@@ -573,7 +573,7 @@ export default function ObjectLifecycle({
                                 ? t("time.formattedTimestamp2.24hour", {
                                     ns: "common",
                                   })
-                                : t("time.formattedTimestamp2", {
+                                : t("time.formattedTimestamp2.12hour", {
                                     ns: "common",
                                   }),
                             time_style: "medium",

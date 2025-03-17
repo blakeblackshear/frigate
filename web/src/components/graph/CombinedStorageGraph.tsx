@@ -198,7 +198,7 @@ export function CombinedStorageGraph({
                     style={{ backgroundColor: item.color }}
                   ></div>
                   {item.name === "Unused"
-                    ? t("storage.cameraStorage.unused")
+                    ? t("storage.cameraStorage.unused.title")
                     : item.name.replaceAll("_", " ")}
                   {item.name === "Unused" && (
                     <Popover>

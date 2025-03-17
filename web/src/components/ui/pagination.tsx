@@ -8,7 +8,7 @@ import { t } from "i18next";
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
-    aria-label={t("pagination.label")}
+    aria-label={t("pagination.label", { ns: "common" })}
     className={cn("mx-auto flex w-full justify-center", className)}
     {...props}
   />
@@ -65,13 +65,13 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label={t("pagination.previous.label")}
+    aria-label={t("pagination.previous.label", { ns: "common" })}
     size="default"
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
-    <span>{t("pagination.previous")}</span>
+    <span>{t("pagination.previous.title", { ns: "common" })}</span>
   </PaginationLink>
 );
 PaginationPrevious.displayName = "PaginationPrevious";
@@ -81,12 +81,12 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label={t("pagination.next.label")}
+    aria-label={t("pagination.next.label", { ns: "common" })}
     size="default"
     className={cn("gap-1 pr-2.5", className)}
     {...props}
   >
-    <span>{t("pagination.next")}</span>
+    <span>{t("pagination.next.title", { ns: "common" })}</span>
     <ChevronRight className="h-4 w-4" />
   </PaginationLink>
 );
@@ -102,7 +102,7 @@ const PaginationEllipsis = ({
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">{t("pagination.more")}</span>
+    <span className="sr-only">{t("pagination.more", { ns: "common" })}</span>
   </span>
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";

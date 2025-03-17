@@ -53,7 +53,7 @@ export function LogSettingsButton({
       <DropdownMenuSeparator />
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">{t("logSettings.loading")}</div>
+          <div className="text-md">{t("logSettings.loading.title")}</div>
           <div className="mt-2.5 flex flex-col gap-2.5">
             <div className="space-y-1 text-xs text-muted-foreground">
               {t("logSettings.loading.desc")}

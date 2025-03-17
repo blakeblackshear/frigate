@@ -13,18 +13,30 @@
   },
   "cameraDisabled": "摄像机已禁用",
   "stats": {
-    "streamType": "流类型：",
-    "streamType.short": "类型",
-    "bandwidth": "带宽：",
-    "bandwidth.short": "带宽",
-    "latency": "延迟：",
-    "latency.short": "延迟",
-    "latency.value": "{{seconds}} 秒",
-    "latency.short.value": "{{seconds}} 秒",
+    "streamType": {
+      "title": "流类型：",
+      "short": "类型"
+    },
+    "bandwidth": {
+      "title": "带宽：",
+      "short": "带宽"
+    },
+    "latency": {
+      "title": "延迟：",
+      "value": "{{seconds}} 秒",
+      "short": {
+        "title": "延迟",
+        "value": "{{seconds}} 秒"
+      }
+    },
     "totalFrames": "总帧数：",
-    "droppedFrames": "丢帧数：",
-    "droppedFrames.short": "丢帧",
-    "droppedFrames.short.value": "{{droppedFrames}} 帧",
+    "droppedFrames": {
+      "title": "丢帧数：",
+      "short": {
+        "title": "丢帧",
+        "value": "{{droppedFrames}} 帧"
+      }
+    },
     "decodedFrames": "解码帧数：",
     "droppedFrameRate": "丢帧率："
   },

@@ -68,7 +68,7 @@ type GeneralSettingsProps = {
 };
 
 export default function GeneralSettings({ className }: GeneralSettingsProps) {
-  const { t } = useTranslation(["common"]);
+  const { t } = useTranslation(["common", "views/settings"]);
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
@@ -100,7 +100,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
           toast.success(
-            t("users.toast.success.updatePassword", { ns: "views/settings" }),
+            t("users.toast.success.updatePassword", {
+              ns: "views/settings",
+            }),
             {
               position: "top-center",
             },
@@ -184,11 +186,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         ? "cursor-pointer"
                         : "flex items-center p-2 text-sm"
                     }
-                    aria-label={t("menu.user.setPassword")}
+                    aria-label={t("menu.user.setPassword", { ns: "common" })}
                     onClick={() => setPasswordDialogOpen(true)}
                   >
                     <LuSquarePen className="mr-2 size-4" />
-                    <span>{t("menu.user.setPassword")}</span>
+                    <span>{t("menu.user.setPassword", { ns: "common" })}</span>
                   </MenuItem>
                 )}
                 <MenuItem
@@ -501,7 +503,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 aria-label={t("menu.documentation.label")}
               >
                 <LuLifeBuoy className="mr-2 size-4" />
-                <span>{t("menu.documentation")}</span>
+                <span>{t("menu.documentation.title")}</span>
               </MenuItem>
             </a>
             <a

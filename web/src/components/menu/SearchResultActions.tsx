@@ -149,7 +149,7 @@ export default function SearchResultActions({
             onClick={showSnapshot}
           >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
-            <span>{t("itemMenu.submitToPlus")}</span>
+            <span>{t("itemMenu.submitToPlus.label")}</span>
           </MenuItem>
         )}
       <MenuItem
@@ -170,7 +170,9 @@ export default function SearchResultActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("dialog.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("dialog.confirmDelete.title")}
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
             <Trans ns="views/explore">dialog.confirmDelete.desc</Trans>

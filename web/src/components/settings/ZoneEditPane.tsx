@@ -161,7 +161,7 @@ export default function ZoneEditPane({
         .optional()
         .or(z.literal("")),
       isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
-        message: t("masksAndZones.polygonDrawing.error.mustBeFinished"),
+        message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       }),
       objects: z.array(z.string()).optional(),
       review_alerts: z.boolean().default(false).optional(),
@@ -170,28 +170,28 @@ export default function ZoneEditPane({
       lineA: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error"),
+          message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineB: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error"),
+          message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineC: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error"),
+          message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineD: z.coerce
         .number()
         .min(0.1, {
-          message: t("masksAndZones.form.distance.error"),
+          message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
@@ -422,7 +422,7 @@ export default function ZoneEditPane({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -438,7 +438,7 @@ export default function ZoneEditPane({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage,
               ns: "common",
             }),
@@ -496,7 +496,7 @@ export default function ZoneEditPane({
           : t("masksAndZones.zones.add")}
       </Heading>
       <div className="my-2 text-sm text-muted-foreground">
-        <p>{t("masksAndZones.zones.desc")}</p>
+        <p>{t("masksAndZones.zones.desc.title")}</p>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
@@ -532,7 +532,7 @@ export default function ZoneEditPane({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("masksAndZones.zones.name")}</FormLabel>
+                <FormLabel>{t("masksAndZones.zones.name.title")}</FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -553,7 +553,7 @@ export default function ZoneEditPane({
             name="inertia"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("masksAndZones.zones.inertia")}</FormLabel>
+                <FormLabel>{t("masksAndZones.zones.inertia.title")}</FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -576,7 +576,9 @@ export default function ZoneEditPane({
             name="loitering_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("masksAndZones.zones.loiteringTime")}</FormLabel>
+                <FormLabel>
+                  {t("masksAndZones.zones.loiteringTime.title")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
@@ -595,7 +597,7 @@ export default function ZoneEditPane({
           />
           <Separator className="my-2 flex bg-secondary" />
           <FormItem>
-            <FormLabel>{t("masksAndZones.zones.objects")}</FormLabel>
+            <FormLabel>{t("masksAndZones.zones.objects.title")}</FormLabel>
             <FormDescription>
               {t("masksAndZones.zones.objects.desc")}
             </FormDescription>
@@ -631,7 +633,7 @@ export default function ZoneEditPane({
                         className="cursor-pointer text-primary"
                         htmlFor="allLabels"
                       >
-                        {t("masksAndZones.zones.speedEstimation")}
+                        {t("masksAndZones.zones.speedEstimation.title")}
                       </FormLabel>
                       <Switch
                         checked={field.value}
@@ -644,7 +646,7 @@ export default function ZoneEditPane({
                           ) {
                             toast.error(
                               t(
-                                "masksAndZones.zones.speedEstimation.pointLengthError",
+                                "masksAndZones.zones.speedThreshold.toast.error.pointLengthError",
                               ),
                             );
                             return;
@@ -655,7 +657,7 @@ export default function ZoneEditPane({
                           if (checked && loiteringTime && loiteringTime > 0) {
                             toast.error(
                               t(
-                                "masksAndZones.zones.speedEstimation.loiteringTimeError",
+                                "masksAndZones.zones.speedThreshold.toast.error.loiteringTimeError",
                               ),
                             );
                           }
@@ -778,11 +780,12 @@ export default function ZoneEditPane({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {t("masksAndZones.zones.speedThreshold", {
+                        {t("masksAndZones.zones.speedThreshold.title", {
+                          ns: "views/settings",
                           unit:
                             config?.ui.unit_system == "imperial"
-                              ? t("unit.speed.mph")
-                              : t("unit.speed.kph"),
+                              ? t("unit.speed.mph", { ns: "common" })
+                              : t("unit.speed.kph", { ns: "common" }),
                         })}
                       </FormLabel>
                       <FormControl>

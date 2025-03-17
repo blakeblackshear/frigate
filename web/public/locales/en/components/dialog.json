@@ -15,13 +15,19 @@
         "desc": "Objects in locations you want to avoid are not false positives. Submitting them as false positives will confuse the model."
       },
       "review": {
-        "true.label": "Confirm this label for Frigate Plus",
-        "true_one": "This is a {{label}}",
-        "true_other": "This is an {{label}}",
-        "false_one": "This is not a {{label}}",
-        "false_other": "This is not an {{label}}",
-        "false.label": "Do not confirm this label for Frigate Plus",
-        "state.submitted": "Submitted"
+        "true": {
+          "label": "Confirm this label for Frigate Plus",
+          "true_one": "This is a {{label}}",
+          "true_other": "This is an {{label}}"
+        },
+        "false": {
+          "label": "Do not confirm this label for Frigate Plus",
+          "false_one": "This is not a {{label}}",
+          "false_other": "This is not an {{label}}"
+        },
+        "state": {
+          "submitted": "Submitted"
+        }
       }
     },
     "video": {
@@ -34,10 +40,14 @@
       "lastHour_one": "Last Hour",
       "lastHour_other": "Last {{count}} Hours",
       "custom": "Custom",
-      "start": "Start Time",
-      "start.label": "Select Start Time",
-      "end": "End Time",
-      "end.label": "Select End Time"
+      "start": {
+        "title": "Start Time",
+        "label": "Select Start Time"
+      },
+      "end": {
+        "title": "End Time",
+        "label": "Select End Time"
+      }
     },
     "name": {
       "placeholder": "Name the Export"
@@ -61,9 +71,11 @@
   "streaming": {
     "label": "Stream",
     "restreaming": {
-      "NotEnabled": "Restreaming is not enabled for this camera.",
-      "desc": "Set up go2rtc for additional live view options and audio for this camera.",
-      "desc.readTheDocumentation": "Read the documentation "
+      "disabled": "Restreaming is not enabled for this camera.",
+      "desc": {
+        "title": "Set up go2rtc for additional live view options and audio for this camera.",
+        "readTheDocumentation": "Read the documentation "
+      }
     },
     "showStats": {
       "label": "Show stream stats",
@@ -78,14 +90,19 @@
       "placeholder": "Enter a name for your search",
       "overwrite": "{{searchName}} already exists. Saving will overwrite the existing value.",
       "success": "Search ({{searchName}}) has been saved.",
-      "button.save.label": "Save this search"
+      "button": {
+        "save": {
+          "label": "Save this search"
+        }
+      }
     }
   },
   "recording": {
     "confirmDelete": {
       "title": "Confirm Delete",
-      "desc": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future.",
-      "desc.selected": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
+      "desc": {
+        "selected": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
+      }
     },
     "button": {
       "export": "Export",

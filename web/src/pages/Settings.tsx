@@ -216,8 +216,8 @@ export default function Settings() {
                   value={item}
                   data-nav-item={item}
                   aria-label={t("selectItem", {
-                    item: t("menu." + item),
                     ns: "common",
+                    item: t("menu." + item),
                   })}
                 >
                   <div className="capitalize">{t("menu." + item)}</div>
