@@ -11,7 +11,10 @@ export default function StepIndicator({
   return (
     <div className="flex flex-row justify-evenly">
       {steps.map((name, idx) => (
-        <div className="flex flex-col items-center justify-center gap-2">
+        <div
+          key={idx}
+          className="flex flex-col items-center justify-center gap-2"
+        >
           <div
             className={cn(
               "flex size-16 items-center justify-center rounded-full",
