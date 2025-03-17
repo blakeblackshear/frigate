@@ -1243,7 +1243,7 @@ function FrigateCameraFeatures({
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
                     <LuX className="size-4 text-danger" />
                     <div>
-                      {t("streaming.restreaming.NotEnabled", {
+                      {t("streaming.restreaming.notEnabled", {
                         ns: "components/dialog",
                       })}
                     </div>

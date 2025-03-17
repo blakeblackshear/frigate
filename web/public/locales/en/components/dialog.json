@@ -61,7 +61,7 @@
   "streaming": {
     "label": "Stream",
     "restreaming": {
-      "NotEnabled": "Restreaming is not enabled for this camera.",
+      "notEnabled": "Restreaming is not enabled for this camera.",
       "desc": "Set up go2rtc for additional live view options and audio for this camera.",
       "desc.readTheDocumentation": "Read the documentation "
     },
