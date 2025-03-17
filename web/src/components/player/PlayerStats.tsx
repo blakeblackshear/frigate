@@ -12,16 +12,16 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
   const fullStatsContent = (
     <>
       <p>
-        <span className="text-white/70">{t("stats.streamType")}</span>{" "}
+        <span className="text-white/70">{t("stats.streamType.title")}</span>{" "}
         <span className="text-white">{stats.streamType}</span>
       </p>
       <p>
-        <span className="text-white/70">{t("stats.bandwidth")}</span>{" "}
+        <span className="text-white/70">{t("stats.bandwidth.title")}</span>{" "}
         <span className="text-white">{stats.bandwidth.toFixed(2)} kbps</span>
       </p>
       {stats.latency != undefined && (
         <p>
-          <span className="text-white/70">{t("stats.latency")}</span>{" "}
+          <span className="text-white/70">{t("stats.latency.title")}</span>{" "}
           <span
             className={`text-white ${stats.latency > 2 ? "text-danger" : ""}`}
           >
@@ -35,7 +35,9 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
       </p>
       {stats.droppedFrames != undefined && (
         <p>
-          <span className="text-white/70">{t("stats.droppedFrames")}</span>{" "}
+          <span className="text-white/70">
+            {t("stats.droppedFrames.title")}
+          </span>{" "}
           <span className="text-white">{stats.droppedFrames}</span>
         </p>
       )}
@@ -68,7 +70,9 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
       </div>
       {stats.latency != undefined && (
         <div className="hidden flex-col items-center gap-1 md:flex">
-          <span className="text-white/70">{t("stats.latency.short")}</span>
+          <span className="text-white/70">
+            {t("stats.latency.short.title")}
+          </span>
           <span
             className={`text-white ${stats.latency >= 2 ? "text-danger" : ""}`}
           >
@@ -81,7 +85,7 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
       {stats.droppedFrames != undefined && (
         <div className="flex flex-col items-center justify-end gap-1">
           <span className="text-white/70">
-            {t("stats.droppedFrames.short")}
+            {t("stats.droppedFrames.short.title")}
           </span>
           <span className="text-white">
             {t("stats.droppedFrames.short.value", {

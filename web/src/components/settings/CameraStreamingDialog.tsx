@@ -50,7 +50,7 @@ export function CameraStreamingDialog({
   setIsDialogOpen,
   onSave,
 }: CameraStreamingDialogProps) {
-  const { t } = useTranslation(["components/camera"]);
+  const { t } = useTranslation(["components/camera", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -198,7 +198,9 @@ export function CameraStreamingDialog({
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  {t("streaming.restreaming.desc", { ns: "components/dialog" })}
+                  {t("streaming.restreaming.desc.title", {
+                    ns: "components/dialog",
+                  })}
                   <div className="mt-2 flex items-center text-primary">
                     <Link
                       to="https://docs.frigate.video/configuration/live"
@@ -206,7 +208,7 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("streaming.restreaming.readTheDocumentation", {
+                      {t("streaming.restreaming.desc.readTheDocumentation", {
                         ns: "components/dialog",
                       })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
@@ -257,7 +259,7 @@ export function CameraStreamingDialog({
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 text-xs">
-                          {t("group.camera.setting.audio.desc")}
+                          {t("group.camera.setting.audio.tips.title")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
                               to="https://docs.frigate.video/configuration/live"
@@ -265,7 +267,7 @@ export function CameraStreamingDialog({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              {t("group.camera.setting.audio.desc.document")}
+                              {t("group.camera.setting.audio.tips.document")}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>
@@ -322,7 +324,7 @@ export function CameraStreamingDialog({
             <>
               <p className="text-sm text-muted-foreground">
                 {t(
-                  "group.camera.setting.streamMethod.method.continuousStreaming.desc",
+                  "group.camera.setting.streamMethod.method.continuousStreaming.desc.title",
                 )}
               </p>
               <div className="flex items-center gap-2">

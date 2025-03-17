@@ -98,7 +98,7 @@ export default function ReviewDetailDialog({
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
-      : t("time.formattedTimestampWithYear", { ns: "common" }),
+      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
 

@@ -27,7 +27,7 @@ export default function MobileCameraDrawer({
       <DrawerTrigger asChild>
         <Button
           className="rounded-lg capitalize"
-          aria-label={t("menu.live.cameras")}
+          aria-label={t("menu.live.cameras.title")}
           size="sm"
         >
           <FaVideo className="text-secondary-foreground" />

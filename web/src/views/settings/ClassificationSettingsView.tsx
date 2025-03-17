@@ -162,9 +162,12 @@ export default function ClassificationSettingsView({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-          position: "top-center",
-        });
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          {
+            position: "top-center",
+          },
+        );
       })
       .finally(() => {
         setIsLoading(false);
@@ -319,7 +322,11 @@ export default function ClassificationSettingsView({
                       className="cursor-pointer"
                       value={size}
                     >
-                      {t("classification.semanticSearch.modelSize." + size)}
+                      {t(
+                        "classification.semanticSearch.modelSize." +
+                          size +
+                          ".title",
+                      )}
                     </SelectItem>
                   ))}
                 </SelectGroup>

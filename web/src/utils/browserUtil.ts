@@ -10,7 +10,7 @@ export function shareOrCopy(url: string, title?: string) {
     });
   } else {
     copy(url);
-    toast.success(t("toast.copyUrlToClipboard"), {
+    toast.success(t("toast.copyUrlToClipboard", { ns: "common" }), {
       position: "top-center",
     });
   }

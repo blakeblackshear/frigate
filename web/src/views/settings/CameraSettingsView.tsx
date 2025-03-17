@@ -166,7 +166,7 @@ export default function CameraSettingsView({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -182,7 +182,7 @@ export default function CameraSettingsView({
             error.response?.data?.detail ||
             "Unknown error";
           toast.error(
-            t("toast.save.error", {
+            t("toast.save.error.title", {
               errorMessage,
               ns: "common",
             }),
@@ -574,7 +574,7 @@ export default function CameraSettingsView({
                         watchedDetectionsZones.length > 0 ? (
                           !selectDetections ? (
                             <Trans
-                              i18nKey="camera.reviewClassification.zoneObjectDetectionsTips"
+                              i18nKey="camera.reviewClassification.zoneObjectDetectionsTips.text"
                               values={{
                                 detectionsLabels,
                                 zone: watchedDetectionsZones

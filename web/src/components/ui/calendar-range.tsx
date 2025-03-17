@@ -60,15 +60,15 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: "today", label: t("time.today") },
-  { name: "yesterday", label: t("time.yesterday") },
-  { name: "last7", label: t("time.last7") },
-  { name: "last14", label: t("time.last14") },
-  { name: "last30", label: t("time.last30") },
-  { name: "thisWeek", label: t("time.thisWeek") },
-  { name: "lastWeek", label: t("time.lastWeek") },
-  { name: "thisMonth", label: t("time.thisMonth") },
-  { name: "lastMonth", label: t("time.lastMonth") },
+  { name: "today", label: t("time.today", { ns: "common" }) },
+  { name: "yesterday", label: t("time.yesterday", { ns: "common" }) },
+  { name: "last7", label: t("time.last7", { ns: "common" }) },
+  { name: "last14", label: t("time.last14", { ns: "common" }) },
+  { name: "last30", label: t("time.last30", { ns: "common" }) },
+  { name: "thisWeek", label: t("time.thisWeek", { ns: "common" }) },
+  { name: "lastWeek", label: t("time.lastWeek", { ns: "common" }) },
+  { name: "thisMonth", label: t("time.thisMonth", { ns: "common" }) },
+  { name: "lastMonth", label: t("time.lastMonth", { ns: "common" }) },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */

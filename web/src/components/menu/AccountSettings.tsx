@@ -15,9 +15,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
-import { DialogClose } from "../ui/dialog";
+} from "@/components/ui/dropdown-menu";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { LuLogOut, LuSquarePen } from "react-icons/lu";
 import useSWR from "swr";
 
@@ -32,7 +36,7 @@ type AccountSettingsProps = {
 };
 
 export default function AccountSettings({ className }: AccountSettingsProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation(["views/settings", "common"]);
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR("config");
   const logoutUrl = config?.proxy?.logout_url || `${baseUrl}api/logout`;
@@ -42,7 +46,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const Content = isDesktop ? DropdownMenuContent : DrawerContent;
-  const MenuItem = isDesktop ? DropdownMenuItem : DialogClose;
+  const MenuItem = isDesktop ? DropdownMenuItem : DrawerClose;
 
   const handlePasswordSave = async (password: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
@@ -74,8 +78,8 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
 
   return (
     <Container modal={!isDesktop}>
-      <Trigger>
-        <Tooltip>
+      <Tooltip>
+        <Trigger asChild>
           <TooltipTrigger asChild>
             <div
               className={cn(
@@ -89,34 +93,41 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               <VscAccount className="size-5 md:m-[6px]" />
             </div>
           </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent side="right">
-              <p>{t("menu.user.account", { ns: "common" })}</p>
-            </TooltipContent>
-          </TooltipPortal>
-        </Tooltip>
-      </Trigger>
+        </Trigger>
+        <TooltipPortal>
+          <TooltipContent side="right" sideOffset={5}>
+            <p>{t("menu.user.account", { ns: "common" })}</p>
+          </TooltipContent>
+        </TooltipPortal>
+      </Tooltip>
+
       <Content
-        className={
-          isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-2"
-        }
+        className={cn(
+          isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-4",
+        )}
       >
         <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
-          <DropdownMenuLabel>
-            {t("menu.user.current", {
-              ns: "common",
-              user:
-                profile?.username || t("menu.user.anonymous", { ns: "common" }),
-            })}{" "}
-            {t("role." + profile?.role) &&
-              `(${t("role." + profile?.role, { ns: "common" })})`}
+          <DropdownMenuLabel className="flex flex-col gap-1.5">
+            <div>
+              {t("menu.user.current", {
+                ns: "common",
+                user:
+                  profile?.username ||
+                  t("menu.user.anonymous", { ns: "common" }),
+              })}{" "}
+              {t("role." + profile?.role) &&
+                `(${t("role." + profile?.role, { ns: "common" })})`}
+            </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
+
+          <DropdownMenuSeparator className={isDesktop ? "my-2" : "my-2"} />
+
           {profile?.username && profile.username !== "anonymous" && (
             <MenuItem
-              className={
-                isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
-              }
+              className={cn(
+                "flex w-full items-center gap-2",
+                isDesktop ? "cursor-pointer" : "p-2 text-sm",
+              )}
               aria-label={t("menu.user.setPassword", { ns: "common" })}
               onClick={() => setPasswordDialogOpen(true)}
             >
@@ -124,13 +135,16 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
               <span>{t("menu.user.setPassword", { ns: "common" })}</span>
             </MenuItem>
           )}
+
           <MenuItem
-            className={
-              isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
-            }
+            className={cn(
+              "flex w-full items-center gap-2",
+              isDesktop ? "cursor-pointer" : "p-2 text-sm",
+            )}
+            asChild
             aria-label={t("menu.user.logout", { ns: "common" })}
           >
-            <a className="flex" href={logoutUrl}>
+            <a href={logoutUrl} className="flex items-center gap-2">
               <LuLogOut className="mr-2 size-4" />
               <span>{t("menu.user.logout", { ns: "common" })}</span>
             </a>

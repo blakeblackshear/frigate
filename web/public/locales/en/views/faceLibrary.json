@@ -1,41 +1,40 @@
 {
-    "documentTitle": "Face Library - Frigate",
-    "uploadFaceImage": {
-        "title": "Upload Face Image",
-        "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
+  "documentTitle": "Face Library - Frigate",
+  "uploadFaceImage": {
+    "title": "Upload Face Image",
+    "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Create Face Library",
+    "desc": "Create a new face library"
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Select train"
+  },
+  "selectItem": "Select {{item}}",
+  "button": {
+    "deleteFaceAttempts": "Delete Face Attempts",
+    "addFace": "Add Face",
+    "uploadImage": "Upload Image",
+    "reprocessFace": "Reprocess Face"
+  },
+  "trainFaceAs": "Train Face as:",
+  "trainFaceAsPerson": "Train Face as Person",
+  "toast": {
+    "success": {
+      "uploadedImage": "Successfully uploaded image.",
+      "addFaceLibrary": "Successfully add face library.",
+      "deletedFace": "Successfully deleted face.",
+      "trainedFace": "Successfully trained face.",
+      "updatedFaceScore": "Successfully updated face score."
     },
-    "createFaceLibrary": {
-        "title": "Create Face Library",
-        "desc": "Create a new face library"
-    },
-    "train": {
-        "title": "Train",
-        "aria": "Select train"
-    },
-    "selectItem": "Select {{item}}",
-    "button": {
-        "deleteFaceAttempts": "Delete Face Attempts",
-        "addFace": "Add Face",
-        "uploadImage": "Upload Image",
-        "reprocessFace:": "Reprocess Face"
-    },
-    "trainFaceAs:": "Train Face as:",
-    "trainFaceAsPerson:": "Train Face as Person",
-    
-    "toast": {
-        "success": {
-            "uploadedImage": "Successfully uploaded image.",
-            "addFaceLibrary": "Successfully add face library.",
-            "deletedFace": "Successfully deleted face.",
-            "trainedFace": "Successfully trained face.",
-            "updatedFaceScore": "Successfully updated face score."
-        },
-        "error": {
-            "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
-            "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
-            "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
-            "trainFailed": "Failed to train: {{errorMessage}}",
-            "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
-        }
+    "error": {
+      "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
+      "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
+      "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
+      "trainFailed": "Failed to train: {{errorMessage}}",
+      "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
     }
+  }
 }

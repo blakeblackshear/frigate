@@ -28,7 +28,7 @@ export default function CalendarFilterButton({
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
-  const { t } = useTranslation(["components/filter"]);
+  const { t } = useTranslation(["components/filter", "views/events"]);
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
@@ -38,7 +38,7 @@ export default function CalendarFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label={t("date.selectDateBy.label")}
+      aria-label={t("explore.date.selectDateBy.label")}
       variant={day == undefined ? "default" : "select"}
       size="sm"
     >
@@ -109,7 +109,7 @@ export function CalendarRangeFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label={t("date.selectDateBy.label")}
+      aria-label={t("explore.date.selectDateBy.label")}
       variant={range == undefined ? "default" : "select"}
       size="sm"
     >

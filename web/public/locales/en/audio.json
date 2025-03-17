@@ -280,7 +280,6 @@
   "ship": "Ship",
   "motor_vehicle": "Motor Vehicle",
   "car": "Car",
-  "honk": "Honk",
   "toot": "Toot",
   "car_alarm": "Car Alarm",
   "power_windows": "Power Windows",
@@ -424,5 +423,6 @@
   "pink_noise": "Pink Noise",
   "television": "Television",
   "radio": "Radio",
-  "field_recording": "Field Recording"
+  "field_recording": "Field Recording",
+  "scream": "Scream"
 }

@@ -3,7 +3,7 @@
     "cameras": "Cameras Stats - Frigate",
     "storage": "Storage Stats - Frigate",
     "general": "General Stats - Frigate",
-    "features": "Features Stats- Frigate",
+    "features": "Features Stats - Frigate",
     "logs": {
       "frigate": "Frigate Logs - Frigate",
       "go2rtc": "Go2RTC Logs - Frigate",
@@ -63,8 +63,12 @@
           "cudaComputerCapability": "CUDA Compute Capability: {{cuda_compute}}",
           "vbios": "VBios Info: {{vbios}}"
         },
-        "closeInfo.label": "Close GPU info",
-        "copyInfo.label": "Copy GPU info",
+        "closeInfo": {
+          "label": "Close GPU info"
+        },
+        "copyInfo": {
+          "label": "Copy GPU info"
+        },
         "toast": {
           "success": "Copied GPU info to clipboard"
         }
@@ -87,12 +91,14 @@
     "cameraStorage": {
       "title": "Camera Storage",
       "camera": "Camera",
-      "unused": "Unused",
       "unusedStorageInformation": "Unused Storage Information",
       "storageUsed": "Storage",
       "percentageOfTotalUsed": "Percentage of Total",
       "bandwidth": "Bandwidth",
-      "unused.tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."
+      "unused": {
+        "title": "Unused",
+        "tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."
+      }
     }
   },
   "cameras": {

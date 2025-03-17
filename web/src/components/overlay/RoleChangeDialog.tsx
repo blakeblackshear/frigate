@@ -68,13 +68,13 @@ export default function RoleChangeDialog({
               <SelectItem value="admin" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuShield className="size-4 text-primary" />
-                  <span>{t("role.admin")}</span>
+                  <span>{t("role.admin", { ns: "common" })}</span>
                 </div>
               </SelectItem>
               <SelectItem value="viewer" className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
                   <LuUser className="size-4 text-primary" />
-                  <span>{t("role.viewer")}</span>
+                  <span>{t("role.viewer", { ns: "common" })}</span>
                 </div>
               </SelectItem>
             </SelectContent>

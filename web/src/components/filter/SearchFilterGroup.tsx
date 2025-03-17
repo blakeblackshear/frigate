@@ -198,7 +198,7 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText={isMobile ? t("dates.all.short") : t("dates.all")}
+          defaultText={isMobile ? t("dates.all.short") : t("dates.all.title")}
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
@@ -244,7 +244,7 @@ function GeneralFilterButton({
     }
 
     if (!selectedLabels || selectedLabels.length == 0) {
-      return t("labels.all");
+      return t("labels.all.title");
     }
 
     if (selectedLabels.length == 1) {
@@ -338,7 +338,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            {t("labels.all")}
+            {t("labels.all.title")}
           </Label>
           <Switch
             className="ml-1"
