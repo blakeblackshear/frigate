@@ -70,8 +70,8 @@ class FaceRecognitionConfig(FrigateBaseModel):
     min_area: int = Field(
         default=500, title="Min area of face box to consider running face recognition."
     )
-    save_attempts: bool = Field(
-        default=True, title="Save images of face detections for training."
+    save_attempts: int = Field(
+        default=100, ge=0, title="Number of face attempts to save in the train tab."
     )
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."
