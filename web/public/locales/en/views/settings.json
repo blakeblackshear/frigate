@@ -7,7 +7,8 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Object Settings - Frigate",
-    "general": "General Settings - Frigate"
+    "general": "General Settings - Frigate",
+    "frigatePlus": "Frigate+ Settings - Frigate"
   },
   "menu": {
     "uiSettings": "UI Settings",
@@ -17,7 +18,8 @@
     "motionTuner": "Motion Tuner",
     "debug": "Debug",
     "users": "Users",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "frigateplus": "Frigate+"
   },
   "dialog": {
     "unsavedChanges": {
@@ -514,6 +516,37 @@
       "error": {
         "registerFailed": "Failed to save notification registration."
       }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Settings",
+    "apiKey": {
+      "title": "Frigate+ API Key",
+      "validated": "Frigate+ API key is detected and validated",
+      "notValidated": "Frigate+ API key is not detected or not validated",
+      "desc": "The Frigate+ API key enables integration with the Frigate+ service.",
+      "plusLink": "Read more about Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Snapshot Configuration",
+      "desc": "Submitting to Frigate+ requires both snapshots and <code>clean_copy</code> snapshots to be enabled in your config.",
+      "documentation": "Read the documentation",
+      "cleanCopyWarning": "Some cameras have snapshots enabled but have the clean copy disabled. You need to enable <code>clean_copy</code> in your snapshot config to be able to submit images from these cameras to Frigate+.",
+      "table": {
+        "camera": "Camera",
+        "snapshots": "Snapshots",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+      }
+    },
+    "modelInfo": {
+      "title": "Model Information",
+      "modelType": "Model Type",
+      "trainDate": "Train Date",
+      "baseModel": "Base Model",
+      "supportedDetectors": "Supported Detectors",
+      "cameras": "Cameras",
+      "loading": "Loading model information...",
+      "error": "Failed to load model information"
     }
   }
 }

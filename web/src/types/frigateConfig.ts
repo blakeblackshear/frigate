@@ -391,6 +391,12 @@ export interface FrigateConfig {
     colormap: { [key: string]: [number, number, number] };
     attributes_map: { [key: string]: [string] };
     all_attributes: [string];
+    plus?: {
+      name: string;
+      trainDate: string;
+      baseModel: string;
+      supportedDetectors: string[];
+    };
   };
 
   motion: Record<string, unknown> | null;
