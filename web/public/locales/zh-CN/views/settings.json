@@ -25,6 +25,10 @@
     "users": "用户",
     "notifications": "通知"
   },
+  "cameraSetting": {
+    "camera": "相机",
+    "noCamera": "没有相机"
+  },
   "general": {
     "title": "常规设置",
     "liveDashboard": {
@@ -512,8 +516,35 @@
       }
     }
   },
-  "cameraSetting": {
-    "camera": "相机",
-    "noCamera": "没有相机"
+  "frigatePlus": {
+    "title": "Frigate+ 设置",
+    "apiKey": {
+      "title": "Frigate+ API 密钥",
+      "validated": "Frigate+ API 密钥已检测并验证通过",
+      "notValidated": "未检测到 Frigate+ API 密钥或验证未通过",
+      "desc": "Frigate+ API 密钥用于启用与 Frigate+ 服务的集成。",
+      "plusLink": "了解更多关于 Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "快照配置",
+      "desc": "提交到 Frigate+ 需要同时在配置中启用快照和 <code>clean_copy</code> 快照。",
+      "documentation": "阅读文档",
+      "cleanCopyWarning": "部分摄像头已启用快照但未启用 <code>clean_copy</code>。您需要在快照配置中启用 <code>clean_copy</code>，才能将这些摄像头的图像提交到 Frigate+。",
+      "table": {
+        "camera": "摄像头",
+        "snapshots": "快照",
+        "cleanCopySnapshots": "<code>clean_copy</code> 快照"
+      }
+    },
+    "modelInfo": {
+      "title": "模型信息",
+      "modelType": "模型类型",
+      "trainDate": "训练日期",
+      "baseModel": "基础模型",
+      "supportedDetectors": "支持的检测器",
+      "cameras": "摄像头",
+      "loading": "正在加载模型信息...",
+      "error": "加载模型信息失败"
+    }
   }
 }
