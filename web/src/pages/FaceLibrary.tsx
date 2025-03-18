@@ -434,7 +434,7 @@ function FaceAttempt({
       <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
         <img className="size-44" src={`${baseUrl}clips/faces/train/${image}`} />
         <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-          <TimeAgo time={data.timestamp * 1000} dense />
+          <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
         </div>
       </div>
       <div className="rounded-b-lg bg-card p-2">
