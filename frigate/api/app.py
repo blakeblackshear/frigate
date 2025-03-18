@@ -177,14 +177,18 @@ def config(request: Request):
 
     # Add model plus data if plus is enabled
     if config["plus"]["enabled"]:
-        model_json_path = FilePath(config["model"]["path"]).with_suffix(".json")
-        try:
-            with open(model_json_path, "r") as f:
-                model_plus_data = json.load(f)
-            config["model"]["plus"] = model_plus_data
-        except FileNotFoundError:
-            config["model"]["plus"] = None
-        except json.JSONDecodeError:
+        model_path = config.get("model", {}).get("path")
+        if model_path:
+            model_json_path = FilePath(model_path).with_suffix(".json")
+            try:
+                with open(model_json_path, "r") as f:
+                    model_plus_data = json.load(f)
+                config["model"]["plus"] = model_plus_data
+            except FileNotFoundError:
+                config["model"]["plus"] = None
+            except json.JSONDecodeError:
+                config["model"]["plus"] = None
+        else:
             config["model"]["plus"] = None
 
     # use merged labelamp
