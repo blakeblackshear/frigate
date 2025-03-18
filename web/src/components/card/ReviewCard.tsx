@@ -293,7 +293,9 @@ export default function ReviewCard({
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            <Trans ns="components/dialog">recording.confirmDelete.desc</Trans>
+            <Trans ns="components/dialog">
+              recording.confirmDelete.desc.selected
+            </Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setOptionsOpen(false)}>

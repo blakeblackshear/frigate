@@ -100,5 +100,21 @@
   "raccoon": "浣熊",
   "robot_lawnmower": "自动割草机",
   "waste_bin": "垃圾桶",
-  "on_demand": "手动"
+  "on_demand": "手动",
+  "face": "人脸",
+  "license_plate": "车牌",
+  "package": "包裹",
+  "bbq_grill": "烧烤架",
+  "amazon": "亚马逊",
+  "usps": "美国邮政",
+  "ups": "UPS",
+  "fedex": "联邦快递",
+  "dhl": "DHL",
+  "an_post": "爱尔兰邮政",
+  "purolator": "普罗莱特",
+  "postnl": "荷兰邮政",
+  "nzpost": "新西兰邮政",
+  "postnord": "北欧邮政",
+  "gls": "GLS",
+  "dpd": "DPD"
 }

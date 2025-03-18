@@ -248,7 +248,7 @@ export default function InputWithTags({
                 filters.before &&
                 timestamp >= filters.before * 1000
               ) {
-                toast.error(t("afterDatebeEarlierBefore"), {
+                toast.error(t("filter.toast.error.afterDatebeEarlierBefore"), {
                   position: "top-center",
                 });
                 return;
@@ -727,7 +727,7 @@ export default function InputWithTags({
                 <div className="space-y-2">
                   <h3 className="font-medium">{t("filter.tips.title")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {t("filter.tips.desc")}
+                    {t("filter.tips.desc.text")}
                   </p>
                   <Trans
                     ns="views/search"

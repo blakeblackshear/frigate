@@ -78,7 +78,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            {t("labels.all")}
+            {t("labels.all.title")}
           </Label>
           <Switch
             className="ml-1"

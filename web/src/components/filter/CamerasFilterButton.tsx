@@ -38,17 +38,17 @@ export function CamerasFilterButton({
 
   const buttonText = useMemo(() => {
     if (isMobile) {
-      return t("menu.live.cameras", { ns: "common" });
+      return t("menu.live.cameras.title", { ns: "common" });
     }
 
     if (!selectedCameras || selectedCameras.length == 0) {
       return t("menu.live.allCameras", { ns: "common" });
     }
     return t("menu.live.cameras.count", {
+      ns: "common",
       count: selectedCameras.includes("birdseye")
         ? selectedCameras.length - 1
         : selectedCameras.length,
-      ns: "common",
     });
   }, [selectedCameras, t]);
 
@@ -158,7 +158,7 @@ export function CamerasFilterContent({
       <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
-          label={t("cameras.all")}
+          label={t("cameras.all.title")}
           onCheckedChange={(isChecked) => {
             if (isChecked) {
               setCurrentCameras(undefined);

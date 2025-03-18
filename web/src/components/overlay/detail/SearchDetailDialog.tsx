@@ -57,6 +57,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -69,11 +70,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuInfo } from "react-icons/lu";
+import { LuInfo, LuSearch } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { useTranslation } from "react-i18next";
+import { TbFaceId } from "react-icons/tb";
 
 const SEARCH_TABS = [
   "details",
@@ -99,7 +101,7 @@ export default function SearchDetailDialog({
   setSimilarity,
   setInputFocused,
 }: SearchDetailDialogProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -195,7 +197,9 @@ export default function SearchDetailDialog({
       >
         <Header>
           <Title>{t("trackedObjectDetails")}</Title>
-          <Description className="sr-only">{t("details")}</Description>
+          <Description className="sr-only">
+            {t("trackedObjectDetails")}
+          </Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -311,7 +315,7 @@ function ObjectDetailsTab({
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
-      : t("time.formattedTimestampWithYear", { ns: "common" }),
+      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
 
@@ -553,6 +557,48 @@ function ObjectDetailsTab({
     [search, apiHost, mutate, setSearch, t],
   );
 
+  // face training
+
+  const hasFace = useMemo(() => {
+    if (!config?.face_recognition.enabled || !search) {
+      return false;
+    }
+
+    return search.data.attributes?.find((attr) => attr.label == "face");
+  }, [config, search]);
+
+  const { data: faceData } = useSWR(hasFace ? "faces" : null);
+
+  const faceNames = useMemo<string[]>(
+    () =>
+      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
+    [faceData],
+  );
+
+  const onTrainFace = useCallback(
+    (trainName: string) => {
+      axios
+        .post(`/faces/train/${trainName}/classify`, { event_id: search.id })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.trainedFace"), {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.trainFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [search, t],
+  );
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -561,7 +607,7 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40">{t("details.label")}</div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              {t("{search.label}", { ns: "objects" })}
+              {t(search.label, { ns: "objects" })}
               {search.sub_label && ` (${search.sub_label})`}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -575,7 +621,9 @@ function ObjectDetailsTab({
                   </span>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>{t("details.editSubLable")}</TooltipContent>
+                  <TooltipContent>
+                    {t("details.editSubLabel.title")}
+                  </TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             </div>
@@ -597,7 +645,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               <div className="flex flex-row items-center gap-1">
-                {t("details.topScore")}
+                {t("details.topScore.label")}
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="cursor-pointer p-0">
@@ -669,20 +717,53 @@ function ObjectDetailsTab({
             draggable={false}
             src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
           />
-          {config?.semantic_search.enabled && search.data.type == "object" && (
-            <Button
-              aria-label={t("itemMenu.findSimilar.aria")}
-              onClick={() => {
-                setSearch(undefined);
+          <div className="flex w-full flex-row gap-2">
+            {config?.semantic_search.enabled &&
+              search.data.type == "object" && (
+                <Button
+                  className="w-full"
+                  aria-label={t("itemMenu.findSimilar.aria")}
+                  onClick={() => {
+                    setSearch(undefined);
 
-                if (setSimilarity) {
-                  setSimilarity();
-                }
-              }}
-            >
-              {t("itemMenu.findSimilar.label")}
-            </Button>
-          )}
+                    if (setSimilarity) {
+                      setSimilarity();
+                    }
+                  }}
+                >
+                  <div className="flex gap-1">
+                    <LuSearch />
+                    {t("itemMenu.findSimilar.label")}
+                  </div>
+                </Button>
+              )}
+            {hasFace && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full">
+                    <div className="flex gap-1">
+                      <TbFaceId />
+                      {t("trainFace", { ns: "views/faceLibrary" })}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>
+                    {t("trainFaceAs", { ns: "views/faceLibrary" })}
+                  </DropdownMenuLabel>
+                  {faceNames.map((faceName) => (
+                    <DropdownMenuItem
+                      key={faceName}
+                      className="cursor-pointer capitalize"
+                      onClick={() => onTrainFace(faceName)}
+                    >
+                      {faceName}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
@@ -727,7 +808,7 @@ function ObjectDetailsTab({
                 aria-label={t("details.button.regenerate.label")}
                 onClick={() => regenerateDescription("thumbnails")}
               >
-                {t("details.button.regenerate")}
+                {t("details.button.regenerate.title")}
               </Button>
               {search.has_snapshot && (
                 <DropdownMenu>
@@ -772,13 +853,13 @@ function ObjectDetailsTab({
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
-            title={t("details.editSubLable")}
+            title={t("details.editSubLabel.title")}
             description={
               search.label
-                ? t("details.editSubLable.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                ? t("details.editSubLabel.desc", {
+                    label: t(search.label, { an: "objects" }),
                   })
-                : t("details.editSubLable.desc.noLabel")
+                : t("details.editSubLabel.descNoLabel")
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
@@ -921,10 +1002,10 @@ export function ObjectSnapshotTab({
                             }}
                           >
                             {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.true_other", {
+                              ? t("explore.plus.review.true.true_other", {
                                   label: search?.label,
                                 })
-                              : t("explore.plus.review.true_one", {
+                              : t("explore.plus.review.true.true_one", {
                                   label: search?.label,
                                 })}
                           </Button>
@@ -938,10 +1019,10 @@ export function ObjectSnapshotTab({
                             }}
                           >
                             {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.false_other", {
+                              ? t("explore.plus.review.false.false_other", {
                                   label: search?.label,
                                 })
-                              : t("explore.plus.review.false_one", {
+                              : t("explore.plus.review.false.false_one", {
                                   label: search?.label,
                                 })}
                           </Button>

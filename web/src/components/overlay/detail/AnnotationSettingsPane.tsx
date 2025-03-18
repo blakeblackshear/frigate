@@ -85,7 +85,7 @@ export function AnnotationSettingsPane({
             updateConfig();
           } else {
             toast.error(
-              t("toast.save.error", {
+              t("toast.save.error.title", {
                 errorMessage: res.statusText,
                 ns: "common",
               }),
@@ -100,9 +100,12 @@ export function AnnotationSettingsPane({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.save.error", { errorMessage, ns: "common" }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .finally(() => {
           setIsLoading(false);
@@ -145,7 +148,7 @@ export function AnnotationSettingsPane({
             onCheckedChange={setShowZones}
           />
           <Label className="cursor-pointer" htmlFor="show-zones">
-            {t("objectLifecycle.annotationSettings.showAllZones")}
+            {t("objectLifecycle.annotationSettings.showAllZones.title")}
           </Label>
         </div>
         <div className="text-sm text-muted-foreground">

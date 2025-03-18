@@ -502,7 +502,7 @@ export default function MasksAndZonesView({
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>{t("masksAndZones.zones.desc")}</p>
+                              <p>{t("masksAndZones.zones.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/zones"
@@ -568,7 +568,7 @@ export default function MasksAndZonesView({
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>{t("masksAndZones.motionMasks.desc")}</p>
+                              <p>{t("masksAndZones.motionMasks.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/masks#motion-masks"
@@ -638,7 +638,7 @@ export default function MasksAndZonesView({
                           </HoverCardTrigger>
                           <HoverCardContent>
                             <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
-                              <p>{t("masksAndZones.objectMasks.desc")}</p>
+                              <p>{t("masksAndZones.objectMasks.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
                                   to="https://docs.frigate.video/configuration/masks#object-filter-masks"
@@ -646,7 +646,9 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t("masksAndZones.objectMasks.documentation")}{" "}
+                                  {t(
+                                    "masksAndZones.objectMasks.desc.documentation",
+                                  )}{" "}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>

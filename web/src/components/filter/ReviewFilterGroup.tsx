@@ -442,7 +442,7 @@ export function GeneralFilterContent({
   onReset,
   onClose,
 }: GeneralFilterContentProps) {
-  const { t } = useTranslation(["components/filter"]);
+  const { t } = useTranslation(["components/filter", "views/events"]);
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
@@ -476,7 +476,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            {t("labels.all")}
+            {t("labels.all.title")}
           </Label>
           <Switch
             className="ml-1"
@@ -523,7 +523,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                {t("zones.all")}
+                {t("zones.all.title")}
               </Label>
               <Switch
                 className="ml-1"
@@ -600,7 +600,7 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
-  const { t } = useTranslation(["views/events"]);
+  const { t } = useTranslation(["views/events", "components/filter"]);
   const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
     motionOnly,
     setMotionOnly,
@@ -627,7 +627,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
-          aria-label={t("motion.showMotionOnly", { ns: "components/filter" })}
+          aria-label={t("motion.only")}
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >

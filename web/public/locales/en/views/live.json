@@ -100,19 +100,21 @@
   "streamingSettings": "Streaming Settings",
   "notifications": "Notifications",
   "audio": "Audio",
-  "suspend:": {
+  "suspend": {
     "forTime": "Suspend for: "
   },
   "stream": {
     "title": "Stream",
     "audio": {
-      "tips": "Audio must be output from your camera and configured in go2rtc for this stream.",
-      "tips.documentation": "Read the documentation ",
+      "tips": {
+        "title": "Audio must be output from your camera and configured in go2rtc for this stream.",
+        "documentation": "Read the documentation "
+      },
       "available": "Audio is available for this stream",
       "unavailable": "Audio is not available for this stream"
     },
     "twoWayTalk": {
-      "tips": "Your device must suppport the feature and WebRTC must be configured for two-way talk.",
+      "tips": "Your device must support the feature and WebRTC must be configured for two-way talk.",
       "tips.documentation": "Read the documentation ",
       "available": "Two-way talk is available for this stream",
       "unavailable": "Two-way talk is unavailable for this stream"
@@ -148,7 +150,9 @@
   },
   "editLayout": {
     "label": "Edit Layout",
-    "group.label": "Edit Camera Group",
+    "group": {
+      "label": "Edit Camera Group"
+    },
     "exitEdit": "Exit Editing"
   }
 }
