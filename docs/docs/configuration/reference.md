@@ -543,12 +543,23 @@ semantic_search:
   model_size: "small"
 
 # Optional: Configuration for face recognition capability
+# NOTE: Can (enabled, min_area) be overridden at the camera level
 face_recognition:
   # Optional: Enable semantic search (default: shown below)
   enabled: False
-  # Optional: Set the model size used for embeddings. (default: shown below)
-  # NOTE: small model runs on CPU and large model runs on GPU
-  model_size: "small"
+  # Optional: Minimum face distance score required to save the attempt (default: shown below)
+  min_score: 0.8
+  # Optional: Minimum face detection score required to detect a face (default: shown below)
+  # NOTE: This only applies when not running a Frigate+ model
+  detection_threshold: 0.7
+  # Optional: Minimum face distance score required to be considered a match (default: shown below)
+  recognition_threshold: 0.9
+  # Optional: Min area of detected face box to consider running face recognition (default: shown below)
+  min_area: 500
+  # Optional: Save images of recognized faces for training (default: shown below)
+  save_attempts: True
+  # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
+  blur_confidence_filter: True
 
 # Optional: Configuration for license plate recognition capability
 lpr:

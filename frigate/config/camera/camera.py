@@ -19,6 +19,10 @@ from frigate.util.builtin import (
 from ..base import FrigateBaseModel
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
+from ..classification import (
+    CameraFaceRecognitionConfig,
+    CameraLicensePlateRecognitionConfig,
+)
 from .detect import DetectConfig
 from .ffmpeg import CameraFfmpegConfig, CameraInput
 from .genai import GenAICameraConfig
@@ -52,6 +56,7 @@ class CameraConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
+    face_recognition: CameraFaceRecognitionConfig = Field(default_factory=CameraFaceRecognitionConfig, title="Face recognition config.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     genai: GenAICameraConfig = Field(
         default_factory=GenAICameraConfig, title="Generative AI configuration."
@@ -59,6 +64,7 @@ class CameraConfig(FrigateBaseModel):
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )
+    lpr: CameraLicensePlateRecognitionConfig = Field(default_factory=CameraLicensePlateRecognitionConfig, title="LPR config.")
     motion: Optional[MotionConfig] = Field(
         None, title="Motion detection configuration."
     )
