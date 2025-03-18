@@ -20,6 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useContextMenu from "@/hooks/use-contextmenu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
@@ -374,6 +375,16 @@ function FaceAttempt({
     };
   }, [image]);
 
+  // interaction
+
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  useContextMenu(imgRef, () => {
+    onClick(true);
+  });
+
+  // api calls
+
   const onTrainAttempt = useCallback(
     (trainName: string) => {
       axios
@@ -429,10 +440,14 @@ function FaceAttempt({
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
-      onClick={(e) => onClick(e.metaKey || e.ctrlKey)}
     >
       <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="size-44" src={`${baseUrl}clips/faces/train/${image}`} />
+        <img
+          ref={imgRef}
+          className="size-44"
+          src={`${baseUrl}clips/faces/train/${image}`}
+          onClick={(e) => onClick(e.metaKey || e.ctrlKey)}
+        />
         <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
           <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
         </div>
