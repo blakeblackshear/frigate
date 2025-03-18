@@ -363,7 +363,7 @@ function TrainingGrid({
           }
         }}
       >
-        <DialogContent className={cn("", isDesktop && "max-w-[50%]")}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("details.face")}</DialogTitle>
             <DialogDescription>{t("details.faceDesc")}</DialogDescription>
@@ -383,7 +383,8 @@ function TrainingGrid({
             <div className="text-sm">{formattedDate}</div>
           </div>
           <img
-            src={`${baseUrl}api/events/${selectedEvent?.eventId}/snapshot.jpg?bbox=1`}
+            className="w-full"
+            src={`${baseUrl}api/events/${selectedEvent?.eventId}/thumbnail.jpg`}
           />
         </DialogContent>
       </Dialog>
