@@ -76,6 +76,7 @@
   "button": {
     "apply": "应用",
     "reset": "重置",
+    "done": "完成",
     "enabled": "启用",
     "enable": "启用",
     "disabled": "禁用",
@@ -104,7 +105,8 @@
     "play": "播放",
     "unselect": "取消选择",
     "export": "导出",
-    "deleteNow": "立即删除"
+    "deleteNow": "立即删除",
+    "next": "下一个"
   },
   "menu": {
     "system": "系统",
