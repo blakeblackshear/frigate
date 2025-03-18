@@ -2,6 +2,12 @@
   "description": {
     "addFace": "Walk through adding a new face to the Face Library."
   },
+  "details": {
+    "confidence": "Confidence",
+    "face": "Face Details",
+    "faceDesc": "Details for the face and associated object",
+    "timestamp": "Timestamp"
+  },
   "documentTitle": "Face Library - Frigate",
   "uploadFaceImage": {
     "title": "Upload Face Image",
