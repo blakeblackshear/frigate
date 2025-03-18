@@ -6,6 +6,13 @@ import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizard
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -20,9 +27,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useContextMenu from "@/hooks/use-contextmenu";
+import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
+import { RecognizedFaceData } from "@/types/face";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -329,20 +339,76 @@ function TrainingGrid({
   onClickFace,
   onRefresh,
 }: TrainingGridProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
+  // face data
+
+  const [selectedEvent, setSelectedEvent] = useState<RecognizedFaceData>();
+
+  const formattedDate = useFormattedTimestamp(
+    selectedEvent?.timestamp ?? 0,
+    config?.ui.time_format == "24hour"
+      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
+      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
+    config?.ui.timezone,
+  );
+
   return (
-    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
-      {attemptImages.map((image: string) => (
-        <FaceAttempt
-          key={image}
-          image={image}
-          faceNames={faceNames}
-          threshold={config.face_recognition.recognition_threshold}
-          selected={selectedFaces.includes(image)}
-          onClick={(meta) => onClickFace(image, meta)}
-          onRefresh={onRefresh}
-        />
-      ))}
-    </div>
+    <>
+      <Dialog
+        open={selectedEvent != undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedEvent(undefined);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("details.face")}</DialogTitle>
+            <DialogDescription>{t("details.faceDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">
+              {t("details.confidence")}
+            </div>
+            <div className="text-sm capitalize">
+              {(selectedEvent?.score || 0) * 100}%
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">
+              {t("details.timestamp")}
+            </div>
+            <div className="text-sm">{formattedDate}</div>
+          </div>
+          <img
+            className="w-full"
+            src={`${baseUrl}api/events/${selectedEvent?.eventId}/thumbnail.jpg`}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
+        {attemptImages.map((image: string) => (
+          <FaceAttempt
+            key={image}
+            image={image}
+            faceNames={faceNames}
+            threshold={config.face_recognition.recognition_threshold}
+            selected={selectedFaces.includes(image)}
+            onClick={(data, meta) => {
+              if (meta) {
+                onClickFace(image, meta);
+              } else {
+                setSelectedEvent(data);
+              }
+            }}
+            onRefresh={onRefresh}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -351,7 +417,7 @@ type FaceAttemptProps = {
   faceNames: string[];
   threshold: number;
   selected: boolean;
-  onClick: (meta: boolean) => void;
+  onClick: (data: RecognizedFaceData, meta: boolean) => void;
   onRefresh: () => void;
 };
 function FaceAttempt({
@@ -363,16 +429,26 @@ function FaceAttempt({
   onRefresh,
 }: FaceAttemptProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
-  const data = useMemo(() => {
+  const data = useMemo<RecognizedFaceData>(() => {
     const parts = image.split("-");
 
     return {
       timestamp: Number.parseFloat(parts[0]),
       eventId: `${parts[0]}-${parts[1]}`,
       name: parts[2],
-      score: parts[3],
+      score: Number.parseFloat(parts[3]),
     };
   }, [image]);
+
+  // interaction
+
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  useContextMenu(imgRef, () => {
+    onClick(data, true);
+  });
+
+  // api calls
 
   const onTrainAttempt = useCallback(
     (trainName: string) => {
@@ -429,12 +505,16 @@ function FaceAttempt({
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
-      onClick={(e) => onClick(e.metaKey || e.ctrlKey)}
     >
       <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="size-44" src={`${baseUrl}clips/faces/train/${image}`} />
+        <img
+          ref={imgRef}
+          className="size-44"
+          src={`${baseUrl}clips/faces/train/${image}`}
+          onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+        />
         <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-          <TimeAgo time={data.timestamp * 1000} dense />
+          <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
         </div>
       </div>
       <div className="rounded-b-lg bg-card p-2">
@@ -443,12 +523,10 @@ function FaceAttempt({
             <div className="capitalize">{data.name}</div>
             <div
               className={cn(
-                Number.parseFloat(data.score) >= threshold
-                  ? "text-success"
-                  : "text-danger",
+                data.score >= threshold ? "text-success" : "text-danger",
               )}
             >
-              {Number.parseFloat(data.score) * 100}%
+              {data.score * 100}%
             </div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
