@@ -190,7 +190,6 @@ def config(request: Request):
         else:
             config["model"]["plus"] = None
 
-
     # use merged labelamp
     for detector_config in config["detectors"].values():
         detector_config["model"]["labelmap"] = (
