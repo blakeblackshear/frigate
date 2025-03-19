@@ -2,6 +2,12 @@
   "description": {
     "addFace": "我们将指导如何将新面孔添加到人脸库中。"
   },
+  "details": {
+    "confidence": "置信度",
+    "face": "人脸详情",
+    "faceDesc": "人脸及相关对象的详细信息",
+    "timestamp": "时间戳"
+  },
   "documentTitle": "人脸库 - Frigate",
   "uploadFaceImage": {
     "title": "上传人脸图片",
@@ -26,7 +32,6 @@
   "readTheDocs": "阅读文档查看更多有关为人脸库优化图像的详细信息",
   "trainFaceAs": "将人脸训练为：",
   "trainFaceAsPerson": "将人脸训练为人物",
-
   "toast": {
     "success": {
       "uploadedImage": "图片上传成功。",

@@ -26,8 +26,8 @@
     "notifications": "通知"
   },
   "cameraSetting": {
-    "camera": "相机",
-    "noCamera": "没有相机"
+    "camera": "摄像头",
+    "noCamera": "没有摄像头"
   },
   "general": {
     "title": "常规设置",
