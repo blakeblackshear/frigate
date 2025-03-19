@@ -198,7 +198,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.post("/faces/{name}/register", dependencies=[Depends(require_role(["admin"]))])
+@router.post("/faces/recognize")
 async def recognize_face(request: Request, name: str, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
