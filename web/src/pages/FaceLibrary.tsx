@@ -369,6 +369,10 @@ function TrainingGrid({
             <DialogDescription>{t("details.faceDesc")}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">{t("details.person")}</div>
+            <div className="text-sm capitalize">{selectedEvent?.name}</div>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               {t("details.confidence")}
             </div>
