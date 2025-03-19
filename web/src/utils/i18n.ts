@@ -9,7 +9,7 @@ i18n
     fallbackLng: "en", // use en if detected lng is not available
 
     backend: {
-      loadPath: "/locales/{{lng}}/{{ns}}.json",
+      loadPath: "locales/{{lng}}/{{ns}}.json",
     },
 
     ns: [
