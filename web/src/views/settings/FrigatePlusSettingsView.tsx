@@ -115,6 +115,12 @@ export default function FrigatePlusSettingsView() {
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
+                            {t("frigatePlus.modelInfo.modelId")}
+                          </Label>
+                          <p>{config.model.plus.id}</p>
+                        </div>
+                        <div>
+                          <Label className="text-muted-foreground">
                             {t("frigatePlus.modelInfo.baseModel")}
                           </Label>
                           <p>{config.model.plus.baseModel}</p>

@@ -393,6 +393,7 @@ export interface FrigateConfig {
     all_attributes: [string];
     plus?: {
       name: string;
+      id: string;
       trainDate: string;
       baseModel: string;
       supportedDetectors: string[];
