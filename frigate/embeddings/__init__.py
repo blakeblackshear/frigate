@@ -197,11 +197,10 @@ class EmbeddingsContext:
             },
         )
 
-    def recognize_face(self, face_name: str, image_data: bytes) -> dict[str, any]:
+    def recognize_face(self, image_data: bytes) -> dict[str, any]:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.recognize_face.value,
             {
-                "face_name": face_name,
                 "image": base64.b64encode(image_data).decode("ASCII"),
             },
         )

@@ -207,7 +207,7 @@ async def recognize_face(request: Request, file: UploadFile):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    result = context.recognize_face(name, await file.read())
+    result = context.recognize_face(await file.read())
     return JSONResponse(
         status_code=200 if result.get("success", True) else 400,
         content=result,
