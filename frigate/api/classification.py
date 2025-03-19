@@ -199,7 +199,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
 
 
 @router.post("/faces/recognize")
-async def recognize_face(request: Request, name: str, file: UploadFile):
+async def recognize_face(request: Request, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
             status_code=400,
