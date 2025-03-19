@@ -32,7 +32,7 @@
     "hour": "{{time}} hours",
     "m": "{{time}}m",
     "minute": "{{time}} minutes",
-    "s": "s",
+    "s": "{{time}}s",
     "second": "{{time}} seconds",
     "formattedTimestamp": {
       "12hour": "%b %-d, %I:%M:%S %p",
