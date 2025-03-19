@@ -288,6 +288,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
+        if not self.config.cameras[obj_data["camera"]].face_recognition.enabled:
+            return
+
         start = datetime.datetime.now().timestamp()
         id = obj_data["id"]
 
@@ -348,7 +351,11 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             face_box = face.get("box")
 
             # check that face is valid
-            if not face_box or area(face_box) < self.config.face_recognition.min_area:
+            if (
+                not face_box
+                or area(face_box)
+                < self.config.cameras[obj_data["camera"]].face_recognition.min_area
+            ):
                 logger.debug(f"Invalid face box {face}")
                 return
 

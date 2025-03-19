@@ -6,6 +6,8 @@ from pydantic import Field
 from .base import FrigateBaseModel
 
 __all__ = [
+    "CameraFaceRecognitionConfig",
+    "CameraLicensePlateRecognitionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
     "LicensePlateRecognitionConfig",
@@ -78,6 +80,13 @@ class FaceRecognitionConfig(FrigateBaseModel):
     )
 
 
+class CameraFaceRecognitionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable face recognition.")
+    min_area: int = Field(
+        default=500, title="Min area of face box to consider running face recognition."
+    )
+
+
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
     detection_threshold: float = Field(
@@ -111,4 +120,12 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     )
     known_plates: Optional[Dict[str, List[str]]] = Field(
         default={}, title="Known plates to track (strings or regular expressions)."
+    )
+
+
+class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable license plate recognition.")
+    min_area: int = Field(
+        default=1000,
+        title="Minimum area of license plate to begin running recognition.",
     )
