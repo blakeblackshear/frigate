@@ -17,12 +17,12 @@ from frigate.util.builtin import (
 )
 
 from ..base import FrigateBaseModel
-from .audio import AudioConfig
-from .birdseye import BirdseyeCameraConfig
 from ..classification import (
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
 )
+from .audio import AudioConfig
+from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
 from .ffmpeg import CameraFfmpegConfig, CameraInput
 from .genai import GenAICameraConfig
