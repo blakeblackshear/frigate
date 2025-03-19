@@ -197,6 +197,14 @@ class EmbeddingsContext:
             },
         )
 
+    def recognize_face(self, image_data: bytes) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.recognize_face.value,
+            {
+                "image": base64.b64encode(image_data).decode("ASCII"),
+            },
+        )
+
     def get_face_ids(self, name: str) -> list[str]:
         sql_query = f"""
             SELECT

@@ -717,7 +717,9 @@ function ObjectDetailsTab({
             draggable={false}
             src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
           />
-          <div className="flex w-full flex-row gap-2">
+          <div
+            className={cn("flex w-full flex-row gap-2", isMobile && "flex-col")}
+          >
             {config?.semantic_search.enabled &&
               search.data.type == "object" && (
                 <Button

@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 
 
 MAX_DETECTION_HEIGHT = 1080
-MAX_FACE_ATTEMPTS = 100
 MIN_MATCHING_FACES = 2
 
 
@@ -407,6 +406,28 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
             self.__clear_classifier()
+        elif topic == EmbeddingsRequestEnum.recognize_face.value:
+            img = cv2.imdecode(
+                np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
+                cv2.IMREAD_COLOR,
+            )
+
+            # detect faces with lower confidence since we expect the face
+            # to be visible in uploaded images
+            face_box = self.__detect_face(img, 0.5)
+
+            if not face_box:
+                return {"message": "No face was detected.", "success": False}
+
+            face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
+            res = self.__classify_face(face)
+
+            if not res:
+                return {"success": False, "message": "No face was recognized."}
+
+            sub_label, score = res
+
+            return {"success": True, "score": score, "face_name": sub_label}
         elif topic == EmbeddingsRequestEnum.register_face.value:
             rand_id = "".join(
                 random.choices(string.ascii_lowercase + string.digits, k=6)
@@ -490,7 +511,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 )
 
                 # delete oldest face image if maximum is reached
-                if len(files) > MAX_FACE_ATTEMPTS:
+                if len(files) > self.config.face_recognition.save_attempts:
                     os.unlink(os.path.join(folder, files[-1]))
 
     def expire_object(self, object_id: str):

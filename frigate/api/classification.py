@@ -201,6 +201,22 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
+@router.post("/faces/recognize")
+async def recognize_face(request: Request, file: UploadFile):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    result = context.recognize_face(await file.read())
+    return JSONResponse(
+        status_code=200 if result.get("success", True) else 400,
+        content=result,
+    )
+
+
 @router.post("/faces/{name}/delete", dependencies=[Depends(require_role(["admin"]))])
 def deregister_faces(request: Request, name: str, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
