@@ -484,7 +484,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 shutil.move(current_file, new_file)
 
                 files = sorted(
-                    os.listdir(folder),
+                    filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
                     key=lambda f: os.path.getctime(os.path.join(folder, f)),
                     reverse=True,
                 )
