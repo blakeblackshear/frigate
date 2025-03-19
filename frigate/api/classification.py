@@ -39,7 +39,7 @@ def get_faces():
         face_dict[name] = []
 
         for file in sorted(
-            os.listdir(face_dir),
+            filter(lambda f: (f.endswith(".webp")), os.listdir(face_dir)),
             key=lambda f: os.path.getctime(os.path.join(face_dir, f)),
             reverse=True,
         ):
