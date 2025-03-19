@@ -10,7 +10,7 @@ from typing_extensions import Literal
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from frigate.util.model import post_process_yolov9
+from frigate.util.model import post_process_dfine, post_process_yolov9
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ class OvDetector(DetectionApi):
         ModelTypeEnum.yolonas,
         ModelTypeEnum.yolov9,
         ModelTypeEnum.yolox,
+        ModelTypeEnum.dfine,
     ]
 
     def __init__(self, detector_config: OvDetectorConfig):
@@ -163,6 +164,21 @@ class OvDetector(DetectionApi):
         infer_request = self.interpreter.create_infer_request()
         # TODO: see if we can use shared_memory=True
         input_tensor = ov.Tensor(array=tensor_input)
+
+        if self.ov_model_type == ModelTypeEnum.dfine:
+            infer_request.set_tensor("images", input_tensor)
+            target_sizes_tensor = ov.Tensor(
+                np.array([[self.h, self.w]], dtype=np.int64)
+            )
+            infer_request.set_tensor("orig_target_sizes", target_sizes_tensor)
+            infer_request.infer()
+            tensor_output = (
+                infer_request.get_output_tensor(0).data,
+                infer_request.get_output_tensor(1).data,
+                infer_request.get_output_tensor(2).data,
+            )
+            return post_process_dfine(tensor_output, self.w, self.h)
+
         infer_request.infer(input_tensor)
 
         detections = np.zeros((20, 6), np.float32)
