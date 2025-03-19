@@ -3,6 +3,7 @@
     "addFace": "Walk through adding a new face to the Face Library."
   },
   "details": {
+    "person": "Person",
     "confidence": "Confidence",
     "face": "Face Details",
     "faceDesc": "Details for the face and associated object",
