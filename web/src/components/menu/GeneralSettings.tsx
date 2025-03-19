@@ -7,6 +7,7 @@ import {
   LuLogOut,
   LuMoon,
   LuSquarePen,
+  LuScanFace,
   LuRotateCw,
   LuSettings,
   LuSun,
@@ -284,10 +285,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   <Link to="/faces">
                     <MenuItem
                       className="flex w-full items-center p-2 text-sm"
-                      aria-label="Face Library"
+                      aria-label={t("menu.faceLibrary")}
                     >
-                      <LuSquarePen className="mr-2 size-4" />
-                      <span>Face Library</span>
+                      <LuScanFace className="mr-2 size-4" />
+                      <span>{t("menu.faceLibrary")}</span>
                     </MenuItem>
                   </Link>
                 </>
