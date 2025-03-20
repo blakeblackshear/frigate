@@ -385,7 +385,10 @@ export default function LivePlayer({
       <div
         className={cn(
           "absolute inset-0 w-full",
-          showStillWithoutActivity && !liveReady && !isReEnabling
+          showStillWithoutActivity &&
+            !liveReady &&
+            !isReEnabling &&
+            cameraEnabled
             ? "visible"
             : "invisible",
         )}
