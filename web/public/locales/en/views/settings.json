@@ -547,7 +547,12 @@
       "supportedDetectors": "Supported Detectors",
       "cameras": "Cameras",
       "loading": "Loading model information...",
-      "error": "Failed to load model information"
+      "error": "Failed to load model information",
+      "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration are shown."
+    },
+    "toast": {
+      "success": "Frigate+ settings have been saved. Restart Frigate to apply changes.",
+      "error": "Failed to save config changes: {{errorMessage}}"
     }
   }
 }
