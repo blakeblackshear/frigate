@@ -91,20 +91,12 @@ export default function LivePlayer({
   // camera activity
 
   const {
-    enabled: cameraWasEnabled,
+    enabled: cameraEnabled,
     activeMotion,
     activeTracking,
     objects,
     offline,
   } = useCameraActivity(cameraConfig);
-
-  const cameraEnabled = useMemo(() => {
-    if (!cameraWasEnabled) {
-      return false;
-    }
-
-    return cameraConfig.enabled;
-  }, [cameraConfig, cameraWasEnabled]);
 
   const cameraActive = useMemo(
     () =>
@@ -393,7 +385,10 @@ export default function LivePlayer({
       <div
         className={cn(
           "absolute inset-0 w-full",
-          showStillWithoutActivity && !liveReady && !isReEnabling
+          showStillWithoutActivity &&
+            !liveReady &&
+            !isReEnabling &&
+            cameraEnabled
             ? "visible"
             : "invisible",
         )}
