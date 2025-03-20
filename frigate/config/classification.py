@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from .base import FrigateBaseModel
 
@@ -86,6 +86,8 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
         default=500, title="Min area of face box to consider running face recognition."
     )
 
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
@@ -129,3 +131,5 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         default=1000,
         title="Minimum area of license plate to begin running recognition.",
     )
+
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())

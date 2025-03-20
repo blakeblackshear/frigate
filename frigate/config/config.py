@@ -437,6 +437,8 @@ class FrigateConfig(FrigateBaseModel):
             include={
                 "audio": ...,
                 "birdseye": ...,
+                "face_recognition": ...,
+                "lpr": ...,
                 "record": ...,
                 "snapshots": ...,
                 "live": ...,

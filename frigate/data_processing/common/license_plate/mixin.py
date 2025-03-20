@@ -844,6 +844,8 @@ class LicensePlateProcessingMixin:
 
     def lpr_process(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for license plates in image."""
+        if not self.config.cameras[obj_data["camera"]].lpr.enabled:
+            return
 
         id = obj_data["id"]
 
@@ -910,7 +912,10 @@ class LicensePlateProcessingMixin:
 
             # check that license plate is valid
             # double the value because we've doubled the size of the car
-            if license_plate_area < self.lpr_config.min_area * 2:
+            if (
+                license_plate_area
+                < self.config.cameras[obj_data["camera"]].lpr.min_area * 2
+            ):
                 logger.debug("License plate is less than min_area")
                 return
 
@@ -942,7 +947,8 @@ class LicensePlateProcessingMixin:
             # check that license plate is valid
             if (
                 not license_plate_box
-                or area(license_plate_box) < self.lpr_config.min_area
+                or area(license_plate_box)
+                < self.config.cameras[obj_data["camera"]].lpr.min_area
             ):
                 logger.debug(f"Invalid license plate box {license_plate}")
                 return
