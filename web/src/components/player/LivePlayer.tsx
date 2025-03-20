@@ -410,9 +410,9 @@ export default function LivePlayer({
             <TbExclamationCircle className="mb-3 size-10" />
             <p className="max-w-96 text-center">
               <Trans
+                ns="components/player"
                 values={{
                   cameraName: capitalizeFirstLetter(cameraConfig.name),
-                  ns: "components/player",
                 }}
               >
                 streamOffline.desc
@@ -423,7 +423,7 @@ export default function LivePlayer({
       )}
 
       {!cameraEnabled && (
-        <div className="relative flex h-full w-full items-center justify-center">
+        <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-secondary-foreground bg-background_alt">
           <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
             <LuVideoOff className="mb-2 size-8 md:size-10" />
             <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
