@@ -136,7 +136,7 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}`,
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled}&lpr.enabled=${classificationSettings.lpr.enabled}`,
         {
           requires_restart: 0,
         },
@@ -172,7 +172,7 @@ export default function ClassificationSettingsView({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [updateConfig, classificationSettings.search, t]);
+  }, [updateConfig, classificationSettings, t]);
 
   const onCancel = useCallback(() => {
     setClassificationSettings(origSearchSettings);
