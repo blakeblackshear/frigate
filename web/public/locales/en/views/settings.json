@@ -540,6 +540,7 @@
     },
     "modelInfo": {
       "title": "Model Information",
+      "modelId": "Model ID",
       "modelType": "Model Type",
       "trainDate": "Train Date",
       "baseModel": "Base Model",
