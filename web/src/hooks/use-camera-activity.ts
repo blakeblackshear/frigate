@@ -37,7 +37,7 @@ export function useCameraActivity(
 
     return getAttributeLabels(config);
   }, [config]);
-  const [objects, setObjects] = useState<ObjectType[]>([]);
+  const [objects, setObjects] = useState<ObjectType[] | undefined>([]);
 
   // init camera activity
 
@@ -54,7 +54,7 @@ export function useCameraActivity(
   // handle camera activity
 
   const hasActiveObjects = useMemo(
-    () => objects?.filter((obj) => !obj?.stationary)?.length > 0,
+    () => (objects || []).filter((obj) => !obj?.stationary)?.length > 0,
     [objects],
   );
 
@@ -81,11 +81,10 @@ export function useCameraActivity(
       return;
     }
 
-    const updatedEventIndex = objects.findIndex(
-      (obj) => obj.id === updatedEvent.after.id,
-    );
+    const updatedEventIndex =
+      objects?.findIndex((obj) => obj.id === updatedEvent.after.id) ?? -1;
 
-    let newObjects: ObjectType[] = [...objects];
+    let newObjects: ObjectType[] = [...(objects ?? [])];
 
     if (updatedEvent.type === "end") {
       if (updatedEventIndex !== -1) {
@@ -104,10 +103,10 @@ export function useCameraActivity(
             score: updatedEvent.after.score,
             sub_label: updatedEvent.after.sub_label?.[0] ?? "",
           };
-          newObjects = [...objects, newActiveObject];
+          newObjects = [...(objects ?? []), newActiveObject];
         }
       } else {
-        const newObjects = [...objects];
+        const newObjects = [...(objects ?? [])];
 
         let label = updatedEvent.after.label;
 
@@ -158,7 +157,7 @@ export function useCameraActivity(
         ? detectingMotion === "ON"
         : updatedCameraState?.motion === true
       : false,
-    objects: isCameraEnabled ? objects : [],
+    objects: isCameraEnabled ? (objects ?? []) : [],
     offline,
   };
 }
