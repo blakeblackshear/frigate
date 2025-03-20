@@ -91,12 +91,20 @@ export default function LivePlayer({
   // camera activity
 
   const {
-    enabled: cameraEnabled,
+    enabled: cameraWasEnabled,
     activeMotion,
     activeTracking,
     objects,
     offline,
   } = useCameraActivity(cameraConfig);
+
+  const cameraEnabled = useMemo(() => {
+    if (!cameraWasEnabled) {
+      return false;
+    }
+
+    return cameraConfig.enabled;
+  }, [cameraConfig, cameraWasEnabled]);
 
   const cameraActive = useMemo(
     () =>
