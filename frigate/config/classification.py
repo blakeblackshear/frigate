@@ -19,6 +19,11 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
+class CameraTypeEnum(str, Enum):
+    standard = "standard"
+    lpr = "lpr"
+
+
 class BirdClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable bird classification.")
     threshold: float = Field(
@@ -127,6 +132,11 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
 
 class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
+    camera_type: str = Field(default=CameraTypeEnum.standard, title="Camera Type")
+    expire_time: int = Field(
+        default=3,
+        title="Expire plates not seen after number of seconds (for dedicated LPR cameras only).",
+    )
     min_area: int = Field(
         default=1000,
         title="Minimum area of license plate to begin running recognition.",
