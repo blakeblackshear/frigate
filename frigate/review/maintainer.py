@@ -181,7 +181,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
-        self.requestor.send_data(f"{segment.camera}/review_status", segment.severity.value.upper())
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_update(
         self,
@@ -207,7 +209,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
-        self.requestor.send_data(f"{segment.camera}/review_status", segment.severity.value.upper())
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_end(
         self,
