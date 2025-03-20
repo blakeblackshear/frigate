@@ -181,6 +181,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_update(
         self,
@@ -206,6 +209,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_end(
         self,
@@ -225,6 +231,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(f"{segment.camera}/review_status", "NONE")
         self.active_review_segments[segment.camera] = None
 
     def end_segment(self, camera: str) -> None:
