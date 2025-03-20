@@ -147,7 +147,7 @@ export function useCameraActivity(
     return cameras[camera.name].camera_fps == 0 && stats["service"].uptime > 60;
   }, [camera, stats]);
 
-  const isCameraEnabled = cameraEnabled ? cameraEnabled === "ON" : undefined;
+  const isCameraEnabled = cameraEnabled ? cameraEnabled === "ON" : true;
 
   return {
     enabled: isCameraEnabled,
