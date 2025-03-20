@@ -80,12 +80,14 @@ def go2rtc_streams():
 
 
 @router.get("/go2rtc/streams/{camera_name}")
-def go2rtc_camera_stream(camera_name: str):
+def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
     )
     if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
+        if request.app.frigate_config.cameras.get(camera_name, {}).get("enabled", True):
+            logger.error("Failed to fetch streams from go2rtc")
+
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
