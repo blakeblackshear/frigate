@@ -54,6 +54,15 @@ export type ObjectType = {
 export interface FrigateCameraState {
   config: {
     enabled: boolean;
+    detect: boolean;
+    snapshots: boolean;
+    record: boolean;
+    audio: boolean;
+    notifications: boolean;
+    notifications_suspended: number;
+    autotracking: boolean;
+    alerts: boolean;
+    detections: boolean;
   };
   motion: boolean;
   objects: ObjectType[];
