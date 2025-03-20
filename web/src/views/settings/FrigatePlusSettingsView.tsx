@@ -113,7 +113,7 @@ export default function FrigatePlusSettingsView() {
                             ).toLocaleString()}
                           </p>
                         </div>
-                        <div>
+                        <div className="col-span-2 md:col-span-1">
                           <Label className="text-muted-foreground">
                             {t("frigatePlus.modelInfo.modelId")}
                           </Label>
