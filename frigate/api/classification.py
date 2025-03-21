@@ -30,6 +30,9 @@ router = APIRouter(tags=[Tags.events])
 def get_faces():
     face_dict: dict[str, list[str]] = {}
 
+    if not os.path.exists(FACE_DIR):
+        return JSONResponse(status_code=200, content={})
+
     for name in os.listdir(FACE_DIR):
         face_dir = os.path.join(FACE_DIR, name)
 
