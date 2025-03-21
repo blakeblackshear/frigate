@@ -659,11 +659,13 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
 
   return (
     <div className="relative flex flex-col rounded-lg">
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img
-          className={cn("h-40", isMobile && "w-full")}
-          src={`${baseUrl}clips/faces/${name}/${image}`}
-        />
+      <div
+        className={cn(
+          "w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground",
+          isMobile && "flex justify-center",
+        )}
+      >
+        <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
       </div>
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
