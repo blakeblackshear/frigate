@@ -28,7 +28,7 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.config import FrigateConfig
-from frigate.config.classification import CameraTypeEnum
+from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
@@ -324,6 +324,7 @@ class EmbeddingMaintainer(threading.Thread):
                     if (
                         recordings_available is not None
                         and event_id in self.detected_license_plates
+                        and self.config.cameras[camera].type != "lpr"
                     ):
                         processor.process_data(
                             {
@@ -395,7 +396,6 @@ class EmbeddingMaintainer(threading.Thread):
             if now - last_seen > self.config.cameras[data["camera"]].lpr.expire_time:
                 to_remove.append(id)
         for id in to_remove:
-            print(f"Expiring plate event {id}")
             self.event_metadata_publisher.publish(
                 EventMetadataTypeEnum.manual_event_end,
                 (id, now),
@@ -448,7 +448,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera_config = self.config.cameras[camera]
 
-        if not camera_config.lpr.camera_type == CameraTypeEnum.lpr:
+        if not camera_config.type == CameraTypeEnum.lpr:
             return
 
         try:

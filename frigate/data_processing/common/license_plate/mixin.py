@@ -1,5 +1,6 @@
 """Handle processing images for face detection and recognition."""
 
+import base64
 import datetime
 import logging
 import math
@@ -18,6 +19,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
+from frigate.config.camera.camera import CameraTypeEnum
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.util.image import area
 
@@ -45,6 +47,9 @@ class LicensePlateProcessingMixin:
         self.max_size = 960
         self.box_thresh = 0.6
         self.mask_thresh = 0.6
+
+        # matching
+        self.similarity_threshold = 0.8
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -870,14 +875,14 @@ class LicensePlateProcessingMixin:
         """
         self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
 
-    def _generate_plate_event(self, camera: str, plate_score: float) -> str:
+    def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
         now = datetime.datetime.now().timestamp()
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         event_id = f"{now}-{rand_id}"
 
         self.event_metadata_publisher.publish(
-            EventMetadataTypeEnum.manual_event_create,
+            EventMetadataTypeEnum.lpr_event_create,
             (
                 now,
                 camera,
@@ -886,9 +891,7 @@ class LicensePlateProcessingMixin:
                 True,
                 plate_score,
                 None,
-                None,
-                "api",
-                {},
+                plate,
             ),
         )
         return event_id
@@ -901,6 +904,9 @@ class LicensePlateProcessingMixin:
         current_time = int(datetime.datetime.now().timestamp())
 
         if not self.config.cameras[camera].lpr.enabled:
+            return
+
+        if not dedicated_lpr and self.config.cameras[camera].type == CameraTypeEnum.lpr:
             return
 
         if dedicated_lpr:
@@ -941,27 +947,6 @@ class LicensePlateProcessingMixin:
                 license_plate[0] : license_plate[2],
             ]
 
-            if WRITE_DEBUG_IMAGES:
-                if license_plate:
-                    frame_with_rect = rgb.copy()
-                    cv2.rectangle(
-                        frame_with_rect,
-                        (
-                            int(license_plate[0]),
-                            int(license_plate[1]),
-                        ),
-                        (
-                            int(license_plate[2]),
-                            int(license_plate[3]),
-                        ),
-                        (0, 255, 0),
-                        2,
-                    )
-                    cv2.imwrite(
-                        f"debug/frames/dedicated_lpr_with_rect_{current_time}.jpg",
-                        frame_with_rect,
-                    )
-
             # Double the size for better OCR
             license_plate_frame = cv2.resize(
                 license_plate_frame,
@@ -970,12 +955,6 @@ class LicensePlateProcessingMixin:
                     int(2 * license_plate_frame.shape[0]),
                 ),
             )
-
-            if WRITE_DEBUG_IMAGES:
-                cv2.imwrite(
-                    f"debug/frames/dedicated_lpr_doubled_{current_time}.jpg",
-                    license_plate_frame,
-                )
 
         else:
             id = obj_data["id"]
@@ -1035,26 +1014,6 @@ class LicensePlateProcessingMixin:
                 if not license_plate:
                     logger.debug("Detected no license plates for car object.")
                     return
-
-                if WRITE_DEBUG_IMAGES and license_plate:
-                    frame_with_rect = car.copy()
-                    cv2.rectangle(
-                        frame_with_rect,
-                        (
-                            int(license_plate[0]),
-                            int(license_plate[1]),
-                        ),
-                        (
-                            int(license_plate[2]),
-                            int(license_plate[3]),
-                        ),
-                        (0, 255, 0),
-                        2,
-                    )
-                    cv2.imwrite(
-                        f"debug/frames/car_frame_with_rect_{current_time}.jpg",
-                        frame_with_rect,
-                    )
 
                 license_plate_area = max(
                     0,
@@ -1145,18 +1104,12 @@ class LicensePlateProcessingMixin:
                     license_plate_frame,
                 )
 
-        start = datetime.datetime.now().timestamp()
-
         # run detection, returns results sorted by confidence, best first
+        start = datetime.datetime.now().timestamp()
         license_plates, confidences, areas = self._process_license_plate(
             license_plate_frame
         )
-
         self.__update_lpr_metrics(datetime.datetime.now().timestamp() - start)
-
-        logger.debug(f"Text boxes: {license_plates}")
-        logger.debug(f"Confidences: {confidences}")
-        logger.debug(f"Areas: {areas}")
 
         if license_plates:
             for plate, confidence, text_area in zip(license_plates, confidences, areas):
@@ -1168,7 +1121,6 @@ class LicensePlateProcessingMixin:
                     f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
                 )
         else:
-            # no plates found
             logger.debug("No text detected")
             return
 
@@ -1193,8 +1145,6 @@ class LicensePlateProcessingMixin:
         # For LPR cameras, match or assign plate ID using Jaro-Winkler distance
         if dedicated_lpr:
             plate_id = None
-            # Similarity threshold for matching plates
-            jaro_winkler_threshold = 0.8
 
             for existing_id, data in self.detected_license_plates.items():
                 if (
@@ -1204,15 +1154,16 @@ class LicensePlateProcessingMixin:
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
                     similarity = jaro_winkler(data["plate"], top_plate)
-                    if similarity >= jaro_winkler_threshold:
+                    if similarity >= self.similarity_threshold:
                         plate_id = existing_id
                         logger.debug(
                             f"Matched plate {top_plate} to {data['plate']} (similarity: {similarity:.3f})"
                         )
                         break
             if plate_id is None:
-                # start new manual lpr event
-                plate_id = self._generate_plate_event(obj_data, avg_confidence)
+                plate_id = self._generate_plate_event(
+                    obj_data, top_plate, avg_confidence
+                )
                 logger.debug(
                     f"New plate event for dedicated LPR camera {plate_id}: {top_plate}"
                 )
@@ -1253,11 +1204,20 @@ class LicensePlateProcessingMixin:
                 EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
             )
 
-        logger.debug("publishing plate for", id, top_plate)
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
             (id, top_plate, avg_confidence),
         )
+
+        if dedicated_lpr:
+            # save the best snapshot
+            logger.debug(f"Writing snapshot for {id}, {top_plate}, {current_time}")
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            _, buffer = cv2.imencode(".jpg", frame_bgr)
+            self.sub_label_publisher.publish(
+                EventMetadataTypeEnum.save_lpr_snapshot,
+                (base64.b64encode(buffer).decode("ASCII"), id, camera),
+            )
 
         self.detected_license_plates[id] = {
             "plate": top_plate,
