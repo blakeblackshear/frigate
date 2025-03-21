@@ -506,6 +506,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if self.config.face_recognition.save_attempts:
                 # write face to library
                 folder = os.path.join(FACE_DIR, "train")
+                os.makedirs(folder, exist_ok=True)
                 new_file = os.path.join(
                     folder, f"{id}-{sub_label}-{score}-{face_score}.webp"
                 )

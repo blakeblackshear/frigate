@@ -32,11 +32,11 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
-import { RecognizedFaceData } from "@/types/face";
+import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -55,11 +55,11 @@ export default function FaceLibrary() {
 
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   // face data
 
-  const { data: faceData, mutate: refreshFaces } = useSWR("faces");
+  const { data: faceData, mutate: refreshFaces } =
+    useSWR<FaceLibraryData>("faces");
 
   const faces = useMemo<string[]>(
     () =>
@@ -233,50 +233,13 @@ export default function FaceLibrary() {
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div ref={tabsRef} className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={pageToggle}
-              onValueChange={(value: string) => {
-                if (value) {
-                  setPageToggle(value);
-                }
-              }}
-            >
-              {trainImages.length > 0 && (
-                <>
-                  <ToggleGroupItem
-                    value="train"
-                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
-                    data-nav-item="train"
-                    aria-label={t("train.aria")}
-                  >
-                    <div>{t("train.title")}</div>
-                  </ToggleGroupItem>
-                  <div>|</div>
-                </>
-              )}
-
-              {Object.values(faces).map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={t("selectItem", { item })}
-                >
-                  <div className="capitalize">
-                    {item} ({faceData[item].length})
-                  </div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
-          </div>
-        </ScrollArea>
+        <LibrarySelector
+          pageToggle={pageToggle}
+          faceData={faceData}
+          faces={faces}
+          trainImages={trainImages}
+          setPageToggle={setPageToggle}
+        />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
             <Button
@@ -320,6 +283,95 @@ export default function FaceLibrary() {
           />
         ))}
     </div>
+  );
+}
+
+type LibrarySelectorProps = {
+  pageToggle: string | undefined;
+  faceData?: FaceLibraryData;
+  faces: string[];
+  trainImages: string[];
+  setPageToggle: (toggle: string | undefined) => void;
+};
+function LibrarySelector({
+  pageToggle,
+  faceData,
+  faces,
+  trainImages,
+  setPageToggle,
+}: LibrarySelectorProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
+  return isDesktop ? (
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="flex flex-row">
+        <ToggleGroup
+          className="*:rounded-md *:px-3 *:py-4"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: string) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {trainImages.length > 0 && (
+            <>
+              <ToggleGroupItem
+                value="train"
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+                data-nav-item="train"
+                aria-label={t("train.aria")}
+              >
+                <div>{t("train.title")}</div>
+              </ToggleGroupItem>
+              <div>|</div>
+            </>
+          )}
+
+          {Object.values(faces).map((face) => (
+            <ToggleGroupItem
+              key={face}
+              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == face ? "" : "*:text-muted-foreground"}`}
+              value={face}
+              data-nav-item={face}
+              aria-label={t("selectItem", { item: face })}
+            >
+              <div className="capitalize">
+                {face} ({faceData?.[face].length})
+              </div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <ScrollBar orientation="horizontal" className="h-0" />
+      </div>
+    </ScrollArea>
+  ) : (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="capitalize">{pageToggle}</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {trainImages.length > 0 && (
+          <DropdownMenuItem
+            className="capitalize"
+            aria-label={t("train.aria")}
+            onClick={() => setPageToggle("train")}
+          >
+            <div>{t("train.title")}</div>
+          </DropdownMenuItem>
+        )}
+        {Object.values(faces).map((face) => (
+          <DropdownMenuItem
+            className="capitalize"
+            onClick={() => setPageToggle(face)}
+          >
+            {face} ({faceData?.[face].length})
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -536,7 +588,7 @@ function FaceAttempt({
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <TooltipTrigger>
                     <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
                   </TooltipTrigger>
@@ -579,7 +631,12 @@ type FaceGridProps = {
 };
 function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
   return (
-    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+    <div
+      className={cn(
+        "scrollbar-container gap-2 overflow-y-scroll",
+        isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
+      )}
+    >
       {faceImages.map((image: string) => (
         <FaceImage
           key={image}
@@ -602,7 +659,12 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
 
   return (
     <div className="relative flex flex-col rounded-lg">
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+      <div
+        className={cn(
+          "w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground",
+          isMobile && "flex justify-center",
+        )}
+      >
         <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
       </div>
       <div className="rounded-b-lg bg-card p-2">
