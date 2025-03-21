@@ -1,9 +1,17 @@
 import { baseUrl } from "@/api/baseUrl";
+import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,32 +27,39 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useContextMenu from "@/hooks/use-contextmenu";
+import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
+import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isDesktop, isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function FaceLibrary() {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // title
 
   useEffect(() => {
-    document.title = "Face Library - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   const [page, setPage] = useState<string>();
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   // face data
 
-  const { data: faceData, mutate: refreshFaces } = useSWR("faces");
+  const { data: faceData, mutate: refreshFaces } =
+    useSWR<FaceLibraryData>("faces");
 
   const faces = useMemo<string[]>(
     () =>
@@ -94,7 +109,7 @@ export default function FaceLibrary() {
           if (resp.status == 200) {
             setUpload(false);
             refreshFaces();
-            toast.success("Successfully uploaded image.", {
+            toast.success(t("toast.success.uploadedImage"), {
               position: "top-center",
             });
           }
@@ -104,42 +119,12 @@ export default function FaceLibrary() {
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to upload image: ${errorMessage}`, {
+          toast.error(t("toast.error.uploadingImageFailed", { errorMessage }), {
             position: "top-center",
           });
         });
     },
-    [pageToggle, refreshFaces],
-  );
-
-  const onAddName = useCallback(
-    (name: string) => {
-      axios
-        .post(`faces/${name}/create`, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((resp) => {
-          if (resp.status == 200) {
-            setAddFace(false);
-            refreshFaces();
-            toast.success("Successfully add face library.", {
-              position: "top-center",
-            });
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(`Failed to set face name: ${errorMessage}`, {
-            position: "top-center",
-          });
-        });
-    },
-    [refreshFaces],
+    [pageToggle, refreshFaces, t],
   );
 
   // face multiselect
@@ -147,7 +132,11 @@ export default function FaceLibrary() {
   const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
 
   const onClickFace = useCallback(
-    (imageId: string) => {
+    (imageId: string, ctrl: boolean) => {
+      if (selectedFaces.length == 0 && !ctrl) {
+        return;
+      }
+
       const index = selectedFaces.indexOf(imageId);
 
       if (index != -1) {
@@ -169,33 +158,42 @@ export default function FaceLibrary() {
     [selectedFaces, setSelectedFaces],
   );
 
-  const onDelete = useCallback(() => {
-    axios
-      .post(`/faces/train/delete`, { ids: selectedFaces })
-      .then((resp) => {
-        setSelectedFaces([]);
+  const onDelete = useCallback(
+    (name: string, ids: string[]) => {
+      axios
+        .post(`/faces/${name}/delete`, { ids })
+        .then((resp) => {
+          setSelectedFaces([]);
 
-        if (resp.status == 200) {
-          toast.success(`Successfully deleted face.`, {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.deletedFace"), {
+              position: "top-center",
+            });
+
+            if (faceImages.length == 1) {
+              // face has been deleted
+              setPageToggle("");
+            }
+
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
             position: "top-center",
           });
-          refreshFaces();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(`Failed to delete: ${errorMessage}`, {
-          position: "top-center",
         });
-      });
-  }, [selectedFaces, refreshFaces]);
+    },
+    [faceImages, refreshFaces, setPageToggle, t],
+  );
 
   // keyboard
 
-  useKeyboardListener(["a"], (key, modifiers) => {
+  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
     if (modifiers.repeat || !modifiers.down) {
       return;
     }
@@ -205,6 +203,9 @@ export default function FaceLibrary() {
         if (modifiers.ctrl) {
           setSelectedFaces([...trainImages]);
         }
+        break;
+      case "Escape":
+        setSelectedFaces([]);
         break;
     }
   });
@@ -219,82 +220,46 @@ export default function FaceLibrary() {
 
       <UploadImageDialog
         open={upload}
-        title="Upload Face Image"
-        description={`Upload an image to scan for faces and include for ${pageToggle}`}
+        title={t("uploadFaceImage.title")}
+        description={t("uploadFaceImage.desc", { pageToggle })}
         setOpen={setUpload}
         onSave={onUploadImage}
       />
 
-      <TextEntryDialog
-        title="Create Face Library"
-        description="Create a new face library"
+      <CreateFaceWizardDialog
         open={addFace}
         setOpen={setAddFace}
-        onSave={onAddName}
+        onFinish={refreshFaces}
       />
 
       <div className="relative mb-2 flex h-11 w-full items-center justify-between">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div ref={tabsRef} className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={pageToggle}
-              onValueChange={(value: string) => {
-                if (value) {
-                  setPageToggle(value);
-                }
-              }}
-            >
-              {trainImages.length > 0 && (
-                <>
-                  <ToggleGroupItem
-                    value="train"
-                    className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
-                    data-nav-item="train"
-                    aria-label="Select train"
-                  >
-                    <div>Train</div>
-                  </ToggleGroupItem>
-                  <div>|</div>
-                </>
-              )}
-
-              {Object.values(faces).map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={`Select ${item}`}
-                >
-                  <div className="capitalize">
-                    {item} ({faceData[item].length})
-                  </div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
-          </div>
-        </ScrollArea>
+        <LibrarySelector
+          pageToggle={pageToggle}
+          faceData={faceData}
+          faces={faces}
+          trainImages={trainImages}
+          setPageToggle={setPageToggle}
+        />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
-            <Button className="flex gap-2" onClick={() => onDelete()}>
+            <Button
+              className="flex gap-2"
+              onClick={() => onDelete("train", selectedFaces)}
+            >
               <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
-              Delete Face Attempts
+              {isDesktop && t("button.deleteFaceAttempts")}
             </Button>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2">
             <Button className="flex gap-2" onClick={() => setAddFace(true)}>
               <LuScanFace className="size-7 rounded-md p-1 text-secondary-foreground" />
-              Add Face
+              {isDesktop && t("button.addFace")}
             </Button>
             {pageToggle != "train" && (
               <Button className="flex gap-2" onClick={() => setUpload(true)}>
                 <LuImagePlus className="size-7 rounded-md p-1 text-secondary-foreground" />
-                Upload Image
+                {isDesktop && t("button.uploadImage")}
               </Button>
             )}
           </div>
@@ -314,10 +279,99 @@ export default function FaceLibrary() {
           <FaceGrid
             faceImages={faceImages}
             pageToggle={pageToggle}
-            onRefresh={refreshFaces}
+            onDelete={onDelete}
           />
         ))}
     </div>
+  );
+}
+
+type LibrarySelectorProps = {
+  pageToggle: string | undefined;
+  faceData?: FaceLibraryData;
+  faces: string[];
+  trainImages: string[];
+  setPageToggle: (toggle: string | undefined) => void;
+};
+function LibrarySelector({
+  pageToggle,
+  faceData,
+  faces,
+  trainImages,
+  setPageToggle,
+}: LibrarySelectorProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
+  return isDesktop ? (
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="flex flex-row">
+        <ToggleGroup
+          className="*:rounded-md *:px-3 *:py-4"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: string) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {trainImages.length > 0 && (
+            <>
+              <ToggleGroupItem
+                value="train"
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+                data-nav-item="train"
+                aria-label={t("train.aria")}
+              >
+                <div>{t("train.title")}</div>
+              </ToggleGroupItem>
+              <div>|</div>
+            </>
+          )}
+
+          {Object.values(faces).map((face) => (
+            <ToggleGroupItem
+              key={face}
+              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == face ? "" : "*:text-muted-foreground"}`}
+              value={face}
+              data-nav-item={face}
+              aria-label={t("selectItem", { item: face })}
+            >
+              <div className="capitalize">
+                {face} ({faceData?.[face].length})
+              </div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <ScrollBar orientation="horizontal" className="h-0" />
+      </div>
+    </ScrollArea>
+  ) : (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="capitalize">{pageToggle}</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {trainImages.length > 0 && (
+          <DropdownMenuItem
+            className="capitalize"
+            aria-label={t("train.aria")}
+            onClick={() => setPageToggle("train")}
+          >
+            <div>{t("train.title")}</div>
+          </DropdownMenuItem>
+        )}
+        {Object.values(faces).map((face) => (
+          <DropdownMenuItem
+            className="capitalize"
+            onClick={() => setPageToggle(face)}
+          >
+            {face} ({faceData?.[face].length})
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -326,7 +380,7 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
-  onClickFace: (image: string) => void;
+  onClickFace: (image: string, ctrl: boolean) => void;
   onRefresh: () => void;
 };
 function TrainingGrid({
@@ -337,20 +391,80 @@ function TrainingGrid({
   onClickFace,
   onRefresh,
 }: TrainingGridProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
+  // face data
+
+  const [selectedEvent, setSelectedEvent] = useState<RecognizedFaceData>();
+
+  const formattedDate = useFormattedTimestamp(
+    selectedEvent?.timestamp ?? 0,
+    config?.ui.time_format == "24hour"
+      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
+      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
+    config?.ui.timezone,
+  );
+
   return (
-    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
-      {attemptImages.map((image: string) => (
-        <FaceAttempt
-          key={image}
-          image={image}
-          faceNames={faceNames}
-          threshold={config.face_recognition.threshold}
-          selected={selectedFaces.includes(image)}
-          onClick={() => onClickFace(image)}
-          onRefresh={onRefresh}
-        />
-      ))}
-    </div>
+    <>
+      <Dialog
+        open={selectedEvent != undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedEvent(undefined);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("details.face")}</DialogTitle>
+            <DialogDescription>{t("details.faceDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">{t("details.person")}</div>
+            <div className="text-sm capitalize">{selectedEvent?.name}</div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">
+              {t("details.confidence")}
+            </div>
+            <div className="text-sm capitalize">
+              {(selectedEvent?.score || 0) * 100}%
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="text-sm text-primary/40">
+              {t("details.timestamp")}
+            </div>
+            <div className="text-sm">{formattedDate}</div>
+          </div>
+          <img
+            className="w-full"
+            src={`${baseUrl}api/events/${selectedEvent?.eventId}/thumbnail.jpg`}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
+        {attemptImages.map((image: string) => (
+          <FaceAttempt
+            key={image}
+            image={image}
+            faceNames={faceNames}
+            threshold={config.face_recognition.recognition_threshold}
+            selected={selectedFaces.includes(image)}
+            onClick={(data, meta) => {
+              if (meta) {
+                onClickFace(image, meta);
+              } else {
+                setSelectedEvent(data);
+              }
+            }}
+            onRefresh={onRefresh}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -359,7 +473,7 @@ type FaceAttemptProps = {
   faceNames: string[];
   threshold: number;
   selected: boolean;
-  onClick: () => void;
+  onClick: (data: RecognizedFaceData, meta: boolean) => void;
   onRefresh: () => void;
 };
 function FaceAttempt({
@@ -370,15 +484,27 @@ function FaceAttempt({
   onClick,
   onRefresh,
 }: FaceAttemptProps) {
-  const data = useMemo(() => {
+  const { t } = useTranslation(["views/faceLibrary"]);
+  const data = useMemo<RecognizedFaceData>(() => {
     const parts = image.split("-");
 
     return {
+      timestamp: Number.parseFloat(parts[0]),
       eventId: `${parts[0]}-${parts[1]}`,
       name: parts[2],
-      score: parts[3],
+      score: Number.parseFloat(parts[3]),
     };
   }, [image]);
+
+  // interaction
+
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  useContextMenu(imgRef, () => {
+    onClick(data, true);
+  });
+
+  // api calls
 
   const onTrainAttempt = useCallback(
     (trainName: string) => {
@@ -386,7 +512,7 @@ function FaceAttempt({
         .post(`/faces/train/${trainName}/classify`, { training_file: image })
         .then((resp) => {
           if (resp.status == 200) {
-            toast.success(`Successfully trained face.`, {
+            toast.success(t("toast.success.trainedFace"), {
               position: "top-center",
             });
             onRefresh();
@@ -397,12 +523,12 @@ function FaceAttempt({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to train: ${errorMessage}`, {
+          toast.error(t("toast.error.trainFailed", { errorMessage }), {
             position: "top-center",
           });
         });
     },
-    [image, onRefresh],
+    [image, onRefresh, t],
   );
 
   const onReprocess = useCallback(() => {
@@ -410,7 +536,7 @@ function FaceAttempt({
       .post(`/faces/reprocess`, { training_file: image })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success(`Successfully updated face score.`, {
+          toast.success(t("toast.success.updatedFaceScore"), {
             position: "top-center",
           });
           onRefresh();
@@ -421,11 +547,11 @@ function FaceAttempt({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to update face score: ${errorMessage}`, {
+        toast.error(t("toast.error.updateFaceScoreFailed", { errorMessage }), {
           position: "top-center",
         });
       });
-  }, [image, onRefresh]);
+  }, [image, onRefresh, t]);
 
   return (
     <div
@@ -435,10 +561,17 @@ function FaceAttempt({
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
-      onClick={onClick}
     >
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img className="size-40" src={`${baseUrl}clips/faces/train/${image}`} />
+      <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+        <img
+          ref={imgRef}
+          className="size-44"
+          src={`${baseUrl}clips/faces/train/${image}`}
+          onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+        />
+        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+          <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
+        </div>
       </div>
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -446,24 +579,22 @@ function FaceAttempt({
             <div className="capitalize">{data.name}</div>
             <div
               className={cn(
-                Number.parseFloat(data.score) >= threshold
-                  ? "text-success"
-                  : "text-danger",
+                data.score >= threshold ? "text-success" : "text-danger",
               )}
             >
-              {Number.parseFloat(data.score) * 100}%
+              {data.score * 100}%
             </div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <TooltipTrigger>
                     <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
                   </TooltipTrigger>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuLabel>Train Face as:</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
                   {faceNames.map((faceName) => (
                     <DropdownMenuItem
                       key={faceName}
@@ -475,7 +606,7 @@ function FaceAttempt({
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <TooltipContent>Train Face as Person</TooltipContent>
+              <TooltipContent>{t("trainFace")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger>
@@ -484,7 +615,7 @@ function FaceAttempt({
                   onClick={() => onReprocess()}
                 />
               </TooltipTrigger>
-              <TooltipContent>Reprocess Face</TooltipContent>
+              <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -496,17 +627,22 @@ function FaceAttempt({
 type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
-  onRefresh: () => void;
+  onDelete: (name: string, ids: string[]) => void;
 };
-function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
+function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
   return (
-    <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll">
+    <div
+      className={cn(
+        "scrollbar-container gap-2 overflow-y-scroll",
+        isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
+      )}
+    >
       {faceImages.map((image: string) => (
         <FaceImage
           key={image}
           name={pageToggle}
           image={image}
-          onRefresh={onRefresh}
+          onDelete={onDelete}
         />
       ))}
     </div>
@@ -516,34 +652,19 @@ function FaceGrid({ faceImages, pageToggle, onRefresh }: FaceGridProps) {
 type FaceImageProps = {
   name: string;
   image: string;
-  onRefresh: () => void;
+  onDelete: (name: string, ids: string[]) => void;
 };
-function FaceImage({ name, image, onRefresh }: FaceImageProps) {
-  const onDelete = useCallback(() => {
-    axios
-      .post(`/faces/${name}/delete`, { ids: [image] })
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(`Successfully deleted face.`, {
-            position: "top-center",
-          });
-          onRefresh();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(`Failed to delete: ${errorMessage}`, {
-          position: "top-center",
-        });
-      });
-  }, [name, image, onRefresh]);
+function FaceImage({ name, image, onDelete }: FaceImageProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
 
   return (
     <div className="relative flex flex-col rounded-lg">
-      <div className="w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+      <div
+        className={cn(
+          "w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground",
+          isMobile && "flex justify-center",
+        )}
+      >
         <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
       </div>
       <div className="rounded-b-lg bg-card p-2">
@@ -556,10 +677,10 @@ function FaceImage({ name, image, onRefresh }: FaceImageProps) {
               <TooltipTrigger>
                 <LuTrash2
                   className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={onDelete}
+                  onClick={() => onDelete(name, [image])}
                 />
               </TooltipTrigger>
-              <TooltipContent>Delete Face Attempt</TooltipContent>
+              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
             </Tooltip>
           </div>
         </div>

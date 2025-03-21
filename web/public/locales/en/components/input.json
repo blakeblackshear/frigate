@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Download Video",
+      "toast": {
+        "success": "Your review item video has started downloading."
+      }
+    }
+  }
+}

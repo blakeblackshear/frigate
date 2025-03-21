@@ -331,19 +331,6 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
-    classification: ClassificationConfig = Field(
-        default_factory=ClassificationConfig, title="Object classification config."
-    )
-    semantic_search: SemanticSearchConfig = Field(
-        default_factory=SemanticSearchConfig, title="Semantic search configuration."
-    )
-    face_recognition: FaceRecognitionConfig = Field(
-        default_factory=FaceRecognitionConfig, title="Face recognition config."
-    )
-    lpr: LicensePlateRecognitionConfig = Field(
-        default_factory=LicensePlateRecognitionConfig,
-        title="License Plate recognition config.",
-    )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
 
     # Detector config
@@ -395,6 +382,21 @@ class FrigateConfig(FrigateBaseModel):
         title="Global timestamp style configuration.",
     )
 
+    # Classification Config
+    classification: ClassificationConfig = Field(
+        default_factory=ClassificationConfig, title="Object classification config."
+    )
+    semantic_search: SemanticSearchConfig = Field(
+        default_factory=SemanticSearchConfig, title="Semantic search configuration."
+    )
+    face_recognition: FaceRecognitionConfig = Field(
+        default_factory=FaceRecognitionConfig, title="Face recognition config."
+    )
+    lpr: LicensePlateRecognitionConfig = Field(
+        default_factory=LicensePlateRecognitionConfig,
+        title="License Plate recognition config.",
+    )
+
     camera_groups: Dict[str, CameraGroupConfig] = Field(
         default_factory=dict, title="Camera group configuration"
     )
@@ -435,6 +437,8 @@ class FrigateConfig(FrigateBaseModel):
             include={
                 "audio": ...,
                 "birdseye": ...,
+                "face_recognition": ...,
+                "lpr": ...,
                 "record": ...,
                 "snapshots": ...,
                 "live": ...,
@@ -607,6 +611,11 @@ class FrigateConfig(FrigateBaseModel):
         self.objects.parse_all_objects(self.cameras)
         self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
+
+        if self.plus_api and not self.snapshots.clean_copy:
+            logger.warning(
+                "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
+            )
 
         for key, detector in self.detectors.items():
             adapter = TypeAdapter(DetectorConfig)

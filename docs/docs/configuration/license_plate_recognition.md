@@ -51,16 +51,16 @@ Fine-tune the LPR feature using these optional parameters:
 
 - **`detection_threshold`**: License plate object detection confidence score required before recognition runs.
   - Default: `0.7`
-  - Note: If you are using a Frigate+ model and you set the `threshold` in your objects config for `license_plate` higher than this value, recognition will never run. It's best to ensure these values match, or this `detection_threshold` is lower than your object config `threshold`.
+  - Note: This is field only applies to the standalone license plate detection model, `min_score` should be used to filter for models that have license plate detection built in.
 - **`min_area`**: Defines the minimum size (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 
 ### Recognition
 
-- **`recognition_threshold`**: Recognition confidence score required to add the plate to the object as a sub label.
+- **`recognition_threshold`**: Recognition confidence score required to add the plate to the object as a `recognized_license_plate` and/or `sub_label`.
   - Default: `0.9`.
-- **`min_plate_length`**: Specifies the minimum number of characters a detected license plate must have to be added as a sub label to an object.
+- **`min_plate_length`**: Specifies the minimum number of characters a detected license plate must have to be added as a `recognized_license_plate` and/or `sub_label` to an object.
   - Use this to filter out short, incomplete, or incorrect detections.
 - **`format`**: A regular expression defining the expected format of detected plates. Plates that do not match this format will be discarded.
   - `"^[A-Z]{1,3} [A-Z]{1,2} [0-9]{1,4}$"` matches plates like "B AB 1234" or "M X 7"

@@ -1,0 +1,51 @@
+{
+  "description": {
+    "addFace": "我们将指导如何将新面孔添加到人脸库中。"
+  },
+  "details": {
+    "confidence": "置信度",
+    "face": "人脸详情",
+    "faceDesc": "人脸及相关对象的详细信息",
+    "timestamp": "时间戳"
+  },
+  "documentTitle": "人脸库 - Frigate",
+  "uploadFaceImage": {
+    "title": "上传人脸图片",
+    "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"
+  },
+  "createFaceLibrary": {
+    "title": "创建人脸库",
+    "desc": "创建一个新的人脸库",
+    "nextSteps": "建议使用“训练”选项卡为每个检测到的人选择并训练图像。在打好基础前，强烈建议训练仅使用正面图像。而不是从摄像机中识别到的角度拍摄的人脸图像。"
+  },
+  "train": {
+    "title": "训练",
+    "aria": "选择训练"
+  },
+  "selectItem": "选择{{item}}",
+  "button": {
+    "deleteFaceAttempts": "尝试删除人脸",
+    "addFace": "添加人脸",
+    "uploadImage": "上传图片",
+    "reprocessFace": "重新处理人脸"
+  },
+  "readTheDocs": "阅读文档查看更多有关为人脸库优化图像的详细信息",
+  "trainFaceAs": "将人脸训练为：",
+  "trainFaceAsPerson": "将人脸训练为人物",
+  "toast": {
+    "success": {
+      "uploadedImage": "图片上传成功。",
+      "addFaceLibrary": "{{name}} 成功添加至人脸库。",
+      "deletedFace": "人脸删除成功。",
+      "trainedFace": "人脸训练成功。",
+      "updatedFaceScore": "人脸分数更新成功。"
+    },
+    "error": {
+      "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
+      "addFaceLibraryFailed": "设置人脸名称失败：{{errorMessage}}",
+      "deleteFaceFailed": "删除失败：{{errorMessage}}",
+      "trainFailed": "训练失败：{{errorMessage}}",
+      "updateFaceScoreFailed": "更新人脸分数失败：{{errorMessage}}"
+    }
+  }
+}

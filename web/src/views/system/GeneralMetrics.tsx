@@ -15,6 +15,7 @@ import GPUInfoDialog from "@/components/overlay/GPUInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type GeneralMetricsProps = {
   lastUpdated: number;
@@ -25,7 +26,7 @@ export default function GeneralMetrics({
   setLastUpdated,
 }: GeneralMetricsProps) {
   // extra info
-
+  const { t } = useTranslation(["views/system"]);
   const [showVainfo, setShowVainfo] = useState(false);
 
   // stats
@@ -448,7 +449,7 @@ export default function GeneralMetrics({
 
       <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
         <div className="text-sm font-medium text-muted-foreground">
-          Detectors
+          {t("general.detector.title")}
         </div>
         <div
           className={cn(
@@ -458,7 +459,7 @@ export default function GeneralMetrics({
         >
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">Detector Inference Speed</div>
+              <div className="mb-5">{t("general.detector.inferenceSpeed")}</div>
               {detInferenceTimeSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}
@@ -496,7 +497,7 @@ export default function GeneralMetrics({
           )}
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">Detector CPU Usage</div>
+              <div className="mb-5">{t("general.detector.cpuUsage")}</div>
               {detCpuSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}
@@ -514,7 +515,7 @@ export default function GeneralMetrics({
           )}
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">Detector Memory Usage</div>
+              <div className="mb-5">{t("general.detector.memoryUsage")}</div>
               {detMemSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}
@@ -541,11 +542,11 @@ export default function GeneralMetrics({
               {canGetGpuInfo && (
                 <Button
                   className="cursor-pointer"
-                  aria-label="Hardware information"
+                  aria-label={t("general.hardwareInfo.title")}
                   size="sm"
                   onClick={() => setShowVainfo(true)}
                 >
-                  Hardware Info
+                  {t("general.hardwareInfo.title")}
                 </Button>
               )}
             </div>
@@ -557,7 +558,9 @@ export default function GeneralMetrics({
             >
               {statsHistory.length != 0 ? (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5">GPU Usage</div>
+                  <div className="mb-5">
+                    {t("general.hardwareInfo.gpuUsage")}
+                  </div>
                   {gpuSeries.map((series) => (
                     <ThresholdBarGraph
                       key={series.name}
@@ -577,7 +580,9 @@ export default function GeneralMetrics({
                 <>
                   {gpuMemSeries && (
                     <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">GPU Memory</div>
+                      <div className="mb-5">
+                        {t("general.hardwareInfo.gpuMemory")}
+                      </div>
                       {gpuMemSeries.map((series) => (
                         <ThresholdBarGraph
                           key={series.name}
@@ -599,7 +604,9 @@ export default function GeneralMetrics({
                 <>
                   {gpuEncSeries && gpuEncSeries?.length != 0 && (
                     <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">GPU Encoder</div>
+                      <div className="mb-5">
+                        {t("general.hardwareInfo.gpuEncoder")}
+                      </div>
                       {gpuEncSeries.map((series) => (
                         <ThresholdBarGraph
                           key={series.name}
@@ -621,7 +628,9 @@ export default function GeneralMetrics({
                 <>
                   {gpuDecSeries && gpuDecSeries?.length != 0 && (
                     <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">GPU Decoder</div>
+                      <div className="mb-5">
+                        {t("general.hardwareInfo.gpuDecoder")}
+                      </div>
                       {gpuDecSeries.map((series) => (
                         <ThresholdBarGraph
                           key={series.name}
@@ -644,12 +653,14 @@ export default function GeneralMetrics({
         )}
 
         <div className="mt-4 text-sm font-medium text-muted-foreground">
-          Other Processes
+          {t("general.otherProcesses.title")}
         </div>
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">Process CPU Usage</div>
+              <div className="mb-5">
+                {t("general.otherProcesses.processCpuUsage")}
+              </div>
               {otherProcessCpuSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}
@@ -667,7 +678,9 @@ export default function GeneralMetrics({
           )}
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">Process Memory Usage</div>
+              <div className="mb-5">
+                {t("general.otherProcesses.processMemoryUsage")}
+              </div>
               {otherProcessMemSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}

@@ -129,8 +129,8 @@ detectors:
     type: edgetpu
     device: pci
 ```
----
 
+---
 
 ## Hailo-8
 
@@ -140,12 +140,13 @@ See the [installation docs](../frigate/installation.md#hailo-8l) for information
 
 ### Configuration
 
-When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.  
+When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
 
-#### YOLO 
+#### YOLO
 
 Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
+
 - **Hailo-8 hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 - **Hailo-8L hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 
@@ -224,16 +225,15 @@ model:
   # Alternatively, or as a fallback, provide a custom URL:
   # path: https://custom-model-url.com/path/to/model.hef
 ```
+
 For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
 
-Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation. 
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
 
-> **Note:**  
+> **Note:**
 > The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
 
 ---
-
-
 
 ## OpenVINO Detector
 
@@ -335,6 +335,30 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+#### D-FINE
+
+[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+
+After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/dfine_s_obj2coco.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -529,6 +553,7 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 ### Supported Models
 
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
+
 - D-FINE models are not supported
 - YOLO-NAS models are known to not run well on integrated GPUs
 
@@ -625,12 +650,6 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 #### D-FINE
 
 [D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
-
-:::warning
-
-D-FINE is currently not supported on OpenVINO
-
-:::
 
 After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 

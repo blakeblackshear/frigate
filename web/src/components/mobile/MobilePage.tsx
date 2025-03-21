@@ -5,6 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const MobilePageContext = createContext<{
   open: boolean;
@@ -138,6 +139,7 @@ export function MobilePageHeader({
   onClose,
   ...props
 }: MobilePageHeaderProps) {
+  const { t } = useTranslation(["common"]);
   const context = useContext(MobilePageContext);
   if (!context)
     throw new Error("MobilePageHeader must be used within MobilePage");
@@ -160,7 +162,7 @@ export function MobilePageHeader({
     >
       <Button
         className="absolute left-0 rounded-lg"
-        aria-label="Go back"
+        aria-label={t("label.back", { ns: "common" })}
         size="sm"
         onClick={handleClose}
       >

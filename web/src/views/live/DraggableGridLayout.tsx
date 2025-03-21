@@ -50,6 +50,7 @@ import { Toaster } from "@/components/ui/sonner";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
+import { useTranslation } from "react-i18next";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -79,6 +80,7 @@ export default function DraggableGridLayout({
   fullscreen,
   toggleFullscreen,
 }: DraggableGridLayoutProps) {
+  const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -658,7 +660,9 @@ export default function DraggableGridLayout({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {isEditMode ? "Exit Editing" : "Edit Layout"}
+                  {isEditMode
+                    ? t("editLayout.exitEdit")
+                    : t("editLayout.label")}
                 </TooltipContent>
               </Tooltip>
               {!isEditMode && (
@@ -676,7 +680,9 @@ export default function DraggableGridLayout({
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isEditMode ? "Exit Editing" : "Edit Camera Group"}
+                        {isEditMode
+                          ? t("editLayout.exitEdit")
+                          : t("editLayout.group.label")}
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -694,7 +700,9 @@ export default function DraggableGridLayout({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                      {fullscreen
+                        ? t("button.exitFullscreen", { ns: "common" })
+                        : t("button.fullscreen", { ns: "common" })}
                     </TooltipContent>
                   </Tooltip>
                 </>

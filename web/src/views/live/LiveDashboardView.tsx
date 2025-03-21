@@ -43,6 +43,7 @@ import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
+import { useTranslation } from "react-i18next";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -60,6 +61,8 @@ export default function LiveDashboardView({
   fullscreen,
   toggleFullscreen,
 }: LiveDashboardViewProps) {
+  const { t } = useTranslation(["views/live"]);
+
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // layout
@@ -471,7 +474,9 @@ export default function LiveDashboardView({
               }
               const streamName =
                 currentGroupStreamingSettings?.[camera.name]?.streamName ||
-                Object.values(camera.live.streams)?.[0];
+                camera?.live?.streams
+                  ? Object?.values(camera?.live?.streams)?.[0]
+                  : "";
               const autoLive =
                 currentGroupStreamingSettings?.[camera.name]?.streamType !==
                 "no-streaming";
@@ -560,7 +565,9 @@ export default function LiveDashboardView({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                  {fullscreen
+                    ? t("button.exitFullscreen", { ns: "common" })
+                    : t("button.fullscreen", { ns: "common" })}
                 </TooltipContent>
               </Tooltip>
             </div>

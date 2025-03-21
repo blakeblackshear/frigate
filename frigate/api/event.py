@@ -701,6 +701,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             for k, v in event["data"].items()
             if k
             in [
+                "attributes",
                 "type",
                 "score",
                 "top_score",

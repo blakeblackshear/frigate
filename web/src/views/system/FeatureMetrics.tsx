@@ -6,6 +6,7 @@ import { EmbeddingThreshold } from "@/types/graph";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type FeatureMetricsProps = {
   lastUpdated: number;
@@ -16,6 +17,7 @@ export default function FeatureMetrics({
   setLastUpdated,
 }: FeatureMetricsProps) {
   // stats
+  const { t } = useTranslation(["views/system"]);
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
     ["stats/history", { keys: "embeddings,service" }],
@@ -74,20 +76,20 @@ export default function FeatureMetrics({
         const key = rawKey.replaceAll("_", " ");
 
         if (!(key in series)) {
-          series[key] = { name: key, data: [] };
+          series[key] = { name: t("features.embeddings." + rawKey), data: [] };
         }
 
         series[key].data.push({ x: statsIdx + 1, y: stat });
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   return (
     <>
       <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
         <div className="text-sm font-medium text-muted-foreground">
-          Features
+          {t("features.title")}
         </div>
         <div
           className={cn(

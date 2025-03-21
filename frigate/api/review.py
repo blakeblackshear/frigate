@@ -9,10 +9,10 @@ import pandas as pd
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from peewee import Case, DoesNotExist, fn, operator
+from peewee import Case, DoesNotExist, IntegrityError, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import get_current_user, require_role
 from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -26,7 +26,7 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
-from frigate.models import Recordings, ReviewSegment
+from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
 
@@ -36,7 +36,15 @@ router = APIRouter(tags=[Tags.review])
 
 
 @router.get("/review", response_model=list[ReviewSegmentResponse])
-def review(params: ReviewQueryParams = Depends()):
+async def review(
+    params: ReviewQueryParams = Depends(),
+    current_user: dict = Depends(get_current_user),
+):
+    if isinstance(current_user, JSONResponse):
+        return current_user
+
+    user_id = current_user["username"]
+
     cameras = params.cameras
     labels = params.labels
     zones = params.zones
@@ -74,9 +82,7 @@ def review(params: ReviewQueryParams = Depends()):
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
                 | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
-
-        label_clause = reduce(operator.or_, label_clauses)
-        clauses.append((label_clause))
+        clauses.append(reduce(operator.or_, label_clauses))
 
     if zones != "all":
         # use matching so segments with multiple zones
@@ -88,27 +94,52 @@ def review(params: ReviewQueryParams = Depends()):
             zone_clauses.append(
                 (ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*')
             )
-
-        zone_clause = reduce(operator.or_, zone_clauses)
-        clauses.append((zone_clause))
-
-    if reviewed == 0:
-        clauses.append((ReviewSegment.has_been_reviewed == False))
+        clauses.append(reduce(operator.or_, zone_clauses))
 
     if severity:
         clauses.append((ReviewSegment.severity == severity))
 
-    review = (
-        ReviewSegment.select()
+    # Join with UserReviewStatus to get per-user review status
+    review_query = (
+        ReviewSegment.select(
+            ReviewSegment.id,
+            ReviewSegment.camera,
+            ReviewSegment.start_time,
+            ReviewSegment.end_time,
+            ReviewSegment.severity,
+            ReviewSegment.thumb_path,
+            ReviewSegment.data,
+            fn.COALESCE(UserReviewStatus.has_been_reviewed, False).alias(
+                "has_been_reviewed"
+            ),
+        )
+        .left_outer_join(
+            UserReviewStatus,
+            on=(
+                (ReviewSegment.id == UserReviewStatus.review_segment)
+                & (UserReviewStatus.user_id == user_id)
+            ),
+        )
         .where(reduce(operator.and_, clauses))
-        .order_by(ReviewSegment.severity.asc())
+    )
+
+    # Filter unreviewed items without subquery
+    if reviewed == 0:
+        review_query = review_query.where(
+            (UserReviewStatus.has_been_reviewed == False)
+            | (UserReviewStatus.has_been_reviewed.is_null())
+        )
+
+    # Apply ordering and limit
+    review_query = (
+        review_query.order_by(ReviewSegment.severity.asc())
         .order_by(ReviewSegment.start_time.desc())
         .limit(limit)
         .dicts()
         .iterator()
     )
 
-    return JSONResponse(content=[r for r in review])
+    return JSONResponse(content=[r for r in review_query])
 
 
 @router.get("/review_ids", response_model=list[ReviewSegmentResponse])
@@ -134,7 +165,15 @@ def review_ids(ids: str):
 
 
 @router.get("/review/summary", response_model=ReviewSummaryResponse)
-def review_summary(params: ReviewSummaryQueryParams = Depends()):
+async def review_summary(
+    params: ReviewSummaryQueryParams = Depends(),
+    current_user: dict = Depends(get_current_user),
+):
+    if isinstance(current_user, JSONResponse):
+        return current_user
+
+    user_id = current_user["username"]
+
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
     month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).timestamp()
@@ -160,10 +199,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
                 | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
-
-        label_clause = reduce(operator.or_, label_clauses)
-        clauses.append((label_clause))
-
+        clauses.append(reduce(operator.or_, label_clauses))
     if zones != "all":
         # use matching so segments with multiple zones
         # still match on a search where any zone matches
@@ -172,21 +208,20 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
 
         for zone in filtered_zones:
             zone_clauses.append(
-                (ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*')
+                ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*'
             )
+        clauses.append(reduce(operator.or_, zone_clauses))
 
-        zone_clause = reduce(operator.or_, zone_clauses)
-        clauses.append((zone_clause))
-
-    last_24 = (
+    last_24_query = (
         ReviewSegment.select(
             fn.SUM(
                 Case(
                     None,
                     [
                         (
-                            (ReviewSegment.severity == SeverityEnum.alert),
-                            ReviewSegment.has_been_reviewed,
+                            (ReviewSegment.severity == SeverityEnum.alert)
+                            & (UserReviewStatus.has_been_reviewed == True),
+                            1,
                         )
                     ],
                     0,
@@ -197,8 +232,9 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == SeverityEnum.detection),
-                            ReviewSegment.has_been_reviewed,
+                            (ReviewSegment.severity == SeverityEnum.detection)
+                            & (UserReviewStatus.has_been_reviewed == True),
+                            1,
                         )
                     ],
                     0,
@@ -228,6 +264,13 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     0,
                 )
             ).alias("total_detection"),
+        )
+        .left_outer_join(
+            UserReviewStatus,
+            on=(
+                (ReviewSegment.id == UserReviewStatus.review_segment)
+                & (UserReviewStatus.user_id == user_id)
+            ),
         )
         .where(reduce(operator.and_, clauses))
         .dicts()
@@ -248,14 +291,12 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
 
         for label in filtered_labels:
             label_clauses.append(
-                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+                ReviewSegment.data["objects"].cast("text") % f'*"{label}"*'
             )
-
-        label_clause = reduce(operator.or_, label_clauses)
-        clauses.append((label_clause))
+        clauses.append(reduce(operator.or_, label_clauses))
 
     day_in_seconds = 60 * 60 * 24
-    last_month = (
+    last_month_query = (
         ReviewSegment.select(
             fn.strftime(
                 "%Y-%m-%d",
@@ -271,8 +312,9 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == SeverityEnum.alert),
-                            ReviewSegment.has_been_reviewed,
+                            (ReviewSegment.severity == SeverityEnum.alert)
+                            & (UserReviewStatus.has_been_reviewed == True),
+                            1,
                         )
                     ],
                     0,
@@ -283,8 +325,9 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == SeverityEnum.detection),
-                            ReviewSegment.has_been_reviewed,
+                            (ReviewSegment.severity == SeverityEnum.detection)
+                            & (UserReviewStatus.has_been_reviewed == True),
+                            1,
                         )
                     ],
                     0,
@@ -315,28 +358,59 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                 )
             ).alias("total_detection"),
         )
+        .left_outer_join(
+            UserReviewStatus,
+            on=(
+                (ReviewSegment.id == UserReviewStatus.review_segment)
+                & (UserReviewStatus.user_id == user_id)
+            ),
+        )
         .where(reduce(operator.and_, clauses))
         .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds,
+            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds
         )
         .order_by(ReviewSegment.start_time.desc())
     )
 
     data = {
-        "last24Hours": last_24,
+        "last24Hours": last_24_query,
     }
 
-    for e in last_month.dicts().iterator():
+    for e in last_month_query.dicts().iterator():
         data[e["day"]] = e
 
     return JSONResponse(content=data)
 
 
 @router.post("/reviews/viewed", response_model=GenericResponse)
-def set_multiple_reviewed(body: ReviewModifyMultipleBody):
-    ReviewSegment.update(has_been_reviewed=True).where(
-        ReviewSegment.id << body.ids
-    ).execute()
+async def set_multiple_reviewed(
+    body: ReviewModifyMultipleBody,
+    current_user: dict = Depends(get_current_user),
+):
+    if isinstance(current_user, JSONResponse):
+        return current_user
+
+    user_id = current_user["username"]
+
+    for review_id in body.ids:
+        try:
+            review_status = UserReviewStatus.get(
+                UserReviewStatus.user_id == user_id,
+                UserReviewStatus.review_segment == review_id,
+            )
+            # If it exists and isn’t reviewed, update it
+            if not review_status.has_been_reviewed:
+                review_status.has_been_reviewed = True
+                review_status.save()
+        except DoesNotExist:
+            try:
+                UserReviewStatus.create(
+                    user_id=user_id,
+                    review_segment=ReviewSegment.get(id=review_id),
+                    has_been_reviewed=True,
+                )
+            except (DoesNotExist, IntegrityError):
+                pass
 
     return JSONResponse(
         content=({"success": True, "message": "Reviewed multiple items"}),
@@ -389,6 +463,9 @@ def delete_reviews(body: ReviewModifyMultipleBody):
     # delete recordings and review segments
     Recordings.delete().where(Recordings.id << recording_ids).execute()
     ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
+    UserReviewStatus.delete().where(
+        UserReviewStatus.review_segment << list_of_ids
+    ).execute()
 
     return JSONResponse(
         content=({"success": True, "message": "Deleted review items."}), status_code=200
@@ -502,7 +579,15 @@ def get_review(review_id: str):
 
 
 @router.delete("/review/{review_id}/viewed", response_model=GenericResponse)
-def set_not_reviewed(review_id: str):
+async def set_not_reviewed(
+    review_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    if isinstance(current_user, JSONResponse):
+        return current_user
+
+    user_id = current_user["username"]
+
     try:
         review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
     except DoesNotExist:
@@ -513,8 +598,15 @@ def set_not_reviewed(review_id: str):
             status_code=404,
         )
 
-    review.has_been_reviewed = False
-    review.save()
+    try:
+        user_review = UserReviewStatus.get(
+            UserReviewStatus.user_id == user_id,
+            UserReviewStatus.review_segment == review,
+        )
+        # we could update here instead of delete if we need
+        user_review.delete_instance()
+    except DoesNotExist:
+        pass  # Already effectively "not reviewed"
 
     return JSONResponse(
         content=({"success": True, "message": f"Set Review {review_id} as not viewed"}),

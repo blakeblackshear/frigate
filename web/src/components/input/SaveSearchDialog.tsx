@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 type SaveSearchDialogProps = {
   existingNames: string[];
@@ -26,15 +27,22 @@ export function SaveSearchDialog({
   onClose,
   onSave,
 }: SaveSearchDialogProps) {
+  const { t } = useTranslation(["components/dialog"]);
+
   const [searchName, setSearchName] = useState("");
 
   const handleSave = () => {
     if (searchName.trim()) {
       onSave(searchName.trim());
       setSearchName("");
-      toast.success(`Search (${searchName.trim()}) has been saved.`, {
-        position: "top-center",
-      });
+      toast.success(
+        t("search.saveSearch.success", {
+          searchName: searchName.trim(),
+        }),
+        {
+          position: "top-center",
+        },
+      );
       onClose();
     }
   };
@@ -54,34 +62,36 @@ export function SaveSearchDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Save Search</DialogTitle>
+          <DialogTitle>{t("search.saveSearch.label")}</DialogTitle>
           <DialogDescription className="sr-only">
-            Provide a name for this saved search.
+            {t("search.saveSearch.desc")}
           </DialogDescription>
         </DialogHeader>
         <Input
           value={searchName}
           className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
-          placeholder="Enter a name for your search"
+          placeholder={t("search.saveSearch.placeholder")}
         />
         {overwrite && (
           <div className="ml-1 text-sm text-danger">
-            {searchName} already exists. Saving will overwrite the existing
-            value.
+            {t("search.saveSearch.overwrite", { searchName })}
           </div>
         )}
         <DialogFooter>
-          <Button aria-label="Cancel" onClick={onClose}>
-            Cancel
+          <Button
+            aria-label={t("button.cancel", { ns: "common" })}
+            onClick={onClose}
+          >
+            {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             onClick={handleSave}
             variant="select"
             className="mb-2 md:mb-0"
-            aria-label="Save this search"
+            aria-label={t("search.saveSearch.button.save.label")}
           >
-            Save
+            {t("button.save", { ns: "common" })}
           </Button>
         </DialogFooter>
       </DialogContent>

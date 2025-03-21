@@ -333,7 +333,8 @@ export interface FrigateConfig {
 
   face_recognition: {
     enabled: boolean;
-    threshold: number;
+    detection_threshold: number;
+    recognition_threshold: number;
   };
 
   ffmpeg: {
@@ -390,6 +391,13 @@ export interface FrigateConfig {
     colormap: { [key: string]: [number, number, number] };
     attributes_map: { [key: string]: [string] };
     all_attributes: [string];
+    plus?: {
+      name: string;
+      id: string;
+      trainDate: string;
+      baseModel: string;
+      supportedDetectors: string[];
+    };
   };
 
   motion: Record<string, unknown> | null;
@@ -432,6 +440,10 @@ export interface FrigateConfig {
 
   plus: {
     enabled: boolean;
+  };
+
+  proxy: {
+    logout_url?: string;
   };
 
   record: {

@@ -305,6 +305,10 @@ Topic to adjust motion contour area for a camera. Expected value is an integer.
 
 Topic with current motion contour area for a camera. Published value is an integer.
 
+### `frigate/<camera_name>/review_status`
+
+Topic with current activity status of the camera. Possible values are `NONE`, `DETECTION`, or `ALERT`.
+
 ### `frigate/<camera_name>/ptz`
 
 Topic to send PTZ commands to camera.

@@ -34,8 +34,10 @@ import { debounce } from "lodash";
 import { isIOS, isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
 import { isInIframe } from "@/utils/isIFrame";
+import { useTranslation } from "react-i18next";
 
 function Logs() {
+  const { t } = useTranslation(["views/system"]);
   const [logService, setLogService] = useState<LogType>("frigate");
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const lazyLogWrapperRef = useRef<HTMLDivElement>(null);
@@ -47,8 +49,8 @@ function Logs() {
   const lastFetchedIndexRef = useRef(-1);
 
   useEffect(() => {
-    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
-  }, [logService]);
+    document.title = t("documentTitle.logs." + logService);
+  }, [logService, t]);
 
   useEffect(() => {
     if (tabsRef.current) {
@@ -104,13 +106,16 @@ function Logs() {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "An unknown error occurred";
-        toast.error(`Error fetching logs: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("logs.toast.error.fetchingLogsFailed", { errorMessage }),
+          {
+            position: "top-center",
+          },
+        );
       }
       return [];
     },
-    [logService, filterLines],
+    [logService, filterLines, t],
   );
 
   const fetchInitialLogs = useCallback(async () => {
@@ -132,13 +137,13 @@ function Logs() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred";
-      toast.error(`Error fetching logs: ${errorMessage}`, {
+      toast.error(t("logs.toast.error.fetchingLogsFailed", { errorMessage }), {
         position: "top-center",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [logService, filterLines, filterSeverity]);
+  }, [logService, filterLines, filterSeverity, t]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -203,10 +208,12 @@ function Logs() {
             error instanceof Error
               ? error.message
               : "An unknown error occurred";
-          toast.error(`Error while streaming logs: ${errorMessage}`);
+          toast.error(
+            t("logs.toast.error.whileStreamingLogs", { errorMessage }),
+          );
         }
       });
-  }, [logService, filterSeverity]);
+  }, [logService, filterSeverity, t]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -285,13 +292,13 @@ function Logs() {
       fetchInitialLogs()
         .then(() => {
           copy(logs.join("\n"));
-          toast.success("Copied logs to clipboard");
+          toast.success(t("logs.copy.success"));
         })
         .catch(() => {
-          toast.error("Could not copy logs to clipboard");
+          toast.error(t("logs.copy.error"));
         });
     }
-  }, [logs, fetchInitialLogs]);
+  }, [logs, fetchInitialLogs, t]);
 
   const handleDownloadLogs = useCallback(() => {
     axios
@@ -496,23 +503,25 @@ function Logs() {
         <div className="flex items-center gap-2">
           <Button
             className="flex items-center justify-between gap-2"
-            aria-label="Copy logs to clipboard"
+            aria-label={t("logs.copy.label")}
             size="sm"
             onClick={handleCopyLogs}
           >
             <FaCopy className="text-secondary-foreground" />
             <div className="hidden text-primary md:block">
-              Copy to Clipboard
+              {t("logs.copy.label")}
             </div>
           </Button>
           <Button
             className="flex items-center justify-between gap-2"
-            aria-label="Download logs"
+            aria-label={t("logs.download.label")}
             size="sm"
             onClick={handleDownloadLogs}
           >
             <FaDownload className="text-secondary-foreground" />
-            <div className="hidden text-primary md:block">Download</div>
+            <div className="hidden text-primary md:block">
+              {t("button.download", { ns: "common" })}
+            </div>
           </Button>
           <LogSettingsButton
             selectedLabels={filterSeverity}
@@ -527,8 +536,10 @@ function Logs() {
         <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
           <div className="col-span-3 lg:col-span-2">
             <div className="flex w-full flex-row items-center">
-              <div className="ml-1 min-w-16 capitalize lg:min-w-20">Type</div>
-              <div className="mr-3">Timestamp</div>
+              <div className="ml-1 min-w-16 capitalize lg:min-w-20">
+                {t("logs.type.label")}
+              </div>
+              <div className="mr-3">{t("logs.type.timestamp")}</div>
             </div>
           </div>
           <div
@@ -537,7 +548,7 @@ function Logs() {
               logService == "frigate" ? "col-span-2" : "col-span-1",
             )}
           >
-            Tag
+            {t("logs.type.tag")}
           </div>
           <div
             className={cn(
@@ -547,7 +558,7 @@ function Logs() {
                 : "md:col-span-8 lg:col-span-9",
             )}
           >
-            <div className="flex flex-1">Message</div>
+            <div className="flex flex-1">{t("logs.type.message")}</div>
           </div>
         </div>
 
@@ -566,9 +577,7 @@ function Logs() {
                         <TooltipTrigger>
                           <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
                         </TooltipTrigger>
-                        <TooltipContent>
-                          Logs are streaming from the server
-                        </TooltipContent>
+                        <TooltipContent>{t("logs.tips")}</TooltipContent>
                       </Tooltip>
                     </div>
                   )}

@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
+from pathlib import Path as FilePath
 from typing import Any, Optional
 
 import aiofiles
@@ -79,12 +80,16 @@ def go2rtc_streams():
 
 
 @router.get("/go2rtc/streams/{camera_name}")
-def go2rtc_camera_stream(camera_name: str):
+def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
     )
     if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
+        camera_config = request.app.frigate_config.cameras.get(camera_name)
+
+        if camera_config and camera_config.enabled:
+            logger.error("Failed to fetch streams from go2rtc")
+
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
@@ -173,6 +178,22 @@ def config(request: Request):
     config["model"]["colormap"] = config_obj.model.colormap
     config["model"]["all_attributes"] = config_obj.model.all_attributes
     config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
+
+    # Add model plus data if plus is enabled
+    if config["plus"]["enabled"]:
+        model_path = config.get("model", {}).get("path")
+        if model_path:
+            model_json_path = FilePath(model_path).with_suffix(".json")
+            try:
+                with open(model_json_path, "r") as f:
+                    model_plus_data = json.load(f)
+                config["model"]["plus"] = model_plus_data
+            except FileNotFoundError:
+                config["model"]["plus"] = None
+            except json.JSONDecodeError:
+                config["model"]["plus"] = None
+        else:
+            config["model"]["plus"] = None
 
     # use merged labelamp
     for detector_config in config["detectors"].values():

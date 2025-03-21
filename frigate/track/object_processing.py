@@ -172,6 +172,16 @@ class TrackedObjectProcessor(threading.Thread):
                         retain=True,
                     )
 
+                    if obj.obj_data.get("sub_label"):
+                        sub_label = obj.obj_data["sub_label"][0]
+
+                        if sub_label in self.config.model.all_attribute_logos:
+                            self.dispatcher.publish(
+                                f"{camera}/{sub_label}/snapshot",
+                                jpg_bytes,
+                                retain=True,
+                            )
+
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
 

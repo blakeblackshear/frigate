@@ -1,0 +1,113 @@
+{
+  "restart": {
+    "title": "你确定要重启 Frigate?",
+    "button": "重启",
+    "restarting": {
+      "title": "Frigate 正在重启",
+      "content": "该页面将会在 {{countdown}} 秒后自动刷新。",
+      "button": "强制刷新"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "提交至 Frigate+",
+        "desc": "您希望避开的地点中的物体不应被视为误报。若将其作为误报提交，可能会导致AI模型容易混淆相关物体的识别。"
+      },
+      "review": {
+        "true": {
+          "label": "为 Frigate Plus 确认此标签",
+          "true_one": "这是 {{label}}",
+          "true_other": "这是 {{label}}"
+        },
+        "false": {
+          "label": "不为 Frigate Plus 确认此标签",
+          "false_one": "这不是 {{label}}",
+          "false_other": "这不是 {{label}}"
+        },
+        "state": {
+          "submitted": "已提交"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "在历史中查看"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "从时间线选择",
+      "lastHour_one": "最后1小时",
+      "lastHour_other": "最后 {{count}} 小时",
+      "custom": "自定义",
+      "start": {
+        "title": "开始时间",
+        "label": "选择开始时间"
+      },
+      "end": {
+        "title": "结束时间",
+        "label": "选择结束时间"
+      }
+    },
+    "name": {
+      "placeholder": "导出项目的名字"
+    },
+    "select": "选择",
+    "export": "导出",
+    "selectOrExport": "选择或导出",
+    "toast": {
+      "success": "导出成功。进入 /exports 目录查看文件。",
+      "error": {
+        "failed": "导出失败：{{error}}",
+        "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
+        "noVaildTimeSelected": "未选择有效的时间范围"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "保存导出",
+      "previewExport": "预览导出"
+    }
+  },
+  "streaming": {
+    "label": "视频流",
+    "restreaming": {
+      "disabled": "此摄像头未启用视频流转发功能。",
+      "desc": {
+        "title": "为此摄像头设置 go2rtc，以获取额外的实时预览选项和音频支持。",
+        "readTheDocumentation": "阅读文档（英文） "
+      }
+    },
+    "showStats": {
+      "label": "显示视频流统计信息",
+      "desc": "启用后将在摄像头画面上叠加显示视频流统计信息。"
+    },
+    "debugView": "调试界面"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "保存搜索",
+      "desc": "请为此已保存的搜索提供一个名称。",
+      "placeholder": "请输入搜索名称",
+      "overwrite": "{{searchName}} 已存在。保存将覆盖现有值。",
+      "success": "搜索 ({{searchName}}) 已保存。",
+      "button": {
+        "save": {
+          "label": "保存此搜索"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "确认删除",
+      "desc": {
+        "selected": "您确定要删除与此审核项相关的所有录制视频吗？<br /><br />提示：按住 <em>Shift</em> 键点击删除可跳过此对话框。"
+      }
+    },
+    "button": {
+      "export": "导出",
+      "markAsReviewed": "标记为已审核",
+      "deleteNow": "立即删除"
+    }
+  }
+}

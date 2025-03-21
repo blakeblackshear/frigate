@@ -1,0 +1,156 @@
+{
+  "documentTitle": {
+    "cameras": "摄像头统计 - Frigate",
+    "storage": "存储统计 - Frigate",
+    "general": "常规统计 - Frigate",
+    "features": "功能统计 - Frigate",
+    "logs": {
+      "frigate": "Frigate 日志 - Frigate",
+      "go2rtc": "Go2RTC 日志 - Frigate",
+      "nginx": "Nginx 日志 - Frigate"
+    }
+  },
+  "title": "系统",
+  "metrics": "系统指标",
+  "logs": {
+    "download": {
+      "label": "下载日志"
+    },
+    "copy": {
+      "label": "复制到剪贴板",
+      "success": "已复制日志到剪贴板",
+      "error": "无法复制日志到剪贴板"
+    },
+    "type": {
+      "label": "类型",
+      "timestamp": "时间戳",
+      "tag": "标签",
+      "message": "消息"
+    },
+    "tips": "日志正在从服务器流式传输",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "获取日志出错：{{errorMessage}}",
+        "whileStreamingLogs": "流式传输日志时出错：{{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "常规",
+    "detector": {
+      "title": "探测器",
+      "inferenceSpeed": "探测器推理速度",
+      "cpuUsage": "探测器CPU使用率",
+      "memoryUsage": "探测器内存使用率"
+    },
+    "hardwareInfo": {
+      "title": "硬件信息",
+      "gpuUsage": "GPU使用率",
+      "gpuMemory": "GPU显存",
+      "gpuEncoder": "GPU编码",
+      "gpuDecoder": "GPU解码",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo 输出",
+          "returnCode": "返回代码：{{code}}",
+          "processOutput": "进程输出：",
+          "processError": "进程错误："
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI 输出",
+          "name": "名称：{{name}}",
+          "driver": "驱动：{{driver}}",
+          "cudaComputerCapability": "CUDA计算能力：{{cuda_compute}}",
+          "vbios": "VBios信息：{{vbios}}"
+        },
+        "closeInfo": {
+          "label": "关闭GPU信息"
+        },
+        "copyInfo": {
+          "label": "复制GPU信息"
+        },
+        "toast": {
+          "success": "已复制GPU信息到剪贴板"
+        }
+      }
+    },
+    "otherProcesses": {
+      "title": "其他进程",
+      "processCpuUsage": "主进程CPU使用率",
+      "processMemoryUsage": "主进程内存使用率"
+    }
+  },
+  "storage": {
+    "title": "存储",
+    "overview": "概览",
+    "recordings": {
+      "title": "录制内容",
+      "tips": "该值表示 Frigate 数据库中录制内容所使用的总存储空间。Frigate 不会追踪磁盘上所有文件的存储使用情况。",
+      "earliestRecording": "最早的可用录制："
+    },
+    "cameraStorage": {
+      "title": "摄像头存储",
+      "camera": "摄像头",
+      "unusedStorageInformation": "未使用存储信息",
+      "storageUsed": "存储使用",
+      "percentageOfTotalUsed": "总使用率",
+      "bandwidth": "带宽",
+      "unused": {
+        "title": "未使用",
+        "tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
+      }
+    }
+  },
+  "cameras": {
+    "title": "摄像头",
+    "overview": "概览",
+    "info": {
+      "cameraProbeInfo": "{{camera}} 的摄像头信息",
+      "streamDataFromFFPROBE": "流数据信息通过<code>ffprobe</code>获取。",
+      "fetching": "正在获取摄像头数据",
+      "stream": "视频流{{idx}}",
+      "video": "视频：",
+      "codec": "编解码器：",
+      "resolution": "分辨率：",
+      "fps": "帧率：",
+      "unknown": "未知",
+      "audio": "音频：",
+      "error": "错误：{{error}}",
+      "tips": {
+        "title": "摄像头信息"
+      }
+    },
+    "framesAndDetections": "帧数/检测次数",
+    "label": {
+      "camera": "摄像头",
+      "detect": "探测",
+      "skipped": "跳过",
+      "ffmpeg": "ffmpeg编码器",
+      "capture": "捕获"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "已复制探测数据到剪贴板。"
+      },
+      "error": {
+        "unableToProbeCamera": "无法探测摄像头：{{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "最后刷新时间：",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} 的 FFMPEG CPU 使用率较高（{{ffmpegAvg}}%）",
+    "detectHighCpuUsage": "{{camera}} 的 探测 CPU 使用率较高（{{detectAvg}}%）",
+    "healthy": "系统运行正常",
+    "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）"
+  },
+  "features": {
+    "title": "功能",
+    "embeddings": {
+      "image_embedding_speed": "图像特征提取速度",
+      "face_embedding_speed": "人脸特征提取速度",
+      "plate_recognition_speed": "车牌识别速度",
+      "text_embedding_speed": "文本编码速度"
+    }
+  }
+}

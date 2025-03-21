@@ -115,10 +115,10 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             x:x2,
         ]
 
-        cv2.imwrite("/media/frigate/test_class.png", input)
+        if input.shape != (224, 224):
+            input = cv2.resize(input, (224, 224))
 
         input = np.expand_dims(input, axis=0)
-
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
@@ -144,7 +144,8 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             return
 
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label, (id, self.labelmap[best_id], score)
+            EventMetadataTypeEnum.sub_label,
+            (obj_data["id"], self.labelmap[best_id], score),
         )
         self.detected_birds[obj_data["id"]] = score
 

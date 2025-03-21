@@ -50,6 +50,7 @@ export type SearchResult = {
     score: number;
     sub_label_score?: number;
     region: number[];
+    attributes?: [{ box: number[]; label: string; score: number }];
     box: number[];
     area: number;
     ratio: number;

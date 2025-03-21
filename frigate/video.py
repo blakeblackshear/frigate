@@ -113,8 +113,10 @@ def capture_frames(
     def get_enabled_state():
         """Fetch the latest enabled state from ZMQ."""
         _, config_data = config_subscriber.check_for_update()
+
         if config_data:
-            return config_data.enabled
+            config.enabled = config_data.enabled
+
         return config.enabled
 
     while not stop_event.is_set():

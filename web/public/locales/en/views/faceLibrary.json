@@ -1,0 +1,52 @@
+{
+  "description": {
+    "addFace": "Walk through adding a new face to the Face Library."
+  },
+  "details": {
+    "person": "Person",
+    "confidence": "Confidence",
+    "face": "Face Details",
+    "faceDesc": "Details for the face and associated object",
+    "timestamp": "Timestamp"
+  },
+  "documentTitle": "Face Library - Frigate",
+  "uploadFaceImage": {
+    "title": "Upload Face Image",
+    "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Create Face Library",
+    "desc": "Create a new face library",
+    "nextSteps": "It is recommended to use the Train tab to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle."
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Select train"
+  },
+  "selectItem": "Select {{item}}",
+  "button": {
+    "deleteFaceAttempts": "Delete Face Attempts",
+    "addFace": "Add Face",
+    "uploadImage": "Upload Image",
+    "reprocessFace": "Reprocess Face"
+  },
+  "readTheDocs": "Read the documentation to view more details on refining images for the Face Library",
+  "trainFaceAs": "Train Face as:",
+  "trainFace": "Train Face",
+  "toast": {
+    "success": {
+      "uploadedImage": "Successfully uploaded image.",
+      "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
+      "deletedFace": "Successfully deleted face.",
+      "trainedFace": "Successfully trained face.",
+      "updatedFaceScore": "Successfully updated face score."
+    },
+    "error": {
+      "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
+      "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
+      "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
+      "trainFailed": "Failed to train: {{errorMessage}}",
+      "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
+    }
+  }
+}
