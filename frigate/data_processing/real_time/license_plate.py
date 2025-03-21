@@ -36,7 +36,10 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         super().__init__(config, metrics)
 
     def process_frame(
-        self, obj_data: dict[str, any], frame: np.ndarray, dedicated_lpr: bool = None
+        self,
+        obj_data: dict[str, any],
+        frame: np.ndarray,
+        dedicated_lpr: bool | None = False,
     ):
         """Look for license plates in image."""
         self.lpr_process(obj_data, frame, dedicated_lpr)

@@ -108,7 +108,7 @@ class CameraConfig(FrigateBaseModel):
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
-    type: str = Field(default=CameraTypeEnum.generic, title="Camera Type")
+    type: CameraTypeEnum = Field(default=CameraTypeEnum.generic, title="Camera Type")
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )

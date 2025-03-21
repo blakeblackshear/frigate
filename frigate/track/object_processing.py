@@ -501,6 +501,21 @@ class TrackedObjectProcessor(threading.Thread):
             )
         )
 
+        self.ongoing_manual_events[event_id] = camera_name
+        self.detection_publisher.publish(
+            (
+                camera_name,
+                frame_time,
+                {
+                    "state": ManualEventState.start,
+                    "label": f"{label}: {sub_label}" if sub_label else label,
+                    "event_id": event_id,
+                    "end_time": None,
+                },
+            ),
+            DetectionTypeEnum.lpr.value,
+        )
+
     def end_manual_event(self, payload: tuple) -> None:
         (event_id, end_time) = payload
 

@@ -897,7 +897,7 @@ class LicensePlateProcessingMixin:
         return event_id
 
     def lpr_process(
-        self, obj_data: dict[str, any], frame: np.ndarray, dedicated_lpr: bool = None
+        self, obj_data: dict[str, any], frame: np.ndarray, dedicated_lpr: bool = False
     ):
         """Look for license plates in image."""
         camera = obj_data if dedicated_lpr else obj_data["camera"]

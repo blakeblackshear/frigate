@@ -410,7 +410,11 @@ class CameraState:
             self.previous_frame_id = frame_name
 
     def save_manual_event_image(
-        self, frame: np.ndarray, event_id: str, label: str, draw: dict[str, list[dict]]
+        self,
+        frame: np.ndarray | None,
+        event_id: str,
+        label: str,
+        draw: dict[str, list[dict]],
     ) -> None:
         img_frame = frame if frame is not None else self.get_current_frame()
 
