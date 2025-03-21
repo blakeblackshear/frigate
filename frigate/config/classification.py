@@ -130,6 +130,7 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
     expire_time: int = Field(
         default=3,
         title="Expire plates not seen after number of seconds (for dedicated LPR cameras only).",
+        gt=0,
     )
     min_area: int = Field(
         default=1000,
