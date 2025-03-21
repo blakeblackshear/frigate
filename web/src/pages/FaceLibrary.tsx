@@ -579,7 +579,7 @@ function FaceAttempt({
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <TooltipTrigger>
                     <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
                   </TooltipTrigger>
