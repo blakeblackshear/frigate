@@ -658,6 +658,7 @@ cameras:
     # Events/Recordings are still viewable.
     enabled: True
     # Optional: camera type used for some Frigate features (default: shown below)
+    # Options are "generic" and "lpr"
     type: "generic"
     # Required: ffmpeg settings for the camera
     ffmpeg:

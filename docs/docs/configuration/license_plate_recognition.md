@@ -23,7 +23,7 @@ Users without a model that detects license plates can still run LPR. Frigate use
 
 :::note
 
-In the default mode, Frigate's LPR needs to first detect a `car` before it can recognize a license plate. If you're using a dedicated LPR camera and have a zoomed-in view where a `car` will not be detected, you can still run LPR, but the configuration parameters will differ from the default mode. See the Dedicated LPR Camera section below.
+In the default mode, Frigate's LPR needs to first detect a `car` before it can recognize a license plate. If you're using a dedicated LPR camera and have a zoomed-in view where a `car` will not be detected, you can still run LPR, but the configuration parameters will differ from the default mode. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section below.
 
 :::
 
@@ -134,7 +134,7 @@ Users with a dedicated LPR camera can run Frigate's LPR by specifying a camera t
 lpr:
   enabled: True
   min_area: 2000
-  match_distance: 1
+  min_plate_length: 4
 
 # Dedicated LPR camera configuration
 cameras:
@@ -201,7 +201,7 @@ If you are using the free model that ships with Frigate, you should _not_ add `l
 
 ### Can I run LPR without detecting `car` objects?
 
-In normal LPR mode, Frigate requires a `car` to be detected first before recognizing a license plate. If you have a dedicated LPR camera, you can change the camera `type` to `"lpr"` to use the Dedicated LPR Camera algorithm. This comes with important caveats, though. See the Dedicated LPR Cameras section above.
+In normal LPR mode, Frigate requires a `car` to be detected first before recognizing a license plate. If you have a dedicated LPR camera, you can change the camera `type` to `"lpr"` to use the Dedicated LPR Camera algorithm. This comes with important caveats, though. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section above.
 
 ### How can I improve detection accuracy?
 
