@@ -355,7 +355,7 @@ function LibrarySelector({
       <DropdownMenuContent>
         {trainImages.length > 0 && (
           <DropdownMenuItem
-            className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+            className="capitalize"
             aria-label={t("train.aria")}
             onClick={() => setPageToggle("train")}
           >
