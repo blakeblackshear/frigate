@@ -353,6 +353,15 @@ function LibrarySelector({
         <Button className="capitalize">{pageToggle}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        {trainImages.length > 0 && (
+          <DropdownMenuItem
+            className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
+            aria-label={t("train.aria")}
+            onClick={() => setPageToggle("train")}
+          >
+            <div>{t("train.title")}</div>
+          </DropdownMenuItem>
+        )}
         {Object.values(faces).map((face) => (
           <DropdownMenuItem
             className="capitalize"
