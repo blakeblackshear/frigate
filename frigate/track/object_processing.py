@@ -172,7 +172,7 @@ class TrackedObjectProcessor(threading.Thread):
                         retain=True,
                     )
 
-                    if obj.obj_data["sub_label"]:
+                    if obj.obj_data.get("sub_label"):
                         sub_label = obj.obj_data["sub_label"][0]
 
                         if sub_label in self.config.model.all_attribute_logos:
