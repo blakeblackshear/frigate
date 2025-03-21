@@ -15,12 +15,6 @@ As of Home Assistant Core 2023.6, Network Mounted Storage is supported for addon
 ### Initial Setup
 
 1. Stop the Frigate addon
-2. Update your [config](configuration/index.md) so the DB is stored in the /config directory by adding:
-
-```yaml
-database:
-  path: /config/frigate.db
-```
 
 ### Move current data
 

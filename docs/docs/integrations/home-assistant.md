@@ -97,13 +97,13 @@ services:
 
 If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
 
-| Addon Version                  | URL                                       |
-| ------------------------------ | ----------------------------------------- |
-| Frigate NVR                    | `http://ccab4aaf-frigate:5000`            |
-| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
-| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`       |
-| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
-| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
+| Addon Version              | URL                                       |
+| -------------------------- | ----------------------------------------- |
+| Frigate                    | `http://ccab4aaf-frigate:5000`            |
+| Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
+| Frigate Beta               | `http://ccab4aaf-frigate-beta:5000`       |
+| Frigate Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
+| Frigate HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
 
 ### Frigate running on a separate machine
 

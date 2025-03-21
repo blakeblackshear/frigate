@@ -281,18 +281,29 @@ HassOS users can install via the addon repository.
 2. Add https://github.com/blakeblackshear/frigate-hass-addons
 3. Install your desired Frigate NVR Addon and navigate to it's page
 4. Setup your network configuration in the `Configuration` tab
-5. (not for proxy addon) Create the file `frigate.yaml` in your `config` directory with your detailed Frigate configuration
+5. (not for proxy addon) Create the file `config.yaml` in your `/addon_configs/ccab4aaf_frigate` directory with your detailed Frigate configuration (see below for more details on how to access this directory)
 6. Start the addon container
 7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
 
-There are several versions of the addon available:
+There are several variants of the addon available:
 
-| Addon Version                  | Description                                                |
-| ------------------------------ | ---------------------------------------------------------- |
-| Frigate NVR                    | Current release with protection mode on                    |
-| Frigate NVR (Full Access)      | Current release with the option to disable protection mode |
-| Frigate NVR Beta               | Beta release with protection mode on                       |
-| Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
+| Addon Version              | Description                                                |
+| -------------------------- | ---------------------------------------------------------- |
+| Frigate                    | Current release with protection mode on                    |
+| Frigate (Full Access)      | Current release with the option to disable protection mode |
+| Frigate Beta               | Beta release with protection mode on                       |
+| Frigate Beta (Full Access) | Beta release with the option to disable protection mode    |
+| Frigate HailoRT Beta       | Beta release with HailoRT support                          |
+
+:::info Accessing Frigate's `/config` directory
+
+When running Frigate through the HA addon, the Frigate `/config` directory is mapped to a directory in the host inside `/addon_configs`. The directory name depends on the addon variant you are using. For example, if you are using the standard Frigate addon, the directory will be `/addon_configs/ccab4aaf_frigate`.
+
+**Whenever you see `/config` in the documentation, it refers to this directory.**
+
+If for example you use the [VS Code addon](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory.
+
+:::
 
 ## Kubernetes
 
