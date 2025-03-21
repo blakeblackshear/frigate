@@ -14,7 +14,7 @@ Depending on your system, these parameters may not be compatible. More informati
 ## Raspberry Pi 3/4
 
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
-If you are using the HA addon, you may need to use the full access variant and turn off `Protection mode` for hardware acceleration.
+If you are using the HassOS addon, you may need to use the full access variant and turn off `Protection mode` for hardware acceleration.
 
 ```yaml
 # if you want to decode a h264 stream
@@ -80,7 +80,7 @@ Or map in all the `/dev/video*` devices.
 
 :::note
 
-The default driver is `iHD`. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
+The default driver is `iHD`. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `config.yaml` for HassOS addon users](advanced.md#environment_vars).
 
 See [The Intel Docs](https://www.intel.com/content/www/us/en/support/articles/000005505/processors.html) to figure out what generation your CPU is.
 
@@ -191,7 +191,7 @@ VAAPI supports automatic profile selection so it will work automatically with bo
 
 :::note
 
-You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
+You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `config.yaml` for HassOS addon users](advanced.md#environment_vars).
 
 :::
 

@@ -3,9 +3,11 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
+For HassOS addon installations, the config file should be at `/addon_configs/ccab4aaf_frigate/config.yaml` ([click here to learn more on how to access this directory](#accessing-addon-config)).
 
-For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
+For all other installation types, the config file should be mapped to `/config/config.yaml` inside the container.
+
+It can be named `config.yaml` or `config.yml`, but if both files exist `config.yaml` will be preferred and `config.yml` will be ignored.
 
 It is recommended to start with a minimal configuration and add to it as described in [this guide](../guides/getting_started.md) and use the built in configuration editor in Frigate's UI which supports validation.
 
@@ -22,6 +24,14 @@ cameras:
           roles:
             - detect
 ```
+
+## Accessing the HassOS addon configuration directory {#accessing-addon-config}
+
+When running Frigate through the HassOS addon, the Frigate `/config` directory is mapped to a directory in the host inside `/addon_configs`. The directory name depends on the addon variant you are using. For example, if you are using the standard Frigate addon variant, the directory will be `/addon_configs/ccab4aaf_frigate`.
+
+**Whenever you see `/config` in the documentation, it refers to this directory.**
+
+If for example you use the [VS Code addon](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory.
 
 ## VSCode Configuration Schema
 
