@@ -734,7 +734,7 @@ class LicensePlateProcessingMixin:
             scale_x = img_w / resized_w
             scale_y = img_h / resized_h
         else:
-            resized_w = int(((img_w / img_h) * 512) // 4 * 4)
+            resized_w = int(((img_w / img_h) * LPR_EMBEDDING_SIZE) // 4 * 4)
             resized_h = LPR_EMBEDDING_SIZE
             x_offset = (LPR_EMBEDDING_SIZE - resized_w) // 2
             y_offset = (LPR_EMBEDDING_SIZE - resized_h) // 2
@@ -886,7 +886,7 @@ class LicensePlateProcessingMixin:
             (
                 now,
                 camera,
-                "license_plate",
+                "car",
                 event_id,
                 True,
                 plate_score,
