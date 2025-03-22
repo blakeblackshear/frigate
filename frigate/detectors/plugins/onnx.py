@@ -11,8 +11,8 @@ from frigate.detectors.detector_config import (
 )
 from frigate.util.model import (
     get_ort_providers,
-    post_process_rfdetr,
     post_process_dfine,
+    post_process_rfdetr,
     post_process_yolov9,
 )
 

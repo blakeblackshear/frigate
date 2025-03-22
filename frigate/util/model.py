@@ -95,7 +95,6 @@ def post_process_rfdetr(tensor_output: list[np.ndarray, np.ndarray]) -> np.ndarr
             bbox[3],
             bbox[2],
         ]
-        # print(f"found a detection {detections[i]}")
 
     return detections
 
