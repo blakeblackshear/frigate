@@ -3,7 +3,7 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant Add-on installations, the config file should be at `/addon_configs/ccab4aaf_frigate/config.yaml` ([click here to learn more on how to access this directory](#accessing-add-on-config)).
+For Home Assistant Add-on installations, the config file should be at `/addon_configs/<addon_directory>/config.yaml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](#accessing-add-on-config-dir).
 
 For all other installation types, the config file should be mapped to `/config/config.yaml` inside the container.
 
@@ -25,13 +25,21 @@ cameras:
             - detect
 ```
 
-## Accessing Frigate `/config` directory for the Home Assistant Add-on  {#accessing-add-on-config}
+## Accessing the Home Assistant Add-on configuration directory {#accessing-add-on-config-dir}
 
-When running Frigate through the HA Add-on, the Frigate `/config` directory is mapped to a directory in the host inside `/addon_configs`. The directory name depends on the Add-on variant you are using. For example, if you are using the standard Frigate Add-on variant, the directory will be `/addon_configs/ccab4aaf_frigate`.
+When running Frigate through the HA Add-on, the Frigate `/config` directory is mapped to `/addon_configs/<addon_directory>` in the host, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running.
+
+| Add-on Variant             | Configuration directory                      |
+| -------------------------- | -------------------------------------------- |
+| Frigate                    | `/addon_configs/ccab4aaf_frigate`            |
+| Frigate (Full Access)      | `/addon_configs/ccab4aaf_frigate_fa`         |
+| Frigate Beta               | `/addon_configs/ccab4aaf_frigate_beta`       |
+| Frigate Beta (Full Access) | `/addon_configs/ccab4aaf_frigate_fa_beta`    |
+| Frigate HailoRT Beta       | `/addon_configs/ccab4aaf_frigate_hailo_beta` |
 
 **Whenever you see `/config` in the documentation, it refers to this directory.**
 
-If for example you use the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory.
+If for example you are running the standard Add-on variant and use the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory and edit the `config.yaml` file. You can also use the built-in file editor in the Frigate UI to edit the configuration file.
 
 ## VS Code Configuration Schema
 

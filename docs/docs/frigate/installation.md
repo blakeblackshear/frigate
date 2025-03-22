@@ -276,12 +276,12 @@ See [the network storage guide](/guides/ha_network_storage.md) for instructions 
 
 Home Assistant OS users can install via the Add-on repository.
 
-1. Navigate to Supervisor > Add-on Store > Repositories
+1. In Home Assistant, navigate to _Settings_ > _Add-ons_ > _Add-on Store_ > _Repositories_
 2. Add `https://github.com/blakeblackshear/frigate-hass-addons`
-3. Install your desired Frigate Add-on and navigate to it's page
+3. Install the desired variant of the Frigate Add-on (see below)
 4. Setup your network configuration in the `Configuration` tab
-5. (not for the Proxy Add-on) Create the file `config.yaml` in your `/addon_configs/ccab4aaf_frigate` directory with your detailed Frigate configuration ([click here to learn more on how to access this directory](../configuration/index.md#accessing-add-on-config))
-6. Start the Add-on
+5. Start the Add-on
+6. Use the _Open Web UI_ button to access the Frigate UI, then click in the _cog icon_ > _Configuration editor_ and configure Frigate to your liking
 
 There are several variants of the Add-on available:
 
@@ -294,6 +294,8 @@ There are several variants of the Add-on available:
 | Frigate HailoRT Beta       | Beta release with HailoRT support                          |
 
 If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the Add-on. This is because the Frigate Add-on runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
+
+You can also edit the Frigate configuration file through the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yaml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](../configuration/index.md#accessing-add-on-config-dir).
 
 ## Kubernetes
 
