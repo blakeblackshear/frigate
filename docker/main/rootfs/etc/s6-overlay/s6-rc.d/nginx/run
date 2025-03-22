@@ -89,6 +89,15 @@ python3 /usr/local/nginx/get_tls_settings.py | \
     tempio  -template /usr/local/nginx/templates/listen.gotmpl \
             -out /usr/local/nginx/conf/listen.conf
 
+# disable open_file_cache on NFS filesystems
+# https://trac.nginx.org/nginx/ticket/478
+NFS_CLIPS_FS=`findmnt -n -o FSTYPE --target /media/frigate/clips`
+
+shopt -s nocasematch; if [[ "$NFS_CLIPS_FS" =~ ^nfs* ]]; then
+    echo "[INFO] NFS mount detected for /media/frigate/clips, disabling NGINX open_file_cache"
+    echo "open_file_cache off;" > /usr/local/nginx/conf/open_file_cache.conf
+fi
+
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
 exec \
