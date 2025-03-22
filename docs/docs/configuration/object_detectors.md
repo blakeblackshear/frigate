@@ -909,6 +909,16 @@ To export as ONNX:
 4. `x = RFDETRBase()`
 5. `x.export()`
 
+#### Additional Configuration
+
+The input tensor resolution can be customized:
+
+```python
+from rfdetr import RFDETRBase
+x = RFDETRBase(resolution=560)  # resolution must be a multiple of 56
+x.export()
+```
+
 ### Downloading YOLO-NAS Model
 
 You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
