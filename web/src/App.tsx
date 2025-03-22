@@ -48,6 +48,17 @@ function App() {
                   <Routes>
                     <Route
                       element={
+                        <ProtectedRoute
+                          requiredRoles={["admin"]}
+                          configGuard={false}
+                        />
+                      }
+                    >
+                      <Route path="/config" element={<ConfigEditor />} />
+                    </Route>
+
+                    <Route
+                      element={
                         <ProtectedRoute requiredRoles={["viewer", "admin"]} />
                       }
                     >
@@ -61,7 +72,6 @@ function App() {
                       element={<ProtectedRoute requiredRoles={["admin"]} />}
                     >
                       <Route path="/system" element={<System />} />
-                      <Route path="/config" element={<ConfigEditor />} />
                       <Route path="/logs" element={<Logs />} />
                       <Route path="/faces" element={<FaceLibrary />} />
                       <Route path="/playground" element={<UIPlayground />} />
