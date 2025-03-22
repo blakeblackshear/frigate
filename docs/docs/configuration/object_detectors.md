@@ -344,6 +344,12 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 [D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
 
+:::warning
+
+Currently D-FINE models only run on OpenVINO in CPU mode, GPUs currently fail to compile the model
+
+:::
+
 After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 
 ```yaml
@@ -653,7 +659,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
 
-```
+```yaml
 detectors:
   onnx:
     type: onnx
@@ -671,7 +677,7 @@ model:
 
 [D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
 
-After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
 
 ```yaml
 detectors:
@@ -898,10 +904,20 @@ Make sure you change the batch size to 1 before exporting.
 To export as ONNX:
 
 1. `pip3 install rfdetr`
-2. `python`
+2. `python3`
 3. `from rfdetr import RFDETRBase`
 4. `x = RFDETRBase()`
 5. `x.export()`
+
+#### Additional Configuration
+
+The input tensor resolution can be customized:
+
+```python
+from rfdetr import RFDETRBase
+x = RFDETRBase(resolution=560)  # resolution must be a multiple of 56
+x.export()
+```
 
 ### Downloading YOLO-NAS Model
 
