@@ -1,4 +1,3 @@
-version: "3"
 services:
   devcontainer:
     container_name: frigate-devcontainer

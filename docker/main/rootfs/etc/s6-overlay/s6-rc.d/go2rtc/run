@@ -61,7 +61,7 @@ if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
     echo "[INFO] Preparing new go2rtc config..."
 
     if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
-        # Running as a Home Assistant add-on, infer the IP address and port
+        # Running as a Home Assistant Add-on, infer the IP address and port
         get_ip_and_port_from_supervisor
     fi
 

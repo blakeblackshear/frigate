@@ -109,11 +109,11 @@ def get_jwt_secret() -> str:
         jwt_secret = (
             Path(os.path.join("/run/secrets", JWT_SECRET_ENV_VAR)).read_text().strip()
         )
-    # check for the addon options file
+    # check for the add-on options file
     elif os.path.isfile("/data/options.json"):
         with open("/data/options.json") as f:
             raw_options = f.read()
-        logger.debug("Using jwt secret from Home Assistant addon options file.")
+        logger.debug("Using jwt secret from Home Assistant Add-on options file.")
         options = json.loads(raw_options)
         jwt_secret = options.get("jwt_secret")
 

@@ -44,7 +44,7 @@ go2rtc:
 
 ### `environment_vars`
 
-This section can be used to set environment variables for those unable to modify the environment of the container (ie. within HassOS)
+This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS.
 
 Example:
 

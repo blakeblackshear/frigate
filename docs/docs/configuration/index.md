@@ -3,9 +3,11 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
+For Home Assistant Add-on installations, the config file should be at `/addon_configs/ccab4aaf_frigate/config.yaml` ([click here to learn more on how to access this directory](#accessing-add-on-config)).
 
-For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
+For all other installation types, the config file should be mapped to `/config/config.yaml` inside the container.
+
+It can be named `config.yaml` or `config.yml`, but if both files exist `config.yaml` will be preferred and `config.yml` will be ignored.
 
 It is recommended to start with a minimal configuration and add to it as described in [this guide](../guides/getting_started.md) and use the built in configuration editor in Frigate's UI which supports validation.
 
@@ -23,9 +25,17 @@ cameras:
             - detect
 ```
 
-## VSCode Configuration Schema
+## Accessing Frigate `/config` directory for the Home Assistant Add-on  {#accessing-add-on-config}
 
-VSCode supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VSCode and Frigate as an add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose the internal unauthenticated port `5000` when accessing the config from VSCode on another machine.
+When running Frigate through the HA Add-on, the Frigate `/config` directory is mapped to a directory in the host inside `/addon_configs`. The directory name depends on the Add-on variant you are using. For example, if you are using the standard Frigate Add-on variant, the directory will be `/addon_configs/ccab4aaf_frigate`.
+
+**Whenever you see `/config` in the documentation, it refers to this directory.**
+
+If for example you use the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) to browse your files, you can click _File_ > _Open folder..._ and navigate to `/addon_configs/ccab4aaf_frigate` to access the Frigate `/config` directory.
+
+## VS Code Configuration Schema
+
+VS Code supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VS Code and Frigate as an Add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose the internal unauthenticated port `5000` when accessing the config from VS Code on another machine.
 
 ## Environment Variable Substitution
 
@@ -65,10 +75,10 @@ genai:
 
 Here are some common starter configuration examples. Refer to the [reference config](./reference.md) for detailed information about all the config values.
 
-### Raspberry Pi Home Assistant Addon with USB Coral
+### Raspberry Pi Home Assistant Add-on with USB Coral
 
 - Single camera with 720p, 5fps stream for detect
-- MQTT connected to home assistant mosquitto addon
+- MQTT connected to the Home Assistant Mosquitto Add-on
 - Hardware acceleration for decoding video
 - USB Coral detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not

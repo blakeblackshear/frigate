@@ -69,7 +69,7 @@ body:
     attributes:
       label: Install method
       options:
-        - HassOS Addon
+        - Home Assistant Add-on
         - Docker Compose
         - Docker CLI
         - Proxmox via Docker

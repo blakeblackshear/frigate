@@ -77,7 +77,7 @@ At this point if motion is working as desired there is no reason to continue wit
 
 Once daytime motion detection is tuned, there is a chance that the settings will work well for motion detection during the night as well. If this is the case then the preferred settings can be written to the config file and left alone.
 
-However, if the preferred day settings do not work well at night it is recommended to use HomeAssistant or some other solution to automate changing the settings. That way completely separate sets of motion settings can be used for optimal day and night motion detection.
+However, if the preferred day settings do not work well at night it is recommended to use Home Assistant or some other solution to automate changing the settings. That way completely separate sets of motion settings can be used for optimal day and night motion detection.
 
 ## Tuning For Large Changes In Motion
 

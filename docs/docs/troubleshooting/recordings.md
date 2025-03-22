@@ -47,10 +47,9 @@ On linux, some helpful tools/commands in diagnosing would be:
 
 On modern linux kernels, the system will utilize some swap if enabled. Setting vm.swappiness=1 no longer means that the kernel will only swap in order to avoid OOM. To prevent any swapping inside a container, set allocations memory and memory+swap to be the same and disable swapping by setting the following docker/podman run parameters:
 
-**Compose example**
+**Docker Compose example**
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...

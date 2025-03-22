@@ -9,7 +9,7 @@ title: Getting started
 
 If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
-If you already have Frigate installed in Docker or as a Home Assistant addon, you can continue to [Configuring Frigate](#configuring-frigate) below.
+If you already have Frigate installed through Docker or through a Home Assistant Add-on, you can continue to [Configuring Frigate](#configuring-frigate) below.
 
 :::
 
@@ -81,7 +81,7 @@ Now you have a minimal Debian server that requires very little maintenance.
 
 ## Installing Frigate
 
-This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant addon or another way, you can continue to [Configuring Frigate](#configuring-frigate).
+This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant Add-on or another way, you can continue to [Configuring Frigate](#configuring-frigate).
 
 ### Setup directories
 
@@ -110,7 +110,6 @@ This `docker-compose.yml` file is just a starter for amd64 devices. You will nee
 `docker-compose.yml`
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     container_name: frigate
@@ -170,7 +169,6 @@ Here is an example configuration with hardware acceleration configured to work w
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...
@@ -199,7 +197,6 @@ By default, Frigate will use a single CPU detector. If you have a USB Coral, you
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...

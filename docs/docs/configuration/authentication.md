@@ -43,13 +43,13 @@ Restarting Frigate will reset the rate limits.
 
 If you are running Frigate behind a proxy, you will want to set `trusted_proxies` or these rate limits will apply to the upstream proxy IP address. This means that a brute force attack will rate limit login attempts from other devices and could temporarily lock you out of your instance. In order to ensure rate limits only apply to the actual IP address where the requests are coming from, you will need to list the upstream networks that you want to trust. These trusted proxies are checked against the `X-Forwarded-For` header when looking for the IP address where the request originated.
 
-If you are running a reverse proxy in the same docker compose file as Frigate, here is an example of how your auth config might look:
+If you are running a reverse proxy in the same Docker Compose file as Frigate, here is an example of how your auth config might look:
 
 ```yaml
 auth:
   failed_login_rate_limit: "1/second;5/minute;20/hour"
   trusted_proxies:
-    - 172.18.0.0/16 # <---- this is the subnet for the internal docker compose network
+    - 172.18.0.0/16 # <---- this is the subnet for the internal Docker Compose network
 ```
 
 ## JWT Token Secret
@@ -66,7 +66,7 @@ Frigate looks for a JWT token secret in the following order:
 
 1. An environment variable named `FRIGATE_JWT_SECRET`
 2. A docker secret named `FRIGATE_JWT_SECRET` in `/run/secrets/`
-3. A `jwt_secret` option from the Home Assistant Addon options
+3. A `jwt_secret` option from the Home Assistant Add-on options
 4. A `.jwt_secret` file in the config directory
 
 If no secret is found on startup, Frigate generates one and stores it in a `.jwt_secret` file in the config directory.

@@ -45,7 +45,7 @@ class PlusApi:
             self.key = (
                 Path(os.path.join("/run/secrets", PLUS_ENV_VAR)).read_text().strip()
             )
-        # check for the addon options file
+        # check for the add-on options file
         elif os.path.isfile("/data/options.json"):
             with open("/data/options.json") as f:
                 raw_options = f.read()
