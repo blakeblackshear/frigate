@@ -12,6 +12,7 @@ from frigate.detectors.detector_config import (
 from frigate.util.model import (
     get_ort_providers,
     post_process_dfine,
+    post_process_rfdetr,
     post_process_yolov9,
 )
 
@@ -73,7 +74,9 @@ class ONNXDetector(DetectionApi):
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
 
-        if self.onnx_model_type == ModelTypeEnum.yolonas:
+        if self.onnx_model_type == ModelTypeEnum.rfdetr:
+            return post_process_rfdetr(tensor_output)
+        elif self.onnx_model_type == ModelTypeEnum.yolonas:
             predictions = tensor_output[0]
 
             detections = np.zeros((20, 6), np.float32)

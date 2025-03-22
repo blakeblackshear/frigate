@@ -342,7 +342,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 #### D-FINE
 
-[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
 
 After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 
@@ -647,9 +647,29 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+#### RF-DETR
+
+[RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more informatoin on downloading the RF-DETR model for use in Frigate.
+
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
+
+```
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: rfdetr
+  width: 560
+  height: 560
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/rfdetr.onnx
+```
+
 #### D-FINE
 
-[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
 
 After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 
@@ -872,6 +892,16 @@ Model export has only been tested on Linux (or WSL2). Not all dependencies are i
 Make sure you change the batch size to 1 before exporting.
 
 :::
+
+### Download RF-DETR Model
+
+To export as ONNX:
+
+1. `pip3 install rfdetr`
+2. `python`
+3. `from rfdetr import RFDETRBase`
+4. `x = RFDETRBase()`
+5. `x.export()`
 
 ### Downloading YOLO-NAS Model
 
