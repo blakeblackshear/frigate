@@ -246,6 +246,7 @@ class NorfairTracker(ObjectTracker):
             "ptz"
             if self.camera_config.onvif.autotracking.enabled_in_config
             and object_type in self.camera_config.onvif.autotracking.track
+            and object_type in self.ptz_object_type_configs.keys()
             else "static"
         )
         if object_type in self.trackers:
