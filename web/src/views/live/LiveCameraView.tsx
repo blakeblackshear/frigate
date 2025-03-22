@@ -160,7 +160,7 @@ export default function LiveCameraView({
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    (cameraEnabled && isRestreamed) ? `go2rtc/streams/${streamName}` : null,
+    cameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
@@ -194,8 +194,6 @@ export default function LiveCameraView({
       ) != undefined
     );
   }, [cameraMetadata]);
-
-
 
   // click overlay for ptzs
 
