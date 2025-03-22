@@ -33,11 +33,12 @@ class InputDTypeEnum(str, Enum):
 
 
 class ModelTypeEnum(str, Enum):
+    dfine = "dfine"
+    rfdetr = "rfdetr"
     ssd = "ssd"
     yolox = "yolox"
     yolov9 = "yolov9"
     yolonas = "yolonas"
-    dfine = "dfine"
     yologeneric = "yolo-generic"
 
 
