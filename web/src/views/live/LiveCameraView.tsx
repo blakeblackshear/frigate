@@ -142,8 +142,11 @@ export default function LiveCameraView({
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
 
-  // supported features
+  // camera enabled state
+  const { payload: enabledState } = useEnabledState(camera.name);
+  const cameraEnabled = enabledState === "ON";
 
+  // supported features
   const [streamName, setStreamName] = usePersistence<string>(
     `${camera.name}-stream`,
     Object.values(camera.live.streams)[0],
@@ -157,7 +160,7 @@ export default function LiveCameraView({
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    isRestreamed ? `go2rtc/streams/${streamName}` : null,
+    cameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
@@ -191,10 +194,6 @@ export default function LiveCameraView({
       ) != undefined
     );
   }, [cameraMetadata]);
-
-  // camera enabled state
-  const { payload: enabledState } = useEnabledState(camera.name);
-  const cameraEnabled = enabledState === "ON";
 
   // click overlay for ptzs
 
