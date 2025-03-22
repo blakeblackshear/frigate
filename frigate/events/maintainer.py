@@ -278,6 +278,13 @@ class EventProcessor(threading.Thread):
                     "top_score": event_data["score"],
                 },
             }
+            if event_data.get("recognized_license_plate") is not None:
+                event[Event.data]["recognized_license_plate"] = event_data[
+                    "recognized_license_plate"
+                ]
+                event[Event.data]["recognized_license_plate_score"] = event_data[
+                    "score"
+                ]
             Event.insert(event).execute()
         elif event_type == EventStateEnum.end:
             event = {

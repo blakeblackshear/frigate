@@ -15,6 +15,8 @@ class EventMetadataTypeEnum(str, Enum):
     regenerate_description = "regenerate_description"
     sub_label = "sub_label"
     recognized_license_plate = "recognized_license_plate"
+    lpr_event_create = "lpr_event_create"
+    save_lpr_snapshot = "save_lpr_snapshot"
 
 
 class EventMetadataPublisher(Publisher):

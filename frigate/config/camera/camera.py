@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import Optional
 
 from pydantic import Field, PrivateAttr
@@ -40,6 +41,11 @@ from .ui import CameraUiConfig
 from .zone import ZoneConfig
 
 __all__ = ["CameraConfig"]
+
+
+class CameraTypeEnum(str, Enum):
+    generic = "generic"
+    lpr = "lpr"
 
 
 class CameraConfig(FrigateBaseModel):
@@ -102,6 +108,7 @@ class CameraConfig(FrigateBaseModel):
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
+    type: CameraTypeEnum = Field(default=CameraTypeEnum.generic, title="Camera Type")
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )

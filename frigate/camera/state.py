@@ -409,9 +409,13 @@ class CameraState:
             self.previous_frame_id = frame_name
 
     def save_manual_event_image(
-        self, event_id: str, label: str, draw: dict[str, list[dict]]
+        self,
+        frame: np.ndarray | None,
+        event_id: str,
+        label: str,
+        draw: dict[str, list[dict]],
     ) -> None:
-        img_frame = self.get_current_frame()
+        img_frame = frame if frame is not None else self.get_current_frame()
 
         # write clean snapshot if enabled
         if self.camera_config.snapshots.clean_copy:

@@ -35,9 +35,14 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics)
 
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
+    def process_frame(
+        self,
+        obj_data: dict[str, any],
+        frame: np.ndarray,
+        dedicated_lpr: bool | None = False,
+    ):
         """Look for license plates in image."""
-        self.lpr_process(obj_data, frame)
+        self.lpr_process(obj_data, frame, dedicated_lpr)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
