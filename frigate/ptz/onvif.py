@@ -86,7 +86,11 @@ class OnvifController:
 
     async def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
-        await onvif.update_xaddrs()
+        try:
+            await onvif.update_xaddrs()
+        except Exception as e:
+            logger.error(f"Onvif connection failed for {camera_name}: {e}")
+            return False
 
         # create init services
         media: ONVIFService = await onvif.create_media_service()
