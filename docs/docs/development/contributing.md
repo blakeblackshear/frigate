@@ -17,15 +17,15 @@ From here, follow the guides for:
 - [Web Interface](#web-interface)
 - [Documentation](#documentation)
 
-### Frigate Home Assistant Addon
+### Frigate Home Assistant Add-on
 
-This repository holds the Home Assistant Addon, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
+This repository holds the Home Assistant Add-on, for use with Home Assistant OS and compatible installations. It is the piece that allows you to run Frigate from your Home Assistant Supervisor tab.
 
 Fork [blakeblackshear/frigate-hass-addons](https://github.com/blakeblackshear/frigate-hass-addons) to your own Github profile, then clone the forked repo to your local machine.
 
 ### Frigate Home Assistant Integration
 
-This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you run that with the [addon](#frigate-home-assistant-addon) or in a separate Docker instance.
+This repository holds the custom integration that allows your Home Assistant installation to automatically create entities for your Frigate instance, whether you are running Frigate as a standalone Docker container or as a [Home Assistant Add-on](#frigate-home-assistant-add-on).
 
 Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshear/frigate-hass-integration) to your own GitHub profile, then clone the forked repo to your local machine.
 
@@ -77,14 +77,14 @@ Create and place these files in a `debug` folder in the root of the repo. This i
 
 #### 4. Run Frigate from the command line
 
-VSCode will start the docker compose file for you and open a terminal window connected to `frigate-dev`.
+VS Code will start the Docker Compose file for you and open a terminal window connected to `frigate-dev`.
 
 - Run `python3 -m frigate` to start the backend.
 - In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm run dev` to start the frontend.
 
 #### 5. Teardown
 
-After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
+After closing VS Code, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
 ### Testing
 

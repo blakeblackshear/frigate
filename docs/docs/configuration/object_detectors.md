@@ -486,7 +486,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri  \
     ...
 ```
 
-When using docker compose:
+When using Docker Compose:
 
 ```yaml
 services:
@@ -518,7 +518,7 @@ $ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
     ...
 ```
 
-When using docker compose:
+When using Docker Compose:
 
 ```yaml
 services:
