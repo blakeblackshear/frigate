@@ -93,7 +93,7 @@ services:
 
 ### Home Assistant Add-on
 
-If you are using Home Assistant Add-on, the URL should be one of the following depending on which add-on variant you are using. Note that if you are using the Proxy Add-on, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
+If you are using Home Assistant Add-on, the URL should be one of the following depending on which Add-on variant you are using. Note that if you are using the Proxy Add-on, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
 
 | Add-on Variant             | URL                                       |
 | -------------------------- | ----------------------------------------- |

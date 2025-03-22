@@ -8,7 +8,7 @@ function migrate_addon_config_dir() {
     local home_assistant_config_dir="/homeassistant"
 
     if ! mountpoint --quiet "${home_assistant_config_dir}"; then
-        # Not running as a Home Assistant add-on
+        # Not running as a Home Assistant Add-on
         return 0
     fi
 
@@ -99,7 +99,7 @@ function migrate_addon_config_dir() {
     echo "[INFO] Migrating config file from '${old_config_file}' to '${new_config_file}'..."
     mv -vf "${old_config_file}" "${new_config_file}"
 
-    echo "[INFO] Migration from Home Assistant config dir to add-on config dir completed."
+    echo "[INFO] Migration from Home Assistant config dir to Add-on config dir completed."
 }
 
 function migrate_db_from_media_to_config() {
