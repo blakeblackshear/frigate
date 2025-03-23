@@ -133,8 +133,8 @@ Users with a dedicated LPR camera can run Frigate's LPR by specifying a camera t
 # LPR global configuration
 lpr:
   enabled: True
-  min_area: 2000
   min_plate_length: 4
+  detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration
 cameras:
@@ -146,7 +146,7 @@ cameras:
     ffmpeg: ...
     detect:
       enabled: False # optional, disable Frigate's standard object detection pipeline
-      fps: 5
+      fps: 5 # keep this at 5, higher values are unnecessary for dedicated LPR mode and could overwhelm the detector
       width: 1920
       height: 1080
     motion:
