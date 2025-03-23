@@ -31,7 +31,7 @@ function migrate_addon_config_dir() {
         # Nothing to migrate
         return 0
     fi
-    unset old_config_file_yaml new_config_file new_config_file_yaml
+    unset old_config_file_yaml new_config_file_yaml
 
     local db_path
     db_path=$(yq -r '.database.path' "${old_config_file}")
