@@ -10,7 +10,11 @@ from typing_extensions import Literal
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from frigate.util.model import post_process_dfine, post_process_yolov9
+from frigate.util.model import (
+    post_process_dfine,
+    post_process_rfdetr,
+    post_process_yolov9,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +29,12 @@ class OvDetectorConfig(BaseDetectorConfig):
 class OvDetector(DetectionApi):
     type_key = DETECTOR_KEY
     supported_models = [
+        ModelTypeEnum.dfine,
+        ModelTypeEnum.rfdetr,
         ModelTypeEnum.ssd,
         ModelTypeEnum.yolonas,
         ModelTypeEnum.yolov9,
         ModelTypeEnum.yolox,
-        ModelTypeEnum.dfine,
     ]
 
     def __init__(self, detector_config: OvDetectorConfig):
@@ -185,6 +190,13 @@ class OvDetector(DetectionApi):
 
         if self.model_invalid:
             return detections
+        elif self.ov_model_type == ModelTypeEnum.rfdetr:
+            return post_process_rfdetr(
+                [
+                    infer_request.get_output_tensor(0).data,
+                    infer_request.get_output_tensor(1).data,
+                ]
+            )
         elif self.ov_model_type == ModelTypeEnum.ssd:
             results = infer_request.get_output_tensor(0).data[0][0]
 
