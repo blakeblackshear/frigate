@@ -210,11 +210,8 @@ class LicensePlateProcessingMixin:
 
                 # set to True to write each cropped image for debugging
                 if False:
-                    save_image = cv2.cvtColor(
-                        plate_images[original_idx], cv2.COLOR_RGB2BGR
-                    )
                     filename = f"debug/frames/plate_{original_idx}_{plate}_{area}.jpg"
-                    cv2.imwrite(filename, save_image)
+                    cv2.imwrite(filename, plate_images[original_idx])
 
                 license_plates[original_idx] = plate
                 average_confidences[original_idx] = average_confidence
@@ -333,7 +330,7 @@ class LicensePlateProcessingMixin:
             # Use pyclipper to shrink the polygon slightly based on the computed distance.
             offset = PyclipperOffset()
             offset.AddPath(points, JT_ROUND, ET_CLOSEDPOLYGON)
-            points = np.array(offset.Execute(distance * 1.75)).reshape((-1, 1, 2))
+            points = np.array(offset.Execute(distance * 1.5)).reshape((-1, 1, 2))
 
             # get the minimum bounding box around the shrunken polygon.
             box, min_side = self._get_min_boxes(points)
@@ -637,6 +634,47 @@ class LicensePlateProcessingMixin:
 
         assert image.shape[2] == input_shape[0], "Unexpected number of image channels."
 
+        # convert to grayscale
+        if image.shape[2] == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        else:
+            gray = image
+
+        # detect noise with Laplacian variance
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+        noise_variance = np.var(laplacian)
+        brightness = cv2.mean(gray)[0]
+        noise_threshold = 70
+        brightness_threshold = 150
+        is_noisy = (
+            noise_variance > noise_threshold and brightness < brightness_threshold
+        )
+
+        # apply bilateral filter and sharpening only if noisy
+        if is_noisy:
+            logger.debug(
+                f"Noise detected (variance: {noise_variance:.1f}, brightness: {brightness:.1f}) - denoising"
+            )
+            smoothed = cv2.bilateralFilter(gray, d=15, sigmaColor=100, sigmaSpace=100)
+            sharpening_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            processed = cv2.filter2D(smoothed, -1, sharpening_kernel)
+        else:
+            logger.debug(
+                f"No noise detected (variance: {noise_variance:.1f}, brightness: {brightness:.1f}) - skipping denoising and sharpening"
+            )
+            processed = gray
+
+        # apply CLAHE for contrast enhancement
+        grid_size = (
+            max(4, input_w // 40),
+            max(4, input_h // 40),
+        )
+        clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=grid_size)
+        enhanced = clahe.apply(processed)
+
+        # Convert back to 3-channel for model compatibility
+        image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2RGB)
+
         # dynamically adjust input width based on max_wh_ratio
         input_w = int(input_h * max_wh_ratio)
 
@@ -661,6 +699,13 @@ class LicensePlateProcessingMixin:
             (input_shape[0], input_h, input_w), mean_pixel, dtype=np.float32
         )
         padded_image[:, :, :resized_w] = resized_image
+
+        if False:
+            current_time = int(datetime.datetime.now().timestamp() * 1000)
+            cv2.imwrite(
+                f"debug/frames/preprocessed_recognition_{current_time}.jpg",
+                image,
+            )
 
         return padded_image
 
@@ -783,6 +828,7 @@ class LicensePlateProcessingMixin:
     def _should_keep_previous_plate(
         self, id, top_plate, top_char_confidences, top_area, avg_confidence
     ):
+        """Determine if the previous plate should be kept over the current one."""
         if id not in self.detected_license_plates:
             return False
 
@@ -797,68 +843,88 @@ class LicensePlateProcessingMixin:
         )
 
         # 1. Normalize metrics
-        # Length score - use relative comparison
-        # If lengths are equal, score is 0.5 for both
-        # If one is longer, it gets a higher score up to 1.0
-        max_length_diff = 4  # Maximum expected difference in plate lengths
+        # Length score: Equal lengths = 0.5, penalize extra characters if low confidence
         length_diff = len(top_plate) - len(prev_plate)
-        curr_length_score = 0.5 + (
-            length_diff / (2 * max_length_diff)
-        )  # Normalize to 0-1
-        curr_length_score = max(0, min(1, curr_length_score))  # Clamp to 0-1
-        prev_length_score = 1 - curr_length_score  # Inverse relationship
+        max_length_diff = 3
+        curr_length_score = 0.5 + (length_diff / (2 * max_length_diff))
+        curr_length_score = max(0, min(1, curr_length_score))
+        prev_length_score = 0.5 - (length_diff / (2 * max_length_diff))
+        prev_length_score = max(0, min(1, prev_length_score))
 
-        # Area score (normalize based on max of current and previous)
+        # Adjust length score based on confidence of extra characters
+        conf_threshold = 0.75  # Minimum confidence for a character to be "trusted"
+        if len(top_plate) > len(prev_plate):
+            extra_conf = min(
+                top_char_confidences[len(prev_plate) :]
+            )  # Lowest extra char confidence
+            if extra_conf < conf_threshold:
+                curr_length_score *= extra_conf / conf_threshold  # Penalize if weak
+        elif len(prev_plate) > len(top_plate):
+            extra_conf = min(prev_char_confidences[len(top_plate) :])
+            if extra_conf < conf_threshold:
+                prev_length_score *= extra_conf / conf_threshold
+
+        # Area score: Normalize by max area
         max_area = max(top_area, prev_area)
-        curr_area_score = top_area / max_area
-        prev_area_score = prev_area / max_area
+        curr_area_score = top_area / max_area if max_area > 0 else 0
+        prev_area_score = prev_area / max_area if max_area > 0 else 0
 
-        # Average confidence score (already normalized 0-1)
+        # Confidence scores
         curr_conf_score = avg_confidence
         prev_conf_score = prev_avg_confidence
 
-        # Character confidence comparison score
+        # Character confidence comparison (average over shared length)
         min_length = min(len(top_plate), len(prev_plate))
         if min_length > 0:
             curr_char_conf = sum(top_char_confidences[:min_length]) / min_length
             prev_char_conf = sum(prev_char_confidences[:min_length]) / min_length
         else:
-            curr_char_conf = 0
-            prev_char_conf = 0
+            curr_char_conf = prev_char_conf = 0
 
-        # 2. Define weights
+        # Penalize any character below threshold
+        curr_min_conf = min(top_char_confidences) if top_char_confidences else 0
+        prev_min_conf = min(prev_char_confidences) if prev_char_confidences else 0
+        curr_conf_penalty = (
+            1.0 if curr_min_conf >= conf_threshold else (curr_min_conf / conf_threshold)
+        )
+        prev_conf_penalty = (
+            1.0 if prev_min_conf >= conf_threshold else (prev_min_conf / conf_threshold)
+        )
+
+        # 2. Define weights (boost confidence importance)
         weights = {
-            "length": 0.4,
-            "area": 0.3,
-            "avg_confidence": 0.2,
-            "char_confidence": 0.1,
+            "length": 0.2,
+            "area": 0.2,
+            "avg_confidence": 0.35,
+            "char_confidence": 0.25,
         }
 
-        # 3. Calculate weighted scores
+        # 3. Calculate weighted scores with penalty
         curr_score = (
             curr_length_score * weights["length"]
             + curr_area_score * weights["area"]
             + curr_conf_score * weights["avg_confidence"]
             + curr_char_conf * weights["char_confidence"]
-        )
+        ) * curr_conf_penalty
 
         prev_score = (
             prev_length_score * weights["length"]
             + prev_area_score * weights["area"]
             + prev_conf_score * weights["avg_confidence"]
             + prev_char_conf * weights["char_confidence"]
-        )
+        ) * prev_conf_penalty
 
-        # 4. Log the comparison for debugging
+        # 4. Log the comparison
         logger.debug(
-            f"Plate comparison - Current plate: {top_plate} (score: {curr_score:.3f}) vs "
-            f"Previous plate: {prev_plate} (score: {prev_score:.3f})\n"
+            f"Plate comparison - Current: {top_plate} (score: {curr_score:.3f}, min_conf: {curr_min_conf:.2f}) vs "
+            f"Previous: {prev_plate} (score: {prev_score:.3f}, min_conf: {prev_min_conf:.2f})\n"
             f"Metrics - Length: {len(top_plate)} vs {len(prev_plate)} (scores: {curr_length_score:.2f} vs {prev_length_score:.2f}), "
             f"Area: {top_area} vs {prev_area}, "
-            f"Avg Conf: {avg_confidence:.2f} vs {prev_avg_confidence:.2f}"
+            f"Avg Conf: {avg_confidence:.2f} vs {prev_avg_confidence:.2f}, "
+            f"Char Conf: {curr_char_conf:.2f} vs {prev_char_conf:.2f}"
         )
 
-        # 5. Return True if we should keep the previous plate (i.e., if it scores higher)
+        # 5. Return True if previous plate scores higher
         return prev_score > curr_score
 
     def __update_yolov9_metrics(self, duration: float) -> None:
