@@ -146,7 +146,7 @@ cameras:
     ffmpeg: ...
     detect:
       enabled: False # optional, disable Frigate's standard object detection pipeline
-      fps: 5
+      fps: 5 # keep this at 5, higher values are unnecessary for dedicated LPR mode and could overwhelm the detector
       width: 1920
       height: 1080
     motion:
