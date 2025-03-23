@@ -34,6 +34,7 @@ class OvDetector(DetectionApi):
         ModelTypeEnum.ssd,
         ModelTypeEnum.yolonas,
         ModelTypeEnum.yolov9,
+        ModelTypeEnum.yologeneric,
         ModelTypeEnum.yolox,
     ]
 
@@ -231,7 +232,10 @@ class OvDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
-        elif self.ov_model_type == ModelTypeEnum.yolov9:
+        elif (
+            self.ov_model_type == ModelTypeEnum.yolov9
+            or self.ov_model_type == ModelTypeEnum.yologeneric
+        ):
             out_tensor = infer_request.get_output_tensor(0).data
             return post_process_yolov9(out_tensor, self.w, self.h)
         elif self.ov_model_type == ModelTypeEnum.yolox:

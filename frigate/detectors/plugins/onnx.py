@@ -97,7 +97,10 @@ class ONNXDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
-        elif self.onnx_model_type == ModelTypeEnum.yolov9:
+        elif (
+            self.onnx_model_type == ModelTypeEnum.yolov9
+            or self.onnx_model_type == ModelTypeEnum.yologeneric
+        ):
             predictions: np.ndarray = tensor_output[0]
             return post_process_yolov9(predictions, self.w, self.h)
         else:
