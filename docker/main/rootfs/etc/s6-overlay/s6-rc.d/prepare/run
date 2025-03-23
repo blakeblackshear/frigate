@@ -51,35 +51,23 @@ function migrate_addon_config_dir() {
         fi
     fi
 
-    local model_path
-    model_path=$(yq -r '.model.path' "${old_config_file}")
-    if [[ "${model_path}" == "${config_dir}/"* ]]; then
-        # replace /config/ prefix with /homeassistant/
-        local old_model_path="${home_assistant_config_dir}/${model_path:8}"
+    local config_entry
+    for config_entry in .model.path .model.labelmap_path .ffmpeg.path .mqtt.tls_ca_certs .mqtt.tls_client_cert .mqtt.tls_client_key; do
+        local config_entry_path
+        config_entry_path=$(yq -r "${config_entry}" "${old_config_file}")
+        if [[ "${config_entry_path}" == "${config_dir}/"* ]]; then
+            # replace /config/ prefix with /homeassistant/
+            local old_config_entry_path="${home_assistant_config_dir}/${config_entry_path:8}"
 
-        if [[ -f "${old_model_path}" ]]; then
-            local new_model_dir
-            new_model_dir="$(dirname "${model_path}")"
-            echo "[INFO] Migrating model from '${old_model_path}' to '${model_path}'..."
-            mkdir -vp "${new_model_dir}"
-            mv -vf "${old_model_path}" "${model_path}"
+            if [[ -f "${old_config_entry_path}" ]]; then
+                local new_model_dir
+                new_model_dir="$(dirname "${config_entry_path}")"
+                echo "[INFO] Migrating ${config_entry} from '${old_config_entry_path}' to '${config_entry_path}'..."
+                mkdir -vp "${new_model_dir}"
+                mv -vf "${old_config_entry_path}" "${config_entry_path}"
+            fi
         fi
-    fi
-
-    local ffmpeg_path
-    ffmpeg_path=$(yq -r '.ffmpeg.path' "${old_config_file}")
-    if [[ "${ffmpeg_path}" == "${config_dir}/"* ]]; then
-        # replace /config/ prefix with /homeassistant/
-        local old_ffmpeg_path="${home_assistant_config_dir}/${ffmpeg_path:8}"
-
-        if [[ -d "${old_ffmpeg_path}" ]]; then
-            local new_ffmpeg_dir
-            new_ffmpeg_dir="$(dirname "${ffmpeg_path}")"
-            echo "[INFO] Migrating ffmpeg from '${old_ffmpeg_path}' to '${ffmpeg_path}'..."
-            mkdir -vp "${new_ffmpeg_dir}"
-            mv -vf "${old_ffmpeg_path}" "${ffmpeg_path}"
-        fi
-    fi
+    done
 
     local old_model_cache_path="${home_assistant_config_dir}/model_cache"
     if [[ -d "${old_model_cache_path}" ]]; then
