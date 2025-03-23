@@ -156,6 +156,7 @@ cameras:
       mask: 0.704,0.007,0.709,0.052,0.989,0.055,0.993,0.001 # ensure your camera's timestamp is masked
     record:
       enabled: True # disable recording if you only want snapshots
+    review:
       detections:
         enabled: True
         retain:
