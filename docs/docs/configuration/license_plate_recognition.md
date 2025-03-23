@@ -133,8 +133,8 @@ Users with a dedicated LPR camera can run Frigate's LPR by specifying a camera t
 # LPR global configuration
 lpr:
   enabled: True
-  min_area: 2000
   min_plate_length: 4
+  detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration
 cameras:
