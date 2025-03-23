@@ -9,6 +9,7 @@ from frigate.const import (
     INCLUDED_FFMPEG_VERSIONS,
 )
 from frigate.util.config import find_config_file
+
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()

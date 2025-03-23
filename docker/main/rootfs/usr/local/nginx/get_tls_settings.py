@@ -7,6 +7,7 @@ from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
 from frigate.util.config import find_config_file
+
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()

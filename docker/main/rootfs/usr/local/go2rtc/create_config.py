@@ -16,6 +16,7 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file
+
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
