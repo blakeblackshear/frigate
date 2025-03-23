@@ -60,10 +60,10 @@ function migrate_addon_config_dir() {
             local old_config_entry_path="${home_assistant_config_dir}/${config_entry_path:8}"
 
             if [[ -f "${old_config_entry_path}" ]]; then
-                local new_model_dir
-                new_model_dir="$(dirname "${config_entry_path}")"
+                local new_config_entry_entry
+                new_config_entry_entry="$(dirname "${config_entry_path}")"
                 echo "[INFO] Migrating ${config_entry} from '${old_config_entry_path}' to '${config_entry_path}'..."
-                mkdir -vp "${new_model_dir}"
+                mkdir -vp "${new_config_entry_entry}"
                 mv -vf "${old_config_entry_path}" "${config_entry_path}"
             fi
         fi
