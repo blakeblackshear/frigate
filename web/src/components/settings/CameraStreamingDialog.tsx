@@ -103,16 +103,24 @@ export function CameraStreamingDialog({
     if (!config) {
       return;
     }
+
+    // Get available streams from the config and first stream entry as fallback
+    const availableStreams = config?.cameras[camera]?.live?.streams || {};
+    const firstStreamEntry = Object.entries(availableStreams)[0]?.[1] || "";
+
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
-      setStreamName(cameraSettings.streamName || "");
+      const streamNameFromSettings = cameraSettings.streamName || "";
+
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName(
-        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
-          "",
-      );
+      setStreamName(firstStreamEntry);
       setStreamType("smart");
       setCompatibilityMode(false);
     }
@@ -150,19 +158,28 @@ export function CameraStreamingDialog({
     if (!config) {
       return;
     }
+
+    // Get available streams from the config and first stream entry as fallback
+    const availableStreams = config?.cameras[camera]?.live?.streams || {};
+    const firstStreamEntry = Object.entries(availableStreams)[0]?.[1] || "";
+
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
-      setStreamName(cameraSettings.streamName || "");
+      const streamNameFromSettings = cameraSettings.streamName || "";
+
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName(
-        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
-          "",
-      );
+      setStreamName(firstStreamEntry);
       setStreamType("smart");
       setCompatibilityMode(false);
     }
+
     setIsDialogOpen(false);
   }, [groupStreamingSettings, camera, config, setIsDialogOpen]);
 
