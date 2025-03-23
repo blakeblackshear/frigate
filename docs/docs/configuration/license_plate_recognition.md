@@ -175,7 +175,7 @@ When using `type: "lpr"` for a camera, a non-standard object detection pipeline 
 - Snapshots will always be saved.
 - Tracked objects are retained according to your retain settings for `record` and `snapshots`.
 - Zones and object masks cannot be used.
-- Debug view may not show `license_plate` bounding boxes, even if you are using a Frigate+ model.
+- Debug view may not show `license_plate` bounding boxes, even if you are using a Frigate+ model for your standard object detection pipeline.
 - The `frigate/events` MQTT topic will not publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
 
 :::
