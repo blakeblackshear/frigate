@@ -110,11 +110,10 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    | Notes                                  |
 | -------------------- | -------------------------- | ------------------------- | ------------------------- | -------------------------------------- |
 | Intel i3 6100T       | 15 - 35 ms                 |                           |                           | Can only run one detector instance     |
-| Intel i3 8100        | ~ 15 ms                    |                           |                           |                                        |
-| Intel i5 4590        | ~ 20 ms                    |                           |                           |                                        |
 | Intel i5 6500        | ~ 15 ms                    |                           |                           |                                        |
 | Intel i5 7200u       | 15 - 25 ms                 |                           |                           |                                        |
 | Intel i5 7500        | ~ 15 ms                    |                           |                           |                                        |
+| Intel i3 8100        | ~ 15 ms                    |                           |                           |                                        |
 | Intel i5 1135G7      | 10 - 15 ms                 |                           |                           |                                        |
 | Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
 | Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
