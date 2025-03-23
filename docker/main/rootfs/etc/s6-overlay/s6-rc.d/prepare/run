@@ -24,10 +24,11 @@ function migrate_addon_config_dir() {
     local old_config_file="${home_assistant_config_dir}/frigate.yml"
     local old_config_file_yaml="${old_config_file//.yml/.yaml}"
     local new_config_file="${config_dir}/config.yml"
-    if [[ -f "${old_config_file_yaml}" ]]; then
+    if [[ -f "${old_config_file}" ]]; then
+        :
+    elif [[ -f "${old_config_file_yaml}" ]]; then
         old_config_file="${old_config_file_yaml}"
-        new_config_file="${new_config_file//.yml/.yaml}"
-    elif [[ ! -f "${old_config_file}" ]]; then
+    else
         # Nothing to migrate
         return 0
     fi
@@ -103,12 +104,14 @@ function migrate_addon_config_dir() {
 }
 
 function migrate_db_from_media_to_config() {
-    # Find config file in yaml or yml, but prefer yaml
+    # Find config file in yml or yaml, but prefer yml
     local config_file="${CONFIG_FILE:-"/config/config.yml"}"
     local config_file_yaml="${config_file//.yml/.yaml}"
-    if [[ -f "${config_file_yaml}" ]]; then
+    if [[ -f "${config_file}" ]]; then
+        :
+    elif [[ -f "${config_file_yaml}" ]]; then
         config_file="${config_file_yaml}"
-    elif [[ ! -f "${config_file}" ]]; then
+    else
         # Frigate will create the config file on startup
         return 0
     fi
