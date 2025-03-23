@@ -269,12 +269,6 @@ export default function FrigatePlusSettingsView({
                             ).toLocaleString()}
                           </p>
                         </div>
-                        <div className="col-span-2 md:col-span-1">
-                          <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.modelId")}
-                          </Label>
-                          <p>{config.model.plus.id}</p>
-                        </div>
                         <div>
                           <Label className="text-muted-foreground">
                             {t("frigatePlus.modelInfo.baseModel")}
@@ -292,7 +286,7 @@ export default function FrigatePlusSettingsView({
                         <div className="col-span-2">
                           <div className="space-y-2">
                             <div className="text-md">
-                              {t("frigatePlus.modelInfo.modelId")}
+                              {t("frigatePlus.modelInfo.availableModels")}
                             </div>
                             <div className="space-y-3 text-sm text-muted-foreground">
                               <p>
@@ -321,9 +315,10 @@ export default function FrigatePlusSettingsView({
                                     className="cursor-pointer"
                                     value={model.id}
                                   >
-                                    {model.id} (
                                     {new Date(model.trainDate).toLocaleString()}
-                                    )
+                                    <div className="text-muted-foreground">
+                                      {model.id}
+                                    </div>
                                   </SelectItem>
                                 ))}
                               </SelectGroup>

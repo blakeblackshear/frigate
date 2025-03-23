@@ -540,7 +540,6 @@
     },
     "modelInfo": {
       "title": "Model Information",
-      "modelId": "Model ID",
       "modelType": "Model Type",
       "trainDate": "Train Date",
       "baseModel": "Base Model",
@@ -548,6 +547,7 @@
       "cameras": "Cameras",
       "loading": "Loading model information...",
       "error": "Failed to load model information",
+      "availableModels": "Available Models",
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration are shown."
     },
     "toast": {
