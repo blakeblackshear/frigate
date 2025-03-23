@@ -19,20 +19,19 @@ function migrate_addon_config_dir() {
         # Already migrated
         return 0
     fi
-    unset new_config_file new_config_file_yaml
 
     local old_config_file="${home_assistant_config_dir}/frigate.yml"
     local old_config_file_yaml="${old_config_file//.yml/.yaml}"
-    local new_config_file="${config_dir}/config.yml"
     if [[ -f "${old_config_file}" ]]; then
         :
     elif [[ -f "${old_config_file_yaml}" ]]; then
         old_config_file="${old_config_file_yaml}"
+        new_config_file="${new_config_file_yaml}"
     else
         # Nothing to migrate
         return 0
     fi
-    unset old_config_file_yaml
+    unset old_config_file_yaml new_config_file new_config_file_yaml
 
     local db_path
     db_path=$(yq -r '.database.path' "${old_config_file}")
