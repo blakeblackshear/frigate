@@ -3,11 +3,11 @@ id: index
 title: Frigate Configuration
 ---
 
-For Home Assistant Add-on installations, the config file should be at `/addon_configs/<addon_directory>/config.yaml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](#accessing-add-on-config-dir).
+For Home Assistant Add-on installations, the config file should be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](#accessing-add-on-config-dir).
 
-For all other installation types, the config file should be mapped to `/config/config.yaml` inside the container.
+For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
-It can be named `config.yaml` or `config.yml`, but if both files exist `config.yaml` will be preferred and `config.yml` will be ignored.
+It can be named `config.yml` or `config.yaml`, but if both files exist `config.yml` will be preferred and `config.yaml` will be ignored.
 
 It is recommended to start with a minimal configuration and add to it as described in [this guide](../guides/getting_started.md) and use the built in configuration editor in Frigate's UI which supports validation.
 
