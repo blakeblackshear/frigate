@@ -25,7 +25,10 @@ import {
 
 type FrigatePlusModel = {
   id: string;
+  type: string;
+  supportedDetectors: string[];
   trainDate: string;
+  baseModel: string;
 };
 
 type FrigatePlusSettings = {
@@ -305,7 +308,10 @@ export default function FrigatePlusSettingsView({
                             }
                           >
                             <SelectTrigger>
-                              {frigatePlusSettings.model.id}
+                              {new Date(
+                                config.model.plus.trainDate,
+                              ).toLocaleString()}{" "}
+                              ({config.model.plus.baseModel})
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
@@ -314,9 +320,17 @@ export default function FrigatePlusSettingsView({
                                     key={model.id}
                                     className="cursor-pointer"
                                     value={model.id}
+                                    disabled={
+                                      model.type != config.model.model_type ||
+                                      !model.supportedDetectors.includes(
+                                        Object.values(config.detectors)[0].type,
+                                      )
+                                    }
                                   >
-                                    {new Date(model.trainDate).toLocaleString()}
-                                    <div className="text-muted-foreground">
+                                    {new Date(model.trainDate).toLocaleString()}{" "}
+                                    ({model.baseModel}) (
+                                    {model.supportedDetectors.join(", ")})
+                                    <div className="text-xs text-muted-foreground">
                                       {model.id}
                                     </div>
                                   </SelectItem>
