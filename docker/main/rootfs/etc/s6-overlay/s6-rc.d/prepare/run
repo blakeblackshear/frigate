@@ -35,7 +35,7 @@ function migrate_addon_config_dir() {
     unset old_config_file_yaml
 
     local db_path
-    db_path=$(yq eval '.database.path' "${old_config_file}")
+    db_path=$(yq -r '.database.path' "${old_config_file}")
     if [[ "${db_path}" == "null" ]]; then
         db_path="${config_dir}/frigate.db"
     fi
@@ -53,7 +53,7 @@ function migrate_addon_config_dir() {
     fi
 
     local model_path
-    model_path=$(yq eval '.model.path' "${old_config_file}")
+    model_path=$(yq -r '.model.path' "${old_config_file}")
     if [[ "${model_path}" == "${config_dir}/"* ]]; then
         # replace /config/ prefix with /homeassistant/
         local old_model_path="${home_assistant_config_dir}/${model_path:8}"
@@ -68,7 +68,7 @@ function migrate_addon_config_dir() {
     fi
 
     local ffmpeg_path
-    ffmpeg_path=$(yq eval '.ffmpeg.path' "${old_config_file}")
+    ffmpeg_path=$(yq -r '.ffmpeg.path' "${old_config_file}")
     if [[ "${ffmpeg_path}" == "${config_dir}/"* ]]; then
         # replace /config/ prefix with /homeassistant/
         local old_ffmpeg_path="${home_assistant_config_dir}/${ffmpeg_path:8}"
@@ -118,8 +118,7 @@ function migrate_db_from_media_to_config() {
     unset config_file_yaml
 
     local user_db_path
-    user_db_path=$(yq eval '.database.path' "${config_file}")
-
+    user_db_path=$(yq -r '.database.path' "${config_file}")
     if [[ "${user_db_path}" == "null" ]]; then
         local old_db_path="/media/frigate/frigate.db"
         local new_db_dir="/config"
