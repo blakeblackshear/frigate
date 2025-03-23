@@ -562,6 +562,7 @@ face_recognition:
   blur_confidence_filter: True
 
 # Optional: Configuration for license plate recognition capability
+# NOTE: enabled and min_area can be overridden at the camera level
 lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
@@ -656,6 +657,9 @@ cameras:
     # If disabled: config is used but no live stream and no capture etc.
     # Events/Recordings are still viewable.
     enabled: True
+    # Optional: camera type used for some Frigate features (default: shown below)
+    # Options are "generic" and "lpr"
+    type: "generic"
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.

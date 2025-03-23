@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 import logging
@@ -7,6 +8,7 @@ from collections import defaultdict
 from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 
+import cv2
 import numpy as np
 from peewee import DoesNotExist
 
@@ -394,6 +396,19 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def save_lpr_snapshot(self, payload: tuple) -> None:
+        # save the snapshot image
+        (frame, event_id, camera) = payload
+
+        img = cv2.imdecode(
+            np.frombuffer(base64.b64decode(frame), dtype=np.uint8),
+            cv2.IMREAD_COLOR,
+        )
+
+        self.camera_states[camera].save_manual_event_image(
+            img, event_id, "license_plate", {}
+        )
+
     def create_manual_event(self, payload: tuple) -> None:
         (
             frame_time,
@@ -409,7 +424,9 @@ class TrackedObjectProcessor(threading.Thread):
         ) = payload
 
         # save the snapshot image
-        self.camera_states[camera_name].save_manual_event_image(event_id, label, draw)
+        self.camera_states[camera_name].save_manual_event_image(
+            None, event_id, label, draw
+        )
         end_time = frame_time + duration if duration is not None else None
 
         # send event to event maintainer
@@ -455,6 +472,59 @@ class TrackedObjectProcessor(threading.Thread):
                 ),
                 DetectionTypeEnum.api.value,
             )
+
+    def create_lpr_event(self, payload: tuple) -> None:
+        (
+            frame_time,
+            camera_name,
+            label,
+            event_id,
+            include_recording,
+            score,
+            sub_label,
+            plate,
+        ) = payload
+
+        # send event to event maintainer
+        self.event_sender.publish(
+            (
+                EventTypeEnum.api,
+                EventStateEnum.start,
+                camera_name,
+                "",
+                {
+                    "id": event_id,
+                    "label": label,
+                    "sub_label": sub_label,
+                    "score": score,
+                    "camera": camera_name,
+                    "start_time": frame_time
+                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    "end_time": None,
+                    "has_clip": self.config.cameras[camera_name].record.enabled
+                    and include_recording,
+                    "has_snapshot": True,
+                    "type": "api",
+                    "recognized_license_plate": plate,
+                    "recognized_license_plate_score": score,
+                },
+            )
+        )
+
+        self.ongoing_manual_events[event_id] = camera_name
+        self.detection_publisher.publish(
+            (
+                camera_name,
+                frame_time,
+                {
+                    "state": ManualEventState.start,
+                    "label": f"{label}: {sub_label}" if sub_label else label,
+                    "event_id": event_id,
+                    "end_time": None,
+                },
+            ),
+            DetectionTypeEnum.lpr.value,
+        )
 
     def end_manual_event(self, payload: tuple) -> None:
         (event_id, end_time) = payload
@@ -560,6 +630,10 @@ class TrackedObjectProcessor(threading.Thread):
                     self.set_recognized_license_plate(
                         event_id, recognized_license_plate, score
                     )
+                elif topic.endswith(EventMetadataTypeEnum.lpr_event_create.value):
+                    self.create_lpr_event(payload)
+                elif topic.endswith(EventMetadataTypeEnum.save_lpr_snapshot.value):
+                    self.save_lpr_snapshot(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
