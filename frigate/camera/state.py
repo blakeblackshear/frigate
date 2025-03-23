@@ -451,7 +451,7 @@ class CameraState:
                     color=box.get("color", (255, 0, 0)),
                 )
 
-        ret, jpg = cv2.imencode(".jpg", img_frame)
+        ret, jpg = cv2.imencode(".webp", img_frame)
         with open(
             os.path.join(CLIPS_DIR, f"{self.camera_config.name}-{event_id}.jpg"),
             "wb",

@@ -1278,8 +1278,7 @@ class LicensePlateProcessingMixin:
         if dedicated_lpr:
             # save the best snapshot
             logger.debug(f"Writing snapshot for {id}, {top_plate}, {current_time}")
-            frame_copy = np.copy(frame)
-            frame_bgr = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             self.sub_label_publisher.publish(
                 EventMetadataTypeEnum.save_lpr_snapshot,
                 (base64.b64encode(frame_bgr).decode("ASCII"), id, camera),
