@@ -20,8 +20,6 @@ function migrate_addon_config_dir() {
         return 0
     fi
 
-    echo "[INFO] Starting migration from Home Assistant config dir to Add-on config dir..." >&2
-
     local old_config_file="${home_assistant_config_dir}/frigate.yml"
     local old_config_file_yaml="${old_config_file//.yml/.yaml}"
     if [[ -f "${old_config_file}" ]]; then
@@ -34,6 +32,8 @@ function migrate_addon_config_dir() {
         return 0
     fi
     unset old_config_file_yaml new_config_file_yaml
+
+    echo "[INFO] Starting migration from Home Assistant config dir to Add-on config dir..." >&2
 
     local db_path
     db_path=$(yq -r '.database.path' "${old_config_file}")
@@ -119,9 +119,9 @@ function migrate_db_from_media_to_config() {
         local old_db_path="/media/frigate/frigate.db"
         local new_db_dir="/config"
         if [[ -f "${old_db_path}" ]]; then
+            echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..." >&2
             if mountpoint --quiet "${new_db_dir}"; then
                 # /config is a mount point, move the db
-                echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
                 mv -vf "${old_db_path}" "${new_db_dir}"
                 local db_file
                 for db_file in "${old_db_path}"-shm "${old_db_path}"-wal; do
@@ -131,14 +131,12 @@ function migrate_db_from_media_to_config() {
                 done
                 unset db_file
             else
-                echo "[ERROR] Trying to migrate the database path from '${old_db_path}' to '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir"
+                echo "[ERROR] Trying to migrate the database path from '${old_db_path}' to '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir" >&2
                 return 1
             fi
         fi
     fi
 }
-
-echo "[INFO] Preparing Frigate..."
 
 migrate_addon_config_dir
 migrate_db_from_media_to_config
