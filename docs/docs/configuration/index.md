@@ -32,9 +32,9 @@ When running Frigate through the HA Add-on, the Frigate `/config` directory is m
 | Add-on Variant             | Configuration directory                      |
 | -------------------------- | -------------------------------------------- |
 | Frigate                    | `/addon_configs/ccab4aaf_frigate`            |
-| Frigate (Full Access)      | `/addon_configs/ccab4aaf_frigate_fa`         |
-| Frigate Beta               | `/addon_configs/ccab4aaf_frigate_beta`       |
-| Frigate Beta (Full Access) | `/addon_configs/ccab4aaf_frigate_fa_beta`    |
+| Frigate (Full Access)      | `/addon_configs/ccab4aaf_frigate-fa`         |
+| Frigate Beta               | `/addon_configs/ccab4aaf_frigate-beta`       |
+| Frigate Beta (Full Access) | `/addon_configs/ccab4aaf_frigate-fa-beta`    |
 
 **Whenever you see `/config` in the documentation, it refers to this directory.**
 
