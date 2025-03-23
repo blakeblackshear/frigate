@@ -40,7 +40,7 @@ Frigate supports multiple different detectors that work on different types of ha
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
   - [Supports many model architectures](../../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
-  
+
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
@@ -89,7 +89,7 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 
 ### Google Coral TPU
 
-Frigate supports both the USB and M.2 versions of the Google Coral. 
+Frigate supports both the USB and M.2 versions of the Google Coral.
 - The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
 - The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
 
@@ -107,23 +107,19 @@ More information is available [in the detector docs](/configuration/object_detec
 
 Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
 
-| Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | Notes                                  |
-| -------------------- | -------------------------- | ------------------------- | -------------------------------------- |
-| Intel Celeron J4105  | ~ 25 ms                    |                           | Can only run one detector instance     |
-| Intel Celeron N3060  | 130 - 150 ms               |                           | Can only run one detector instance     |
-| Intel Celeron N3205U | ~ 120 ms                   |                           | Can only run one detector instance     |
-| Intel Celeron N4020  | 50 - 200 ms                |                           | Inference speed depends on other loads |
-| Intel i3 6100T       | 15 - 35 ms                 |                           | Can only run one detector instance     |
-| Intel i3 8100        | ~ 15 ms                    |                           |                                        |
-| Intel i5 4590        | ~ 20 ms                    |                           |                                        |
-| Intel i5 6500        | ~ 15 ms                    |                           |                                        |
-| Intel i5 7200u       | 15 - 25 ms                 |                           |                                        |
-| Intel i5 7500        | ~ 15 ms                    |                           |                                        |
-| Intel i5 1135G7      | 10 - 15 ms                 |                           |                                        |
-| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                                        |
-| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                                        |
-| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                                        |
-| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                                        |
+| Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    | Notes                                  |
+| -------------------- | -------------------------- | ------------------------- | ------------------------- | -------------------------------------- |
+| Intel i3 6100T       | 15 - 35 ms                 |                           |                           | Can only run one detector instance     |
+| Intel i5 6500        | ~ 15 ms                    |                           |                           |                                        |
+| Intel i5 7200u       | 15 - 25 ms                 |                           |                           |                                        |
+| Intel i5 7500        | ~ 15 ms                    |                           |                           |                                        |
+| Intel i3 8100        | ~ 15 ms                    |                           |                           |                                        |
+| Intel i5 1135G7      | 10 - 15 ms                 |                           |                           |                                        |
+| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
+| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
+| Intel i7 12650H      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 42 ms | 336: 50 ms                |                                        |
+| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                           |                                        |
+| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                           |                                        |
 
 ### TensorRT - Nvidia GPU
 
@@ -132,15 +128,15 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YoloV7 Inference Time | YOLO-NAS Inference Time   |
-| --------------- | --------------------- | ------------------------- |
-| GTX 1060 6GB    | ~ 7 ms                |                           |
-| GTX 1070        | ~ 6 ms                |                           |
-| GTX 1660 SUPER  | ~ 4 ms                |                           |
-| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
-| RTX 3070 Mobile | ~ 5 ms                |                           |
-| Quadro P400 2GB | 20 - 25 ms            |                           |
-| Quadro P2000    | ~ 12 ms               |                           |
+| Name            | YoloV7 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
+| --------------- | --------------------- | ------------------------- | ------------------------- |
+| GTX 1060 6GB    | ~ 7 ms                |                           |                           |
+| GTX 1070        | ~ 6 ms                |                           |                           |
+| GTX 1660 SUPER  | ~ 4 ms                |                           |                           |
+| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
+| RTX 3070 Mobile | ~ 5 ms                |                           |                           |
+| Quadro P400 2GB | 20 - 25 ms            |                           |                           |
+| Quadro P2000    | ~ 12 ms               |                           |                           |
 
 ### AMD GPUs
 
