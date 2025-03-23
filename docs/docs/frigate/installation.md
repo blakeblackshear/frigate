@@ -291,7 +291,6 @@ There are several variants of the Add-on available:
 | Frigate (Full Access)      | Current release with the option to disable protection mode |
 | Frigate Beta               | Beta release with protection mode on                       |
 | Frigate Beta (Full Access) | Beta release with the option to disable protection mode    |
-| Frigate HailoRT Beta       | Beta release with HailoRT support                          |
 
 If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the Add-on. This is because the Frigate Add-on runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
 

@@ -101,7 +101,6 @@ If you are using Home Assistant Add-on, the URL should be one of the following d
 | Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
 | Frigate Beta               | `http://ccab4aaf-frigate-beta:5000`       |
 | Frigate Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
-| Frigate HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
 
 ### Frigate running on a separate machine
 

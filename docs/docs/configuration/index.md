@@ -35,7 +35,6 @@ When running Frigate through the HA Add-on, the Frigate `/config` directory is m
 | Frigate (Full Access)      | `/addon_configs/ccab4aaf_frigate_fa`         |
 | Frigate Beta               | `/addon_configs/ccab4aaf_frigate_beta`       |
 | Frigate Beta (Full Access) | `/addon_configs/ccab4aaf_frigate_fa_beta`    |
-| Frigate HailoRT Beta       | `/addon_configs/ccab4aaf_frigate_hailo_beta` |
 
 **Whenever you see `/config` in the documentation, it refers to this directory.**
 
