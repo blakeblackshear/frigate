@@ -20,6 +20,8 @@ function migrate_addon_config_dir() {
         return 0
     fi
 
+    echo "[INFO] Starting migration from Home Assistant config dir to Add-on config dir..." >&2
+
     local old_config_file="${home_assistant_config_dir}/frigate.yml"
     local old_config_file_yaml="${old_config_file//.yml/.yaml}"
     if [[ -f "${old_config_file}" ]]; then
@@ -45,9 +47,16 @@ function migrate_addon_config_dir() {
         if [[ -f "${old_db_path}" ]]; then
             local new_db_dir
             new_db_dir="$(dirname "${db_path}")"
-            echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
+            echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..." >&2
             mkdir -vp "${new_db_dir}"
-            mv -vf "${old_db_path}"* "${new_db_dir}"
+            mv -vf "${old_db_path}" "${new_db_dir}"
+            local db_file
+            for db_file in "${old_db_path}"-shm "${old_db_path}"-wal; do
+                if [[ -f "${db_file}" ]]; then
+                    mv -vf "${db_file}" "${new_db_dir}"
+                fi
+            done
+            unset db_file
         fi
     fi
 
@@ -62,7 +71,7 @@ function migrate_addon_config_dir() {
             if [[ -f "${old_config_entry_path}" ]]; then
                 local new_config_entry_entry
                 new_config_entry_entry="$(dirname "${config_entry_path}")"
-                echo "[INFO] Migrating ${config_entry} from '${old_config_entry_path}' to '${config_entry_path}'..."
+                echo "[INFO] Migrating ${config_entry} from '${old_config_entry_path}' to '${config_entry_path}'..." >&2
                 mkdir -vp "${new_config_entry_entry}"
                 mv -vf "${old_config_entry_path}" "${config_entry_path}"
             fi
@@ -71,11 +80,11 @@ function migrate_addon_config_dir() {
 
     local old_model_cache_path="${home_assistant_config_dir}/model_cache"
     if [[ -d "${old_model_cache_path}" ]]; then
-        echo "[INFO] Migrating '${old_model_cache_path}' to '${config_dir}'..."
+        echo "[INFO] Migrating '${old_model_cache_path}' to '${config_dir}'..." >&2
         mv -f "${old_model_cache_path}" "${config_dir}"
     fi
 
-    echo "[INFO] Migrating other files from '${home_assistant_config_dir}' to '${config_dir}'..."
+    echo "[INFO] Migrating other files from '${home_assistant_config_dir}' to '${config_dir}'..." >&2
     local file
     for file in .exports .jwt_secret .timeline .vacuum go2rtc; do
         file="${home_assistant_config_dir}/${file}"
@@ -84,10 +93,10 @@ function migrate_addon_config_dir() {
         fi
     done
 
-    echo "[INFO] Migrating config file from '${old_config_file}' to '${new_config_file}'..."
+    echo "[INFO] Migrating config file from '${old_config_file}' to '${new_config_file}'..." >&2
     mv -vf "${old_config_file}" "${new_config_file}"
 
-    echo "[INFO] Migration from Home Assistant config dir to Add-on config dir completed."
+    echo "[INFO] Migration from Home Assistant config dir to Add-on config dir completed." >&2
 }
 
 function migrate_db_from_media_to_config() {
@@ -113,8 +122,14 @@ function migrate_db_from_media_to_config() {
             if mountpoint --quiet "${new_db_dir}"; then
                 # /config is a mount point, move the db
                 echo "[INFO] Migrating database from '${old_db_path}' to '${new_db_dir}' dir..."
-                # Move all files that starts with frigate.db to the new directory
-                mv -vf "${old_db_path}"* "${new_db_dir}"
+                mv -vf "${old_db_path}" "${new_db_dir}"
+                local db_file
+                for db_file in "${old_db_path}"-shm "${old_db_path}"-wal; do
+                    if [[ -f "${db_file}" ]]; then
+                        mv -vf "${db_file}" "${new_db_dir}"
+                    fi
+                done
+                unset db_file
             else
                 echo "[ERROR] Trying to migrate the database path from '${old_db_path}' to '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir"
                 return 1
