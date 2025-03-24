@@ -331,12 +331,16 @@ export default function FrigatePlusSettingsView({
                             <SelectTrigger>
                               {frigatePlusSettings.model.id &&
                               availableModels?.[frigatePlusSettings.model.id]
-                                ? new Date(
+                                ? (new Date(
                                     availableModels[
                                       frigatePlusSettings.model.id
                                     ].trainDate,
-                                  ).toLocaleString()
-                                : "Retrieving models..."}
+                                  ).toLocaleString() + " (" + availableModels[
+                                      frigatePlusSettings.model.id
+                                    ].width + "x" + availableModels[
+                                      frigatePlusSettings.model.id
+                                    ].height) + ")
+                               : "Retrieving models..."}
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
@@ -359,9 +363,11 @@ export default function FrigatePlusSettingsView({
                                       ).toLocaleString()}{" "}
                                       ({model.baseModel})
                                       <div>
-                                        Supported Detectors: ({model.supportedDetectors.join(", ")}) Dimensions (
-                                        {model.width + "x" + model.height})
+                                        Supported Detectors: ({model.supportedDetectors.join(", ")})
                                       </div>
+                                      <div>
+                                        Dimensions ({model.width + "x" + model.height})
+                                      </div>                                      
                                       <div className="text-xs text-muted-foreground">
                                         {id}
                                       </div>
