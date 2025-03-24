@@ -890,7 +890,7 @@ telemetry:
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
-  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  # NOTE: If you use the Home Assistant integration, disabling this will prevent it from reporting new versions
   version_check: True
 
 # Optional: Camera groups (default: no groups are setup)

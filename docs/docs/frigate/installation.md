@@ -3,11 +3,11 @@ id: installation
 title: Installation
 ---
 
-Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant.
+Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant Add-on](https://www.home-assistant.io/addons/). Note that the Home Assistant Add-on is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant Add-on.
 
 :::tip
 
-If you already have Frigate installed as a Home Assistant addon, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+If you already have Frigate installed as a Home Assistant Add-on, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
 
 :::
 
@@ -45,7 +45,7 @@ The following ports are used by Frigate and can be mapped via docker as required
 | `8554` | RTSP restreaming. By default, these streams are unauthenticated. Authentication can be configured in go2rtc section of config.                                             |
 | `8555` | WebRTC connections for low latency live views.                                                                                                                             |
 
-#### Common docker compose storage configurations
+#### Common Docker Compose storage configurations
 
 Writing to a local disk or external USB drive:
 
@@ -73,7 +73,7 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in docker-compose).
+The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose).
 
 The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
 
@@ -184,10 +184,9 @@ Next, you should configure [hardware object detection](/configuration/object_det
 
 ## Docker
 
-Running in Docker with compose is the recommended install method.
+Running through Docker with Docker Compose is the recommended install method.
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     container_name: frigate
@@ -219,7 +218,7 @@ services:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
 
-If you can't use docker compose, you can run the container with something similar to this:
+If you can't use Docker Compose, you can run the container with something similar to this:
 
 ```bash
 docker run -d \
@@ -255,13 +254,13 @@ The community supported docker image tags for the current stable version are:
 - `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
   - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat
 
-## Home Assistant Addon
+## Home Assistant Add-on
 
 :::warning
 
-As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
+As of Home Assistant Operating System 10.2 and Home Assistant 2023.6 defining separate network storage for media is supported.
 
-There are important limitations in Home Assistant Operating System to be aware of:
+There are important limitations in HA OS to be aware of:
 
 - Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
@@ -275,24 +274,27 @@ See [the network storage guide](/guides/ha_network_storage.md) for instructions 
 
 :::
 
-HassOS users can install via the addon repository.
+Home Assistant OS users can install via the Add-on repository.
 
-1. Navigate to Supervisor > Add-on Store > Repositories
-2. Add https://github.com/blakeblackshear/frigate-hass-addons
-3. Install your desired Frigate NVR Addon and navigate to it's page
+1. In Home Assistant, navigate to _Settings_ > _Add-ons_ > _Add-on Store_ > _Repositories_
+2. Add `https://github.com/blakeblackshear/frigate-hass-addons`
+3. Install the desired variant of the Frigate Add-on (see below)
 4. Setup your network configuration in the `Configuration` tab
-5. (not for proxy addon) Create the file `frigate.yaml` in your `config` directory with your detailed Frigate configuration
-6. Start the addon container
-7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
+5. Start the Add-on
+6. Use the _Open Web UI_ button to access the Frigate UI, then click in the _cog icon_ > _Configuration editor_ and configure Frigate to your liking
 
-There are several versions of the addon available:
+There are several variants of the Add-on available:
 
-| Addon Version                  | Description                                                |
-| ------------------------------ | ---------------------------------------------------------- |
-| Frigate NVR                    | Current release with protection mode on                    |
-| Frigate NVR (Full Access)      | Current release with the option to disable protection mode |
-| Frigate NVR Beta               | Beta release with protection mode on                       |
-| Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
+| Add-on Variant             | Description                                                |
+| -------------------------- | ---------------------------------------------------------- |
+| Frigate                    | Current release with protection mode on                    |
+| Frigate (Full Access)      | Current release with the option to disable protection mode |
+| Frigate Beta               | Beta release with protection mode on                       |
+| Frigate Beta (Full Access) | Beta release with the option to disable protection mode    |
+
+If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the Add-on. This is because the Frigate Add-on runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
+
+You can also edit the Frigate configuration file through the [VS Code Add-on](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate Add-on you are running. See the list of directories [here](../configuration/index.md#accessing-add-on-config-dir).
 
 ## Kubernetes
 

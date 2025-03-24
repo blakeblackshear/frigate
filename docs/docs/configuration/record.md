@@ -146,7 +146,7 @@ The above configuration example can be added globally or on a per camera basis.
 
 ## Can I have "continuous" recordings, but only at certain times?
 
-Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
+Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
 ## How do I export recordings?
 
