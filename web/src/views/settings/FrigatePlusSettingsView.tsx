@@ -131,6 +131,12 @@ export default function FrigatePlusSettingsView({
             position: "top-center",
           });
           setChangedValue(false);
+          addMessage(
+            "plus_restart",
+            "Restart required (Frigate+ model changed)",
+            undefined,
+            "plus_restart",
+          );
           updateConfig();
         } else {
           toast.error(
@@ -156,7 +162,7 @@ export default function FrigatePlusSettingsView({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [updateConfig, frigatePlusSettings, t]);
+  }, [updateConfig, addMessage, frigatePlusSettings, t]);
 
   const onCancel = useCallback(() => {
     setFrigatePlusSettings(origPlusSettings);
