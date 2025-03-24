@@ -339,7 +339,7 @@ export default function FrigatePlusSettingsView({
                                       frigatePlusSettings.model.id
                                     ].width + "x" + availableModels[
                                       frigatePlusSettings.model.id
-                                    ].height) + ")
+                                    ].height) + ")"
                                : "Retrieving models..."}
                             </SelectTrigger>
                             <SelectContent>
