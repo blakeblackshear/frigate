@@ -78,8 +78,9 @@ COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
-    && pip install -r /requirements-ov.txt
+    && pip3 install -r /requirements-ov.txt
 
 # Get OpenVino Model
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
@@ -172,6 +173,7 @@ RUN apt-get -qq update \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
@@ -235,6 +237,7 @@ ENV DEFAULT_FFMPEG_VERSION="7.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
