@@ -357,9 +357,11 @@ export default function FrigatePlusSettingsView({
                                       {new Date(
                                         model.trainDate,
                                       ).toLocaleString()}{" "}
-                                      ({model.baseModel}) (
-                                      {model.supportedDetectors.join(", ")}) (
-                                      {model.width + "x" + model.height})
+                                      ({model.baseModel})
+                                      <div>
+                                        Supported Detectors: ({model.supportedDetectors.join(", ")}) Dimensions (
+                                        {model.width + "x" + model.height})
+                                      </div>
                                       <div className="text-xs text-muted-foreground">
                                         {id}
                                       </div>
