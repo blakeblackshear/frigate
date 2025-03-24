@@ -29,6 +29,8 @@ type FrigatePlusModel = {
   supportedDetectors: string[];
   trainDate: string;
   baseModel: string;
+  width: number;
+  height: number;
 };
 
 type FrigatePlusSettings = {
@@ -67,15 +69,20 @@ export default function FrigatePlusSettingsView({
     },
   );
 
-  const { data: availableModels } = useSWR<FrigatePlusModel[]>("/plus/models", {
-    fallbackData: [],
-    fetcher: (url) =>
-      axios
-        .get(url, {
-          params: { filterByCurrentModelDetector: true },
-          withCredentials: true,
-        })
-        .then((res) => res.data),
+  const { data: availableModels = {} } = useSWR<
+    Record<string, FrigatePlusModel>
+  >("/plus/models", {
+    fallbackData: {},
+    fetcher: async (url) => {
+      const res = await axios.get(url, { withCredentials: true });
+      return res.data.reduce(
+        (obj: Record<string, FrigatePlusModel>, model: FrigatePlusModel) => {
+          obj[model.id] = model;
+          return obj;
+        },
+        {},
+      );
+    },
   });
 
   useEffect(() => {
@@ -260,7 +267,13 @@ export default function FrigatePlusSettingsView({
                           <Label className="text-muted-foreground">
                             {t("frigatePlus.modelInfo.modelType")}
                           </Label>
-                          <p>{config.model.plus.name}</p>
+                          <p>
+                            {config.model.plus.name} (
+                            {config.model.plus.width +
+                              "x" +
+                              config.model.plus.height}
+                            )
+                          </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
@@ -308,33 +321,44 @@ export default function FrigatePlusSettingsView({
                             }
                           >
                             <SelectTrigger>
-                              {new Date(
-                                config.model.plus.trainDate,
-                              ).toLocaleString()}{" "}
-                              ({config.model.plus.baseModel})
+                              {(() => {
+                                const modelId = frigatePlusSettings?.model?.id;
+                                return modelId &&
+                                  availableModels?.[modelId]?.trainDate
+                                  ? new Date(
+                                      availableModels[modelId].trainDate,
+                                    ).toLocaleString()
+                                  : "N/A";
+                              })()}
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
-                                {availableModels?.map((model) => (
-                                  <SelectItem
-                                    key={model.id}
-                                    className="cursor-pointer"
-                                    value={model.id}
-                                    disabled={
-                                      model.type != config.model.model_type ||
-                                      !model.supportedDetectors.includes(
-                                        Object.values(config.detectors)[0].type,
-                                      )
-                                    }
-                                  >
-                                    {new Date(model.trainDate).toLocaleString()}{" "}
-                                    ({model.baseModel}) (
-                                    {model.supportedDetectors.join(", ")})
-                                    <div className="text-xs text-muted-foreground">
-                                      {model.id}
-                                    </div>
-                                  </SelectItem>
-                                ))}
+                                {Object.entries(availableModels || {}).map(
+                                  ([id, model]) => (
+                                    <SelectItem
+                                      key={id}
+                                      className="cursor-pointer"
+                                      value={id}
+                                      disabled={
+                                        model.type != config.model.model_type ||
+                                        !model.supportedDetectors.includes(
+                                          Object.values(config.detectors)[0]
+                                            .type,
+                                        )
+                                      }
+                                    >
+                                      {new Date(
+                                        model.trainDate,
+                                      ).toLocaleString()}{" "}
+                                      ({model.baseModel}) (
+                                      {model.supportedDetectors.join(", ")}) (
+                                      {model.width + "x" + model.height})
+                                      <div className="text-xs text-muted-foreground">
+                                        {id}
+                                      </div>
+                                    </SelectItem>
+                                  ),
+                                )}
                               </SelectGroup>
                             </SelectContent>
                           </Select>

@@ -397,6 +397,8 @@ export interface FrigateConfig {
       trainDate: string;
       baseModel: string;
       supportedDetectors: string[];
+      width: number;
+      height: number;
     };
   };
 
