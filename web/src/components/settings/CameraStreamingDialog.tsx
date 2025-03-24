@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useEnabledState } from "@/api/ws";
+import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { IoIosWarning } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   FrigateConfig,
+  CameraConfig,
   GroupStreamingSettings,
   StreamType,
 } from "@/types/frigateConfig";
@@ -65,8 +66,9 @@ export function CameraStreamingDialog({
   // metadata
 
   // camera enabled state
-  const { payload: enabledState } = useEnabledState(camera);
-  const cameraEnabled = enabledState === "ON";
+  const { enabled: isCameraEnabled } = useCameraActivity(
+    config?.cameras[camera] ?? ({} as CameraConfig),
+  );
 
   const isRestreamed = useMemo(
     () =>
@@ -76,7 +78,7 @@ export function CameraStreamingDialog({
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    cameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
+    isCameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
