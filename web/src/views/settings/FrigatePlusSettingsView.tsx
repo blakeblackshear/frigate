@@ -371,12 +371,11 @@ export default function FrigatePlusSettingsView({
                                         {t(
                                           "frigatePlus.modelInfo.supportedDetectors",
                                         )}
-                                        : ({model.supportedDetectors.join(", ")}
-                                        )
+                                        : {model.supportedDetectors.join(", ")}
                                       </div>
                                       <div>
                                         {t("frigatePlus.modelInfo.dimensions")}{" "}
-                                        ({model.width + "x" + model.height})
+                                        {model.width + "x" + model.height}
                                       </div>
                                       <div className="text-xs text-muted-foreground">
                                         {id}
