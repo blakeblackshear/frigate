@@ -642,7 +642,7 @@ def get_sub_labels(split_joined: Optional[int] = None):
 
 @router.get("/plus/models")
 def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
-    if not request.app.frigate_config.plus_api.is_active:
+    if not request.app.frigate_config.plus_api.is_active():
         return JSONResponse(
             content=({"success": False, "message": "Frigate+ is not enabled"}),
             status_code=400,
