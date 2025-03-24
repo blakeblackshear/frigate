@@ -122,7 +122,9 @@ export default function FrigatePlusSettingsView({
     setIsLoading(true);
 
     axios
-      .put(`config/set?model.path=plus://${frigatePlusSettings.model.id}`, {})
+      .put(`config/set?model.path=plus://${frigatePlusSettings.model.id}`, {
+        requires_restart: 0,
+      })
       .then((res) => {
         if (res.status === 200) {
           toast.success(t("frigatePlus.toast.success"), {
@@ -321,15 +323,14 @@ export default function FrigatePlusSettingsView({
                             }
                           >
                             <SelectTrigger>
-                              {(() => {
-                                const modelId = frigatePlusSettings?.model?.id;
-                                return modelId &&
-                                  availableModels?.[modelId]?.trainDate
-                                  ? new Date(
-                                      availableModels[modelId].trainDate,
-                                    ).toLocaleString()
-                                  : "Retrieving models...";
-                              })()}
+                              {frigatePlusSettings.model.id &&
+                              availableModels?.[frigatePlusSettings.model.id]
+                                ? new Date(
+                                    availableModels[
+                                      frigatePlusSettings.model.id
+                                    ].trainDate,
+                                  ).toLocaleString()
+                                : "Retrieving models..."}
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
