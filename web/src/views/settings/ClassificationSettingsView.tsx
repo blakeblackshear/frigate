@@ -172,7 +172,7 @@ export default function ClassificationSettingsView({
       .finally(() => {
         addMessage(
           "search_settings",
-          `Unsaved Classification settings changes`,
+          `Restart Required (Classification settings changed)`,
           undefined,
           "search_settings",
         );
@@ -185,6 +185,21 @@ export default function ClassificationSettingsView({
     setChangedValue(false);
     removeMessage("search_settings", "search_settings");
   }, [origSearchSettings, removeMessage]);
+
+  useEffect(() => {
+    if (changedValue) {
+      addMessage(
+        "search_settings",
+        `Unsaved Classification settings changes`,
+        undefined,
+        "search_settings",
+      );
+    } else {
+      removeMessage("search_settings", "search_settings");
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changedValue]);
 
   useEffect(() => {
     document.title = t("documentTitle.classification");
