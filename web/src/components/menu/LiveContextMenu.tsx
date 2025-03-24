@@ -377,7 +377,7 @@ export default function LiveContextMenu({
               </ContextMenuItem>
             </>
           )}
-          {notificationsEnabledInConfig && (
+          {notificationsEnabledInConfig && isEnabled && (
             <>
               <ContextMenuSeparator />
               <ContextMenuSub>
