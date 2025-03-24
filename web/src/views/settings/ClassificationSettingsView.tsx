@@ -170,9 +170,15 @@ export default function ClassificationSettingsView({
         );
       })
       .finally(() => {
+        addMessage(
+          "search_settings",
+          `Restart Required (Classification settings changed)`,
+          undefined,
+          "search_settings",
+        );
         setIsLoading(false);
       });
-  }, [updateConfig, classificationSettings, t]);
+  }, [classificationSettings, t, addMessage, updateConfig]);
 
   const onCancel = useCallback(() => {
     setClassificationSettings(origSearchSettings);
