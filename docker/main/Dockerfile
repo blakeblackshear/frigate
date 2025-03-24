@@ -78,7 +78,7 @@ COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && sed 's/args.append("setuptools")/args.append("setuptools==77.0.3")/g' get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
     && pip3 install -r /requirements-ov.txt
 
@@ -173,7 +173,7 @@ RUN apt-get -qq update \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && sed 's/args.append("setuptools")/args.append("setuptools==77.0.3")/g' get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
@@ -240,7 +240,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    && sed 's/args.append("setuptools")/args.append("setuptools==77.0.3")/g' get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
