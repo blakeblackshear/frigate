@@ -237,10 +237,10 @@ ENV DEFAULT_FFMPEG_VERSION="7.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
