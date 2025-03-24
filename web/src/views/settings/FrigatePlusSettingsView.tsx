@@ -331,16 +331,21 @@ export default function FrigatePlusSettingsView({
                             <SelectTrigger>
                               {frigatePlusSettings.model.id &&
                               availableModels?.[frigatePlusSettings.model.id]
-                                ? (new Date(
+                                ? new Date(
                                     availableModels[
                                       frigatePlusSettings.model.id
                                     ].trainDate,
-                                  ).toLocaleString() + " (" + availableModels[
-                                      frigatePlusSettings.model.id
-                                    ].width + "x" + availableModels[
-                                      frigatePlusSettings.model.id
-                                    ].height) + ")"
-                               : "Retrieving models..."}
+                                  ).toLocaleString() +
+                                  " (" +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .width +
+                                  "x" +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .height +
+                                  ")"
+                                : t(
+                                    "frigatePlus.modelInfo.loadingAvailableModels",
+                                  )}
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
@@ -363,11 +368,16 @@ export default function FrigatePlusSettingsView({
                                       ).toLocaleString()}{" "}
                                       ({model.baseModel})
                                       <div>
-                                        Supported Detectors: ({model.supportedDetectors.join(", ")})
+                                        {t(
+                                          "frigatePlus.modelInfo.supportedDetectors",
+                                        )}
+                                        : ({model.supportedDetectors.join(", ")}
+                                        )
                                       </div>
                                       <div>
-                                        Dimensions ({model.width + "x" + model.height})
-                                      </div>                                      
+                                        {t("frigatePlus.modelInfo.dimensions")}{" "}
+                                        ({model.width + "x" + model.height})
+                                      </div>
                                       <div className="text-xs text-muted-foreground">
                                         {id}
                                       </div>
