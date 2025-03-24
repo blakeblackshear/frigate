@@ -63,8 +63,8 @@ Fine-tune the LPR feature using these optional parameters:
 - **`detection_threshold`**: License plate object detection confidence score required before recognition runs.
   - Default: `0.7`
   - Note: This is field only applies to the standalone license plate detection model, `min_score` should be used to filter for models that have license plate detection built in.
-- **`min_area`**: Defines the minimum size (in pixels) a license plate must be before recognition runs.
-  - Default: `1000` pixels.
+- **`min_area`**: Defines the minimum area (in pixels) a license plate must be before recognition runs.
+  - Default: `1000` pixels. Note: this is intentionally set very low as it is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 
 ### Recognition
@@ -94,7 +94,7 @@ These configuration parameters are available at the global level of your config.
 ```yaml
 lpr:
   enabled: True
-  min_area: 1500 # Ignore plates smaller than 1500 pixels
+  min_area: 1500 # Ignore plates with an area (length x width) smaller than 1500 pixels
   min_plate_length: 4 # Only recognize plates with 4 or more characters
   known_plates:
     Wife's Car:
@@ -111,7 +111,7 @@ lpr:
 ```yaml
 lpr:
   enabled: True
-  min_area: 4000 # Run recognition on larger plates only
+  min_area: 4000 # Run recognition on larger plates only (4000 pixels represents a 63x63 pixel square in your image)
   recognition_threshold: 0.85
   format: "^[A-Z]{2} [A-Z][0-9]{4}$" # Only recognize plates that are two letters, followed by a space, followed by a single letter and 4 numbers
   match_distance: 1 # Allow one character variation in plate matching
@@ -175,6 +175,7 @@ When using `type: "lpr"` for a camera, a non-standard object detection pipeline 
 - Snapshots will always be saved.
 - Tracked objects are retained according to your retain settings for `record` and `snapshots`.
 - Zones and object masks cannot be used.
+- Debug view may not show `license_plate` bounding boxes, even if you are using a Frigate+ model for your standard object detection pipeline.
 - The `frigate/events` MQTT topic will not publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
 
 :::
