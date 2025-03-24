@@ -278,7 +278,9 @@ export default function Settings() {
         {page == "notifications" && (
           <NotificationView setUnsavedChanges={setUnsavedChanges} />
         )}
-        {page == "frigateplus" && <FrigatePlusSettingsView />}
+        {page == "frigateplus" && (
+          <FrigatePlusSettingsView setUnsavedChanges={setUnsavedChanges} />
+        )}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog

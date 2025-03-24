@@ -640,6 +640,48 @@ def get_sub_labels(split_joined: Optional[int] = None):
     return JSONResponse(content=sub_labels)
 
 
+@router.get("/plus/models")
+def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
+    if not request.app.frigate_config.plus_api.is_active():
+        return JSONResponse(
+            content=({"success": False, "message": "Frigate+ is not enabled"}),
+            status_code=400,
+        )
+
+    models: dict[any, any] = request.app.frigate_config.plus_api.get_models()
+
+    if not models["list"]:
+        return JSONResponse(
+            content=({"success": False, "message": "No models found"}),
+            status_code=400,
+        )
+
+    modelList = models["list"]
+
+    # current model type
+    modelType = request.app.frigate_config.model.model_type
+
+    # current detectorType for comparing to supportedDetectors
+    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+
+    validModels = []
+
+    for model in sorted(
+        filter(
+            lambda m: (
+                not filterByCurrentModelDetector
+                or (detectorType in m["supportedDetectors"] and modelType in m["type"])
+            ),
+            modelList,
+        ),
+        key=(lambda m: m["trainDate"]),
+        reverse=True,
+    ):
+        validModels.append(model)
+
+    return JSONResponse(content=validModels)
+
+
 @router.get("/recognized_license_plates")
 def get_recognized_license_plates(split_joined: Optional[int] = None):
     try:

@@ -1,19 +1,189 @@
 import Heading from "@/components/ui/heading";
 import { Label } from "@/components/ui/label";
-import { useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { Separator } from "../../components/ui/separator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { toast } from "sonner";
 import useSWR from "swr";
+import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { IoIosWarning } from "react-icons/io";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 
-export default function FrigatePlusSettingsView() {
-  const { data: config } = useSWR<FrigateConfig>("config");
+type FrigatePlusModel = {
+  id: string;
+  type: string;
+  supportedDetectors: string[];
+  trainDate: string;
+  baseModel: string;
+  width: number;
+  height: number;
+};
+
+type FrigatePlusSettings = {
+  model: {
+    id?: string;
+  };
+};
+
+type FrigateSettingsViewProps = {
+  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export default function FrigatePlusSettingsView({
+  setUnsavedChanges,
+}: FrigateSettingsViewProps) {
   const { t } = useTranslation("views/settings");
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
+  const [changedValue, setChangedValue] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
+
+  const [frigatePlusSettings, setFrigatePlusSettings] =
+    useState<FrigatePlusSettings>({
+      model: {
+        id: undefined,
+      },
+    });
+
+  const [origPlusSettings, setOrigPlusSettings] = useState<FrigatePlusSettings>(
+    {
+      model: {
+        id: undefined,
+      },
+    },
+  );
+
+  const { data: availableModels = {} } = useSWR<
+    Record<string, FrigatePlusModel>
+  >("/plus/models", {
+    fallbackData: {},
+    fetcher: async (url) => {
+      const res = await axios.get(url, { withCredentials: true });
+      return res.data.reduce(
+        (obj: Record<string, FrigatePlusModel>, model: FrigatePlusModel) => {
+          obj[model.id] = model;
+          return obj;
+        },
+        {},
+      );
+    },
+  });
+
+  useEffect(() => {
+    if (config) {
+      if (frigatePlusSettings?.model.id == undefined) {
+        setFrigatePlusSettings({
+          model: {
+            id: config.model.plus?.id,
+          },
+        });
+      }
+
+      setOrigPlusSettings({
+        model: {
+          id: config.model.plus?.id,
+        },
+      });
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config]);
+
+  const handleFrigatePlusConfigChange = (
+    newConfig: Partial<FrigatePlusSettings>,
+  ) => {
+    setFrigatePlusSettings((prevConfig) => ({
+      model: {
+        ...prevConfig.model,
+        ...newConfig.model,
+      },
+    }));
+    setUnsavedChanges(true);
+    setChangedValue(true);
+  };
+
+  const saveToConfig = useCallback(async () => {
+    setIsLoading(true);
+
+    axios
+      .put(`config/set?model.path=plus://${frigatePlusSettings.model.id}`, {
+        requires_restart: 0,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success(t("frigatePlus.toast.success"), {
+            position: "top-center",
+          });
+          setChangedValue(false);
+          addMessage(
+            "plus_restart",
+            "Restart required (Frigate+ model changed)",
+            undefined,
+            "plus_restart",
+          );
+          updateConfig();
+        } else {
+          toast.error(
+            t("frigatePlus.toast.error", { errorMessage: res.statusText }),
+            {
+              position: "top-center",
+            },
+          );
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          {
+            position: "top-center",
+          },
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [updateConfig, addMessage, frigatePlusSettings, t]);
+
+  const onCancel = useCallback(() => {
+    setFrigatePlusSettings(origPlusSettings);
+    setChangedValue(false);
+    removeMessage("plus_settings", "plus_settings");
+  }, [origPlusSettings, removeMessage]);
+
+  useEffect(() => {
+    if (changedValue) {
+      addMessage(
+        "plus_settings",
+        `Unsaved Frigate+ settings changes`,
+        undefined,
+        "plus_settings",
+      );
+    } else {
+      removeMessage("plus_settings", "plus_settings");
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changedValue]);
 
   useEffect(() => {
     document.title = t("documentTitle.frigatePlus");
@@ -27,6 +197,10 @@ export default function FrigatePlusSettingsView() {
       (camera) => camera.snapshots.enabled && !camera.snapshots.clean_copy,
     );
   };
+
+  if (!config) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <>
@@ -101,7 +275,13 @@ export default function FrigatePlusSettingsView() {
                           <Label className="text-muted-foreground">
                             {t("frigatePlus.modelInfo.modelType")}
                           </Label>
-                          <p>{config.model.plus.name}</p>
+                          <p>
+                            {config.model.plus.name} (
+                            {config.model.plus.width +
+                              "x" +
+                              config.model.plus.height}
+                            )
+                          </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
@@ -112,12 +292,6 @@ export default function FrigatePlusSettingsView() {
                               config.model.plus.trainDate,
                             ).toLocaleString()}
                           </p>
-                        </div>
-                        <div className="col-span-2 md:col-span-1">
-                          <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.modelId")}
-                          </Label>
-                          <p>{config.model.plus.id}</p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
@@ -132,6 +306,86 @@ export default function FrigatePlusSettingsView() {
                           <p>
                             {config.model.plus.supportedDetectors.join(", ")}
                           </p>
+                        </div>
+                        <div className="col-span-2">
+                          <div className="space-y-2">
+                            <div className="text-md">
+                              {t("frigatePlus.modelInfo.availableModels")}
+                            </div>
+                            <div className="space-y-3 text-sm text-muted-foreground">
+                              <p>
+                                <Trans ns="views/settings">
+                                  frigatePlus.modelInfo.modelSelect
+                                </Trans>
+                              </p>
+                            </div>
+                          </div>
+                          <Select
+                            value={frigatePlusSettings.model.id}
+                            onValueChange={(value) =>
+                              handleFrigatePlusConfigChange({
+                                model: { id: value as string },
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              {frigatePlusSettings.model.id &&
+                              availableModels?.[frigatePlusSettings.model.id]
+                                ? new Date(
+                                    availableModels[
+                                      frigatePlusSettings.model.id
+                                    ].trainDate,
+                                  ).toLocaleString() +
+                                  " (" +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .width +
+                                  "x" +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .height +
+                                  ")"
+                                : t(
+                                    "frigatePlus.modelInfo.loadingAvailableModels",
+                                  )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {Object.entries(availableModels || {}).map(
+                                  ([id, model]) => (
+                                    <SelectItem
+                                      key={id}
+                                      className="cursor-pointer"
+                                      value={id}
+                                      disabled={
+                                        model.type != config.model.model_type ||
+                                        !model.supportedDetectors.includes(
+                                          Object.values(config.detectors)[0]
+                                            .type,
+                                        )
+                                      }
+                                    >
+                                      {new Date(
+                                        model.trainDate,
+                                      ).toLocaleString()}{" "}
+                                      ({model.baseModel})
+                                      <div>
+                                        {t(
+                                          "frigatePlus.modelInfo.supportedDetectors",
+                                        )}
+                                        : {model.supportedDetectors.join(", ")}
+                                      </div>
+                                      <div>
+                                        {t("frigatePlus.modelInfo.dimensions")}:{" "}
+                                        {model.width + "x" + model.height}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {id}
+                                      </div>
+                                    </SelectItem>
+                                  ),
+                                )}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     )}
@@ -226,6 +480,34 @@ export default function FrigatePlusSettingsView() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <Separator className="my-2 flex bg-secondary" />
+
+            <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
+              <Button
+                className="flex flex-1"
+                aria-label={t("button.reset", { ns: "common" })}
+                onClick={onCancel}
+              >
+                {t("button.reset", { ns: "common" })}
+              </Button>
+              <Button
+                variant="select"
+                disabled={!changedValue || isLoading}
+                className="flex flex-1"
+                aria-label="Save"
+                onClick={saveToConfig}
+              >
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator />
+                    <span>{t("button.saving", { ns: "common" })}</span>
+                  </div>
+                ) : (
+                  t("button.save", { ns: "common" })
+                )}
+              </Button>
             </div>
           </div>
         </div>

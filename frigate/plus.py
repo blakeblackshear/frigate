@@ -234,3 +234,11 @@ class PlusApi:
             raise Exception(r.text)
 
         return r.json()
+
+    def get_models(self) -> Any:
+        r = self._get("model/list")
+
+        if not r.ok:
+            raise Exception(r.text)
+
+        return r.json()

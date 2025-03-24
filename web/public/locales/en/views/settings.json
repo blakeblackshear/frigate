@@ -540,14 +540,21 @@
     },
     "modelInfo": {
       "title": "Model Information",
-      "modelId": "Model ID",
       "modelType": "Model Type",
       "trainDate": "Train Date",
       "baseModel": "Base Model",
       "supportedDetectors": "Supported Detectors",
+      "dimensions": "Dimensions",
       "cameras": "Cameras",
       "loading": "Loading model information...",
-      "error": "Failed to load model information"
+      "error": "Failed to load model information",
+      "availableModels": "Available Models",
+      "loadingAvailableModels": "Loading available models...",
+      "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
+    },
+    "toast": {
+      "success": "Frigate+ settings have been saved. Restart Frigate to apply changes.",
+      "error": "Failed to save config changes: {{errorMessage}}"
     }
   }
 }
