@@ -328,7 +328,7 @@ export default function FrigatePlusSettingsView({
                                   ? new Date(
                                       availableModels[modelId].trainDate,
                                     ).toLocaleString()
-                                  : "N/A";
+                                  : "Retrieving models...";
                               })()}
                             </SelectTrigger>
                             <SelectContent>
