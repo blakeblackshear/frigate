@@ -170,30 +170,21 @@ export default function ClassificationSettingsView({
         );
       })
       .finally(() => {
+        addMessage(
+          "search_settings",
+          `Unsaved Classification settings changes`,
+          undefined,
+          "search_settings",
+        );
         setIsLoading(false);
       });
-  }, [updateConfig, classificationSettings, t]);
+  }, [classificationSettings, t, addMessage, updateConfig]);
 
   const onCancel = useCallback(() => {
     setClassificationSettings(origSearchSettings);
     setChangedValue(false);
     removeMessage("search_settings", "search_settings");
   }, [origSearchSettings, removeMessage]);
-
-  useEffect(() => {
-    if (changedValue) {
-      addMessage(
-        "search_settings",
-        `Unsaved Classification settings changes`,
-        undefined,
-        "search_settings",
-      );
-    } else {
-      removeMessage("search_settings", "search_settings");
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changedValue]);
 
   useEffect(() => {
     document.title = t("documentTitle.classification");
