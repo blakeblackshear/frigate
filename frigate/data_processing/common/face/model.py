@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import cv2
 import numpy as np
+from scipy import stats
 
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
@@ -234,7 +235,7 @@ class FaceNetRecognizer(FaceRecognizer):
             return
 
         for name, embs in face_embeddings_map.items():
-            self.mean_embs[name] = np.mean(embs, axis=0)
+            self.mean_embs[name] = stats.trim_mean(embs, 0.1)
 
     def classify(self, face_image):
         if not self.landmark_detector:
