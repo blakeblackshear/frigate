@@ -285,9 +285,16 @@ export default function ObjectLifecycle({
 
   useEffect(() => {
     if (eventSequence && eventSequence.length > 0) {
-      setTimeIndex(eventSequence?.[current].timestamp);
-      handleSetBox(eventSequence?.[current].data.box ?? []);
-      setLifecycleZones(eventSequence?.[current].data.zones);
+      if (current == -1) {
+        // normal path point
+        setBoxStyle(null);
+        setLifecycleZones([]);
+      } else {
+        // lifecycle point
+        setTimeIndex(eventSequence?.[current].timestamp);
+        handleSetBox(eventSequence?.[current].data.box ?? []);
+        setLifecycleZones(eventSequence?.[current].data.zones);
+      }
       setSelectedZone("");
     }
   }, [current, imgLoaded, handleSetBox, eventSequence]);
@@ -322,6 +329,10 @@ export default function ObjectLifecycle({
         mainApi.scrollTo(sequenceIndex);
         thumbnailApi.scrollTo(sequenceIndex);
         setCurrent(sequenceIndex);
+      } else {
+        // click on a normal path point, not a lifecycle point
+        setCurrent(-1);
+        setTimeIndex(pathPoints[index].timestamp);
       }
     },
     [mainApi, thumbnailApi, eventSequence, pathPoints],
