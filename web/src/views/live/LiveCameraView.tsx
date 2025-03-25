@@ -112,7 +112,6 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { usePersistence } from "@/hooks/use-persistence";
-import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
@@ -144,9 +143,8 @@ export default function LiveCameraView({
     useResizeObserver(window);
 
   // camera enabled state
-  const { enabled: isCameraEnabled } = useCameraActivity(
-    config?.cameras[camera.name] ?? ({} as CameraConfig),
-  );
+  const { payload: enabledState } = useEnabledState(camera.name);
+  const cameraEnabled = enabledState === "ON";
 
   // supported features
   const [streamName, setStreamName] = usePersistence<string>(
@@ -162,7 +160,7 @@ export default function LiveCameraView({
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    isCameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
+    cameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
@@ -522,7 +520,7 @@ export default function LiveCameraView({
                       setPip(false);
                     }
                   }}
-                  disabled={!isCameraEnabled}
+                  disabled={!cameraEnabled}
                 />
               )}
               {supports2WayTalk && (
@@ -544,7 +542,7 @@ export default function LiveCameraView({
                       setAudio(true);
                     }
                   }}
-                  disabled={!isCameraEnabled}
+                  disabled={!cameraEnabled}
                 />
               )}
               {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
@@ -561,7 +559,7 @@ export default function LiveCameraView({
                     t("button.cameraAudio", { ns: "common" })
                   }
                   onClick={() => setAudio(!audio)}
-                  disabled={!isCameraEnabled}
+                  disabled={!cameraEnabled}
                 />
               )}
               <FrigateCameraFeatures
@@ -583,7 +581,7 @@ export default function LiveCameraView({
                 setLowBandwidth={setLowBandwidth}
                 supportsAudioOutput={supportsAudioOutput}
                 supports2WayTalk={supports2WayTalk}
-                cameraEnabled={isCameraEnabled ?? false}
+                cameraEnabled={cameraEnabled}
               />
             </div>
           </TooltipProvider>
