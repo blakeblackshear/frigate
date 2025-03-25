@@ -197,7 +197,7 @@ class FaceNetRecognizer(FaceRecognizer):
         self.face_embedder: FaceNetEmbedding = FaceNetEmbedding()
 
     def clear(self) -> None:
-        self.mean_embs = None
+        self.mean_embs = {}
 
     def build(self):
         if not self.landmark_detector:

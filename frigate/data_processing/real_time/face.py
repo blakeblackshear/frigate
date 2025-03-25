@@ -36,8 +36,8 @@ MAX_DETECTION_HEIGHT = 1080
 MIN_MATCHING_FACES = 2
 
 
-def weighted_average_by_area(results_list):
-    if not results_list:
+def weighted_average_by_area(results_list: list[tuple[str, float, int]]):
+    if len(results_list) < 3:
         return "unknown", 0.0
 
     score_count = {}
