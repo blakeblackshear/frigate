@@ -235,7 +235,8 @@ class FaceNetRecognizer(FaceRecognizer):
             return
 
         for name, embs in face_embeddings_map.items():
-            self.mean_embs[name] = stats.trim_mean(embs, 0.1)
+            norms = np.linalg.norm(embs, axis=-1, keepdims=True)
+            self.mean_embs[name] = stats.trim_mean(embs / norms, 0.15)
 
     def classify(self, face_image):
         if not self.landmark_detector:
