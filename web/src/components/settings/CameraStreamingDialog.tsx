@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useEnabledState } from "@/api/ws";
 import { IoIosWarning } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,10 +63,6 @@ export function CameraStreamingDialog({
 
   // metadata
 
-  // camera enabled state
-  const { payload: enabledState } = useEnabledState(camera);
-  const cameraEnabled = enabledState === "ON";
-
   const isRestreamed = useMemo(
     () =>
       config &&
@@ -76,7 +71,7 @@ export function CameraStreamingDialog({
   );
 
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    cameraEnabled && isRestreamed ? `go2rtc/streams/${streamName}` : null,
+    isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
     },
