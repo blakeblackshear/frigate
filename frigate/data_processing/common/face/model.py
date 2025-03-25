@@ -243,6 +243,30 @@ class FaceNetRecognizer(FaceRecognizer):
         for name, embs in face_embeddings_map.items():
             self.mean_embs[name] = stats.trim_mean(embs, 0.15)
 
+    def similarity_to_confidence(
+        self, cosine_similarity: float, median=0.3, range_width=0.6, slope_factor=12
+    ):
+        """
+        Default sigmoid function to map cosine similarity to confidence.
+
+        Args:
+            cosine_similarity (float): The input cosine similarity.
+            median (float): Assumed median of cosine similarity distribution.
+            range_width (float): Assumed range of cosine similarity distribution (90th percentile - 10th percentile).
+            slope_factor (float): Adjusts the steepness of the curve.
+
+        Returns:
+            float: The confidence score.
+        """
+
+        # Calculate slope and bias
+        slope = slope_factor / range_width
+        bias = median
+
+        # Calculate confidence
+        confidence = 1 / (1 + np.exp(-slope * (cosine_similarity - bias)))
+        return confidence
+
     def classify(self, face_image):
         if not self.landmark_detector:
             return None
@@ -272,9 +296,10 @@ class FaceNetRecognizer(FaceRecognizer):
             magnitude_B = np.linalg.norm(mean_emb)
 
             cosine_similarity = dot_product / (magnitude_A * magnitude_B)
+            confidence = self.similarity_to_confidence(cosine_similarity)
 
             if cosine_similarity > score:
-                score = cosine_similarity
+                score = confidence
                 label = name
 
         if score < self.config.face_recognition.min_score:

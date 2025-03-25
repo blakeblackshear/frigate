@@ -266,6 +266,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         res = self.recognizer.classify(face_frame)
 
         if not res:
+            self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
 
         sub_label, score = res
