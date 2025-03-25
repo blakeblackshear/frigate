@@ -29,7 +29,9 @@ In both cases a lightweight face landmark detection model is also used to align 
 
 ## Minimum System Requirements
 
-Face recognition is lightweight and runs on the CPU, there are no significantly different system requirements than running Frigate itself.
+Face recognition is lightweight and runs on the CPU, there are no significantly different system requirements than running Frigate itself when using the `small` model.
+
+When using the `large` model an integrated or discrete GPU is recommended.
 
 ## Configuration
 
@@ -55,6 +57,7 @@ Fine-tune face recognition with these optional parameters:
 
 ### Recognition
 
+- `model_size`: Which model size to use, options are `small` or `large`
 - `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
   - Default: `0.9`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
