@@ -51,6 +51,9 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 class FaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable face recognition.")
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
     min_score: float = Field(
         title="Minimum face distance score required to save the attempt.",
         default=0.8,
