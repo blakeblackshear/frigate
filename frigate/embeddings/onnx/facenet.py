@@ -13,7 +13,7 @@ from .runner import ONNXModelRunner
 
 logger = logging.getLogger(__name__)
 
-FACE_EMBEDDING_SIZE = 160
+FACE_EMBEDDING_SIZE = 112
 
 
 class FaceNetEmbedding(BaseEmbedding):
@@ -77,9 +77,9 @@ class FaceNetEmbedding(BaseEmbedding):
         og = np.array(pil).astype(np.float32)
 
         # Image must be FACE_EMBEDDING_SIZExFACE_EMBEDDING_SIZE
-        og_h, og_w = og.shape
+        og_h, og_w, channels = og.shape
         frame = np.zeros(
-            (FACE_EMBEDDING_SIZE, FACE_EMBEDDING_SIZE, 3), dtype=np.float32
+            (FACE_EMBEDDING_SIZE, FACE_EMBEDDING_SIZE, channels), dtype=np.float32
         )
 
         # compute center offset
@@ -87,8 +87,12 @@ class FaceNetEmbedding(BaseEmbedding):
         y_center = (FACE_EMBEDDING_SIZE - og_h) // 2
 
         # copy img image into center of result image
-        frame[y_center : y_center + og_h, x_center : x_center + og_w, 0] = og
-        frame[y_center : y_center + og_h, x_center : x_center + og_w, 1] = og
-        frame[y_center : y_center + og_h, x_center : x_center + og_w, 2] = og
+        frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
+
+        # run arcface normalization
+        normalized_image = frame.astype(np.float32) / 255.0
+        frame = (normalized_image - 0.5) / 0.5
+
+        frame = np.transpose(frame, (2, 0, 1))
         frame = np.expand_dims(frame, axis=0)
-        return [{"input_2": frame}]
+        return [{"data": frame}]

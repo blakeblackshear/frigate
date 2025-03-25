@@ -85,6 +85,7 @@ class BaseEmbedding(ABC):
         input_names = self.runner.get_input_names()
         onnx_inputs = {name: [] for name in input_names}
         input: dict[str, any]
+        print(f"onnx inputs are {input_names}")
         for input in processed:
             for key, value in input.items():
                 if key in input_names:

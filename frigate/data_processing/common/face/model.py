@@ -44,6 +44,7 @@ class FaceRecognizer(ABC):
         output_height: int,
     ) -> np.ndarray:
         # landmark is run on grayscale images
+
         if image.ndim == 3:
             land_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
@@ -230,7 +231,6 @@ class FaceNetRecognizer(FaceRecognizer):
                 if img is None:
                     continue
 
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 img = self.align_face(img, img.shape[1], img.shape[0])
                 emb = self.face_embedder([img])[0].squeeze()
                 face_embeddings_map[name].append(emb)
@@ -241,8 +241,7 @@ class FaceNetRecognizer(FaceRecognizer):
             return
 
         for name, embs in face_embeddings_map.items():
-            norms = np.linalg.norm(embs, axis=-1, keepdims=True)
-            self.mean_embs[name] = stats.trim_mean(embs / norms, 0.15)
+            self.mean_embs[name] = stats.trim_mean(embs, 0.15)
 
     def classify(self, face_image):
         if not self.landmark_detector:
@@ -255,14 +254,13 @@ class FaceNetRecognizer(FaceRecognizer):
                 return None
 
         # face recognition is best run on grayscale images
-        img = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
 
         # get blur factor before aligning face
-        blur_factor = self.get_blur_factor(img)
+        blur_factor = self.get_blur_factor(face_image)
         logger.debug(f"face detected with bluriness {blur_factor}")
 
         # align face and run recognition
-        img = self.align_face(img, img.shape[1], img.shape[0])
+        img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
         embedding = self.face_embedder([img])[0].squeeze()
 
         score = 0
