@@ -77,7 +77,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         self.label_map: dict[int, str] = {}
 
-        if self.face_config.model_size == "smal":
+        if self.face_config.model_size == "small":
             self.recognizer = LBPHRecognizer(self.config)
         else:
             self.recognizer = FaceNetRecognizer(self.config)
