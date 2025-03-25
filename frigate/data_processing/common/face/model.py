@@ -43,8 +43,14 @@ class FaceRecognizer(ABC):
         output_width: int,
         output_height: int,
     ) -> np.ndarray:
+        # landmark is run on grayscale images
+        if image.ndim == 3:
+            land_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            land_image = image
+
         _, lands = self.landmark_detector.fit(
-            image, np.array([(0, 0, image.shape[1], image.shape[0])])
+            land_image, np.array([(0, 0, land_image.shape[1], land_image.shape[0])])
         )
         landmarks: np.ndarray = lands[0][0]
 
