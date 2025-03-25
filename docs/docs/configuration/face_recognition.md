@@ -7,7 +7,7 @@ Face recognition identifies known individuals by matching detected faces with pr
 
 ## Model Requirements
 
-Frigate has support for CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally. A lightweight face landmark detection model is also used to align faces before running them through the face recognizer.
+### Face Detection
 
 Users running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
@@ -18,6 +18,14 @@ Users without a model that detects faces can still run face recognition. Frigate
 Frigate needs to first detect a `face` before it can recognize a face.
 
 :::
+
+### Face Recognition
+
+Frigate has support for two face recognition model types:
+- **small**: Frigate will use CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally on the CPU.
+- **large**: Frigate will run a face embedding model, this is only recommended to be run when an integrated or dedicated GPU is available.
+
+In both cases a lightweight face landmark detection model is also used to align faces before running them through the face recognizer.
 
 ## Minimum System Requirements
 
@@ -107,3 +115,7 @@ This can happen for a few different reasons, but this is usually an indicator th
 - If you train with only a few images per person, especially if those images are very similar, the recognition model becomes overly specialized to those specific images.
 - When you provide images with different poses, lighting, and expressions, the algorithm extracts features that are consistent across those variations.
 - By training on a diverse set of images, the algorithm becomes less sensitive to minor variations and noise in the input image.
+
+### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
+
+The Frigate face recognizer collects face recognition scores from all of the frames across the person objects lifecycle. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if there is a prominent person recognized. This avoids cases where a single high confidence recognition result would throw off the results.
