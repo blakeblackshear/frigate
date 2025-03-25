@@ -23,7 +23,7 @@ class ArcfaceEmbedding(BaseEmbedding):
     ):
         super().__init__(
             model_name="facedet",
-            model_file="facenet.onnx",
+            model_file="arcface.onnx",
             download_urls={
                 "arcface.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
             },
