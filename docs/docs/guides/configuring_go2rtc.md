@@ -115,3 +115,7 @@ section.
 
 1. If the stream you added to go2rtc is also used by Frigate for the `record` or `detect` role, you can migrate your config to pull from the RTSP restream to reduce the number of connections to your camera as shown [here](/configuration/restream#reduce-connections-to-camera).
 2. You may also prefer to [setup WebRTC](/configuration/live#webrtc-extra-configuration) for slightly lower latency than MSE. Note that WebRTC only supports h264 and specific audio formats and may require opening ports on your router.
+
+## Important considerations
+
+If you are configuring go2rtc to publish HomeKit camera streams, on pairing the configuration is written to the `/dev/shm/go2rtc.yaml` file inside the container. These changes must be manually copied across to the `go2rtc` section of your Frigate configuration in order to persist through restarts.
