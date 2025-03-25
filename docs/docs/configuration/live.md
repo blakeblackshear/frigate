@@ -205,7 +205,9 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 
    When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI labels as "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. Continuous streaming mode does not have an automatic reset mechanism, but you can use the _Reset_ option to force a reload of your stream.
 
-   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the (recommendations above)[#camera_settings_recommendations].
+   If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
+
+   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the [recommendations above](#camera_settings_recommendations).
 
 3. **It doesn't seem like my cameras are streaming on the Live dashboard. Why?**
 
