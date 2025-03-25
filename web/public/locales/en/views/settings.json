@@ -127,7 +127,7 @@
       "readTheDocumentation": "Read the Documentation"
     },
     "toast": {
-      "success": "Classification settings have been saved.",
+      "success": "Classification settings have been saved. Restart Frigate to apply your changes.",
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
