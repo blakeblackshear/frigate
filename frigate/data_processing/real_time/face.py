@@ -20,7 +20,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
-    FaceNetRecognizer,
+    ArcFaceRecognizer,
     FaceRecognizer,
     LBPHRecognizer,
 )
@@ -110,7 +110,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if self.face_config.model_size == "small":
             self.recognizer = LBPHRecognizer(self.config)
         else:
-            self.recognizer = FaceNetRecognizer(self.config)
+            self.recognizer = ArcFaceRecognizer(self.config)
 
         self.recognizer.build()
 

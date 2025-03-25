@@ -198,7 +198,7 @@ class LBPHRecognizer(FaceRecognizer):
         return self.label_map[index], round(score, 2)
 
 
-class FaceNetRecognizer(FaceRecognizer):
+class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
