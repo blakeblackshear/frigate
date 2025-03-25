@@ -36,6 +36,36 @@ MAX_DETECTION_HEIGHT = 1080
 MIN_MATCHING_FACES = 2
 
 
+def weighted_average_by_area(results_list):
+    if not results_list:
+        return "unknown", 0.0
+
+    score_count = {}
+    weighted_scores = {}
+    total_face_areas = {}
+
+    for name, score, face_area in results_list:
+        if name not in weighted_scores:
+            score_count[name] = 1
+            weighted_scores[name] = 0.0
+            total_face_areas[name] = 0.0
+        else:
+            score_count[name] += 1
+
+        weighted_scores[name] += score * face_area
+        total_face_areas[name] += face_area
+
+    prominent_name = max(score_count)
+
+    # if a single name is not prominent in the history then we are not confident
+    if score_count[prominent_name] / len(results_list) < 0.65:
+        return "unknown", 0.0
+
+    return prominent_name, weighted_scores[prominent_name] / total_face_areas[
+        prominent_name
+    ]
+
+
 class FaceRealTimeProcessor(RealTimeProcessorApi):
     def __init__(
         self,
@@ -48,7 +78,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.sub_label_publisher = sub_label_publisher
         self.face_detector: cv2.FaceDetectorYN = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
-        self.detected_faces: dict[str, float] = {}
+        self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.recognizer: FaceRecognizer | None = None
 
         download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
@@ -164,7 +194,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         # don't overwrite sub label for objects that have a sub label
         # that is not a face
-        if obj_data.get("sub_label") and id not in self.detected_faces:
+        if obj_data.get("sub_label") and id not in self.person_face_history:
             logger.debug(
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
@@ -240,46 +270,38 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         sub_label, score = res
 
-        # calculate the overall face score as the probability * area of face
-        # this will help to reduce false positives from small side-angle faces
-        # if a large front-on face image may have scored slightly lower but
-        # is more likely to be accurate due to the larger face area
-        face_score = round(score * face_frame.shape[0] * face_frame.shape[1], 2)
-
         logger.debug(
-            f"Detected best face for person as: {sub_label} with probability {score} and overall face score {face_score}"
+            f"Detected best face for person as: {sub_label} with probability {score}"
         )
 
         if self.config.face_recognition.save_attempts:
             # write face to library
             folder = os.path.join(FACE_DIR, "train")
-            file = os.path.join(folder, f"{id}-{sub_label}-{score}-{face_score}.webp")
+            file = os.path.join(folder, f"{id}-{sub_label}-{score}-0.webp")
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, face_frame)
 
-        if score < self.config.face_recognition.recognition_threshold:
-            logger.debug(
-                f"Recognized face distance {score} is less than threshold {self.config.face_recognition.recognition_threshold}"
-            )
-            self.__update_metrics(datetime.datetime.now().timestamp() - start)
-            return
+        if id not in self.person_face_history:
+            self.person_face_history[id] = []
 
-        if id in self.detected_faces and face_score <= self.detected_faces[id]:
-            logger.debug(
-                f"Recognized face distance {score} and overall score {face_score} is less than previous overall face score ({self.detected_faces.get(id)})."
-            )
-            self.__update_metrics(datetime.datetime.now().timestamp() - start)
-            return
-
-        self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label, (id, sub_label, score)
+        self.person_face_history[id].append(
+            (sub_label, score, face_frame.shape[0] * face_frame.shape[1])
         )
-        self.detected_faces[id] = face_score
+        (weighted_sub_label, weighted_score) = weighted_average_by_area(
+            self.person_face_history[id]
+        )
+
+        if weighted_score >= self.face_config.recognition_threshold:
+            self.sub_label_publisher.publish(
+                EventMetadataTypeEnum.sub_label,
+                (id, weighted_sub_label, weighted_score),
+            )
+
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
 
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
-            self.__clear_classifier()
+            self.recognizer.clear()
         elif topic == EmbeddingsRequestEnum.recognize_face.value:
             img = cv2.imdecode(
                 np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
@@ -343,7 +365,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             with open(file, "wb") as output:
                 output.write(thumbnail.tobytes())
 
-            self.__clear_classifier()
+            self.recognizer.clear()
             return {
                 "message": "Successfully registered face.",
                 "success": True,
@@ -390,5 +412,5 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     os.unlink(os.path.join(folder, files[-1]))
 
     def expire_object(self, object_id: str):
-        if object_id in self.detected_faces:
-            self.detected_faces.pop(object_id)
+        if object_id in self.person_face_history:
+            self.person_face_history.pop(object_id)
