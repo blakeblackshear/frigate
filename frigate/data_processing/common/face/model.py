@@ -8,7 +8,7 @@ from scipy import stats
 
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.embeddings.onnx.facenet import FaceNetEmbedding
+from frigate.embeddings.onnx.facenet import ArcfaceEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -202,7 +202,7 @@ class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
-        self.face_embedder: FaceNetEmbedding = FaceNetEmbedding()
+        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding()
 
     def clear(self) -> None:
         self.mean_embs = {}

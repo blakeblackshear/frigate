@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 FACE_EMBEDDING_SIZE = 112
 
 
-class FaceNetEmbedding(BaseEmbedding):
+class ArcfaceEmbedding(BaseEmbedding):
     def __init__(
         self,
         device: str = "AUTO",
@@ -25,7 +25,7 @@ class FaceNetEmbedding(BaseEmbedding):
             model_name="facedet",
             model_file="facenet.onnx",
             download_urls={
-                "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.onnx",
+                "arcface.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
             },
         )
         self.device = device
