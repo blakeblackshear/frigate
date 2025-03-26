@@ -53,12 +53,15 @@ class CameraState:
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
-        self.max_update_frequency = (
+        self.requires_face_detection = (
+            self.config.face_recognition.enabled
+            and "face" not in self.config.objects.all_objects
+        )
+
+    def get_max_update_frequency(self, obj: TrackedObject) -> int:
+        return (
             1
-            if (
-                self.config.face_recognition.enabled
-                and "face" not in self.config.objects.all_objects
-            )
+            if self.requires_face_detection and obj.obj_data["label"] == "person"
             else 5
         )
 
@@ -295,7 +298,8 @@ class CameraState:
             # and the last update is greater than the last publish or
             # the object has changed significantly
             if (
-                frame_time - updated_obj.last_published > self.max_update_frequency
+                frame_time - updated_obj.last_published
+                > self.get_max_update_frequency(updated_obj)
                 and updated_obj.last_updated > updated_obj.last_published
             ) or significant_update:
                 # call event handlers
