@@ -424,7 +424,7 @@ export default function ClassificationSettingsView({
               }
             >
               <SelectTrigger className="w-20">
-                {classificationSettings.search.model_size}
+                {classificationSettings.face.model_size}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
