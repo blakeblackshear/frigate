@@ -107,7 +107,19 @@
     "faceRecognition": {
       "title": "Face Recognition",
       "desc": "Face recognition allows people to be assigned names and when their face is recognized Frigate will assign the person's name as a sub label. This information is included in the UI, filters, as well as in notifications.",
-      "readTheDocumentation": "Read the Documentation"
+      "readTheDocumentation": "Read the Documentation",
+      "modelSize": {
+        "label": "Model Size",
+        "desc": "The size of the model used for face recognition.",
+        "small": {
+          "title": "small",
+          "desc": "Using <em>small</em> employs a Local Binary Pattern Histogram model via OpenCV that runs efficiently on most CPUs."
+        },
+        "large": {
+          "title": "large",
+          "desc": "Using <em>large</em> employs an ArcFace Face embedding model and will automatically run on the GPU if applicable."
+        }
+      }
     },
     "licensePlateRecognition": {
       "title": "License Plate Recognition",
@@ -115,7 +127,7 @@
       "readTheDocumentation": "Read the Documentation"
     },
     "toast": {
-      "success": "Classification settings have been saved.",
+      "success": "Classification settings have been saved. Restart Frigate to apply your changes.",
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },

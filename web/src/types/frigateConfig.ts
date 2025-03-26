@@ -333,6 +333,7 @@ export interface FrigateConfig {
 
   face_recognition: {
     enabled: boolean;
+    model_size: SearchModelSize;
     detection_threshold: number;
     recognition_threshold: number;
   };

@@ -30,6 +30,7 @@ type ClassificationSettings = {
   };
   face: {
     enabled?: boolean;
+    model_size?: SearchModelSize;
   };
   lpr: {
     enabled?: boolean;
@@ -59,6 +60,7 @@ export default function ClassificationSettingsView({
       },
       face: {
         enabled: undefined,
+        model_size: undefined,
       },
       lpr: {
         enabled: undefined,
@@ -74,6 +76,7 @@ export default function ClassificationSettingsView({
       },
       face: {
         enabled: undefined,
+        model_size: undefined,
       },
       lpr: {
         enabled: undefined,
@@ -91,6 +94,7 @@ export default function ClassificationSettingsView({
           },
           face: {
             enabled: config.face_recognition.enabled,
+            model_size: config.face_recognition.model_size,
           },
           lpr: {
             enabled: config.lpr.enabled,
@@ -106,6 +110,7 @@ export default function ClassificationSettingsView({
         },
         face: {
           enabled: config.face_recognition.enabled,
+          model_size: config.face_recognition.model_size,
         },
         lpr: {
           enabled: config.lpr.enabled,
@@ -136,7 +141,7 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
         {
           requires_restart: 0,
         },
@@ -384,6 +389,61 @@ export default function ClassificationSettingsView({
                 </Label>
               </div>
             </div>
+            <div className="space-y-0.5">
+              <div className="text-md">
+                {t("classification.faceRecognition.modelSize.label")}
+              </div>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <p>
+                  <Trans ns="views/settings">
+                    classification.faceRecognition.modelSize.desc
+                  </Trans>
+                </p>
+                <ul className="list-disc pl-5 text-sm">
+                  <li>
+                    <Trans ns="views/settings">
+                      classification.faceRecognition.modelSize.small.desc
+                    </Trans>
+                  </li>
+                  <li>
+                    <Trans ns="views/settings">
+                      classification.faceRecognition.modelSize.large.desc
+                    </Trans>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <Select
+              value={classificationSettings.face.model_size}
+              onValueChange={(value) =>
+                handleClassificationConfigChange({
+                  face: {
+                    model_size: value as SearchModelSize,
+                  },
+                })
+              }
+            >
+              <SelectTrigger className="w-20">
+                {classificationSettings.search.model_size}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {["small", "large"].map((size) => (
+                    <SelectItem
+                      key={size}
+                      className="cursor-pointer"
+                      value={size}
+                    >
+                      {t(
+                        "classification.faceRecognition.modelSize." +
+                          size +
+                          ".title",
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <Separator className="my-2 flex bg-secondary" />
