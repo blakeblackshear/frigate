@@ -20,7 +20,7 @@
     "@docusaurus/core": "^3.6.3",
     "@docusaurus/preset-classic": "^3.6.3",
     "@docusaurus/theme-mermaid": "^3.6.3",
-    "@docusaurus/plugin-content-docs": "^3.6.3",
+    "@docusaurus/plugin-content-docs": "^3.7.0",
     "@mdx-js/react": "^3.1.0",
     "clsx": "^2.1.1",
     "docusaurus-plugin-openapi-docs": "^4.3.1",
