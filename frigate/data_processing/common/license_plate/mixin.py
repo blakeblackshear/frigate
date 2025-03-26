@@ -1135,9 +1135,9 @@ class LicensePlateProcessingMixin:
 
                 license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
-                # Expand the license_plate_box by 30%
+                # Expand the license_plate_box by 10%
                 box_array = np.array(license_plate_box)
-                expansion = (box_array[2:] - box_array[:2]) * 0.30
+                expansion = (box_array[2:] - box_array[:2]) * 0.10
                 expanded_box = np.array(
                     [
                         license_plate_box[0] - expansion[0],
