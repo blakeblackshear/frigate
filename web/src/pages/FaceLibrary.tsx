@@ -33,7 +33,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -451,7 +451,7 @@ function TrainingGrid({
             key={image}
             image={image}
             faceNames={faceNames}
-            threshold={config.face_recognition.recognition_threshold}
+            recognitionConfig={config.face_recognition}
             selected={selectedFaces.includes(image)}
             onClick={(data, meta) => {
               if (meta) {
@@ -471,7 +471,7 @@ function TrainingGrid({
 type FaceAttemptProps = {
   image: string;
   faceNames: string[];
-  threshold: number;
+  recognitionConfig: FaceRecognitionConfig;
   selected: boolean;
   onClick: (data: RecognizedFaceData, meta: boolean) => void;
   onRefresh: () => void;
@@ -479,7 +479,7 @@ type FaceAttemptProps = {
 function FaceAttempt({
   image,
   faceNames,
-  threshold,
+  recognitionConfig,
   selected,
   onClick,
   onRefresh,
@@ -495,6 +495,16 @@ function FaceAttempt({
       score: Number.parseFloat(parts[3]),
     };
   }, [image]);
+
+  const scoreStatus = useMemo(() => {
+    if (data.score >= recognitionConfig.recognition_threshold) {
+      return "match";
+    } else if (data.score >= recognitionConfig.unknown_score) {
+      return "potential";
+    } else {
+      return "unknown";
+    }
+  }, [data, recognitionConfig]);
 
   // interaction
 
@@ -579,10 +589,13 @@ function FaceAttempt({
             <div className="capitalize">{data.name}</div>
             <div
               className={cn(
-                data.score >= threshold ? "text-success" : "text-danger",
+                "",
+                scoreStatus == "match" && "text-success",
+                scoreStatus == "potential" && "text-orange-400",
+                scoreStatus == "unknown" && "text-danger",
               )}
             >
-              {data.score * 100}%
+              {Math.round(data.score * 100)}%
             </div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">

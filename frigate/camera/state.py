@@ -5,7 +5,7 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Callable
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -53,8 +53,19 @@ class CameraState:
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
+        self.requires_face_detection = (
+            self.config.face_recognition.enabled
+            and "face" not in self.config.objects.all_objects
+        )
 
-    def get_current_frame(self, draw_options={}):
+    def get_max_update_frequency(self, obj: TrackedObject) -> int:
+        return (
+            1
+            if self.requires_face_detection and obj.obj_data["label"] == "person"
+            else 5
+        )
+
+    def get_current_frame(self, draw_options: dict[str, Any] = {}):
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
@@ -283,11 +294,12 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than 5 seconds since the last thumb update
+            # if it has been more than max_update_frequency seconds since the last thumb update
             # and the last update is greater than the last publish or
             # the object has changed significantly
             if (
-                frame_time - updated_obj.last_published > 5
+                frame_time - updated_obj.last_published
+                > self.get_max_update_frequency(updated_obj)
                 and updated_obj.last_updated > updated_obj.last_published
             ) or significant_update:
                 # call event handlers

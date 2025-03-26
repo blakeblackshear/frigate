@@ -36,36 +36,6 @@ MAX_DETECTION_HEIGHT = 1080
 MIN_MATCHING_FACES = 2
 
 
-def weighted_average_by_area(results_list: list[tuple[str, float, int]]):
-    if len(results_list) < 3:
-        return "unknown", 0.0
-
-    score_count = {}
-    weighted_scores = {}
-    total_face_areas = {}
-
-    for name, score, face_area in results_list:
-        if name not in weighted_scores:
-            score_count[name] = 1
-            weighted_scores[name] = 0.0
-            total_face_areas[name] = 0.0
-        else:
-            score_count[name] += 1
-
-        weighted_scores[name] += score * face_area
-        total_face_areas[name] += face_area
-
-    prominent_name = max(score_count)
-
-    # if a single name is not prominent in the history then we are not confident
-    if score_count[prominent_name] / len(results_list) < 0.65:
-        return "unknown", 0.0
-
-    return prominent_name, weighted_scores[prominent_name] / total_face_areas[
-        prominent_name
-    ]
-
-
 class FaceRealTimeProcessor(RealTimeProcessorApi):
     def __init__(
         self,
@@ -271,6 +241,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         sub_label, score = res
 
+        if score < self.face_config.unknown_score:
+            sub_label = "unknown"
+
         logger.debug(
             f"Detected best face for person as: {sub_label} with probability {score}"
         )
@@ -288,7 +261,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.person_face_history[id].append(
             (sub_label, score, face_frame.shape[0] * face_frame.shape[1])
         )
-        (weighted_sub_label, weighted_score) = weighted_average_by_area(
+        (weighted_sub_label, weighted_score) = self.weighted_average_by_area(
             self.person_face_history[id]
         )
 
@@ -415,3 +388,34 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def expire_object(self, object_id: str):
         if object_id in self.person_face_history:
             self.person_face_history.pop(object_id)
+
+    def weighted_average_by_area(self, results_list: list[tuple[str, float, int]]):
+        min_faces = 1 if self.requires_face_detection else 3
+
+        if len(results_list) < min_faces:
+            return "unknown", 0.0
+
+        score_count = {}
+        weighted_scores = {}
+        total_face_areas = {}
+
+        for name, score, face_area in results_list:
+            if name not in weighted_scores:
+                score_count[name] = 1
+                weighted_scores[name] = 0.0
+                total_face_areas[name] = 0.0
+            else:
+                score_count[name] += 1
+
+            weighted_scores[name] += score * face_area
+            total_face_areas[name] += face_area
+
+        prominent_name = max(score_count)
+
+        # if a single name is not prominent in the history then we are not confident
+        if score_count[prominent_name] / len(results_list) < 0.65:
+            return "unknown", 0.0
+
+        return prominent_name, weighted_scores[prominent_name] / total_face_areas[
+            prominent_name
+        ]

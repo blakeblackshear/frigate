@@ -22,16 +22,16 @@ Frigate needs to first detect a `face` before it can recognize a face.
 ### Face Recognition
 
 Frigate has support for two face recognition model types:
-- **small**: Frigate will use CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally on the CPU.
-- **large**: Frigate will run a face embedding model, this is only recommended to be run when an integrated or dedicated GPU is available.
 
-In both cases a lightweight face landmark detection model is also used to align faces before running them through the face recognizer.
+- **small**: Frigate will use CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
+- **large**: Frigate will run a face embedding model, this model is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
+
+In both cases a lightweight face landmark detection model is also used to align faces before running the recognition model.
 
 ## Minimum System Requirements
 
-Face recognition is lightweight and runs on the CPU, there are no significantly different system requirements than running Frigate itself when using the `small` model.
-
-When using the `large` model an integrated or discrete GPU is recommended.
+The `small` model is optimized for efficiency and runs on the CPU, there are no significantly different system requirements.
+The `large` model is optimized for accuracy and an integrated or discrete GPU is highly recommended.
 
 ## Configuration
 
@@ -58,6 +58,8 @@ Fine-tune face recognition with these optional parameters:
 ### Recognition
 
 - `model_size`: Which model size to use, options are `small` or `large`
+- `unknown_score`: Min score to mark a person as a potential match, matches below this will be marked as unknown.
+  - Default: `0.8`.
 - `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
   - Default: `0.9`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
@@ -108,13 +110,14 @@ Once straight-on images are performing well, start choosing slightly off-angle i
 
 ## FAQ
 
-### Why is every face tagged as a known face and not unknown?
+### Why can't I bulk upload photos?
 
-Any recognized face with a score >= `min_score` will show in the `Train` tab along with the recognition score. A low scoring face is effectively the same as `unknown`, but includes more information. This does not mean the recognition is not working well, and is part of the importance of choosing the correct `recognition_threshold`.
+It is important to methodically add photos to the library, bulk importing photos (especially from a general photo library) will lead to overfitting in that particular scenario and hurt recognition performance.
 
 ### Why do unknown people score similarly to known people?
 
 This can happen for a few different reasons, but this is usually an indicator that the training set needs to be improved. This is often related to overfitting:
+
 - If you train with only a few images per person, especially if those images are very similar, the recognition model becomes overly specialized to those specific images.
 - When you provide images with different poses, lighting, and expressions, the algorithm extracts features that are consistent across those variations.
 - By training on a diverse set of images, the algorithm becomes less sensitive to minor variations and noise in the input image.
