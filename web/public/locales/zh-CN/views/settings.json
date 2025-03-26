@@ -11,9 +11,9 @@
     "frigatePlus": "Frigate+ 设置 - Frigate"
   },
   "menu": {
-    "uiSettings": "界面设置",
-    "classificationSettings": "分类设置",
-    "cameraSettings": "摄像头设置",
+    "ui": "界面设置",
+    "classification": "分类设置",
+    "cameras": "摄像头设置",
     "masksAndZones": "遮罩/ 区域",
     "motionTuner": "运动调整器",
     "debug": "调试",
@@ -109,16 +109,16 @@
       "desc": "人脸识别功能允许为人物分配名称，当识别到他们的面孔时，Frigate 会将人物的名字作为子标签进行分配。这些信息会显示在界面、过滤器以及通知中。",
       "readTheDocumentation": "阅读文档（英文）",
       "modelSize": {
-          "label": "模型大小",
-          "desc": "用于人脸识别的模型尺寸。",
-          "small": {
-              "title": "小模型",
-              "desc": "使用<em>小模型</em>将采用OpenCV的局部二值模式直方图(LBPH)算法，可在大多数CPU上高效运行。"
-          },
-          "large": {
-              "title": "大模型",
-              "desc": "使用<em>大模型</em>将采用ArcFace人脸嵌入模型，若适用将自动在GPU上运行。"
-          }
+        "label": "模型大小",
+        "desc": "用于人脸识别的模型尺寸。",
+        "small": {
+          "title": "小模型",
+          "desc": "使用<em>小模型</em>将采用OpenCV的局部二值模式直方图(LBPH)算法，可在大多数CPU上高效运行。"
+        },
+        "large": {
+          "title": "大模型",
+          "desc": "使用<em>大模型</em>将采用ArcFace人脸嵌入模型，若适用将自动在GPU上运行。"
+        }
       }
     },
     "licensePlateRecognition": {
@@ -565,8 +565,8 @@
       "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前探测器配置兼容的模型。"
     },
     "toast": {
-        "success": "Frigate+ 设置已保存。请重启 Frigate 以应用更改。",
-        "error": "配置更改保存失败：{{errorMessage}}"
+      "success": "Frigate+ 设置已保存。请重启 Frigate 以应用更改。",
+      "error": "配置更改保存失败：{{errorMessage}}"
     }
   }
 }
