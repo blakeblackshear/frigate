@@ -3,7 +3,7 @@ id: bird_classification
 title: Bird Classification
 ---
 
-Bird classification identifies known bird using a quantized inat bird tensorflow model. When a known bird is recognized, its common name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+Bird classification identifies known birds using a quantized Tensorflow model. When a known bird is recognized, its common name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
 ## Minimum System Requirements
 
