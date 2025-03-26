@@ -229,7 +229,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
             face_frame = face_frame[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
+                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),F
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
 

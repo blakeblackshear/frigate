@@ -547,8 +547,8 @@ semantic_search:
 face_recognition:
   # Optional: Enable semantic search (default: shown below)
   enabled: False
-  # Optional: Minimum face distance score required to save the attempt (default: shown below)
-  min_score: 0.8
+  # Optional: Minimum face distance score required to mark as a potential match (default: shown below)
+  unknown_score: 0.8
   # Optional: Minimum face detection score required to detect a face (default: shown below)
   # NOTE: This only applies when not running a Frigate+ model
   detection_threshold: 0.7
