@@ -20,8 +20,8 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target
 # COPY required individual CUDA deps
 RUN mkdir -p /usr/local/cuda-deps
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda-deps/ && \
-      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda-deps/ ; \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.s* /usr/local/cuda-deps/ && \
+      cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.s* /usr/local/cuda-deps/ ; \
     fi
 
 # Frigate w/ TensorRT Support as separate image
