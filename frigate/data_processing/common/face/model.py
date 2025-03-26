@@ -164,9 +164,7 @@ class LBPHRecognizer(FaceRecognizer):
             return
 
         self.recognizer: cv2.face.LBPHFaceRecognizer = (
-            cv2.face.LBPHFaceRecognizer_create(
-                radius=2, threshold=(1 - self.config.face_recognition.min_score) * 1000
-            )
+            cv2.face.LBPHFaceRecognizer_create(radius=2, threshold=400)
         )
         self.recognizer.train(faces, np.array(labels))
 
@@ -303,8 +301,5 @@ class ArcFaceRecognizer(FaceRecognizer):
             if cosine_similarity > score:
                 score = confidence
                 label = name
-
-        if score < self.config.face_recognition.min_score:
-            return None
 
         return label, round(score * blur_factor, 2)

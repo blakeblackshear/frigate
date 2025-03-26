@@ -54,8 +54,8 @@ class FaceRecognitionConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
-    min_score: float = Field(
-        title="Minimum face distance score required to save the attempt.",
+    unknown_score: float = Field(
+        title="Minimum face distance score required to be marked as a potential match.",
         default=0.8,
         gt=0.0,
         le=1.0,

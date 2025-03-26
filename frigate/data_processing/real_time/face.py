@@ -241,6 +241,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         sub_label, score = res
 
+        if score < self.face_config.unknown_score:
+            sub_label = "unknown"
+
         logger.debug(
             f"Detected best face for person as: {sub_label} with probability {score}"
         )
