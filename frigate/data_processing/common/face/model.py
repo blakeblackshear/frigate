@@ -18,10 +18,7 @@ class FaceRecognizer(ABC):
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.landmark_detector = cv2.face.createFacemarkLBF()
-        self.landmark_detector.loadModel(
-            os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
-        )
+        self.init_landmark_detector()
 
     @abstractmethod
     def build(self) -> None:
@@ -36,6 +33,13 @@ class FaceRecognizer(ABC):
     @abstractmethod
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
+
+    def init_landmark_detector(self) -> None:
+        landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
+
+        if os.path.exists(landmark_model):
+            self.landmark_detector = cv2.face.createFacemarkLBF()
+            self.landmark_detector.loadModel(landmark_model)
 
     def align_face(
         self,
@@ -130,6 +134,7 @@ class LBPHRecognizer(FaceRecognizer):
 
     def build(self):
         if not self.landmark_detector:
+            self.init_landmark_detector()
             return None
 
         labels = []
@@ -207,6 +212,7 @@ class ArcFaceRecognizer(FaceRecognizer):
 
     def build(self):
         if not self.landmark_detector:
+            self.init_landmark_detector()
             return None
 
         face_embeddings_map: dict[str, list[np.ndarray]] = {}
