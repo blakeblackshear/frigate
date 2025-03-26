@@ -1,5 +1,7 @@
 import logging
 import os
+import queue
+import threading
 from abc import ABC, abstractmethod
 
 import cv2
@@ -18,10 +20,7 @@ class FaceRecognizer(ABC):
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.landmark_detector = cv2.face.createFacemarkLBF()
-        self.landmark_detector.loadModel(
-            os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
-        )
+        self.init_landmark_detector()
 
     @abstractmethod
     def build(self) -> None:
@@ -36,6 +35,13 @@ class FaceRecognizer(ABC):
     @abstractmethod
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
+
+    def init_landmark_detector(self) -> None:
+        landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
+
+        if os.path.exists(landmark_model):
+            self.landmark_detector = cv2.face.createFacemarkLBF()
+            self.landmark_detector.loadModel(landmark_model)
 
     def align_face(
         self,
@@ -130,6 +136,7 @@ class LBPHRecognizer(FaceRecognizer):
 
     def build(self):
         if not self.landmark_detector:
+            self.init_landmark_detector()
             return None
 
         labels = []
@@ -201,45 +208,69 @@ class ArcFaceRecognizer(FaceRecognizer):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
         self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding()
+        self.model_builder_queue: queue.Queue | None = None
 
     def clear(self) -> None:
         self.mean_embs = {}
 
-    def build(self):
-        if not self.landmark_detector:
-            return None
+    def run_build_task(self) -> None:
+        self.model_builder_queue = queue.Queue()
 
-        face_embeddings_map: dict[str, list[np.ndarray]] = {}
-        idx = 0
+        def build_model():
+            face_embeddings_map: dict[str, list[np.ndarray]] = {}
+            idx = 0
 
-        dir = "/media/frigate/clips/faces"
-        for name in os.listdir(dir):
-            if name == "train":
-                continue
-
-            face_folder = os.path.join(dir, name)
-
-            if not os.path.isdir(face_folder):
-                continue
-
-            face_embeddings_map[name] = []
-            for image in os.listdir(face_folder):
-                img = cv2.imread(os.path.join(face_folder, image))
-
-                if img is None:
+            dir = "/media/frigate/clips/faces"
+            for name in os.listdir(dir):
+                if name == "train":
                     continue
 
-                img = self.align_face(img, img.shape[1], img.shape[0])
-                emb = self.face_embedder([img])[0].squeeze()
-                face_embeddings_map[name].append(emb)
+                face_folder = os.path.join(dir, name)
 
-            idx += 1
+                if not os.path.isdir(face_folder):
+                    continue
+
+                face_embeddings_map[name] = []
+                for image in os.listdir(face_folder):
+                    img = cv2.imread(os.path.join(face_folder, image))
+
+                    if img is None:
+                        continue
+
+                    img = self.align_face(img, img.shape[1], img.shape[0])
+                    emb = self.face_embedder([img])[0].squeeze()
+                    face_embeddings_map[name].append(emb)
+
+                idx += 1
+
+            self.model_builder_queue.put(face_embeddings_map)
+
+        thread = threading.Thread(target=build_model, daemon=True)
+        thread.start()
+
+    def build(self):
+        if not self.landmark_detector:
+            self.init_landmark_detector()
+            return None
+
+        if self.model_builder_queue is not None:
+            try:
+                face_embeddings_map: dict[str, list[np.ndarray]] = (
+                    self.model_builder_queue.get(timeout=0.1)
+                )
+                self.model_builder_queue = None
+            except queue.Empty:
+                return
+        else:
+            self.run_build_task()
+            return
 
         if not face_embeddings_map:
             return
 
         for name, embs in face_embeddings_map.items():
-            self.mean_embs[name] = stats.trim_mean(embs, 0.15)
+            if embs:
+                self.mean_embs[name] = stats.trim_mean(embs, 0.15)
 
         logger.debug("Finished building ArcFace model")
 

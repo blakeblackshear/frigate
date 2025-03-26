@@ -198,6 +198,16 @@ async def register_face(request: Request, name: str, file: UploadFile):
 
     context: EmbeddingsContext = request.app.embeddings
     result = context.register_face(name, await file.read())
+
+    if not isinstance(result, dict):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": "Could not process request. Try restarting Frigate.",
+            },
+        )
+
     return JSONResponse(
         status_code=200 if result.get("success", True) else 400,
         content=result,
@@ -214,6 +224,16 @@ async def recognize_face(request: Request, file: UploadFile):
 
     context: EmbeddingsContext = request.app.embeddings
     result = context.recognize_face(await file.read())
+
+    if not isinstance(result, dict):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": "Could not process request. Try restarting Frigate.",
+            },
+        )
+
     return JSONResponse(
         status_code=200 if result.get("success", True) else 400,
         content=result,
