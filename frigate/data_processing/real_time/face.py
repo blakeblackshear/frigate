@@ -186,7 +186,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             if not face_box:
                 logger.debug("Detected no faces for person object.")
-                cv2.imwrite(f"/media/frigate/face_detect/{datetime.datetime.now().timestamp()}_miss.jpg", person)
                 return
 
             face_frame = person[
@@ -196,7 +195,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             try:
                 face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-                cv2.imwrite(f"/media/frigate/face_detect/{datetime.datetime.now().timestamp()}_hit.jpg", person)
             except Exception:
                 return
         else:
