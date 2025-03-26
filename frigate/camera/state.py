@@ -5,7 +5,7 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Callable
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -65,7 +65,7 @@ class CameraState:
             else 5
         )
 
-    def get_current_frame(self, draw_options={}):
+    def get_current_frame(self, draw_options: dict[str, Any] = {}):
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
