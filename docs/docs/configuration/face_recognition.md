@@ -23,14 +23,14 @@ Frigate needs to first detect a `face` before it can recognize a face.
 
 Frigate has support for two face recognition model types:
 
-- **small**: Frigate will use CV2 Local Binary Pattern Face Recognizer to recognize faces, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
-- **large**: Frigate will run a face embedding model, this model is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
+- **small**: Frigate will run a small FaceNet embedding model, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
+- **large**: Frigate will run a large ArcFace embedding model, this model is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
 
 In both cases a lightweight face landmark detection model is also used to align faces before running the recognition model.
 
 ## Minimum System Requirements
 
-The `small` model is optimized for efficiency and runs on the CPU, there are no significantly different system requirements.
+The `small` model is optimized for efficiency and runs on the CPU, there are no significantly different system requirements, though users on ultra efficient systems may see CPU spikes.
 The `large` model is optimized for accuracy and an integrated or discrete GPU is highly recommended.
 
 ## Configuration
