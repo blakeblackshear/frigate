@@ -26,7 +26,7 @@ class FaceNetEmbedding(BaseEmbedding):
             model_name="facedet",
             model_file="facenet.onnx",
             download_urls={
-                "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
+                "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.onnx",
             },
         )
         self.device = device
