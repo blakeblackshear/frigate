@@ -176,8 +176,8 @@ export default function ClassificationSettingsView({
       })
       .finally(() => {
         addMessage(
-          "search_settings",
-          `Restart Required (Classification settings changed)`,
+          "search_settings_restart",
+          `Restart required (Classification settings changed)`,
           undefined,
           "search_settings",
         );
