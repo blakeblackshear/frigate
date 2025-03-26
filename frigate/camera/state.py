@@ -53,6 +53,14 @@ class CameraState:
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
+        self.max_update_frequency = (
+            1
+            if (
+                self.config.face_recognition.enabled
+                and "face" not in self.config.objects.all_objects
+            )
+            else 5
+        )
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -283,11 +291,11 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than 5 seconds since the last thumb update
+            # if it has been more than max_update_frequency seconds since the last thumb update
             # and the last update is greater than the last publish or
             # the object has changed significantly
             if (
-                frame_time - updated_obj.last_published > 5
+                frame_time - updated_obj.last_published > self.max_update_frequency
                 and updated_obj.last_updated > updated_obj.last_published
             ) or significant_update:
                 # call event handlers

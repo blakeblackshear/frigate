@@ -243,6 +243,8 @@ class ArcFaceRecognizer(FaceRecognizer):
         for name, embs in face_embeddings_map.items():
             self.mean_embs[name] = stats.trim_mean(embs, 0.15)
 
+        logger.debug("Finished building ArcFace model")
+
     def similarity_to_confidence(
         self, cosine_similarity: float, median=0.3, range_width=0.6, slope_factor=12
     ):
