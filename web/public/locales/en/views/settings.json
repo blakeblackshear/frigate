@@ -11,9 +11,9 @@
     "frigatePlus": "Frigate+ Settings - Frigate"
   },
   "menu": {
-    "uiSettings": "UI Settings",
-    "classificationSettings": "Classification Settings",
-    "cameraSettings": "Camera Settings",
+    "ui": "UI",
+    "classification": "Classification",
+    "cameras": "Camera Settings",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "debug": "Debug",
