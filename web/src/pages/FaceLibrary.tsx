@@ -504,7 +504,7 @@ function FaceAttempt({
     } else {
       return "unknown";
     }
-  }, [data]);
+  }, [data, recognitionConfig]);
 
   // interaction
 
