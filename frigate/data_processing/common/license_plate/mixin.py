@@ -32,10 +32,6 @@ class LicensePlateProcessingMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.requires_license_plate_detection = (
-            "license_plate" not in self.config.objects.all_objects
-        )
-
         self.event_metadata_publisher = EventMetadataPublisher()
 
         self.ctc_decoder = CTCDecoder()
@@ -312,7 +308,6 @@ class LicensePlateProcessingMixin:
 
             # get minimum bounding box (rotated rectangle) around the contour and the smallest side length.
             points, min_side = self._get_min_boxes(contour)
-            logger.debug(f"min side {index}, {min_side}")
 
             if min_side < self.min_size:
                 continue
@@ -320,7 +315,6 @@ class LicensePlateProcessingMixin:
             points = np.array(points)
 
             score = self._box_score(output, contour)
-            logger.debug(f"box score {index}, {score}")
             if self.box_thresh > score:
                 continue
 
@@ -991,21 +985,21 @@ class LicensePlateProcessingMixin:
             license_plate = self._detect_license_plate(rgb)
 
             logger.debug(
-                f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+                f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
             )
             self.__update_yolov9_metrics(
                 datetime.datetime.now().timestamp() - yolov9_start
             )
 
             if not license_plate:
-                logger.debug("Detected no license plates in full frame.")
+                logger.debug(f"{camera}: Detected no license plates in full frame.")
                 return
 
             license_plate_area = (license_plate[2] - license_plate[0]) * (
                 license_plate[3] - license_plate[1]
             )
             if license_plate_area < self.lpr_config.min_area:
-                logger.debug("License plate area below minimum threshold.")
+                logger.debug(f"{camera}: License plate area below minimum threshold.")
                 return
 
             license_plate_frame = rgb[
@@ -1027,13 +1021,15 @@ class LicensePlateProcessingMixin:
 
             # don't run for non car objects
             if obj_data.get("label") != "car":
-                logger.debug("Not a processing license plate for non car object.")
+                logger.debug(
+                    f"{camera}: Not a processing license plate for non car object."
+                )
                 return
 
             # don't run for stationary car objects
             if obj_data.get("stationary") == True:
                 logger.debug(
-                    "Not a processing license plate for a stationary car object."
+                    f"{camera}: Not a processing license plate for a stationary car object."
                 )
                 return
 
@@ -1041,14 +1037,14 @@ class LicensePlateProcessingMixin:
             # that is not a license plate
             if obj_data.get("sub_label") and id not in self.detected_license_plates:
                 logger.debug(
-                    f"Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
+                    f"{camera}: Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
                 )
                 return
 
             license_plate: Optional[dict[str, any]] = None
 
-            if self.requires_license_plate_detection:
-                logger.debug("Running manual license_plate detection.")
+            if "license_plate" not in self.config.cameras[camera].objects.track:
+                logger.debug(f"{camera}: Running manual license_plate detection.")
 
                 car_box = obj_data.get("box")
 
@@ -1071,14 +1067,16 @@ class LicensePlateProcessingMixin:
                 yolov9_start = datetime.datetime.now().timestamp()
                 license_plate = self._detect_license_plate(car)
                 logger.debug(
-                    f"YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
+                    f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
                 )
                 self.__update_yolov9_metrics(
                     datetime.datetime.now().timestamp() - yolov9_start
                 )
 
                 if not license_plate:
-                    logger.debug("Detected no license plates for car object.")
+                    logger.debug(
+                        f"{camera}: Detected no license plates for car object."
+                    )
                     return
 
                 license_plate_area = max(
@@ -1093,7 +1091,7 @@ class LicensePlateProcessingMixin:
                     license_plate_area
                     < self.config.cameras[obj_data["camera"]].lpr.min_area * 2
                 ):
-                    logger.debug("License plate is less than min_area")
+                    logger.debug(f"{camera}: License plate is less than min_area")
                     return
 
                 license_plate_frame = car[
@@ -1103,7 +1101,7 @@ class LicensePlateProcessingMixin:
             else:
                 # don't run for object without attributes
                 if not obj_data.get("current_attributes"):
-                    logger.debug("No attributes to parse.")
+                    logger.debug(f"{camera}: No attributes to parse.")
                     return
 
                 attributes: list[dict[str, any]] = obj_data.get(
@@ -1130,7 +1128,7 @@ class LicensePlateProcessingMixin:
                     or area(license_plate_box)
                     < self.config.cameras[obj_data["camera"]].lpr.min_area
                 ):
-                    logger.debug(f"Invalid license plate box {license_plate}")
+                    logger.debug(f"{camera}: Invalid license plate box {license_plate}")
                     return
 
                 license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -1184,7 +1182,7 @@ class LicensePlateProcessingMixin:
                 )
 
                 logger.debug(
-                    f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
+                    f"{camera}: Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
                 )
         else:
             logger.debug("No text detected")
@@ -1204,7 +1202,7 @@ class LicensePlateProcessingMixin:
         # Check against minimum confidence threshold
         if avg_confidence < self.lpr_config.recognition_threshold:
             logger.debug(
-                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
+                f"{camera}: Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
             )
             return
 
@@ -1223,7 +1221,7 @@ class LicensePlateProcessingMixin:
                     if similarity >= self.similarity_threshold:
                         plate_id = existing_id
                         logger.debug(
-                            f"Matched plate {top_plate} to {data['plate']} (similarity: {similarity:.3f})"
+                            f"{camera}: Matched plate {top_plate} to {data['plate']} (similarity: {similarity:.3f})"
                         )
                         break
             if plate_id is None:
@@ -1231,11 +1229,11 @@ class LicensePlateProcessingMixin:
                     obj_data, top_plate, avg_confidence
                 )
                 logger.debug(
-                    f"New plate event for dedicated LPR camera {plate_id}: {top_plate}"
+                    f"{camera}: New plate event for dedicated LPR camera {plate_id}: {top_plate}"
                 )
             else:
                 logger.debug(
-                    f"Matched existing plate event for dedicated LPR camera {plate_id}: {top_plate}"
+                    f"{camera}: Matched existing plate event for dedicated LPR camera {plate_id}: {top_plate}"
                 )
                 self.detected_license_plates[plate_id]["last_seen"] = current_time
 
@@ -1246,7 +1244,7 @@ class LicensePlateProcessingMixin:
             if self._should_keep_previous_plate(
                 id, top_plate, top_char_confidences, top_area, avg_confidence
             ):
-                logger.debug("Keeping previous plate")
+                logger.debug(f"{camera}: Keeping previous plate")
                 return
 
         # Determine subLabel based on known plates, use regex matching
@@ -1277,7 +1275,9 @@ class LicensePlateProcessingMixin:
 
         if dedicated_lpr:
             # save the best snapshot
-            logger.debug(f"Writing snapshot for {id}, {top_plate}, {current_time}")
+            logger.debug(
+                f"{camera}: Writing snapshot for {id}, {top_plate}, {current_time}"
+            )
             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             self.sub_label_publisher.publish(
                 EventMetadataTypeEnum.save_lpr_snapshot,

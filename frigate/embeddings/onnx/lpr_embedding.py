@@ -261,8 +261,8 @@ class LicensePlateDetector(BaseEmbedding):
     def _preprocess_inputs(self, raw_inputs):
         if isinstance(raw_inputs, list):
             raise ValueError("License plate embedding does not support batch inputs.")
-        # Get image as numpy array
-        img = self._process_image(raw_inputs)
+
+        img = raw_inputs
         height, width, channels = img.shape
 
         # Resize maintaining aspect ratio
