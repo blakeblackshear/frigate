@@ -20,6 +20,14 @@ export interface BirdseyeConfig {
   width: number;
 }
 
+export interface FaceRecognitionConfig {
+  enabled: boolean;
+  model_size: SearchModelSize;
+  unknown_score: number;
+  detection_threshold: number;
+  recognition_threshold: number;
+}
+
 export type SearchModel = "jinav1" | "jinav2";
 export type SearchModelSize = "small" | "large";
 
@@ -331,12 +339,7 @@ export interface FrigateConfig {
 
   environment_vars: Record<string, unknown>;
 
-  face_recognition: {
-    enabled: boolean;
-    model_size: SearchModelSize;
-    detection_threshold: number;
-    recognition_threshold: number;
-  };
+  face_recognition: FaceRecognitionConfig;
 
   ffmpeg: {
     global_args: string[];
