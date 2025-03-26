@@ -7,13 +7,8 @@
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
     "motionTuner": "运动调整器 - Frigate",
     "object": "对象设置 - Frigate",
-    "general": "常规设置 - Frigate"
-  },
-  "dialog": {
-    "unsavedChanges": {
-      "title": "你有未保存的更改。",
-      "desc": "是否要在继续之前保存更改？"
-    }
+    "general": "常规设置 - Frigate",
+    "frigatePlus": "Frigate+ 设置 - Frigate"
   },
   "menu": {
     "uiSettings": "界面设置",
@@ -23,7 +18,14 @@
     "motionTuner": "运动调整器",
     "debug": "调试",
     "users": "用户",
-    "notifications": "通知"
+    "notifications": "通知",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "你有未保存的更改。",
+      "desc": "是否要在继续之前保存更改？"
+    }
   },
   "cameraSetting": {
     "camera": "摄像头",
@@ -105,7 +107,19 @@
     "faceRecognition": {
       "title": "人脸识别",
       "desc": "人脸识别功能允许为人物分配名称，当识别到他们的面孔时，Frigate 会将人物的名字作为子标签进行分配。这些信息会显示在界面、过滤器以及通知中。",
-      "readTheDocumentation": "阅读文档（英文）"
+      "readTheDocumentation": "阅读文档（英文）",
+      "modelSize": {
+          "label": "模型大小",
+          "desc": "用于人脸识别的模型尺寸。",
+          "small": {
+              "title": "小模型",
+              "desc": "使用<em>小模型</em>将采用OpenCV的局部二值模式直方图(LBPH)算法，可在大多数CPU上高效运行。"
+          },
+          "large": {
+              "title": "大模型",
+              "desc": "使用<em>大模型</em>将采用ArcFace人脸嵌入模型，若适用将自动在GPU上运行。"
+          }
+      }
     },
     "licensePlateRecognition": {
       "title": "车牌识别",
@@ -113,7 +127,7 @@
       "readTheDocumentation": "阅读文档（英文）"
     },
     "toast": {
-      "success": "分类设置已保存。",
+      "success": "分类设置已保存，请重启 Frigate 以应用更改。",
       "error": "保存配置更改失败：{{errorMessage}}"
     }
   },
@@ -542,9 +556,17 @@
       "trainDate": "训练日期",
       "baseModel": "基础模型",
       "supportedDetectors": "支持的检测器",
+      "dimensions": "大小",
       "cameras": "摄像头",
       "loading": "正在加载模型信息...",
-      "error": "加载模型信息失败"
+      "error": "加载模型信息失败",
+      "availableModels": "可用模型",
+      "loadingAvailableModels": "正在加载可用模型...",
+      "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前探测器配置兼容的模型。"
+    },
+    "toast": {
+        "success": "Frigate+ 设置已保存。请重启 Frigate 以应用更改。",
+        "error": "配置更改保存失败：{{errorMessage}}"
     }
   }
 }
