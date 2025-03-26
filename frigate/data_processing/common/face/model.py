@@ -245,7 +245,7 @@ class ArcFaceRecognizer(FaceRecognizer):
 
             self.model_builder_queue.put(face_embeddings_map)
 
-        thread = threading.Thread(target=build_model)
+        thread = threading.Thread(target=build_model, daemon=True)
         thread.start()
 
     def build(self):
