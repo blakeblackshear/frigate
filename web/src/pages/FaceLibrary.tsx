@@ -514,8 +514,8 @@ function TrainingGrid({
                     recognitionConfig={config.face_recognition}
                     selected={selectedFaces.includes(data.filename)}
                     onClick={(data, meta) => {
-                      if (meta) {
-                        onClickFace(data.filename, meta);
+                      if (meta || selectedFaces.length > 0) {
+                        onClickFace(data.filename, true);
                       } else {
                         setSelectedEvent(event);
                       }
