@@ -3,6 +3,7 @@ export type FaceLibraryData = {
 };
 
 export type RecognizedFaceData = {
+  filename: string;
   timestamp: number;
   eventId: string;
   name: string;

@@ -32,6 +32,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
+import { Event } from "@/types/event";
 import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
@@ -395,6 +396,41 @@ function TrainingGrid({
 
   // face data
 
+  const faceGroups = useMemo(() => {
+    const groups: { [eventId: string]: RecognizedFaceData[] } = {};
+
+    attemptImages.forEach((image) => {
+      const parts = image.split("-");
+      const data = {
+        filename: image,
+        timestamp: Number.parseFloat(parts[0]),
+        eventId: `${parts[0]}-${parts[1]}`,
+        name: parts[2],
+        score: Number.parseFloat(parts[3]),
+      };
+
+      if (groups[data.eventId]) {
+        groups[data.eventId].push(data);
+      } else {
+        groups[data.eventId] = [data];
+      }
+    });
+
+    return groups;
+  }, [attemptImages]);
+
+  const eventIdsQuery = useMemo(
+    () => Object.keys(faceGroups).join(","),
+    [faceGroups],
+  );
+
+  const { data: events } = useSWR<Event[]>([
+    "event_ids",
+    { ids: eventIdsQuery },
+  ]);
+
+  // selection
+
   const [selectedEvent, setSelectedEvent] = useState<RecognizedFaceData>();
 
   const formattedDate = useFormattedTimestamp(
@@ -404,6 +440,10 @@ function TrainingGrid({
       : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
+
+  if (!events) {
+    return null;
+  }
 
   return (
     <>
@@ -446,30 +486,49 @@ function TrainingGrid({
       </Dialog>
 
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
-        {attemptImages.map((image: string) => (
-          <FaceAttempt
-            key={image}
-            image={image}
-            faceNames={faceNames}
-            recognitionConfig={config.face_recognition}
-            selected={selectedFaces.includes(image)}
-            onClick={(data, meta) => {
-              if (meta) {
-                onClickFace(image, meta);
-              } else {
-                setSelectedEvent(data);
-              }
-            }}
-            onRefresh={onRefresh}
-          />
-        ))}
+        {Object.entries(faceGroups).map(([key, group]) => {
+          const event = events.find((ev) => ev.id == key);
+
+          if (!event) {
+            return null;
+          }
+
+          return (
+            <div className="flex flex-col gap-2 rounded-lg bg-card p-4">
+              <div className="capitalize">
+                {event.label} ({Math.round(event.data.top_score * 100)}%){" "}
+                {event.sub_label &&
+                  `${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`}
+              </div>
+              <div className="flex flex-row">
+                {group.map((data: RecognizedFaceData) => (
+                  <FaceAttempt
+                    key={data.timestamp}
+                    data={data}
+                    faceNames={faceNames}
+                    recognitionConfig={config.face_recognition}
+                    selected={selectedFaces.includes(data.filename)}
+                    onClick={(data, meta) => {
+                      if (meta) {
+                        onClickFace(data.filename, meta);
+                      } else {
+                        setSelectedEvent(data);
+                      }
+                    }}
+                    onRefresh={onRefresh}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );
 }
 
 type FaceAttemptProps = {
-  image: string;
+  data: RecognizedFaceData;
   faceNames: string[];
   recognitionConfig: FaceRecognitionConfig;
   selected: boolean;
@@ -477,7 +536,7 @@ type FaceAttemptProps = {
   onRefresh: () => void;
 };
 function FaceAttempt({
-  image,
+  data,
   faceNames,
   recognitionConfig,
   selected,
@@ -485,16 +544,6 @@ function FaceAttempt({
   onRefresh,
 }: FaceAttemptProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
-  const data = useMemo<RecognizedFaceData>(() => {
-    const parts = image.split("-");
-
-    return {
-      timestamp: Number.parseFloat(parts[0]),
-      eventId: `${parts[0]}-${parts[1]}`,
-      name: parts[2],
-      score: Number.parseFloat(parts[3]),
-    };
-  }, [image]);
 
   const scoreStatus = useMemo(() => {
     if (data.score >= recognitionConfig.recognition_threshold) {
@@ -519,7 +568,9 @@ function FaceAttempt({
   const onTrainAttempt = useCallback(
     (trainName: string) => {
       axios
-        .post(`/faces/train/${trainName}/classify`, { training_file: image })
+        .post(`/faces/train/${trainName}/classify`, {
+          training_file: data.eventId,
+        })
         .then((resp) => {
           if (resp.status == 200) {
             toast.success(t("toast.success.trainedFace"), {
@@ -538,12 +589,12 @@ function FaceAttempt({
           });
         });
     },
-    [image, onRefresh, t],
+    [data, onRefresh, t],
   );
 
   const onReprocess = useCallback(() => {
     axios
-      .post(`/faces/reprocess`, { training_file: image })
+      .post(`/faces/reprocess`, { training_file: data.filename })
       .then((resp) => {
         if (resp.status == 200) {
           toast.success(t("toast.success.updatedFaceScore"), {
@@ -561,7 +612,7 @@ function FaceAttempt({
           position: "top-center",
         });
       });
-  }, [image, onRefresh, t]);
+  }, [data, onRefresh, t]);
 
   return (
     <div
@@ -576,7 +627,7 @@ function FaceAttempt({
         <img
           ref={imgRef}
           className="size-44"
-          src={`${baseUrl}clips/faces/train/${image}`}
+          src={`${baseUrl}clips/faces/train/${data.filename}`}
           onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
         />
         <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
