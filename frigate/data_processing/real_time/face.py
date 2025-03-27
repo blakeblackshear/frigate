@@ -261,7 +261,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.person_face_history[id].append(
             (sub_label, score, face_frame.shape[0] * face_frame.shape[1])
         )
-        (weighted_sub_label, weighted_score) = self.weighted_average_by_area(
+        (weighted_sub_label, weighted_score) = self.weighted_average(
             self.person_face_history[id]
         )
 
@@ -389,24 +389,45 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if object_id in self.person_face_history:
             self.person_face_history.pop(object_id)
 
-    def weighted_average_by_area(self, results_list: list[tuple[str, float, int]]):
-        score_count = {}
+    def weighted_average(
+        self, results_list: list[tuple[str, float, int]], max_weight: int = 4000
+    ):
+        """
+        Calculates a robust weighted average, capping the area weight and giving more weight to higher scores.
+
+        Args:
+            results_list: A list of tuples, where each tuple contains (name, score, face_area).
+            max_weight: The maximum weight to apply based on face area.
+
+        Returns:
+            A tuple containing the prominent name and its weighted average score, or (None, 0.0) if the list is empty.
+        """
+        if not results_list:
+            return None, 0.0
+
         weighted_scores = {}
-        total_face_areas = {}
+        total_weights = {}
 
         for name, score, face_area in results_list:
+            if name == "unknown":
+                continue
+
             if name not in weighted_scores:
-                score_count[name] = 1
                 weighted_scores[name] = 0.0
-                total_face_areas[name] = 0.0
-            else:
-                score_count[name] += 1
+                total_weights[name] = 0.0
 
-            weighted_scores[name] += score * face_area
-            total_face_areas[name] += face_area
+            # Capped weight based on face area
+            weight = min(face_area, max_weight)
 
-        prominent_name = max(score_count)
+            # Score-based weighting (higher scores get more weight)
+            weight *= (score - self.face_config.unknown_score) * 10
+            weighted_scores[name] += score * weight
+            total_weights[name] += weight
 
-        return prominent_name, weighted_scores[prominent_name] / total_face_areas[
-            prominent_name
-        ]
+        if not weighted_scores:
+            return None, 0.0
+
+        best_name = max(weighted_scores, key=weighted_scores.get)
+        weighted_average = weighted_scores[best_name] / total_weights[best_name]
+
+        return best_name, weighted_average
