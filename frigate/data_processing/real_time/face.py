@@ -21,8 +21,8 @@ from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
     ArcFaceRecognizer,
+    FaceNetRecognizer,
     FaceRecognizer,
-    LBPHRecognizer,
 )
 from frigate.util.image import area
 
@@ -78,7 +78,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.label_map: dict[int, str] = {}
 
         if self.face_config.model_size == "small":
-            self.recognizer = LBPHRecognizer(self.config)
+            self.recognizer = FaceNetRecognizer(self.config)
         else:
             self.recognizer = ArcFaceRecognizer(self.config)
 
