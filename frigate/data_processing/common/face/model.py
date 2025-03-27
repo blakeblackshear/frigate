@@ -10,7 +10,7 @@ from scipy import stats
 
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.embeddings.onnx.facenet import ArcfaceEmbedding
+from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -329,7 +329,7 @@ class ArcFaceRecognizer(FaceRecognizer):
             cosine_similarity = dot_product / (magnitude_A * magnitude_B)
             confidence = self.similarity_to_confidence(cosine_similarity)
 
-            if cosine_similarity > score:
+            if confidence > score:
                 score = confidence
                 label = name
 

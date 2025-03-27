@@ -90,8 +90,7 @@ class ArcfaceEmbedding(BaseEmbedding):
         frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
 
         # run arcface normalization
-        normalized_image = frame.astype(np.float32) / 255.0
-        frame = (normalized_image - 0.5) / 0.5
+        frame = (frame / 127.5) - 1.0
 
         frame = np.transpose(frame, (2, 0, 1))
         frame = np.expand_dims(frame, axis=0)
