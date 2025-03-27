@@ -37,8 +37,9 @@ class ClassificationConfig(FrigateBaseModel):
 
 class SemanticSearchConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable semantic search.")
-    reindex: Optional[bool] = Field(
-        default=False, title="Reindex all tracked objects on startup."
+    reindex_next_startup: Optional[bool] = Field(
+        default=False,
+        title="Reindex all tracked objects on next startup. Resets to false on completion.",
     )
     model: Optional[SemanticSearchModelEnum] = Field(
         default=SemanticSearchModelEnum.jinav1,

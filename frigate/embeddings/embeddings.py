@@ -20,7 +20,8 @@ from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
-from frigate.util.builtin import serialize
+from frigate.util.builtin import serialize, update_yaml_file
+from frigate.util.config import find_config_file
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
@@ -366,5 +367,13 @@ class Embeddings:
             round(time.time() - st, 1),
         )
         totals["status"] = "completed"
+
+        self.config.semantic_search.reindex_next_startup = False
+
+        update_yaml_file(
+            find_config_file(),
+            ["semantic_search", "reindex_next_startup"],
+            False,
+        )
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)

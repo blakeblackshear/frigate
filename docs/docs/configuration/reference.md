@@ -535,7 +535,8 @@ semantic_search:
   # Optional: Enable semantic search (default: shown below)
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
-  reindex: False
+  # Resets on successful completion
+  reindex_next_startup: False
   # Optional: Set the model used for embeddings. (default: shown below)
   model: "jinav1"
   # Optional: Set the model size used for embeddings. (default: shown below)

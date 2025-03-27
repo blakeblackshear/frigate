@@ -89,7 +89,7 @@
       "readTheDocumentation": "Read the Documentation",
       "reindexOnStartup": {
         "label": "Re-Index On Startup",
-        "desc": "Re-indexing will reprocess all thumbnails and descriptions (if enabled) and apply the embeddings on each startup. <em>Don't forget to disable the option after restarting!</em>"
+        "desc": "Re-indexing will reprocess all thumbnails and descriptions (if enabled) and apply the embeddings at next startup. This field will be reset after successfully completing."
       },
       "modelSize": {
         "label": "Model Size",

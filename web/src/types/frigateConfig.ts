@@ -486,7 +486,7 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
-    reindex: boolean;
+    reindex_next_startup: boolean;
     model: SearchModel;
     model_size: SearchModelSize;
   };

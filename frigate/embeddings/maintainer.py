@@ -85,7 +85,7 @@ class EmbeddingMaintainer(threading.Thread):
             self.embeddings = Embeddings(config, db, metrics)
 
             # Check if we need to re-index events
-            if config.semantic_search.reindex:
+            if config.semantic_search.reindex_next_startup:
                 self.embeddings.reindex()
 
         # create communication for updating event descriptions

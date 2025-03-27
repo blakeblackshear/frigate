@@ -25,7 +25,7 @@ import { Trans, useTranslation } from "react-i18next";
 type ClassificationSettings = {
   search: {
     enabled?: boolean;
-    reindex?: boolean;
+    reindex_next_startup?: boolean;
     model_size?: SearchModelSize;
   };
   face: {
@@ -55,7 +55,7 @@ export default function ClassificationSettingsView({
     useState<ClassificationSettings>({
       search: {
         enabled: undefined,
-        reindex: undefined,
+        reindex_next_startup: undefined,
         model_size: undefined,
       },
       face: {
@@ -71,7 +71,7 @@ export default function ClassificationSettingsView({
     useState<ClassificationSettings>({
       search: {
         enabled: undefined,
-        reindex: undefined,
+        reindex_next_startup: undefined,
         model_size: undefined,
       },
       face: {
@@ -89,7 +89,7 @@ export default function ClassificationSettingsView({
         setClassificationSettings({
           search: {
             enabled: config.semantic_search.enabled,
-            reindex: config.semantic_search.reindex,
+            reindex_next_startup: config.semantic_search.reindex_next_startup,
             model_size: config.semantic_search.model_size,
           },
           face: {
@@ -105,7 +105,7 @@ export default function ClassificationSettingsView({
       setOrigSearchSettings({
         search: {
           enabled: config.semantic_search.enabled,
-          reindex: config.semantic_search.reindex,
+          reindex_next_startup: config.semantic_search.reindex_next_startup,
           model_size: config.semantic_search.model_size,
         },
         face: {
@@ -141,7 +141,7 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex_next_startup=${classificationSettings.search.reindex_next_startup ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
         {
           requires_restart: 0,
         },
@@ -267,11 +267,11 @@ export default function ClassificationSettingsView({
               <Switch
                 id="reindex"
                 className="mr-3"
-                disabled={classificationSettings.search.reindex === undefined}
-                checked={classificationSettings.search.reindex === true}
+                disabled={classificationSettings.search.reindex_next_startup === undefined}
+                checked={classificationSettings.search.reindex_next_startup === true}
                 onCheckedChange={(isChecked) => {
                   handleClassificationConfigChange({
-                    search: { reindex: isChecked },
+                    search: { reindex_next_startup: isChecked },
                   });
                 }}
               />

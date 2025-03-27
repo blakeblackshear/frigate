@@ -24,14 +24,14 @@ Semantic Search is disabled by default, and must be enabled in your config file 
 ```yaml
 semantic_search:
   enabled: True
-  reindex: False
+  reindex_next_startup: False
 ```
 
 :::tip
 
-The embeddings database can be re-indexed from the existing tracked objects in your database by adding `reindex: True` to your `semantic_search` configuration or by toggling the switch on the Search Settings page in the UI and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing. Make sure to turn the UI's switch off or set the config back to `False` before restarting Frigate again.
+The embeddings database can be re-indexed from the existing tracked objects in your database by adding `reindex_next_startup: True` to your `semantic_search` configuration or by toggling the switch on the Search Settings page in the UI and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing. Once completed, this will automatically be set back to `False`.
 
-If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to enable the `reindex` feature in order to do that.
+If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to enable the `reindex_next_startup` feature in order to do that.
 
 :::
 
