@@ -365,7 +365,6 @@ export default function ObjectLifecycle({
       <div
         className={cn(
           "relative mx-auto flex max-h-[50dvh] flex-row justify-center",
-          !imgLoaded && aspectRatio < 16 / 9 && "h-full",
         )}
         style={{
           aspectRatio: !imgLoaded ? aspectRatio : undefined,
