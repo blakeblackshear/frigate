@@ -40,14 +40,14 @@ lpr:
   enabled: True
 ```
 
-You can also enable it for specific cameras only at the camera level:
+Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You can disable it for specific cameras at the camera level:
 
 ```yaml
 cameras:
   driveway:
     ...
     lpr:
-      enabled: True
+      enabled: False
 ```
 
 For non-dedicated LPR cameras, ensure that your camera is configured to detect objects of type `car`, and that a car is actually being detected by Frigate. Otherwise, LPR will not run.
@@ -195,11 +195,15 @@ When using `type: "lpr"` for a camera, a non-standard object detection pipeline 
 
 Ensure that:
 
-- Your camera has a clear, human-readable, well-lit view of the plate. If you can't read the plate, Frigate certainly won't be able to. This may require changing video size, quality, or frame rate settings on your camera, depending on your scene and how fast the vehicles are traveling.
+- Your camera has a clear, human-readable, well-lit view of the plate. If you can't read the plate's characters, Frigate certainly won't be able to, even if the model is recognizing a `license_plate`. This may require changing video size, quality, or frame rate settings on your camera, depending on your scene and how fast the vehicles are traveling.
 - The plate is large enough in the image (try adjusting `min_area`) or increasing the resolution of your camera's stream.
 
 If you are using a Frigate+ model or a custom model that detects license plates, ensure that `license_plate` is added to your list of objects to track.
 If you are using the free model that ships with Frigate, you should _not_ add `license_plate` to the list of objects to track.
+
+Recognized plates will show as object labels in the debug view and will appear in the "Recognized License Plates" select box in the More Filters popout in Explore.
+
+If you are still having issues detecting plates, start with a basic configuration and see the debugging tips below.
 
 ### Can I run LPR without detecting `car` objects?
 
@@ -222,9 +226,17 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 ### How do I debug LPR issues?
 
 - View MQTT messages for `frigate/events` to verify detected plates.
-- Adjust `detection_threshold` and `recognition_threshold` settings.
 - If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car`.
+- Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` label will change to the recognized plate when LPR is enabled and working.
+- Adjust `detection_threshold` and `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
 - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
+
+  ```yaml
+  logger:
+    default: info
+    logs:
+      frigate.data_processing.common.license_plate: debug
+  ```
 
 ### Will LPR slow down my system?
 

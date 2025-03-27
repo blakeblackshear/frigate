@@ -399,19 +399,25 @@ export default function Explore() {
                   )}
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      t("exploreIsUnavailable.embeddingsReindexing.step.thumbnailsEmbedded")
+                      {t(
+                        "exploreIsUnavailable.embeddingsReindexing.step.thumbnailsEmbedded",
+                      )}
                     </span>
                     {reindexState.thumbnails}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      t("exploreIsUnavailable.embeddingsReindexing.step.descriptionsEmbedded")
+                      {t(
+                        "exploreIsUnavailable.embeddingsReindexing.step.descriptionsEmbedded",
+                      )}
                     </span>
                     {reindexState.descriptions}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
-                      t("exploreIsUnavailable.embeddingsReindexing.step.trackedObjectsProcessed")
+                      {t(
+                        "exploreIsUnavailable.embeddingsReindexing.step.trackedObjectsProcessed",
+                      )}
                     </span>
                     {reindexState.processed_objects} /{" "}
                     {reindexState.total_objects}
