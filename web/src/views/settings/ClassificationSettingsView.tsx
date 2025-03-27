@@ -267,8 +267,13 @@ export default function ClassificationSettingsView({
               <Switch
                 id="reindex"
                 className="mr-3"
-                disabled={classificationSettings.search.reindex_next_startup === undefined}
-                checked={classificationSettings.search.reindex_next_startup === true}
+                disabled={
+                  classificationSettings.search.reindex_next_startup ===
+                  undefined
+                }
+                checked={
+                  classificationSettings.search.reindex_next_startup === true
+                }
                 onCheckedChange={(isChecked) => {
                   handleClassificationConfigChange({
                     search: { reindex_next_startup: isChecked },
