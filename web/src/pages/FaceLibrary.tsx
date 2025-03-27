@@ -408,7 +408,7 @@ function TrainingGrid({
   const faceGroups = useMemo(() => {
     const groups: { [eventId: string]: RecognizedFaceData[] } = {};
 
-    attemptImages.forEach((image) => {
+    new Set(attemptImages).forEach((image) => {
       const parts = image.split("-");
       const data = {
         filename: image,
@@ -504,7 +504,10 @@ function TrainingGrid({
           const event = events?.find((ev) => ev.id == key);
 
           return (
-            <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
+            <div
+              key={key}
+              className="flex flex-col gap-2 rounded-lg bg-card p-2"
+            >
               <div className="flex flex-row justify-between">
                 <div className="capitalize">
                   Person
