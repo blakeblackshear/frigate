@@ -450,10 +450,6 @@ function TrainingGrid({
     config?.ui.timezone,
   );
 
-  if (!events) {
-    return null;
-  }
-
   return (
     <>
       <Dialog
@@ -500,14 +496,14 @@ function TrainingGrid({
 
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
         {Object.entries(faceGroups).map(([key, group]) => {
-          const event = events.find((ev) => ev.id == key);
+          const event = events?.find((ev) => ev.id == key);
 
           return (
             <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
               <div className="flex flex-row justify-between">
                 <div className="capitalize">
                   Person
-                  {event && event?.sub_label
+                  {event?.sub_label
                     ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
                     : ": Unknown"}
                 </div>
