@@ -634,13 +634,20 @@ class LicensePlateProcessingMixin:
         else:
             gray = image
 
+        if False:
+            smoothed = cv2.bilateralFilter(gray, d=3, sigmaColor=50, sigmaSpace=50)
+            sharpening_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            processed = cv2.filter2D(smoothed, -1, sharpening_kernel)
+        else:
+            processed = gray
+
         # apply CLAHE for contrast enhancement
         grid_size = (
             max(4, input_w // 40),
             max(4, input_h // 40),
         )
         clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=grid_size)
-        enhanced = clahe.apply(gray)
+        enhanced = clahe.apply(processed)
 
         # Convert back to 3-channel for model compatibility
         image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2RGB)
@@ -1257,9 +1264,10 @@ class LicensePlateProcessingMixin:
                 f"{camera}: Writing snapshot for {id}, {top_plate}, {current_time}"
             )
             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            _, encoded_img = cv2.imencode(".jpg", frame_bgr)
             self.sub_label_publisher.publish(
                 EventMetadataTypeEnum.save_lpr_snapshot,
-                (base64.b64encode(frame_bgr).decode("ASCII"), id, camera),
+                (base64.b64encode(encoded_img).decode("ASCII"), id, camera),
             )
 
         self.detected_license_plates[id] = {
