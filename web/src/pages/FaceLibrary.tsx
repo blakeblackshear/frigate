@@ -506,10 +506,10 @@ function TrainingGrid({
             <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
               <div className="flex flex-row justify-between">
                 <div className="capitalize">
-                  Person:
+                  Person
                   {event && event?.sub_label
-                    ? ` ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-                    : " Unknown"}
+                    ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+                    : ": Unknown"}
                 </div>
                 {event && (
                   <Tooltip>
