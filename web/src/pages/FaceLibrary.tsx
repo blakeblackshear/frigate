@@ -431,10 +431,10 @@ function TrainingGrid({
 
   // selection
 
-  const [selectedEvent, setSelectedEvent] = useState<RecognizedFaceData>();
+  const [selectedEvent, setSelectedEvent] = useState<Event>();
 
   const formattedDate = useFormattedTimestamp(
-    selectedEvent?.timestamp ?? 0,
+    selectedEvent?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
       : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
@@ -462,16 +462,20 @@ function TrainingGrid({
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
-            <div className="text-sm capitalize">{selectedEvent?.name}</div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              {t("details.confidence")}
-            </div>
             <div className="text-sm capitalize">
-              {(selectedEvent?.score || 0) * 100}%
+              {selectedEvent?.sub_label ?? "Unknown"}
             </div>
           </div>
+          {selectedEvent?.data.sub_label_score && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">
+                {t("details.confidence")}
+              </div>
+              <div className="text-sm capitalize">
+                {(selectedEvent?.data?.sub_label_score || 0) * 100}%
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               {t("details.timestamp")}
@@ -480,7 +484,7 @@ function TrainingGrid({
           </div>
           <img
             className="w-full"
-            src={`${baseUrl}api/events/${selectedEvent?.eventId}/thumbnail.jpg`}
+            src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
         </DialogContent>
       </Dialog>
@@ -513,7 +517,7 @@ function TrainingGrid({
                       if (meta) {
                         onClickFace(data.filename, meta);
                       } else {
-                        setSelectedEvent(data);
+                        setSelectedEvent(event);
                       }
                     }}
                     onRefresh={onRefresh}
