@@ -494,13 +494,14 @@ function TrainingGrid({
           }
 
           return (
-            <div className="flex flex-col gap-2 rounded-lg bg-card p-4">
+            <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
               <div className="capitalize">
-                {event.label} ({Math.round(event.data.top_score * 100)}%){" "}
-                {event.sub_label &&
-                  `${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`}
+                {event.label}:
+                {event.sub_label
+                  ? ` ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+                  : " Unknown"}
               </div>
-              <div className="flex flex-row">
+              <div className="flex flex-row flex-wrap gap-2">
                 {group.map((data: RecognizedFaceData) => (
                   <FaceAttempt
                     key={data.timestamp}
@@ -623,7 +624,7 @@ function FaceAttempt({
           : "outline-transparent duration-500",
       )}
     >
-      <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
+      <div className="relative w-full overflow-hidden rounded-lg border border-t-0 *:text-card-foreground">
         <img
           ref={imgRef}
           className="size-44"
@@ -634,7 +635,7 @@ function FaceAttempt({
           <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
         </div>
       </div>
-      <div className="rounded-b-lg bg-card p-2">
+      <div className="p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="capitalize">{data.name}</div>
