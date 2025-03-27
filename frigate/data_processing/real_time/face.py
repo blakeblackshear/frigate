@@ -390,11 +390,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.person_face_history.pop(object_id)
 
     def weighted_average_by_area(self, results_list: list[tuple[str, float, int]]):
-        min_faces = 1 if self.requires_face_detection else 3
-
-        if len(results_list) < min_faces:
-            return "unknown", 0.0
-
         score_count = {}
         weighted_scores = {}
         total_face_areas = {}
