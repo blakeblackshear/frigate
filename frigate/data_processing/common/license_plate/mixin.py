@@ -814,7 +814,9 @@ class LicensePlateProcessingMixin:
                 ]
             ).clip(0, [input.shape[1], input.shape[0]] * 2)
 
-            logger.debug(f"Found license plate: {expanded_box.astype(int)}")
+            logger.debug(
+                f"Found license plate. Bounding box: {expanded_box.astype(int)}"
+            )
             return tuple(expanded_box.astype(int))
         else:
             return None  # No detection above the threshold
