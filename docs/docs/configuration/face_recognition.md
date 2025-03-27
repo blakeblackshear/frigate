@@ -31,6 +31,7 @@ In both cases a lightweight face landmark detection model is also used to align 
 ## Minimum System Requirements
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
+
 The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended.
 
 ## Configuration
@@ -65,7 +66,7 @@ Fine-tune face recognition with these optional parameters:
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
 
-## Dataset
+## Creating a Robust Training Set
 
 The number of images needed for a sufficient training set for face recognition varies depending on several factors:
 
@@ -74,11 +75,9 @@ The number of images needed for a sufficient training set for face recognition v
 
 However, here are some general guidelines:
 
-- Minimum: For basic face recognition tasks, a minimum of 10-20 images per person is often recommended.
-- Recommended: For more robust and accurate systems, 30-50 images per person is a good starting point.
-- Ideal: For optimal performance, especially in challenging conditions, 100 or more images per person can be beneficial.
-
-## Creating a Robust Training Set
+- Minimum: For basic face recognition tasks, a minimum of 5-10 images per person is often recommended.
+- Recommended: For more robust and accurate systems, 20-30 images per person is a good starting point.
+- Ideal: For optimal performance, especially in challenging conditions, 50-100 images per person can be beneficial.
 
 The accuracy of face recognition is heavily dependent on the quality of data given to it for training. It is recommended to build the face training library in phases.
 
@@ -89,7 +88,8 @@ When choosing images to include in the face training set it is recommended to al
 - If it is difficult to make out details in a persons face it will not be helpful in training.
 - Avoid images with extreme under/over-exposure.
 - Avoid blurry / pixelated images.
-- Be careful when uploading images of people when they are wearing clothing that covers a lot of their face as this may confuse the model.
+- Avoid training on infrared (grayscale). The models are trained on color images and will be able to extract features from grayscale images.
+- Using images of people wearing hats / sunglasses may confuse the model.
 - Do not upload too many similar images at the same time, it is recommended to train no more than 4-6 similar images for each person to avoid overfitting.
 
 :::
@@ -124,4 +124,4 @@ This can happen for a few different reasons, but this is usually an indicator th
 
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
-The Frigate face recognizer collects face recognition scores from all of the frames across the person objects lifecycle. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if there is a prominent person recognized. This avoids cases where a single high confidence recognition result would throw off the results.
+The Frigate considers the recognition scores across all recogntion attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
