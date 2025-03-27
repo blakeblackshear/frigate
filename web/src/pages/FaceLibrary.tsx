@@ -460,7 +460,12 @@ function TrainingGrid({
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          className={cn(
+            "",
+            selectedEvent?.has_snapshot && isDesktop && "max-w-7xl",
+          )}
+        >
           <DialogHeader>
             <DialogTitle>{t("details.face")}</DialogTitle>
             <DialogDescription>{t("details.faceDesc")}</DialogDescription>
