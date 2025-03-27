@@ -502,38 +502,36 @@ function TrainingGrid({
         {Object.entries(faceGroups).map(([key, group]) => {
           const event = events.find((ev) => ev.id == key);
 
-          if (!event) {
-            return null;
-          }
-
           return (
             <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
               <div className="flex flex-row justify-between">
                 <div className="capitalize">
-                  {event.label}:
-                  {event.sub_label
+                  Person:
+                  {event && event?.sub_label
                     ? ` ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
                     : " Unknown"}
                 </div>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div
-                      className="cursor-pointer"
-                      onClick={() => {
-                        navigate(`/explore?event_id=${event.id}`);
-                      }}
-                    >
-                      <LuSearch className="size-4 text-muted-foreground" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("details.item.button.viewInExplore", {
-                        ns: "views/explore",
-                      })}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
+                {event && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigate(`/explore?event_id=${event.id}`);
+                        }}
+                      >
+                        <LuSearch className="size-4 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("details.item.button.viewInExplore", {
+                          ns: "views/explore",
+                        })}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                )}
               </div>
 
               <div className="flex flex-row flex-wrap gap-2">
