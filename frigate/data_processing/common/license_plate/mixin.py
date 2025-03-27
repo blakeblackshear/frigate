@@ -634,37 +634,13 @@ class LicensePlateProcessingMixin:
         else:
             gray = image
 
-        # detect noise with Laplacian variance
-        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
-        noise_variance = np.var(laplacian)
-        brightness = cv2.mean(gray)[0]
-        noise_threshold = 70
-        brightness_threshold = 150
-        is_noisy = (
-            noise_variance > noise_threshold and brightness < brightness_threshold
-        )
-
-        # apply bilateral filter and sharpening only if noisy
-        if is_noisy:
-            logger.debug(
-                f"Noise detected (variance: {noise_variance:.1f}, brightness: {brightness:.1f}) - denoising"
-            )
-            smoothed = cv2.bilateralFilter(gray, d=15, sigmaColor=100, sigmaSpace=100)
-            sharpening_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-            processed = cv2.filter2D(smoothed, -1, sharpening_kernel)
-        else:
-            logger.debug(
-                f"No noise detected (variance: {noise_variance:.1f}, brightness: {brightness:.1f}) - skipping denoising and sharpening"
-            )
-            processed = gray
-
         # apply CLAHE for contrast enhancement
         grid_size = (
             max(4, input_w // 40),
             max(4, input_h // 40),
         )
         clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=grid_size)
-        enhanced = clahe.apply(processed)
+        enhanced = clahe.apply(gray)
 
         # Convert back to 3-channel for model compatibility
         image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2RGB)
