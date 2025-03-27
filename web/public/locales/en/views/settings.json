@@ -87,9 +87,15 @@
       "title": "Semantic Search",
       "desc": "Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one.",
       "readTheDocumentation": "Read the Documentation",
-      "reindexOnStartup": {
-        "label": "Re-Index On Startup",
-        "desc": "Re-indexing will reprocess all thumbnails and descriptions (if enabled) and apply the embeddings on each startup. <em>Don't forget to disable the option after restarting!</em>"
+      "reindexNow": {
+        "label": "Reindex Now",
+        "desc": "Reindexing will regenerate embeddings for all tracked object. This process runs in the background and may max out your CPU and take a fair amount of time depending on the number of tracked objects you have.",
+        "confirmTitle": "Confirm Reindexing",
+        "confirmDesc": "Are you sure you want to reindex all tracked object embeddings? This process will run in the background but it may max out your CPU and take a fair amount of time. You can watch the progress on the Explore page.",
+        "confirmButton": "Reindex",
+        "success": "Reindexing started successfully.",
+        "alreadyInProgress": "Reindexing is already in progress.",
+        "error": "Failed to start reindexing: {{errorMessage}}"
       },
       "modelSize": {
         "label": "Model Size",

@@ -17,6 +17,7 @@ class EmbeddingsRequestEnum(Enum):
     register_face = "register_face"
     reprocess_face = "reprocess_face"
     reprocess_plate = "reprocess_plate"
+    reindex = "reindex"
 
 
 class EmbeddingsResponder:
