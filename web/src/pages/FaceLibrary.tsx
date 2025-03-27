@@ -538,7 +538,7 @@ function TrainingGrid({
               <div className="flex flex-row flex-wrap gap-2">
                 {group.map((data: RecognizedFaceData) => (
                   <FaceAttempt
-                    key={data.timestamp}
+                    key={data.filename}
                     data={data}
                     faceNames={faceNames}
                     recognitionConfig={config.face_recognition}
