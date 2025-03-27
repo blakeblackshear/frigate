@@ -253,13 +253,9 @@ class FaceNetRecognizer(FaceRecognizer):
                 cosine_similarity, median=0.5, range_width=0.6
             )
 
-            print(f"got {cosine_similarity} -> {confidence} :: {name}")
-
             if confidence > score:
                 score = confidence
                 label = name
-
-        print("===========================")
 
         return label, round(score * blur_factor, 2)
 
