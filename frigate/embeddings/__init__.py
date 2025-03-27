@@ -236,6 +236,10 @@ class EmbeddingsContext:
         if len(os.listdir(folder)) == 0:
             os.rmdir(folder)
 
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
             EmbeddingsRequestEnum.embed_description.value,

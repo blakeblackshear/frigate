@@ -21,8 +21,8 @@ from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
     ArcFaceRecognizer,
+    FaceNetRecognizer,
     FaceRecognizer,
-    LBPHRecognizer,
 )
 from frigate.util.image import area
 
@@ -78,7 +78,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.label_map: dict[int, str] = {}
 
         if self.face_config.model_size == "small":
-            self.recognizer = LBPHRecognizer(self.config)
+            self.recognizer = FaceNetRecognizer(self.config)
         else:
             self.recognizer = ArcFaceRecognizer(self.config)
 
@@ -411,10 +411,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             total_face_areas[name] += face_area
 
         prominent_name = max(score_count)
-
-        # if a single name is not prominent in the history then we are not confident
-        if score_count[prominent_name] / len(results_list) < 0.65:
-            return "unknown", 0.0
 
         return prominent_name, weighted_scores[prominent_name] / total_face_areas[
             prominent_name
