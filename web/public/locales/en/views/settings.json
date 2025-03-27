@@ -113,11 +113,11 @@
         "desc": "The size of the model used for face recognition.",
         "small": {
           "title": "small",
-          "desc": "Using <em>small</em> employs a Local Binary Pattern Histogram model via OpenCV that runs efficiently on most CPUs."
+          "desc": "Using <em>small</em> employs a FaceNet face embedding model that runs efficiently on most CPUs."
         },
         "large": {
           "title": "large",
-          "desc": "Using <em>large</em> employs an ArcFace Face embedding model and will automatically run on the GPU if applicable."
+          "desc": "Using <em>large</em> employs an ArcFace face embedding model and will automatically run on the GPU if applicable."
         }
       }
     },
