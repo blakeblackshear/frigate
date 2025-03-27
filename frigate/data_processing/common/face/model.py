@@ -20,6 +20,7 @@ class FaceRecognizer(ABC):
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
+        self.landmark_detector: cv2.face.FacemarkLBF = None
         self.init_landmark_detector()
 
     @abstractmethod
