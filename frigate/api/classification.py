@@ -300,7 +300,7 @@ def reprocess_license_plate(request: Request, event_id: str):
     )
 
 
-@router.put("/reindex")
+@router.put("/reindex", dependencies=[Depends(require_role(["admin"]))])
 def reindex_embeddings(request: Request):
     if not request.app.frigate_config.semantic_search.enabled:
         message = (
