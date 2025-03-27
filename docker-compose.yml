@@ -36,6 +36,7 @@ services:
      # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
   mqtt:
     container_name: mqtt
-    image: eclipse-mosquitto:1.6
+    image: eclipse-mosquitto:2.0
+    command: mosquitto -c /mosquitto-no-auth.conf # enable no-auth mode
     ports:
       - "1883:1883"
