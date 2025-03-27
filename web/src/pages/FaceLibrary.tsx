@@ -35,11 +35,19 @@ import { cn } from "@/lib/utils";
 import { Event } from "@/types/event";
 import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
-import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
+import {
+  LuImagePlus,
+  LuRefreshCw,
+  LuScanFace,
+  LuSearch,
+  LuTrash2,
+} from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -392,7 +400,8 @@ function TrainingGrid({
   onClickFace,
   onRefresh,
 }: TrainingGridProps) {
-  const { t } = useTranslation(["views/faceLibrary"]);
+  const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
+  const navigate = useNavigate();
 
   // face data
 
@@ -499,12 +508,34 @@ function TrainingGrid({
 
           return (
             <div className="flex flex-col gap-2 rounded-lg bg-card p-2">
-              <div className="capitalize">
-                {event.label}:
-                {event.sub_label
-                  ? ` ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-                  : " Unknown"}
+              <div className="flex flex-row justify-between">
+                <div className="capitalize">
+                  {event.label}:
+                  {event.sub_label
+                    ? ` ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+                    : " Unknown"}
+                </div>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => {
+                        navigate(`/explore?event_id=${event.id}`);
+                      }}
+                    >
+                      <LuSearch className="size-4 text-muted-foreground" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>
+                      {t("details.item.button.viewInExplore", {
+                        ns: "views/explore",
+                      })}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
               </div>
+
               <div className="flex flex-row flex-wrap gap-2">
                 {group.map((data: RecognizedFaceData) => (
                   <FaceAttempt
