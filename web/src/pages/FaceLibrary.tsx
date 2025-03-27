@@ -545,7 +545,7 @@ function TrainingGrid({
                     onClick={(data, meta) => {
                       if (meta || selectedFaces.length > 0) {
                         onClickFace(data.filename, true);
-                      } else {
+                      } else if (event) {
                         setSelectedEvent(event);
                       }
                     }}
