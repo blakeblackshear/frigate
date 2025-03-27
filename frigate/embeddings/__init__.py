@@ -250,3 +250,6 @@ class EmbeddingsContext:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.reprocess_plate.value, {"event": event}
         )
+
+    def reindex_embeddings(self) -> dict[str, any]:
+        return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})

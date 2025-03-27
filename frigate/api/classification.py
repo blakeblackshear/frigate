@@ -298,3 +298,29 @@ def reprocess_license_plate(request: Request, event_id: str):
         content=response,
         status_code=200,
     )
+
+
+@router.put("/reindex")
+def reindex_embeddings(request: Request):
+    if not request.app.frigate_config.semantic_search.enabled:
+        message = (
+            "Cannot reindex tracked object embeddings, Semantic Search is not enabled."
+        )
+        logger.error(message)
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": message,
+                }
+            ),
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    response = context.reindex_embeddings()
+
+    return JSONResponse(
+        content=response,
+        status_code=200,
+    )
