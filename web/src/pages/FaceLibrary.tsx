@@ -481,7 +481,7 @@ function TrainingGrid({
                 {t("details.confidence")}
               </div>
               <div className="text-sm capitalize">
-                {(selectedEvent?.data?.sub_label_score || 0) * 100}%
+                {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
               </div>
             </div>
           )}
