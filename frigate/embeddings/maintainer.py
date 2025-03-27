@@ -207,8 +207,8 @@ class EmbeddingMaintainer(threading.Thread):
                             pack=False,
                         )
                     elif topic == EmbeddingsRequestEnum.reindex.value:
-                        self.embeddings.reindex()
-                        return "Embeddings reindex in progress"
+                        response = self.embeddings.start_reindex()
+                        return "started" if response else "in_progress"
 
                 processors = [self.realtime_processors, self.post_processors]
                 for processor_list in processors:

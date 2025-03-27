@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import threading
 import time
 
 from numpy import ndarray
@@ -73,6 +74,10 @@ class Embeddings:
         self.db = db
         self.metrics = metrics
         self.requestor = InterProcessRequestor()
+
+        self.reindex_lock = threading.Lock()
+        self.reindex_thread = None
+        self.reindex_running = False
 
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
@@ -368,3 +373,27 @@ class Embeddings:
         totals["status"] = "completed"
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+    def start_reindex(self) -> bool:
+        """Start reindexing in a separate thread if not already running."""
+        with self.reindex_lock:
+            if self.reindex_running:
+                logger.warning("Reindex embeddings is already running.")
+                return False
+
+            # Mark as running and start the thread
+            self.reindex_running = True
+            self.reindex_thread = threading.Thread(
+                target=self._reindex_wrapper, daemon=True
+            )
+            self.reindex_thread.start()
+            return True
+
+    def _reindex_wrapper(self) -> None:
+        """Wrapper to run reindex and reset running flag when done."""
+        try:
+            self.reindex()
+        finally:
+            with self.reindex_lock:
+                self.reindex_running = False
+                self.reindex_thread = None
