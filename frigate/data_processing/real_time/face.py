@@ -412,10 +412,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         prominent_name = max(score_count)
 
-        # if a single name is not prominent in the history then we are not confident
-        if score_count[prominent_name] / len(results_list) < 0.65:
-            return "unknown", 0.0
-
         return prominent_name, weighted_scores[prominent_name] / total_face_areas[
             prominent_name
         ]
