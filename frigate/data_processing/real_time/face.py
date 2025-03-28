@@ -297,6 +297,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             sub_label, score = res
 
+            if score < self.face_config.unknown_score:
+                sub_label = "unknown"
+
             return {"success": True, "score": score, "face_name": sub_label}
         elif topic == EmbeddingsRequestEnum.register_face.value:
             rand_id = "".join(
