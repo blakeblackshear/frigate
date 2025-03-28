@@ -295,8 +295,14 @@ def stats_snapshot(
                     "image_embedding_speed": round(
                         embeddings_metrics.image_embeddings_speed.value * 1000, 2
                     ),
+                    "image_embedding": round(
+                        embeddings_metrics.image_embeddings_eps.value, 2
+                    ),
                     "text_embedding_speed": round(
                         embeddings_metrics.text_embeddings_speed.value * 1000, 2
+                    ),
+                    "text_embedding": round(
+                        embeddings_metrics.text_embeddings_eps.value, 2
                     ),
                 }
             )

@@ -21,7 +21,7 @@ from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
-from frigate.util.builtin import serialize
+from frigate.util.builtin import EventsPerSecond, serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
@@ -75,6 +75,11 @@ class Embeddings:
         self.metrics = metrics
         self.requestor = InterProcessRequestor()
 
+        self.image_eps = EventsPerSecond()
+        self.image_eps.start()
+        self.text_eps = EventsPerSecond()
+        self.text_eps.start()
+
         self.reindex_lock = threading.Lock()
         self.reindex_thread = None
         self.reindex_running = False
@@ -119,6 +124,10 @@ class Embeddings:
                 requestor=self.requestor,
                 device="GPU" if config.semantic_search.model_size == "large" else "CPU",
             )
+
+    def update_stats(self) -> None:
+        self.metrics.image_embeddings_eps = self.image_eps.eps()
+        self.metrics.text_embeddings_eps = self.text_eps.eps()
 
     def get_model_definitions(self):
         # Version-specific models
@@ -178,6 +187,7 @@ class Embeddings:
         self.metrics.image_embeddings_speed.value = (
             self.metrics.image_embeddings_speed.value * 9 + duration
         ) / 10
+        self.image_eps.update()
 
         return embedding
 
@@ -199,6 +209,7 @@ class Embeddings:
             for i in range(len(ids)):
                 items.append(ids[i])
                 items.append(serialize(embeddings[i]))
+                self.image_eps.update()
 
             self.db.execute_sql(
                 """
@@ -234,6 +245,7 @@ class Embeddings:
         self.metrics.text_embeddings_speed.value = (
             self.metrics.text_embeddings_speed.value * 9 + duration
         ) / 10
+        self.text_eps.update()
 
         return embedding
 
@@ -254,6 +266,7 @@ class Embeddings:
             for i in range(len(ids)):
                 items.append(ids[i])
                 items.append(serialize(embeddings[i]))
+                self.text_eps.update()
 
             self.db.execute_sql(
                 """

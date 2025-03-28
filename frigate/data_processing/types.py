@@ -17,7 +17,9 @@ class DataProcessorMetrics:
 
     def __init__(self):
         self.image_embeddings_speed = mp.Value("d", 0.01)
+        self.image_embeddings_eps = mp.Value("d", 0.0)
         self.text_embeddings_speed = mp.Value("d", 0.01)
+        self.text_embeddings_eps = mp.Value("d", 0.0)
         self.face_rec_speed = mp.Value("d", 0.01)
         self.face_rec_fps = mp.Value("d", 0.0)
         self.alpr_speed = mp.Value("d", 0.01)
