@@ -949,8 +949,8 @@ class LicensePlateProcessingMixin:
         """
         Update inference metrics.
         """
-        self.metrics.yolov9_lpr_fps.value = (
-            self.metrics.yolov9_lpr_fps.value * 9 + duration
+        self.metrics.yolov9_lpr_speed.value = (
+            self.metrics.yolov9_lpr_speed.value * 9 + duration
         ) / 10
 
     def __update_lpr_metrics(self, duration: float) -> None:
