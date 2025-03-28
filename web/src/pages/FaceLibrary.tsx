@@ -769,6 +769,8 @@ type FaceGridProps = {
   onDelete: (name: string, ids: string[]) => void;
 };
 function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
+  const sortedFaces = useMemo(() => [...new Set(faceImages)], [faceImages]);
+
   return (
     <div
       className={cn(
@@ -776,7 +778,7 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
         isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
       )}
     >
-      {faceImages.map((image: string) => (
+      {sortedFaces.map((image: string) => (
         <FaceImage
           key={image}
           name={pageToggle}

@@ -41,13 +41,9 @@ def get_faces():
 
         face_dict[name] = []
 
-        for file in sorted(
-            filter(
-                lambda f: (f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))),
-                os.listdir(face_dir),
-            ),
-            key=lambda f: os.path.getctime(os.path.join(face_dir, f)),
-            reverse=True,
+        for file in filter(
+            lambda f: (f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))),
+            os.listdir(face_dir),
         ):
             face_dict[name].append(file)
 
