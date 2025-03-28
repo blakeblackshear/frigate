@@ -146,7 +146,7 @@
   },
   "enrichments": {
     "title": "Enrichments",
-    "recsPerSecond": "Recognitions Per Second",
+    "infPerSecond": "Inferences Per Second",
     "embeddings": {
       "image_embedding_speed": "Image Embedding Speed",
       "face_embedding_speed": "Face Embedding Speed",

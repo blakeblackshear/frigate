@@ -118,7 +118,7 @@ export default function EnrichmentMetrics({
                       key={series.name}
                       graphId={`${series.name}-fps`}
                       unit=""
-                      name={t("enrichments.recsPerSecond")}
+                      name={t("enrichments.infPerSecond")}
                       updateTimes={updateTimes}
                       data={[series]}
                     />
