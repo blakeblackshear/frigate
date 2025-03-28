@@ -672,7 +672,7 @@ function FaceAttempt({
         <TextEntryDialog
           open={true}
           setOpen={setNewFace}
-          title="Create New Face"
+          title={t("createFaceLibrary.new")}
           onSave={(newName) => onTrainAttempt(newName)}
         />
       )}
@@ -730,7 +730,7 @@ function FaceAttempt({
                       onClick={() => setNewFace(true)}
                     >
                       <LuPlus />
-                      Create New Face
+                      {t("createFaceLibrary.new")}
                     </DropdownMenuItem>
                     {faceNames.map((faceName) => (
                       <DropdownMenuItem
