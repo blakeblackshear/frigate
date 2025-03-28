@@ -3,7 +3,7 @@
     "cameras": "Cameras Stats - Frigate",
     "storage": "Storage Stats - Frigate",
     "general": "General Stats - Frigate",
-    "features": "Features Stats - Frigate",
+    "enrichments": "Enrichments Stats - Frigate",
     "logs": {
       "frigate": "Frigate Logs - Frigate",
       "go2rtc": "Go2RTC Logs - Frigate",
@@ -144,8 +144,9 @@
     "healthy": "System is healthy",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
   },
-  "features": {
-    "title": "Features",
+  "enrichments": {
+    "title": "Enrichments",
+    "infPerSecond": "Inferences Per Second",
     "embeddings": {
       "image_embedding_speed": "Image Embedding Speed",
       "face_embedding_speed": "Face Embedding Speed",

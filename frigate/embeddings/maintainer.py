@@ -236,6 +236,7 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         camera_config = self.config.cameras[camera]
+        self.embeddings.update_stats()
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
         if not camera_config.genai.enabled and len(self.realtime_processors) == 0:

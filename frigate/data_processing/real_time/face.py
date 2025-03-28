@@ -24,6 +24,7 @@ from frigate.data_processing.common.face.model import (
     FaceNetRecognizer,
     FaceRecognizer,
 )
+from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
 from ..types import DataProcessorMetrics
@@ -51,6 +52,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.recognizer: FaceRecognizer | None = None
+        self.faces_per_second = EventsPerSecond()
 
         download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
         self.model_files = {
@@ -103,6 +105,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             score_threshold=0.5,
             nms_threshold=0.3,
         )
+        self.faces_per_second.start()
 
     def __detect_face(
         self, input: np.ndarray, threshold: float
@@ -146,12 +149,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         return face
 
     def __update_metrics(self, duration: float) -> None:
-        self.metrics.face_rec_fps.value = (
-            self.metrics.face_rec_fps.value * 9 + duration
+        self.faces_per_second.update()
+        self.metrics.face_rec_speed.value = (
+            self.metrics.face_rec_speed.value * 9 + duration
         ) / 10
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
+        self.metrics.face_rec_fps.value = self.faces_per_second.eps()
+
         if not self.config.cameras[obj_data["camera"]].face_recognition.enabled:
             return
 

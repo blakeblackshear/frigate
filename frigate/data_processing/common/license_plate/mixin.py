@@ -24,6 +24,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
+from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
@@ -34,11 +35,12 @@ WRITE_DEBUG_IMAGES = False
 class LicensePlateProcessingMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        self.plates_rec_second = EventsPerSecond()
+        self.plates_rec_second.start()
+        self.plates_det_second = EventsPerSecond()
+        self.plates_det_second.start()
         self.event_metadata_publisher = EventMetadataPublisher()
-
         self.ctc_decoder = CTCDecoder()
-
         self.batch_size = 6
 
         # Detection specific parameters
@@ -947,15 +949,17 @@ class LicensePlateProcessingMixin:
         """
         Update inference metrics.
         """
-        self.metrics.yolov9_lpr_fps.value = (
-            self.metrics.yolov9_lpr_fps.value * 9 + duration
+        self.metrics.yolov9_lpr_speed.value = (
+            self.metrics.yolov9_lpr_speed.value * 9 + duration
         ) / 10
 
     def __update_lpr_metrics(self, duration: float) -> None:
         """
         Update inference metrics.
         """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
+        self.metrics.alpr_speed.value = (
+            self.metrics.alpr_speed.value * 9 + duration
+        ) / 10
 
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
@@ -982,6 +986,8 @@ class LicensePlateProcessingMixin:
         self, obj_data: dict[str, any], frame: np.ndarray, dedicated_lpr: bool = False
     ):
         """Look for license plates in image."""
+        self.metrics.alpr_pps.value = self.plates_rec_second.eps()
+        self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
         camera = obj_data if dedicated_lpr else obj_data["camera"]
         current_time = int(datetime.datetime.now().timestamp())
 
@@ -1011,6 +1017,7 @@ class LicensePlateProcessingMixin:
             logger.debug(
                 f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
             )
+            self.plates_det_second.update()
             self.__update_yolov9_metrics(
                 datetime.datetime.now().timestamp() - yolov9_start
             )
@@ -1093,6 +1100,7 @@ class LicensePlateProcessingMixin:
                 logger.debug(
                     f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
                 )
+                self.plates_det_second.update()
                 self.__update_yolov9_metrics(
                     datetime.datetime.now().timestamp() - yolov9_start
                 )
@@ -1197,6 +1205,7 @@ class LicensePlateProcessingMixin:
         license_plates, confidences, areas = self._process_license_plate(
             camera, id, license_plate_frame
         )
+        self.plates_rec_second.update()
         self.__update_lpr_metrics(datetime.datetime.now().timestamp() - start)
 
         if license_plates:
