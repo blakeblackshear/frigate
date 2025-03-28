@@ -59,7 +59,7 @@ Fine-tune face recognition with these optional parameters:
 ### Recognition
 
 - `model_size`: Which model size to use, options are `small` or `large`
-- `unknown_score`: Min score to mark a person as a potential match, matches below this will be marked as unknown.
+- `unknown_score`: Min score to mark a person as a potential match, matches at or below this will be marked as unknown.
   - Default: `0.8`.
 - `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
   - Default: `0.9`.

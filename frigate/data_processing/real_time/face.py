@@ -241,7 +241,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         sub_label, score = res
 
-        if score < self.face_config.unknown_score:
+        if score <= self.face_config.unknown_score:
             sub_label = "unknown"
 
         logger.debug(
