@@ -3,6 +3,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
   LuImagePlus,
+  LuPlus,
   LuRefreshCw,
   LuScanFace,
   LuSearch,
@@ -605,6 +607,8 @@ function FaceAttempt({
 
   // interaction
 
+  const [newFace, setNewFace] = useState(false);
+
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useContextMenu(imgRef, () => {
@@ -663,76 +667,99 @@ function FaceAttempt({
   }, [data, onRefresh, t]);
 
   return (
-    <div
-      className={cn(
-        "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
-        selected
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500",
-      )}
-    >
-      <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
-        <img
-          ref={imgRef}
-          className={cn("size-44", isMobile && "w-full")}
-          src={`${baseUrl}clips/faces/train/${data.filename}`}
-          onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+    <>
+      {newFace && (
+        <TextEntryDialog
+          open={true}
+          setOpen={setNewFace}
+          title="Create New Face"
+          onSave={(newName) => onTrainAttempt(newName)}
         />
-        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-          <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
+      )}
+
+      <div
+        className={cn(
+          "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
+          selected
+            ? "shadow-selected outline-selected"
+            : "outline-transparent duration-500",
+        )}
+      >
+        <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
+          <img
+            ref={imgRef}
+            className={cn("size-44", isMobile && "w-full")}
+            src={`${baseUrl}clips/faces/train/${data.filename}`}
+            onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+          />
+          <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+            <TimeAgo
+              className="text-white"
+              time={data.timestamp * 1000}
+              dense
+            />
+          </div>
         </div>
-      </div>
-      <div className="p-2">
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="capitalize">{data.name}</div>
-            <div
-              className={cn(
-                "",
-                scoreStatus == "match" && "text-success",
-                scoreStatus == "potential" && "text-orange-400",
-                scoreStatus == "unknown" && "text-danger",
-              )}
-            >
-              {Math.round(data.score * 100)}%
+        <div className="p-2">
+          <div className="flex w-full flex-row items-center justify-between gap-2">
+            <div className="flex flex-col items-start text-xs text-primary-variant">
+              <div className="capitalize">{data.name}</div>
+              <div
+                className={cn(
+                  "",
+                  scoreStatus == "match" && "text-success",
+                  scoreStatus == "potential" && "text-orange-400",
+                  scoreStatus == "unknown" && "text-danger",
+                )}
+              >
+                {Math.round(data.score * 100)}%
+              </div>
+            </div>
+            <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+              <Tooltip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <TooltipTrigger>
+                      <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                    </TooltipTrigger>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      className="flex cursor-pointer gap-2 capitalize"
+                      onClick={() => setNewFace(true)}
+                    >
+                      <LuPlus />
+                      Create New Face
+                    </DropdownMenuItem>
+                    {faceNames.map((faceName) => (
+                      <DropdownMenuItem
+                        key={faceName}
+                        className="flex cursor-pointer gap-2 capitalize"
+                        onClick={() => onTrainAttempt(faceName)}
+                      >
+                        <LuScanFace />
+                        {faceName}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <TooltipContent>{t("trainFace")}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger>
+                  <LuRefreshCw
+                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                    onClick={() => onReprocess()}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
+              </Tooltip>
             </div>
           </div>
-          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-            <Tooltip>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <TooltipTrigger>
-                    <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                  </TooltipTrigger>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                  {faceNames.map((faceName) => (
-                    <DropdownMenuItem
-                      key={faceName}
-                      className="cursor-pointer capitalize"
-                      onClick={() => onTrainAttempt(faceName)}
-                    >
-                      {faceName}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <TooltipContent>{t("trainFace")}</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger>
-                <LuRefreshCw
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={() => onReprocess()}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
-            </Tooltip>
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
