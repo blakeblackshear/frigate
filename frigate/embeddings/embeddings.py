@@ -126,8 +126,8 @@ class Embeddings:
             )
 
     def update_stats(self) -> None:
-        self.metrics.image_embeddings_eps = self.image_eps.eps()
-        self.metrics.text_embeddings_eps = self.text_eps.eps()
+        self.metrics.image_embeddings_eps.value = self.image_eps.eps()
+        self.metrics.text_embeddings_eps.value = self.text_eps.eps()
 
     def get_model_definitions(self):
         # Version-specific models
