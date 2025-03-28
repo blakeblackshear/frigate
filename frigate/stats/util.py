@@ -323,7 +323,7 @@ def stats_snapshot(
                 embeddings_metrics.alpr_pps.value, 2
             )
 
-            if "license_plate" not in config.objects.all_objects:
+            if embeddings_metrics.yolov9_lpr_pps.value:
                 stats["embeddings"]["yolov9_plate_detection_speed"] = round(
                     embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
                 )
