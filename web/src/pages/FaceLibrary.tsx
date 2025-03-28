@@ -506,7 +506,10 @@ function TrainingGrid({
           return (
             <div
               key={key}
-              className="flex flex-col gap-2 rounded-lg bg-card p-2"
+              className={cn(
+                "flex flex-col gap-2 rounded-lg bg-card p-2",
+                isMobile && "w-full",
+              )}
             >
               <div className="flex flex-row justify-between">
                 <div className="capitalize">
@@ -538,7 +541,12 @@ function TrainingGrid({
                 )}
               </div>
 
-              <div className="flex flex-row flex-wrap gap-2">
+              <div
+                className={cn(
+                  "gap-2",
+                  isDesktop ? "flex flex-row flex-wrap" : "grid grid-cols-2",
+                )}
+              >
                 {group.map((data: RecognizedFaceData) => (
                   <FaceAttempt
                     key={data.filename}
@@ -661,10 +669,10 @@ function FaceAttempt({
           : "outline-transparent duration-500",
       )}
     >
-      <div className="relative w-full overflow-hidden rounded-lg border border-t-0 *:text-card-foreground">
+      <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
         <img
           ref={imgRef}
-          className="size-44"
+          className={cn("size-44", isMobile && "w-full")}
           src={`${baseUrl}clips/faces/train/${data.filename}`}
           onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
         />
@@ -736,7 +744,9 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
     <div
       className={cn(
         "scrollbar-container gap-2 overflow-y-scroll",
-        isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
+        isDesktop
+          ? "flex flex-wrap"
+          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       )}
     >
       {faceImages.map((image: string) => (
