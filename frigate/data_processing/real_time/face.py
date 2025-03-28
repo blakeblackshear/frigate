@@ -149,6 +149,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         return face
 
     def __update_metrics(self, duration: float) -> None:
+        self.faces_per_second.update()
         self.metrics.face_rec_speed.value = (
             self.metrics.face_rec_speed.value * 9 + duration
         ) / 10
@@ -256,7 +257,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
 
-        self.faces_per_second.update()
         res = self.recognizer.classify(face_frame)
 
         if not res:

@@ -305,18 +305,24 @@ def stats_snapshot(
             stats["embeddings"]["face_recognition_speed"] = round(
                 embeddings_metrics.face_rec_speed.value * 1000, 2
             )
-            stats["embeddings"]["face_recognition_fps"] = round(
-                embeddings_metrics.face_rec_speed.value, 2
+            stats["embeddings"]["face_recognition"] = round(
+                embeddings_metrics.face_rec_fps.value, 2
             )
 
         if config.lpr.enabled:
             stats["embeddings"]["plate_recognition_speed"] = round(
                 embeddings_metrics.alpr_speed.value * 1000, 2
             )
+            stats["embeddings"]["plate_recognition"] = round(
+                embeddings_metrics.alpr_pps.value, 2
+            )
 
             if "license_plate" not in config.objects.all_objects:
                 stats["embeddings"]["yolov9_plate_detection_speed"] = round(
                     embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
+                )
+                stats["embeddings"]["yolov9_plate_detection"] = round(
+                    embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
     get_processing_stats(config, stats, hwaccel_errors)
