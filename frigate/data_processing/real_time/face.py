@@ -379,6 +379,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             sub_label, score = res
 
+            if score < self.face_config.unknown_score:
+                sub_label = "unknown"
+
             if self.config.face_recognition.save_attempts:
                 # write face to library
                 folder = os.path.join(FACE_DIR, "train")
