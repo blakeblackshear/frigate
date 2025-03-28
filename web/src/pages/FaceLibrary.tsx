@@ -617,7 +617,7 @@ function FaceAttempt({
     (trainName: string) => {
       axios
         .post(`/faces/train/${trainName}/classify`, {
-          training_file: data.eventId,
+          training_file: data.filename,
         })
         .then((resp) => {
           if (resp.status == 200) {
