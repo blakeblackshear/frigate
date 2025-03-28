@@ -255,6 +255,16 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, face_frame)
 
+            files = sorted(
+                filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
+                key=lambda f: os.path.getctime(os.path.join(folder, f)),
+                reverse=True,
+            )
+
+            # delete oldest face image if maximum is reached
+            if len(files) > self.config.face_recognition.save_attempts:
+                os.unlink(os.path.join(folder, files[-1]))
+
         if id not in self.person_face_history:
             self.person_face_history[id] = []
 
@@ -377,16 +387,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     folder, f"{id}-{sub_label}-{score}-{face_score}.webp"
                 )
                 shutil.move(current_file, new_file)
-
-                files = sorted(
-                    filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
-                    key=lambda f: os.path.getctime(os.path.join(folder, f)),
-                    reverse=True,
-                )
-
-                # delete oldest face image if maximum is reached
-                if len(files) > self.config.face_recognition.save_attempts:
-                    os.unlink(os.path.join(folder, files[-1]))
 
     def expire_object(self, object_id: str):
         if object_id in self.person_face_history:
