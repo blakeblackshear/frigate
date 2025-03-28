@@ -143,3 +143,118 @@ export function CameraLineGraph({
     </div>
   );
 }
+
+type EventsPerSecondLineGraphProps = {
+  graphId: string;
+  unit: string;
+  name: string;
+  updateTimes: number[];
+  data: ApexAxisChartSeries;
+};
+export function EventsPerSecondsLineGraph({
+  graphId,
+  unit,
+  name,
+  updateTimes,
+  data,
+}: EventsPerSecondLineGraphProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const { theme, systemTheme } = useTheme();
+
+  const lastValue = useMemo<number>(
+    // @ts-expect-error y is valid
+    () => data[0].data[data[0].data.length - 1]?.y ?? 0,
+    [data],
+  );
+
+  const formatTime = useCallback(
+    (val: unknown) => {
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.round(val as number) - 1],
+        {
+          timezone: config?.ui.timezone,
+          strftime_fmt:
+            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+        },
+      );
+    },
+    [config, updateTimes],
+  );
+
+  const options = useMemo(() => {
+    return {
+      chart: {
+        id: graphId,
+        selection: {
+          enabled: false,
+        },
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      colors: GRAPH_COLORS,
+      grid: {
+        show: false,
+      },
+      legend: {
+        show: false,
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        width: 1,
+      },
+      tooltip: {
+        theme: systemTheme || theme,
+      },
+      markers: {
+        size: 0,
+      },
+      xaxis: {
+        tickAmount: isMobileOnly ? 2 : 3,
+        tickPlacement: "on",
+        labels: {
+          rotate: 0,
+          formatter: formatTime,
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      },
+      yaxis: {
+        show: true,
+        labels: {
+          formatter: (val: number) => Math.ceil(val).toString(),
+        },
+        min: 0,
+      },
+    } as ApexCharts.ApexOptions;
+  }, [graphId, systemTheme, theme, formatTime]);
+
+  useEffect(() => {
+    ApexCharts.exec(graphId, "updateOptions", options, true, true);
+  }, [graphId, options]);
+
+  return (
+    <div className="flex w-full flex-col">
+      <div className="flex items-center gap-1">
+        <div className="text-xs text-muted-foreground">{name}</div>
+        <div className="text-xs text-primary">
+          {lastValue}
+          {unit}
+        </div>
+      </div>
+      <Chart type="line" options={options} series={data} height="120" />
+    </div>
+  );
+}

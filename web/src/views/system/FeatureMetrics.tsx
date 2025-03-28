@@ -7,7 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { CameraLineGraph } from "@/components/graph/CameraGraph";
+import {
+  CameraLineGraph,
+  EventsPerSecondsLineGraph,
+} from "@/components/graph/LineGraph";
 
 type FeatureMetricsProps = {
   lastUpdated: number;
@@ -114,11 +117,11 @@ export default function FeatureMetrics({
                       data={[series]}
                     />
                   ) : (
-                    <CameraLineGraph
+                    <EventsPerSecondsLineGraph
                       key={series.name}
                       graphId={`${series.name}-fps`}
-                      dataLabels={["Recognitions Per Second"]}
                       unit=""
+                      name="Recognitions Per Second"
                       updateTimes={updateTimes}
                       data={[series]}
                     />
