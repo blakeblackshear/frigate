@@ -544,7 +544,9 @@ function TrainingGrid({
               <div
                 className={cn(
                   "gap-2",
-                  isDesktop ? "flex flex-row flex-wrap" : "grid grid-cols-2",
+                  isDesktop
+                    ? "flex flex-row flex-wrap"
+                    : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
                 )}
               >
                 {group.map((data: RecognizedFaceData) => (
@@ -744,9 +746,7 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
     <div
       className={cn(
         "scrollbar-container gap-2 overflow-y-scroll",
-        isDesktop
-          ? "flex flex-wrap"
-          : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+        isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
       )}
     >
       {faceImages.map((image: string) => (
