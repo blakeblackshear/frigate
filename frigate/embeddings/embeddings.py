@@ -175,8 +175,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.image_embeddings_fps.value = (
-            self.metrics.image_embeddings_fps.value * 9 + duration
+        self.metrics.image_embeddings_speed.value = (
+            self.metrics.image_embeddings_speed.value * 9 + duration
         ) / 10
 
         return embedding
@@ -209,8 +209,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + (duration / len(ids))
         ) / 10
 
         return embeddings
@@ -231,8 +231,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + duration
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + duration
         ) / 10
 
         return embedding
@@ -264,8 +264,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + (duration / len(ids))
         ) / 10
 
         return embeddings

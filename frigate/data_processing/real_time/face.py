@@ -146,8 +146,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         return face
 
     def __update_metrics(self, duration: float) -> None:
-        self.metrics.face_rec_fps.value = (
-            self.metrics.face_rec_fps.value * 9 + duration
+        self.metrics.face_rec_speed.value = (
+            self.metrics.face_rec_speed.value * 9 + duration
         ) / 10
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):

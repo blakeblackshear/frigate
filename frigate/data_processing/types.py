@@ -6,18 +6,18 @@ from multiprocessing.sharedctypes import Synchronized
 
 
 class DataProcessorMetrics:
-    image_embeddings_fps: Synchronized
-    text_embeddings_sps: Synchronized
-    face_rec_fps: Synchronized
-    alpr_pps: Synchronized
-    yolov9_lpr_fps: Synchronized
+    image_embeddings_speed: Synchronized
+    text_embeddings_speed: Synchronized
+    face_rec_speed: Synchronized
+    alpr_speed: Synchronized
+    yolov9_lpr_speed: Synchronized
 
     def __init__(self):
-        self.image_embeddings_fps = mp.Value("d", 0.01)
-        self.text_embeddings_sps = mp.Value("d", 0.01)
-        self.face_rec_fps = mp.Value("d", 0.01)
-        self.alpr_pps = mp.Value("d", 0.01)
-        self.yolov9_lpr_fps = mp.Value("d", 0.01)
+        self.image_embeddings_speed = mp.Value("d", 0.01)
+        self.text_embeddings_speed = mp.Value("d", 0.01)
+        self.face_rec_speed = mp.Value("d", 0.01)
+        self.alpr_speed = mp.Value("d", 0.01)
+        self.yolov9_lpr_speed = mp.Value("d", 0.01)
 
 
 class DataProcessorModelRunner:
