@@ -174,7 +174,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         # check if we have hit limits
         if (
             id in self.person_face_history
-            and len(self.person_face_history[id]) > MAX_FACES_ATTEMPTS_AFTER_REC
+            and len(self.person_face_history[id]) >= MAX_FACES_ATTEMPTS_AFTER_REC
         ):
             # if we are at max attempts after rec and we have a rec
             if obj_data.get("sub_label"):
@@ -184,7 +184,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 return
 
             # if we don't have a rec and are at max attempts
-            if len(self.person_face_history[id]) > MAX_FACE_ATTEMPTS:
+            if len(self.person_face_history[id]) >= MAX_FACE_ATTEMPTS:
                 logger.debug("Not processing due to hitting max rec attempts.")
                 return
 
