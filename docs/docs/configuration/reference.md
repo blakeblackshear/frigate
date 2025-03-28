@@ -562,7 +562,7 @@ face_recognition:
   blur_confidence_filter: True
 
 # Optional: Configuration for license plate recognition capability
-# NOTE: enabled and min_area can be overridden at the camera level
+# NOTE: enabled, min_area, and enhancement can be overridden at the camera level
 lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
@@ -580,6 +580,11 @@ lpr:
   match_distance: 1
   # Optional: Known plates to track (strings or regular expressions) (default: shown below)
   known_plates: {}
+  # Optional: Enhance the detected plate image with contrast adjustment and denoising (default: shown below)
+  # A value between 0 and 10. Higher values are not always better and may perform worse than lower values.
+  enhancement: 0
+  # Optional: Save plate images to /media/frigate/clips/lpr for debugging purposes (default: shown below)
+  debug_save_plates: False
 
 # Optional: Configuration for AI generated tracked object descriptions
 # WARNING: Depending on the provider, this will send thumbnails over the internet

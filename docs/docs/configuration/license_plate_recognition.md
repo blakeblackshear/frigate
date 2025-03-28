@@ -87,6 +87,20 @@ Fine-tune the LPR feature using these optional parameters:
   - For example, setting `match_distance: 1` allows a plate `ABCDE` to match `ABCBE` or `ABCD`.
   - This parameter will _not_ operate on known plates that are defined as regular expressions. You should define the full string of your plate in `known_plates` in order to use `match_distance`.
 
+### Image Enhancement
+
+- **`enhancement`**: A value between **0 and 10** that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
+  - **Default:** `0` (no enhancement)
+  - Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters, actually making them much harder for Frigate to recognize.
+  - This setting is best adjusted **at the camera level** if running LPR on multiple cameras.
+  - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at **5** and adjusting as needed. To preview how different enhancement levels affect your plates, use the `debug_save_plates` configuration option (see below).
+
+### Debugging
+
+- **`debug_save_plates`**: Set to `True` to save captured text on plates for debugging. These images are stored in `/media/frigate/clips/lpr`, organized into subdirectories by `<camera>/<event_id>`, and named based on the capture timestamp.
+  - These saved images are not full plates but rather the specific areas of text detected on the plates. It is normal for the text detection model to sometimes find multiple areas of text on the plate. Use them to analyze what text Frigate recognized and how image enhancement affects detection.
+  - **Note:** Frigate does **not** automatically delete these debug images. Once LPR is functioning correctly, you should disable this option and manually remove the saved files to free up storage.
+
 ## Configuration Examples
 
 These configuration parameters are available at the global level of your config. The only optional parameters that should be set at the camera level are `enabled` and `min_area`.
@@ -143,6 +157,7 @@ cameras:
     lpr:
       enabled: True
       expire_time: 3 # optional, default
+      enhancement: 3 # optional, enhance the image before trying to recognize characters
     ffmpeg: ...
     detect:
       enabled: False # optional, disable Frigate's standard object detection pipeline
@@ -151,7 +166,7 @@ cameras:
       height: 1080
     motion:
       threshold: 30
-      contour_area: 80 # use an increased value here to tune out small motion changes
+      contour_area: 60 # use an increased value here to tune out small motion changes
       improve_contrast: false
       mask: 0.704,0.007,0.709,0.052,0.989,0.055,0.993,0.001 # ensure your camera's timestamp is masked
     record:
@@ -197,6 +212,7 @@ Ensure that:
 
 - Your camera has a clear, human-readable, well-lit view of the plate. If you can't read the plate's characters, Frigate certainly won't be able to, even if the model is recognizing a `license_plate`. This may require changing video size, quality, or frame rate settings on your camera, depending on your scene and how fast the vehicles are traveling.
 - The plate is large enough in the image (try adjusting `min_area`) or increasing the resolution of your camera's stream.
+- Your `enhancement` level (if you've changed it from the default of `0`) is not too high. Too much enhancement will run too much denoising and cause the plate characters to become blurry and unreadable.
 
 If you are using a Frigate+ model or a custom model that detects license plates, ensure that `license_plate` is added to your list of objects to track.
 If you are using the free model that ships with Frigate, you should _not_ add `license_plate` to the list of objects to track.
@@ -229,6 +245,7 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 - If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car`.
 - Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` label will change to the recognized plate when LPR is enabled and working.
 - Adjust `detection_threshold` and `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
+- Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`).
 - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
 
   ```yaml
