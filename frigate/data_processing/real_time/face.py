@@ -33,7 +33,8 @@ logger = logging.getLogger(__name__)
 
 
 MAX_DETECTION_HEIGHT = 1080
-MIN_MATCHING_FACES = 2
+MAX_FACES_ATTEMPTS_AFTER_REC = 6
+MAX_FACE_ATTEMPTS = 12
 
 
 class FaceRealTimeProcessor(RealTimeProcessorApi):
@@ -169,6 +170,23 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
             return
+
+        # check if we have hit limits
+        if (
+            id in self.person_face_history
+            and len(self.person_face_history[id]) > MAX_FACES_ATTEMPTS_AFTER_REC
+        ):
+            # if we are at max attempts after rec and we have a rec
+            if obj_data.get("sub_label"):
+                logger.debug(
+                    "Not processing due to hitting max attempts after true recognition."
+                )
+                return
+
+            # if we don't have a rec and are at max attempts
+            if len(self.person_face_history[id]) > MAX_FACE_ATTEMPTS:
+                logger.debug("Not processing due to hitting max rec attempts.")
+                return
 
         face: Optional[dict[str, any]] = None
 
