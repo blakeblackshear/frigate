@@ -17,6 +17,7 @@
   "createFaceLibrary": {
     "title": "Create Face Library",
     "desc": "Create a new face library",
+    "new": "Create New Face",
     "nextSteps": "It is recommended to use the Train tab to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle."
   },
   "train": {

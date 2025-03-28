@@ -3,6 +3,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,13 +33,23 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
+import { Event } from "@/types/event";
 import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
-import { LuImagePlus, LuRefreshCw, LuScanFace, LuTrash2 } from "react-icons/lu";
+import {
+  LuImagePlus,
+  LuPlus,
+  LuRefreshCw,
+  LuScanFace,
+  LuSearch,
+  LuTrash2,
+} from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -391,14 +402,53 @@ function TrainingGrid({
   onClickFace,
   onRefresh,
 }: TrainingGridProps) {
-  const { t } = useTranslation(["views/faceLibrary"]);
+  const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
+  const navigate = useNavigate();
 
   // face data
 
-  const [selectedEvent, setSelectedEvent] = useState<RecognizedFaceData>();
+  const faceGroups = useMemo(() => {
+    const groups: { [eventId: string]: RecognizedFaceData[] } = {};
+
+    Array.from(new Set(attemptImages))
+      .sort()
+      .reverse()
+      .forEach((image) => {
+        const parts = image.split("-");
+        const data = {
+          filename: image,
+          timestamp: Number.parseFloat(parts[0]),
+          eventId: `${parts[0]}-${parts[1]}`,
+          name: parts[2],
+          score: Number.parseFloat(parts[3]),
+        };
+
+        if (groups[data.eventId]) {
+          groups[data.eventId].push(data);
+        } else {
+          groups[data.eventId] = [data];
+        }
+      });
+
+    return groups;
+  }, [attemptImages]);
+
+  const eventIdsQuery = useMemo(
+    () => Object.keys(faceGroups).join(","),
+    [faceGroups],
+  );
+
+  const { data: events } = useSWR<Event[]>([
+    "event_ids",
+    { ids: eventIdsQuery },
+  ]);
+
+  // selection
+
+  const [selectedEvent, setSelectedEvent] = useState<Event>();
 
   const formattedDate = useFormattedTimestamp(
-    selectedEvent?.timestamp ?? 0,
+    selectedEvent?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
       : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
@@ -415,23 +465,32 @@ function TrainingGrid({
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          className={cn(
+            "",
+            selectedEvent?.has_snapshot && isDesktop && "max-w-7xl",
+          )}
+        >
           <DialogHeader>
             <DialogTitle>{t("details.face")}</DialogTitle>
             <DialogDescription>{t("details.faceDesc")}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
-            <div className="text-sm capitalize">{selectedEvent?.name}</div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              {t("details.confidence")}
-            </div>
             <div className="text-sm capitalize">
-              {(selectedEvent?.score || 0) * 100}%
+              {selectedEvent?.sub_label ?? "Unknown"}
             </div>
           </div>
+          {selectedEvent?.data.sub_label_score && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">
+                {t("details.confidence")}
+              </div>
+              <div className="text-sm capitalize">
+                {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">
               {t("details.timestamp")}
@@ -440,36 +499,89 @@ function TrainingGrid({
           </div>
           <img
             className="w-full"
-            src={`${baseUrl}api/events/${selectedEvent?.eventId}/thumbnail.jpg`}
+            src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
         </DialogContent>
       </Dialog>
 
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
-        {attemptImages.map((image: string) => (
-          <FaceAttempt
-            key={image}
-            image={image}
-            faceNames={faceNames}
-            recognitionConfig={config.face_recognition}
-            selected={selectedFaces.includes(image)}
-            onClick={(data, meta) => {
-              if (meta) {
-                onClickFace(image, meta);
-              } else {
-                setSelectedEvent(data);
-              }
-            }}
-            onRefresh={onRefresh}
-          />
-        ))}
+        {Object.entries(faceGroups).map(([key, group]) => {
+          const event = events?.find((ev) => ev.id == key);
+
+          return (
+            <div
+              key={key}
+              className={cn(
+                "flex flex-col gap-2 rounded-lg bg-card p-2",
+                isMobile && "w-full",
+              )}
+            >
+              <div className="flex flex-row justify-between">
+                <div className="capitalize">
+                  Person
+                  {event?.sub_label
+                    ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+                    : ": Unknown"}
+                </div>
+                {event && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigate(`/explore?event_id=${event.id}`);
+                        }}
+                      >
+                        <LuSearch className="size-4 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("details.item.button.viewInExplore", {
+                          ns: "views/explore",
+                        })}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                )}
+              </div>
+
+              <div
+                className={cn(
+                  "gap-2",
+                  isDesktop
+                    ? "flex flex-row flex-wrap"
+                    : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
+                )}
+              >
+                {group.map((data: RecognizedFaceData) => (
+                  <FaceAttempt
+                    key={data.filename}
+                    data={data}
+                    faceNames={faceNames}
+                    recognitionConfig={config.face_recognition}
+                    selected={selectedFaces.includes(data.filename)}
+                    onClick={(data, meta) => {
+                      if (meta || selectedFaces.length > 0) {
+                        onClickFace(data.filename, true);
+                      } else if (event) {
+                        setSelectedEvent(event);
+                      }
+                    }}
+                    onRefresh={onRefresh}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );
 }
 
 type FaceAttemptProps = {
-  image: string;
+  data: RecognizedFaceData;
   faceNames: string[];
   recognitionConfig: FaceRecognitionConfig;
   selected: boolean;
@@ -477,7 +589,7 @@ type FaceAttemptProps = {
   onRefresh: () => void;
 };
 function FaceAttempt({
-  image,
+  data,
   faceNames,
   recognitionConfig,
   selected,
@@ -485,16 +597,6 @@ function FaceAttempt({
   onRefresh,
 }: FaceAttemptProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
-  const data = useMemo<RecognizedFaceData>(() => {
-    const parts = image.split("-");
-
-    return {
-      timestamp: Number.parseFloat(parts[0]),
-      eventId: `${parts[0]}-${parts[1]}`,
-      name: parts[2],
-      score: Number.parseFloat(parts[3]),
-    };
-  }, [image]);
 
   const scoreStatus = useMemo(() => {
     if (data.score >= recognitionConfig.recognition_threshold) {
@@ -508,6 +610,8 @@ function FaceAttempt({
 
   // interaction
 
+  const [newFace, setNewFace] = useState(false);
+
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useContextMenu(imgRef, () => {
@@ -519,7 +623,9 @@ function FaceAttempt({
   const onTrainAttempt = useCallback(
     (trainName: string) => {
       axios
-        .post(`/faces/train/${trainName}/classify`, { training_file: image })
+        .post(`/faces/train/${trainName}/classify`, {
+          training_file: data.filename,
+        })
         .then((resp) => {
           if (resp.status == 200) {
             toast.success(t("toast.success.trainedFace"), {
@@ -538,12 +644,12 @@ function FaceAttempt({
           });
         });
     },
-    [image, onRefresh, t],
+    [data, onRefresh, t],
   );
 
   const onReprocess = useCallback(() => {
     axios
-      .post(`/faces/reprocess`, { training_file: image })
+      .post(`/faces/reprocess`, { training_file: data.filename })
       .then((resp) => {
         if (resp.status == 200) {
           toast.success(t("toast.success.updatedFaceScore"), {
@@ -561,79 +667,102 @@ function FaceAttempt({
           position: "top-center",
         });
       });
-  }, [image, onRefresh, t]);
+  }, [data, onRefresh, t]);
 
   return (
-    <div
-      className={cn(
-        "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
-        selected
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500",
-      )}
-    >
-      <div className="relative w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground">
-        <img
-          ref={imgRef}
-          className="size-44"
-          src={`${baseUrl}clips/faces/train/${image}`}
-          onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+    <>
+      {newFace && (
+        <TextEntryDialog
+          open={true}
+          setOpen={setNewFace}
+          title={t("createFaceLibrary.new")}
+          onSave={(newName) => onTrainAttempt(newName)}
         />
-        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-          <TimeAgo className="text-white" time={data.timestamp * 1000} dense />
+      )}
+
+      <div
+        className={cn(
+          "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
+          selected
+            ? "shadow-selected outline-selected"
+            : "outline-transparent duration-500",
+        )}
+      >
+        <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
+          <img
+            ref={imgRef}
+            className={cn("size-44", isMobile && "w-full")}
+            src={`${baseUrl}clips/faces/train/${data.filename}`}
+            onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+          />
+          <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+            <TimeAgo
+              className="text-white"
+              time={data.timestamp * 1000}
+              dense
+            />
+          </div>
         </div>
-      </div>
-      <div className="rounded-b-lg bg-card p-2">
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="capitalize">{data.name}</div>
-            <div
-              className={cn(
-                "",
-                scoreStatus == "match" && "text-success",
-                scoreStatus == "potential" && "text-orange-400",
-                scoreStatus == "unknown" && "text-danger",
-              )}
-            >
-              {Math.round(data.score * 100)}%
+        <div className="p-2">
+          <div className="flex w-full flex-row items-center justify-between gap-2">
+            <div className="flex flex-col items-start text-xs text-primary-variant">
+              <div className="capitalize">{data.name}</div>
+              <div
+                className={cn(
+                  "",
+                  scoreStatus == "match" && "text-success",
+                  scoreStatus == "potential" && "text-orange-400",
+                  scoreStatus == "unknown" && "text-danger",
+                )}
+              >
+                {Math.round(data.score * 100)}%
+              </div>
+            </div>
+            <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+              <Tooltip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <TooltipTrigger>
+                      <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                    </TooltipTrigger>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      className="flex cursor-pointer gap-2 capitalize"
+                      onClick={() => setNewFace(true)}
+                    >
+                      <LuPlus />
+                      {t("createFaceLibrary.new")}
+                    </DropdownMenuItem>
+                    {faceNames.map((faceName) => (
+                      <DropdownMenuItem
+                        key={faceName}
+                        className="flex cursor-pointer gap-2 capitalize"
+                        onClick={() => onTrainAttempt(faceName)}
+                      >
+                        <LuScanFace />
+                        {faceName}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <TooltipContent>{t("trainFace")}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger>
+                  <LuRefreshCw
+                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                    onClick={() => onReprocess()}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
+              </Tooltip>
             </div>
           </div>
-          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-            <Tooltip>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <TooltipTrigger>
-                    <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                  </TooltipTrigger>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                  {faceNames.map((faceName) => (
-                    <DropdownMenuItem
-                      key={faceName}
-                      className="cursor-pointer capitalize"
-                      onClick={() => onTrainAttempt(faceName)}
-                    >
-                      {faceName}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <TooltipContent>{t("trainFace")}</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger>
-                <LuRefreshCw
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={() => onReprocess()}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
-            </Tooltip>
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -643,6 +772,8 @@ type FaceGridProps = {
   onDelete: (name: string, ids: string[]) => void;
 };
 function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
+  const sortedFaces = useMemo(() => faceImages.sort().reverse(), [faceImages]);
+
   return (
     <div
       className={cn(
@@ -650,7 +781,7 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
         isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
       )}
     >
-      {faceImages.map((image: string) => (
+      {sortedFaces.map((image: string) => (
         <FaceImage
           key={image}
           name={pageToggle}
