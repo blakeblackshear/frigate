@@ -410,22 +410,25 @@ function TrainingGrid({
   const faceGroups = useMemo(() => {
     const groups: { [eventId: string]: RecognizedFaceData[] } = {};
 
-    new Set(attemptImages).forEach((image) => {
-      const parts = image.split("-");
-      const data = {
-        filename: image,
-        timestamp: Number.parseFloat(parts[0]),
-        eventId: `${parts[0]}-${parts[1]}`,
-        name: parts[2],
-        score: Number.parseFloat(parts[3]),
-      };
+    Array.from(new Set(attemptImages))
+      .sort()
+      .reverse()
+      .forEach((image) => {
+        const parts = image.split("-");
+        const data = {
+          filename: image,
+          timestamp: Number.parseFloat(parts[0]),
+          eventId: `${parts[0]}-${parts[1]}`,
+          name: parts[2],
+          score: Number.parseFloat(parts[3]),
+        };
 
-      if (groups[data.eventId]) {
-        groups[data.eventId].push(data);
-      } else {
-        groups[data.eventId] = [data];
-      }
-    });
+        if (groups[data.eventId]) {
+          groups[data.eventId].push(data);
+        } else {
+          groups[data.eventId] = [data];
+        }
+      });
 
     return groups;
   }, [attemptImages]);
@@ -769,7 +772,7 @@ type FaceGridProps = {
   onDelete: (name: string, ids: string[]) => void;
 };
 function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
-  const sortedFaces = useMemo(() => [...new Set(faceImages)], [faceImages]);
+  const sortedFaces = useMemo(() => faceImages.sort().reverse(), [faceImages]);
 
   return (
     <div
