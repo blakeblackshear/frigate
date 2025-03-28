@@ -4,9 +4,11 @@ import base64
 import datetime
 import logging
 import math
+import os
 import random
 import re
 import string
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import cv2
@@ -20,6 +22,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataTypeEnum,
 )
 from frigate.config.camera.camera import CameraTypeEnum
+from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.util.image import area
 
@@ -107,7 +110,7 @@ class LicensePlateProcessingMixin:
         return self._process_classification_output(images, outputs)
 
     def _recognize(
-        self, images: List[np.ndarray]
+        self, camera: string, images: List[np.ndarray]
     ) -> Tuple[List[str], List[List[float]]]:
         """
         Recognize the characters on the detected license plates using the recognition model.
@@ -137,7 +140,7 @@ class LicensePlateProcessingMixin:
             # preprocess the images based on the max aspect ratio
             for i in range(index, min(num_images, index + self.batch_size)):
                 norm_image = self._preprocess_recognition_image(
-                    images[indices[i]], max_wh_ratio
+                    camera, images[indices[i]], max_wh_ratio
                 )
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
@@ -146,7 +149,7 @@ class LicensePlateProcessingMixin:
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
-        self, image: np.ndarray
+        self, camera: string, id: string, image: np.ndarray
     ) -> Tuple[List[str], List[float], List[int]]:
         """
         Complete pipeline for detecting, classifying, and recognizing license plates in the input image.
@@ -174,11 +177,27 @@ class LicensePlateProcessingMixin:
         boxes = self._sort_boxes(list(boxes))
         plate_images = [self._crop_license_plate(image, x) for x in boxes]
 
+        current_time = int(datetime.datetime.now().timestamp())
+
         if WRITE_DEBUG_IMAGES:
-            current_time = int(datetime.datetime.now().timestamp())
             for i, img in enumerate(plate_images):
                 cv2.imwrite(
                     f"debug/frames/license_plate_cropped_{current_time}_{i + 1}.jpg",
+                    img,
+                )
+
+        if self.config.lpr.debug_save_plates:
+            logger.debug(f"{camera}: Saving plates for event {id}")
+
+            Path(os.path.join(CLIPS_DIR, f"lpr/{camera}/{id}")).mkdir(
+                parents=True, exist_ok=True
+            )
+
+            for i, img in enumerate(plate_images):
+                cv2.imwrite(
+                    os.path.join(
+                        CLIPS_DIR, f"lpr/{camera}/{id}/{current_time}_{i + 1}.jpg"
+                    ),
                     img,
                 )
 
@@ -188,7 +207,7 @@ class LicensePlateProcessingMixin:
             idx: original_idx for original_idx, idx in enumerate(sorted_indices)
         }
 
-        results, confidences = self._recognize(plate_images)
+        results, confidences = self._recognize(camera, plate_images)
 
         if results:
             license_plates = [""] * len(plate_images)
@@ -606,7 +625,7 @@ class LicensePlateProcessingMixin:
         return images, results
 
     def _preprocess_recognition_image(
-        self, image: np.ndarray, max_wh_ratio: float
+        self, camera: string, image: np.ndarray, max_wh_ratio: float
     ) -> np.ndarray:
         """
         Preprocess an image for recognition by dynamically adjusting its width.
@@ -634,13 +653,38 @@ class LicensePlateProcessingMixin:
         else:
             gray = image
 
-        # apply CLAHE for contrast enhancement
-        grid_size = (
-            max(4, input_w // 40),
-            max(4, input_h // 40),
-        )
-        clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=grid_size)
-        enhanced = clahe.apply(gray)
+        if self.config.cameras[camera].lpr.enhancement > 3:
+            # denoise using a configurable pixel neighborhood value
+            logger.debug(
+                f"{camera}: Denoising recognition image (level: {self.config.cameras[camera].lpr.enhancement})"
+            )
+            smoothed = cv2.bilateralFilter(
+                gray,
+                d=5 + self.config.cameras[camera].lpr.enhancement,
+                sigmaColor=10 * self.config.cameras[camera].lpr.enhancement,
+                sigmaSpace=10 * self.config.cameras[camera].lpr.enhancement,
+            )
+            sharpening_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            processed = cv2.filter2D(smoothed, -1, sharpening_kernel)
+        else:
+            processed = gray
+
+        if self.config.cameras[camera].lpr.enhancement > 0:
+            # always apply the same CLAHE for contrast enhancement when enhancement level is above 3
+            logger.debug(
+                f"{camera}: Enhancing contrast for recognition image (level: {self.config.cameras[camera].lpr.enhancement})"
+            )
+            grid_size = (
+                max(4, input_w // 40),
+                max(4, input_h // 40),
+            )
+            clahe = cv2.createCLAHE(
+                clipLimit=2 if self.config.cameras[camera].lpr.enhancement > 5 else 1.5,
+                tileGridSize=grid_size,
+            )
+            enhanced = clahe.apply(processed)
+        else:
+            enhanced = processed
 
         # Convert back to 3-channel for model compatibility
         image = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2RGB)
@@ -948,6 +992,8 @@ class LicensePlateProcessingMixin:
             return
 
         if dedicated_lpr:
+            id = "dedicated-lpr"
+
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
             # apply motion mask
@@ -1149,7 +1195,7 @@ class LicensePlateProcessingMixin:
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
         license_plates, confidences, areas = self._process_license_plate(
-            license_plate_frame
+            camera, id, license_plate_frame
         )
         self.__update_lpr_metrics(datetime.datetime.now().timestamp() - start)
 
@@ -1257,9 +1303,10 @@ class LicensePlateProcessingMixin:
                 f"{camera}: Writing snapshot for {id}, {top_plate}, {current_time}"
             )
             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            _, encoded_img = cv2.imencode(".jpg", frame_bgr)
             self.sub_label_publisher.publish(
                 EventMetadataTypeEnum.save_lpr_snapshot,
-                (base64.b64encode(frame_bgr).decode("ASCII"), id, camera),
+                (base64.b64encode(encoded_img).decode("ASCII"), id, camera),
             )
 
         self.detected_license_plates[id] = {
