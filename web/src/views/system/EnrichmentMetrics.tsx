@@ -7,19 +7,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import {
-  CameraLineGraph,
-  EventsPerSecondsLineGraph,
-} from "@/components/graph/LineGraph";
+import { EventsPerSecondsLineGraph } from "@/components/graph/LineGraph";
 
-type FeatureMetricsProps = {
+type EnrichmentMetricsProps = {
   lastUpdated: number;
   setLastUpdated: (last: number) => void;
 };
-export default function FeatureMetrics({
+export default function EnrichmentMetrics({
   lastUpdated,
   setLastUpdated,
-}: FeatureMetricsProps) {
+}: EnrichmentMetricsProps) {
   // stats
   const { t } = useTranslation(["views/system"]);
 
@@ -121,7 +118,7 @@ export default function FeatureMetrics({
                       key={series.name}
                       graphId={`${series.name}-fps`}
                       unit=""
-                      name="Recognitions Per Second"
+                      name={t("enrichments.recsPerSecond")}
                       updateTimes={updateTimes}
                       data={[series]}
                     />
