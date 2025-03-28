@@ -987,7 +987,7 @@ class LicensePlateProcessingMixin:
     ):
         """Look for license plates in image."""
         self.metrics.alpr_pps.value = self.plates_rec_second.eps()
-        self.metrics.yolov9_pps.value = self.plates_det_second.eps()
+        self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
         camera = obj_data if dedicated_lpr else obj_data["camera"]
         current_time = int(datetime.datetime.now().timestamp())
 

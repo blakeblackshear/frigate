@@ -25,7 +25,7 @@ class DataProcessorMetrics:
         self.alpr_speed = mp.Value("d", 0.01)
         self.alpr_pps = mp.Value("d", 0.0)
         self.yolov9_lpr_speed = mp.Value("d", 0.01)
-        self.yolov9_pps = mp.Value("d", 0.0)
+        self.yolov9_lpr_pps = mp.Value("d", 0.0)
 
 
 class DataProcessorModelRunner:
