@@ -305,8 +305,8 @@ def stats_snapshot(
             stats["embeddings"]["face_recognition_speed"] = round(
                 embeddings_metrics.face_rec_speed.value * 1000, 2
             )
-            stats["embeddings"]["face_recognition_rps"] = round(
-                embeddings_metrics.face_rec_rps, 2
+            stats["embeddings"]["face_recognition_fps"] = round(
+                embeddings_metrics.face_rec_speed.value, 2
             )
 
         if config.lpr.enabled:

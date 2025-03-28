@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { CameraLineGraph } from "@/components/graph/CameraGraph";
 
 type FeatureMetricsProps = {
   lastUpdated: number;
@@ -102,15 +103,26 @@ export default function FeatureMetrics({
               {embeddingInferenceTimeSeries.map((series) => (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5 capitalize">{series.name}</div>
-                  <ThresholdBarGraph
-                    key={series.name}
-                    graphId={`${series.name}-inference`}
-                    name={series.name}
-                    unit="ms"
-                    threshold={EmbeddingThreshold}
-                    updateTimes={updateTimes}
-                    data={[series]}
-                  />
+                  {series.name.endsWith("Speed") ? (
+                    <ThresholdBarGraph
+                      key={series.name}
+                      graphId={`${series.name}-inference`}
+                      name={series.name}
+                      unit="ms"
+                      threshold={EmbeddingThreshold}
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  ) : (
+                    <CameraLineGraph
+                      key={series.name}
+                      graphId={`${series.name}-fps`}
+                      dataLabels={["Recognitions Per Second"]}
+                      unit=""
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  )}
                 </div>
               ))}
             </>

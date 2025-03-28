@@ -955,7 +955,7 @@ class LicensePlateProcessingMixin:
         """
         Update inference metrics.
         """
-        self.metrics.alpr_pps.value = (self.metrics.alpr_pps.value * 9 + duration) / 10
+        self.metrics.alpr_speed.value = (self.metrics.alpr_speed.value * 9 + duration) / 10
 
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
