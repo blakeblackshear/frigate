@@ -126,6 +126,16 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     known_plates: Optional[Dict[str, List[str]]] = Field(
         default={}, title="Known plates to track (strings or regular expressions)."
     )
+    enhancement: int = Field(
+        default=0,
+        title="Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
+        ge=0,
+        le=10,
+    )
+    debug_save_plates: bool = Field(
+        default=False,
+        title="Save plates captured for LPR for debugging purposes.",
+    )
 
 
 class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
@@ -138,6 +148,12 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
     min_area: int = Field(
         default=1000,
         title="Minimum area of license plate to begin running recognition.",
+    )
+    enhancement: int = Field(
+        default=0,
+        title="Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
+        ge=0,
+        le=10,
     )
 
     model_config = ConfigDict(extra="ignore", protected_namespaces=())
