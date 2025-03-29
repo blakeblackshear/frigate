@@ -955,8 +955,8 @@ export function ObjectSnapshotTab({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <a
-                          download
                           href={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                          download={`${search?.camera}_${search?.label}.jpg`}
                         >
                           <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
                             <FaDownload className="size-4 text-white" />
