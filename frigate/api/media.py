@@ -2,6 +2,7 @@
 
 import glob
 import logging
+import math
 import os
 import subprocess as sp
 import time
@@ -262,7 +263,7 @@ def get_snapshot_from_recording(
     except DoesNotExist:
         # try again with a rounded frame time as it may be between
         # the rounded segment start time
-        frame_time = round(frame_time)
+        frame_time = math.ceil(frame_time)
         try:
             recording = (
                 Recordings.select(
