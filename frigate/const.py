@@ -1,9 +1,9 @@
 import re
 
-CONFIG_DIR = "/config"
+CONFIG_DIR = "./config"
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
-BASE_DIR = "/media/frigate"
+BASE_DIR = "./media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 RECORD_DIR = f"{BASE_DIR}/recordings"
 EXPORT_DIR = f"{BASE_DIR}/exports"

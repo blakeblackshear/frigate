@@ -7,7 +7,8 @@ import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
-
+import subprocess
+import sys
 import psutil
 import uvicorn
 from peewee_migrate import Router
@@ -94,7 +95,38 @@ class FrigateApp:
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.config = config
+        self.go2rtc_process = self.run_go2rtc()
+        # self.nginx_process = self.run_nginx()
 
+    def run_go2rtc(self, config_path="./config/cam.yaml"):
+        """
+        Hàm chạy Frigate cùng với go2rtc trong một tiến trình nền.
+        
+        Args:
+            config_path (str): Đường dẫn đến file cấu hình của go2rtc (mặc định: config/cam.yaml)
+        """
+        # Khởi động go2rtc trong một tiến trình nền
+      
+        go2rtc_process = subprocess.Popen(
+            ["go2rtc", "-c", config_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True  # Để dễ đọc output dưới dạng chuỗi
+        )
+        print(f"Đã khởi động go2rtc với PID: {go2rtc_process.pid}")
+        return go2rtc_process
+    
+    def run_nginx(self):
+        nginx_path = shutil.which("nginx")
+        nginx_process = subprocess.Popen(
+            ["sudo", nginx_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        print(f"Đã khởi động Nginx với PID: {nginx_process.pid}")
+        return nginx_process
+    
     def ensure_dirs(self) -> None:
         for d in [
             CONFIG_DIR,
@@ -583,7 +615,6 @@ class FrigateApp:
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
-
         # Ensure global state.
         self.ensure_dirs()
 
@@ -642,7 +673,13 @@ class FrigateApp:
 
     def stop(self) -> None:
         logger.info("Stopping...")
-
+        
+        self.go2rtc_process.terminate()
+        logger.info("Exiting go2rtc...")
+        
+        # self.nginx_process.terminate()
+        # logger.info("Exiting Nginx...")
+        
         self.stop_event.set()
 
         # set an end_time on entries without an end_time before exiting

@@ -67,27 +67,29 @@ class FfmpegConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_path(self) -> str:
-        if self.path == "default":
-            if shutil.which("ffmpeg") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-            else:
-                return "ffmpeg"
-        elif self.path in INCLUDED_FFMPEG_VERSIONS:
-            return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
-        else:
-            return f"{self.path}/bin/ffmpeg"
+        # if self.path == "default":
+        #     if shutil.which("ffmpeg") is None:
+        #         return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
+        #     else:
+        #         return "ffmpeg"
+        # elif self.path in INCLUDED_FFMPEG_VERSIONS:
+        #     return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
+        # else:
+        #     return f"{self.path}/bin/ffmpeg"
+        return shutil.which("ffmpeg")
 
     @property
     def ffprobe_path(self) -> str:
-        if self.path == "default":
-            if shutil.which("ffprobe") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
-            else:
-                return "ffprobe"
-        elif self.path in INCLUDED_FFMPEG_VERSIONS:
-            return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
-        else:
-            return f"{self.path}/bin/ffprobe"
+        # if self.path == "default":
+        #     if shutil.which("ffprobe") is None:
+        #         return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
+        #     else:
+        #         return "ffprobe"
+        # elif self.path in INCLUDED_FFMPEG_VERSIONS:
+        #     return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
+        # else:
+        #     return f"{self.path}/bin/ffprobe"
+        return shutil.which("ffprobe")
 
 
 class CameraRoleEnum(str, Enum):

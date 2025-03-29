@@ -309,7 +309,7 @@ class AudioTfl:
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads
-        self.labels = load_labels("/audio-labelmap.txt", prefill=521)
+        self.labels = load_labels("./audio-labelmap.txt", prefill=521)
         self.interpreter = Interpreter(
             model_path="/cpu_audio_model.tflite",
             num_threads=self.num_threads,

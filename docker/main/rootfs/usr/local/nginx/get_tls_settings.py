@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 
 yaml = YAML()
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+config_file = os.environ.get("CONFIG_FILE", "./config/config.yml")
 
 # Check if we can use .yaml instead of .yml
 config_file_yaml = config_file.replace(".yml", ".yaml")

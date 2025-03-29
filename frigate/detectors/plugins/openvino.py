@@ -35,8 +35,8 @@ class OvDetector(DetectionApi):
             logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError
 
-        os.makedirs("/config/model_cache/openvino", exist_ok=True)
-        self.ov_core.set_property({props.cache_dir: "/config/model_cache/openvino"})
+        os.makedirs("./config/model_cache/openvino", exist_ok=True)
+        self.ov_core.set_property({props.cache_dir: "./config/model_cache/openvino"})
         self.interpreter = self.ov_core.compile_model(
             model=detector_config.model.path, device_name=detector_config.device
         )

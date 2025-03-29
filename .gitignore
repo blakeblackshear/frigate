@@ -11,7 +11,7 @@ models
 *.mp4
 *.db
 *.csv
-frigate/version.py
+# frigate/version.py
 web/build
 web/node_modules
 web/coverage
@@ -19,3 +19,4 @@ core
 !/web/**/*.ts
 .idea/*
 .ipynb_checkpoints
+media/*

@@ -46,7 +46,7 @@ def get_ort_providers(
             # so it is not enabled by default
             if device == "Tensorrt":
                 os.makedirs(
-                    "/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
+                    "./config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
                 )
                 device_id = 0 if not device.isdigit() else int(device)
                 providers.append(provider)
@@ -57,19 +57,19 @@ def get_ort_providers(
                         and os.environ.get("USE_FP_16", "True") != "False",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
+                        "trt_timing_cache_path": "./config/model_cache/tensorrt/ort",
+                        "trt_engine_cache_path": "./config/model_cache/tensorrt/ort/trt-engines",
                     }
                 )
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
-            os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
+            os.makedirs("./config/model_cache/openvino/ort", exist_ok=True)
             providers.append(provider)
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
-                    "cache_dir": "/config/model_cache/openvino/ort",
+                    "cache_dir": "./config/model_cache/openvino/ort",
                     "device_type": device,
                 }
             )
@@ -103,7 +103,7 @@ class ONNXModelRunner:
                 self.type = "ov"
                 self.ov = ov.Core()
                 self.ov.set_property(
-                    {ov.properties.cache_dir: "/config/model_cache/openvino"}
+                    {ov.properties.cache_dir: "./config/model_cache/openvino"}
                 )
                 self.interpreter = self.ov.compile_model(
                     model=model_path, device_name=device

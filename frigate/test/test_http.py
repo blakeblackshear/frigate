@@ -316,7 +316,7 @@ class TestHttp(unittest.TestCase):
         )
 
         with TestClient(app) as client:
-            config = client.get("/config").json()
+            config = client.get("./config").json()
             assert config
             assert config["cameras"]["front_door"]
 

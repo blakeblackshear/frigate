@@ -8,7 +8,7 @@
     "node_modules",
     "__pycache__",
     "dist",
-    "/audio-labelmap.txt"
+    "./audio-labelmap.txt"
   ],
   "language": "en",
   "dictionaryDefinitions": [

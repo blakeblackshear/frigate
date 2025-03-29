@@ -17,7 +17,7 @@ supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
-model_cache_dir = "/config/model_cache/rknn_cache/"
+model_cache_dir = "./config/model_cache/rknn_cache/"
 
 
 class RknnDetectorConfig(BaseDetectorConfig):

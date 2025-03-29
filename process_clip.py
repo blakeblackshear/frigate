@@ -266,7 +266,7 @@ def process(path, label, output, debug_path):
         },
     }
 
-    object_detector = LocalObjectDetector(labels="/labelmap.txt")
+    object_detector = LocalObjectDetector(labels="./labelmap.txt")
 
     results = []
     for c in clips:
