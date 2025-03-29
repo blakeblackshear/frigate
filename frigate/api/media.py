@@ -240,25 +240,50 @@ def get_snapshot_from_recording(
             content={"success": False, "message": "Camera not found"},
             status_code=404,
         )
-
-    recording_query = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-        )
-        .where(
-            (
-                (frame_time >= Recordings.start_time)
-                & (frame_time <= Recordings.end_time)
-            )
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.desc())
-        .limit(1)
-    )
+    recording: Recordings | None = None
 
     try:
-        recording: Recordings = recording_query.get()
+        recording = (
+            Recordings.select(
+                Recordings.path,
+                Recordings.start_time,
+            )
+            .where(
+                (
+                    (frame_time >= Recordings.start_time)
+                    & (frame_time <= Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .order_by(Recordings.start_time.desc())
+            .limit(1)
+            .get()
+        )
+    except DoesNotExist:
+        # try again with a rounded frame time as it may be between
+        # the rounded segment start time
+        frame_time = round(frame_time)
+        try:
+            recording = (
+                Recordings.select(
+                    Recordings.path,
+                    Recordings.start_time,
+                )
+                .where(
+                    (
+                        (frame_time >= Recordings.start_time)
+                        & (frame_time <= Recordings.end_time)
+                    )
+                )
+                .where(Recordings.camera == camera_name)
+                .order_by(Recordings.start_time.desc())
+                .limit(1)
+                .get()
+            )
+        except DoesNotExist:
+            pass
+
+    if recording is not None:
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
         mime_type = "png" if format == "png" else "jpeg"
@@ -279,7 +304,7 @@ def get_snapshot_from_recording(
                 status_code=404,
             )
         return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
-    except DoesNotExist:
+    else:
         return JSONResponse(
             content={
                 "success": False,
