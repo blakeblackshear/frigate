@@ -3,7 +3,7 @@
     "cameras": "摄像头统计 - Frigate",
     "storage": "存储统计 - Frigate",
     "general": "常规统计 - Frigate",
-    "features": "功能统计 - Frigate",
+    "enrichments": "增强功能统计 - Frigate",
     "logs": {
       "frigate": "Frigate 日志 - Frigate",
       "go2rtc": "Go2RTC 日志 - Frigate",
@@ -144,8 +144,9 @@
     "healthy": "系统运行正常",
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）"
   },
-  "features": {
-    "title": "功能",
+  "enrichments": {
+    "title": "增强功能",
+    "infPerSecond": "每秒推理次数",
     "embeddings": {
       "image_embedding_speed": "图像特征提取速度",
       "face_embedding_speed": "人脸特征提取速度",

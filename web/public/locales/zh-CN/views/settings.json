@@ -87,9 +87,15 @@
       "title": "语义搜索",
       "desc": "Frigate的语义搜索能够让你使用自然语言根据图像本身、自定义的文本描述或自动生成的描述来搜索视频。",
       "readTheDocumentation": "阅读文档（英文）",
-      "reindexOnStartup": {
-        "label": "启动时重新索引",
-        "desc": "每次启动将重新索引并重新处理所有缩略图和描述。<em>关闭该设置后不要忘记重启！</em>"
+      "reindexNow": {
+        "label": "立即重建索引",
+        "desc": "重建索引将为所有跟踪对象重新生成特征向量。该过程将在后台运行，可能会使CPU满载，所需时间取决于跟踪对象的数量。",
+        "confirmTitle": "确认重建索引",
+        "confirmDesc": "确定要为所有跟踪对象重建特征向量索引吗？此过程将在后台运行，但可能会导致CPU满载并耗费较长时间。您可以在探索页面查看进度。", 
+        "confirmButton": "重建索引",
+        "success": "重建索引已成功启动。",
+        "alreadyInProgress": "重建索引已在执行中。",
+        "error": "启动重建索引失败：{{errorMessage}}"
       },
       "modelSize": {
         "label": "模型大小",
@@ -113,11 +119,11 @@
         "desc": "用于人脸识别的模型尺寸。",
         "small": {
           "title": "小模型",
-          "desc": "使用<em>小模型</em>将采用OpenCV的局部二值模式直方图(LBPH)算法，可在大多数CPU上高效运行。"
+          "desc": "使用<em>小模型</em>将采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
         },
         "large": {
           "title": "大模型",
-          "desc": "使用<em>大模型</em>将采用ArcFace人脸嵌入模型，若适用将自动在GPU上运行。"
+          "desc": "使用<em>大模型</em>将采用ArcFace人脸特征提取模型，若条件允许将自动使用GPU运行。"
         }
       }
     },
