@@ -88,7 +88,9 @@ class CameraState:
                         thickness = 1
                     else:
                         thickness = 2
-                        color = self.config.model.colormap[obj["label"]]
+                        color = self.config.model.colormap.get(
+                            obj["label"], (255, 255, 255)
+                        )
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -110,7 +112,9 @@ class CameraState:
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
-                    color = self.config.model.colormap[obj["label"]]
+                    color = self.config.model.colormap.get(
+                        obj["label"], (255, 255, 255)
+                    )
 
                     # debug autotracking zooming - show the zoom factor box
                     if (
