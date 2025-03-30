@@ -62,7 +62,7 @@ Fine-tune the LPR feature using these optional parameters:
 
 - **`detection_threshold`**: License plate object detection confidence score required before recognition runs.
   - Default: `0.7`
-  - Note: This is field only applies to the standalone license plate detection model, `min_score` should be used to filter for models like Frigate+ that have license plate detection built in.
+  - Note: This is field only applies to the standalone license plate detection model, `threshold` and `min_score` object filters should be used for models like Frigate+ that have license plate detection built in.
 - **`min_area`**: Defines the minimum area (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels. Note: this is intentionally set very low as it is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
