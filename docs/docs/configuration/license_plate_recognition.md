@@ -229,7 +229,7 @@ cameras:
     ffmpeg: ...
     detect:
       enabled: False # disable Frigate's standard object detection pipeline
-      fps: 5 # increase if necessary, though high values may slow down Frigate's enhancements pipeline and use considerable CPU
+      fps: 5 # increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU
       width: 1920
       height: 1080
     objects:
