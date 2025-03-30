@@ -442,7 +442,7 @@ class TrackedObject:
 
         if bounding_box:
             thickness = 2
-            color = self.colormap[self.obj_data["label"]]
+            color = self.colormap.get(self.obj_data["label"], (255, 255, 255))
 
             # draw the bounding boxes on the frame
             box = self.thumbnail_data["box"]

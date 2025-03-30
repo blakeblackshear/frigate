@@ -62,7 +62,7 @@ Fine-tune the LPR feature using these optional parameters:
 
 - **`detection_threshold`**: License plate object detection confidence score required before recognition runs.
   - Default: `0.7`
-  - Note: This is field only applies to the standalone license plate detection model, `min_score` should be used to filter for models that have license plate detection built in.
+  - Note: This is field only applies to the standalone license plate detection model, `threshold` and `min_score` object filters should be used for models like Frigate+ that have license plate detection built in.
 - **`min_area`**: Defines the minimum area (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels. Note: this is intentionally set very low as it is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
@@ -137,17 +137,86 @@ lpr:
       - "MN D3163"
 ```
 
+:::note
+
+If you want to detect cars on cameras but don't want to use resources to run LPR on those cars, you should disable LPR for those specific cameras.
+
+```yaml
+cameras:
+  side_yard:
+    lpr:
+      enabled: False
+    ...
+```
+
+:::
+
 ## Dedicated LPR Cameras
 
 Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to capture license plates on distant vehicles, often with fine-tuned settings to capture plates at night.
 
-Users with a dedicated LPR camera can run Frigate's LPR by specifying a camera type of `lpr` in the camera configuration. An example config for a dedicated LPR camera might look like this:
+Users can configure Frigate's LPR in two different ways depending on whether they are using a Frigate+ model:
+
+### Using a Frigate+ Model
+
+Users running a Frigate+ model (or any model that natively detects `license_plate`) can take advantage of `license_plate` detection. This allows license plates to be treated as standard objects in dedicated LPR mode, meaning that alerts, detections, snapshots, zones, and other Frigate features work as usual, and plates are detected efficiently through your configured object detector.
+
+An example configuration for a dedicated LPR camera using a Frigate+ model:
 
 ```yaml
 # LPR global configuration
 lpr:
   enabled: True
-  min_plate_length: 4
+
+# Dedicated LPR camera configuration
+cameras:
+  dedicated_lpr_camera:
+    type: "lpr" # required to use dedicated LPR camera mode
+    detect:
+      enabled: True
+      fps: 5 # increase if vehicles move quickly
+      min_initialized: 2 # set at fps divided by 3 for very fast cars
+      width: 1920
+      height: 1080
+    objects:
+      track:
+        - license_plate
+      filters:
+        license_plate:
+          threshold: 0.7
+    motion:
+      threshold: 30
+      contour_area: 60 # use an increased value to tune out small motion changes
+      improve_contrast: false
+      mask: 0.704,0.007,0.709,0.052,0.989,0.055,0.993,0.001 # ensure your camera's timestamp is masked
+    record:
+      enabled: True # disable recording if you only want snapshots
+    snapshots:
+      enabled: True
+    review:
+      detections:
+        labels:
+          - license_plate
+```
+
+With this setup:
+
+- License plates are treated as normal objects in Frigate.
+- Scores, alerts, detections, snapshots, zones, and object masks work as expected.
+- Snapshots will have license plate bounding boxes on them.
+- The `frigate/events` MQTT topic will publish tracked object updates.
+- Debug view will display `license_plate` bounding boxes.
+
+### Using the Secondary LPR Pipeline (Without Frigate+)
+
+If you are not running a Frigate+ model, you can use Frigate’s built-in secondary dedicated LPR pipeline. In this mode, Frigate bypasses the standard object detection pipeline and runs a local license plate detector model on the full frame whenever motion activity occurs.
+
+An example configuration for a dedicated LPR camera using the secondary pipeline:
+
+```yaml
+# LPR global configuration
+lpr:
+  enabled: True
   detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration
@@ -156,14 +225,15 @@ cameras:
     type: "lpr" # required to use dedicated LPR camera mode
     lpr:
       enabled: True
-      expire_time: 3 # optional, default
       enhancement: 3 # optional, enhance the image before trying to recognize characters
     ffmpeg: ...
     detect:
-      enabled: False # optional, disable Frigate's standard object detection pipeline
-      fps: 5 # keep this at 5, higher values are unnecessary for dedicated LPR mode and could overwhelm the detector
+      enabled: False # disable Frigate's standard object detection pipeline
+      fps: 5 # increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU
       width: 1920
       height: 1080
+    objects:
+      track: [] # required when not using a Frigate+ model for dedicated LPR mode
     motion:
       threshold: 30
       contour_area: 60 # use an increased value here to tune out small motion changes
@@ -178,31 +248,38 @@ cameras:
           default: 7
 ```
 
-The camera-level `type` setting tells Frigate to treat your camera as a dedicated LPR camera. Setting this option bypasses Frigate's standard object detection pipeline so that a `car` does not need to be detected to run LPR. This dedicated LPR pipeline does not utilize defined zones or object masks, and the license plate detector is always run on the full frame whenever motion activity occurs. If a plate is found, a snapshot at the highest scoring moment is saved as a `car` object, visible in Explore and searchable by the recognized plate via Explore's More Filters.
+With this setup:
 
-An optional config variable for dedicated LPR cameras only, `expire_time`, can be specified under the `lpr` configuration at the camera level to change the time it takes for Frigate to consider a previously tracked plate as expired.
-
-:::note
-
-When using `type: "lpr"` for a camera, a non-standard object detection pipeline is used. Any detected license plates on dedicated LPR cameras are treated similarly to manual events in Frigate. Note that for `car` objects with license plates:
-
+- The standard object detection pipeline is bypassed. Any detected license plates on dedicated LPR cameras are treated similarly to manual events in Frigate. You must **not** specify `license_plate` as an object to track.
+- The license plate detector runs on the full frame whenever motion is detected and processes frames according to your detect `fps` setting.
 - Review items will always be classified as a `detection`.
 - Snapshots will always be saved.
-- Tracked objects are retained according to your retain settings for `record` and `snapshots`.
-- Zones and object masks cannot be used.
-- Debug view may not show `license_plate` bounding boxes, even if you are using a Frigate+ model for your standard object detection pipeline.
-- The `frigate/events` MQTT topic will not publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
+- Zones and object masks are **not** used.
+- The `frigate/events` MQTT topic will **not** publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
+- License plate snapshots are saved at the highest-scoring moment and appear in Explore.
+- Debug view will not show `license_plate` bounding boxes.
 
-:::
+### Summary
+
+| Feature                 | Native `license_plate` detecting Model (like Frigate+) | Secondary Pipeline (without native model or Frigate+)           |
+| ----------------------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| License Plate Detection | Uses `license_plate` as a tracked object               | Runs a dedicated LPR pipeline                                   |
+| FPS Setting             | 5 (increase for fast-moving cars)                      | 5 (increase for fast-moving cars, but it may use much more CPU) |
+| Object Detection        | Standard Frigate+ detection applies                    | Bypasses standard object detection                              |
+| Zones & Object Masks    | Supported                                              | Not supported                                                   |
+| Debug View              | May show `license_plate` bounding boxes                | May **not** show `license_plate` bounding boxes                 |
+| MQTT `frigate/events`   | Publishes tracked object updates                       | Does **not** publish tracked object updates                     |
+| Explore                 | Recognized plates available in More Filters            | Recognized plates available in More Filters                     |
+
+By selecting the appropriate configuration, users can optimize their dedicated LPR cameras based on whether they are using a Frigate+ model or the secondary LPR pipeline.
 
 ### Best practices for using Dedicated LPR camera mode
 
 - Tune your motion detection and increase the `contour_area` until you see only larger motion boxes being created as cars pass through the frame (likely somewhere between 50-90 for a 1920x1080 detect stream). Increasing the `contour_area` filters out small areas of motion and will prevent excessive resource use from looking for license plates in frames that don't even have a car passing through it.
 - Disable the `improve_contrast` motion setting, especially if you are running LPR at night and the frame is mostly dark. This will prevent small pixel changes and smaller areas of motion from triggering license plate detection.
 - Ensure your camera's timestamp is covered with a motion mask so that it's not incorrectly detected as a license plate.
-- While not strictly required, it may be beneficial to disable standard object detection on your dedicated LPR camera (`detect` --> `enabled: False`). If you've set the camera type to `"lpr"`, license plate detection will still be performed on the entire frame when motion occurs.
-- If multiple tracked objects are being produced for the same license plate, you can tweak the `expire_time` to prevent plates from being expired from the view as quickly.
-- You may need to change your camera settings for a clearer image or decrease your global `recognition_threshold` config if your plates are not being accurately recognized at night.
+- For non-Frigate+ users, you may need to change your camera settings for a clearer image or decrease your global `recognition_threshold` config if your plates are not being accurately recognized at night.
+- The secondary pipeline mode runs a local AI model on your CPU to detect plates. Increasing detect `fps` will increase CPU usage proportionally.
 
 ## FAQ
 

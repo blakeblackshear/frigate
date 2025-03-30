@@ -457,7 +457,11 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera_config = self.config.cameras[camera]
 
-        if not camera_config.type == CameraTypeEnum.lpr:
+        if (
+            camera_config.type != CameraTypeEnum.lpr
+            or "license_plate" in camera_config.objects.track
+        ):
+            # we're not a dedicated lpr camera or we are one but we're using frigate+
             return
 
         try:

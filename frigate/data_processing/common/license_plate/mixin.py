@@ -21,7 +21,6 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
-from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.util.builtin import EventsPerSecond
@@ -972,7 +971,7 @@ class LicensePlateProcessingMixin:
             (
                 now,
                 camera,
-                "car",
+                "license_plate",
                 event_id,
                 True,
                 plate_score,
@@ -994,9 +993,7 @@ class LicensePlateProcessingMixin:
         if not self.config.cameras[camera].lpr.enabled:
             return
 
-        if not dedicated_lpr and self.config.cameras[camera].type == CameraTypeEnum.lpr:
-            return
-
+        # dedicated LPR cam without frigate+
         if dedicated_lpr:
             id = "dedicated-lpr"
 
@@ -1050,8 +1047,11 @@ class LicensePlateProcessingMixin:
         else:
             id = obj_data["id"]
 
-            # don't run for non car objects
-            if obj_data.get("label") != "car":
+            # don't run for non car or non license plate (dedicated lpr with frigate+) objects
+            if (
+                obj_data.get("label") != "car"
+                and obj_data.get("label") != "license_plate"
+            ):
                 logger.debug(
                     f"{camera}: Not a processing license plate for non car object."
                 )
@@ -1131,26 +1131,34 @@ class LicensePlateProcessingMixin:
                     license_plate[0] : license_plate[2],
                 ]
             else:
-                # don't run for object without attributes
-                if not obj_data.get("current_attributes"):
+                # don't run for object without attributes if this isn't dedicated lpr with frigate+
+                if (
+                    not obj_data.get("current_attributes")
+                    and obj_data.get("label") != "license_plate"
+                ):
                     logger.debug(f"{camera}: No attributes to parse.")
                     return
 
-                attributes: list[dict[str, any]] = obj_data.get(
-                    "current_attributes", []
-                )
-                for attr in attributes:
-                    if attr.get("label") != "license_plate":
-                        continue
+                if obj_data.get("label") == "car":
+                    attributes: list[dict[str, any]] = obj_data.get(
+                        "current_attributes", []
+                    )
+                    for attr in attributes:
+                        if attr.get("label") != "license_plate":
+                            continue
 
-                    if license_plate is None or attr.get(
-                        "score", 0.0
-                    ) > license_plate.get("score", 0.0):
-                        license_plate = attr
+                        if license_plate is None or attr.get(
+                            "score", 0.0
+                        ) > license_plate.get("score", 0.0):
+                            license_plate = attr
 
-                # no license plates detected in this frame
-                if not license_plate:
-                    return
+                    # no license plates detected in this frame
+                    if not license_plate:
+                        return
+
+                # we are using dedicated lpr with frigate+
+                if obj_data.get("label") == "license_plate":
+                    license_plate = obj_data
 
                 license_plate_box = license_plate.get("box")
 
@@ -1160,7 +1168,9 @@ class LicensePlateProcessingMixin:
                     or area(license_plate_box)
                     < self.config.cameras[obj_data["camera"]].lpr.min_area
                 ):
-                    logger.debug(f"{camera}: Invalid license plate box {license_plate}")
+                    logger.debug(
+                        f"{camera}: Area for license plate box {area(license_plate_box)} is less than min_area {self.config.cameras[obj_data['camera']].lpr.min_area}"
+                    )
                     return
 
                 license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -1239,8 +1249,11 @@ class LicensePlateProcessingMixin:
             )
             return
 
-        # For LPR cameras, match or assign plate ID using Jaro-Winkler distance
-        if dedicated_lpr:
+        # For dedicated LPR cameras, match or assign plate ID using Jaro-Winkler distance
+        if (
+            dedicated_lpr
+            and "license_plate" not in self.config.cameras[camera].objects.track
+        ):
             plate_id = None
 
             for existing_id, data in self.detected_license_plates.items():
@@ -1306,8 +1319,11 @@ class LicensePlateProcessingMixin:
             (id, top_plate, avg_confidence),
         )
 
-        if dedicated_lpr:
-            # save the best snapshot
+        # save the best snapshot for dedicated lpr cams not using frigate+
+        if (
+            dedicated_lpr
+            and "license_plate" not in self.config.cameras[camera].objects.track
+        ):
             logger.debug(
                 f"{camera}: Writing snapshot for {id}, {top_plate}, {current_time}"
             )

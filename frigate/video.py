@@ -15,6 +15,7 @@ from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
+from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -519,6 +520,7 @@ def track_camera(
         frame_queue,
         frame_shape,
         model_config,
+        config,
         config.detect,
         frame_manager,
         motion_detector,
@@ -585,6 +587,7 @@ def process_frames(
     frame_queue: mp.Queue,
     frame_shape,
     model_config: ModelConfig,
+    camera_config: CameraConfig,
     detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
@@ -611,6 +614,29 @@ def process_frames(
     camera_enabled = True
 
     region_min_size = get_min_region_size(model_config)
+
+    attributes_map = model_config.attributes_map
+    all_attributes = model_config.all_attributes
+
+    # remove license_plate from attributes if this camera is a dedicated LPR cam
+    if camera_config.type == CameraTypeEnum.lpr:
+        modified_attributes_map = model_config.attributes_map.copy()
+
+        if (
+            "car" in modified_attributes_map
+            and "license_plate" in modified_attributes_map["car"]
+        ):
+            modified_attributes_map["car"] = [
+                attr
+                for attr in modified_attributes_map["car"]
+                if attr != "license_plate"
+            ]
+
+            attributes_map = modified_attributes_map
+
+        all_attributes = [
+            attr for attr in model_config.all_attributes if attr != "license_plate"
+        ]
 
     while not stop_event.is_set():
         _, updated_enabled_config = enabled_config_subscriber.check_for_update()
@@ -805,9 +831,7 @@ def process_frames(
             # if detection was run on this frame, consolidate
             if len(regions) > 0:
                 tracked_detections = [
-                    d
-                    for d in consolidated_detections
-                    if d[0] not in model_config.all_attributes
+                    d for d in consolidated_detections if d[0] not in all_attributes
                 ]
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(
@@ -819,7 +843,7 @@ def process_frames(
 
         # group the attribute detections based on what label they apply to
         attribute_detections: dict[str, list[TrackedObjectAttribute]] = {}
-        for label, attribute_labels in model_config.attributes_map.items():
+        for label, attribute_labels in attributes_map.items():
             attribute_detections[label] = [
                 TrackedObjectAttribute(d)
                 for d in consolidated_detections
@@ -836,8 +860,7 @@ def process_frames(
         for attributes in attribute_detections.values():
             for attribute in attributes:
                 filtered_objects = filter(
-                    lambda o: attribute.label
-                    in model_config.attributes_map.get(o["label"], []),
+                    lambda o: attribute.label in attributes_map.get(o["label"], []),
                     all_objects,
                 )
                 selected_object_id = attribute.find_best_object(filtered_objects)
@@ -885,7 +908,7 @@ def process_frames(
             for obj in object_tracker.tracked_objects.values():
                 if obj["frame_time"] == frame_time:
                     thickness = 2
-                    color = model_config.colormap[obj["label"]]
+                    color = model_config.colormap.get(obj["label"], (255, 255, 255))
                 else:
                     thickness = 1
                     color = (255, 0, 0)
