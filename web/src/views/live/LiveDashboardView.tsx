@@ -472,11 +472,20 @@ export default function LiveDashboardView({
               } else {
                 grow = "aspect-video";
               }
-              const streamName =
-                currentGroupStreamingSettings?.[camera.name]?.streamName ||
-                camera?.live?.streams
-                  ? Object?.values(camera?.live?.streams)?.[0]
-                  : "";
+              const availableStreams = camera.live.streams || {};
+              const firstStreamEntry = Object.values(availableStreams)[0] || "";
+
+              const streamNameFromSettings =
+                currentGroupStreamingSettings?.[camera.name]?.streamName || "";
+              const streamExists =
+                streamNameFromSettings &&
+                Object.values(availableStreams).includes(
+                  streamNameFromSettings,
+                );
+
+              const streamName = streamExists
+                ? streamNameFromSettings
+                : firstStreamEntry;
               const autoLive =
                 currentGroupStreamingSettings?.[camera.name]?.streamType !==
                 "no-streaming";
