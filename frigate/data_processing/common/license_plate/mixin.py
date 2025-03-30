@@ -971,7 +971,7 @@ class LicensePlateProcessingMixin:
             (
                 now,
                 camera,
-                "car",
+                "license_plate",
                 event_id,
                 True,
                 plate_score,
