@@ -9,15 +9,9 @@ Face recognition identifies known individuals by matching detected faces with pr
 
 ### Face Detection
 
-Users running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
+When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
-Users without a model that detects faces can still run face recognition. Frigate uses a lightweight DNN face detection model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
-
-:::note
-
-Frigate needs to first detect a `face` before it can recognize a face.
-
-:::
+When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
 
 ### Face Recognition
 
@@ -26,7 +20,7 @@ Frigate has support for two face recognition model types:
 - **small**: Frigate will run a FaceNet embedding model to recognize faces, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
 - **large**: Frigate will run a large ArcFace embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
 
-In both cases a lightweight face landmark detection model is also used to align faces before running the recognition model.
+In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
 
 ## Minimum System Requirements
 
@@ -88,9 +82,9 @@ When choosing images to include in the face training set it is recommended to al
 - If it is difficult to make out details in a persons face it will not be helpful in training.
 - Avoid images with extreme under/over-exposure.
 - Avoid blurry / pixelated images.
-- Avoid training on infrared (grayscale). The models are trained on color images and will be able to extract features from grayscale images.
+- Avoid training on infrared (gray-scale). The models are trained on color images and will be able to extract features from gray-scale images.
 - Using images of people wearing hats / sunglasses may confuse the model.
-- Do not upload too many similar images at the same time, it is recommended to train no more than 4-6 similar images for each person to avoid overfitting.
+- Do not upload too many similar images at the same time, it is recommended to train no more than 4-6 similar images for each person to avoid over-fitting.
 
 :::
 
@@ -100,7 +94,7 @@ When first enabling face recognition it is important to build a foundation of st
 
 Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle.
 
-Aim to strike a balance between the quality of images while also having a range of conditions (day / night, different weather conditions, different times of day, etc.) in order to have diversity in the images used for each person and not have overfitting.
+Aim to strike a balance between the quality of images while also having a range of conditions (day / night, different weather conditions, different times of day, etc.) in order to have diversity in the images used for each person and not have over-fitting.
 
 Once a person starts to be consistently recognized correctly on images that are straight-on, it is time to move on to the next step.
 
@@ -112,11 +106,11 @@ Once straight-on images are performing well, start choosing slightly off-angle i
 
 ### Why can't I bulk upload photos?
 
-It is important to methodically add photos to the library, bulk importing photos (especially from a general photo library) will lead to overfitting in that particular scenario and hurt recognition performance.
+It is important to methodically add photos to the library, bulk importing photos (especially from a general photo library) will lead to over-fitting in that particular scenario and hurt recognition performance.
 
 ### Why do unknown people score similarly to known people?
 
-This can happen for a few different reasons, but this is usually an indicator that the training set needs to be improved. This is often related to overfitting:
+This can happen for a few different reasons, but this is usually an indicator that the training set needs to be improved. This is often related to over-fitting:
 
 - If you train with only a few images per person, especially if those images are very similar, the recognition model becomes overly specialized to those specific images.
 - When you provide images with different poses, lighting, and expressions, the algorithm extracts features that are consistent across those variations.
@@ -124,4 +118,4 @@ This can happen for a few different reasons, but this is usually an indicator th
 
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
-The Frigate considers the recognition scores across all recogntion attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
