@@ -556,8 +556,8 @@ face_recognition:
   recognition_threshold: 0.9
   # Optional: Min area of detected face box to consider running face recognition (default: shown below)
   min_area: 500
-  # Optional: Save images of recognized faces for training (default: shown below)
-  save_attempts: True
+  # Optional: Number of images of recognized faces to save for training (default: shown below)
+  save_attempts: 100
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
   blur_confidence_filter: True
 
