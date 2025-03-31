@@ -620,6 +620,11 @@ function FaceAttemptGroup({
           : "outline-transparent duration-500",
       )}
       onClick={(e) => handleClickEvent(e.metaKey)}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        handleClickEvent(true);
+      }}
     >
       <div className="flex flex-row justify-between">
         <div className="capitalize">
