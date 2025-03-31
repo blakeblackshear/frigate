@@ -25,6 +25,8 @@ type CameraStorage = {
     bandwidth: number;
     usage: number;
     usage_percent: number;
+    record_retain_mode: string;
+    record_retain_days: number;
   };
 };
 
@@ -56,6 +58,8 @@ export function CombinedStorageGraph({
     usage: cameraStorage[entity].usage,
     bandwidth: cameraStorage[entity].bandwidth,
     color: colors[index], // Assign the corresponding color
+    retentionMode: cameraStorage[entity].record_retain_mode,
+    retentionDays: cameraStorage[entity].record_retain_days,
   }));
 
   // Add the unused percentage to the series
@@ -67,6 +71,8 @@ export function CombinedStorageGraph({
     usage: totalStorage.total - totalStorage.used,
     bandwidth: 0,
     color: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
+    retentionMode: "",
+    retentionDays: 0,
   });
 
   const options = useMemo(() => {
@@ -181,6 +187,7 @@ export function CombinedStorageGraph({
           <TableHeader>
             <TableRow>
               <TableHead>{t("storage.cameraStorage.camera")}</TableHead>
+              <TableHead>{t("storage.cameraStorage.retention")}</TableHead>
               <TableHead>{t("storage.cameraStorage.storageUsed")}</TableHead>
               <TableHead>
                 {t("storage.cameraStorage.percentageOfTotalUsed")}
@@ -224,6 +231,18 @@ export function CombinedStorageGraph({
                       </PopoverContent>
                     </Popover>
                   )}
+                </TableCell>
+                <TableCell>
+                  {item.name === "Unused"
+                    ? "—"
+                    : t("effectiveRetainMode.modes." + item.retentionMode) +
+                      (" (" +
+                        item.retentionDays +
+                        " " +
+                        (item.retentionDays === 1
+                          ? t("storage.cameraStorage.day")
+                          : t("storage.cameraStorage.days")) +
+                        ")")}
                 </TableCell>
                 <TableCell>{getUnitSize(item.usage ?? 0)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>

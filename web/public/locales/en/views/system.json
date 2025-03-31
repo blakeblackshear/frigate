@@ -91,6 +91,9 @@
     "cameraStorage": {
       "title": "Camera Storage",
       "camera": "Camera",
+      "retention": "Retention",
+      "day": "day",
+      "days": "days",
       "unusedStorageInformation": "Unused Storage Information",
       "storageUsed": "Storage",
       "percentageOfTotalUsed": "Percentage of Total",
