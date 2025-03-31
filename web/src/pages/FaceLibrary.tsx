@@ -216,7 +216,7 @@ export default function FaceLibrary() {
     switch (key) {
       case "a":
         if (modifiers.ctrl) {
-          if (selectedFaces) {
+          if (selectedFaces.length) {
             setSelectedFaces([]);
           } else {
             setSelectedFaces([...trainImages]);
