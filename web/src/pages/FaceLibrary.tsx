@@ -142,29 +142,33 @@ export default function FaceLibrary() {
 
   const [selectedFaces, setSelectedFaces] = useState<string[]>([]);
 
-  const onClickFace = useCallback(
-    (imageId: string, ctrl: boolean) => {
+  const onClickFaces = useCallback(
+    (images: string[], ctrl: boolean) => {
       if (selectedFaces.length == 0 && !ctrl) {
         return;
       }
 
-      const index = selectedFaces.indexOf(imageId);
+      let newSelectedFaces = [...selectedFaces];
 
-      if (index != -1) {
-        if (selectedFaces.length == 1) {
-          setSelectedFaces([]);
+      images.forEach((imageId) => {
+        const index = newSelectedFaces.indexOf(imageId);
+
+        if (index != -1) {
+          if (selectedFaces.length == 1) {
+            newSelectedFaces = [];
+          } else {
+            const copy = [
+              ...newSelectedFaces.slice(0, index),
+              ...newSelectedFaces.slice(index + 1),
+            ];
+            newSelectedFaces = copy;
+          }
         } else {
-          const copy = [
-            ...selectedFaces.slice(0, index),
-            ...selectedFaces.slice(index + 1),
-          ];
-          setSelectedFaces(copy);
+          newSelectedFaces.push(imageId);
         }
-      } else {
-        const copy = [...selectedFaces];
-        copy.push(imageId);
-        setSelectedFaces(copy);
-      }
+      });
+
+      setSelectedFaces(newSelectedFaces);
     },
     [selectedFaces, setSelectedFaces],
   );
@@ -283,7 +287,7 @@ export default function FaceLibrary() {
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
-            onClickFace={onClickFace}
+            onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
           />
         ) : (
@@ -391,7 +395,7 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
-  onClickFace: (image: string, ctrl: boolean) => void;
+  onClickFaces: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
 };
 function TrainingGrid({
@@ -399,7 +403,7 @@ function TrainingGrid({
   attemptImages,
   faceNames,
   selectedFaces,
-  onClickFace,
+  onClickFaces,
   onRefresh,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -523,7 +527,7 @@ function TrainingGrid({
               event={event}
               faceNames={faceNames}
               selectedFaces={selectedFaces}
-              onClickFace={onClickFace}
+              onClickFaces={onClickFaces}
               onSelectEvent={setSelectedEvent}
               onRefresh={onRefresh}
             />
@@ -540,7 +544,7 @@ type FaceAttemptGroupProps = {
   event?: Event;
   faceNames: string[];
   selectedFaces: string[];
-  onClickFace: (image: string, ctrl: boolean) => void;
+  onClickFaces: (image: string[], ctrl: boolean) => void;
   onSelectEvent: (event: Event) => void;
   onRefresh: () => void;
 };
@@ -550,7 +554,7 @@ function FaceAttemptGroup({
   event,
   faceNames,
   selectedFaces,
-  onClickFace,
+  onClickFaces,
   onSelectEvent,
   onRefresh,
 }: FaceAttemptGroupProps) {
@@ -564,15 +568,48 @@ function FaceAttemptGroup({
     [group, selectedFaces],
   );
 
+  // interaction
+
+  const handleClickEvent = useCallback(
+    (meta: boolean) => {
+      if (event && selectedFaces.length == 0 && !meta) {
+        onSelectEvent(event);
+      } else {
+        const anySelected =
+          group.find((face) => selectedFaces.includes(face.filename)) !=
+          undefined;
+
+        if (anySelected) {
+          // deselect all
+          const toDeselect: string[] = [];
+          group.forEach((face) => {
+            if (selectedFaces.includes(face.filename)) {
+              toDeselect.push(face.filename);
+            }
+          });
+          onClickFaces(toDeselect, false);
+        } else {
+          // select all
+          onClickFaces(
+            group.map((face) => face.filename),
+            true,
+          );
+        }
+      }
+    },
+    [event, group, selectedFaces, onClickFaces, onSelectEvent],
+  );
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
         isMobile && "w-full",
         allFacesSelected
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
+      onClick={(e) => handleClickEvent(e.metaKey)}
     >
       <div className="flex flex-row justify-between">
         <div className="capitalize">
@@ -623,7 +660,7 @@ function FaceAttemptGroup({
             }
             onClick={(data, meta) => {
               if (meta || selectedFaces.length > 0) {
-                onClickFace(data.filename, true);
+                onClickFaces([data.filename], true);
               } else if (event) {
                 onSelectEvent(event);
               }
@@ -749,7 +786,10 @@ function FaceAttempt({
             ref={imgRef}
             className={cn("size-44", isMobile && "w-full")}
             src={`${baseUrl}clips/faces/train/${data.filename}`}
-            onClick={(e) => onClick(data, e.metaKey || e.ctrlKey)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick(data, e.metaKey || e.ctrlKey);
+            }}
           />
           <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
             <TimeAgo
