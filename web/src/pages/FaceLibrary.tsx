@@ -410,16 +410,23 @@ function TrainingGrid({
   const faceGroups = useMemo(() => {
     const groups: { [eventId: string]: RecognizedFaceData[] } = {};
 
-    const faces = attemptImages.map((image) => {
-      const parts = image.split("-");
-      return {
-        filename: image,
-        timestamp: Number.parseFloat(parts[0]),
-        eventId: `${parts[0]}-${parts[1]}`,
-        name: parts[2],
-        score: Number.parseFloat(parts[3]),
-      };
-    });
+    const faces = attemptImages
+      .map((image) => {
+        const parts = image.split("-");
+
+        try {
+          return {
+            filename: image,
+            timestamp: Number.parseFloat(parts[2]),
+            eventId: `${parts[0]}-${parts[1]}`,
+            name: parts[3],
+            score: Number.parseFloat(parts[4]),
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter((v) => v != null);
 
     faces
       .sort((a, b) => a.eventId.localeCompare(b.eventId))
