@@ -257,6 +257,16 @@ export default function FaceLibrary() {
         />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
+            <div className="mx-1 flex w-48 items-center justify-center text-sm text-muted-foreground">
+              <div className="p-1">{`${selectedFaces.length} selected`}</div>
+              <div className="p-1">{"|"}</div>
+              <div
+                className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                onClick={() => setSelectedFaces([])}
+              >
+                {t("button.unselect", { ns: "common" })}
+              </div>
+            </div>
             <Button
               className="flex gap-2"
               onClick={() => onDelete("train", selectedFaces)}
