@@ -216,7 +216,11 @@ export default function FaceLibrary() {
     switch (key) {
       case "a":
         if (modifiers.ctrl) {
-          setSelectedFaces([...trainImages]);
+          if (selectedFaces) {
+            setSelectedFaces([]);
+          } else {
+            setSelectedFaces([...trainImages]);
+          }
         }
         break;
       case "Escape":
