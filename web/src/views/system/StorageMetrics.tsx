@@ -20,8 +20,6 @@ type CameraStorage = {
     bandwidth: number;
     usage: number;
     usage_percent: number;
-    record_retain_mode: string;
-    record_retain_days: number;
   };
 };
 

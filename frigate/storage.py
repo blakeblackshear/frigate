@@ -82,8 +82,6 @@ class StorageMaintainer(threading.Thread):
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0
                 ),
-                "record_retain_mode": self.config.cameras[camera].record.retain.mode,
-                "record_retain_days": self.config.cameras[camera].record.retain.days,
             }
 
         return usages

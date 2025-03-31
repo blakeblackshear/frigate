@@ -1,4 +1,5 @@
 import { useTheme } from "@/context/theme-provider";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { generateColors } from "@/utils/colorUtil";
 import { useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
@@ -19,14 +20,13 @@ import { getUnitSize } from "@/utils/storageUtil";
 
 import { CiCircleAlert } from "react-icons/ci";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 
 type CameraStorage = {
   [key: string]: {
     bandwidth: number;
     usage: number;
     usage_percent: number;
-    record_retain_mode: string;
-    record_retain_days: number;
   };
 };
 
@@ -45,6 +45,9 @@ export function CombinedStorageGraph({
   cameraStorage,
   totalStorage,
 }: CombinedStorageGraphProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
   const { t } = useTranslation(["views/system"]);
 
   const { theme, systemTheme } = useTheme();
@@ -58,8 +61,8 @@ export function CombinedStorageGraph({
     usage: cameraStorage[entity].usage,
     bandwidth: cameraStorage[entity].bandwidth,
     color: colors[index], // Assign the corresponding color
-    retentionMode: cameraStorage[entity].record_retain_mode,
-    retentionDays: cameraStorage[entity].record_retain_days,
+    retentionMode: config?.cameras[entity].record.retain.mode,
+    retentionDays: config?.cameras[entity].record.retain.days,
   }));
 
   // Add the unused percentage to the series
