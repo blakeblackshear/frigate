@@ -402,8 +402,7 @@ function TrainingGrid({
   onClickFace,
   onRefresh,
 }: TrainingGridProps) {
-  const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["views/faceLibrary"]);
 
   // face data
 
@@ -516,76 +515,111 @@ function TrainingGrid({
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
         {Object.entries(faceGroups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
-
           return (
-            <div
+            <FaceAttemptGroup
               key={key}
-              className={cn(
-                "flex flex-col gap-2 rounded-lg bg-card p-2",
-                isMobile && "w-full",
-              )}
-            >
-              <div className="flex flex-row justify-between">
-                <div className="capitalize">
-                  Person
-                  {event?.sub_label
-                    ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-                    : ": Unknown"}
-                </div>
-                {event && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/explore?event_id=${event.id}`);
-                        }}
-                      >
-                        <LuSearch className="size-4 text-muted-foreground" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("details.item.button.viewInExplore", {
-                          ns: "views/explore",
-                        })}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
-                )}
-              </div>
-
-              <div
-                className={cn(
-                  "gap-2",
-                  isDesktop
-                    ? "flex flex-row flex-wrap"
-                    : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
-                )}
-              >
-                {group.map((data: RecognizedFaceData) => (
-                  <FaceAttempt
-                    key={data.filename}
-                    data={data}
-                    faceNames={faceNames}
-                    recognitionConfig={config.face_recognition}
-                    selected={selectedFaces.includes(data.filename)}
-                    onClick={(data, meta) => {
-                      if (meta || selectedFaces.length > 0) {
-                        onClickFace(data.filename, true);
-                      } else if (event) {
-                        setSelectedEvent(event);
-                      }
-                    }}
-                    onRefresh={onRefresh}
-                  />
-                ))}
-              </div>
-            </div>
+              config={config}
+              group={group}
+              event={event}
+              faceNames={faceNames}
+              selectedFaces={selectedFaces}
+              onClickFace={onClickFace}
+              onSelectEvent={setSelectedEvent}
+              onRefresh={onRefresh}
+            />
           );
         })}
       </div>
     </>
+  );
+}
+
+type FaceAttemptGroupProps = {
+  config: FrigateConfig;
+  group: RecognizedFaceData[];
+  event?: Event;
+  faceNames: string[];
+  selectedFaces: string[];
+  onClickFace: (image: string, ctrl: boolean) => void;
+  onSelectEvent: (event: Event) => void;
+  onRefresh: () => void;
+};
+function FaceAttemptGroup({
+  config,
+  group,
+  event,
+  faceNames,
+  selectedFaces,
+  onClickFace,
+  onSelectEvent,
+  onRefresh,
+}: FaceAttemptGroupProps) {
+  const navigate = useNavigate();
+  const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-2 rounded-lg bg-card p-2",
+        isMobile && "w-full",
+      )}
+    >
+      <div className="flex flex-row justify-between">
+        <div className="capitalize">
+          Person
+          {event?.sub_label
+            ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+            : ": Unknown"}
+        </div>
+        {event && (
+          <Tooltip>
+            <TooltipTrigger>
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate(`/explore?event_id=${event.id}`);
+                }}
+              >
+                <LuSearch className="size-4 text-muted-foreground" />
+              </div>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>
+                {t("details.item.button.viewInExplore", {
+                  ns: "views/explore",
+                })}
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+        )}
+      </div>
+
+      <div
+        className={cn(
+          "gap-2",
+          isDesktop
+            ? "flex flex-row flex-wrap"
+            : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
+        )}
+      >
+        {group.map((data: RecognizedFaceData) => (
+          <FaceAttempt
+            key={data.filename}
+            data={data}
+            faceNames={faceNames}
+            recognitionConfig={config.face_recognition}
+            selected={selectedFaces.includes(data.filename)}
+            onClick={(data, meta) => {
+              if (meta || selectedFaces.length > 0) {
+                onClickFace(data.filename, true);
+              } else if (event) {
+                onSelectEvent(event);
+              }
+            }}
+            onRefresh={onRefresh}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
