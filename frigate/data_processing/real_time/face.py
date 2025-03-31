@@ -272,22 +272,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             f"Detected best face for person as: {sub_label} with probability {score}"
         )
 
-        if self.config.face_recognition.save_attempts:
-            # write face to library
-            folder = os.path.join(FACE_DIR, "train")
-            file = os.path.join(folder, f"{id}-{sub_label}-{score}-0.webp")
-            os.makedirs(folder, exist_ok=True)
-            cv2.imwrite(file, face_frame)
-
-            files = sorted(
-                filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
-                key=lambda f: os.path.getctime(os.path.join(folder, f)),
-                reverse=True,
-            )
-
-            # delete oldest face image if maximum is reached
-            if len(files) > self.config.face_recognition.save_attempts:
-                os.unlink(os.path.join(folder, files[-1]))
+        self.write_face_attempt(
+            face_frame, id, datetime.datetime.now().timestamp(), sub_label, score
+        )
 
         if id not in self.person_face_history:
             self.person_face_history[id] = []
@@ -383,9 +370,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             }
         elif topic == EmbeddingsRequestEnum.reprocess_face.value:
             current_file: str = request_data["image_file"]
-            id = current_file[0 : current_file.index("-", current_file.index("-") + 1)]
-            face_score = current_file[current_file.rfind("-") : current_file.rfind(".")]
+            (id_time, id_rand, timestamp, _, _) = current_file.split("-")
             img = None
+            id = f"{id_time}-{id_rand}"
 
             if current_file:
                 img = cv2.imread(current_file)
@@ -411,7 +398,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 folder = os.path.join(FACE_DIR, "train")
                 os.makedirs(folder, exist_ok=True)
                 new_file = os.path.join(
-                    folder, f"{id}-{sub_label}-{score}-{face_score}.webp"
+                    folder, f"{id}-{timestamp}-{sub_label}-{score}.webp"
                 )
                 shutil.move(current_file, new_file)
 
@@ -461,3 +448,30 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         weighted_average = weighted_scores[best_name] / total_weights[best_name]
 
         return best_name, weighted_average
+
+    def write_face_attempt(
+        self,
+        frame: np.ndarray,
+        event_id: str,
+        timestamp: float,
+        sub_label: str,
+        score: float,
+    ) -> None:
+        if self.config.face_recognition.save_attempts:
+            # write face to library
+            folder = os.path.join(FACE_DIR, "train")
+            file = os.path.join(
+                folder, f"{event_id}-{timestamp}-{sub_label}-{score}.webp"
+            )
+            os.makedirs(folder, exist_ok=True)
+            cv2.imwrite(file, frame)
+
+            files = sorted(
+                filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
+                key=lambda f: os.path.getctime(os.path.join(folder, f)),
+                reverse=True,
+            )
+
+            # delete oldest face image if maximum is reached
+            if len(files) > self.config.face_recognition.save_attempts:
+                os.unlink(os.path.join(folder, files[-1]))
