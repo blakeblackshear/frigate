@@ -108,6 +108,10 @@ Once straight-on images are performing well, start choosing slightly off-angle i
 
 It is important to methodically add photos to the library, bulk importing photos (especially from a general photo library) will lead to over-fitting in that particular scenario and hurt recognition performance.
 
+### Why can't I bulk reprocess faces?
+
+Face embedding models work by breaking apart faces into different features. This means that when reprocessing an image, only images from a similar angle will have its score affected.
+
 ### Why do unknown people score similarly to known people?
 
 This can happen for a few different reasons, but this is usually an indicator that the training set needs to be improved. This is often related to over-fitting:
