@@ -556,11 +556,22 @@ function FaceAttemptGroup({
 }: FaceAttemptGroupProps) {
   const navigate = useNavigate();
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
+
+  // data
+
+  const allFacesSelected = useMemo(
+    () => group.every((face) => selectedFaces.includes(face.filename)),
+    [group, selectedFaces],
+  );
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 rounded-lg bg-card p-2",
+        "flex flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
         isMobile && "w-full",
+        allFacesSelected
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500",
       )}
     >
       <div className="flex flex-row justify-between">
@@ -607,7 +618,9 @@ function FaceAttemptGroup({
             data={data}
             faceNames={faceNames}
             recognitionConfig={config.face_recognition}
-            selected={selectedFaces.includes(data.filename)}
+            selected={
+              allFacesSelected ? false : selectedFaces.includes(data.filename)
+            }
             onClick={(data, meta) => {
               if (meta || selectedFaces.length > 0) {
                 onClickFace(data.filename, true);
@@ -848,7 +861,7 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
     <div className="relative flex flex-col rounded-lg">
       <div
         className={cn(
-          "w-full overflow-hidden rounded-t-lg border border-t-0 *:text-card-foreground",
+          "w-full overflow-hidden rounded-t-lg *:text-card-foreground",
           isMobile && "flex justify-center",
         )}
       >
