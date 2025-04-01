@@ -57,6 +57,8 @@ Fine-tune face recognition with these optional parameters:
   - Default: `0.8`.
 - `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
   - Default: `0.9`.
+- `save_attempts`: Number of images of recognized faces to save for training.
+  - Default: `100`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
 
