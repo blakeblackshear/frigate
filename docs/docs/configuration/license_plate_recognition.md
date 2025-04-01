@@ -103,7 +103,7 @@ Fine-tune the LPR feature using these optional parameters:
 
 ## Configuration Examples
 
-These configuration parameters are available at the global level of your config. The only optional parameters that should be set at the camera level are `enabled` and `min_area`.
+These configuration parameters are available at the global level of your config. The only optional parameters that should be set at the camera level are `enabled`, `min_area`, and `enhancement`.
 
 ```yaml
 lpr:

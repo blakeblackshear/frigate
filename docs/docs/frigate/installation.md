@@ -242,17 +242,15 @@ docker run -d \
 
 The official docker image tags for the current stable version are:
 
-- `stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64
+- `stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64. This build includes support for Hailo devices as well.
 - `stable-standard-arm64` - Standard Frigate build for arm64
 - `stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
+- `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
 
 The community supported docker image tags for the current stable version are:
 
-- `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
 - `stable-tensorrt-jp6` - Frigate build optimized for nvidia Jetson devices running Jetpack 6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
-- `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
-  - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat
 
 ## Home Assistant Add-on
 
