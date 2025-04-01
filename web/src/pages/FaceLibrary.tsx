@@ -623,7 +623,11 @@ function FaceAttemptGroup({
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
       )}
-      onClick={(e) => handleClickEvent(e.metaKey)}
+      onClick={() => {
+        if (selectedFaces.length) {
+          handleClickEvent(true);
+        }
+      }}
       onContextMenu={(e) => {
         e.stopPropagation();
         e.preventDefault();
