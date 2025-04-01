@@ -174,8 +174,8 @@ cameras:
     type: "lpr" # required to use dedicated LPR camera mode
     detect:
       enabled: True
-      fps: 5 # increase if vehicles move quickly
-      min_initialized: 2 # set at fps divided by 3 for very fast cars
+      fps: 5 # increase to 10 if vehicles move quickly across your frame
+      min_initialized: 2
       width: 1920
       height: 1080
     objects:
@@ -206,6 +206,7 @@ With this setup:
 - Snapshots will have license plate bounding boxes on them.
 - The `frigate/events` MQTT topic will publish tracked object updates.
 - Debug view will display `license_plate` bounding boxes.
+- If you are using a Frigate+ model and want to submit images from your dedicated LPR camera for model training and fine-tuning, annotate both the `car` and the `license_plate` in the snapshots on the Frigate+ website, even if the car is barely visible.
 
 ### Using the Secondary LPR Pipeline (Without Frigate+)
 
