@@ -125,7 +125,7 @@ auth:
 # NOTE: The default values are for the EdgeTPU detector.
 # Other detectors will require the model config to be set.
 model:
-  # Required: path to the model (default: automatic based on detector)
+  # Required: path to the model. Frigate+ models use plus://<model_id> (default: automatic based on detector)
   path: /edgetpu_model.tflite
   # Required: path to the labelmap (default: shown below)
   labelmap_path: /labelmap.txt
