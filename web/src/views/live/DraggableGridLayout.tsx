@@ -582,7 +582,8 @@ export default function DraggableGridLayout({
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   isRestreamed={isRestreamedStates[camera.name]}
                   supportsAudio={
-                    supportsAudioOutputStates[streamName].supportsAudio ?? false
+                    supportsAudioOutputStates[streamName]?.supportsAudio ??
+                    false
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}
