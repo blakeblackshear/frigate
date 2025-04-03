@@ -181,6 +181,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_update(
         self,
@@ -206,6 +209,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(
+            f"{segment.camera}/review_status", segment.severity.value.upper()
+        )
 
     def _publish_segment_end(
         self,
@@ -225,6 +231,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 }
             ),
         )
+        self.requestor.send_data(f"{segment.camera}/review_status", "NONE")
         self.active_review_segments[segment.camera] = None
 
     def end_segment(self, camera: str) -> None:
@@ -253,7 +260,8 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         if len(active_objects) > 0:
             has_activity = True
-            should_update = False
+            should_update_image = False
+            should_update_state = False
 
             if frame_time > segment.last_update:
                 segment.last_update = frame_time
@@ -284,7 +292,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                     and camera_config.review.alerts.enabled
                 ):
                     segment.severity = SeverityEnum.alert
-                    should_update = True
+                    should_update_state = True
+                    should_update_image = True
 
                 # keep zones up to date
                 if len(object["current_zones"]) > 0:
@@ -293,17 +302,24 @@ class ReviewSegmentMaintainer(threading.Thread):
                             segment.zones.append(zone)
 
             if len(active_objects) > segment.frame_active_count:
-                should_update = True
+                should_update_state = True
+                should_update_image = True
 
-            if should_update:
+            if prev_data["data"]["sub_labels"] != list(segment.sub_labels.values()):
+                should_update_state = True
+
+            if should_update_state:
                 try:
-                    yuv_frame = self.frame_manager.get(
-                        frame_name, camera_config.frame_shape_yuv
-                    )
+                    if should_update_image:
+                        yuv_frame = self.frame_manager.get(
+                            frame_name, camera_config.frame_shape_yuv
+                        )
 
-                    if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_name} from SHM")
-                        return
+                        if yuv_frame is None:
+                            logger.debug(f"Failed to get frame {frame_name} from SHM")
+                            return
+                    else:
+                        yuv_frame = None
 
                     self._publish_segment_update(
                         segment, camera_config, yuv_frame, active_objects, prev_data
@@ -498,7 +514,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     _,
                     audio_detections,
                 ) = data
-            elif topic == DetectionTypeEnum.api:
+            elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
                 (
                     camera,
                     frame_time,
@@ -557,13 +573,21 @@ class ReviewSegmentMaintainer(threading.Thread):
                             or audio in camera_config.review.detections.labels
                         ) and camera_config.review.detections.enabled:
                             current_segment.audio.add(audio)
-                elif topic == DetectionTypeEnum.api:
+                elif topic == DetectionTypeEnum.api or topic == DetectionTypeEnum.lpr:
                     if manual_info["state"] == ManualEventState.complete:
                         current_segment.detections[manual_info["event_id"]] = (
                             manual_info["label"]
                         )
-                        if self.config.cameras[camera].review.alerts.enabled:
+                        if (
+                            topic == DetectionTypeEnum.api
+                            and self.config.cameras[camera].review.alerts.enabled
+                        ):
                             current_segment.severity = SeverityEnum.alert
+                        elif (
+                            topic == DetectionTypeEnum.lpr
+                            and self.config.cameras[camera].review.detections.enabled
+                        ):
+                            current_segment.severity = SeverityEnum.detection
                         current_segment.last_update = manual_info["end_time"]
                     elif manual_info["state"] == ManualEventState.start:
                         self.indefinite_events[camera][manual_info["event_id"]] = (
@@ -572,8 +596,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                         current_segment.detections[manual_info["event_id"]] = (
                             manual_info["label"]
                         )
-                        if self.config.cameras[camera].review.alerts.enabled:
+                        if (
+                            topic == DetectionTypeEnum.api
+                            and self.config.cameras[camera].review.alerts.enabled
+                        ):
                             current_segment.severity = SeverityEnum.alert
+                        elif (
+                            topic == DetectionTypeEnum.lpr
+                            and self.config.cameras[camera].review.detections.enabled
+                        ):
+                            current_segment.severity = SeverityEnum.detection
 
                         # temporarily make it so this event can not end
                         current_segment.last_update = sys.maxsize
@@ -660,6 +692,34 @@ class ReviewSegmentMaintainer(threading.Thread):
                     else:
                         logger.warning(
                             f"Manual event API has been called for {camera}, but alerts are disabled. This manual event will not appear as an alert."
+                        )
+                elif topic == DetectionTypeEnum.lpr:
+                    if self.config.cameras[camera].review.detections.enabled:
+                        self.active_review_segments[camera] = PendingReviewSegment(
+                            camera,
+                            frame_time,
+                            SeverityEnum.detection,
+                            {manual_info["event_id"]: manual_info["label"]},
+                            {},
+                            [],
+                            set(),
+                        )
+
+                        if manual_info["state"] == ManualEventState.start:
+                            self.indefinite_events[camera][manual_info["event_id"]] = (
+                                manual_info["label"]
+                            )
+                            # temporarily make it so this event can not end
+                            self.active_review_segments[
+                                camera
+                            ].last_update = sys.maxsize
+                        elif manual_info["state"] == ManualEventState.complete:
+                            self.active_review_segments[
+                                camera
+                            ].last_update = manual_info["end_time"]
+                    else:
+                        logger.warning(
+                            f"Dedicated LPR camera API has been called for {camera}, but detections are disabled. LPR events will not appear as a detection."
                         )
 
         self.record_config_subscriber.stop()

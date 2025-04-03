@@ -21,7 +21,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 ## [Frigate Notify](https://github.com/0x2142/frigate-notify)
 
-[Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate NVR to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
+[Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
 
 ## [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
 

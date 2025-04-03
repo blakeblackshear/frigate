@@ -15,6 +15,7 @@ from frigate.const import (
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.util.config import find_config_file
 
 sys.path.remove("/opt/frigate")
 
@@ -29,12 +30,7 @@ if os.path.isdir("/run/secrets"):
                 Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
             )
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-# Check if we can use .yaml instead of .yml
-config_file_yaml = config_file.replace(".yml", ".yaml")
-if os.path.isfile(config_file_yaml):
-    config_file = config_file_yaml
+config_file = find_config_file()
 
 try:
     with open(config_file) as f:

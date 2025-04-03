@@ -7,15 +7,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { EventsPerSecondsLineGraph } from "@/components/graph/LineGraph";
 
-type FeatureMetricsProps = {
+type EnrichmentMetricsProps = {
   lastUpdated: number;
   setLastUpdated: (last: number) => void;
 };
-export default function FeatureMetrics({
+export default function EnrichmentMetrics({
   lastUpdated,
   setLastUpdated,
-}: FeatureMetricsProps) {
+}: EnrichmentMetricsProps) {
   // stats
   const { t } = useTranslation(["views/system"]);
 
@@ -102,15 +103,26 @@ export default function FeatureMetrics({
               {embeddingInferenceTimeSeries.map((series) => (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5 capitalize">{series.name}</div>
-                  <ThresholdBarGraph
-                    key={series.name}
-                    graphId={`${series.name}-inference`}
-                    name={series.name}
-                    unit="ms"
-                    threshold={EmbeddingThreshold}
-                    updateTimes={updateTimes}
-                    data={[series]}
-                  />
+                  {series.name.endsWith("Speed") ? (
+                    <ThresholdBarGraph
+                      key={series.name}
+                      graphId={`${series.name}-inference`}
+                      name={series.name}
+                      unit="ms"
+                      threshold={EmbeddingThreshold}
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  ) : (
+                    <EventsPerSecondsLineGraph
+                      key={series.name}
+                      graphId={`${series.name}-fps`}
+                      unit=""
+                      name={t("enrichments.infPerSecond")}
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  )}
                 </div>
               ))}
             </>

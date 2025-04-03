@@ -139,7 +139,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         scale_y = image.shape[0] / detect_height
 
         # Determine which box to enlarge based on detection mode
-        if self.requires_license_plate_detection:
+        if "license_plate" not in self.config.cameras[camera_name].objects.track:
             # Scale and enlarge the car box
             box = obj_data.get("box")
             if not box:
@@ -189,7 +189,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         )
 
         keyframe_obj_data = obj_data.copy()
-        if self.requires_license_plate_detection:
+        if "license_plate" not in self.config.cameras[camera_name].objects.track:
             # car box
             keyframe_obj_data["box"] = [new_left, new_top, new_right, new_bottom]
         else:

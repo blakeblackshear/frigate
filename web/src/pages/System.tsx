@@ -14,10 +14,10 @@ import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
-import FeatureMetrics from "@/views/system/FeatureMetrics";
+import EnrichmentMetrics from "@/views/system/EnrichmentMetrics";
 import { useTranslation } from "react-i18next";
 
-const allMetrics = ["general", "features", "storage", "cameras"] as const;
+const allMetrics = ["general", "enrichments", "storage", "cameras"] as const;
 type SystemMetric = (typeof allMetrics)[number];
 
 function System() {
@@ -34,7 +34,7 @@ function System() {
       !config?.lpr.enabled &&
       !config?.face_recognition.enabled
     ) {
-      const index = metrics.indexOf("features");
+      const index = metrics.indexOf("enrichments");
       metrics.splice(index, 1);
     }
 
@@ -89,7 +89,7 @@ function System() {
               aria-label={`Select ${item}`}
             >
               {item == "general" && <LuActivity className="size-4" />}
-              {item == "features" && <LuSearchCode className="size-4" />}
+              {item == "enrichments" && <LuSearchCode className="size-4" />}
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && (
@@ -122,8 +122,8 @@ function System() {
           setLastUpdated={setLastUpdated}
         />
       )}
-      {page == "features" && (
-        <FeatureMetrics
+      {page == "enrichments" && (
+        <EnrichmentMetrics
           lastUpdated={lastUpdated}
           setLastUpdated={setLastUpdated}
         />

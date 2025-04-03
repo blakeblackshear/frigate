@@ -806,7 +806,7 @@ export default function InputWithTags({
                             className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                           >
                             {t("filter.label." + filterType)}:{" "}
-                            {formatFilterValues(filterType, value)}
+                            {value.replaceAll("_", " ")}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)

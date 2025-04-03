@@ -549,9 +549,20 @@ export default function DraggableGridLayout({
               } else {
                 grow = "aspect-video";
               }
-              const streamName =
-                currentGroupStreamingSettings?.[camera.name]?.streamName ||
-                Object.values(camera.live.streams)[0];
+              const availableStreams = camera.live.streams || {};
+              const firstStreamEntry = Object.values(availableStreams)[0] || "";
+
+              const streamNameFromSettings =
+                currentGroupStreamingSettings?.[camera.name]?.streamName || "";
+              const streamExists =
+                streamNameFromSettings &&
+                Object.values(availableStreams).includes(
+                  streamNameFromSettings,
+                );
+
+              const streamName = streamExists
+                ? streamNameFromSettings
+                : firstStreamEntry;
               const autoLive =
                 currentGroupStreamingSettings?.[camera.name]?.streamType !==
                 "no-streaming";
@@ -571,7 +582,8 @@ export default function DraggableGridLayout({
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   isRestreamed={isRestreamedStates[camera.name]}
                   supportsAudio={
-                    supportsAudioOutputStates[streamName].supportsAudio
+                    supportsAudioOutputStates[streamName]?.supportsAudio ??
+                    false
                   }
                   audioState={audioStates[camera.name]}
                   toggleAudio={() => toggleAudio(camera.name)}

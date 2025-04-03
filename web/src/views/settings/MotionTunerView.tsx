@@ -323,7 +323,7 @@ export default function MotionTunerView({
       </div>
 
       {cameraConfig ? (
-        <div className="flex md:h-dvh md:max-h-full md:w-7/12 md:grow">
+        <div className="flex max-h-[70%] md:h-dvh md:max-h-full md:w-7/12 md:grow">
           <div className="size-full min-h-10">
             <AutoUpdatingCameraImage
               camera={cameraConfig.name}

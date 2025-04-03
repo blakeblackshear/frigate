@@ -19,11 +19,11 @@ Once logged in, you can generate an API key for Frigate in Settings.
 
 ### Set your API key
 
-In Frigate, you can use an environment variable or a docker secret named `PLUS_API_KEY` to enable the `Frigate+` buttons on the Explore page. Home Assistant Addon users can set it under Settings > Addons > Frigate NVR > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
+In Frigate, you can use an environment variable or a docker secret named `PLUS_API_KEY` to enable the `Frigate+` buttons on the Explore page. Home Assistant Addon users can set it under Settings > Add-ons > Frigate > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
 
 :::warning
 
-You cannot use the `environment_vars` section of your Frigate configuration file to set this environment variable. It must be defined as an environment variable in the docker config or HA addon config.
+You cannot use the `environment_vars` section of your Frigate configuration file to set this environment variable. It must be defined as an environment variable in the docker config or Home Assistant Add-on config.
 
 :::
 
@@ -50,6 +50,8 @@ You can view all of your submitted images at [https://plus.frigate.video](https:
 ## Use Models
 
 Once you have [requested your first model](../plus/first_model.md) and gotten your own model ID, it can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
+
+You can either choose the new model from the Frigate+ pane in the Settings page of the Frigate UI, or manually set the model at the root level in your config:
 
 ```yaml
 model:

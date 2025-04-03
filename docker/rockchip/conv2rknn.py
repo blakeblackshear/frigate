@@ -14,7 +14,7 @@ try:
     with open("/config/conv2rknn.yaml", "r") as config_file:
         configuration = yaml.safe_load(config_file)
 except FileNotFoundError:
-    raise Exception("Please place a config.yaml file in /config/conv2rknn.yaml")
+    raise Exception("Please place a config file at /config/conv2rknn.yaml")
 
 if configuration["config"] != None:
     rknn_config = configuration["config"]

@@ -125,7 +125,7 @@ auth:
 # NOTE: The default values are for the EdgeTPU detector.
 # Other detectors will require the model config to be set.
 model:
-  # Required: path to the model (default: automatic based on detector)
+  # Required: path to the model. Frigate+ models use plus://<model_id> (default: automatic based on detector)
   path: /edgetpu_model.tflite
   # Required: path to the labelmap (default: shown below)
   labelmap_path: /labelmap.txt
@@ -543,14 +543,26 @@ semantic_search:
   model_size: "small"
 
 # Optional: Configuration for face recognition capability
+# NOTE: Can (enabled, min_area) be overridden at the camera level
 face_recognition:
   # Optional: Enable semantic search (default: shown below)
   enabled: False
-  # Optional: Set the model size used for embeddings. (default: shown below)
-  # NOTE: small model runs on CPU and large model runs on GPU
-  model_size: "small"
+  # Optional: Minimum face distance score required to mark as a potential match (default: shown below)
+  unknown_score: 0.8
+  # Optional: Minimum face detection score required to detect a face (default: shown below)
+  # NOTE: This only applies when not running a Frigate+ model
+  detection_threshold: 0.7
+  # Optional: Minimum face distance score required to be considered a match (default: shown below)
+  recognition_threshold: 0.9
+  # Optional: Min area of detected face box to consider running face recognition (default: shown below)
+  min_area: 500
+  # Optional: Number of images of recognized faces to save for training (default: shown below)
+  save_attempts: 100
+  # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
+  blur_confidence_filter: True
 
 # Optional: Configuration for license plate recognition capability
+# NOTE: enabled, min_area, and enhancement can be overridden at the camera level
 lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
@@ -568,6 +580,11 @@ lpr:
   match_distance: 1
   # Optional: Known plates to track (strings or regular expressions) (default: shown below)
   known_plates: {}
+  # Optional: Enhance the detected plate image with contrast adjustment and denoising (default: shown below)
+  # A value between 0 and 10. Higher values are not always better and may perform worse than lower values.
+  enhancement: 0
+  # Optional: Save plate images to /media/frigate/clips/lpr for debugging purposes (default: shown below)
+  debug_save_plates: False
 
 # Optional: Configuration for AI generated tracked object descriptions
 # WARNING: Depending on the provider, this will send thumbnails over the internet
@@ -645,6 +662,9 @@ cameras:
     # If disabled: config is used but no live stream and no capture etc.
     # Events/Recordings are still viewable.
     enabled: True
+    # Optional: camera type used for some Frigate features (default: shown below)
+    # Options are "generic" and "lpr"
+    type: "generic"
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.
@@ -875,7 +895,7 @@ telemetry:
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
-  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  # NOTE: If you use the Home Assistant integration, disabling this will prevent it from reporting new versions
   version_check: True
 
 # Optional: Camera groups (default: no groups are setup)

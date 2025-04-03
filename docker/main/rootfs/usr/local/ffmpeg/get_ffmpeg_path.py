@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 
 from ruamel.yaml import YAML
@@ -9,17 +8,13 @@ from frigate.const import (
     DEFAULT_FFMPEG_VERSION,
     INCLUDED_FFMPEG_VERSIONS,
 )
+from frigate.util.config import find_config_file
 
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-# Check if we can use .yaml instead of .yml
-config_file_yaml = config_file.replace(".yml", ".yaml")
-if os.path.isfile(config_file_yaml):
-    config_file = config_file_yaml
+config_file = find_config_file()
 
 try:
     with open(config_file) as f:

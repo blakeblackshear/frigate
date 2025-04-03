@@ -69,6 +69,8 @@ class BaseEmbedding(ABC):
                 image = Image.open(BytesIO(response.content)).convert(output)
         elif isinstance(image, bytes):
             image = Image.open(BytesIO(image)).convert(output)
+        elif isinstance(image, np.ndarray):
+            image = Image.fromarray(image)
 
         return image
 

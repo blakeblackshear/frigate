@@ -11,7 +11,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
-from frigate.util.path import delete_event_images
+from frigate.util.path import delete_event_snapshot, delete_event_thumbnail
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class EventCleanup(threading.Thread):
 
             # delete the media from disk
             for expired in expired_events:
-                deleted = delete_event_images(expired)
+                deleted = delete_event_snapshot(expired)
 
                 if not deleted:
                     logger.warning(
@@ -176,7 +176,7 @@ class EventCleanup(threading.Thread):
                 # so no need to delete mp4 files
                 for event in expired_events:
                     events_to_update.append(event.id)
-                    deleted = delete_event_images(event)
+                    deleted = delete_event_snapshot(event)
 
                     if not deleted:
                         logger.warning(
@@ -340,6 +340,10 @@ class EventCleanup(threading.Thread):
                 .iterator()
             )
             events_to_delete = [e.id for e in events]
+
+            for e in events:
+                delete_event_thumbnail(e)
+
             logger.debug(f"Found {len(events_to_delete)} events that can be expired")
             if len(events_to_delete) > 0:
                 for i in range(0, len(events_to_delete), CHUNK_SIZE):

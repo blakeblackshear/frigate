@@ -21,15 +21,26 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { Trans, useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
 
 type ClassificationSettings = {
   search: {
     enabled?: boolean;
-    reindex?: boolean;
     model_size?: SearchModelSize;
   };
   face: {
     enabled?: boolean;
+    model_size?: SearchModelSize;
   };
   lpr: {
     enabled?: boolean;
@@ -47,37 +58,22 @@ export default function ClassificationSettingsView({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReindexDialogOpen, setIsReindexDialogOpen] = useState(false);
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   const [classificationSettings, setClassificationSettings] =
     useState<ClassificationSettings>({
-      search: {
-        enabled: undefined,
-        reindex: undefined,
-        model_size: undefined,
-      },
-      face: {
-        enabled: undefined,
-      },
-      lpr: {
-        enabled: undefined,
-      },
+      search: { enabled: undefined, model_size: undefined },
+      face: { enabled: undefined, model_size: undefined },
+      lpr: { enabled: undefined },
     });
 
   const [origSearchSettings, setOrigSearchSettings] =
     useState<ClassificationSettings>({
-      search: {
-        enabled: undefined,
-        reindex: undefined,
-        model_size: undefined,
-      },
-      face: {
-        enabled: undefined,
-      },
-      lpr: {
-        enabled: undefined,
-      },
+      search: { enabled: undefined, model_size: undefined },
+      face: { enabled: undefined, model_size: undefined },
+      lpr: { enabled: undefined },
     });
 
   useEffect(() => {
@@ -86,30 +82,26 @@ export default function ClassificationSettingsView({
         setClassificationSettings({
           search: {
             enabled: config.semantic_search.enabled,
-            reindex: config.semantic_search.reindex,
             model_size: config.semantic_search.model_size,
           },
           face: {
             enabled: config.face_recognition.enabled,
+            model_size: config.face_recognition.model_size,
           },
-          lpr: {
-            enabled: config.lpr.enabled,
-          },
+          lpr: { enabled: config.lpr.enabled },
         });
       }
 
       setOrigSearchSettings({
         search: {
           enabled: config.semantic_search.enabled,
-          reindex: config.semantic_search.reindex,
           model_size: config.semantic_search.model_size,
         },
         face: {
           enabled: config.face_recognition.enabled,
+          model_size: config.face_recognition.model_size,
         },
-        lpr: {
-          enabled: config.lpr.enabled,
-        },
+        lpr: { enabled: config.lpr.enabled },
       });
     }
     // we know that these deps are correct
@@ -120,10 +112,7 @@ export default function ClassificationSettingsView({
     newConfig: Partial<ClassificationSettings>,
   ) => {
     setClassificationSettings((prevConfig) => ({
-      search: {
-        ...prevConfig.search,
-        ...newConfig.search,
-      },
+      search: { ...prevConfig.search, ...newConfig.search },
       face: { ...prevConfig.face, ...newConfig.face },
       lpr: { ...prevConfig.lpr, ...newConfig.lpr },
     }));
@@ -136,10 +125,8 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.reindex=${classificationSettings.search.reindex ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}`,
-        {
-          requires_restart: 0,
-        },
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
+        { requires_restart: 0 },
       )
       .then((res) => {
         if (res.status === 200) {
@@ -151,9 +138,7 @@ export default function ClassificationSettingsView({
         } else {
           toast.error(
             t("classification.toast.error", { errorMessage: res.statusText }),
-            {
-              position: "top-center",
-            },
+            { position: "top-center" },
           );
         }
       })
@@ -164,21 +149,62 @@ export default function ClassificationSettingsView({
           "Unknown error";
         toast.error(
           t("toast.save.error.title", { errorMessage, ns: "common" }),
-          {
-            position: "top-center",
-          },
+          { position: "top-center" },
         );
       })
       .finally(() => {
+        addMessage(
+          "search_settings_restart",
+          `Restart required (Classification settings changed)`,
+          undefined,
+          "search_settings",
+        );
         setIsLoading(false);
       });
-  }, [updateConfig, classificationSettings.search, t]);
+  }, [classificationSettings, t, addMessage, updateConfig]);
 
   const onCancel = useCallback(() => {
     setClassificationSettings(origSearchSettings);
     setChangedValue(false);
     removeMessage("search_settings", "search_settings");
   }, [origSearchSettings, removeMessage]);
+
+  const onReindex = useCallback(() => {
+    setIsLoading(true);
+
+    axios
+      .put("/reindex")
+      .then((res) => {
+        if (res.status === 202) {
+          toast.success(t("classification.semanticSearch.reindexNow.success"), {
+            position: "top-center",
+          });
+        } else {
+          toast.error(
+            t("classification.semanticSearch.reindexNow.error", {
+              errorMessage: res.statusText,
+            }),
+            { position: "top-center" },
+          );
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("classification.semanticSearch.reindexNow.error", {
+            errorMessage,
+          }),
+          { position: "top-center" },
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+        setIsReindexDialogOpen(false);
+      });
+  }, [t]);
 
   useEffect(() => {
     if (changedValue) {
@@ -251,28 +277,18 @@ export default function ClassificationSettingsView({
               </Label>
             </div>
           </div>
-          <div className="flex flex-col">
-            <div className="flex flex-row items-center">
-              <Switch
-                id="reindex"
-                className="mr-3"
-                disabled={classificationSettings.search.reindex === undefined}
-                checked={classificationSettings.search.reindex === true}
-                onCheckedChange={(isChecked) => {
-                  handleClassificationConfigChange({
-                    search: { reindex: isChecked },
-                  });
-                }}
-              />
-              <div className="space-y-0.5">
-                <Label htmlFor="reindex">
-                  {t("classification.semanticSearch.reindexOnStartup.label")}
-                </Label>
-              </div>
-            </div>
+          <div className="space-y-3">
+            <Button
+              variant="default"
+              disabled={isLoading || !classificationSettings.search.enabled}
+              onClick={() => setIsReindexDialogOpen(true)}
+              aria-label={t("classification.semanticSearch.reindexNow.label")}
+            >
+              {t("classification.semanticSearch.reindexNow.label")}
+            </Button>
             <div className="mt-3 text-sm text-muted-foreground">
               <Trans ns="views/settings">
-                classification.semanticSearch.reindexOnStartup.desc
+                classification.semanticSearch.reindexNow.desc
               </Trans>
             </div>
           </div>
@@ -305,9 +321,7 @@ export default function ClassificationSettingsView({
               value={classificationSettings.search.model_size}
               onValueChange={(value) =>
                 handleClassificationConfigChange({
-                  search: {
-                    model_size: value as SearchModelSize,
-                  },
+                  search: { model_size: value as SearchModelSize },
                 })
               }
             >
@@ -334,6 +348,35 @@ export default function ClassificationSettingsView({
             </Select>
           </div>
         </div>
+
+        <AlertDialog
+          open={isReindexDialogOpen}
+          onOpenChange={setIsReindexDialogOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t("classification.semanticSearch.reindexNow.confirmTitle")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                <Trans ns="views/settings">
+                  classification.semanticSearch.reindexNow.confirmDesc
+                </Trans>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIsReindexDialogOpen(false)}>
+                {t("button.cancel", { ns: "common" })}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onReindex}
+                className={buttonVariants({ variant: "select" })}
+              >
+                {t("classification.semanticSearch.reindexNow.confirmButton")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <div className="my-2 space-y-6">
           <Separator className="my-2 flex bg-secondary" />
@@ -378,6 +421,61 @@ export default function ClassificationSettingsView({
                 </Label>
               </div>
             </div>
+            <div className="space-y-0.5">
+              <div className="text-md">
+                {t("classification.faceRecognition.modelSize.label")}
+              </div>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <p>
+                  <Trans ns="views/settings">
+                    classification.faceRecognition.modelSize.desc
+                  </Trans>
+                </p>
+                <ul className="list-disc pl-5 text-sm">
+                  <li>
+                    <Trans ns="views/settings">
+                      classification.faceRecognition.modelSize.small.desc
+                    </Trans>
+                  </li>
+                  <li>
+                    <Trans ns="views/settings">
+                      classification.faceRecognition.modelSize.large.desc
+                    </Trans>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <Select
+              value={classificationSettings.face.model_size}
+              onValueChange={(value) =>
+                handleClassificationConfigChange({
+                  face: {
+                    model_size: value as SearchModelSize,
+                  },
+                })
+              }
+            >
+              <SelectTrigger className="w-20">
+                {classificationSettings.face.model_size}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {["small", "large"].map((size) => (
+                    <SelectItem
+                      key={size}
+                      className="cursor-pointer"
+                      value={size}
+                    >
+                      {t(
+                        "classification.faceRecognition.modelSize." +
+                          size +
+                          ".title",
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <Separator className="my-2 flex bg-secondary" />

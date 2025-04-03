@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import threading
 import time
 
 from numpy import ndarray
@@ -20,7 +21,7 @@ from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
-from frigate.util.builtin import serialize
+from frigate.util.builtin import EventsPerSecond, serialize
 from frigate.util.path import get_event_thumbnail_bytes
 
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
@@ -74,6 +75,15 @@ class Embeddings:
         self.metrics = metrics
         self.requestor = InterProcessRequestor()
 
+        self.image_eps = EventsPerSecond()
+        self.image_eps.start()
+        self.text_eps = EventsPerSecond()
+        self.text_eps.start()
+
+        self.reindex_lock = threading.Lock()
+        self.reindex_thread = None
+        self.reindex_running = False
+
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
 
@@ -114,6 +124,10 @@ class Embeddings:
                 requestor=self.requestor,
                 device="GPU" if config.semantic_search.model_size == "large" else "CPU",
             )
+
+    def update_stats(self) -> None:
+        self.metrics.image_embeddings_eps.value = self.image_eps.eps()
+        self.metrics.text_embeddings_eps.value = self.text_eps.eps()
 
     def get_model_definitions(self):
         # Version-specific models
@@ -170,9 +184,10 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.image_embeddings_fps.value = (
-            self.metrics.image_embeddings_fps.value * 9 + duration
+        self.metrics.image_embeddings_speed.value = (
+            self.metrics.image_embeddings_speed.value * 9 + duration
         ) / 10
+        self.image_eps.update()
 
         return embedding
 
@@ -194,6 +209,7 @@ class Embeddings:
             for i in range(len(ids)):
                 items.append(ids[i])
                 items.append(serialize(embeddings[i]))
+                self.image_eps.update()
 
             self.db.execute_sql(
                 """
@@ -204,8 +220,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + (duration / len(ids))
         ) / 10
 
         return embeddings
@@ -226,9 +242,10 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + duration
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + duration
         ) / 10
+        self.text_eps.update()
 
         return embedding
 
@@ -249,6 +266,7 @@ class Embeddings:
             for i in range(len(ids)):
                 items.append(ids[i])
                 items.append(serialize(embeddings[i]))
+                self.text_eps.update()
 
             self.db.execute_sql(
                 """
@@ -259,8 +277,8 @@ class Embeddings:
             )
 
         duration = datetime.datetime.now().timestamp() - start
-        self.metrics.text_embeddings_sps.value = (
-            self.metrics.text_embeddings_sps.value * 9 + (duration / len(ids))
+        self.metrics.text_embeddings_speed.value = (
+            self.metrics.text_embeddings_speed.value * 9 + (duration / len(ids))
         ) / 10
 
         return embeddings
@@ -368,3 +386,27 @@ class Embeddings:
         totals["status"] = "completed"
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+    def start_reindex(self) -> bool:
+        """Start reindexing in a separate thread if not already running."""
+        with self.reindex_lock:
+            if self.reindex_running:
+                logger.warning("Reindex embeddings is already running.")
+                return False
+
+            # Mark as running and start the thread
+            self.reindex_running = True
+            self.reindex_thread = threading.Thread(
+                target=self._reindex_wrapper, daemon=True
+            )
+            self.reindex_thread.start()
+            return True
+
+    def _reindex_wrapper(self) -> None:
+        """Wrapper to run reindex and reset running flag when done."""
+        try:
+            self.reindex()
+        finally:
+            with self.reindex_lock:
+                self.reindex_running = False
+                self.reindex_thread = None

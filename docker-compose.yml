@@ -1,8 +1,8 @@
-version: "3"
 services:
   devcontainer:
     container_name: frigate-devcontainer
-    # add groups from host for render, plugdev, video
+    # Check host system's actual render/video/plugdev group IDs with 'getent group render', 'getent group video', and 'getent group plugdev'
+    # Must add these exact IDs in container's group_add section or OpenVINO GPU acceleration will fail
     group_add:
       - "109" # render
       - "110" # render
@@ -24,8 +24,8 @@ services:
     #                     capabilities: [gpu]
     environment:
       YOLO_MODELS: ""
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
+    # devices:
+      # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - .:/workspace/frigate:cached
@@ -33,9 +33,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config:/config
       - ./debug:/media/frigate
-      - /dev/bus/usb:/dev/bus/usb
+     # - /dev/bus/usb:/dev/bus/usb # Uncomment for Google Coral USB
   mqtt:
     container_name: mqtt
-    image: eclipse-mosquitto:1.6
+    image: eclipse-mosquitto:2.0
+    command: mosquitto -c /mosquitto-no-auth.conf # enable no-auth mode
     ports:
       - "1883:1883"

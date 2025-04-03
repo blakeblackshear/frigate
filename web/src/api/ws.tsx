@@ -44,7 +44,8 @@ function useValue(): useValueReturn {
       return;
     }
 
-    const cameraActivity: { [key: string]: object } = JSON.parse(activityValue);
+    const cameraActivity: { [key: string]: FrigateCameraState } =
+      JSON.parse(activityValue);
 
     if (Object.keys(cameraActivity).length === 0) {
       return;
@@ -64,9 +65,7 @@ function useValue(): useValueReturn {
         autotracking,
         alerts,
         detections,
-      } =
-        // @ts-expect-error we know this is correct
-        state["config"];
+      } = state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
       cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
@@ -174,7 +173,7 @@ export function useEnabledState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/enabled/state`, `${camera}/enabled/set`);
-  return { payload: (payload ?? "ON") as ToggleableSetting, send };
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function useDetectState(camera: string): {

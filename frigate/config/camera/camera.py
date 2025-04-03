@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import Optional
 
 from pydantic import Field, PrivateAttr
@@ -17,6 +18,10 @@ from frigate.util.builtin import (
 )
 
 from ..base import FrigateBaseModel
+from ..classification import (
+    CameraFaceRecognitionConfig,
+    CameraLicensePlateRecognitionConfig,
+)
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
@@ -38,6 +43,11 @@ from .zone import ZoneConfig
 __all__ = ["CameraConfig"]
 
 
+class CameraTypeEnum(str, Enum):
+    generic = "generic"
+    lpr = "lpr"
+
+
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(None, title="Camera name.", pattern=REGEX_CAMERA_NAME)
     enabled: bool = Field(default=True, title="Enable camera.")
@@ -52,12 +62,18 @@ class CameraConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
+    face_recognition: CameraFaceRecognitionConfig = Field(
+        default_factory=CameraFaceRecognitionConfig, title="Face recognition config."
+    )
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     genai: GenAICameraConfig = Field(
         default_factory=GenAICameraConfig, title="Generative AI configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
+    )
+    lpr: CameraLicensePlateRecognitionConfig = Field(
+        default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
     )
     motion: Optional[MotionConfig] = Field(
         None, title="Motion detection configuration."
@@ -92,6 +108,7 @@ class CameraConfig(FrigateBaseModel):
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
+    type: CameraTypeEnum = Field(default=CameraTypeEnum.generic, title="Camera Type")
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )

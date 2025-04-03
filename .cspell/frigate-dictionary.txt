@@ -108,7 +108,6 @@ imagestream
 imdecode
 imencode
 imread
-imutils
 imwrite
 interp
 iostat

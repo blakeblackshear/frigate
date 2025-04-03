@@ -292,10 +292,27 @@ def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
 
 
 def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
-    """Verify that required_zones are specified when autotracking is enabled."""
+    """Verify that motion detection is not disabled and object detection is enabled."""
     if camera_config.detect.enabled and not camera_config.motion.enabled:
         raise ValueError(
             f"Camera {camera_config.name} has motion detection disabled and object detection enabled but object detection requires motion detection."
+        )
+
+
+def verify_lpr_and_face(
+    frigate_config: FrigateConfig, camera_config: CameraConfig
+) -> ValueError | None:
+    """Verify that lpr and face are enabled at the global level if enabled at the camera level."""
+    if camera_config.lpr.enabled and not frigate_config.lpr.enabled:
+        raise ValueError(
+            f"Camera {camera_config.name} has lpr enabled but lpr is disabled at the global level of the config. You must enable lpr at the global level."
+        )
+    if (
+        camera_config.face_recognition.enabled
+        and not frigate_config.face_recognition.enabled
+    ):
+        raise ValueError(
+            f"Camera {camera_config.name} has face_recognition enabled but face_recognition is disabled at the global level of the config. You must enable face_recognition at the global level."
         )
 
 
@@ -331,19 +348,6 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
-    classification: ClassificationConfig = Field(
-        default_factory=ClassificationConfig, title="Object classification config."
-    )
-    semantic_search: SemanticSearchConfig = Field(
-        default_factory=SemanticSearchConfig, title="Semantic search configuration."
-    )
-    face_recognition: FaceRecognitionConfig = Field(
-        default_factory=FaceRecognitionConfig, title="Face recognition config."
-    )
-    lpr: LicensePlateRecognitionConfig = Field(
-        default_factory=LicensePlateRecognitionConfig,
-        title="License Plate recognition config.",
-    )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
 
     # Detector config
@@ -395,6 +399,21 @@ class FrigateConfig(FrigateBaseModel):
         title="Global timestamp style configuration.",
     )
 
+    # Classification Config
+    classification: ClassificationConfig = Field(
+        default_factory=ClassificationConfig, title="Object classification config."
+    )
+    semantic_search: SemanticSearchConfig = Field(
+        default_factory=SemanticSearchConfig, title="Semantic search configuration."
+    )
+    face_recognition: FaceRecognitionConfig = Field(
+        default_factory=FaceRecognitionConfig, title="Face recognition config."
+    )
+    lpr: LicensePlateRecognitionConfig = Field(
+        default_factory=LicensePlateRecognitionConfig,
+        title="License Plate recognition config.",
+    )
+
     camera_groups: Dict[str, CameraGroupConfig] = Field(
         default_factory=dict, title="Camera group configuration"
     )
@@ -435,6 +454,8 @@ class FrigateConfig(FrigateBaseModel):
             include={
                 "audio": ...,
                 "birdseye": ...,
+                "face_recognition": ...,
+                "lpr": ...,
                 "record": ...,
                 "snapshots": ...,
                 "live": ...,
@@ -603,6 +624,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_required_zones_exist(camera_config)
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
+            verify_lpr_and_face(self, camera_config)
 
         self.objects.parse_all_objects(self.cameras)
         self.model.create_colormap(sorted(self.objects.all_objects))

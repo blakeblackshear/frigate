@@ -265,6 +265,19 @@ def draw_box_with_label(
     )
 
 
+def grab_cv2_contours(cnts):
+    # if the length the contours tuple returned by cv2.findContours
+    # is '2' then we are using either OpenCV v2.4, v4-beta, or
+    # v4-official
+    if len(cnts) == 2:
+        return cnts[0]
+
+    # if the length of the contours tuple is '3' then we are using
+    # either OpenCV v3, v4-pre, or v4-alpha
+    elif len(cnts) == 3:
+        return cnts[1]
+
+
 def is_label_printable(label) -> bool:
     """Check if label is printable."""
     return not bool(set(label) - set(printable))

@@ -117,7 +117,9 @@ export default function StorageMetrics({
               {formatUnixTimestampToDateTime(earliestDate, {
                 timezone: timezone,
                 strftime_fmt:
-                  config.ui.time_format == "24hour" ? "%d %b %Y" : "%B %d, %Y",
+                  config.ui.time_format === "24hour"
+                    ? "%d %b %Y, %H:%M"
+                    : "%B %d, %Y, %I:%M %p",
               })}
             </div>
           )}

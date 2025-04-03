@@ -7,17 +7,19 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Object Settings - Frigate",
-    "general": "General Settings - Frigate"
+    "general": "General Settings - Frigate",
+    "frigatePlus": "Frigate+ Settings - Frigate"
   },
   "menu": {
-    "uiSettings": "UI Settings",
-    "classificationSettings": "Classification Settings",
-    "cameraSettings": "Camera Settings",
+    "ui": "UI",
+    "classification": "Classification",
+    "cameras": "Camera Settings",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "debug": "Debug",
     "users": "Users",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "frigateplus": "Frigate+"
   },
   "dialog": {
     "unsavedChanges": {
@@ -85,9 +87,15 @@
       "title": "Semantic Search",
       "desc": "Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one.",
       "readTheDocumentation": "Read the Documentation",
-      "reindexOnStartup": {
-        "label": "Re-Index On Startup",
-        "desc": "Re-indexing will reprocess all thumbnails and descriptions (if enabled) and apply the embeddings on each startup. <em>Don't forget to disable the option after restarting!</em>"
+      "reindexNow": {
+        "label": "Reindex Now",
+        "desc": "Reindexing will regenerate embeddings for all tracked object. This process runs in the background and may max out your CPU and take a fair amount of time depending on the number of tracked objects you have.",
+        "confirmTitle": "Confirm Reindexing",
+        "confirmDesc": "Are you sure you want to reindex all tracked object embeddings? This process will run in the background but it may max out your CPU and take a fair amount of time. You can watch the progress on the Explore page.",
+        "confirmButton": "Reindex",
+        "success": "Reindexing started successfully.",
+        "alreadyInProgress": "Reindexing is already in progress.",
+        "error": "Failed to start reindexing: {{errorMessage}}"
       },
       "modelSize": {
         "label": "Model Size",
@@ -105,7 +113,19 @@
     "faceRecognition": {
       "title": "Face Recognition",
       "desc": "Face recognition allows people to be assigned names and when their face is recognized Frigate will assign the person's name as a sub label. This information is included in the UI, filters, as well as in notifications.",
-      "readTheDocumentation": "Read the Documentation"
+      "readTheDocumentation": "Read the Documentation",
+      "modelSize": {
+        "label": "Model Size",
+        "desc": "The size of the model used for face recognition.",
+        "small": {
+          "title": "small",
+          "desc": "Using <em>small</em> employs a FaceNet face embedding model that runs efficiently on most CPUs."
+        },
+        "large": {
+          "title": "large",
+          "desc": "Using <em>large</em> employs an ArcFace face embedding model and will automatically run on the GPU if applicable."
+        }
+      }
     },
     "licensePlateRecognition": {
       "title": "License Plate Recognition",
@@ -113,7 +133,7 @@
       "readTheDocumentation": "Read the Documentation"
     },
     "toast": {
-      "success": "Classification settings have been saved.",
+      "success": "Classification settings have been saved. Restart Frigate to apply your changes.",
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
@@ -514,6 +534,45 @@
       "error": {
         "registerFailed": "Failed to save notification registration."
       }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Settings",
+    "apiKey": {
+      "title": "Frigate+ API Key",
+      "validated": "Frigate+ API key is detected and validated",
+      "notValidated": "Frigate+ API key is not detected or not validated",
+      "desc": "The Frigate+ API key enables integration with the Frigate+ service.",
+      "plusLink": "Read more about Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Snapshot Configuration",
+      "desc": "Submitting to Frigate+ requires both snapshots and <code>clean_copy</code> snapshots to be enabled in your config.",
+      "documentation": "Read the documentation",
+      "cleanCopyWarning": "Some cameras have snapshots enabled but have the clean copy disabled. You need to enable <code>clean_copy</code> in your snapshot config to be able to submit images from these cameras to Frigate+.",
+      "table": {
+        "camera": "Camera",
+        "snapshots": "Snapshots",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+      }
+    },
+    "modelInfo": {
+      "title": "Model Information",
+      "modelType": "Model Type",
+      "trainDate": "Train Date",
+      "baseModel": "Base Model",
+      "supportedDetectors": "Supported Detectors",
+      "dimensions": "Dimensions",
+      "cameras": "Cameras",
+      "loading": "Loading model information...",
+      "error": "Failed to load model information",
+      "availableModels": "Available Models",
+      "loadingAvailableModels": "Loading available models...",
+      "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
+    },
+    "toast": {
+      "success": "Frigate+ settings have been saved. Restart Frigate to apply changes.",
+      "error": "Failed to save config changes: {{errorMessage}}"
     }
   }
 }

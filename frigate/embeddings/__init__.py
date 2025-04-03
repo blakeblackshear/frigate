@@ -197,6 +197,14 @@ class EmbeddingsContext:
             },
         )
 
+    def recognize_face(self, image_data: bytes) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.recognize_face.value,
+            {
+                "image": base64.b64encode(image_data).decode("ASCII"),
+            },
+        )
+
     def get_face_ids(self, name: str) -> list[str]:
         sql_query = f"""
             SELECT
@@ -228,6 +236,10 @@ class EmbeddingsContext:
         if len(os.listdir(folder)) == 0:
             os.rmdir(folder)
 
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
             EmbeddingsRequestEnum.embed_description.value,
@@ -238,3 +250,6 @@ class EmbeddingsContext:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.reprocess_plate.value, {"event": event}
         )
+
+    def reindex_embeddings(self) -> dict[str, any]:
+        return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})

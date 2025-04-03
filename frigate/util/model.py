@@ -13,7 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 ### Post Processing
-def post_process_dfine(tensor_output: np.ndarray, width, height) -> np.ndarray:
+
+
+def post_process_dfine(
+    tensor_output: np.ndarray, width: int, height: int
+) -> np.ndarray:
     class_ids = tensor_output[0][tensor_output[2] > 0.4]
     boxes = tensor_output[1][tensor_output[2] > 0.4]
     scores = tensor_output[2][tensor_output[2] > 0.4]
@@ -25,6 +29,60 @@ def post_process_dfine(tensor_output: np.ndarray, width, height) -> np.ndarray:
 
     for i, (bbox, confidence, class_id) in enumerate(
         zip(boxes[indices], scores[indices], class_ids[indices])
+    ):
+        if i == 20:
+            break
+
+        detections[i] = [
+            class_id,
+            confidence,
+            bbox[1],
+            bbox[0],
+            bbox[3],
+            bbox[2],
+        ]
+
+    return detections
+
+
+def post_process_rfdetr(tensor_output: list[np.ndarray, np.ndarray]) -> np.ndarray:
+    boxes = tensor_output[0]
+    raw_scores = tensor_output[1]
+
+    # apply soft max to scores
+    exp = np.exp(raw_scores - np.max(raw_scores, axis=-1, keepdims=True))
+    all_scores = exp / np.sum(exp, axis=-1, keepdims=True)
+
+    # get highest scoring class from every detection
+    scores = np.max(all_scores[0, :, 1:], axis=-1)
+    labels = np.argmax(all_scores[0, :, 1:], axis=-1)
+
+    idxs = scores > 0.4
+    filtered_boxes = boxes[0, idxs]
+    filtered_scores = scores[idxs]
+    filtered_labels = labels[idxs]
+
+    # convert boxes from [x_center, y_center, width, height]
+    x_center, y_center, w, h = (
+        filtered_boxes[:, 0],
+        filtered_boxes[:, 1],
+        filtered_boxes[:, 2],
+        filtered_boxes[:, 3],
+    )
+    x_min = x_center - w / 2
+    y_min = y_center - h / 2
+    x_max = x_center + w / 2
+    y_max = y_center + h / 2
+    filtered_boxes = np.stack([x_min, y_min, x_max, y_max], axis=-1)
+
+    # apply nms
+    indices = cv2.dnn.NMSBoxes(
+        filtered_boxes, filtered_scores, score_threshold=0.4, nms_threshold=0.4
+    )
+    detections = np.zeros((20, 6), np.float32)
+
+    for i, (bbox, confidence, class_id) in enumerate(
+        zip(filtered_boxes[indices], filtered_scores[indices], filtered_labels[indices])
     ):
         if i == 20:
             break

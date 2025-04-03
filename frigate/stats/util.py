@@ -293,27 +293,42 @@ def stats_snapshot(
             stats["embeddings"].update(
                 {
                     "image_embedding_speed": round(
-                        embeddings_metrics.image_embeddings_fps.value * 1000, 2
+                        embeddings_metrics.image_embeddings_speed.value * 1000, 2
+                    ),
+                    "image_embedding": round(
+                        embeddings_metrics.image_embeddings_eps.value, 2
                     ),
                     "text_embedding_speed": round(
-                        embeddings_metrics.text_embeddings_sps.value * 1000, 2
+                        embeddings_metrics.text_embeddings_speed.value * 1000, 2
+                    ),
+                    "text_embedding": round(
+                        embeddings_metrics.text_embeddings_eps.value, 2
                     ),
                 }
             )
 
         if config.face_recognition.enabled:
             stats["embeddings"]["face_recognition_speed"] = round(
-                embeddings_metrics.face_rec_fps.value * 1000, 2
+                embeddings_metrics.face_rec_speed.value * 1000, 2
+            )
+            stats["embeddings"]["face_recognition"] = round(
+                embeddings_metrics.face_rec_fps.value, 2
             )
 
         if config.lpr.enabled:
             stats["embeddings"]["plate_recognition_speed"] = round(
-                embeddings_metrics.alpr_pps.value * 1000, 2
+                embeddings_metrics.alpr_speed.value * 1000, 2
+            )
+            stats["embeddings"]["plate_recognition"] = round(
+                embeddings_metrics.alpr_pps.value, 2
             )
 
-            if "license_plate" not in config.objects.all_objects:
+            if embeddings_metrics.yolov9_lpr_pps.value > 0.0:
                 stats["embeddings"]["yolov9_plate_detection_speed"] = round(
-                    embeddings_metrics.yolov9_lpr_fps.value * 1000, 2
+                    embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
+                )
+                stats["embeddings"]["yolov9_plate_detection"] = round(
+                    embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
     get_processing_stats(config, stats, hwaccel_errors)

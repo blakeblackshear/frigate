@@ -129,8 +129,8 @@ detectors:
     type: edgetpu
     device: pci
 ```
----
 
+---
 
 ## Hailo-8
 
@@ -140,12 +140,13 @@ See the [installation docs](../frigate/installation.md#hailo-8l) for information
 
 ### Configuration
 
-When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.  
+When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
 
-#### YOLO 
+#### YOLO
 
 Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
+
 - **Hailo-8 hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 - **Hailo-8L hardware:** Uses **YOLOv6n** (default: `yolov6n.hef`)
 
@@ -224,16 +225,15 @@ model:
   # Alternatively, or as a fallback, provide a custom URL:
   # path: https://custom-model-url.com/path/to/model.hef
 ```
+
 For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
 
-Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation. 
+Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
 
-> **Note:**  
+> **Note:**
 > The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
 
 ---
-
-
 
 ## OpenVINO Detector
 
@@ -335,6 +335,63 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/yolov9-t.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+#### RF-DETR
+
+[RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more informatoin on downloading the RF-DETR model for use in Frigate.
+
+:::warning
+
+Due to the size and complexity of the RF-DETR model, it is only recommended to be run with discrete Arc Graphics Cards.
+
+:::
+
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  model_type: rfdetr
+  width: 560
+  height: 560
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/rfdetr.onnx
+```
+
+#### D-FINE
+
+[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+
+:::warning
+
+Currently D-FINE models only run on OpenVINO in CPU mode, GPUs currently fail to compile the model
+
+:::
+
+After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  model_type: dfine
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/dfine_s_obj2coco.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -462,7 +519,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri  \
     ...
 ```
 
-When using docker compose:
+When using Docker Compose:
 
 ```yaml
 services:
@@ -494,7 +551,7 @@ $ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
     ...
 ```
 
-When using docker compose:
+When using Docker Compose:
 
 ```yaml
 services:
@@ -529,6 +586,7 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 ### Supported Models
 
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
+
 - D-FINE models are not supported
 - YOLO-NAS models are known to not run well on integrated GPUs
 
@@ -622,17 +680,31 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+#### RF-DETR
+
+[RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more informatoin on downloading the RF-DETR model for use in Frigate.
+
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: rfdetr
+  width: 560
+  height: 560
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/rfdetr.onnx
+```
+
 #### D-FINE
 
-[D-FINE](https://github.com/Peterande/D-FINE) is the [current state of the art](https://paperswithcode.com/sota/real-time-object-detection-on-coco?p=d-fine-redefine-regression-task-in-detrs-as) at the time of writing. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
+[D-FINE](https://github.com/Peterande/D-FINE) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-d-fine-model) for more information on downloading the D-FINE model for use in Frigate.
 
-:::warning
-
-D-FINE is currently not supported on OpenVINO
-
-:::
-
-After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
+After placing the downloaded onnx model in your `config/model_cache` folder, you can use the following configuration:
 
 ```yaml
 detectors:
@@ -853,6 +925,26 @@ Model export has only been tested on Linux (or WSL2). Not all dependencies are i
 Make sure you change the batch size to 1 before exporting.
 
 :::
+
+### Download RF-DETR Model
+
+To export as ONNX:
+
+1. `pip3 install rfdetr`
+2. `python3`
+3. `from rfdetr import RFDETRBase`
+4. `x = RFDETRBase()`
+5. `x.export()`
+
+#### Additional Configuration
+
+The input tensor resolution can be customized:
+
+```python
+from rfdetr import RFDETRBase
+x = RFDETRBase(resolution=560)  # resolution must be a multiple of 56
+x.export()
+```
 
 ### Downloading YOLO-NAS Model
 

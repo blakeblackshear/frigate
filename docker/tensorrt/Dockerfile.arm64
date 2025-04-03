@@ -9,9 +9,9 @@ ARG DEBIAN_FRONTEND
 
 # Add deadsnakes PPA for python3.11
 RUN apt-get -qq update && \
-        apt-get -qq install -y --no-install-recommends \
-        software-properties-common \
-        && add-apt-repository ppa:deadsnakes/ppa
+    apt-get -qq install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -24,6 +24,7 @@ RUN apt-get -qq update \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 FROM build-wheels AS trt-wheels

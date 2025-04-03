@@ -7,11 +7,11 @@ import {
   LuLogOut,
   LuMoon,
   LuSquarePen,
+  LuScanFace,
   LuRotateCw,
   LuSettings,
   LuSun,
   LuSunMoon,
-  LuEarth,
 } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -75,7 +75,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   // settings
 
-  const { language, setLanguage, systemLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -284,10 +284,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   <Link to="/faces">
                     <MenuItem
                       className="flex w-full items-center p-2 text-sm"
-                      aria-label="Face Library"
+                      aria-label={t("menu.faceLibrary")}
                     >
-                      <LuSquarePen className="mr-2 size-4" />
-                      <span>Face Library</span>
+                      <LuScanFace className="mr-2 size-4" />
+                      <span>{t("menu.faceLibrary")}</span>
                     </MenuItem>
                   </Link>
                 </>
@@ -349,24 +349,6 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span className="ml-6 mr-2">
                         {t("menu.language.zhCN")}
                       </span>
-                    )}
-                  </MenuItem>
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.withSystem.label")}
-                    onClick={() => setLanguage(systemLanguage)}
-                  >
-                    {language === systemLanguage ? (
-                      <>
-                        <LuEarth className="mr-2 size-4 scale-100 transition-all" />
-                        {t("menu.withSystem")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">{t("menu.withSystem")}</span>
                     )}
                   </MenuItem>
                 </SubItemContent>

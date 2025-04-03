@@ -32,7 +32,7 @@ The USB coral can draw up to 900mA and this can be too much for some on-device U
 The USB coral has different IDs when it is uninitialized and initialized.
 
 - When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped.
-- When running HA OS you may need to run the Full Access version of the Frigate addon with the `Protected Mode` switch disabled so that the coral can be accessed.
+- When running through the Home Assistant OS you may need to run the Full Access variant of the Frigate Add-on with the _Protection mode_ switch disabled so that the coral can be accessed.
 
 ### Synology 716+II running DSM 7.2.1-69057 Update 5
 

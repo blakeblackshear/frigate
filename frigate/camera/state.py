@@ -5,7 +5,7 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Callable
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -53,8 +53,19 @@ class CameraState:
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
+        self.requires_face_detection = (
+            self.config.face_recognition.enabled
+            and "face" not in self.config.objects.all_objects
+        )
 
-    def get_current_frame(self, draw_options={}):
+    def get_max_update_frequency(self, obj: TrackedObject) -> int:
+        return (
+            1
+            if self.requires_face_detection and obj.obj_data["label"] == "person"
+            else 5
+        )
+
+    def get_current_frame(self, draw_options: dict[str, Any] = {}):
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
@@ -77,7 +88,9 @@ class CameraState:
                         thickness = 1
                     else:
                         thickness = 2
-                        color = self.config.model.colormap[obj["label"]]
+                        color = self.config.model.colormap.get(
+                            obj["label"], (255, 255, 255)
+                        )
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -99,7 +112,9 @@ class CameraState:
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
-                    color = self.config.model.colormap[obj["label"]]
+                    color = self.config.model.colormap.get(
+                        obj["label"], (255, 255, 255)
+                    )
 
                     # debug autotracking zooming - show the zoom factor box
                     if (
@@ -283,11 +298,12 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than 5 seconds since the last thumb update
+            # if it has been more than max_update_frequency seconds since the last thumb update
             # and the last update is greater than the last publish or
             # the object has changed significantly
             if (
-                frame_time - updated_obj.last_published > 5
+                frame_time - updated_obj.last_published
+                > self.get_max_update_frequency(updated_obj)
                 and updated_obj.last_updated > updated_obj.last_published
             ) or significant_update:
                 # call event handlers
@@ -306,7 +322,6 @@ class CameraState:
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
         camera_activity: dict[str, list[any]] = {
-            "enabled": True,
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }
@@ -410,9 +425,13 @@ class CameraState:
             self.previous_frame_id = frame_name
 
     def save_manual_event_image(
-        self, event_id: str, label: str, draw: dict[str, list[dict]]
+        self,
+        frame: np.ndarray | None,
+        event_id: str,
+        label: str,
+        draw: dict[str, list[dict]],
     ) -> None:
-        img_frame = self.get_current_frame()
+        img_frame = frame if frame is not None else self.get_current_frame()
 
         # write clean snapshot if enabled
         if self.camera_config.snapshots.clean_copy:
@@ -458,9 +477,9 @@ class CameraState:
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
-        cv2.imwrite(
-            os.path.join(THUMB_DIR, self.camera_config.name, f"{event_id}.webp"), thumb
-        )
+        thumb_path = os.path.join(THUMB_DIR, self.camera_config.name)
+        os.makedirs(thumb_path, exist_ok=True)
+        cv2.imwrite(os.path.join(thumb_path, f"{event_id}.webp"), thumb)
 
     def shutdown(self) -> None:
         for obj in self.tracked_objects.values():
