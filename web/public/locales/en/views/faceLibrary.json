@@ -45,7 +45,7 @@
       "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
       "deletedFace_one": "Successfully deleted {{count}} face.",
       "deletedFace_other": "Successfully deleted {{count}} faces.",
-      "deletedName_zero": "Empty name deleted successfully.",
+      "deletedName_zero": "Empty collection deleted successfully.",
       "deletedName_one": "{{count}} face has been successfully deleted.",
       "deletedName_other": "{{count}} faces have been successfully deleted.",
       "trainedFace": "Successfully trained face.",

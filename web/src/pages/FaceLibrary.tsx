@@ -424,7 +424,7 @@ function LibrarySelector({
             <>
               <DropdownMenuSeparator />
               <div className="mb-1 ml-1.5 text-xs text-secondary-foreground">
-                Names
+                Collections
               </div>
             </>
           )}
