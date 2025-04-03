@@ -19,10 +19,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
@@ -174,16 +173,28 @@ export default function FaceLibrary() {
   );
 
   const onDelete = useCallback(
-    (name: string, ids: string[]) => {
+    (name: string, ids: string[], isName: boolean = false) => {
       axios
         .post(`/faces/${name}/delete`, { ids })
         .then((resp) => {
           setSelectedFaces([]);
 
           if (resp.status == 200) {
-            toast.success(t("toast.success.deletedFace"), {
-              position: "top-center",
-            });
+            if (isName) {
+              toast.success(
+                t("toast.success.deletedName", { count: ids.length }),
+                {
+                  position: "top-center",
+                },
+              );
+            } else {
+              toast.success(
+                t("toast.success.deletedFace", { count: ids.length }),
+                {
+                  position: "top-center",
+                },
+              );
+            }
 
             if (faceImages.length == 1) {
               // face has been deleted
@@ -198,9 +209,15 @@ export default function FaceLibrary() {
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
-            position: "top-center",
-          });
+          if (isName) {
+            toast.error(t("toast.error.deleteNameFailed", { errorMessage }), {
+              position: "top-center",
+            });
+          } else {
+            toast.error(t("toast.error.deleteFaceFailed", { errorMessage }), {
+              position: "top-center",
+            });
+          }
         });
     },
     [faceImages, refreshFaces, setPageToggle, t],
@@ -258,6 +275,7 @@ export default function FaceLibrary() {
           faces={faces}
           trainImages={trainImages}
           setPageToggle={setPageToggle}
+          onDelete={onDelete}
         />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
@@ -321,6 +339,7 @@ type LibrarySelectorProps = {
   faces: string[];
   trainImages: string[];
   setPageToggle: (toggle: string | undefined) => void;
+  onDelete: (name: string, ids: string[], isName: boolean) => void;
 };
 function LibrarySelector({
   pageToggle,
@@ -328,79 +347,117 @@ function LibrarySelector({
   faces,
   trainImages,
   setPageToggle,
+  onDelete,
 }: LibrarySelectorProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  return isDesktop ? (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="flex flex-row">
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: string) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }}
+  const handleDeleteFace = useCallback(
+    (faceName: string) => {
+      // Get all image IDs for this face
+      const imageIds = faceData?.[faceName] || [];
+
+      onDelete(faceName, imageIds, true);
+      setPageToggle("train");
+    },
+    [faceData, onDelete, setPageToggle],
+  );
+
+  return (
+    <>
+      <Dialog
+        open={!!confirmDelete}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("deleteFaceLibrary.title")}</DialogTitle>
+            <DialogDescription>
+              {t("deleteFaceLibrary.desc", { name: confirmDelete })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+              {t("button.cancel", { ns: "common" })}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDelete) {
+                  handleDeleteFace(confirmDelete);
+                  setConfirmDelete(null);
+                }
+              }}
+            >
+              {t("button.delete", { ns: "common" })}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="flex justify-between capitalize">
+            {pageToggle || t("selectFace")}
+            <span className="ml-2 text-primary-variant">
+              ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
+            </span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="scrollbar-container max-h-[40dvh] min-w-[220px] overflow-y-auto"
+          align="start"
         >
           {trainImages.length > 0 && (
+            <DropdownMenuItem
+              className="flex cursor-pointer items-center justify-start gap-2"
+              aria-label={t("train.aria")}
+              onClick={() => setPageToggle("train")}
+            >
+              <div>{t("train.title")}</div>
+              <div className="text-secondary-foreground">
+                ({trainImages.length})
+              </div>
+            </DropdownMenuItem>
+          )}
+          {trainImages.length > 0 && faces.length > 0 && (
             <>
-              <ToggleGroupItem
-                value="train"
-                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == "train" ? "" : "*:text-muted-foreground"}`}
-                data-nav-item="train"
-                aria-label={t("train.aria")}
-              >
-                <div>{t("train.title")}</div>
-              </ToggleGroupItem>
-              <div>|</div>
+              <DropdownMenuSeparator />
+              <div className="mb-1 ml-1.5 text-xs text-secondary-foreground">
+                Collections
+              </div>
             </>
           )}
-
           {Object.values(faces).map((face) => (
-            <ToggleGroupItem
+            <DropdownMenuItem
               key={face}
-              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == face ? "" : "*:text-muted-foreground"}`}
-              value={face}
-              data-nav-item={face}
-              aria-label={t("selectItem", { item: face })}
+              className="group flex items-center justify-between"
             >
-              <div className="capitalize">
-                {face} ({faceData?.[face].length})
+              <div
+                className="flex-grow cursor-pointer capitalize"
+                onClick={() => setPageToggle(face)}
+              >
+                {face}
+                <span className="ml-2 text-muted-foreground">
+                  ({faceData?.[face].length})
+                </span>
               </div>
-            </ToggleGroupItem>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmDelete(face);
+                }}
+              >
+                <LuTrash2 className="size-4 text-destructive" />
+              </Button>
+            </DropdownMenuItem>
           ))}
-        </ToggleGroup>
-        <ScrollBar orientation="horizontal" className="h-0" />
-      </div>
-    </ScrollArea>
-  ) : (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button className="capitalize">{pageToggle}</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {trainImages.length > 0 && (
-          <DropdownMenuItem
-            className="capitalize"
-            aria-label={t("train.aria")}
-            onClick={() => setPageToggle("train")}
-          >
-            <div>{t("train.title")}</div>
-          </DropdownMenuItem>
-        )}
-        {Object.values(faces).map((face) => (
-          <DropdownMenuItem
-            className="capitalize"
-            onClick={() => setPageToggle(face)}
-          >
-            {face} ({faceData?.[face].length})
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
 

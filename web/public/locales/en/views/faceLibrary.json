@@ -25,6 +25,11 @@
     "aria": "Select train"
   },
   "selectItem": "Select {{item}}",
+  "selectFace": "Select Face",
+  "deleteFaceLibrary": {
+    "title": "Delete Name",
+    "desc": "Are you sure you want to delete {{name}}? This will permanently delete all associated faces."
+  },
   "button": {
     "deleteFaceAttempts": "Delete Face Attempts",
     "addFace": "Add Face",
@@ -38,7 +43,11 @@
     "success": {
       "uploadedImage": "Successfully uploaded image.",
       "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
-      "deletedFace": "Successfully deleted face.",
+      "deletedFace_one": "Successfully deleted {{count}} face.",
+      "deletedFace_other": "Successfully deleted {{count}} faces.",
+      "deletedName_zero": "Empty collection deleted successfully.",
+      "deletedName_one": "{{count}} face has been successfully deleted.",
+      "deletedName_other": "{{count}} faces have been successfully deleted.",
       "trainedFace": "Successfully trained face.",
       "updatedFaceScore": "Successfully updated face score."
     },
@@ -46,6 +55,7 @@
       "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
       "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
       "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
+      "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
       "trainFailed": "Failed to train: {{errorMessage}}",
       "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
     }
