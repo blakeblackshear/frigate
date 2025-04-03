@@ -388,8 +388,14 @@ class RecordingMaintainer(threading.Thread):
                 ]
             )
             motion_count += len(frame[2])
-            is_calibrating += frame[3]
+            is_calibrating = is_calibrating or frame[3]
             region_count += len(frame[4])
+
+        # if there is any motion frame without calibrating, consider the section as non-calibrating.
+        is_calibrating = is_calibrating and not any(
+            len(frame[2]) > 0 and not frame[3]
+            for frame in self.object_recordings_info[camera]
+        )
 
         audio_values = []
         for frame in self.audio_recordings_info[camera]:

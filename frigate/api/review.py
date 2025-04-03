@@ -530,7 +530,11 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
         .to_frame()
     )
     cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
-    calibrations = df["is_calibrating"].resample(f"{scale}s").apply(lambda x: all(x))
+    calibrations = (
+        df["is_calibrating"]
+        .resample(f"{scale}s")
+        .apply(lambda x: (len(x) > 0 and all(x)))
+    )
     df = motion.join(cameras).join(calibrations)
 
     length = df.shape[0]

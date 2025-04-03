@@ -57,7 +57,16 @@ export const useMotionSegmentUtils = (
         (acc, curr) => acc + (curr.motion ?? 0),
         0,
       );
-      const isCalibrating = matchingEvents.every((curr) => curr.is_calibrating);
+      // A segment is considered calibration only when there is no "non-calibrating" motion.
+      const isCalibrating =
+        matchingEvents.some((curr) => curr.is_calibrating) &&
+        matchingEvents.every(
+          (curr) =>
+            !curr.motion ||
+            (curr.motion > 0 &&
+              curr.is_calibrating != undefined &&
+              curr.is_calibrating),
+        );
 
       return { totalMotion: totalMotion, isCalibrating: isCalibrating };
     },
