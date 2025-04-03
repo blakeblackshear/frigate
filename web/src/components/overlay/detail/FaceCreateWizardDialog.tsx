@@ -101,7 +101,7 @@ export default function CreateFaceWizardDialog({
       }}
     >
       <Content
-        className={cn("flex flex-col gap-4", isDesktop ? "max-w-[50%]" : "p-4")}
+        className={cn("flex flex-col gap-4", isDesktop ? "max-w-3xl" : "p-4")}
       >
         <Header>
           <Title>{t("button.addFace")}</Title>
@@ -110,7 +110,7 @@ export default function CreateFaceWizardDialog({
         <StepIndicator steps={STEPS} currentStep={step} />
         {step == 0 && (
           <TextEntry
-            placeholder="Enter Face Name"
+            placeholder={t("description.placeholder")}
             onSave={(name) => {
               setName(name);
               setStep(1);
