@@ -1,4 +1,10 @@
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback } from "react";
@@ -14,50 +20,47 @@ type TextEntryProps = {
   children?: React.ReactNode;
 };
 export default function TextEntry({
-  defaultValue,
+  defaultValue = "",
   placeholder,
-  allowEmpty,
+  allowEmpty = false,
   onSave,
   children,
 }: TextEntryProps) {
   const formSchema = z.object({
-    text: z.string(),
+    text: allowEmpty
+      ? z.string().optional()
+      : z.string().min(1, "Field is required"),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { text: defaultValue },
   });
-  const fileRef = form.register("text");
-
-  // upload handler
 
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
-      if (!allowEmpty && !data["text"]) {
-        return;
-      }
-      onSave(data["text"]);
+      onSave(data.text || "");
     },
-    [onSave, allowEmpty],
+    [onSave],
   );
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="text"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Input
-                  className="aspect-video h-8 w-full"
+                  {...field}
+                  className="w-full"
                   placeholder={placeholder}
                   type="text"
-                  {...fileRef}
                 />
               </FormControl>
+              <FormMessage className="text-xs text-destructive" />
             </FormItem>
           )}
         />

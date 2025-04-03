@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { LuExternalLink } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -101,7 +101,7 @@ export default function CreateFaceWizardDialog({
       }}
     >
       <Content
-        className={cn("flex flex-col gap-4", isDesktop ? "max-w-[50%]" : "p-4")}
+        className={cn("flex flex-col gap-4", isDesktop ? "max-w-3xl" : "p-4")}
       >
         <Header>
           <Title>{t("button.addFace")}</Title>
@@ -110,7 +110,7 @@ export default function CreateFaceWizardDialog({
         <StepIndicator steps={STEPS} currentStep={step} />
         {step == 0 && (
           <TextEntry
-            placeholder="Enter Face Name"
+            placeholder={t("description.placeholder")}
             onSave={(name) => {
               setName(name);
               setStep(1);
@@ -133,12 +133,16 @@ export default function CreateFaceWizardDialog({
           </ImageEntry>
         )}
         {step == 2 && (
-          <div>
+          <div className="mt-2">
             {t("toast.success.addFaceLibrary", { name })}
-            <p className="py-4 text-sm text-secondary-foreground">
-              {t("createFaceLibrary.nextSteps")}
+            <p className="py-4 text-sm text-primary-variant">
+              <ul className="list-inside list-disc">
+                <Trans ns="views/faceLibrary">
+                  createFaceLibrary.nextSteps
+                </Trans>
+              </ul>
             </p>
-            <div className="text-s my-4 flex items-center text-primary">
+            <div className="my-2 flex items-center text-sm text-primary">
               <Link
                 to="https://docs.frigate.video/configuration/face_recognition"
                 target="_blank"
