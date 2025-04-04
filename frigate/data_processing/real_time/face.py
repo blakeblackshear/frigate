@@ -393,6 +393,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if score <= self.face_config.unknown_score:
                 sub_label = "unknown"
 
+            if "-" in sub_label:
+                sub_label = sub_label.replace("-", "_")
+
             if self.config.face_recognition.save_attempts:
                 # write face to library
                 folder = os.path.join(FACE_DIR, "train")
@@ -460,6 +463,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if self.config.face_recognition.save_attempts:
             # write face to library
             folder = os.path.join(FACE_DIR, "train")
+
+            if "-" in sub_label:
+                sub_label = sub_label.replace("-", "_")
+
             file = os.path.join(
                 folder, f"{event_id}-{timestamp}-{sub_label}-{score}.webp"
             )
