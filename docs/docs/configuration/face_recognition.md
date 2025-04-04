@@ -125,3 +125,7 @@ This can happen for a few different reasons, but this is usually an indicator th
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+
+### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
+
+No, using another face recognition service will interfere with Frigate's built in face recognition. When using double-take the sub_label feature must be disabled if the built in face recognition is also desired.
