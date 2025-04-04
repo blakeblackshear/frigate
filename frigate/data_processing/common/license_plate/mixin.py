@@ -1395,13 +1395,8 @@ class LicensePlateProcessingMixin:
             None,
         )
 
-        # don't overwrite sub label for objects that have a sub label
-        if sub_label is not None and obj_data.get("sub_label") is not None:
-            logger.debug(
-                f"{camera}: Not overwriting sub label for recognized license plate due to existing sub label: {obj_data.get('sub_label')}."
-            )
-        elif sub_label is not None:
-            # If it's a known plate, publish to sub_label
+        # If it's a known plate, publish to sub_label
+        if sub_label is not None:
             self.sub_label_publisher.publish(
                 EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
             )
