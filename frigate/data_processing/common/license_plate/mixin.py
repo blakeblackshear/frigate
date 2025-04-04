@@ -175,6 +175,17 @@ class LicensePlateProcessingMixin:
             logger.debug("No boxes found by OCR detector model")
             return [], [], []
 
+        if len(boxes) > 0:
+            plate_left = np.min([np.min(box[:, 0]) for box in boxes])
+            plate_right = np.max([np.max(box[:, 0]) for box in boxes])
+            plate_width = plate_right - plate_left
+        else:
+            plate_width = 0
+
+        boxes = self._merge_nearby_boxes(
+            boxes, plate_width=plate_width, gap_fraction=0.1
+        )
+
         boxes = self._sort_boxes(list(boxes))
         plate_images = [self._crop_license_plate(image, x) for x in boxes]
 
@@ -296,6 +307,90 @@ class LicensePlateProcessingMixin:
         cv2.subtract(image, mean, image)
         cv2.multiply(image, std, image)
         return image.transpose((2, 0, 1))[np.newaxis, ...]
+
+    def _merge_nearby_boxes(
+        self, boxes: List[np.ndarray], plate_width: float, gap_fraction: float = 0.1
+    ) -> List[np.ndarray]:
+        """
+        Merge bounding boxes that are likely part of the same license plate based on proximity,
+        with a dynamic max_gap based on the provided width of the entire license plate.
+
+        Args:
+            boxes (List[np.ndarray]): List of bounding boxes with shape (n, 4, 2), where n is the number of boxes,
+                                    each box has 4 corners, and each corner has (x, y) coordinates.
+            plate_width (float): The width of the entire license plate in pixels, used to calculate max_gap.
+            gap_fraction (float): Fraction of the plate width to use as the maximum gap.
+                                Default is 0.1 (10% of the plate width).
+
+        Returns:
+            List[np.ndarray]: List of merged bounding boxes.
+        """
+        if len(boxes) == 0:
+            return []
+
+        max_gap = plate_width * gap_fraction
+
+        # Sort boxes by top left x
+        sorted_boxes = sorted(boxes, key=lambda x: x[0][0])
+
+        merged_boxes = []
+        current_box = sorted_boxes[0]
+
+        for i in range(1, len(sorted_boxes)):
+            next_box = sorted_boxes[i]
+
+            # Calculate the horizontal gap between the current box and the next box
+            current_right = np.max(
+                current_box[:, 0]
+            )  # Rightmost x-coordinate of current box
+            next_left = np.min(next_box[:, 0])  # Leftmost x-coordinate of next box
+            horizontal_gap = next_left - current_right
+
+            # Check if the boxes are vertically aligned (similar y-coordinates)
+            current_top = np.min(current_box[:, 1])
+            current_bottom = np.max(current_box[:, 1])
+            next_top = np.min(next_box[:, 1])
+            next_bottom = np.max(next_box[:, 1])
+
+            # Consider boxes part of the same plate if they are close horizontally or overlap
+            if horizontal_gap <= max_gap and max(current_top, next_top) <= min(
+                current_bottom, next_bottom
+            ):
+                merged_points = np.vstack((current_box, next_box))
+                new_box = np.array(
+                    [
+                        [
+                            np.min(merged_points[:, 0]),
+                            np.min(merged_points[:, 1]),
+                        ],
+                        [
+                            np.max(merged_points[:, 0]),
+                            np.min(merged_points[:, 1]),
+                        ],
+                        [
+                            np.max(merged_points[:, 0]),
+                            np.max(merged_points[:, 1]),
+                        ],
+                        [
+                            np.min(merged_points[:, 0]),
+                            np.max(merged_points[:, 1]),
+                        ],
+                    ]
+                )
+                current_box = new_box
+            else:
+                # If the boxes are not close enough, add the current box to the result
+                merged_boxes.append(current_box)
+                current_box = next_box
+
+            logger.debug(
+                f"Provided plate_width: {plate_width}, max_gap: {max_gap}, horizontal_gap: {horizontal_gap}"
+            )
+
+        # Add the last box
+        merged_boxes.append(current_box)
+
+        return np.array(merged_boxes, dtype=np.int32)
 
     def _boxes_from_bitmap(
         self, output: np.ndarray, mask: np.ndarray, dest_width: int, dest_height: int
@@ -1064,14 +1159,6 @@ class LicensePlateProcessingMixin:
                 )
                 return
 
-            # don't overwrite sub label for objects that have a sub label
-            # that is not a license plate
-            if obj_data.get("sub_label") and id not in self.detected_license_plates:
-                logger.debug(
-                    f"{camera}: Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
-                )
-                return
-
             license_plate: Optional[dict[str, any]] = None
 
             if "license_plate" not in self.config.cameras[camera].objects.track:
@@ -1314,6 +1401,7 @@ class LicensePlateProcessingMixin:
                 EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
             )
 
+        # always publish to recognized_license_plate field
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
             (id, top_plate, avg_confidence),
