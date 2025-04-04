@@ -85,6 +85,9 @@ class Rknn(DetectionApi):
         if "/" in model_path:
             model_props["preset"] = False
             model_props["path"] = model_path
+            for model_type in ModelTypeEnum:
+                if model_type in model_path:
+                    model_props["model_type"] = model_type
         else:
             model_props["preset"] = True
 
