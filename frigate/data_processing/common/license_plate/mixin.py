@@ -1396,12 +1396,7 @@ class LicensePlateProcessingMixin:
         )
 
         # don't overwrite sub label for objects that have a sub label
-        # that is not a license plate
-        if (
-            sub_label is not None
-            and obj_data.get("sub_label") is not None
-            and id not in self.detected_license_plates
-        ):
+        if sub_label is not None and obj_data.get("sub_label") is not None:
             logger.debug(
                 f"{camera}: Not overwriting sub label for recognized license plate due to existing sub label: {obj_data.get('sub_label')}."
             )
