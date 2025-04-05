@@ -482,6 +482,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                     camera_name = updated_record_topic.rpartition("/")[-1]
                     self.config.cameras[camera_name].record = updated_record_config
 
+                    # immediately end segment
+                    if not updated_record_config.enabled:
+                        self.end_segment(camera_name)
+
                 if updated_review_topic:
                     camera_name = updated_review_topic.rpartition("/")[-1]
                     self.config.cameras[camera_name].review = updated_review_config
@@ -491,6 +495,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                     self.config.cameras[
                         camera_name
                     ].enabled = updated_enabled_config.enabled
+
+                    # immediately end segment as we may not get another update
+                    if not updated_enabled_config.enabled:
+                        self.end_segment(camera_name)
 
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
@@ -523,15 +531,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if camera not in self.indefinite_events:
                     self.indefinite_events[camera] = {}
 
-            current_segment = self.active_review_segments.get(camera)
-
             if (
                 not self.config.cameras[camera].enabled
                 or not self.config.cameras[camera].record.enabled
             ):
-                if current_segment:
-                    self.end_segment(camera)
                 continue
+
+            current_segment = self.active_review_segments.get(camera)
 
             # Check if the current segment should be processed based on enabled settings
             if current_segment:
