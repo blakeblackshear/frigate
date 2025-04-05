@@ -789,9 +789,7 @@ class LicensePlateProcessingMixin:
         input_w = int(input_h * max_wh_ratio)
 
         # check for model-specific input width
-        model_input_w = self.model_runner.recognition_model.runner.ort.get_inputs()[
-            0
-        ].shape[3]
+        model_input_w = self.model_runner.recognition_model.runner.get_input_width()
         if isinstance(model_input_w, int) and model_input_w > 0:
             input_w = model_input_w
 
