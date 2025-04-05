@@ -657,10 +657,11 @@ export function CameraGroupEdit({
   const formSchema = z.object({
     name: z
       .string()
+      .trim()
       .min(2, {
         message: t("group.name.errorMessage.mustLeastCharacters"),
       })
-      .transform((val: string) => val.trim().replace(/\s+/g, "_"))
+      .transform((val: string) => val.replace(/\s+/g, "_"))
       .refine(
         (value: string) => {
           return (
