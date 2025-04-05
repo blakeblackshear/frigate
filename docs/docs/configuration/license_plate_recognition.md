@@ -29,7 +29,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` before it can r
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The models are relatively lightweight and run on your CPU. At least 4GB of RAM is required.
+License plate recognition works by running AI models locally on your system. The models are relatively lightweight and will be auto-selected to run on your CPU or GPU. At least 4GB of RAM is required.
 
 ## Configuration
 
@@ -280,7 +280,7 @@ By selecting the appropriate configuration, users can optimize their dedicated L
 - Disable the `improve_contrast` motion setting, especially if you are running LPR at night and the frame is mostly dark. This will prevent small pixel changes and smaller areas of motion from triggering license plate detection.
 - Ensure your camera's timestamp is covered with a motion mask so that it's not incorrectly detected as a license plate.
 - For non-Frigate+ users, you may need to change your camera settings for a clearer image or decrease your global `recognition_threshold` config if your plates are not being accurately recognized at night.
-- The secondary pipeline mode runs a local AI model on your CPU to detect plates. Increasing detect `fps` will increase CPU usage proportionally.
+- The secondary pipeline mode runs a local AI model on your CPU or GPU (auto-selected) to detect plates. Increasing detect `fps` will increase resource usage proportionally.
 
 ## FAQ
 
@@ -335,4 +335,4 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 
 ### Will LPR slow down my system?
 
-LPR runs on the CPU, so performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
+LPR's performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU or GPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
