@@ -240,9 +240,7 @@ def output_frames(
     if birdseye is not None:
         birdseye.stop()
 
-    for subscriber in enabled_subscribers.values():
-        subscriber.stop()
-
+    config_enabled_subscriber.stop()
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
     websocket_server.manager.join()
