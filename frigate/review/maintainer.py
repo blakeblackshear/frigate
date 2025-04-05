@@ -492,6 +492,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera_name
                     ].enabled = updated_enabled_config.enabled
 
+                    # immediately end segment as we may not get another update
+                    if not updated_enabled_config.enabled:
+                        self.end_segment(camera_name)
+
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
             if not topic:
