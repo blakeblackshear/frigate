@@ -8,7 +8,7 @@
 
 A complete and local NVR designed for [Home Assistant](https://www.home-assistant.io) with AI object detection. Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras.
 
-Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but highly recommended. The Coral will outperform even the best CPUs and can process 100+ FPS with very little overhead.
+Use of a GPU or AI accelerator such as a [Google Coral](https://coral.ai/products/) or [Hailo](https://hailo.ai/) is highly recommended. AI accelerators will outperform even the best CPUs with very little overhead.
 
 - Tight integration with Home Assistant via a [custom component](https://github.com/blakeblackshear/frigate-hass-integration)
 - Designed to minimize resource use and maximize performance by only looking for objects when and where it is necessary
@@ -50,3 +50,7 @@ If you would like to make a donation to support development, please use [Github 
 <div>
 <img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d7885fc3-bfe6-452f-b7d0-d957cb3e31f5">
 </div>
+
+## Translations
+
+We use [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) to support language translations. Contributions are always welcome.
