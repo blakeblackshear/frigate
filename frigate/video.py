@@ -9,6 +9,7 @@ import threading
 import time
 
 import cv2
+import numpy as np
 from setproctitle import setproctitle
 
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -503,13 +504,19 @@ def track_camera(
         name=config.name,
         ptz_metrics=ptz_metrics,
     )
+
+    frame_manager = SharedMemoryFrameManager(max_frame=model_config.max_batch)
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config, stop_event
+        name,
+        labelmap,
+        detection_queue,
+        result_connection,
+        model_config,
+        stop_event,
+        frame_manager,
     )
 
     object_tracker = NorfairTracker(config, ptz_metrics)
-
-    frame_manager = SharedMemoryFrameManager()
 
     # create communication for region grid updates
     requestor = InterProcessRequestor()
@@ -549,35 +556,53 @@ def detect(
     object_detector,
     frame,
     model_config: ModelConfig,
-    region,
+    regions,
     objects_to_track,
     object_filters,
+    multi_batch: bool = False,
 ):
-    tensor_input = create_tensor_input(frame, model_config, region)
+    if multi_batch:
+        tensor_list = []
+        for i, region in enumerate(regions):
+            if i > model_config.max_batch:
+                logger.info(f"batch is too large, skipping")
+                break
+            tensor_list.append(create_tensor_input(frame, model_config, region))
+        tensor_input = np.concatenate(tensor_list, axis=0)
+    else:
+        tensor_input = create_tensor_input(frame, model_config, regions)
 
+    region_detections_list = object_detector.detect(tensor_input)
     detections = []
-    region_detections = object_detector.detect(tensor_input)
-    for d in region_detections:
-        box = d[2]
-        size = region[2] - region[0]
-        x_min = int(max(0, (box[1] * size) + region[0]))
-        y_min = int(max(0, (box[0] * size) + region[1]))
-        x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
-        y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
+    if not multi_batch:
+        region_detections_list = [region_detections_list]
+        regions = [regions]
 
-        # ignore objects that were detected outside the frame
-        if (x_min >= detect_config.width - 1) or (y_min >= detect_config.height - 1):
-            continue
+    for region_detections, region in zip(region_detections_list, regions):
+        for d in region_detections:
+            box = d[2]
+            size = region[2] - region[0]
+            x_min = int(max(0, (box[1] * size) + region[0]))
+            y_min = int(max(0, (box[0] * size) + region[1]))
+            x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
+            y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
 
-        width = x_max - x_min
-        height = y_max - y_min
-        area = width * height
-        ratio = width / max(1, height)
-        det = (d[0], d[1], (x_min, y_min, x_max, y_max), area, ratio, region)
-        # apply object filters
-        if is_object_filtered(det, objects_to_track, object_filters):
-            continue
-        detections.append(det)
+            # ignore objects that were detected outside the frame
+            if (x_min >= detect_config.width - 1) or (
+                y_min >= detect_config.height - 1
+            ):
+                continue
+
+            width = x_max - x_min
+            height = y_max - y_min
+            area = width * height
+            ratio = width / max(1, height)
+            det = (d[0], d[1], (x_min, y_min, x_max, y_max), area, ratio, region)
+            # apply object filters
+            if is_object_filtered(det, objects_to_track, object_filters):
+                continue
+            detections.append(det)
+
     return detections
 
 
@@ -617,6 +642,8 @@ def process_frames(
 
     attributes_map = model_config.attributes_map
     all_attributes = model_config.all_attributes
+
+    multi_batch = model_config.max_batch > 1
 
     # remove license_plate from attributes if this camera is a dedicated LPR cam
     if camera_config.type == CameraTypeEnum.lpr:
@@ -813,18 +840,32 @@ def process_frames(
                 if obj["id"] in stationary_object_ids
             ]
 
-            for region in regions:
+            if multi_batch and len(regions) > 0:
                 detections.extend(
                     detect(
                         detect_config,
                         object_detector,
                         frame,
                         model_config,
-                        region,
+                        regions,
                         objects_to_track,
                         object_filters,
+                        multi_batch,
                     )
                 )
+            else:
+                for region in regions:
+                    detections.extend(
+                        detect(
+                            detect_config,
+                            object_detector,
+                            frame,
+                            model_config,
+                            region,
+                            objects_to_track,
+                            object_filters,
+                        )
+                    )
 
             consolidated_detections = reduce_detections(frame_shape, detections)
 
