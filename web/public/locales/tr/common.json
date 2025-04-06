@@ -17,6 +17,7 @@
         "30minutes": "30 dakika",
         "1hour": "1 saat",
         "12hours": "12 saat",
-        "last14": "Son 14 gün"
+        "last14": "Son 14 gün",
+        "24hours": "24 saat"
     }
 }
