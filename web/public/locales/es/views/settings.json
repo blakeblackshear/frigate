@@ -83,7 +83,8 @@
     },
     "classification": {
         "semanticSearch": {
-            "title": "Búsqueda semántica"
+            "title": "Búsqueda semántica",
+            "desc": "La búsqueda semántica en Frigate te permite encontrar objetos rastreados dentro de tus elementos de revisión utilizando la propia imagen, una descripción escrita por el usuario o una generada automáticamente."
         },
         "title": "Configuración de clasificación"
     }
