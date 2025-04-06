@@ -72,7 +72,12 @@
         "title": "Configuración general",
         "toast": {
             "success": {
-                "clearStoredLayout": "Diseño almacenado eliminado para {{cameraName}}"
+                "clearStoredLayout": "Diseño almacenado eliminado para {{cameraName}}",
+                "clearStreamingSettings": "Se ha borrado la configuración de transmisión de todos los grupos de cámaras."
+            },
+            "error": {
+                "clearStreamingSettingsFailed": "Error al borrar la configuración de transmisión: {{errorMessage}}",
+                "clearStoredLayoutFailed": "Error al borrar el diseño guardado: {{errorMessage}}"
             }
         }
     }
