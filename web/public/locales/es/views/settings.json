@@ -1,1 +1,21 @@
-{}
+{
+    "documentTitle": {
+        "masksAndZones": "Editor de máscaras y zonas - Frigate",
+        "object": "Configuración de objetos - Frigate",
+        "default": "Configuración - Frigate",
+        "authentication": "Configuración de autenticación - Frigate",
+        "camera": "Configuración de cámara - Frigate",
+        "motionTuner": "Ajuste de movimiento - Frigate",
+        "classification": "Configuración de clasificación - Frigate",
+        "general": "Configuración general - Frigate",
+        "frigatePlus": "Configuración de Frigate+ - Frigate"
+    },
+    "menu": {
+        "cameras": "Configuración de cámara",
+        "debug": "Depuración",
+        "ui": "Interfaz de usuario",
+        "classification": "Clasificación",
+        "motionTuner": "Ajuste de movimiento",
+        "masksAndZones": "Máscaras / Zonas"
+    }
+}
