@@ -458,14 +458,17 @@ def yuv_crop_and_resize(frame, region, height=None):
     # copy u2
     yuv_cropped_frame[
         size + uv_channel_y_offset : size + uv_channel_y_offset + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[u2[1] : u2[3], u2[0] : u2[2]]
 
     # copy v1
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
@@ -474,11 +477,14 @@ def yuv_crop_and_resize(frame, region, height=None):
 
     # copy v2
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[v2[1] : v2[3], v2[0] : v2[2]]
@@ -831,21 +837,87 @@ class UntrackedSharedMemory(_mpshm.SharedMemory):
 
 
 class SharedMemoryFrameManager(FrameManager):
-    def __init__(self):
+    def __init__(self, max_frame: int = 8, frame_shape: tuple = (300, 300, 3)):
         self.shm_store: dict[str, UntrackedSharedMemory] = {}
+        self.max_frame = max_frame
+        self.header_size = 8
+        self.frame_shape = frame_shape
+        self.frame_size = int(np.prod(frame_shape).item())
+        self.max_frame_size = int(np.prod(frame_shape).item() * max_frame)
 
-    def create(self, name: str, size) -> AnyStr:
-        try:
-            shm = UntrackedSharedMemory(
-                name=name,
-                create=True,
-                size=size,
-            )
-        except FileExistsError:
-            shm = UntrackedSharedMemory(name=name)
-
+    def create(self, name: str, size: Optional[int] = None) -> AnyStr:
+        if size is None:
+            size = self.max_frame_size
+            try:
+                shm = UntrackedSharedMemory(
+                    name=name,
+                    create=True,
+                    size=self.max_frame_size + self.header_size,
+                )
+            except FileExistsError:
+                shm = UntrackedSharedMemory(name=name)
+        else:
+            try:
+                shm = UntrackedSharedMemory(
+                    name=name,
+                    create=True,
+                    size=size,
+                )
+            except FileExistsError:
+                shm = UntrackedSharedMemory(name=name)
         self.shm_store[name] = shm
-        return shm.buf
+
+        shm.buf[0:4] = (0).to_bytes(4, byteorder="little")
+        return memoryview(shm.buf)[self.header_size :]
+
+    def write_frame(self, name: str, data: np.ndarray) -> bool:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name, size=self.max_frame_size + 8)
+                self.shm_store[name] = shm
+
+            size = np.prod(data.shape).item()
+            shm.buf[0:4] = size.to_bytes(4, byteorder="little")
+
+            if isinstance(data, (bytes, bytearray)):
+                shm.buf[self.header_size : self.header_size + size] = data
+            else:
+                np.copyto(
+                    np.ndarray(
+                        (*data.shape,),
+                        dtype=np.uint8,
+                        buffer=shm.buf[self.header_size : self.header_size + size],
+                    ),
+                    data,
+                )
+
+            return True
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return False
+
+    def get_frame(self, name: str) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+
+            size = int.from_bytes(shm.buf[0:4], byteorder="little")
+            if size <= 0:
+                return None
+            batch_num = size // self.frame_size
+
+            return np.ndarray(
+                (batch_num, *self.frame_shape),
+                dtype=np.uint8,
+                buffer=shm.buf[self.header_size : self.header_size + size],
+            )
+        except FileNotFoundError:
+            return None
 
     def write(self, name: str) -> memoryview:
         try:
@@ -866,7 +938,144 @@ class SharedMemoryFrameManager(FrameManager):
             else:
                 shm = UntrackedSharedMemory(name=name)
                 self.shm_store[name] = shm
+
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+        except FileNotFoundError:
+            return None
+
+    def close(self, name: str):
+        if name in self.shm_store:
+            self.shm_store[name].close()
+            del self.shm_store[name]
+
+    def delete(self, name: str):
+        if name in self.shm_store:
+            self.shm_store[name].close()
+
+            try:
+                self.shm_store[name].unlink()
+            except FileNotFoundError:
+                pass
+
+            del self.shm_store[name]
+        else:
+            try:
+                shm = UntrackedSharedMemory(name=name)
+                shm.close()
+                shm.unlink()
+            except FileNotFoundError:
+                pass
+
+    def cleanup(self) -> None:
+        for shm in self.shm_store.values():
+            shm.close()
+
+            try:
+                shm.unlink()
+            except FileNotFoundError:
+                pass
+
+
+class SharedMemoryResultManager(FrameManager):
+    def __init__(self, max_frame: int = 8, result_shape: tuple = (20, 6)):
+        self.shm_store: dict[str, UntrackedSharedMemory] = {}
+        self.header_size = 8
+        self.max_frame = max_frame
+        self.result_shape = result_shape
+        self.result_size = int(np.prod(result_shape).item())
+        self.max_result_size = int(np.prod(result_shape).item() * max_frame * 4)
+
+    def create(self, name: str) -> AnyStr:
+        try:
+            shm = UntrackedSharedMemory(
+                name=name,
+                create=True,
+                size=self.max_result_size + self.header_size,
+            )
+        except FileExistsError:
+            shm = UntrackedSharedMemory(
+                name=name, size=self.max_result_size + self.header_size
+            )
+
+        self.shm_store[name] = shm
+        shm.buf[0:4] = (0).to_bytes(4, byteorder="little")
+        return memoryview(shm.buf)[self.header_size :]
+
+    def write_result(self, name: str, data: np.ndarray) -> bool:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(
+                    name=name, size=self.max_result_size + self.header_size
+                )
+                self.shm_store[name] = shm
+
+            size = np.prod(data.shape).item() * 4
+            shm.buf[0:4] = size.to_bytes(4, byteorder="little")
+
+            if isinstance(data, (bytes, bytearray)):
+                shm.buf[self.header_size : self.header_size + size] = data
+            else:
+                np.copyto(
+                    np.ndarray(
+                        (*data.shape,),
+                        dtype=np.float32,
+                        buffer=shm.buf[self.header_size :],
+                    ),
+                    data,
+                )
+
+            return True
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return False
+
+    def get_result(self, name: str) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(
+                    name=name, size=self.max_result_size + self.header_size
+                )
+                self.shm_store[name] = shm
+
+            size = int.from_bytes(shm.buf[0:4], byteorder="little")
+            if size <= 0:
+
+                return None
+
+            batch_num = size // self.result_size // 4
+
+            return np.ndarray(
+                (batch_num, *self.result_shape),
+                dtype=np.float32,
+                buffer=shm.buf[self.header_size : self.header_size + size],
+            )
+        except FileNotFoundError as e:
+            return None
+
+    def write(self, name: str) -> memoryview:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+            return shm.buf
+        except FileNotFoundError:
+            logger.info(f"the file {name} not found")
+            return None
+
+    def get(self, name: str, shape) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = UntrackedSharedMemory(name=name)
+                self.shm_store[name] = shm
+            return np.ndarray(shape, dtype=np.float32, buffer=shm.buf)
         except FileNotFoundError:
             return None
 
