@@ -80,5 +80,11 @@
                 "clearStoredLayoutFailed": "Error al borrar el diseño guardado: {{errorMessage}}"
             }
         }
+    },
+    "classification": {
+        "semanticSearch": {
+            "title": "Búsqueda semántica"
+        },
+        "title": "Configuración de clasificación"
     }
 }
