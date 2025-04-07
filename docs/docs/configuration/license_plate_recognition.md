@@ -280,7 +280,7 @@ By selecting the appropriate configuration, users can optimize their dedicated L
 - Disable the `improve_contrast` motion setting, especially if you are running LPR at night and the frame is mostly dark. This will prevent small pixel changes and smaller areas of motion from triggering license plate detection.
 - Ensure your camera's timestamp is covered with a motion mask so that it's not incorrectly detected as a license plate.
 - For non-Frigate+ users, you may need to change your camera settings for a clearer image or decrease your global `recognition_threshold` config if your plates are not being accurately recognized at night.
-- The secondary pipeline mode runs a local AI model on your CPU or GPU to detect plates. Increasing detect `fps` will increase resource usage proportionally.
+- The secondary pipeline mode runs a local AI model on your CPU or GPU (auto-selected) to detect plates. Increasing detect `fps` will increase resource usage proportionally.
 
 ## FAQ
 
