@@ -12,13 +12,13 @@ class LicensePlateModelRunner(DataProcessorModelRunner):
     def __init__(self, requestor, device: str = "CPU", model_size: str = "large"):
         super().__init__(requestor, device, model_size)
         self.detection_model = PaddleOCRDetection(
-            model_size=model_size, requestor=requestor, device=device
+            model_size=model_size, requestor=requestor, device="CPU"
         )
         self.classification_model = PaddleOCRClassification(
-            model_size=model_size, requestor=requestor, device=device
+            model_size=model_size, requestor=requestor, device="CPU"
         )
         self.recognition_model = PaddleOCRRecognition(
-            model_size=model_size, requestor=requestor, device=device
+            model_size=model_size, requestor=requestor, device="CPU"
         )
         self.yolov9_detection_model = LicensePlateDetector(
             model_size=model_size, requestor=requestor, device=device
