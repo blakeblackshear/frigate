@@ -309,7 +309,11 @@ class LicensePlateProcessingMixin:
         return image.transpose((2, 0, 1))[np.newaxis, ...]
 
     def _merge_nearby_boxes(
-        self, boxes: List[np.ndarray], plate_width: float, gap_fraction: float = 0.1
+        self,
+        boxes: List[np.ndarray],
+        plate_width: float,
+        gap_fraction: float = 0.1,
+        min_overlap_fraction: float = -0.2,
     ) -> List[np.ndarray]:
         """
         Merge bounding boxes that are likely part of the same license plate based on proximity,
@@ -329,6 +333,7 @@ class LicensePlateProcessingMixin:
             return []
 
         max_gap = plate_width * gap_fraction
+        min_overlap = plate_width * min_overlap_fraction
 
         # Sort boxes by top left x
         sorted_boxes = sorted(boxes, key=lambda x: x[0][0])
@@ -353,9 +358,10 @@ class LicensePlateProcessingMixin:
             next_bottom = np.max(next_box[:, 1])
 
             # Consider boxes part of the same plate if they are close horizontally or overlap
-            if horizontal_gap <= max_gap and max(current_top, next_top) <= min(
-                current_bottom, next_bottom
-            ):
+            # within the allowed limit and their vertical positions overlap significantly
+            if min_overlap <= horizontal_gap <= max_gap and max(
+                current_top, next_top
+            ) <= min(current_bottom, next_bottom):
                 merged_points = np.vstack((current_box, next_box))
                 new_box = np.array(
                     [
@@ -379,7 +385,7 @@ class LicensePlateProcessingMixin:
                 )
                 current_box = new_box
             else:
-                # If the boxes are not close enough, add the current box to the result
+                # If the boxes are not close enough or overlap too much, add the current box to the result
                 merged_boxes.append(current_box)
                 current_box = next_box
 
