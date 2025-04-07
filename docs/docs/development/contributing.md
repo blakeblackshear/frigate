@@ -239,7 +239,7 @@ sudo cp docker/main/rootfs/usr/local/nginx/conf/* /usr/local/nginx/conf/ && sudo
 
 ## Contributing translations of the Web UI
 
-Frigate uses Weblate to manage translations of the Web UI. To contribute translation, sign up for an account at Weblate and navigate to the Frigate NVR project:
+Frigate uses [Weblate](https://weblate.org) to manage translations of the Web UI. To contribute translation, sign up for an account at Weblate and navigate to the Frigate NVR project:
 
 https://hosted.weblate.org/projects/frigate-nvr/
 
