@@ -344,7 +344,7 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 
 LPR's performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU or GPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
 
-### I am seeing a YOLOv9 plate detection metric in Enrichment Metrics, but I have a Frigate+ model that detects `license_plate`. Why is the YOLOv9 model running?
+### I am seeing a YOLOv9 plate detection metric in Enrichment Metrics, but I have a Frigate+ or custom model that detects `license_plate`. Why is the YOLOv9 model running?
 
 The YOLOv9 license plate detector model will run (and the metric will appear) if you've enabled LPR but haven't defined `license_plate` as an object to track, either at the global or camera level.
 
