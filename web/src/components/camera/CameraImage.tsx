@@ -5,7 +5,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isDesktop } from "react-device-detect";
 import { cn } from "@/lib/utils";
-import { useEnabledState } from "@/api/ws";
+import { useCameraActivity } from "@/hooks/use-camera-activity";
 
 type CameraImageProps = {
   className?: string;
@@ -27,8 +27,7 @@ export default function CameraImage({
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   const { name } = config ? config.cameras[camera] : "";
-  const { payload: enabledState } = useEnabledState(camera);
-  const enabled = enabledState === "ON" || enabledState === undefined;
+  const { enabled } = useCameraActivity(config.cameras[camera]);
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
