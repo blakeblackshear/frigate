@@ -29,7 +29,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` before it can r
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The models are relatively lightweight and will be auto-selected to run on your CPU or GPU. At least 4GB of RAM is required.
+License plate recognition works by running AI models locally on your system. The models are relatively lightweight and will be auto-selected to run on your CPU. At least 4GB of RAM is required.
 
 ## Configuration
 
