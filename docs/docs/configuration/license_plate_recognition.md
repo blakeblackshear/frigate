@@ -316,6 +316,10 @@ In normal LPR mode, Frigate requires a `car` to be detected first before recogni
 
 Yes, but performance depends on camera quality, lighting, and infrared capabilities. Make sure your camera can capture clear images of plates at night.
 
+### Can I limit LPR to specific zones?
+
+LPR, like other Frigate enrichments, runs at the camera level rather than the zone level. While you can't restrict LPR to specific zones directly, you can control when recognition runs by setting a `min_area` value to filter out smaller detections.
+
 ### How can I match known plates with minor variations?
 
 Use `match_distance` to allow small character mismatches. Alternatively, define multiple variations in `known_plates`.
