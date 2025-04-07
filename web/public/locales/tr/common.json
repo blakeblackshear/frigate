@@ -1,0 +1,23 @@
+{
+    "time": {
+        "lastWeek": "Geçen Hafta",
+        "thisWeek": "Bu Hafta",
+        "lastMonth": "Geçen Ay",
+        "untilForRestart": "Frigate yeniden başlatılana kadar.",
+        "untilRestart": "Yeniden başlatmaya kadar",
+        "ago": "{{timeAgo}} önce",
+        "justNow": "Az önce",
+        "today": "Bugün",
+        "yesterday": "Dün",
+        "last7": "Son 7 gün",
+        "last30": "Son 30 gün",
+        "thisMonth": "Bu Ay",
+        "5minutes": "5 dakika",
+        "10minutes": "10 dakika",
+        "30minutes": "30 dakika",
+        "1hour": "1 saat",
+        "12hours": "12 saat",
+        "last14": "Son 14 gün",
+        "24hours": "24 saat"
+    }
+}

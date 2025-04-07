@@ -1,0 +1,91 @@
+{
+    "documentTitle": {
+        "masksAndZones": "Editor de máscaras y zonas - Frigate",
+        "object": "Configuración de objetos - Frigate",
+        "default": "Configuración - Frigate",
+        "authentication": "Configuración de autenticación - Frigate",
+        "camera": "Configuración de cámara - Frigate",
+        "motionTuner": "Ajuste de movimiento - Frigate",
+        "classification": "Configuración de clasificación - Frigate",
+        "general": "Configuración general - Frigate",
+        "frigatePlus": "Configuración de Frigate+ - Frigate"
+    },
+    "menu": {
+        "cameras": "Configuración de cámara",
+        "debug": "Depuración",
+        "ui": "Interfaz de usuario",
+        "classification": "Clasificación",
+        "motionTuner": "Ajuste de movimiento",
+        "masksAndZones": "Máscaras / Zonas",
+        "frigateplus": "Frigate+",
+        "users": "Usuarios",
+        "notifications": "Notificaciones"
+    },
+    "dialog": {
+        "unsavedChanges": {
+            "title": "Tienes cambios sin guardar.",
+            "desc": "¿Quieres guardar los cambios antes de continuar?"
+        }
+    },
+    "cameraSetting": {
+        "camera": "Cámara",
+        "noCamera": "Sin cámara"
+    },
+    "general": {
+        "liveDashboard": {
+            "automaticLiveView": {
+                "label": "Vista en directo automática",
+                "desc": "Cambiar automáticamente a la vista en directo de una cámara cuando se detecta actividad. Si se desactiva esta opción, las imágenes de las cámaras en el panel en directo solo se actualizarán una vez por minuto."
+            },
+            "playAlertVideos": {
+                "label": "Reproducir vídeos de alertas",
+                "desc": "De forma predeterminada, las alertas recientes en el panel en directo se reproducen como pequeños vídeos en bucle. Desactiva esta opción para mostrar solo una imagen estática de las alertas recientes en este dispositivo/navegador."
+            },
+            "title": "Panel en directo"
+        },
+        "cameraGroupStreaming": {
+            "desc": "La configuración de transmisión de cada grupo de cámaras se guarda en el almacenamiento local de tu navegador.",
+            "title": "Configuración de transmisión de grupo de cámaras",
+            "clearAll": "Borrar toda la configuración de transmisión"
+        },
+        "recordingsViewer": {
+            "defaultPlaybackRate": {
+                "label": "Velocidad de reproducción predeterminada",
+                "desc": "Velocidad de reproducción predeterminada para la reproducción de grabaciones."
+            },
+            "title": "Visor de grabaciones"
+        },
+        "calendar": {
+            "firstWeekday": {
+                "label": "Primer día de la semana",
+                "sunday": "Domingo",
+                "desc": "El día con el que comienzan las semanas en el calendario de revisión.",
+                "monday": "Lunes"
+            },
+            "title": "Calendario"
+        },
+        "storedLayouts": {
+            "desc": "El diseño de las cámaras en un grupo de cámaras se puede arrastrar y redimensionar. Las posiciones se guardan en el almacenamiento local de tu navegador.",
+            "title": "Diseños guardados",
+            "clearAll": "Borrar todos los diseños"
+        },
+        "title": "Configuración general",
+        "toast": {
+            "success": {
+                "clearStoredLayout": "Diseño almacenado eliminado para {{cameraName}}",
+                "clearStreamingSettings": "Se ha borrado la configuración de transmisión de todos los grupos de cámaras."
+            },
+            "error": {
+                "clearStreamingSettingsFailed": "Error al borrar la configuración de transmisión: {{errorMessage}}",
+                "clearStoredLayoutFailed": "Error al borrar el diseño guardado: {{errorMessage}}"
+            }
+        }
+    },
+    "classification": {
+        "semanticSearch": {
+            "title": "Búsqueda semántica",
+            "desc": "La búsqueda semántica en Frigate te permite encontrar objetos rastreados dentro de tus elementos de revisión utilizando la propia imagen, una descripción escrita por el usuario o una generada automáticamente."
+        },
+        "title": "Configuración de clasificación"
+    }
+}
