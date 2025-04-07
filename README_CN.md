@@ -4,7 +4,9 @@
 
 # Frigate - 一个具有实时目标检测的本地NVR
 
-[English](https://github.com/blakeblackshear/frigate) | \[简体中文\] <a href="https://hosted.weblate.org/engage/frigate-nvr/-/zh_Hans/">
+[English](https://github.com/blakeblackshear/frigate) | \[简体中文\] 
+
+<a href="https://hosted.weblate.org/engage/frigate-nvr/-/zh_Hans/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/-/zh_Hans/svg-badge.svg" alt="翻译状态" />
 </a>
 
@@ -25,6 +27,7 @@
 ## 文档（英文）
 
 你可以在这里查看文档 https://docs.frigate.video
+
 文档还暂时没有提供翻译，将会在未来提供。
 
 ## 赞助
