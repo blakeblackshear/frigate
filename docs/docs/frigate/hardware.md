@@ -23,8 +23,7 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Hailo8 or Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-WARNING: Frigate requires your CPU to support AVX instructions. Please verify your CPU supports AVX before trying to run Frigate. 
-
+WARNING: Frigate requires your CPU to support AVX instructions. CPUs made before 2011 likely do not support AVX. 
 | Name                                                                                                          | Notes                                                                                     |
 | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
