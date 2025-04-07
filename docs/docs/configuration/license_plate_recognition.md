@@ -19,7 +19,7 @@ When a plate is recognized, the recognized name is:
 
 Users running a Frigate+ model (or any custom model that natively detects license plates) should ensure that `license_plate` is added to the [list of objects to track](https://docs.frigate.video/plus/#available-label-types) either globally or for a specific camera. This will improve the accuracy and performance of the LPR model.
 
-Users without a model that detects license plates can still run LPR. Frigate uses a lightweight YOLOv9 license plate detection model that runs on your CPU. In this case, you should _not_ define `license_plate` in your list of objects to track.
+Users without a model that detects license plates can still run LPR. Frigate uses a lightweight YOLOv9 license plate detection model that runs on your CPU or GPU. In this case, you should _not_ define `license_plate` in your list of objects to track.
 
 :::note
 
@@ -29,7 +29,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` before it can r
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The models are relatively lightweight and will be auto-selected to run on your CPU or GPU. At least 4GB of RAM is required.
+License plate recognition works by running AI models locally on your system. The models are relatively lightweight and will be auto-selected to run on your CPU. At least 4GB of RAM is required.
 
 ## Configuration
 
@@ -40,11 +40,11 @@ lpr:
   enabled: True
 ```
 
-Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You can disable it for specific cameras at the camera level:
+Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You should disable it for specific cameras at the camera level if you don't want to run LPR on cars on those cameras:
 
 ```yaml
 cameras:
-  driveway:
+  garage:
     ...
     lpr:
       enabled: False
@@ -174,7 +174,7 @@ cameras:
     type: "lpr" # required to use dedicated LPR camera mode
     detect:
       enabled: True
-      fps: 5 # increase to 10 if vehicles move quickly across your frame
+      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.
       min_initialized: 2
       width: 1920
       height: 1080
@@ -313,6 +313,10 @@ In normal LPR mode, Frigate requires a `car` to be detected first before recogni
 
 Yes, but performance depends on camera quality, lighting, and infrared capabilities. Make sure your camera can capture clear images of plates at night.
 
+### Can I limit LPR to specific zones?
+
+LPR, like other Frigate enrichments, runs at the camera level rather than the zone level. While you can't restrict LPR to specific zones directly, you can control when recognition runs by setting a `min_area` value to filter out smaller detections.
+
 ### How can I match known plates with minor variations?
 
 Use `match_distance` to allow small character mismatches. Alternatively, define multiple variations in `known_plates`.
@@ -336,3 +340,9 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 ### Will LPR slow down my system?
 
 LPR's performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU or GPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
+
+### I am seeing a YOLOv9 plate detection metric in Enrichment Metrics, but I have a Frigate+ or custom model that detects `license_plate`. Why is the YOLOv9 model running?
+
+The YOLOv9 license plate detector model will run (and the metric will appear) if you've enabled LPR but haven't defined `license_plate` as an object to track, either at the global or camera level.
+
+If you are detecting `car` on cameras where you don't want to run LPR, make sure you disable LPR it at the camera level. And if you do want to run LPR on those cameras, make sure you define `license_plate` as an object to track.
