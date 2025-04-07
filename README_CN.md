@@ -61,4 +61,4 @@
 我们使用 [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) 平台提供翻译支持，欢迎参与进来一起完善。
 
 ## 中文讨论社区
-欢迎加入中文讨论QQ群：1043861059
+欢迎加入非官方中文讨论QQ群：1043861059
