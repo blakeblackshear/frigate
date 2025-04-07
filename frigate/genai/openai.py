@@ -54,9 +54,13 @@ class OpenAIClient(GenAIClient):
                 ],
                 timeout=self.timeout,
             )
-        except TimeoutException as e:
+            if (
+                result is not None
+                and hasattr(result, "choices")
+                and len(result.choices) > 0
+            ):
+                return result.choices[0].message.content.strip()
+            return None
+        except (TimeoutException, Exception) as e:
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
-        if len(result.choices) > 0:
-            return result.choices[0].message.content.strip()
-        return None
