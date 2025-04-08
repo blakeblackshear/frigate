@@ -68,7 +68,7 @@ Fine-tune the LPR feature using these optional parameters:
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 - **`device`**: Device to use to run license plate recognition models.
   - Default: `CPU`
-  - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the YOLOv9 license plate detector model.
+  - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model.
 
 ### Recognition
 
@@ -170,6 +170,7 @@ An example configuration for a dedicated LPR camera using a Frigate+ model:
 # LPR global configuration
 lpr:
   enabled: True
+  device: CPU # can also be GPU if available
 
 # Dedicated LPR camera configuration
 cameras:
@@ -221,6 +222,7 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 # LPR global configuration
 lpr:
   enabled: True
+  device: CPU # can also be GPU if available
   detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration
