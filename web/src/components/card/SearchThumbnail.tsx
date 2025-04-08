@@ -56,6 +56,11 @@ export default function SearchThumbnail({
     return `${searchResult.label}-verified`;
   }, [config, searchResult]);
 
+  const hasRecognizedPlate = useMemo(
+    () => (searchResult.data.recognized_license_plate?.length || 0) > 0,
+    [searchResult],
+  );
+
   return (
     <div
       className="relative size-full cursor-pointer"
@@ -97,7 +102,10 @@ export default function SearchThumbnail({
                     className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs`}
                     onClick={() => onClick(searchResult, false, true)}
                   >
-                    {getIconForLabel(objectLabel, "size-3 text-white")}
+                    {getIconForLabel(
+                      `${objectLabel}${hasRecognizedPlate ? "-plate" : ""}`,
+                      "size-3 text-white",
+                    )}
                     {Math.round(
                       (searchResult.data.score ??
                         searchResult.data.top_score ??
