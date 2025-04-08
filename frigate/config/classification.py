@@ -20,7 +20,6 @@ class SemanticSearchModelEnum(str, Enum):
 
 
 class LPRDeviceEnum(str, Enum):
-    AUTO = "AUTO"
     GPU = "GPU"
     CPU = "CPU"
 
@@ -101,7 +100,7 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
     device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.AUTO,
+        default=LPRDeviceEnum.CPU,
         title="The device used for license plate recognition.",
     )
     detection_threshold: float = Field(
