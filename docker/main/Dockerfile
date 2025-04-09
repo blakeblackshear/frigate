@@ -85,7 +85,7 @@ RUN apt-get -qq update \
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
     mkdir /models && cd /models \
     && wget http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
-    && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz --no-same-owner \
     && python3 /build_ov_model.py
 
 ####
