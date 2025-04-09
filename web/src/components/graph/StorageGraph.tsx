@@ -25,6 +25,9 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
         zoom: {
           enabled: false,
         },
+        animations: {
+          enabled: false,
+        },
       },
       grid: {
         show: false,
