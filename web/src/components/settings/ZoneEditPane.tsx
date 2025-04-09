@@ -677,7 +677,7 @@ export default function ZoneEditPane({
 
           {form.watch("speedEstimation") &&
             polygons &&
-            activePolygonIndex &&
+            activePolygonIndex !== undefined &&
             polygons[activePolygonIndex].points.length === 4 && (
               <>
                 <FormField
