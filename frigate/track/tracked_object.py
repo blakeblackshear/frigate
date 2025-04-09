@@ -349,6 +349,9 @@ class TrackedObject:
 
     def should_update_attribute(self) -> bool:
         """Decides if attributes should be checked."""
+        if not self.active:
+            return False
+
         if self.obj_data["label"] == "person" and not self.requires_face_detection:
             return False
         elif self.obj_data["label"] == "car" and not self.requires_lpr_detection:
