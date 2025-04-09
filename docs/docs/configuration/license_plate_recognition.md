@@ -92,11 +92,11 @@ Fine-tune the LPR feature using these optional parameters:
 
 ### Image Enhancement
 
-- **`enhancement`**: A value between **0 and 10** that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
+- **`enhancement`**: A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
   - **Default:** `0` (no enhancement)
   - Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters, actually making them much harder for Frigate to recognize.
-  - This setting is best adjusted **at the camera level** if running LPR on multiple cameras.
-  - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at **5** and adjusting as needed. To preview how different enhancement levels affect your plates, use the `debug_save_plates` configuration option (see below).
+  - This setting is best adjusted at the camera level if running LPR on multiple cameras.
+  - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 5 and adjusting as needed. You should see how different enhancement levels affect your plates. Use the `debug_save_plates` configuration option (see below).
 
 ### Debugging
 
@@ -176,6 +176,7 @@ lpr:
 cameras:
   dedicated_lpr_camera:
     type: "lpr" # required to use dedicated LPR camera mode
+    ffmpeg: ... # add your streams
     detect:
       enabled: True
       fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.
@@ -232,7 +233,7 @@ cameras:
     lpr:
       enabled: True
       enhancement: 3 # optional, enhance the image before trying to recognize characters
-    ffmpeg: ...
+    ffmpeg: ... # add your streams
     detect:
       enabled: False # disable Frigate's standard object detection pipeline
       fps: 5 # increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU
@@ -332,7 +333,7 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 - If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car`.
 - Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` label will change to the recognized plate when LPR is enabled and working.
 - Adjust `detection_threshold` and `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
-- Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`).
+- Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`). Ensure these images are readable and the text is clear.
 - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
 
   ```yaml
