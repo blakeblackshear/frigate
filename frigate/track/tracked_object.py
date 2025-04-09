@@ -358,7 +358,6 @@ class TrackedObject:
 
         if now + 0.5 > self.last_published:
             self.last_published = now
-            print(f"running manual attribute update")
             return True
 
         return False

@@ -250,12 +250,6 @@ def deregister_faces(request: Request, name: str, body: dict = None):
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
-    if not list_of_ids or len(list_of_ids) == 0:
-        return JSONResponse(
-            content=({"success": False, "message": "Not a valid list of ids"}),
-            status_code=404,
-        )
-
     context: EmbeddingsContext = request.app.embeddings
     context.delete_face_ids(
         name, map(lambda file: sanitize_filename(file), list_of_ids)
