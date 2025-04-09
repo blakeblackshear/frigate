@@ -1,5 +1,6 @@
 """Object attribute."""
 
+import datetime
 import logging
 import math
 import os
@@ -71,6 +72,14 @@ class TrackedObject:
         self.velocity_angle = 0
         self.path_data = []
         self.previous = self.to_dict()
+        self.requires_face_detection = (
+            self.camera_config.face_recognition.enabled
+            and "face" not in self.camera_config.objects.track
+        )
+        self.requires_lpr_detection = (
+            self.camera_config.lpr.enabled
+            and "license_plate" not in self.camera_config.objects.track
+        )
 
     @property
     def max_severity(self) -> Optional[str]:
@@ -337,6 +346,22 @@ class TrackedObject:
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
         return (thumb_update, significant_change, autotracker_update)
+
+    def should_update_attribute(self) -> bool:
+        """Decides if attributes should be checked."""
+        if self.obj_data["label"] == "person" and not self.requires_face_detection:
+            return False
+        elif self.obj_data["label"] == "car" and not self.requires_lpr_detection:
+            return False
+
+        now = datetime.datetime.now().timestamp()
+
+        if now + 0.5 > self.last_published:
+            self.last_published = now
+            print(f"running manual attribute update")
+            return True
+
+        return False
 
     def to_dict(self):
         event = {
