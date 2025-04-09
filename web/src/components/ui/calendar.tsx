@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
-import { enUS, Locale, zhCN, es } from "date-fns/locale";
+import { enUS, Locale, zhCN, es, pl } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import i18n from "@/utils/i18n";
@@ -15,6 +15,9 @@ switch (i18n.language) {
     break;
   case "es":
     locale = es;
+    break;
+  case "pl":
+    locale = pl;
     break;
   default:
     locale = enUS;
