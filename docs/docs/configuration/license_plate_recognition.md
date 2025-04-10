@@ -56,7 +56,7 @@ Like the other real-time processors in Frigate, license plate recognition runs o
 
 ## Advanced Configuration
 
-Fine-tune the LPR feature using these optional parameters:
+Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that should be set at the camera level are `enabled`, `min_area`, and `enhancement`.
 
 ### Detection
 
@@ -158,13 +158,15 @@ cameras:
 
 Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to capture license plates on distant vehicles, often with fine-tuned settings to capture plates at night.
 
-Users can configure Frigate's LPR in two different ways depending on whether they are using a Frigate+ model:
+To mark a camera as a dedicated LPR camera, add `type: "lpr"` the camera configuration.
 
-### Using a Frigate+ Model
+Users can configure Frigate's dedicated LPR mode in two different ways depending on whether a Frigate+ (or native `license_plate` detecting) model is used:
+
+### Using a Frigate+ (or Native `license_plate` Detecting) Model
 
 Users running a Frigate+ model (or any model that natively detects `license_plate`) can take advantage of `license_plate` detection. This allows license plates to be treated as standard objects in dedicated LPR mode, meaning that alerts, detections, snapshots, zones, and other Frigate features work as usual, and plates are detected efficiently through your configured object detector.
 
-An example configuration for a dedicated LPR camera using a Frigate+ model:
+An example configuration for a dedicated LPR camera using a `license_plate`-detecting model:
 
 ```yaml
 # LPR global configuration
