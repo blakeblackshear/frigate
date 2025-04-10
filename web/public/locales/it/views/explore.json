@@ -1,0 +1,10 @@
+{
+    "generativeAI": "AI Generativa",
+    "documentTitle": "Esplora - Frigate",
+    "exploreIsUnavailable": {
+        "title": "Esplora non è disponibile",
+        "embeddingsReindexing": {
+            "context": "Potrai usare Esplora dopo che l'incorporamento degli oggetti tracciati avrà terminato la ricostruzione dell'indice."
+        }
+    }
+}
