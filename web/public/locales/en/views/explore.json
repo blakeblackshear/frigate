@@ -91,11 +91,13 @@
       "toast": {
         "success": {
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
-          "updatedSublabel": "Successfully updated sub label."
+          "updatedSublabel": "Successfully updated sub label.",
+          "updatedLPR": "Successfully updated license plate."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
-          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}"
+          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
+          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}"
         }
       }
     },
@@ -105,10 +107,16 @@
       "desc": "Enter a new sub label for this {{label}}",
       "descNoLabel": "Enter a new sub label for this tracked object"
     },
+    "editLPR": {
+      "title": "Edit license plate",
+      "desc": "Enter a new license plate value for this {{label}}",
+      "descNoLabel": "Enter a new license plate value for this tracked object"
+    },
     "topScore": {
       "label": "Top Score",
       "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
     },
+    "recognizedLicensePlate": "Recognized License Plate",
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",
