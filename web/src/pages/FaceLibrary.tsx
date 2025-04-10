@@ -3,7 +3,6 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button } from "@/components/ui/button";
