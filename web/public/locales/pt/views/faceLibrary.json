@@ -1,0 +1,59 @@
+{
+    "description": {
+        "placeholder": "Digite um nome para esta coleção",
+        "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos."
+    },
+    "details": {
+        "person": "Pessoa",
+        "face": "Detalhes do rosto",
+        "faceDesc": "Detalhes do rosto e objeto associado",
+        "timestamp": "Carimbo de hora",
+        "confidence": "Confiança"
+    },
+    "documentTitle": "Biblioteca de rostos - Frigate",
+    "uploadFaceImage": {
+        "title": "Carregar imagem do rosto",
+        "desc": "Carregue uma imagem para escanear rostos e incluir em {{pageToggle}}"
+    },
+    "createFaceLibrary": {
+        "title": "Criar coleção",
+        "desc": "Criar uma nova coleção",
+        "new": "Criar novo rosto",
+        "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treinamento que capturem rostos em ângulo.</li></ul>"
+    },
+    "train": {
+        "aria": "Selecionar treino",
+        "title": "Treinar"
+    },
+    "selectItem": "Selecionar {{item}}",
+    "selectFace": "Selecionar rosto",
+    "deleteFaceLibrary": {
+        "title": "Excluir nome",
+        "desc": "Tem certeza de que deseja excluir a coleção {{name}}? Isso excluirá permanentemente todos os rostos associados."
+    },
+    "button": {
+        "addFace": "Adicionar rosto",
+        "uploadImage": "Carregar imagem"
+    },
+    "imageEntry": {
+        "validation": {
+            "selectImage": "Selecione um arquivo de imagem."
+        },
+        "dropActive": "Solte a imagem aqui...",
+        "maxSize": "Tamanho máximo: {{size}}MB",
+        "dropInstructions": "Arraste e solte uma imagem aqui ou clique para selecionar"
+    },
+    "trainFace": "Treinar rosto",
+    "toast": {
+        "success": {
+            "updatedFaceScore": "Pontuação facial atualizada com sucesso.",
+            "trainedFace": "Rosto treinado com sucesso."
+        },
+        "error": {
+            "uploadingImageFailed": "Falha ao carregar a imagem: {{errorMessage}}",
+            "deleteFaceFailed": "Falha ao excluir: {{errorMessage}}",
+            "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}"
+        }
+    },
+    "readTheDocs": "Leia a documentação"
+}

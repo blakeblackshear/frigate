@@ -1,0 +1,49 @@
+{
+    "search": "Pesquisar",
+    "savedSearches": "Pesquisas salvas",
+    "searchFor": "Pesquisar por {{inputValue}}",
+    "button": {
+        "save": "Salvar pesquisa",
+        "delete": "Excluir pesquisa salva",
+        "filterInformation": "Informação do filtro",
+        "filterActive": "Filtros ativos",
+        "clear": "Limpar pesquisa"
+    },
+    "trackedObjectId": "ID do objeto rastreado",
+    "filter": {
+        "label": {
+            "sub_labels": "Sub etiquetas",
+            "zones": "Zonas",
+            "cameras": "Câmeras",
+            "labels": "Etiquetas",
+            "search_type": "Tipo de pesquisa",
+            "time_range": "Intervalo de tempo",
+            "before": "Antes",
+            "after": "Depois",
+            "min_score": "Pontuação mínima",
+            "max_score": "Pontuação máxima",
+            "min_speed": "Velocidade mínima",
+            "max_speed": "Velocidade máxima",
+            "recognized_license_plate": "Placa reconhecida"
+        },
+        "searchType": {
+            "thumbnail": "Miniatura",
+            "description": "Descrição"
+        },
+        "header": {
+            "noFilters": "Filtros",
+            "activeFilters": "Filtros ativos"
+        },
+        "tips": {
+            "desc": {
+                "text": "Os filtros ajudam você a restringir os resultados da sua pesquisa. Veja como usá-los no campo de entrada:"
+            }
+        }
+    },
+    "placeholder": {
+        "search": "Pesquisar..."
+    },
+    "similaritySearch": {
+        "title": "Pesquisa de similaridade"
+    }
+}
