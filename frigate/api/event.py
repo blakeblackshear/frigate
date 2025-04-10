@@ -724,13 +724,15 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if (sort is None or sort == "relevance") and search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
     elif min_score is not None and max_score is not None and sort == "score_asc":
-        processed_events.sort(key=lambda x: x["score"])
+        processed_events.sort(key=lambda x: x["data"]["score"])
     elif min_score is not None and max_score is not None and sort == "score_desc":
-        processed_events.sort(key=lambda x: x["score"], reverse=True)
+        processed_events.sort(key=lambda x: x["data"]["score"], reverse=True)
     elif min_speed is not None and max_speed is not None and sort == "speed_asc":
-        processed_events.sort(key=lambda x: x["average_estimated_speed"])
+        processed_events.sort(key=lambda x: x["data"]["average_estimated_speed"])
     elif min_speed is not None and max_speed is not None and sort == "speed_desc":
-        processed_events.sort(key=lambda x: x["average_estimated_speed"], reverse=True)
+        processed_events.sort(
+            key=lambda x: x["data"]["average_estimated_speed"], reverse=True
+        )
     elif sort == "date_asc":
         processed_events.sort(key=lambda x: x["start_time"])
     else:
