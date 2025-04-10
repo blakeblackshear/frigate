@@ -3,8 +3,8 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
+import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -42,7 +41,6 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
   LuImagePlus,
-  LuPlus,
   LuRefreshCw,
   LuScanFace,
   LuSearch,
@@ -783,8 +781,6 @@ function FaceAttempt({
 
   // interaction
 
-  const [newFace, setNewFace] = useState(false);
-
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useContextMenu(imgRef, () => {
@@ -844,15 +840,6 @@ function FaceAttempt({
 
   return (
     <>
-      {newFace && (
-        <TextEntryDialog
-          open={true}
-          setOpen={setNewFace}
-          title={t("createFaceLibrary.new")}
-          onSave={(newName) => onTrainAttempt(newName)}
-        />
-      )}
-
       <div
         className={cn(
           "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
@@ -895,36 +882,12 @@ function FaceAttempt({
               </div>
             </div>
             <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              <Tooltip>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <TooltipTrigger>
-                      <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                    </TooltipTrigger>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      className="flex cursor-pointer gap-2 capitalize"
-                      onClick={() => setNewFace(true)}
-                    >
-                      <LuPlus />
-                      {t("createFaceLibrary.new")}
-                    </DropdownMenuItem>
-                    {faceNames.map((faceName) => (
-                      <DropdownMenuItem
-                        key={faceName}
-                        className="flex cursor-pointer gap-2 capitalize"
-                        onClick={() => onTrainAttempt(faceName)}
-                      >
-                        <LuScanFace />
-                        {faceName}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <TooltipContent>{t("trainFace")}</TooltipContent>
-              </Tooltip>
+              <FaceSelectionDialog
+                faceNames={faceNames}
+                onTrainAttempt={onTrainAttempt}
+              >
+                <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+              </FaceSelectionDialog>
               <Tooltip>
                 <TooltipTrigger>
                   <LuRefreshCw

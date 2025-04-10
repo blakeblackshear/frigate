@@ -27,7 +27,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Nvidia**
 
 - [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs and Jetson devices, using one of many default models.
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp(4/5)` Frigate images when a supported ONNX model is configured.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp6` Frigate images when a supported ONNX model is configured.
 
 **Rockchip**
 
