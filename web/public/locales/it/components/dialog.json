@@ -1,0 +1,10 @@
+{
+    "restart": {
+        "title": "Sei sicuro di voler riavviare Frigate?",
+        "button": "Riavvio",
+        "restarting": {
+            "title": "Frigare è in riavvio",
+            "content": "Questa pagina si ricaricherà in {{countdown}} secondi."
+        }
+    }
+}

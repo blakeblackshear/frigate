@@ -1,0 +1,8 @@
+{
+    "noPreviewFound": "Nessuna Anteprima Trovata",
+    "noRecordingsFoundForThisTime": "Nessuna registrazione trovata per questo intervallo",
+    "noPreviewFoundFor": "Nessuna Anteprima Trovata per {{cameraName}}",
+    "submitFrigatePlus": {
+        "title": "Vuoi inviare questo frame a Frigate+?"
+    }
+}
