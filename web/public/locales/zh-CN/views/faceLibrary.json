@@ -1,72 +1,69 @@
 {
-  "description": {
-    "addFace": "我们将引导你如何向人脸库中添加新的特征集。",
-    "placeholder": "请输入此特征集的名称"
-  },
-  "details": {
-    "person": "人",
-    "confidence": "置信度",
-    "face": "人脸详情",
-    "faceDesc": "人脸及相关对象的详细信息",
-    "timestamp": "时间戳"
-  },
-  "documentTitle": "人脸库 - Frigate",
-  "uploadFaceImage": {
-    "title": "上传人脸图片",
-    "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"
-  },
-  "createFaceLibrary": {
-    "title": "创建特征库",
-    "desc": "创建一个新的特征库",
-    "new": "新建人脸",
-    "nextSteps": "建议按以下步骤建立可靠的特征库：<li>使用<em>训练</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
-  },
-  "train": {
-    "title": "训练",
-    "aria": "选择训练"
-  },
-  "selectItem": "选择{{item}}",
-  "selectFace": "选择人脸",
-  "deleteFaceLibrary": {
-    "title": "删除名称",
-    "desc": "确定要删除特征库 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
-  },
-  "button": {
-    "deleteFaceAttempts": "尝试删除人脸",
-    "addFace": "添加人脸",
-    "uploadImage": "上传图片",
-    "reprocessFace": "重新处理人脸"
-  },
-  "imageEntry": {
-    "validation": {
-      "selectImage": "请选择图片文件。"
+    "description": {
+        "addFace": "我们将引导你如何向人脸库中添加新的特征集。",
+        "placeholder": "请输入此特征集的名称"
     },
-    "dropActive": "拖动图片文件到这里……",
-    "dropInstructions": "拖动图片文件到此处或点击选择",
-    "maxSize": "最大文件大小：{{size}}MB"
-  },
-  "readTheDocs": "阅读文档",
-  "trainFaceAs": "将人脸特征训练为：",
-  "trainFace": "训练人脸特征",
-  "toast": {
-    "success": {
-      "uploadedImage": "图片上传成功",
-      "addFaceLibrary": "{{name}} 已成功添加至人脸库！",
-      "deletedFace_one": "成功删除 {{count}} 个人脸特征",
-      "deletedFace_other": "成功删除 {{count}} 个人脸特征",
-      "deletedName_zero": "空特征集删除成功",
-      "deletedName_one": "成功删除 {{count}} 个人脸特征",
-      "deletedName_other": "成功删除 {{count}} 个人脸特征",
-      "trainedFace": "人脸特征训练成功",
-      "updatedFaceScore": "更新人脸特征评分成功"
+    "details": {
+        "person": "人",
+        "confidence": "置信度",
+        "face": "人脸详情",
+        "faceDesc": "人脸及相关对象的详细信息",
+        "timestamp": "时间戳"
     },
-    "error": {
-      "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
-      "addFaceLibraryFailed": "人脸命名失败：{{errorMessage}}",
-      "deleteFaceFailed": "删除失败：{{errorMessage}}",
-      "deleteNameFailed": "特征集删除失败：{{errorMessage}}",
-      "trainFailed": "训练失败：{{errorMessage}}",
-      "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}"
+    "documentTitle": "人脸库 - Frigate",
+    "uploadFaceImage": {
+        "title": "上传人脸图片",
+        "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"
+    },
+    "createFaceLibrary": {
+        "title": "创建特征库",
+        "desc": "创建一个新的特征库",
+        "new": "新建人脸",
+        "nextSteps": "建议按以下步骤建立可靠的特征库：<li>使用<em>训练</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
+    },
+    "train": {
+        "title": "训练",
+        "aria": "选择训练"
+    },
+    "selectItem": "选择 {{item}}",
+    "selectFace": "选择人脸",
+    "deleteFaceLibrary": {
+        "title": "删除名称",
+        "desc": "确定要删除特征库 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
+    },
+    "button": {
+        "deleteFaceAttempts": "尝试删除人脸",
+        "addFace": "添加人脸",
+        "uploadImage": "上传图片",
+        "reprocessFace": "重新处理人脸"
+    },
+    "imageEntry": {
+        "validation": {
+            "selectImage": "请选择图片文件。"
+        },
+        "dropActive": "拖动图片文件到这里……",
+        "dropInstructions": "拖动图片文件到此处或点击选择",
+        "maxSize": "最大文件大小：{{size}}MB"
+    },
+    "readTheDocs": "阅读文档",
+    "trainFaceAs": "将人脸特征训练为：",
+    "trainFace": "训练人脸特征",
+    "toast": {
+        "success": {
+            "uploadedImage": "图片上传成功。",
+            "addFaceLibrary": "{{name}} 已成功添加至人脸库！",
+            "deletedFace_other": "成功删除 {{count}} 个 人脸特征。",
+            "deletedName_other": "成功删除 {{count}} 个 人脸特征。",
+            "trainedFace": "人脸特征训练成功。",
+            "updatedFaceScore": "更新人脸特征评分成功。"
+        },
+        "error": {
+            "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
+            "addFaceLibraryFailed": "人脸命名失败：{{errorMessage}}",
+            "deleteFaceFailed": "删除失败：{{errorMessage}}",
+            "deleteNameFailed": "特征集删除失败：{{errorMessage}}",
+            "trainFailed": "训练失败：{{errorMessage}}",
+            "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}"
+        }
     }
-  }
 }
