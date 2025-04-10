@@ -260,8 +260,9 @@ export default function ReviewDetailDialog({
                               event.label,
                               "size-3 text-primary",
                             )}
-                            {event.sub_label ?? event.label} (
-                            {Math.round(event.data.top_score * 100)}%)
+                            {event.sub_label ??
+                              event.label.replaceAll("_", " ")}{" "}
+                            ({Math.round(event.data.top_score * 100)}%)
                             <Tooltip>
                               <TooltipTrigger>
                                 <div

@@ -90,6 +90,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <GiGoat key={label} className={className} />;
     case "horse":
       return <FaHorse key={label} className={className} />;
+    case "license_plate":
+      return <LuScanBarcode key={label} className={className} />;
     case "motorcycle":
       return <FaMotorcycle key={label} className={className} />;
     case "mouse":
