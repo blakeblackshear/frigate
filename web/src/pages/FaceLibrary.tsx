@@ -14,6 +14,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -842,6 +848,11 @@ function FaceAttempt({
       });
   }, [data, onRefresh, t]);
 
+  const Selector = isDesktop ? DropdownMenu : Drawer;
+  const SelectorTrigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
+  const SelectorContent = isDesktop ? DropdownMenuContent : DrawerContent;
+  const SelectorItem = isDesktop ? DropdownMenuItem : DrawerClose;
+
   return (
     <>
       {newFace && (
@@ -896,33 +907,45 @@ function FaceAttempt({
             </div>
             <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
               <Tooltip>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                <Selector>
+                  <SelectorTrigger asChild>
                     <TooltipTrigger>
                       <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
                     </TooltipTrigger>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  </SelectorTrigger>
+                  <SelectorContent
+                    className={cn(
+                      "max-h-[75dvh] overflow-hidden",
+                      isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
+                    )}
+                  >
                     <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      className="flex cursor-pointer gap-2 capitalize"
-                      onClick={() => setNewFace(true)}
+                    <div
+                      className={cn(
+                        "flex flex-col",
+                        isMobile && "gap-2 overflow-y-auto pb-4",
+                      )}
                     >
-                      <LuPlus />
-                      {t("createFaceLibrary.new")}
-                    </DropdownMenuItem>
-                    {faceNames.map((faceName) => (
-                      <DropdownMenuItem
-                        key={faceName}
+                      <SelectorItem
                         className="flex cursor-pointer gap-2 capitalize"
-                        onClick={() => onTrainAttempt(faceName)}
+                        onClick={() => setNewFace(true)}
                       >
-                        <LuScanFace />
-                        {faceName}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        <LuPlus />
+                        {t("createFaceLibrary.new")}
+                      </SelectorItem>
+                      {faceNames.map((faceName) => (
+                        <SelectorItem
+                          key={faceName}
+                          className="flex cursor-pointer gap-2 capitalize"
+                          onClick={() => onTrainAttempt(faceName)}
+                        >
+                          <LuScanFace />
+                          {faceName}
+                        </SelectorItem>
+                      ))}
+                    </div>
+                  </SelectorContent>
+                </Selector>
                 <TooltipContent>{t("trainFace")}</TooltipContent>
               </Tooltip>
               <Tooltip>
