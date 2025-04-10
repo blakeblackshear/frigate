@@ -1,0 +1,17 @@
+{
+    "labels": {
+        "all": {
+            "title": "Alla Etiketter",
+            "short": "Etiketter"
+        },
+        "label": "Etiketter",
+        "count": "{{count}} Etiketter"
+    },
+    "filter": "Filter",
+    "zones": {
+        "label": "Zoner",
+        "all": {
+            "title": "Alla zoner"
+        }
+    }
+}

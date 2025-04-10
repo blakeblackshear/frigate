@@ -1,0 +1,11 @@
+{
+    "details": {
+        "person": "Person",
+        "confidence": "Säkerhet",
+        "face": "Ansiktsdetaljer"
+    },
+    "description": {
+        "placeholder": "Ange ett namn för denna samling"
+    },
+    "documentTitle": "Ansiktsbibliotek - Frigate"
+}
