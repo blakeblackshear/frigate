@@ -71,14 +71,6 @@ class TrackedObject:
         self.velocity_angle = 0
         self.path_data = []
         self.previous = self.to_dict()
-        self.requires_face_detection = (
-            self.camera_config.face_recognition.enabled
-            and "face" not in self.camera_config.objects.track
-        )
-        self.requires_lpr_detection = (
-            self.camera_config.lpr.enabled
-            and "license_plate" not in self.camera_config.objects.track
-        )
 
     @property
     def max_severity(self) -> Optional[str]:
