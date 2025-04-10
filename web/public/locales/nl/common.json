@@ -1,0 +1,203 @@
+{
+    "time": {
+        "untilForTime": "Totdat {{time}}",
+        "untilForRestart": "Totdat Frigate herstart.",
+        "untilRestart": "Tot herstart",
+        "12hours": "12 uur",
+        "lastWeek": "Vorige week",
+        "last7": "Laatste 7 dagen",
+        "last30": "Laatste 30 dagen",
+        "yr": "{{time}} jaar",
+        "5minutes": "5 minuten",
+        "10minutes": "10 minuten",
+        "24hours": "24 uur",
+        "30minutes": "30 minuten",
+        "ago": "{{timeAgo}} geleden",
+        "justNow": "Zo juist",
+        "today": "Vandaag",
+        "yesterday": "Gisteren",
+        "last14": "Laatste 14 dagen",
+        "thisWeek": "Deze week",
+        "thisMonth": "Deze maand",
+        "lastMonth": "Vorige maand",
+        "1hour": "1 uur",
+        "pm": "pm",
+        "am": "am",
+        "year": "{{time}} Jaren",
+        "mo": "{{time}}maand",
+        "month": "{{time}} maanden",
+        "formattedTimestamp2": {
+            "12hour": "%d-%m %H:%M:%S",
+            "24hour": "%d %b %H:%M:%S"
+        },
+        "s": "{{time}}seconde",
+        "formattedTimestamp": {
+            "12hour": "%d %b %H:%M:%S",
+            "24hour": "%-d %b, %H:%M:%S"
+        },
+        "formattedTimestampOnlyMonthAndDay": "%-d %b",
+        "d": "{{time}}dag",
+        "day": "{{time}} dagen",
+        "h": "{{time}}uur",
+        "hour": "{{time}} uren",
+        "m": "{{time}}minuut",
+        "formattedTimestampWithYear": {
+            "12hour": "%-d %b %Y, %H:%M",
+            "24hour": "%-d %b %Y, %H:%M"
+        },
+        "formattedTimestampExcludeSeconds": {
+            "24hour": "%-d %b, %H:%M",
+            "12hour": "%-d %b, %H:%M"
+        },
+        "minute": "{{time}} minuten",
+        "second": "{{time}} seconden"
+    },
+    "button": {
+        "enabled": "Ingeschakeld",
+        "back": "Terug",
+        "apply": "Toepassen",
+        "reset": "Opnieuw instellen",
+        "enable": "Inschakelen",
+        "disabled": "Uitgeschakeld",
+        "cancel": "Annuleren",
+        "close": "Sluiten",
+        "copy": "Kopieer",
+        "done": "Klaar",
+        "saving": "Opslaan...",
+        "disable": "Uitschakelen",
+        "save": "Opslaan",
+        "history": "Geschiedenis",
+        "fullscreen": "Volledig scherm",
+        "pictureInPicture": "Foto in foto",
+        "twoWayTalk": "Tweerichtingsgesprek",
+        "cameraAudio": "Camera geluid",
+        "on": "aan",
+        "copyCoordinates": "Coördinaten kopiëren",
+        "delete": "Verwijder",
+        "yes": "Ja",
+        "no": "Nee",
+        "suspended": "Opgeschort",
+        "unsuspended": "Heractiveren",
+        "export": "Exporteren",
+        "exitFullscreen": "Verlaat volledig scherm",
+        "play": "Speel",
+        "off": "uit",
+        "info": "Info",
+        "edit": "Bewerken",
+        "download": "Download",
+        "unselect": "Deselecteren",
+        "next": "Volgende",
+        "deleteNow": "Nu verwijderen"
+    },
+    "unit": {
+        "speed": {
+            "mph": "mph",
+            "kph": "km/u"
+        }
+    },
+    "label": {
+        "back": "Ga terug"
+    },
+    "menu": {
+        "system": "Systeem",
+        "systemMetrics": "Systeemstatistieken",
+        "settings": "Instellingen",
+        "configuration": "Configuratie",
+        "systemLogs": "Systeem logboeken",
+        "configurationEditor": "Configuratie bewerker",
+        "languages": "Talen",
+        "language": {
+            "en": "Engels",
+            "zhCN": "简体中文 (Vereenvoudigd Chinees)",
+            "withSystem": {
+                "label": "Gebruik de systeeminstellingen voor de taal"
+            }
+        },
+        "darkMode": {
+            "label": "Donkere modus",
+            "light": "Licht",
+            "dark": "Donker",
+            "withSystem": {
+                "label": "Gebruik de systeeminstellingen voor de lichte of donkere modus"
+            }
+        },
+        "appearance": "Verschijning",
+        "theme": {
+            "blue": "Blauw",
+            "contrast": "Hoog contrast",
+            "label": "Thema",
+            "green": "Groen",
+            "nord": "Noord",
+            "red": "Rood",
+            "default": "Standaard"
+        },
+        "withSystem": "Systeem",
+        "help": "Help",
+        "live": {
+            "title": "Live",
+            "allCameras": "Alle Camera's",
+            "cameras": {
+                "title": "Camera's",
+                "count_one": "{{count}} Camera",
+                "count_other": "{{count}} Camera's"
+            }
+        },
+        "restart": "Herstart Frigate",
+        "documentation": {
+            "title": "Documentatie",
+            "label": "Frigate documentatie"
+        },
+        "review": "Beoordeling",
+        "explore": "Verkennen",
+        "export": "Exporteren",
+        "uiPlayground": "Testgebied voor gebruikersinterface",
+        "faceLibrary": "Gezichtenbibliotheek",
+        "user": {
+            "title": "Gebruik",
+            "current": "Huidige gebruiker: {{user}}",
+            "logout": "Uitloggen",
+            "setPassword": "Wachtwoord instellen",
+            "account": "Account",
+            "anonymous": "anoniem"
+        }
+    },
+    "toast": {
+        "copyUrlToClipboard": "URL naar klembord gekopieerd.",
+        "save": {
+            "title": "Opslaan",
+            "error": {
+                "title": "Opslaan van configuratiewijzigingen mislukt: {{errorMessage}}",
+                "noMessage": "Het opslaan van configuratiewijzigingen is mislukt"
+            }
+        }
+    },
+    "role": {
+        "title": "Rol",
+        "admin": "Beheerder",
+        "viewer": "Waarnemer",
+        "desc": "Beheerders hebben volledige toegang tot alle functies in de Frigate-interface. Kijkers kunnen alleen camera’s bekijken, items beoordelen en historische beelden terugkijken."
+    },
+    "pagination": {
+        "previous": {
+            "title": "Vorig",
+            "label": "Ga naar de vorige pagina"
+        },
+        "more": "Meer pagina's",
+        "label": "Paginering",
+        "next": {
+            "title": "Volgende",
+            "label": "Ga naar volgende pagina"
+        }
+    },
+    "accessDenied": {
+        "documentTitle": "Toegang geweigerd - Frigate",
+        "desc": "Je hebt geen toestemming om deze pagina te bekijken.",
+        "title": "Toegang geweigerd"
+    },
+    "notFound": {
+        "desc": "Pagina niet gevonden",
+        "title": "404",
+        "documentTitle": "Niet gevonden - Frigate"
+    },
+    "selectItem": "Selecteer {{item}}"
+}
