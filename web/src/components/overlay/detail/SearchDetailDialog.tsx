@@ -76,6 +76,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { useTranslation } from "react-i18next";
 import { TbFaceId } from "react-icons/tb";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const SEARCH_TABS = [
   "details",
@@ -294,6 +295,10 @@ function ObjectDetailsTab({
   // mutation / revalidation
 
   const mutate = useGlobalMutation();
+
+  // users
+
+  const isAdmin = useIsAdmin();
 
   // data
 
@@ -687,23 +692,25 @@ function ObjectDetailsTab({
               {getIconForLabel(search.label, "size-4 text-primary")}
               {t(search.label, { ns: "objects" })}
               {search.sub_label && ` (${search.sub_label})`}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <FaPencilAlt
-                      className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                      onClick={() => {
-                        setIsSubLabelDialogOpen(true);
-                      }}
-                    />
-                  </span>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("details.editSubLabel.title")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <FaPencilAlt
+                        className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                        onClick={() => {
+                          setIsSubLabelDialogOpen(true);
+                        }}
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>
+                      {t("details.editSubLabel.title")}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              )}
             </div>
           </div>
           {search?.data.recognized_license_plate && (
@@ -716,23 +723,25 @@ function ObjectDetailsTab({
                   {search.data.recognized_license_plate}{" "}
                   {recognizedLicensePlateScore &&
                     ` (${recognizedLicensePlateScore}%)`}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <FaPencilAlt
-                          className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                          onClick={() => {
-                            setIsLPRDialogOpen(true);
-                          }}
-                        />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("details.editLPR.title")}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
+                  {isAdmin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <FaPencilAlt
+                            className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                            onClick={() => {
+                              setIsLPRDialogOpen(true);
+                            }}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("details.editLPR.title")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             </div>
