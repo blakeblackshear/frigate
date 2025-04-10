@@ -1,0 +1,74 @@
+{
+    "restart": {
+        "title": "Êtes-vous sûr de vouloir redémarrer Frigate ?",
+        "restarting": {
+            "title": "Frigate redémarre",
+            "content": "Cette page sera rechargée dans {{countdown}} secondes.",
+            "button": "Forcer le rechargement maintenant"
+        },
+        "button": "Redémarrer"
+    },
+    "explore": {
+        "plus": {
+            "submitToPlus": {
+                "label": "Soumettre à Frigate+",
+                "desc": "Les objets situés dans des endroits que vous souhaitez éviter ne sont pas des faux positifs. Les soumettre comme faux positifs perturberait le modèle."
+            },
+            "review": {
+                "true": {
+                    "label": "Confirmez cette étiquette pour Frigate Plus",
+                    "true_one": "C'est un {{label}}",
+                    "true_many": "Ce sont des {{label}}",
+                    "true_other": ""
+                },
+                "false": {
+                    "false_one": "Ceci n'est pas un {{label}}",
+                    "false_many": "Ceci n'est pas une {{label}}",
+                    "false_other": "",
+                    "label": "Ne pas confirmer cette étiquette pour Frigate Plus"
+                },
+                "state": {
+                    "submitted": "Soumis"
+                }
+            }
+        },
+        "video": {
+            "viewInHistory": "Afficher dans l'historique"
+        }
+    },
+    "export": {
+        "time": {
+            "custom": "Personnalisé",
+            "fromTimeline": "Sélectionner depuis la chronologie",
+            "lastHour_one": "Dernière heure",
+            "lastHour_many": "{{count}} dernières heures",
+            "lastHour_other": "",
+            "end": {
+                "label": "Sélectionner l'instant de fin",
+                "title": "Instant de fin"
+            },
+            "start": {
+                "label": "Sélectionner l'instant de démarrage",
+                "title": "Instant de démarrage"
+            }
+        },
+        "selectOrExport": "Sélectionner ou Exporter",
+        "toast": {
+            "error": {
+                "failed": "Impossible de démarrer l'export : {{error}}"
+            },
+            "success": "Exportation démarrée. Consulter le fichier dans le dossier /exports."
+        },
+        "select": "Sélectionner",
+        "name": {
+            "placeholder": "Nommer l'export"
+        },
+        "export": "Exporter"
+    },
+    "search": {
+        "saveSearch": {
+            "desc": "Fournir un nom pour cette recherche sauvegardée.",
+            "label": "Sauvergarder la recherche"
+        }
+    }
+}

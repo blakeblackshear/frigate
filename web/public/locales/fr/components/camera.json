@@ -1,0 +1,36 @@
+{
+    "group": {
+        "edit": "Éditer le groupe de caméras",
+        "label": "Groupe de caméras",
+        "add": "Ajouter un groupe de caméras",
+        "delete": {
+            "label": "Supprimer le groupe de caméras",
+            "confirm": {
+                "title": "Confirmer la suppression",
+                "desc": "Êtes-vous sûr de vouloir supprimer le groupe de caméras <em>{{name}}</em>?"
+            }
+        },
+        "name": {
+            "placeholder": "Saisissez un nom...",
+            "label": "Nom",
+            "errorMessage": {
+                "mustLeastCharacters": "Le nom du groupe de caméras doit comporter au moins 2 caractères.",
+                "exists": "Le nom du groupe de caméras existe déjà.",
+                "nameMustNotPeriod": "Le nom de groupe de caméras ne doit pas contenir de période.",
+                "invalid": "Nom de groupe de caméras invalide."
+            }
+        },
+        "cameras": {
+            "label": "Caméras",
+            "desc": "Sélectionner les caméras pour ce groupe."
+        },
+        "success": "Le groupe de caméras ({{name}}) a été enregistré.",
+        "icon": "Icône",
+        "camera": {
+            "setting": {
+                "label": "Paramètres de flux de caméra",
+                "title": "{{cameraName}} Paramètres de flux"
+            }
+        }
+    }
+}
