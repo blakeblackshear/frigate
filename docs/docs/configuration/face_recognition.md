@@ -129,3 +129,10 @@ The Frigate considers the recognition scores across all recognition attempts for
 ### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
 
 No, using another face recognition service will interfere with Frigate's built in face recognition. When using double-take the sub_label feature must be disabled if the built in face recognition is also desired.
+
+### Does face recognition run on the recording stream?
+
+Face recognition does not run on the recording stream, this would be suboptimal for many reasons:
+1. The latency of accessing the recordings means the notifications would not include the names of recognized people because recognition would not complete until after.
+2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
+3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
