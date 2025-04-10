@@ -1,0 +1,79 @@
+{
+    "details": {
+        "timestamp": "Zeitstempel",
+        "item": {
+            "title": "Item-Details begutachten",
+            "desc": "Item-Details begutachten"
+        }
+    },
+    "documentTitle": "Erkunden - Frigate",
+    "generativeAI": "Generative KI",
+    "exploreIsUnavailable": {
+        "title": "Erkunden ist nicht Verfügbar",
+        "embeddingsReindexing": {
+            "context": "Erkunden kann nach der Re-Indexierung der verfolgten Objekte verwendet werden.",
+            "startingUp": "Startet...",
+            "estimatedTime": "Voraussichtlich verbleibende Zeit:",
+            "finishingShortly": "Bald erledigt",
+            "step": {
+                "thumbnailsEmbedded": "Vorschaubilder eingebettet: ",
+                "descriptionsEmbedded": "Beschreibungen eingebettet: ",
+                "trackedObjectsProcessed": "Verfolgte Objekte bearbeitet: "
+            }
+        },
+        "downloadingModels": {
+            "setup": {
+                "visionModel": "Vision Model",
+                "visionModelFeatureExtractor": "Vision Model Feature Extraktor",
+                "textModel": "Text Model",
+                "textTokenizer": "Text Tokenizer"
+            },
+            "tips": {
+                "context": "Sie sollten eine Re-Indexierung der verfolgten Objekte durchführen, sobald die Modelle heruntergeladen sind.",
+                "documentation": "Lesen Sie die Dokumentation"
+            },
+            "error": "Ein Fehler ist aufgetreten. Bitte prüfen Sie die Frigate Logs.",
+            "context": "Frigate lädt derzeit benötigte Modelle für den Support des \"Semantic Search\"-Features. Je nach der Geschwindigkeit der Netzwerkverbindung kann dies einige Minuten in Anspruch nehmen."
+        }
+    },
+    "trackedObjectDetails": "Details zu verfolgtem Objekt",
+    "objectLifecycle": {
+        "noImageFound": "Kein Bild für diesen Zeitstempel gefunden.",
+        "createObjectMask": "Objekt-Maske erstellen",
+        "lifecycleItemDesc": {
+            "entered_zone": "{{label}} hat {{zones}} betreten",
+            "visible": "{{label}} erkannt",
+            "attribute": {
+                "other": "{{label}} erkannt als {{attribute}}",
+                "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}"
+            },
+            "external": "{{label}} erkannt",
+            "active": "{{label}} wurde aktiv",
+            "gone": "{{label}} hat verlassen",
+            "stationary": "{{label}} wurde stationär",
+            "heard": "{{label}} gehört"
+        },
+        "annotationSettings": {
+            "offset": {
+                "documentation": "Lesen Sie die Dokumentation ",
+                "label": "Anmerkungen Versatz"
+            },
+            "showAllZones": {
+                "title": "Zeige alle Zonen"
+            },
+            "title": "Anmerkungseinstellungen"
+        },
+        "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
+        "title": "Objekt-Lebenszyklus",
+        "carousel": {
+            "next": "Nächste Anzeige",
+            "previous": "Vorherige Anzeige"
+        }
+    },
+    "type": {
+        "details": "Details",
+        "video": "Video",
+        "object_lifecycle": "Objekt-Lebenszyklus",
+        "snapshot": "Snapshot"
+    }
+}
