@@ -53,17 +53,6 @@ class CameraState:
         self.callbacks = defaultdict(list)
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
-        self.requires_face_detection = (
-            self.config.face_recognition.enabled
-            and "face" not in self.config.objects.all_objects
-        )
-
-    def get_max_update_frequency(self, obj: TrackedObject) -> int:
-        return (
-            1
-            if self.requires_face_detection and obj.obj_data["label"] == "person"
-            else 5
-        )
 
     def get_current_frame(self, draw_options: dict[str, Any] = {}):
         with self.current_frame_lock:
@@ -280,8 +269,10 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            thumb_update, significant_update, autotracker_update = updated_obj.update(
-                frame_time, current_detections[id], current_frame is not None
+            thumb_update, significant_update, path_update, autotracker_update = (
+                updated_obj.update(
+                    frame_time, current_detections[id], current_frame is not None
+                )
             )
 
             if autotracker_update or significant_update:
@@ -298,14 +289,18 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than max_update_frequency seconds since the last thumb update
+            # if it has been more than 5 seconds since the last thumb update
             # and the last update is greater than the last publish or
-            # the object has changed significantly
+            # the object has changed significantly or
+            # the object moved enough to update the path
             if (
-                frame_time - updated_obj.last_published
-                > self.get_max_update_frequency(updated_obj)
-                and updated_obj.last_updated > updated_obj.last_published
-            ) or significant_update:
+                (
+                    frame_time - updated_obj.last_published > 5
+                    and updated_obj.last_updated > updated_obj.last_published
+                )
+                or significant_update
+                or path_update
+            ):
                 # call event handlers
                 for c in self.callbacks["update"]:
                     c(self.name, updated_obj, frame_name)

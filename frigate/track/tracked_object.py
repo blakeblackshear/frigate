@@ -117,6 +117,7 @@ class TrackedObject:
     def update(self, current_frame_time: float, obj_data, has_valid_frame: bool):
         thumb_update = False
         significant_change = False
+        path_update = False
         autotracker_update = False
         # if the object is not in the current frame, add a 0.0 to the score history
         if obj_data["frame_time"] != current_frame_time:
@@ -324,19 +325,21 @@ class TrackedObject:
 
             if not self.path_data:
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
             elif (
                 math.dist(self.path_data[-1][0], bottom_center) >= threshold
                 or len(self.path_data) == 1
             ):
                 # check Euclidean distance before appending
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
                 logger.debug(
                     f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
                 )
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
-        return (thumb_update, significant_change, autotracker_update)
+        return (thumb_update, significant_change, path_update, autotracker_update)
 
     def to_dict(self):
         event = {
