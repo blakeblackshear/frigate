@@ -1,0 +1,35 @@
+{
+    "labels": {
+        "label": "Étiquettes",
+        "all": {
+            "title": "Toutes les étiquettes",
+            "short": "Étiquettes"
+        },
+        "count": "{{count}} Étiquettes"
+    },
+    "filter": "Filtre",
+    "zones": {
+        "label": "Zones",
+        "all": {
+            "title": "Toutes les zones",
+            "short": "Zones"
+        }
+    },
+    "dates": {
+        "all": {
+            "title": "Toutes les dates",
+            "short": "Dates"
+        }
+    },
+    "more": "Plus de filtres",
+    "reset": {
+        "label": "Réinitialiser les filtres aux valeurs par défaut"
+    },
+    "timeRange": "Plage de temps",
+    "subLabels": {
+        "label": "Sous-étiquettes",
+        "all": "Toutes les sous-étiquettes"
+    },
+    "score": "Score",
+    "estimatedSpeed": "Vitesse estimée ({{unit}})"
+}
