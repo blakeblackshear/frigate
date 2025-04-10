@@ -25,7 +25,7 @@ type ImageEntryProps = {
 export default function ImageEntry({
   onSave,
   children,
-  maxSize = 10 * 1024 * 1024, // 10MB default
+  maxSize = 20 * 1024 * 1024, // 20MB default
   accept = { "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] },
 }: ImageEntryProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
