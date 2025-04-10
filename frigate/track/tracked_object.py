@@ -1,6 +1,5 @@
 """Object attribute."""
 
-import datetime
 import logging
 import math
 import os
@@ -126,6 +125,7 @@ class TrackedObject:
     def update(self, current_frame_time: float, obj_data, has_valid_frame: bool):
         thumb_update = False
         significant_change = False
+        path_update = False
         autotracker_update = False
         # if the object is not in the current frame, add a 0.0 to the score history
         if obj_data["frame_time"] != current_frame_time:
@@ -333,37 +333,21 @@ class TrackedObject:
 
             if not self.path_data:
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
             elif (
                 math.dist(self.path_data[-1][0], bottom_center) >= threshold
                 or len(self.path_data) == 1
             ):
                 # check Euclidean distance before appending
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
                 logger.debug(
                     f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
                 )
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
-        return (thumb_update, significant_change, autotracker_update)
-
-    def should_update_attribute(self) -> bool:
-        """Decides if attributes should be checked."""
-        if not self.active:
-            return False
-
-        if self.obj_data["label"] == "person" and not self.requires_face_detection:
-            return False
-        elif self.obj_data["label"] == "car" and not self.requires_lpr_detection:
-            return False
-
-        now = datetime.datetime.now().timestamp()
-
-        if now + 0.5 > self.last_published:
-            self.last_published = now
-            return True
-
-        return False
+        return (thumb_update, significant_change, path_update, autotracker_update)
 
     def to_dict(self):
         event = {

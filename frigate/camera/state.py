@@ -269,8 +269,10 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            thumb_update, significant_update, autotracker_update = updated_obj.update(
-                frame_time, current_detections[id], current_frame is not None
+            thumb_update, significant_update, path_update, autotracker_update = (
+                updated_obj.update(
+                    frame_time, current_detections[id], current_frame is not None
+                )
             )
 
             if autotracker_update or significant_update:
@@ -290,14 +292,14 @@ class CameraState:
             # if it has been more than 5 seconds since the last thumb update
             # and the last update is greater than the last publish or
             # the object has changed significantly or
-            # we are due for an attribute update
+            # the object moved enough to update the path
             if (
                 (
                     frame_time - updated_obj.last_published > 5
                     and updated_obj.last_updated > updated_obj.last_published
                 )
                 or significant_update
-                or updated_obj.should_update_attribute()
+                or path_update
             ):
                 # call event handlers
                 for c in self.callbacks["update"]:
