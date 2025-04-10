@@ -13,6 +13,15 @@ class EventsSubLabelBody(BaseModel):
     )
 
 
+class EventsLPRBody(BaseModel):
+    recognizedLicensePlate: str = Field(
+        title="Recognized License Plate", max_length=100
+    )
+    recognizedLicensePlateScore: Optional[float] = Field(
+        title="Score for recognized license plate", default=None, gt=0.0, le=1.0
+    )
+
+
 class EventsDescriptionBody(BaseModel):
     description: Union[str, None] = Field(title="The description of the event")
 

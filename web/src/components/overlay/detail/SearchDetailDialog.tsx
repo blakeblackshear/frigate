@@ -76,6 +76,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { useTranslation } from "react-i18next";
 import { TbFaceId } from "react-icons/tb";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const SEARCH_TABS = [
   "details",
@@ -295,10 +296,15 @@ function ObjectDetailsTab({
 
   const mutate = useGlobalMutation();
 
+  // users
+
+  const isAdmin = useIsAdmin();
+
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
   const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
+  const [isLPRDialogOpen, setIsLPRDialogOpen] = useState(false);
 
   const handleDescriptionFocus = useCallback(() => {
     setInputFocused(true);
@@ -557,6 +563,83 @@ function ObjectDetailsTab({
     [search, apiHost, mutate, setSearch, t],
   );
 
+  // recognized plate
+
+  const handleLPRSave = useCallback(
+    (text: string) => {
+      if (!search) return;
+
+      // set score to 1.0 if we're manually entering a new plate
+      const plateScore = text === "" ? undefined : 1.0;
+
+      axios
+        .post(`${apiHost}api/events/${search.id}/recognized_license_plate`, {
+          recognizedLicensePlate: text,
+          recognizedLicensePlateScore: plateScore,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success(t("details.item.toast.success.updatedLPR"), {
+              position: "top-center",
+            });
+
+            mutate(
+              (key) =>
+                typeof key === "string" &&
+                (key.includes("events") ||
+                  key.includes("events/search") ||
+                  key.includes("events/explore")),
+              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+                if (!currentData) return currentData;
+                return currentData.flat().map((event) =>
+                  event.id === search.id
+                    ? {
+                        ...event,
+                        data: {
+                          ...event.data,
+                          recognized_license_plate: text,
+                          recognized_license_plate_score: plateScore,
+                        },
+                      }
+                    : event,
+                );
+              },
+              {
+                optimisticData: true,
+                rollbackOnError: true,
+                revalidate: false,
+              },
+            );
+
+            setSearch({
+              ...search,
+              data: {
+                ...search.data,
+                recognized_license_plate: text,
+                recognized_license_plate_score: plateScore,
+              },
+            });
+            setIsLPRDialogOpen(false);
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("details.item.toast.error.updatedLPRFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+        });
+    },
+    [search, apiHost, mutate, setSearch, t],
+  );
+
   // face training
 
   const hasFace = useMemo(() => {
@@ -609,35 +692,56 @@ function ObjectDetailsTab({
               {getIconForLabel(search.label, "size-4 text-primary")}
               {t(search.label, { ns: "objects" })}
               {search.sub_label && ` (${search.sub_label})`}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <FaPencilAlt
-                      className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                      onClick={() => {
-                        setIsSubLabelDialogOpen(true);
-                      }}
-                    />
-                  </span>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("details.editSubLabel.title")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <FaPencilAlt
+                        className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                        onClick={() => {
+                          setIsSubLabelDialogOpen(true);
+                        }}
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>
+                      {t("details.editSubLabel.title")}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              )}
             </div>
           </div>
           {search?.data.recognized_license_plate && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                Recognized License Plate
+                {t("details.recognizedLicensePlate")}
               </div>
               <div className="flex flex-col space-y-0.5 text-sm">
                 <div className="flex flex-row items-center gap-2">
                   {search.data.recognized_license_plate}{" "}
                   {recognizedLicensePlateScore &&
                     ` (${recognizedLicensePlateScore}%)`}
+                  {isAdmin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <FaPencilAlt
+                            className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                            onClick={() => {
+                              setIsLPRDialogOpen(true);
+                            }}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("details.editLPR.title")}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             </div>
@@ -859,12 +963,27 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editSubLabel.desc", {
-                    label: t(search.label, { an: "objects" }),
+                    label: t(search.label, { ns: "objects" }),
                   })
                 : t("details.editSubLabel.descNoLabel")
             }
             onSave={handleSubLabelSave}
             defaultValue={search?.sub_label || ""}
+            allowEmpty={true}
+          />
+          <TextEntryDialog
+            open={isLPRDialogOpen}
+            setOpen={setIsLPRDialogOpen}
+            title={t("details.editLPR.title")}
+            description={
+              search.label
+                ? t("details.editLPR.desc", {
+                    label: t(search.label, { ns: "objects" }),
+                  })
+                : t("details.editLPR.descNoLabel")
+            }
+            onSave={handleLPRSave}
+            defaultValue={search?.data.recognized_license_plate || ""}
             allowEmpty={true}
           />
         </div>
