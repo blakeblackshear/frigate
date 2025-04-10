@@ -200,5 +200,5 @@
         "title": "404",
         "desc": "Página no encontrada"
     },
-    "selectItem": "Selecciona {{item}}"
+    "selectItem": "Seleccionar {{item}}"
 }

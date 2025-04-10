@@ -1,1 +1,73 @@
-{}
+{
+    "description": {
+        "addFace": "Guía para agregar una nueva colección a la Biblioteca de Rostros.",
+        "placeholder": "Introduce un nombre para esta colección"
+    },
+    "details": {
+        "person": "Persona",
+        "confidence": "Confianza",
+        "face": "Detalles del rostro",
+        "faceDesc": "Detalles del rostro y del objeto asociado",
+        "timestamp": "Marca de tiempo"
+    },
+    "documentTitle": "Biblioteca de Rostros - Frigate",
+    "uploadFaceImage": {
+        "title": "Subir imagen del rostro",
+        "desc": "Sube una imagen para escanear rostros e incluirla en {{pageToggle}}"
+    },
+    "createFaceLibrary": {
+        "title": "Crear colección",
+        "desc": "Crear una nueva colección",
+        "new": "Crear nuevo rostro",
+        "nextSteps": "Para construir una base sólida: <li>Usa la pestaña Entrenar para seleccionar y entrenar con imágenes de cada persona detectada.</li> <li>Enfócate en imágenes frontales para obtener los mejores resultados; evita entrenar con imágenes que capturen rostros en ángulo.</li>"
+    },
+    "train": {
+        "title": "Entrenar",
+        "aria": "Seleccionar entrenamiento"
+    },
+    "selectItem": "Seleccionar {{item}}",
+    "selectFace": "Seleccionar rostro",
+    "deleteFaceLibrary": {
+        "title": "Eliminar nombre",
+        "desc": "¿Estás seguro de que quieres eliminar la colección {{name}}? Esto eliminará permanentemente todos los rostros asociados."
+    },
+    "button": {
+        "deleteFaceAttempts": "Eliminar intentos de rostro",
+        "addFace": "Agregar rostro",
+        "uploadImage": "Subir imagen",
+        "reprocessFace": "Reprocesar rostro"
+    },
+    "imageEntry": {
+        "validation": {
+            "selectImage": "Por favor, selecciona un archivo de imagen."
+        },
+        "dropActive": "Suelta la imagen aquí...",
+        "dropInstructions": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
+        "maxSize": "Tamaño máximo: {{size}}MB"
+    },
+    "toast": {
+        "success": {
+            "addFaceLibrary": "¡{{name}} ha sido añadido con éxito a la Biblioteca de Rostros!",
+            "trainedFace": "Rostro entrenado con éxito.",
+            "deletedName_one": "{{count}} rostro ha sido eliminado con éxito.",
+            "deletedName_many": "{{count}} rostros han sido eliminados con éxito.",
+            "deletedName_other": "{{count}} rostros han sido eliminados con éxito.",
+            "updatedFaceScore": "Puntuación del rostro actualizada con éxito.",
+            "deletedFace_one": "{{count}} rostro eliminado con éxito",
+            "deletedFace_many": "{{count}} rostros eliminados con éxito",
+            "deletedFace_other": "{{count}} rostros eliminados con éxito",
+            "uploadedImage": "Imagen subida con éxito."
+        },
+        "error": {
+            "uploadingImageFailed": "No se pudo subir la imagen: {{errorMessage}}",
+            "addFaceLibraryFailed": "No se pudo establecer el nombre del rostro: {{errorMessage}}",
+            "deleteFaceFailed": "No se pudo eliminar: {{errorMessage}}",
+            "deleteNameFailed": "No se pudo eliminar el nombre: {{errorMessage}}",
+            "trainFailed": "No se pudo entrenar: {{errorMessage}}",
+            "updateFaceScoreFailed": "No se pudo actualizar la puntuación del rostro: {{errorMessage}}"
+        }
+    },
+    "readTheDocs": "Leer la documentación",
+    "trainFaceAs": "Entrenar rostro como:",
+    "trainFace": "Entrenar rostro"
+}
