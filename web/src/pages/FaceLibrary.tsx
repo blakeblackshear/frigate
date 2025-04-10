@@ -5,6 +5,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
+import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,16 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -48,7 +42,6 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
   LuImagePlus,
-  LuPlus,
   LuRefreshCw,
   LuScanFace,
   LuSearch,
@@ -789,8 +782,6 @@ function FaceAttempt({
 
   // interaction
 
-  const [newFace, setNewFace] = useState(false);
-
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useContextMenu(imgRef, () => {
@@ -848,22 +839,8 @@ function FaceAttempt({
       });
   }, [data, onRefresh, t]);
 
-  const Selector = isDesktop ? DropdownMenu : Drawer;
-  const SelectorTrigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
-  const SelectorContent = isDesktop ? DropdownMenuContent : DrawerContent;
-  const SelectorItem = isDesktop ? DropdownMenuItem : DrawerClose;
-
   return (
     <>
-      {newFace && (
-        <TextEntryDialog
-          open={true}
-          setOpen={setNewFace}
-          title={t("createFaceLibrary.new")}
-          onSave={(newName) => onTrainAttempt(newName)}
-        />
-      )}
-
       <div
         className={cn(
           "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
@@ -906,48 +883,12 @@ function FaceAttempt({
               </div>
             </div>
             <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              <Tooltip>
-                <Selector>
-                  <SelectorTrigger asChild>
-                    <TooltipTrigger>
-                      <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                    </TooltipTrigger>
-                  </SelectorTrigger>
-                  <SelectorContent
-                    className={cn(
-                      "max-h-[75dvh] overflow-hidden",
-                      isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
-                    )}
-                  >
-                    <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                    <div
-                      className={cn(
-                        "flex flex-col",
-                        isMobile && "gap-2 overflow-y-auto pb-4",
-                      )}
-                    >
-                      <SelectorItem
-                        className="flex cursor-pointer gap-2 capitalize"
-                        onClick={() => setNewFace(true)}
-                      >
-                        <LuPlus />
-                        {t("createFaceLibrary.new")}
-                      </SelectorItem>
-                      {faceNames.map((faceName) => (
-                        <SelectorItem
-                          key={faceName}
-                          className="flex cursor-pointer gap-2 capitalize"
-                          onClick={() => onTrainAttempt(faceName)}
-                        >
-                          <LuScanFace />
-                          {faceName}
-                        </SelectorItem>
-                      ))}
-                    </div>
-                  </SelectorContent>
-                </Selector>
-                <TooltipContent>{t("trainFace")}</TooltipContent>
-              </Tooltip>
+              <FaceSelectionDialog
+                faceNames={faceNames}
+                onTrainAttempt={onTrainAttempt}
+              >
+                <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+              </FaceSelectionDialog>
               <Tooltip>
                 <TooltipTrigger>
                   <LuRefreshCw

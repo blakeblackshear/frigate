@@ -57,7 +57,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -77,6 +76,7 @@ import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { useTranslation } from "react-i18next";
 import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import FaceSelectionDialog from "../FaceSelectionDialog";
 
 const SEARCH_TABS = [
   "details",
@@ -844,30 +844,18 @@ function ObjectDetailsTab({
                 </Button>
               )}
             {hasFace && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="w-full">
-                    <div className="flex gap-1">
-                      <TbFaceId />
-                      {t("trainFace", { ns: "views/faceLibrary" })}
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>
-                    {t("trainFaceAs", { ns: "views/faceLibrary" })}
-                  </DropdownMenuLabel>
-                  {faceNames.map((faceName) => (
-                    <DropdownMenuItem
-                      key={faceName}
-                      className="cursor-pointer capitalize"
-                      onClick={() => onTrainFace(faceName)}
-                    >
-                      {faceName}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <FaceSelectionDialog
+                className="w-full"
+                faceNames={faceNames}
+                onTrainAttempt={onTrainFace}
+              >
+                <Button className="w-full">
+                  <div className="flex gap-1">
+                    <TbFaceId />
+                    {t("trainFace", { ns: "views/faceLibrary" })}
+                  </div>
+                </Button>
+              </FaceSelectionDialog>
             )}
           </div>
         </div>
