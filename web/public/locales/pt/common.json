@@ -1,0 +1,175 @@
+{
+    "time": {
+        "last30": "Últimos 30 dias",
+        "12hours": "12 horas",
+        "justNow": "Agora",
+        "yesterday": "Ontem",
+        "today": "Hoje",
+        "last7": "Últimos 7 dias",
+        "last14": "Últimos 14 dias",
+        "thisWeek": "Essa semana",
+        "lastWeek": "Semana passada",
+        "5minutes": "5 minutos",
+        "10minutes": "10 minutos",
+        "30minutes": "30 minutos",
+        "24hours": "24 horas",
+        "pm": "pm",
+        "am": "am",
+        "year": "{{time}} anos",
+        "month": "{{time}} meses",
+        "day": "{{time}} dias",
+        "thisMonth": "Esse mês",
+        "lastMonth": "Mês passado",
+        "1hour": "1 hora",
+        "hour": "{{time}} horas",
+        "minute": "{{time}} minutos",
+        "second": "{{time}} segundos",
+        "untilForTime": "Até {{time}}",
+        "untilForRestart": "Até que o Frigate reinicie.",
+        "untilRestart": "Até reiniciar",
+        "ago": "{{timeAgo}} atrás",
+        "d": "{{time}}d",
+        "h": "{{time}}h",
+        "m": "{{time}}m",
+        "s": "{{time}}s",
+        "yr": "{{time}}ano",
+        "mo": "{{time}}mês"
+    },
+    "unit": {
+        "speed": {
+            "kph": "kph",
+            "mph": "mph"
+        }
+    },
+    "button": {
+        "enabled": "Habilitado",
+        "enable": "Habilitar",
+        "done": "Feito",
+        "reset": "Reiniciar",
+        "disabled": "Desabilitado",
+        "saving": "Salvando...",
+        "apply": "Aplicar",
+        "disable": "Desabilitar",
+        "save": "Salvar",
+        "copy": "Cópia",
+        "cancel": "Cancelar",
+        "close": "Fechar",
+        "history": "Histórico",
+        "back": "Voltar",
+        "fullscreen": "Tela cheia",
+        "exitFullscreen": "Sair da tela cheia",
+        "twoWayTalk": "Conversa bidirecional",
+        "cameraAudio": "Áudio da câmera",
+        "edit": "Editar",
+        "off": "DESLIGADO",
+        "copyCoordinates": "Copiar coordenadas",
+        "on": "LIGADO",
+        "delete": "Excluir",
+        "download": "Download",
+        "info": "Informações",
+        "no": "Não",
+        "suspended": "Suspenso",
+        "yes": "Sim",
+        "unselect": "Desmarcar",
+        "unsuspended": "Dessuspender",
+        "deleteNow": "Excluir agora",
+        "export": "Exportar",
+        "next": "Próximo"
+    },
+    "label": {
+        "back": "Voltar"
+    },
+    "menu": {
+        "user": {
+            "logout": "Sair",
+            "account": "Conta",
+            "current": "Usuário atual: {{user}}",
+            "setPassword": "Definir senha",
+            "title": "Usuário",
+            "anonymous": "anônimo"
+        },
+        "faceLibrary": "Biblioteca de rostos",
+        "withSystem": "Sistema",
+        "theme": {
+            "label": "Tema",
+            "blue": "Azul",
+            "green": "Verde",
+            "red": "Vermelho",
+            "contrast": "Alto contraste",
+            "default": "Padrão"
+        },
+        "system": "Sistema",
+        "systemMetrics": "Métricas do sistema",
+        "configuration": "Configuração",
+        "systemLogs": "Logs do sistema",
+        "settings": "Configurações",
+        "configurationEditor": "Editor de configuração",
+        "languages": "Idiomas",
+        "language": {
+            "en": "Inglês",
+            "zhCN": "Chinês simplificado",
+            "withSystem": {
+                "label": "Use as configurações do sistema para idioma"
+            }
+        },
+        "appearance": "Aparência",
+        "darkMode": {
+            "label": "Modo escuro",
+            "withSystem": {
+                "label": "Use as configurações do sistema para o modo claro ou escuro"
+            },
+            "light": "Claro",
+            "dark": "Escuro"
+        },
+        "help": "Ajuda",
+        "documentation": {
+            "title": "Documentação",
+            "label": "Documentação do Frigate"
+        },
+        "restart": "Reiniciar Frigate",
+        "live": {
+            "title": "Ao vivo",
+            "allCameras": "Todas as câmeras",
+            "cameras": {
+                "title": "Câmeras"
+            }
+        },
+        "export": "Exportar",
+        "explore": "Explorar",
+        "review": "Análise"
+    },
+    "pagination": {
+        "previous": {
+            "label": "Ir para a página anterior",
+            "title": "Anterior"
+        },
+        "label": "paginação",
+        "next": {
+            "title": "Próximo",
+            "label": "Ir para a próxima página"
+        },
+        "more": "Mais páginas"
+    },
+    "role": {
+        "admin": "Administrador",
+        "viewer": "Visualizador",
+        "title": "Regra"
+    },
+    "toast": {
+        "copyUrlToClipboard": "URL copiada para a área de transferência.",
+        "save": {
+            "title": "Salvar"
+        }
+    },
+    "accessDenied": {
+        "documentTitle": "Acesso negado - Frigate",
+        "title": "Acesso negado",
+        "desc": "Você não tem permissão para visualizar esta página."
+    },
+    "notFound": {
+        "documentTitle": "Não encontrado - Frigate",
+        "desc": "Página não encontrada",
+        "title": "404"
+    },
+    "selectItem": "Selecionar {{item}}"
+}

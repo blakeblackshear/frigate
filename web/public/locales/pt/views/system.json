@@ -1,0 +1,120 @@
+{
+    "documentTitle": {
+        "storage": "Estatísticas de armazenamento - Frigate",
+        "general": "Estatísticas gerais - Frigate",
+        "enrichments": "Estatísticas de enriquecimento - Frigate",
+        "logs": {
+            "frigate": "Logs do Frigate - Frigate",
+            "go2rtc": "Logs do Go2RTC - Frigate",
+            "nginx": "Logs do Nginx - Frigate"
+        },
+        "cameras": "Estatísticas das câmeras - Frigate"
+    },
+    "title": "Sistema",
+    "metrics": "Métricas do sistema",
+    "logs": {
+        "type": {
+            "label": "Tipo",
+            "timestamp": "Carimbo de hora",
+            "tag": "Tag",
+            "message": "Mensagem"
+        },
+        "copy": {
+            "success": "Logs copiados para a área de transferência",
+            "label": "Copiar para a área de transferência",
+            "error": "Não foi possível copiar os logs para a área de transferência"
+        },
+        "download": {
+            "label": "Baixar logs"
+        },
+        "tips": "Os logs estão sendo transmitidos do servidor",
+        "toast": {
+            "error": {
+                "fetchingLogsFailed": "Erro ao buscar logs: {{errorMessage}}",
+                "whileStreamingLogs": "Erro ao transmitir logs: {{errorMessage}}"
+            }
+        }
+    },
+    "storage": {
+        "cameraStorage": {
+            "camera": "Câmera",
+            "storageUsed": "Armazenamento",
+            "percentageOfTotalUsed": "Porcentagem do total",
+            "bandwidth": "Largura de banda",
+            "unused": {
+                "tips": "Este valor pode não representar com precisão o espaço livre disponível para o Frigate se você tiver outros arquivos armazenados em sua unidade além das gravações do Frigate. O Frigate não rastreia o uso de armazenamento fora de suas gravações.",
+                "title": "Não utilizado"
+            },
+            "unusedStorageInformation": "Informações de armazenamento não utilizado",
+            "title": "Armazenamento da câmera"
+        },
+        "title": "Armazenamento",
+        "overview": "Visão geral"
+    },
+    "cameras": {
+        "title": "Câmeras",
+        "info": {
+            "video": "Vídeo:",
+            "unknown": "Desconhecido",
+            "error": "Erro: {{error}}",
+            "fetching": "Obtendo dados da câmera",
+            "resolution": "Resolução:",
+            "codec": "Codec:",
+            "fps": "FPS:",
+            "stream": "Transmissão {{idx}}",
+            "audio": "Áudio:"
+        },
+        "framesAndDetections": "Quadros / Detecções",
+        "label": {
+            "camera": "câmera",
+            "detect": "detectar",
+            "capture": "capturar",
+            "skipped": "pulado",
+            "ffmpeg": "ffmpeg"
+        },
+        "overview": "Visão geral"
+    },
+    "lastRefreshed": "Última atualização: ",
+    "stats": {
+        "ffmpegHighCpuUsage": "{{camera}} tem alto uso de CPU FFMPEG ({{ffmpegAvg}}%)",
+        "detectHighCpuUsage": "{{camera}} tem alto uso de CPU de detecção ({{detectAvg}}%)",
+        "healthy": "O sistema está saudável"
+    },
+    "general": {
+        "title": "Geral",
+        "detector": {
+            "title": "Detectores",
+            "cpuUsage": "Uso da CPU do detector",
+            "memoryUsage": "Uso da memória do detector"
+        },
+        "hardwareInfo": {
+            "title": "Informações de hardware",
+            "gpuUsage": "Uso da GPU",
+            "gpuMemory": "Memória da GPU",
+            "gpuInfo": {
+                "nvidiaSMIOutput": {
+                    "driver": "Driver: {{driver}}",
+                    "vbios": "Informação VBios: {{vbios}}",
+                    "name": "Nome: {{name}}",
+                    "cudaComputerCapability": "Capacidade de computação CUDA: {{cuda_compute}}"
+                },
+                "copyInfo": {
+                    "label": "Copiar informações da GPU"
+                }
+            }
+        },
+        "otherProcesses": {
+            "title": "Outros processos"
+        }
+    },
+    "enrichments": {
+        "title": "Enriquecimentos",
+        "infPerSecond": "Inferências por segundo",
+        "embeddings": {
+            "image_embedding_speed": "Velocidade de incorporação de imagem",
+            "face_embedding_speed": "Velocidade de incorporação facial",
+            "plate_recognition_speed": "Velocidade de reconhecimento de placas",
+            "text_embedding_speed": "Velocidade de incorporação de texto"
+        }
+    }
+}
