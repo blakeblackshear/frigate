@@ -1,0 +1,11 @@
+{
+    "documentTitle": "Live - Frigate",
+    "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+    "twoWayTalk": {
+        "enable": "Aktivera Two Way Talk",
+        "disable": "Avaktivera Two Way Talk"
+    },
+    "cameraAudio": {
+        "disable": "Inaktivera kameraljud"
+    }
+}
