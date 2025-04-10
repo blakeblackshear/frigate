@@ -1,72 +1,71 @@
 {
-  "description": {
-    "addFace": "Walk through adding a new collection to the Face Library.",
-    "placeholder": "Enter a name for this collection"
-  },
-  "details": {
-    "person": "Person",
-    "confidence": "Confidence",
-    "face": "Face Details",
-    "faceDesc": "Details for the face and associated object",
-    "timestamp": "Timestamp"
-  },
-  "documentTitle": "Face Library - Frigate",
-  "uploadFaceImage": {
-    "title": "Upload Face Image",
-    "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
-  },
-  "createFaceLibrary": {
-    "title": "Create Collection",
-    "desc": "Create a new collection",
-    "new": "Create New Face",
-    "nextSteps": "To build a strong foundation:<li>Use the Train tab to select and train on images for each detected person.</li><li>Focus on straight-on images for best results; avoid training images that capture faces at an angle.</li></ul>"
-  },
-  "train": {
-    "title": "Train",
-    "aria": "Select train"
-  },
-  "selectItem": "Select {{item}}",
-  "selectFace": "Select Face",
-  "deleteFaceLibrary": {
-    "title": "Delete Name",
-    "desc": "Are you sure you want to delete the collection {{name}}? This will permanently delete all associated faces."
-  },
-  "button": {
-    "deleteFaceAttempts": "Delete Face Attempts",
-    "addFace": "Add Face",
-    "uploadImage": "Upload Image",
-    "reprocessFace": "Reprocess Face"
-  },
-  "imageEntry": {
-    "validation": {
-      "selectImage": "Please select an image file."
+    "description": {
+        "addFace": "Walk through adding a new collection to the Face Library.",
+        "placeholder": "Enter a name for this collection"
     },
-    "dropActive": "Drop the image here...",
-    "dropInstructions": "Drag and drop an image here, or click to select",
-    "maxSize": "Max size: {{size}}MB"
-  },
-  "readTheDocs": "Read the documentation",
-  "trainFaceAs": "Train Face as:",
-  "trainFace": "Train Face",
-  "toast": {
-    "success": {
-      "uploadedImage": "Successfully uploaded image.",
-      "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
-      "deletedFace_one": "Successfully deleted {{count}} face.",
-      "deletedFace_other": "Successfully deleted {{count}} faces.",
-      "deletedName_zero": "Empty collection deleted successfully.",
-      "deletedName_one": "{{count}} face has been successfully deleted.",
-      "deletedName_other": "{{count}} faces have been successfully deleted.",
-      "trainedFace": "Successfully trained face.",
-      "updatedFaceScore": "Successfully updated face score."
+    "details": {
+        "person": "Person",
+        "confidence": "Confidence",
+        "face": "Face Details",
+        "faceDesc": "Details for the face and associated object",
+        "timestamp": "Timestamp"
     },
-    "error": {
-      "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
-      "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
-      "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
-      "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
-      "trainFailed": "Failed to train: {{errorMessage}}",
-      "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
+    "documentTitle": "Face Library - Frigate",
+    "uploadFaceImage": {
+        "title": "Upload Face Image",
+        "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
+    },
+    "createFaceLibrary": {
+        "title": "Create Collection",
+        "desc": "Create a new collection",
+        "new": "Create New Face",
+        "nextSteps": "To build a strong foundation:<li>Use the Train tab to select and train on images for each detected person.</li><li>Focus on straight-on images for best results; avoid training images that capture faces at an angle.</li></ul>"
+    },
+    "train": {
+        "title": "Train",
+        "aria": "Select train"
+    },
+    "selectItem": "Select {{item}}",
+    "selectFace": "Select Face",
+    "deleteFaceLibrary": {
+        "title": "Delete Name",
+        "desc": "Are you sure you want to delete the collection {{name}}? This will permanently delete all associated faces."
+    },
+    "button": {
+        "deleteFaceAttempts": "Delete Face Attempts",
+        "addFace": "Add Face",
+        "uploadImage": "Upload Image",
+        "reprocessFace": "Reprocess Face"
+    },
+    "imageEntry": {
+        "validation": {
+            "selectImage": "Please select an image file."
+        },
+        "dropActive": "Drop the image here...",
+        "dropInstructions": "Drag and drop an image here, or click to select",
+        "maxSize": "Max size: {{size}}MB"
+    },
+    "readTheDocs": "Read the documentation",
+    "trainFaceAs": "Train Face as:",
+    "trainFace": "Train Face",
+    "toast": {
+        "success": {
+            "uploadedImage": "Successfully uploaded image.",
+            "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
+            "deletedFace_one": "Successfully deleted {{count}} face.",
+            "deletedFace_other": "Successfully deleted {{count}} faces.",
+            "deletedName_one": "{{count}} face has been successfully deleted.",
+            "deletedName_other": "{{count}} faces have been successfully deleted.",
+            "trainedFace": "Successfully trained face.",
+            "updatedFaceScore": "Successfully updated face score."
+        },
+        "error": {
+            "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
+            "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
+            "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
+            "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
+            "trainFailed": "Failed to train: {{errorMessage}}",
+            "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
+        }
     }
-  }
 }
