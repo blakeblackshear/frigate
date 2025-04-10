@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 
 type TextEntryDialogProps = {
@@ -43,7 +45,7 @@ export default function TextEntryDialog({
           allowEmpty={allowEmpty}
           onSave={onSave}
         >
-          <DialogFooter className="pt-4">
+          <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
             <Button type="button" onClick={() => setOpen(false)}>
               {t("button.cancel")}
             </Button>

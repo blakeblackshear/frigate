@@ -2,6 +2,9 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
@@ -74,6 +77,12 @@ export default function FaceSelectionDialog({
               isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
             )}
           >
+            {isMobile && (
+              <DrawerHeader className="sr-only">
+                <DrawerTitle>Log Details</DrawerTitle>
+                <DrawerDescription>Log details</DrawerDescription>
+              </DrawerHeader>
+            )}
             <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
             <div
               className={cn(
