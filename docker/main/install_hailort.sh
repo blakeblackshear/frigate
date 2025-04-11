@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-hailo_version="4.20.0"
+hailo_version="4.20.1"
 
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     arch="x86_64"
