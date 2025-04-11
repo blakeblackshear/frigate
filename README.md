@@ -4,6 +4,10 @@
 
 # Frigate - NVR With Realtime Object Detection for IP Cameras
 
+<a href="https://hosted.weblate.org/engage/frigate-nvr/">
+<img src="https://hosted.weblate.org/widget/frigate-nvr/language-badge.svg" alt="Translation status" />
+</a>
+
 \[English\] | [简体中文](https://github.com/blakeblackshear/frigate/blob/dev/README_CN.md)
 
 A complete and local NVR designed for [Home Assistant](https://www.home-assistant.io) with AI object detection. Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras.
@@ -32,21 +36,25 @@ If you would like to make a donation to support development, please use [Github 
 ## Screenshots
 
 ### Live dashboard
+
 <div>
 <img width="800" alt="Live dashboard" src="https://github.com/blakeblackshear/frigate/assets/569905/5e713cb9-9db5-41dc-947a-6937c3bc376e">
 </div>
 
 ### Streamlined review workflow
+
 <div>
 <img width="800" alt="Streamlined review workflow" src="https://github.com/blakeblackshear/frigate/assets/569905/6fed96e8-3b18-40e5-9ddc-31e6f3c9f2ff">
 </div>
 
 ### Multi-camera scrubbing
+
 <div>
 <img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d6788a15-0eeb-4427-a8d4-80b93cae3d74">
 </div>
 
 ### Built-in mask and zone editor
+
 <div>
 <img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d7885fc3-bfe6-452f-b7d0-d957cb3e31f5">
 </div>
@@ -54,3 +62,7 @@ If you would like to make a donation to support development, please use [Github 
 ## Translations
 
 We use [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) to support language translations. Contributions are always welcome.
+
+<a href="https://hosted.weblate.org/engage/frigate-nvr/">
+<img src="https://hosted.weblate.org/widget/frigate-nvr/multi-auto.svg" alt="Translation status" />
+</a>
