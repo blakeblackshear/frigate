@@ -1336,7 +1336,7 @@ class LicensePlateProcessingMixin:
         # Check against minimum confidence threshold
         if avg_confidence < self.lpr_config.recognition_threshold:
             logger.debug(
-                f"{camera}: Average confidence {avg_confidence} is less than threshold ({self.lpr_config.recognition_threshold})"
+                f"{camera}: Average character confidence {avg_confidence} is less than recognition_threshold ({self.lpr_config.recognition_threshold})"
             )
             return
 
