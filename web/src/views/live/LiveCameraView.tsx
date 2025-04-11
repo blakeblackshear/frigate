@@ -1479,17 +1479,17 @@ function FrigateCameraFeatures({
                   })}
                 </p>
               </div>
-              <div className="flex flex-col gap-1">
+              <div
+                className="flex cursor-pointer flex-col gap-1"
+                onClick={() =>
+                  navigate(`/settings?page=debug&camera=${camera.name}`)
+                }
+              >
                 <div className="flex items-center justify-between text-sm font-medium leading-none">
                   {t("streaming.debugView", {
                     ns: "components/dialog",
                   })}
-                  <LuExternalLink
-                    onClick={() =>
-                      navigate(`/settings?page=debug&camera=${camera.name}`)
-                    }
-                    className="ml-2 inline-flex size-5 cursor-pointer"
-                  />
+                  <LuExternalLink className="ml-2 inline-flex size-5" />
                 </div>
               </div>
             </div>
