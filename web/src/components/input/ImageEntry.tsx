@@ -32,7 +32,11 @@ export default function ImageEntry({
   const [preview, setPreview] = useState<string | null>(null);
 
   const formSchema = z.object({
-    file: z.instanceof(File, { message: "Please select an image file." }),
+    file: z
+      .instanceof(File, { message: t("imageEntry.validation.selectImage") })
+      .refine((file) =>
+        accept["image/*"].includes(`.${file.type.split("/")[1]}`),
+      ),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

@@ -462,6 +462,13 @@ export function SubFilterContent({
   setSubLabels,
 }: SubFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
+  const sortedSubLabels = useMemo(
+    () =>
+      [...allSubLabels].sort((a, b) =>
+        a.toLowerCase().localeCompare(b.toLowerCase()),
+      ),
+    [allSubLabels],
+  );
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
@@ -482,7 +489,7 @@ export function SubFilterContent({
         />
       </div>
       <div className="mt-2.5 flex flex-col gap-2.5">
-        {allSubLabels.map((item) => (
+        {sortedSubLabels.map((item) => (
           <FilterSwitch
             key={item}
             label={item.replaceAll("_", " ")}
