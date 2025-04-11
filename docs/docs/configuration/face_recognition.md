@@ -136,3 +136,7 @@ Face recognition does not run on the recording stream, this would be suboptimal 
 1. The latency of accessing the recordings means the notifications would not include the names of recognized people because recognition would not complete until after.
 2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
 3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
+
+### I get an unknown error when taking a photo directly with my iPhone
+
+By default iOS devices will use HEIC (High Efficiency Image Container) for images, but this format is not supported for uploads. Choosing `large` as the format instead of `original` will use JPG which will work correctly.
