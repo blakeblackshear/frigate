@@ -163,6 +163,7 @@ model:
   input_pixel_format: rgb
   input_dtype: int
   model_type: yolo-generic
+  labelmap_path: /labelmap/coco-80.txt
 
   # The detector automatically selects the default model based on your hardware:
   # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
@@ -219,6 +220,7 @@ model:
   input_pixel_format: rgb
   input_dtype: int
   model_type: yolo-generic
+  labelmap_path: /labelmap/coco-80.txt
   # Optional: Specify a local model path.
   # path: /config/model_cache/hailo/custom_model.hef
   #
