@@ -1,1 +1,30 @@
-{}
+{
+  "menu": {
+    "users": "Użytkownicy",
+    "notifications": "Powiadomienia"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Masz niezapisane zmiany.",
+      "desc": "Czy chcesz zapisać swoje zmiany przed kontynuowaniem?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera"
+  },
+  "general": {
+    "title": "Ustawienia Ogólne",
+    "storedLayouts": {
+      "title": "Zapisane Układy"
+    },
+    "calendar": {
+      "title": "Kalendarz",
+      "firstWeekday": {
+        "label": "Pierwszy dzień tygodnia",
+        "sunday": "Niedziela",
+        "monday": "Poniedziałek",
+        "desc": "Dzień od którego zaczyna się kalendarz przeglądu"
+      }
+    }
+  }
+}

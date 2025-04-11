@@ -1,1 +1,5 @@
-{}
+{
+  "restart": {
+    "title": "Czy na pewno chcesz ponownie uruchomić Frigate?"
+  }
+}

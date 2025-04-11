@@ -23,5 +23,7 @@
   "horse": "Koń",
   "clock": "Zegar",
   "animal": "Zwierzę",
-  "bark": "Szczekanie"
+  "bark": "Szczekanie",
+  "person": "Osoba",
+  "airplane": "Samolot"
 }
