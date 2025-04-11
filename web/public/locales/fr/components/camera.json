@@ -29,8 +29,55 @@
     "camera": {
       "setting": {
         "label": "Paramètres de flux de caméra",
-        "title": "{{cameraName}} Paramètres de flux"
+        "title": "{{cameraName}} Paramètres de flux",
+        "audioIsUnavailable": "L'audio n'est pas disponible pour ce flux",
+        "audioIsAvailable": "L'audio est disponible pour ce flux",
+        "desc": "Modifie les options du flux temps réel pour le tableau de bord de ce groupe de caméras. <em>Ces paramètres sont spécifiques à un périphérique et/ou navigateur.</em>",
+        "audio": {
+          "tips": {
+            "document": "Lire la documentation ",
+            "title": "L'audio doit être capté par la caméra et configuré dans go2rtc pour ce flux."
+          }
+        },
+        "streamMethod": {
+          "label": "Méthode de streaming",
+          "method": {
+            "noStreaming": {
+              "label": "Pas de streaming",
+              "desc": "Les images provenant de la caméra ne seront mises à jour qu'une fois par minute et il n'y aura pas de diffusion en temps réel."
+            },
+            "smartStreaming": {
+              "label": "Streaming intelligent (recommandé)",
+              "desc": "Le streaming intelligent mettra à jour les images de la caméra une fois par minute lorsqu'aucune activité n'est détectée afin de conserver la bande-passante et les ressources."
+            },
+            "continuousStreaming": {
+              "label": "Streaming continu",
+              "desc": {
+                "title": "L'image de la caméra sera toujours un flux temps réel lorsqu'elle est visible dans le tableau de bord, même si aucune activité n'est détectée.",
+                "warning": "Le streaming continu peut engendrer une bande-passante élevée et des problèmes de performance. A utiliser avec précaution."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Mode de compatibilité",
+          "desc": "Activer cette option uniquement si votre flux temps réel affiche des erreurs chromatiques et a une ligne diagonale sur le côté droit de l'image."
+        }
       }
     }
+  },
+  "debug": {
+    "timestamp": "Horodatage",
+    "motion": "Mouvement",
+    "mask": "Masque",
+    "options": {
+      "showOptions": "Afficher les options",
+      "title": "Options",
+      "label": "Paramètres",
+      "hideOptions": "Masquer les options"
+    },
+    "boundingBox": "Boîte de délimitation",
+    "zones": "Zones",
+    "regions": "Régions"
   }
 }
