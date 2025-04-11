@@ -44,22 +44,30 @@ export default function SearchThumbnail({
     [searchResult, onClick],
   );
 
-  const objectLabel = useMemo(() => {
-    if (
-      !config ||
-      !searchResult.sub_label ||
-      !config.model.attributes_map[searchResult.label]
-    ) {
-      return searchResult.label;
-    }
-
-    return `${searchResult.label}-verified`;
-  }, [config, searchResult]);
-
   const hasRecognizedPlate = useMemo(
     () => (searchResult.data.recognized_license_plate?.length || 0) > 0,
     [searchResult],
   );
+
+  const objectLabel = useMemo(() => {
+    if (!config) {
+      return searchResult.label;
+    }
+
+    if (!searchResult.sub_label) {
+      return `${searchResult.label}${hasRecognizedPlate ? "-plate" : ""}`;
+    }
+
+    if (
+      config.model.attributes_map[searchResult.label]?.includes(
+        searchResult.sub_label,
+      )
+    ) {
+      return searchResult.sub_label;
+    }
+
+    return `${searchResult.label}-verified`;
+  }, [config, hasRecognizedPlate, searchResult]);
 
   return (
     <div
@@ -102,10 +110,7 @@ export default function SearchThumbnail({
                     className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs`}
                     onClick={() => onClick(searchResult, false, true)}
                   >
-                    {getIconForLabel(
-                      `${objectLabel}${hasRecognizedPlate ? "-plate" : ""}`,
-                      "size-3 text-white",
-                    )}
+                    {getIconForLabel(objectLabel, "size-3 text-white")}
                     {Math.round(
                       (searchResult.data.score ??
                         searchResult.data.top_score ??
