@@ -39,17 +39,17 @@
     "year": "{{time}} años",
     "mo": "{{time}}mes",
     "month": "{{time}} meses",
-    "h": "{{time}}hora",
-    "m": "{{time}}minuto",
+    "h": "{{time}}h",
+    "m": "{{time}}m",
     "minute": "{{time}} minutos",
-    "s": "{{time}}segundo",
+    "s": "{{time}}s",
     "formattedTimestamp2": {
       "12hour": "%m/%d %I:%M:%S%P",
       "24hour": "%d %b %H:%M:%S"
     },
     "5minutes": "5 minutos",
     "am": "am",
-    "d": "{{time}}día",
+    "d": "{{time}}d",
     "hour": "{{time}} horas"
   },
   "menu": {
@@ -71,11 +71,37 @@
     "configurationEditor": "Editor de configuración",
     "languages": "Idiomas",
     "language": {
-      "en": "Inglés",
+      "en": "English (Inglés)",
       "zhCN": "简体中文 (Chino simplificado)",
       "withSystem": {
         "label": "Usar los ajustes del sistema para el idioma"
-      }
+      },
+      "ru": "Русский (Ruso)",
+      "de": "Deutsch (Alemán)",
+      "ja": "日本語 (Japonés)",
+      "tr": "Türkçe (Turco)",
+      "sv": "Svenska (Sueco)",
+      "nb": "Norsk Bokmål (Noruego Bokmål)",
+      "ko": "한국어 (Coreano)",
+      "vi": "Tiếng Việt (Vietnamita)",
+      "fa": "فارسی (Persa)",
+      "pl": "Polski (Polaco)",
+      "uk": "Українська (Ucraniano)",
+      "he": "עברית (Hebreo)",
+      "el": "Ελληνικά (Griego)",
+      "ro": "Română (Rumano)",
+      "hu": "Magyar (Húngaro)",
+      "fi": "Suomi (Finlandés)",
+      "it": "Italian (Italiano)",
+      "da": "Dansk (Danés)",
+      "sk": "Slovenčina (Eslovaco)",
+      "hi": "हिन्दी (Hindi)",
+      "es": "Español",
+      "ar": "العربية (Árabe)",
+      "pt": "Português (Portugues)",
+      "cs": "Čeština (Checo)",
+      "nl": "Nederlands (Neerlandés)",
+      "fr": "Français (Frances)"
     },
     "appearance": "Apariencia",
     "darkMode": {
