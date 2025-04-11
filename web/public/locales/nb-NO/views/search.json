@@ -1,1 +1,67 @@
-{}
+{
+  "search": "Søk",
+  "savedSearches": "Lagrede søk",
+  "searchFor": "Søk etter {{inputValue}}",
+  "button": {
+    "clear": "Fjern søk",
+    "save": "Lagre søk",
+    "delete": "Slett lagret søk",
+    "filterInformation": "Filterinformasjon",
+    "filterActive": "Filtre aktive"
+  },
+  "filter": {
+    "label": {
+      "cameras": "Kameraer",
+      "labels": "Etiketter",
+      "search_type": "Søketype",
+      "after": "Etter",
+      "min_score": "Min. poengsum",
+      "max_score": "Maks. poengsum",
+      "min_speed": "Min. hastighet",
+      "zones": "Soner",
+      "sub_labels": "Underetiketter",
+      "time_range": "Tidsintervall",
+      "before": "Før",
+      "max_speed": "Maks. hastighet",
+      "recognized_license_plate": "Gjenkjent bilskilt",
+      "has_clip": "Har videoklipp",
+      "has_snapshot": "Har øyeblikksbilde"
+    },
+    "searchType": {
+      "thumbnail": "Miniatyrbilde",
+      "description": "Beskrivelse"
+    },
+    "toast": {
+      "error": {
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Min. hastighet' må være mindre enn eller lik 'maks. hastighet'.",
+        "beforeDateBeLaterAfter": "'Før'-datoen må være senere enn 'etter'-datoen.",
+        "afterDatebeEarlierBefore": "'Etter'-datoen må være tidligere enn 'før'-datoen.",
+        "minScoreMustBeLessOrEqualMaxScore": "'Min. poengsum' må være mindre enn eller lik 'maks. poengsum'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'Maks. poengsum' må være større enn eller lik 'min. poengsum'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'Maks. hastighet' må være større enn eller lik 'min. hastighet'."
+      }
+    },
+    "tips": {
+      "title": "Hvordan bruke tekstfiltre",
+      "desc": {
+        "text": "Filtre hjelper deg med å begrense søkeresultatene. Her er hvordan du bruker dem i inndatafeltet:",
+        "example": "Eksempel: <code className=\"text-primary\">kameraer:hoveddør etikett:person før:01012024 tidsområde:15:00-16:00 </code>",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Skriv et filternavn etterfulgt av et kolon (f.eks. \"kameraer:\").</li><li>Velg en verdi fra forslagene eller skriv din egen.</li><li>Bruk flere filtre ved å legge dem til etter hverandre med et mellomrom mellom.</li><li>Datofiltre (før: og etter:) bruker <em>{{DateFormat}}</em>-format.</li><li>Tidsområdefilter bruker <em>{{exampleTime}}</em>-format.</li><li>Fjern filtre ved å klikke på 'x' ved siden av dem.</li></ul>"
+      }
+    },
+    "header": {
+      "currentFilterType": "Filterverdier",
+      "noFilters": "Filtre",
+      "activeFilters": "Aktive filtre"
+    }
+  },
+  "placeholder": {
+    "search": "Søk..."
+  },
+  "trackedObjectId": "Sporings-ID for objekt",
+  "similaritySearch": {
+    "title": "Søk etter likhet",
+    "active": "Søk etter likhet er aktivt",
+    "clear": "Fjern søk etter likhet"
+  }
+}
