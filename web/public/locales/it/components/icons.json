@@ -1,8 +1,8 @@
 {
-    "iconPicker": {
-        "search": {
-            "placeholder": "Cerca un'icona..."
-        },
-        "selectIcon": "Seleziona un'icona"
-    }
+  "iconPicker": {
+    "search": {
+      "placeholder": "Cerca un'icona..."
+    },
+    "selectIcon": "Seleziona un'icona"
+  }
 }

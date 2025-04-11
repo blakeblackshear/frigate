@@ -1,8 +1,8 @@
 {
-    "documentTitle": {
-        "camera": "Kamerainställningar - Frigate",
-        "default": "Inställningar - Frigate",
-        "general": "Allmäna inställningar - Frigate",
-        "authentication": "Autentiseringsinställningar - Frigate"
-    }
+  "documentTitle": {
+    "camera": "Kamerainställningar - Frigate",
+    "default": "Inställningar - Frigate",
+    "general": "Allmäna inställningar - Frigate",
+    "authentication": "Autentiseringsinställningar - Frigate"
+  }
 }

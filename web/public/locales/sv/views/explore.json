@@ -1,12 +1,12 @@
 {
-    "generativeAI": "Generativ AI",
-    "documentTitle": "Utforska - Frigate",
-    "exploreIsUnavailable": {
-        "embeddingsReindexing": {
-            "startingUp": "Startar upp...",
-            "estimatedTime": "Beräknad återstående tid:",
-            "finishingShortly": "Snart klar"
-        },
-        "title": "Utforska är inte tillgänglig"
-    }
+  "generativeAI": "Generativ AI",
+  "documentTitle": "Utforska - Frigate",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Startar upp...",
+      "estimatedTime": "Beräknad återstående tid:",
+      "finishingShortly": "Snart klar"
+    },
+    "title": "Utforska är inte tillgänglig"
+  }
 }

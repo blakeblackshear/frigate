@@ -1,15 +1,15 @@
 {
-    "saveOnly": "Sadece Kaydet",
-    "toast": {
-        "error": {
-            "savingError": "Yapılandırma kaydedilirken hata"
-        },
-        "success": {
-            "copyToClipboard": "Yapılandırma panoya kopyalandı."
-        }
+  "saveOnly": "Sadece Kaydet",
+  "toast": {
+    "error": {
+      "savingError": "Yapılandırma kaydedilirken hata"
     },
-    "copyConfig": "Yapılandırmayı Kopyala",
-    "configEditor": "Yapılandırma Düzenleyicisi",
-    "documentTitle": "Yapılandırma Düzenleyicisi - Frigate",
-    "saveAndRestart": "Kaydet & Yeniden Başlat"
+    "success": {
+      "copyToClipboard": "Yapılandırma panoya kopyalandı."
+    }
+  },
+  "copyConfig": "Yapılandırmayı Kopyala",
+  "configEditor": "Yapılandırma Düzenleyicisi",
+  "documentTitle": "Yapılandırma Düzenleyicisi - Frigate",
+  "saveAndRestart": "Kaydet & Yeniden Başlat"
 }

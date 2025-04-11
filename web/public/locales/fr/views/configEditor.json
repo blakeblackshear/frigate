@@ -1,15 +1,15 @@
 {
-    "configEditor": "Éditeur de configuration",
-    "documentTitle": "Éditeur de configuration - Frigate",
-    "copyConfig": "Copier la configuration",
-    "saveOnly": "Sauvegarder seulement",
-    "saveAndRestart": "Sauvegarder & redémarrer",
-    "toast": {
-        "success": {
-            "copyToClipboard": "Configuration copiée dans le presse-papiers."
-        },
-        "error": {
-            "savingError": "Erreur lors de l'enregistrement de la configuration"
-        }
+  "configEditor": "Éditeur de configuration",
+  "documentTitle": "Éditeur de configuration - Frigate",
+  "copyConfig": "Copier la configuration",
+  "saveOnly": "Sauvegarder seulement",
+  "saveAndRestart": "Sauvegarder & redémarrer",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Configuration copiée dans le presse-papiers."
+    },
+    "error": {
+      "savingError": "Erreur lors de l'enregistrement de la configuration"
     }
+  }
 }

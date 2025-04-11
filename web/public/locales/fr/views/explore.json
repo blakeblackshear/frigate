@@ -1,33 +1,33 @@
 {
-    "generativeAI": "IA générative",
-    "documentTitle": "Explorer - Frigate",
-    "exploreIsUnavailable": {
-        "title": "L'exploration est indisponible",
-        "embeddingsReindexing": {
-            "estimatedTime": "Temps restant estimé :",
-            "finishingShortly": "Termine bientôt",
-            "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée",
-            "startingUp": "Démarrage...",
-            "step": {
-                "thumbnailsEmbedded": "Vignettes intégrées : ",
-                "descriptionsEmbedded": "Descriptions intégrées : ",
-                "trackedObjectsProcessed": "Objets suivis traités : "
-            }
-        },
-        "downloadingModels": {
-            "context": "Frigate télécharge les modèles de représentation vectorielle nécessaires à la prise en charge de la recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
-            "setup": {
-                "visionModelFeatureExtractor": "Extracteur de caractéristiques de modèle de vision",
-                "textTokenizer": "Tokeniseur de texte",
-                "visionModel": "Modèle de vision",
-                "textModel": "Modèle de texte"
-            },
-            "tips": {
-                "documentation": "Lire la documentation"
-            }
-        }
+  "generativeAI": "IA générative",
+  "documentTitle": "Explorer - Frigate",
+  "exploreIsUnavailable": {
+    "title": "L'exploration est indisponible",
+    "embeddingsReindexing": {
+      "estimatedTime": "Temps restant estimé :",
+      "finishingShortly": "Termine bientôt",
+      "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée",
+      "startingUp": "Démarrage...",
+      "step": {
+        "thumbnailsEmbedded": "Vignettes intégrées : ",
+        "descriptionsEmbedded": "Descriptions intégrées : ",
+        "trackedObjectsProcessed": "Objets suivis traités : "
+      }
     },
-    "details": {
-        "timestamp": "Horodatage"
+    "downloadingModels": {
+      "context": "Frigate télécharge les modèles de représentation vectorielle nécessaires à la prise en charge de la recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
+      "setup": {
+        "visionModelFeatureExtractor": "Extracteur de caractéristiques de modèle de vision",
+        "textTokenizer": "Tokeniseur de texte",
+        "visionModel": "Modèle de vision",
+        "textModel": "Modèle de texte"
+      },
+      "tips": {
+        "documentation": "Lire la documentation"
+      }
     }
+  },
+  "details": {
+    "timestamp": "Horodatage"
+  }
 }

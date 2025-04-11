@@ -1,12 +1,12 @@
 {
-    "export": "Export",
-    "calendar": "Kalender",
-    "filters": "Filter",
-    "toast": {
-        "error": {
-            "endTimeMustAfterStartTime": "Endzeit muss nach Startzeit liegen",
-            "noValidTimeSelected": "Gewählter Zeitraum ist ungültig"
-        }
-    },
-    "filter": "Filter"
+  "export": "Export",
+  "calendar": "Kalender",
+  "filters": "Filter",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "Endzeit muss nach Startzeit liegen",
+      "noValidTimeSelected": "Gewählter Zeitraum ist ungültig"
+    }
+  },
+  "filter": "Filter"
 }

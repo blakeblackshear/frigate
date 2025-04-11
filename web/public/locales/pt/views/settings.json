@@ -1,123 +1,123 @@
 {
-    "documentTitle": {
-        "camera": "Configurações da câmera - Frigate",
-        "classification": "Configurações de classificação - Frigate",
-        "masksAndZones": "Editor de máscara e zona - Frigate",
-        "motionTuner": "Ajuste de movimento - Frigate",
-        "object": "Configurações do objeto - Frigate",
-        "authentication": "Configurações de autenticação - Frigate",
-        "general": "Configurações gerais - Frigate",
-        "frigatePlus": "Configurações do Frigate+ - Frigate",
-        "default": "Configurações - Frigate"
-    },
-    "menu": {
-        "ui": "UI",
-        "masksAndZones": "Máscaras / Zonas",
-        "cameras": "Configurações da câmera",
-        "classification": "Classificação",
-        "motionTuner": "Ajuste de movimento",
-        "debug": "Depurar",
-        "users": "Usuários",
-        "notifications": "Notificações",
-        "frigateplus": "Frigate+"
-    },
-    "dialog": {
-        "unsavedChanges": {
-            "title": "Você tem alterações não salvas.",
-            "desc": "Deseja salvar suas alterações antes de continuar?"
-        }
-    },
-    "cameraSetting": {
-        "camera": "Câmera",
-        "noCamera": "Sem câmera"
-    },
-    "general": {
-        "title": "Configurações gerais",
-        "liveDashboard": {
-            "title": "Painel ao vivo",
-            "automaticLiveView": {
-                "label": "Visualização ao vivo automática"
-            }
-        },
-        "calendar": {
-            "title": "Calendário",
-            "firstWeekday": {
-                "label": "Primeiro dia da semana",
-                "sunday": "Domingo",
-                "monday": "Segunda-feira"
-            }
-        },
-        "storedLayouts": {
-            "title": "Layouts armazenados"
-        },
-        "recordingsViewer": {
-            "defaultPlaybackRate": {
-                "label": "Taxa de reprodução padrão"
-            }
-        }
-    },
-    "classification": {
-        "faceRecognition": {
-            "modelSize": {
-                "label": "Tamanho do modelo"
-            },
-            "readTheDocumentation": "Leia a documentação"
-        },
-        "licensePlateRecognition": {
-            "readTheDocumentation": "Leia a documentação"
-        },
-        "semanticSearch": {
-            "readTheDocumentation": "Leia a documentação"
-        },
-        "title": "Configurações de classificação"
-    },
-    "notification": {
-        "globalSettings": {
-            "title": "Configurações globais"
-        },
-        "notificationSettings": {
-            "documentation": "Leia a documentação"
-        },
-        "notificationUnavailable": {
-            "documentation": "Leia a documentação"
-        }
-    },
-    "frigatePlus": {
-        "snapshotConfig": {
-            "documentation": "Leia a documentação",
-            "table": {
-                "snapshots": "Snapshots",
-                "camera": "Câmera"
-            }
-        }
-    },
-    "masksAndZones": {
-        "motionMasks": {
-            "point_one": "{{count}} ponto",
-            "point_many": "{{count}} pontos",
-            "point_other": "{{count}} pontos",
-            "context": {
-                "documentation": "Leia a documentação"
-            },
-            "polygonAreaTooLarge": {
-                "documentation": "Leia a documentação"
-            }
-        },
-        "zones": {
-            "label": "Zonas"
-        }
-    },
-    "debug": {
-        "zones": {
-            "title": "Zonas"
-        },
-        "timestamp": {
-            "title": "Carimbo de hora"
-        }
-    },
-    "camera": {
-        "reviewClassification": {
-            "readTheDocumentation": "Leia a documentação"
-        }
+  "documentTitle": {
+    "camera": "Configurações da câmera - Frigate",
+    "classification": "Configurações de classificação - Frigate",
+    "masksAndZones": "Editor de máscara e zona - Frigate",
+    "motionTuner": "Ajuste de movimento - Frigate",
+    "object": "Configurações do objeto - Frigate",
+    "authentication": "Configurações de autenticação - Frigate",
+    "general": "Configurações gerais - Frigate",
+    "frigatePlus": "Configurações do Frigate+ - Frigate",
+    "default": "Configurações - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "masksAndZones": "Máscaras / Zonas",
+    "cameras": "Configurações da câmera",
+    "classification": "Classificação",
+    "motionTuner": "Ajuste de movimento",
+    "debug": "Depurar",
+    "users": "Usuários",
+    "notifications": "Notificações",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Você tem alterações não salvas.",
+      "desc": "Deseja salvar suas alterações antes de continuar?"
     }
+  },
+  "cameraSetting": {
+    "camera": "Câmera",
+    "noCamera": "Sem câmera"
+  },
+  "general": {
+    "title": "Configurações gerais",
+    "liveDashboard": {
+      "title": "Painel ao vivo",
+      "automaticLiveView": {
+        "label": "Visualização ao vivo automática"
+      }
+    },
+    "calendar": {
+      "title": "Calendário",
+      "firstWeekday": {
+        "label": "Primeiro dia da semana",
+        "sunday": "Domingo",
+        "monday": "Segunda-feira"
+      }
+    },
+    "storedLayouts": {
+      "title": "Layouts armazenados"
+    },
+    "recordingsViewer": {
+      "defaultPlaybackRate": {
+        "label": "Taxa de reprodução padrão"
+      }
+    }
+  },
+  "classification": {
+    "faceRecognition": {
+      "modelSize": {
+        "label": "Tamanho do modelo"
+      },
+      "readTheDocumentation": "Leia a documentação"
+    },
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Leia a documentação"
+    },
+    "semanticSearch": {
+      "readTheDocumentation": "Leia a documentação"
+    },
+    "title": "Configurações de classificação"
+  },
+  "notification": {
+    "globalSettings": {
+      "title": "Configurações globais"
+    },
+    "notificationSettings": {
+      "documentation": "Leia a documentação"
+    },
+    "notificationUnavailable": {
+      "documentation": "Leia a documentação"
+    }
+  },
+  "frigatePlus": {
+    "snapshotConfig": {
+      "documentation": "Leia a documentação",
+      "table": {
+        "snapshots": "Snapshots",
+        "camera": "Câmera"
+      }
+    }
+  },
+  "masksAndZones": {
+    "motionMasks": {
+      "point_one": "{{count}} ponto",
+      "point_many": "{{count}} pontos",
+      "point_other": "{{count}} pontos",
+      "context": {
+        "documentation": "Leia a documentação"
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "Leia a documentação"
+      }
+    },
+    "zones": {
+      "label": "Zonas"
+    }
+  },
+  "debug": {
+    "zones": {
+      "title": "Zonas"
+    },
+    "timestamp": {
+      "title": "Carimbo de hora"
+    }
+  },
+  "camera": {
+    "reviewClassification": {
+      "readTheDocumentation": "Leia a documentação"
+    }
+  }
 }

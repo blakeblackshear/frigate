@@ -1,71 +1,71 @@
 {
-    "selectItem": "Selecteer {{item}}",
-    "details": {
-        "timestamp": "Tijdstempel",
-        "person": "Persoon",
-        "confidence": "Vertrouwen",
-        "face": "Gezicht Details",
-        "faceDesc": "Details van het gezicht en het bijbehorende object"
+  "selectItem": "Selecteer {{item}}",
+  "details": {
+    "timestamp": "Tijdstempel",
+    "person": "Persoon",
+    "confidence": "Vertrouwen",
+    "face": "Gezicht Details",
+    "faceDesc": "Details van het gezicht en het bijbehorende object"
+  },
+  "documentTitle": "Gezichtsbibliotheek - Frigate",
+  "description": {
+    "placeholder": "Voer een naam in voor deze verzameling",
+    "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek."
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Selecteer trainen"
+  },
+  "selectFace": "Selecteer gezicht",
+  "toast": {
+    "error": {
+      "addFaceLibraryFailed": "Het is niet gelukt om de gezichtsnaam in te stellen: {{errorMessage}}",
+      "deleteFaceFailed": "Verwijderen mislukt: {{errorMessage}}",
+      "deleteNameFailed": "Naam verwijderen is niet gelukt: {{errorMessage}}",
+      "updateFaceScoreFailed": "Niet gelukt om gezichtsscore bij te werken: {{errorMessage}}",
+      "uploadingImageFailed": "Afbeelding uploaden mislukt: {{errorMessage}}",
+      "trainFailed": "Trainen mislukt: {{errorMessage}}"
     },
-    "documentTitle": "Gezichtsbibliotheek - Frigate",
-    "description": {
-        "placeholder": "Voer een naam in voor deze verzameling",
-        "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek."
-    },
-    "train": {
-        "title": "Train",
-        "aria": "Selecteer trainen"
-    },
-    "selectFace": "Selecteer gezicht",
-    "toast": {
-        "error": {
-            "addFaceLibraryFailed": "Het is niet gelukt om de gezichtsnaam in te stellen: {{errorMessage}}",
-            "deleteFaceFailed": "Verwijderen mislukt: {{errorMessage}}",
-            "deleteNameFailed": "Naam verwijderen is niet gelukt: {{errorMessage}}",
-            "updateFaceScoreFailed": "Niet gelukt om gezichtsscore bij te werken: {{errorMessage}}",
-            "uploadingImageFailed": "Afbeelding uploaden mislukt: {{errorMessage}}",
-            "trainFailed": "Trainen mislukt: {{errorMessage}}"
-        },
-        "success": {
-            "deletedFace_one": "{{count}} gezicht is succesvol verwijderd.",
-            "deletedFace_other": "{{count}} gezichten zijn succesvol verwijderd.",
-            "trainedFace": "Met succes getraind gezicht.",
-            "updatedFaceScore": "De gezichtsscore is succesvol bijgewerkt.",
-            "deletedName_one": "{{count}} gezicht is succesvol verwijderd.",
-            "deletedName_other": "{{count}} gezichten zijn succesvol verwijderd.",
-            "uploadedImage": "Afbeelding succesvol geüpload.",
-            "addFaceLibrary": "{{name}} is succesvol toegevoegd aan de Gezichtenbibliotheek!"
-        }
-    },
-    "imageEntry": {
-        "dropActive": "Zet de afbeelding hier neer...",
-        "dropInstructions": "Sleep een afbeelding hierheen of klik om te selecteren",
-        "maxSize": "Maximale grootte: {{size}}MB",
-        "validation": {
-            "selectImage": "Selecteer een afbeeldingbestand."
-        }
-    },
-    "createFaceLibrary": {
-        "title": "Collectie maken",
-        "desc": "Een nieuwe collectie maken",
-        "new": "Creëer een nieuw gezicht",
-        "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad Trainen om per gedetecteerd persoon afbeeldingen te selecteren en te trainen.</li> <li>Richt je op frontale afbeeldingen voor het beste resultaat; vermijd trainingsbeelden waarop gezichten vanuit een hoek te zien zijn.</li>"
-    },
-    "button": {
-        "addFace": "Gezicht toevoegen",
-        "uploadImage": "Afbeelding uploaden",
-        "deleteFaceAttempts": "Pogingen tot gezichtsherkenning verwijderen",
-        "reprocessFace": "Herverwerk gezicht"
-    },
-    "uploadFaceImage": {
-        "desc": "Upload een afbeelding om te scannen op gezichten en op te nemen voor {{pageToggle}}",
-        "title": "Upload gezichtsafbeelding"
-    },
-    "deleteFaceLibrary": {
-        "title": "Verwijder Naam",
-        "desc": "Weet je zeker dat je de collectie {{name}} wilt verwijderen? Dit zal permanent alle geassocieerde gezichten verwijderen."
-    },
-    "trainFaceAs": "Train Face als:",
-    "trainFace": "Train Face",
-    "readTheDocs": "Lees de documentatie"
+    "success": {
+      "deletedFace_one": "{{count}} gezicht is succesvol verwijderd.",
+      "deletedFace_other": "{{count}} gezichten zijn succesvol verwijderd.",
+      "trainedFace": "Met succes getraind gezicht.",
+      "updatedFaceScore": "De gezichtsscore is succesvol bijgewerkt.",
+      "deletedName_one": "{{count}} gezicht is succesvol verwijderd.",
+      "deletedName_other": "{{count}} gezichten zijn succesvol verwijderd.",
+      "uploadedImage": "Afbeelding succesvol geüpload.",
+      "addFaceLibrary": "{{name}} is succesvol toegevoegd aan de Gezichtenbibliotheek!"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Zet de afbeelding hier neer...",
+    "dropInstructions": "Sleep een afbeelding hierheen of klik om te selecteren",
+    "maxSize": "Maximale grootte: {{size}}MB",
+    "validation": {
+      "selectImage": "Selecteer een afbeeldingbestand."
+    }
+  },
+  "createFaceLibrary": {
+    "title": "Collectie maken",
+    "desc": "Een nieuwe collectie maken",
+    "new": "Creëer een nieuw gezicht",
+    "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad Trainen om per gedetecteerd persoon afbeeldingen te selecteren en te trainen.</li> <li>Richt je op frontale afbeeldingen voor het beste resultaat; vermijd trainingsbeelden waarop gezichten vanuit een hoek te zien zijn.</li>"
+  },
+  "button": {
+    "addFace": "Gezicht toevoegen",
+    "uploadImage": "Afbeelding uploaden",
+    "deleteFaceAttempts": "Pogingen tot gezichtsherkenning verwijderen",
+    "reprocessFace": "Herverwerk gezicht"
+  },
+  "uploadFaceImage": {
+    "desc": "Upload een afbeelding om te scannen op gezichten en op te nemen voor {{pageToggle}}",
+    "title": "Upload gezichtsafbeelding"
+  },
+  "deleteFaceLibrary": {
+    "title": "Verwijder Naam",
+    "desc": "Weet je zeker dat je de collectie {{name}} wilt verwijderen? Dit zal permanent alle geassocieerde gezichten verwijderen."
+  },
+  "trainFaceAs": "Train Face als:",
+  "trainFace": "Train Face",
+  "readTheDocs": "Lees de documentatie"
 }

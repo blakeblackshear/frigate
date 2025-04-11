@@ -1,31 +1,31 @@
 {
-    "documentTitle": {
-        "storage": "Statistiques de stockage - Frigate",
-        "cameras": "Statistiques des caméras - Frigate",
-        "general": "Statistiques générales - Frigate",
-        "enrichments": "Statistiques enrichies - Frigate",
-        "logs": {
-            "frigate": "Journaux de Frigate - Frigate",
-            "nginx": "Journaux Nginx - Frigate",
-            "go2rtc": "Journaux Go2RTC - Frigate"
-        }
-    },
-    "title": "Système",
-    "metrics": "Métriques du système",
+  "documentTitle": {
+    "storage": "Statistiques de stockage - Frigate",
+    "cameras": "Statistiques des caméras - Frigate",
+    "general": "Statistiques générales - Frigate",
+    "enrichments": "Statistiques enrichies - Frigate",
     "logs": {
-        "download": {
-            "label": "Télécharger les journaux"
-        },
-        "copy": {
-            "label": "Copier dans le presse-papiers",
-            "success": "Journaux copiés vers le presse-papiers",
-            "error": "Échec du copiage des journaux dans le presse-papiers"
-        },
-        "type": {
-            "label": "Type",
-            "timestamp": "Horodatage",
-            "tag": "Étiqueter",
-            "message": "Message"
-        }
+      "frigate": "Journaux de Frigate - Frigate",
+      "nginx": "Journaux Nginx - Frigate",
+      "go2rtc": "Journaux Go2RTC - Frigate"
     }
+  },
+  "title": "Système",
+  "metrics": "Métriques du système",
+  "logs": {
+    "download": {
+      "label": "Télécharger les journaux"
+    },
+    "copy": {
+      "label": "Copier dans le presse-papiers",
+      "success": "Journaux copiés vers le presse-papiers",
+      "error": "Échec du copiage des journaux dans le presse-papiers"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Horodatage",
+      "tag": "Étiqueter",
+      "message": "Message"
+    }
+  }
 }

@@ -1,8 +1,8 @@
 {
-    "documentTitle": {
-        "authentication": "Impostazioni di Autenticazione - Frigate",
-        "default": "Impostazioni - Frigate",
-        "classification": "Impostazioni di Classificazione - Frigate",
-        "camera": "Impostazioni Telecamera - Frigate"
-    }
+  "documentTitle": {
+    "authentication": "Impostazioni di Autenticazione - Frigate",
+    "default": "Impostazioni - Frigate",
+    "classification": "Impostazioni di Classificazione - Frigate",
+    "camera": "Impostazioni Telecamera - Frigate"
+  }
 }

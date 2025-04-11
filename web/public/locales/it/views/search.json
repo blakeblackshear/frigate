@@ -1,8 +1,8 @@
 {
-    "search": "Cerca",
-    "savedSearches": "Ricerche Salvate",
-    "searchFor": "Cerca {{inputValue}}",
-    "button": {
-        "clear": "Azzera Ricerca"
-    }
+  "search": "Cerca",
+  "savedSearches": "Ricerche Salvate",
+  "searchFor": "Cerca {{inputValue}}",
+  "button": {
+    "clear": "Azzera Ricerca"
+  }
 }

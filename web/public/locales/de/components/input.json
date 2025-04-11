@@ -1,10 +1,10 @@
 {
-    "button": {
-        "downloadVideo": {
-            "label": "Video herunterladen",
-            "toast": {
-                "success": "Das Herunterladen des überprüften Videos wurde gestartet."
-            }
-        }
+  "button": {
+    "downloadVideo": {
+      "label": "Video herunterladen",
+      "toast": {
+        "success": "Das Herunterladen des überprüften Videos wurde gestartet."
+      }
     }
+  }
 }

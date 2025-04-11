@@ -1,23 +1,23 @@
 {
-    "documentTitle": {
-        "default": "Paramètres - Frigate",
-        "authentication": "Paramètres d'authentification - Frigate",
-        "camera": "Paramètres des caméras - Frigate",
-        "classification": "Paramètres de classification - Frigate",
-        "motionTuner": "Réglages du mouvement - Frigate",
-        "general": "Paramètres généraux - Frigate",
-        "masksAndZones": "Éditeur de masques et de zones - Frigate",
-        "object": "Paramètres d'objets - Frigate",
-        "frigatePlus": "Paramètres Frigate+ - Frigate"
-    },
-    "menu": {
-        "ui": "Interface utilisateur",
-        "classification": "Classification",
-        "masksAndZones": "Masques / Zones",
-        "motionTuner": "Réglages du mouvement",
-        "debug": "Debug",
-        "cameras": "Paramètres des caméras",
-        "users": "Utilisateurs",
-        "notifications": "Notifications"
-    }
+  "documentTitle": {
+    "default": "Paramètres - Frigate",
+    "authentication": "Paramètres d'authentification - Frigate",
+    "camera": "Paramètres des caméras - Frigate",
+    "classification": "Paramètres de classification - Frigate",
+    "motionTuner": "Réglages du mouvement - Frigate",
+    "general": "Paramètres généraux - Frigate",
+    "masksAndZones": "Éditeur de masques et de zones - Frigate",
+    "object": "Paramètres d'objets - Frigate",
+    "frigatePlus": "Paramètres Frigate+ - Frigate"
+  },
+  "menu": {
+    "ui": "Interface utilisateur",
+    "classification": "Classification",
+    "masksAndZones": "Masques / Zones",
+    "motionTuner": "Réglages du mouvement",
+    "debug": "Debug",
+    "cameras": "Paramètres des caméras",
+    "users": "Utilisateurs",
+    "notifications": "Notifications"
+  }
 }

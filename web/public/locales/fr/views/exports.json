@@ -1,17 +1,17 @@
 {
-    "documentTitle": "Exporter - Frigate",
-    "search": "Chercher",
-    "noExports": "Aucune exportation trouvée",
-    "deleteExport": "Supprimer l'export",
-    "deleteExport.desc": "Êtes-vous sûr de vouloir supprimer {{exportName}}?",
-    "editExport": {
-        "title": "Renommer l'export",
-        "desc": "Saisissez un nouveau nom pour cet export.",
-        "saveExport": "Enregistrer l'export"
-    },
-    "toast": {
-        "error": {
-            "renameExportFailed": "Échec du renommage de l'export : {{errorMessage}}"
-        }
+  "documentTitle": "Exporter - Frigate",
+  "search": "Chercher",
+  "noExports": "Aucune exportation trouvée",
+  "deleteExport": "Supprimer l'export",
+  "deleteExport.desc": "Êtes-vous sûr de vouloir supprimer {{exportName}}?",
+  "editExport": {
+    "title": "Renommer l'export",
+    "desc": "Saisissez un nouveau nom pour cet export.",
+    "saveExport": "Enregistrer l'export"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Échec du renommage de l'export : {{errorMessage}}"
     }
+  }
 }

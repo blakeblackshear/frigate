@@ -1,33 +1,33 @@
 {
-    "noRecordingsFoundForThisTime": "Aucun enregistrement trouvé pour cette heure",
-    "noPreviewFoundFor": "Aucun aperçu trouvé pour {{cameraName}}",
-    "noPreviewFound": "Aucun aperçu trouvé",
-    "submitFrigatePlus": {
-        "title": "Soumettre cette image à Frigate+?",
-        "submit": "Soumettre"
+  "noRecordingsFoundForThisTime": "Aucun enregistrement trouvé pour cette heure",
+  "noPreviewFoundFor": "Aucun aperçu trouvé pour {{cameraName}}",
+  "noPreviewFound": "Aucun aperçu trouvé",
+  "submitFrigatePlus": {
+    "title": "Soumettre cette image à Frigate+?",
+    "submit": "Soumettre"
+  },
+  "streamOffline": {
+    "title": "Flux hors ligne",
+    "desc": "Aucune image n'a été reçue sur le flux {{cameraName}} <code>detect</code> , vérifiez le journal d'erreurs"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version ultérieure est requis pour ce type de flux en direct.",
+  "cameraDisabled": "La caméra est désactivée",
+  "stats": {
+    "streamType": {
+      "title": "Type de flux :",
+      "short": "Type"
     },
-    "streamOffline": {
-        "title": "Flux hors ligne",
-        "desc": "Aucune image n'a été reçue sur le flux {{cameraName}} <code>detect</code> , vérifiez le journal d'erreurs"
+    "bandwidth": {
+      "title": "Bande passante :",
+      "short": "Bande passante"
     },
-    "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version ultérieure est requis pour ce type de flux en direct.",
-    "cameraDisabled": "La caméra est désactivée",
-    "stats": {
-        "streamType": {
-            "title": "Type de flux :",
-            "short": "Type"
-        },
-        "bandwidth": {
-            "title": "Bande passante :",
-            "short": "Bande passante"
-        },
-        "latency": {
-            "title": "Latence :",
-            "value": "{{seconds}} secondes",
-            "short": {
-                "title": "Latence",
-                "value": "{{seconds}} sec"
-            }
-        }
+    "latency": {
+      "title": "Latence :",
+      "value": "{{seconds}} secondes",
+      "short": {
+        "title": "Latence",
+        "value": "{{seconds}} sec"
+      }
     }
+  }
 }

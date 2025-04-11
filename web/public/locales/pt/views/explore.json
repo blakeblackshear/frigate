@@ -1,76 +1,76 @@
 {
-    "generativeAI": "IA Generativa",
-    "exploreIsUnavailable": {
-        "embeddingsReindexing": {
-            "startingUp": "Iniciando...",
-            "estimatedTime": "Tempo restante estimado:",
-            "finishingShortly": "Terminando em breve",
-            "step": {
-                "thumbnailsEmbedded": "Miniaturas incorporadas: ",
-                "descriptionsEmbedded": "Descrições incorporadas: ",
-                "trackedObjectsProcessed": "Objetos rastreados processados: "
-            },
-            "context": "O explorar pode ser usado depois que as incorporações de objetos rastreados terminarem de ser reindexadas."
-        },
-        "downloadingModels": {
-            "setup": {
-                "visionModel": "Modelo de visão",
-                "textModel": "Modelo de texto",
-                "textTokenizer": "Tokenizador de texto"
-            },
-            "context": "O Frigate está baixando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
-            "tips": {
-                "context": "Talvez você queira reindexar as incorporações dos seus objetos rastreados depois que os modelos forem baixados.",
-                "documentation": "Leia a documentação"
-            },
-            "error": "Ocorreu um erro. Verifique os logs do Frigate."
-        },
-        "title": "Explorar não está disponível"
+  "generativeAI": "IA Generativa",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Iniciando...",
+      "estimatedTime": "Tempo restante estimado:",
+      "finishingShortly": "Terminando em breve",
+      "step": {
+        "thumbnailsEmbedded": "Miniaturas incorporadas: ",
+        "descriptionsEmbedded": "Descrições incorporadas: ",
+        "trackedObjectsProcessed": "Objetos rastreados processados: "
+      },
+      "context": "O explorar pode ser usado depois que as incorporações de objetos rastreados terminarem de ser reindexadas."
     },
-    "details": {
-        "timestamp": "Carimbo de hora",
-        "item": {
-            "title": "Revisar detalhes do item",
-            "desc": "Revisar detalhes do item"
-        },
-        "zones": "Zonas",
-        "description": {
-            "label": "Descrição"
-        },
-        "camera": "Câmera"
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "Modelo de visão",
+        "textModel": "Modelo de texto",
+        "textTokenizer": "Tokenizador de texto"
+      },
+      "context": "O Frigate está baixando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
+      "tips": {
+        "context": "Talvez você queira reindexar as incorporações dos seus objetos rastreados depois que os modelos forem baixados.",
+        "documentation": "Leia a documentação"
+      },
+      "error": "Ocorreu um erro. Verifique os logs do Frigate."
     },
-    "documentTitle": "Explorar - Frigate",
-    "trackedObjectDetails": "Detalhes do objeto rastreado",
-    "type": {
-        "details": "detalhes",
-        "video": "vídeo",
-        "object_lifecycle": "ciclo de vida do objeto",
-        "snapshot": "snapshot"
+    "title": "Explorar não está disponível"
+  },
+  "details": {
+    "timestamp": "Carimbo de hora",
+    "item": {
+      "title": "Revisar detalhes do item",
+      "desc": "Revisar detalhes do item"
     },
-    "objectLifecycle": {
-        "title": "Ciclo de vida do objeto",
-        "lifecycleItemDesc": {
-            "attribute": {
-                "other": "{{label}} reconhecido como {{attribute}}",
-                "faceOrLicense_plate": "{{attribute}} detectado por {{label}}"
-            },
-            "gone": "{{label}} saiu",
-            "heard": "{{label}} ouvido",
-            "visible": "{{label}} detectado",
-            "external": "{{label}} detectado"
-        },
-        "annotationSettings": {
-            "title": "Configurações de anotação",
-            "offset": {
-                "documentation": "Leia a documentação "
-            },
-            "showAllZones": {
-                "title": "Mostrar todas as zonas"
-            }
-        },
-        "carousel": {
-            "previous": "Slide anterior",
-            "next": "Próximo slide"
-        }
+    "zones": "Zonas",
+    "description": {
+      "label": "Descrição"
+    },
+    "camera": "Câmera"
+  },
+  "documentTitle": "Explorar - Frigate",
+  "trackedObjectDetails": "Detalhes do objeto rastreado",
+  "type": {
+    "details": "detalhes",
+    "video": "vídeo",
+    "object_lifecycle": "ciclo de vida do objeto",
+    "snapshot": "snapshot"
+  },
+  "objectLifecycle": {
+    "title": "Ciclo de vida do objeto",
+    "lifecycleItemDesc": {
+      "attribute": {
+        "other": "{{label}} reconhecido como {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} detectado por {{label}}"
+      },
+      "gone": "{{label}} saiu",
+      "heard": "{{label}} ouvido",
+      "visible": "{{label}} detectado",
+      "external": "{{label}} detectado"
+    },
+    "annotationSettings": {
+      "title": "Configurações de anotação",
+      "offset": {
+        "documentation": "Leia a documentação "
+      },
+      "showAllZones": {
+        "title": "Mostrar todas as zonas"
+      }
+    },
+    "carousel": {
+      "previous": "Slide anterior",
+      "next": "Próximo slide"
     }
+  }
 }

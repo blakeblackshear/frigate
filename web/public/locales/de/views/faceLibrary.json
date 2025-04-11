@@ -1,24 +1,24 @@
 {
-    "description": {
-        "placeholder": "Gib einen Name für diese Kollektion ein",
-        "addFace": "Anleitung für das Hinzufügen einer neuen Kollektion zur Gesichtsbibliothek."
-    },
-    "details": {
-        "person": "Person",
-        "confidence": "Vertrauen",
-        "timestamp": "Zeitstempel",
-        "faceDesc": "Details für das Gesicht und der zugehörigen Person",
-        "face": "Gesichtsdetails"
-    },
-    "uploadFaceImage": {
-        "title": "Lade Gesichtsbild hoch",
-        "desc": "Lade ein Bild zur Gesichtserkennung hoch und füge es für {{pageToggle}} hinzu"
-    },
-    "createFaceLibrary": {
-        "title": "Kollektion erstellen",
-        "new": "Lege ein neues Gesicht an",
-        "desc": "Erstelle eine neue Kollektion"
-    },
-    "documentTitle": "Gesichtsbibliothek - Frigate",
-    "selectItem": "Wähle {{item}}"
+  "description": {
+    "placeholder": "Gib einen Name für diese Kollektion ein",
+    "addFace": "Anleitung für das Hinzufügen einer neuen Kollektion zur Gesichtsbibliothek."
+  },
+  "details": {
+    "person": "Person",
+    "confidence": "Vertrauen",
+    "timestamp": "Zeitstempel",
+    "faceDesc": "Details für das Gesicht und der zugehörigen Person",
+    "face": "Gesichtsdetails"
+  },
+  "uploadFaceImage": {
+    "title": "Lade Gesichtsbild hoch",
+    "desc": "Lade ein Bild zur Gesichtserkennung hoch und füge es für {{pageToggle}} hinzu"
+  },
+  "createFaceLibrary": {
+    "title": "Kollektion erstellen",
+    "new": "Lege ein neues Gesicht an",
+    "desc": "Erstelle eine neue Kollektion"
+  },
+  "documentTitle": "Gesichtsbibliothek - Frigate",
+  "selectItem": "Wähle {{item}}"
 }

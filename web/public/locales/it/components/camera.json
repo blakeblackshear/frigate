@@ -1,10 +1,10 @@
 {
-    "group": {
-        "label": "Gruppo di Telecamere",
-        "add": "Aggiungi Gruppo di Telecamere",
-        "delete": {
-            "label": "Cancella Gruppo di Telecamere"
-        },
-        "edit": "Modifica Gruppo di Telecamere"
-    }
+  "group": {
+    "label": "Gruppo di Telecamere",
+    "add": "Aggiungi Gruppo di Telecamere",
+    "delete": {
+      "label": "Cancella Gruppo di Telecamere"
+    },
+    "edit": "Modifica Gruppo di Telecamere"
+  }
 }

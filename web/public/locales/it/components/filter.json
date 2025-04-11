@@ -1,10 +1,10 @@
 {
-    "filter": "Filtro",
-    "labels": {
-        "label": "Etichette",
-        "all": {
-            "title": "Tutte le Etichette",
-            "short": "Etichette"
-        }
+  "filter": "Filtro",
+  "labels": {
+    "label": "Etichette",
+    "all": {
+      "title": "Tutte le Etichette",
+      "short": "Etichette"
     }
+  }
 }

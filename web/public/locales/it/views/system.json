@@ -1,8 +1,8 @@
 {
-    "documentTitle": {
-        "cameras": "Statistiche Telecamere - Frigate",
-        "enrichments": "Statistiche di arricchimento - Frigate",
-        "storage": "Statistiche Storage - Frigate",
-        "general": "Statistiche Generali - Frigate"
-    }
+  "documentTitle": {
+    "cameras": "Statistiche Telecamere - Frigate",
+    "enrichments": "Statistiche di arricchimento - Frigate",
+    "storage": "Statistiche Storage - Frigate",
+    "general": "Statistiche Generali - Frigate"
+  }
 }

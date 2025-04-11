@@ -1,47 +1,47 @@
 {
-    "documentTitle": "Direct - Frigate",
-    "lowBandwidthMode": "Mode faible bande-passante",
-    "documentTitle.withCamera": "{{camera}} - Direct - Frigate",
-    "twoWayTalk": {
-        "disable": "Désactiver la conversation bidirectionnelle",
-        "enable": "Activer la conversation bidirectionnelle"
+  "documentTitle": "Direct - Frigate",
+  "lowBandwidthMode": "Mode faible bande-passante",
+  "documentTitle.withCamera": "{{camera}} - Direct - Frigate",
+  "twoWayTalk": {
+    "disable": "Désactiver la conversation bidirectionnelle",
+    "enable": "Activer la conversation bidirectionnelle"
+  },
+  "cameraAudio": {
+    "disable": "Désactiver le son de la caméra",
+    "enable": "Activer le son de la caméra"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Cliquez dans l'image pour centrer la caméra",
+        "enable": "Activer le click pour déplacer",
+        "disable": "Désactiver le click pour déplacer"
+      },
+      "left": {
+        "label": "Déplacer la caméra PTZ sur la gauche"
+      },
+      "up": {
+        "label": "Déplacer la caméra PTZ ver le haut"
+      },
+      "right": {
+        "label": "Déplacer la caméra PTZ vers la droite"
+      },
+      "down": {
+        "label": "Déplacer la caméra PTZ vers le bas"
+      }
     },
-    "cameraAudio": {
-        "disable": "Désactiver le son de la caméra",
-        "enable": "Activer le son de la caméra"
+    "zoom": {
+      "in": {
+        "label": "Zoomer vers l'avant la caméra PTZ"
+      },
+      "out": {
+        "label": "Zoom arrière de la caméra PTZ"
+      }
     },
-    "ptz": {
-        "move": {
-            "clickMove": {
-                "label": "Cliquez dans l'image pour centrer la caméra",
-                "enable": "Activer le click pour déplacer",
-                "disable": "Désactiver le click pour déplacer"
-            },
-            "left": {
-                "label": "Déplacer la caméra PTZ sur la gauche"
-            },
-            "up": {
-                "label": "Déplacer la caméra PTZ ver le haut"
-            },
-            "right": {
-                "label": "Déplacer la caméra PTZ vers la droite"
-            },
-            "down": {
-                "label": "Déplacer la caméra PTZ vers le bas"
-            }
-        },
-        "zoom": {
-            "in": {
-                "label": "Zoomer vers l'avant la caméra PTZ"
-            },
-            "out": {
-                "label": "Zoom arrière de la caméra PTZ"
-            }
-        },
-        "frame": {
-            "center": {
-                "label": "Cliquez dans l'image pour centrer la caméra PTZ"
-            }
-        }
+    "frame": {
+      "center": {
+        "label": "Cliquez dans l'image pour centrer la caméra PTZ"
+      }
     }
+  }
 }

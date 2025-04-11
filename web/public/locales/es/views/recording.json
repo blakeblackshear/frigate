@@ -1,12 +1,12 @@
 {
-    "export": "Exportar",
-    "calendar": "Calendario",
-    "filter": "Filtro",
-    "filters": "Filtros",
-    "toast": {
-        "error": {
-            "noValidTimeSelected": "No se ha seleccionado un rango de tiempo válido",
-            "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio"
-        }
+  "export": "Exportar",
+  "calendar": "Calendario",
+  "filter": "Filtro",
+  "filters": "Filtros",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "No se ha seleccionado un rango de tiempo válido",
+      "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio"
     }
+  }
 }

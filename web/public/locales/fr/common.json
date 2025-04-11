@@ -1,173 +1,173 @@
 {
-    "time": {
-        "untilForRestart": "Jusqu'au redémarrage de Frigate.",
-        "untilRestart": "Jusqu'au redémarrage",
-        "untilForTime": "Jusqu'à {{time}}",
-        "justNow": "À l'instant",
-        "today": "Aujourd'hui",
-        "last7": "7 derniers jours",
-        "last14": "14 derniers jours",
-        "ago": "{{timeAgo}} avant",
-        "yesterday": "Hier",
-        "last30": "30 derniers jours",
-        "thisWeek": "Cette semaine",
-        "lastWeek": "Semaine dernière",
-        "thisMonth": "Ce mois-ci",
-        "lastMonth": "Mois dernier",
-        "10minutes": "10 minutes",
-        "5minutes": "5 minutes",
-        "30minutes": "30 minutes",
-        "12hours": "12 heures",
-        "h": "{{time}}h",
-        "pm": "PM",
-        "am": "AM",
-        "yr": "{{time}}a",
-        "year": "{{time}} années",
-        "mo": "{{time}}m",
-        "month": "{{time}} mois",
-        "s": "{{time}}s",
-        "second": "{{time}} secondes",
-        "m": "{{time}}m",
-        "hour": "{{time}} heures",
-        "24hours": "24 heures",
-        "minute": "{{time}} minutes",
-        "d": "{{time}}j",
-        "day": "{{time}} jours",
-        "1hour": "1 heure"
+  "time": {
+    "untilForRestart": "Jusqu'au redémarrage de Frigate.",
+    "untilRestart": "Jusqu'au redémarrage",
+    "untilForTime": "Jusqu'à {{time}}",
+    "justNow": "À l'instant",
+    "today": "Aujourd'hui",
+    "last7": "7 derniers jours",
+    "last14": "14 derniers jours",
+    "ago": "{{timeAgo}} avant",
+    "yesterday": "Hier",
+    "last30": "30 derniers jours",
+    "thisWeek": "Cette semaine",
+    "lastWeek": "Semaine dernière",
+    "thisMonth": "Ce mois-ci",
+    "lastMonth": "Mois dernier",
+    "10minutes": "10 minutes",
+    "5minutes": "5 minutes",
+    "30minutes": "30 minutes",
+    "12hours": "12 heures",
+    "h": "{{time}}h",
+    "pm": "PM",
+    "am": "AM",
+    "yr": "{{time}}a",
+    "year": "{{time}} années",
+    "mo": "{{time}}m",
+    "month": "{{time}} mois",
+    "s": "{{time}}s",
+    "second": "{{time}} secondes",
+    "m": "{{time}}m",
+    "hour": "{{time}} heures",
+    "24hours": "24 heures",
+    "minute": "{{time}} minutes",
+    "d": "{{time}}j",
+    "day": "{{time}} jours",
+    "1hour": "1 heure"
+  },
+  "button": {
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "disabled": "Désactivé",
+    "save": "Sauvegarder",
+    "saving": "Sauvegarde ...",
+    "close": "Fermer",
+    "copy": "Copier",
+    "back": "Retour",
+    "history": "Historique",
+    "pictureInPicture": "Image en incrustation",
+    "twoWayTalk": "Discussion dans les 2 sens",
+    "off": "Inactif",
+    "edit": "Editer",
+    "copyCoordinates": "Copier les coordonnées",
+    "delete": "Supprimer",
+    "yes": "Oui",
+    "no": "Non",
+    "unsuspended": "Ré-activer",
+    "play": "Play",
+    "unselect": "Désélectionner",
+    "suspended": "Suspendu",
+    "enable": "Activer",
+    "enabled": "Activé",
+    "info": "Info",
+    "disable": "Désactiver",
+    "cancel": "Annuler",
+    "fullscreen": "Plein écran",
+    "next": "Suivant",
+    "exitFullscreen": "Sortir du mode plein écran",
+    "cameraAudio": "Son de la caméra",
+    "on": "Actif",
+    "export": "Exporter",
+    "deleteNow": "Supprimer immédiatement",
+    "download": "Télécharger",
+    "done": "Terminé"
+  },
+  "menu": {
+    "configuration": "Configuration",
+    "language": {
+      "en": "Anglais"
     },
-    "button": {
-        "apply": "Appliquer",
-        "reset": "Réinitialiser",
-        "disabled": "Désactivé",
-        "save": "Sauvegarder",
-        "saving": "Sauvegarde ...",
-        "close": "Fermer",
-        "copy": "Copier",
-        "back": "Retour",
-        "history": "Historique",
-        "pictureInPicture": "Image en incrustation",
-        "twoWayTalk": "Discussion dans les 2 sens",
-        "off": "Inactif",
-        "edit": "Editer",
-        "copyCoordinates": "Copier les coordonnées",
-        "delete": "Supprimer",
-        "yes": "Oui",
-        "no": "Non",
-        "unsuspended": "Ré-activer",
-        "play": "Play",
-        "unselect": "Désélectionner",
-        "suspended": "Suspendu",
-        "enable": "Activer",
-        "enabled": "Activé",
-        "info": "Info",
-        "disable": "Désactiver",
-        "cancel": "Annuler",
-        "fullscreen": "Plein écran",
-        "next": "Suivant",
-        "exitFullscreen": "Sortir du mode plein écran",
-        "cameraAudio": "Son de la caméra",
-        "on": "Actif",
-        "export": "Exporter",
-        "deleteNow": "Supprimer immédiatement",
-        "download": "Télécharger",
-        "done": "Terminé"
+    "appearance": "Apparence",
+    "darkMode": {
+      "light": "Mode clair",
+      "dark": "Sombre",
+      "withSystem": {
+        "label": "Utiliser les paramètres système pour le mode clair ou sombre"
+      },
+      "label": "Mode sombre"
     },
-    "menu": {
-        "configuration": "Configuration",
-        "language": {
-            "en": "Anglais"
-        },
-        "appearance": "Apparence",
-        "darkMode": {
-            "light": "Mode clair",
-            "dark": "Sombre",
-            "withSystem": {
-                "label": "Utiliser les paramètres système pour le mode clair ou sombre"
-            },
-            "label": "Mode sombre"
-        },
-        "review": "Contrôler",
-        "explore": "Explorer",
-        "export": "Exporter",
-        "user": {
-            "account": "Compte",
-            "logout": "Se déconnecter",
-            "setPassword": "Configurer un mot de passe",
-            "current": "Utilisateur : {{user}}",
-            "title": "Utilisateur",
-            "anonymous": "anonyme"
-        },
-        "systemLogs": "Journaux système",
-        "documentation": {
-            "title": "Documentation",
-            "label": "Documentation de Frigate"
-        },
-        "system": "Système",
-        "help": "Aide",
-        "configurationEditor": "Editeur de configuration",
-        "theme": {
-            "contrast": "Contraste élevé",
-            "blue": "Bleu",
-            "green": "Vert",
-            "nord": "Nord",
-            "red": "Rouge",
-            "default": "Défaut",
-            "label": "Thème"
-        },
-        "systemMetrics": "Indicateurs systèmes",
-        "settings": "Paramètres",
-        "withSystem": "Système",
-        "restart": "Redémarrer Frigate",
-        "live": {
-            "cameras": {
-                "count_one": "{{count}} Camera",
-                "count_many": "{{count}} Cameras",
-                "count_other": "",
-                "title": "Caméras"
-            },
-            "allCameras": "Toutes les caméras",
-            "title": "Temps réel"
-        },
-        "uiPlayground": "Gestion de l'interface",
-        "faceLibrary": "Librairie des visages",
-        "languages": "Langues"
+    "review": "Contrôler",
+    "explore": "Explorer",
+    "export": "Exporter",
+    "user": {
+      "account": "Compte",
+      "logout": "Se déconnecter",
+      "setPassword": "Configurer un mot de passe",
+      "current": "Utilisateur : {{user}}",
+      "title": "Utilisateur",
+      "anonymous": "anonyme"
     },
-    "toast": {
-        "save": {
-            "title": "Sauvegarder"
-        },
-        "copyUrlToClipboard": "Lien copié dans le presse-papier."
+    "systemLogs": "Journaux système",
+    "documentation": {
+      "title": "Documentation",
+      "label": "Documentation de Frigate"
     },
-    "role": {
-        "title": "Rôle",
-        "viewer": "Spectateur",
-        "admin": "Administrateur",
-        "desc": "Les Administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les Spectateurs sont limités à la consultation des caméras, au contrôle des évènements et à l'historique des enregistrements."
+    "system": "Système",
+    "help": "Aide",
+    "configurationEditor": "Editeur de configuration",
+    "theme": {
+      "contrast": "Contraste élevé",
+      "blue": "Bleu",
+      "green": "Vert",
+      "nord": "Nord",
+      "red": "Rouge",
+      "default": "Défaut",
+      "label": "Thème"
     },
-    "pagination": {
-        "next": {
-            "title": "Suivant",
-            "label": "Aller à la page suivante"
-        },
-        "more": "Plus de pages",
-        "previous": {
-            "label": "Aller à la page précédente",
-            "title": "Précédent"
-        },
-        "label": "pagination"
+    "systemMetrics": "Indicateurs systèmes",
+    "settings": "Paramètres",
+    "withSystem": "Système",
+    "restart": "Redémarrer Frigate",
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} Camera",
+        "count_many": "{{count}} Cameras",
+        "count_other": "",
+        "title": "Caméras"
+      },
+      "allCameras": "Toutes les caméras",
+      "title": "Temps réel"
     },
-    "notFound": {
-        "title": "404",
-        "documentTitle": "Non trouvé - Frigate",
-        "desc": "Page non trouvée"
+    "uiPlayground": "Gestion de l'interface",
+    "faceLibrary": "Librairie des visages",
+    "languages": "Langues"
+  },
+  "toast": {
+    "save": {
+      "title": "Sauvegarder"
     },
-    "selectItem": "Sélectionner {{item}}",
-    "accessDenied": {
-        "title": "Accés refusé",
-        "documentTitle": "Accés refusé - Frigate",
-        "desc": "Vous n'avez pas l'autorisation de voir cette page."
+    "copyUrlToClipboard": "Lien copié dans le presse-papier."
+  },
+  "role": {
+    "title": "Rôle",
+    "viewer": "Spectateur",
+    "admin": "Administrateur",
+    "desc": "Les Administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les Spectateurs sont limités à la consultation des caméras, au contrôle des évènements et à l'historique des enregistrements."
+  },
+  "pagination": {
+    "next": {
+      "title": "Suivant",
+      "label": "Aller à la page suivante"
     },
-    "label": {
-        "back": "Retour"
-    }
+    "more": "Plus de pages",
+    "previous": {
+      "label": "Aller à la page précédente",
+      "title": "Précédent"
+    },
+    "label": "pagination"
+  },
+  "notFound": {
+    "title": "404",
+    "documentTitle": "Non trouvé - Frigate",
+    "desc": "Page non trouvée"
+  },
+  "selectItem": "Sélectionner {{item}}",
+  "accessDenied": {
+    "title": "Accés refusé",
+    "documentTitle": "Accés refusé - Frigate",
+    "desc": "Vous n'avez pas l'autorisation de voir cette page."
+  },
+  "label": {
+    "back": "Retour"
+  }
 }

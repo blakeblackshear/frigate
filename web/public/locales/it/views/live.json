@@ -1,8 +1,8 @@
 {
-    "documentTitle": "Dal vivo - Frigate",
-    "documentTitle.withCamera": "{{camera}} - Dal Vivo - Frigate",
-    "lowBandwidthMode": "Modalità banda-ridotta",
-    "twoWayTalk": {
-        "enable": "Abilita Audio a 2 Vie"
-    }
+  "documentTitle": "Dal vivo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Dal Vivo - Frigate",
+  "lowBandwidthMode": "Modalità banda-ridotta",
+  "twoWayTalk": {
+    "enable": "Abilita Audio a 2 Vie"
+  }
 }

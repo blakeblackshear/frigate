@@ -1,8 +1,8 @@
 {
-    "car": "Bil",
-    "person": "Person",
-    "bicycle": "Cykel",
-    "motorcycle": "Motorcykel",
-    "airplane": "Flygplan",
-    "bus": "Buss"
+  "car": "Bil",
+  "person": "Person",
+  "bicycle": "Cykel",
+  "motorcycle": "Motorcykel",
+  "airplane": "Flygplan",
+  "bus": "Buss"
 }

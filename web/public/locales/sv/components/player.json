@@ -1,13 +1,13 @@
 {
-    "noPreviewFound": "Ingen Förhandsvisning Hittad",
-    "noRecordingsFoundForThisTime": "Inga inspelningar hittade för denna tid",
-    "noPreviewFoundFor": "Ingen förhandsvisning hittad för {{cameraName}}",
-    "submitFrigatePlus": {
-        "title": "Skicka denna bild till Frigate+?",
-        "submit": "Skicka"
-    },
-    "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
-    "streamOffline": {
-        "title": "Ström ej tillgänglig"
-    }
+  "noPreviewFound": "Ingen Förhandsvisning Hittad",
+  "noRecordingsFoundForThisTime": "Inga inspelningar hittade för denna tid",
+  "noPreviewFoundFor": "Ingen förhandsvisning hittad för {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Skicka denna bild till Frigate+?",
+    "submit": "Skicka"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
+  "streamOffline": {
+    "title": "Ström ej tillgänglig"
+  }
 }

@@ -1,24 +1,24 @@
 {
-    "restart": {
-        "title": "Möchten Sie Frigate wirklich neu starten?",
-        "restarting": {
-            "title": "Frigate startet neu",
-            "content": "Diese Seite wird in {{countdown}} Sekunde(n) aktualisiert."
-        },
-        "button": "Neustart"
+  "restart": {
+    "title": "Möchten Sie Frigate wirklich neu starten?",
+    "restarting": {
+      "title": "Frigate startet neu",
+      "content": "Diese Seite wird in {{countdown}} Sekunde(n) aktualisiert."
     },
-    "explore": {
-        "plus": {
-            "review": {
-                "true": {
-                    "label": "Bestätigen Sie das Label für Frigate Plus",
-                    "true_one": "Das ist ein/eine {{label}}",
-                    "true_other": ""
-                }
-            },
-            "submitToPlus": {
-                "label": "An Frigate+ übermitteln"
-            }
+    "button": "Neustart"
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "true": {
+          "label": "Bestätigen Sie das Label für Frigate Plus",
+          "true_one": "Das ist ein/eine {{label}}",
+          "true_other": ""
         }
+      },
+      "submitToPlus": {
+        "label": "An Frigate+ übermitteln"
+      }
     }
+  }
 }

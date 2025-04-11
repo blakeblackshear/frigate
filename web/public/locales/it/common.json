@@ -1,204 +1,204 @@
 {
-    "time": {
-        "last14": "Ultimi 14 giorni",
-        "pm": "pm",
-        "last30": "Ultimi 30 giorni",
-        "untilRestart": "Fino al riavvio",
-        "yesterday": "Ieri",
-        "am": "am",
-        "untilForTime": "Fino alle {{time}}",
-        "minute": "{{time}} minuti",
-        "5minutes": "5 minuti",
-        "24hours": "24 ore",
-        "second": "{{time}} secondi",
-        "untilForRestart": "Fino al riavvio di Frigate.",
-        "ago": "{{timeAgo}} fa",
-        "justNow": "Adesso",
-        "today": "Oggi",
-        "last7": "Ultimi 7 giorni",
-        "thisWeek": "Questa Settimana",
-        "lastWeek": "Settimana Scorsa",
-        "thisMonth": "Questo Mese",
-        "lastMonth": "Mese Scorso",
-        "10minutes": "10 minuti",
-        "30minutes": "30 minuti",
-        "1hour": "1 ora",
-        "12hours": "12 ore",
-        "year": "{{time}} anni",
-        "month": "{{time}} mesi",
-        "day": "{{time}} giorni",
-        "hour": "{{time}} ore",
-        "yr": "{{time}}anno",
-        "mo": "{{time}}mese",
-        "d": "{{time}}giorno",
-        "h": "{{time}}ora",
-        "m": "{{time}}minuto",
-        "s": "{{time}}secondo",
-        "formattedTimestamp": {
-            "12hour": "%b %-d, %I:%M:%S %p",
-            "24hour": "%b %-d, %H:%M:%S"
-        },
-        "formattedTimestamp2": {
-            "12hour": "%m/%d %I:%M:%S%P",
-            "24hour": "%d %b %H:%M:%S"
-        },
-        "formattedTimestampExcludeSeconds": {
-            "12hour": "%b %-d, %I:%M %p",
-            "24hour": "%b %-d, %H:%M"
-        },
-        "formattedTimestampWithYear": {
-            "12hour": "%b %-d %Y, %I:%M %p",
-            "24hour": "%b %-d %Y, %H:%M"
-        },
-        "formattedTimestampOnlyMonthAndDay": "%b %-d"
+  "time": {
+    "last14": "Ultimi 14 giorni",
+    "pm": "pm",
+    "last30": "Ultimi 30 giorni",
+    "untilRestart": "Fino al riavvio",
+    "yesterday": "Ieri",
+    "am": "am",
+    "untilForTime": "Fino alle {{time}}",
+    "minute": "{{time}} minuti",
+    "5minutes": "5 minuti",
+    "24hours": "24 ore",
+    "second": "{{time}} secondi",
+    "untilForRestart": "Fino al riavvio di Frigate.",
+    "ago": "{{timeAgo}} fa",
+    "justNow": "Adesso",
+    "today": "Oggi",
+    "last7": "Ultimi 7 giorni",
+    "thisWeek": "Questa Settimana",
+    "lastWeek": "Settimana Scorsa",
+    "thisMonth": "Questo Mese",
+    "lastMonth": "Mese Scorso",
+    "10minutes": "10 minuti",
+    "30minutes": "30 minuti",
+    "1hour": "1 ora",
+    "12hours": "12 ore",
+    "year": "{{time}} anni",
+    "month": "{{time}} mesi",
+    "day": "{{time}} giorni",
+    "hour": "{{time}} ore",
+    "yr": "{{time}}anno",
+    "mo": "{{time}}mese",
+    "d": "{{time}}giorno",
+    "h": "{{time}}ora",
+    "m": "{{time}}minuto",
+    "s": "{{time}}secondo",
+    "formattedTimestamp": {
+      "12hour": "%b %-d, %I:%M:%S %p",
+      "24hour": "%b %-d, %H:%M:%S"
     },
-    "button": {
-        "cancel": "Annulla",
-        "yes": "Sì",
-        "unselect": "Deseleziona",
-        "disabled": "Disabilitato",
-        "fullscreen": "A schermo intero",
-        "save": "Salva",
-        "no": "No",
-        "edit": "Modifica",
-        "export": "Esporta",
-        "disable": "Disabilita",
-        "apply": "Applica",
-        "reset": "Reimposta",
-        "done": "Fatto",
-        "enabled": "Abilitato",
-        "enable": "Abilita",
-        "saving": "Salvataggio...",
-        "copy": "Copia",
-        "history": "Storico",
-        "exitFullscreen": "Esci da schermo intero",
-        "on": "ON",
-        "copyCoordinates": "Copia coordinate",
-        "download": "Scarica",
-        "info": "Info",
-        "suspended": "Sospeso",
-        "unsuspended": "Riattiva",
-        "play": "Riproduci",
-        "deleteNow": "Elimina Ora",
-        "next": "Successivo",
-        "off": "OFF",
-        "delete": "Elimina",
-        "close": "Chiudi",
-        "back": "Indietro",
-        "pictureInPicture": "Picture in Picture",
-        "twoWayTalk": "Comunicazione a 2 vie",
-        "cameraAudio": "Audio della Telecamera"
+    "formattedTimestamp2": {
+      "12hour": "%m/%d %I:%M:%S%P",
+      "24hour": "%d %b %H:%M:%S"
     },
-    "unit": {
-        "speed": {
-            "kph": "km/h",
-            "mph": "miglia/h"
-        }
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
     },
-    "label": {
-        "back": "Indietro"
+    "formattedTimestampWithYear": {
+      "12hour": "%b %-d %Y, %I:%M %p",
+      "24hour": "%b %-d %Y, %H:%M"
     },
-    "menu": {
-        "configuration": "Configurazione",
-        "languages": "Lingue",
-        "appearance": "Aspetto",
-        "systemMetrics": "Metriche di Sistema",
-        "systemLogs": "Eventi di sistema",
-        "settings": "Impostazioni",
-        "configurationEditor": "Editor di Configurazione",
-        "language": {
-            "en": "Inglese",
-            "zhCN": "Cinese Semplificato",
-            "withSystem": {
-                "label": "Usa la lingua di sistema"
-            }
-        },
-        "darkMode": {
-            "label": "Modalità Scura",
-            "light": "Chiara",
-            "dark": "Scura",
-            "withSystem": {
-                "label": "Usa le impostazioni di sistema per le modalità chiara/scura"
-            }
-        },
-        "system": "Sistema",
-        "theme": {
-            "label": "Tema",
-            "blue": "Blu",
-            "contrast": "Alto Contrasto",
-            "green": "Verde",
-            "default": "Predefinito",
-            "red": "Rosso",
-            "nord": "Nord"
-        },
-        "live": {
-            "cameras": {
-                "title": "Telecamere",
-                "count_one": "{{count}} Telecamera",
-                "count_many": "{{count}} Telecamere",
-                "count_other": "{{count}} Telecamere"
-            },
-            "title": "Dal vivo",
-            "allCameras": "Tutte le telecamere"
-        },
-        "help": "Aiuto",
-        "documentation": {
-            "title": "Documentazione",
-            "label": "Documentazione di Frigate"
-        },
-        "restart": "Riavvia Frigate",
-        "review": "Rivedi",
-        "explore": "Esplora",
-        "export": "Esporta",
-        "uiPlayground": "Interfaccia Laboratorio",
-        "user": {
-            "account": "Account",
-            "current": "Utente Attuale: {{user}}",
-            "anonymous": "anonimo",
-            "logout": "Esci",
-            "title": "Utente",
-            "setPassword": "Imposta Password"
-        },
-        "withSystem": "Sistema",
-        "faceLibrary": "Raccolta Volti"
+    "formattedTimestampOnlyMonthAndDay": "%b %-d"
+  },
+  "button": {
+    "cancel": "Annulla",
+    "yes": "Sì",
+    "unselect": "Deseleziona",
+    "disabled": "Disabilitato",
+    "fullscreen": "A schermo intero",
+    "save": "Salva",
+    "no": "No",
+    "edit": "Modifica",
+    "export": "Esporta",
+    "disable": "Disabilita",
+    "apply": "Applica",
+    "reset": "Reimposta",
+    "done": "Fatto",
+    "enabled": "Abilitato",
+    "enable": "Abilita",
+    "saving": "Salvataggio...",
+    "copy": "Copia",
+    "history": "Storico",
+    "exitFullscreen": "Esci da schermo intero",
+    "on": "ON",
+    "copyCoordinates": "Copia coordinate",
+    "download": "Scarica",
+    "info": "Info",
+    "suspended": "Sospeso",
+    "unsuspended": "Riattiva",
+    "play": "Riproduci",
+    "deleteNow": "Elimina Ora",
+    "next": "Successivo",
+    "off": "OFF",
+    "delete": "Elimina",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "pictureInPicture": "Picture in Picture",
+    "twoWayTalk": "Comunicazione a 2 vie",
+    "cameraAudio": "Audio della Telecamera"
+  },
+  "unit": {
+    "speed": {
+      "kph": "km/h",
+      "mph": "miglia/h"
+    }
+  },
+  "label": {
+    "back": "Indietro"
+  },
+  "menu": {
+    "configuration": "Configurazione",
+    "languages": "Lingue",
+    "appearance": "Aspetto",
+    "systemMetrics": "Metriche di Sistema",
+    "systemLogs": "Eventi di sistema",
+    "settings": "Impostazioni",
+    "configurationEditor": "Editor di Configurazione",
+    "language": {
+      "en": "Inglese",
+      "zhCN": "Cinese Semplificato",
+      "withSystem": {
+        "label": "Usa la lingua di sistema"
+      }
     },
-    "pagination": {
-        "next": {
-            "title": "Successiva",
-            "label": "Vai alla pagina successiva"
-        },
-        "previous": {
-            "label": "Vai alla pagina precedente",
-            "title": "Precedente"
-        },
-        "label": "paginazione",
-        "more": "Altre pagine"
+    "darkMode": {
+      "label": "Modalità Scura",
+      "light": "Chiara",
+      "dark": "Scura",
+      "withSystem": {
+        "label": "Usa le impostazioni di sistema per le modalità chiara/scura"
+      }
     },
-    "role": {
-        "title": "Ruolo",
-        "admin": "Amministratore",
-        "viewer": "Osservatore",
-        "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Osservatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
+    "system": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Blu",
+      "contrast": "Alto Contrasto",
+      "green": "Verde",
+      "default": "Predefinito",
+      "red": "Rosso",
+      "nord": "Nord"
     },
-    "accessDenied": {
-        "desc": "Non hai i permessi per visualizzare questa pagina.",
-        "documentTitle": "Accesso Vietato - Frigate",
-        "title": "Accesso Vietato"
+    "live": {
+      "cameras": {
+        "title": "Telecamere",
+        "count_one": "{{count}} Telecamera",
+        "count_many": "{{count}} Telecamere",
+        "count_other": "{{count}} Telecamere"
+      },
+      "title": "Dal vivo",
+      "allCameras": "Tutte le telecamere"
     },
-    "notFound": {
-        "desc": "Pagina non trovata",
-        "documentTitle": "Non Trovato - Frigate",
-        "title": "404"
+    "help": "Aiuto",
+    "documentation": {
+      "title": "Documentazione",
+      "label": "Documentazione di Frigate"
     },
-    "toast": {
-        "copyUrlToClipboard": "URL copiata negli appunti.",
-        "save": {
-            "error": {
-                "title": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
-                "noMessage": "Impossibile salvare le modifiche alla configurazione"
-            },
-            "title": "Salva"
-        }
+    "restart": "Riavvia Frigate",
+    "review": "Rivedi",
+    "explore": "Esplora",
+    "export": "Esporta",
+    "uiPlayground": "Interfaccia Laboratorio",
+    "user": {
+      "account": "Account",
+      "current": "Utente Attuale: {{user}}",
+      "anonymous": "anonimo",
+      "logout": "Esci",
+      "title": "Utente",
+      "setPassword": "Imposta Password"
     },
-    "selectItem": "Seleziona {{item}}"
+    "withSystem": "Sistema",
+    "faceLibrary": "Raccolta Volti"
+  },
+  "pagination": {
+    "next": {
+      "title": "Successiva",
+      "label": "Vai alla pagina successiva"
+    },
+    "previous": {
+      "label": "Vai alla pagina precedente",
+      "title": "Precedente"
+    },
+    "label": "paginazione",
+    "more": "Altre pagine"
+  },
+  "role": {
+    "title": "Ruolo",
+    "admin": "Amministratore",
+    "viewer": "Osservatore",
+    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Osservatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
+  },
+  "accessDenied": {
+    "desc": "Non hai i permessi per visualizzare questa pagina.",
+    "documentTitle": "Accesso Vietato - Frigate",
+    "title": "Accesso Vietato"
+  },
+  "notFound": {
+    "desc": "Pagina non trovata",
+    "documentTitle": "Non Trovato - Frigate",
+    "title": "404"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL copiata negli appunti.",
+    "save": {
+      "error": {
+        "title": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
+        "noMessage": "Impossibile salvare le modifiche alla configurazione"
+      },
+      "title": "Salva"
+    }
+  },
+  "selectItem": "Seleziona {{item}}"
 }

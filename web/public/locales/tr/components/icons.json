@@ -1,8 +1,8 @@
 {
-    "iconPicker": {
-        "search": {
-            "placeholder": "Bir simge arayın..."
-        },
-        "selectIcon": "Bir simge belirleyin"
-    }
+  "iconPicker": {
+    "search": {
+      "placeholder": "Bir simge arayın..."
+    },
+    "selectIcon": "Bir simge belirleyin"
+  }
 }

@@ -1,5 +1,5 @@
 {
-    "time": {
-        "untilForTime": "Do {{time}}"
-    }
+  "time": {
+    "untilForTime": "Do {{time}}"
+  }
 }

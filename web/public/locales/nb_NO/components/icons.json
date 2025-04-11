@@ -1,8 +1,8 @@
 {
-    "iconPicker": {
-        "selectIcon": "Velg et ikon",
-        "search": {
-            "placeholder": "Søk etter et ikon..."
-        }
+  "iconPicker": {
+    "selectIcon": "Velg et ikon",
+    "search": {
+      "placeholder": "Søk etter et ikon..."
     }
+  }
 }

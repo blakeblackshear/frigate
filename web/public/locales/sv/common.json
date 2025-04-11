@@ -1,13 +1,13 @@
 {
-    "time": {
-        "untilForTime": "Till {{time}}",
-        "untilForRestart": "Tills Frigate startar om.",
-        "untilRestart": "Tills omstart",
-        "ago": "{{timeAgo}} sedan",
-        "justNow": "Just nu",
-        "today": "Idag"
-    },
-    "button": {
-        "save": "Spara"
-    }
+  "time": {
+    "untilForTime": "Till {{time}}",
+    "untilForRestart": "Tills Frigate startar om.",
+    "untilRestart": "Tills omstart",
+    "ago": "{{timeAgo}} sedan",
+    "justNow": "Just nu",
+    "today": "Idag"
+  },
+  "button": {
+    "save": "Spara"
+  }
 }

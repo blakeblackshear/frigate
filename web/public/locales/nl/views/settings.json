@@ -1,10 +1,10 @@
 {
-    "documentTitle": {
-        "default": "Instellingen - Frigate",
-        "camera": "Camera-instellingen - Frigate",
-        "authentication": "Authenticatie-instellingen - Frigate",
-        "motionTuner": "Motion Tuner - Frigate",
-        "classification": "Classificatie-instellingen - Frigate",
-        "masksAndZones": "Masker- en zone-editor - Frigate"
-    }
+  "documentTitle": {
+    "default": "Instellingen - Frigate",
+    "camera": "Camera-instellingen - Frigate",
+    "authentication": "Authenticatie-instellingen - Frigate",
+    "motionTuner": "Motion Tuner - Frigate",
+    "classification": "Classificatie-instellingen - Frigate",
+    "masksAndZones": "Masker- en zone-editor - Frigate"
+  }
 }

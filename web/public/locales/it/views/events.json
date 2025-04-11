@@ -1,19 +1,19 @@
 {
-    "alerts": "Avvisi",
-    "detections": "Rilevazioni",
-    "motion": {
-        "label": "Movimento",
-        "only": "Solo Movimento"
-    },
-    "empty": {
-        "alert": "Non ci sono avvisi da rivedere",
-        "detection": "Non ci sono rilevamenti da rivedere"
-    },
-    "newReviewItems": {
-        "label": "Visualizza i nuovi elementi da rivedere",
-        "button": "Nuovi Oggetti da Rivedere"
-    },
-    "markTheseItemsAsReviewed": "Segna questi oggetti come visti",
-    "markAsReviewed": "Segna come Visto",
-    "documentTitle": "Rivedi - Frigate"
+  "alerts": "Avvisi",
+  "detections": "Rilevazioni",
+  "motion": {
+    "label": "Movimento",
+    "only": "Solo Movimento"
+  },
+  "empty": {
+    "alert": "Non ci sono avvisi da rivedere",
+    "detection": "Non ci sono rilevamenti da rivedere"
+  },
+  "newReviewItems": {
+    "label": "Visualizza i nuovi elementi da rivedere",
+    "button": "Nuovi Oggetti da Rivedere"
+  },
+  "markTheseItemsAsReviewed": "Segna questi oggetti come visti",
+  "markAsReviewed": "Segna come Visto",
+  "documentTitle": "Rivedi - Frigate"
 }
