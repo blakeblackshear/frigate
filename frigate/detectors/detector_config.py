@@ -47,6 +47,7 @@ class ModelConfig(BaseModel):
     labelmap_path: Optional[str] = Field(
         None, title="Label map for custom object detector."
     )
+    max_batch: int = Field(default=4, title="Max batch size.")
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(

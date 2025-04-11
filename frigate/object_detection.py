@@ -18,7 +18,7 @@ from frigate.detectors.detector_config import (
     InputTensorEnum,
 )
 from frigate.util.builtin import EventsPerSecond, load_labels
-from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
+from frigate.util.image import SharedMemoryFrameManager, SharedMemoryResultManager
 from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
@@ -111,23 +111,19 @@ def run_detector(
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
+    result_manager = SharedMemoryResultManager()
     object_detector = LocalObjectDetector(detector_config=detector_config)
 
-    outputs = {}
     for name in out_events.keys():
-        out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
-        out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
-        outputs[name] = {"shm": out_shm, "np": out_np}
+        result_manager.create(name=f"out-{name}")
 
     while not stop_event.is_set():
         try:
             connection_id = detection_queue.get(timeout=1)
         except queue.Empty:
             continue
-        input_frame = frame_manager.get(
-            connection_id,
-            (1, detector_config.model.height, detector_config.model.width, 3),
-        )
+
+        input_frame = frame_manager.get_frame(connection_id)
 
         if input_frame is None:
             logger.warning(f"Failed to get frame {connection_id} from SHM")
@@ -138,7 +134,8 @@ def run_detector(
         detections = object_detector.detect_raw(input_frame)
         duration = datetime.datetime.now().timestamp() - start.value
         frame_manager.close(connection_id)
-        outputs[connection_id]["np"][:] = detections[:]
+
+        result_manager.write_result(f"out-{connection_id}", detections)
         out_events[connection_id].set()
         start.value = 0.0
 
@@ -198,21 +195,27 @@ class ObjectDetectProcess:
 
 
 class RemoteObjectDetector:
-    def __init__(self, name, labels, detection_queue, event, model_config, stop_event):
+    def __init__(
+        self,
+        name,
+        labels,
+        detection_queue,
+        event,
+        model_config,
+        stop_event,
+        frame_manager: SharedMemoryFrameManager,
+    ):
         self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue
         self.event = event
         self.stop_event = stop_event
-        self.shm = UntrackedSharedMemory(name=self.name, create=False)
-        self.np_shm = np.ndarray(
-            (1, model_config.height, model_config.width, 3),
-            dtype=np.uint8,
-            buffer=self.shm.buf,
+        self.frame_manager = frame_manager
+
+        self.result_manager = SharedMemoryResultManager(
+            max_frame=model_config.max_batch
         )
-        self.out_shm = UntrackedSharedMemory(name=f"out-{self.name}", create=False)
-        self.out_np_shm = np.ndarray((20, 6), dtype=np.float32, buffer=self.out_shm.buf)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -221,7 +224,8 @@ class RemoteObjectDetector:
             return detections
 
         # copy input to shared memory
-        self.np_shm[:] = tensor_input[:]
+        self.frame_manager.write_frame(self.name, tensor_input)
+
         self.event.clear()
         self.detection_queue.put(self.name)
         result = self.event.wait(timeout=5.0)
@@ -230,15 +234,23 @@ class RemoteObjectDetector:
         if result is None:
             return detections
 
-        for d in self.out_np_shm:
-            if d[1] < threshold:
-                break
-            detections.append(
-                (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
-            )
+        batch_result_np = self.result_manager.get_result(f"out-{self.name}")
+
+        if not isinstance(batch_result_np, np.ndarray):
+            return detections
+
+        for result_np in batch_result_np:
+            tmp_detections = []
+            for d in result_np:
+                if d[1] < threshold:
+                    break
+                tmp_detections.append(
+                    (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
+                )
+            detections.append(tmp_detections)
         self.fps.update()
         return detections
 
     def cleanup(self):
-        self.shm.unlink()
-        self.out_shm.unlink()
+        self.result_manager.cleanup()
+        self.frame_manager.cleanup()
