@@ -690,7 +690,7 @@ function FaceAttemptGroup({
       }}
     >
       <div className="flex flex-row justify-between">
-        <div className="capitalize">
+        <div className="select-none capitalize">
           Person
           {event?.sub_label
             ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
@@ -848,7 +848,7 @@ function FaceAttempt({
             : "outline-transparent duration-500",
         )}
       >
-        <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
+        <div className="relative w-full select-none overflow-hidden rounded-lg *:text-card-foreground">
           <img
             ref={imgRef}
             className={cn("size-44", isMobile && "w-full")}
@@ -866,7 +866,7 @@ function FaceAttempt({
             />
           </div>
         </div>
-        <div className="p-2">
+        <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start text-xs text-primary-variant">
               <div className="capitalize">{data.name}</div>
