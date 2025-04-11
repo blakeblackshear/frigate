@@ -109,7 +109,10 @@
       "zhCN": "简体中文 (Uproszczony Chiński)",
       "withSystem": {
         "label": "Użyj ustawień systemowych dla języka"
-      }
+      },
+      "es": "Hiszpański",
+      "cs": "Czeski",
+      "pl": "Polski"
     },
     "appearance": "Wygląd",
     "darkMode": {

@@ -1,3 +1,35 @@
 {
-  "camera": "Kamera"
+  "camera": "Kamera",
+  "empty": {
+    "alert": "Det er ingen varsler å gjennomgå",
+    "detection": "Det er ingen deteksjoner å gjennomgå",
+    "motion": "Ingen bevegelsesdata funnet"
+  },
+  "timeline": "Tidslinje",
+  "events": {
+    "label": "Hendelser",
+    "aria": "Velg hendelser",
+    "noFoundForTimePeriod": "Ingen hendelser funnet for denne tidsperioden."
+  },
+  "newReviewItems": {
+    "label": "Vis nye elementer for gjennomgang",
+    "button": "Nye elementer å gjennomgå"
+  },
+  "alerts": "Varsler",
+  "detections": "Deteksjoner",
+  "motion": {
+    "label": "Bevegelse",
+    "only": "Kun bevegelse"
+  },
+  "allCameras": "Alle kameraer",
+  "timeline.aria": "Velg tidslinje",
+  "documentTitle": "Gjennomgang - Frigate",
+  "recordings": {
+    "documentTitle": "Opptak - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Siste 24 timer"
+  },
+  "markAsReviewed": "Merk som gjennomgått",
+  "markTheseItemsAsReviewed": "Merk disse objektene som gjennomgått"
 }

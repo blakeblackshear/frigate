@@ -111,7 +111,33 @@
       "zhCN": "简体中文 (Vereenvoudigd Chinees)",
       "withSystem": {
         "label": "Gebruik de systeeminstellingen voor de taal"
-      }
+      },
+      "ar": "العربية (Arabisch)",
+      "pt": "Português (Portugees)",
+      "ru": "Русский (Russisch)",
+      "de": "Deutsch (Duits)",
+      "tr": "Türkçe (Turks)",
+      "it": "Italiano (Italiaans)",
+      "nl": "Nederlands (Nederlands)",
+      "sv": "Svenska (Zweeds)",
+      "cs": "Čeština (Tsjechisch)",
+      "fa": "فارسی (Perzisch)",
+      "pl": "Polski (Pools)",
+      "he": "עברית (Hebreeuws)",
+      "el": "Ελληνικά (Grieks)",
+      "ro": "Română (Roemeense)",
+      "hu": "Magyar (Hongaars)",
+      "fi": "Suomi (Fins)",
+      "da": "Dansk (Deens)",
+      "sk": "Slovenčina (Slowaaks)",
+      "ko": "한국어 (Koreaans)",
+      "nb": "Norsk Bokmål (Noors Bokmål)",
+      "fr": "Français (Frans)",
+      "uk": "Українська (Oekraïens)",
+      "es": "Español (Spaans)",
+      "vi": "Tiếng Việt (Vietnamees)",
+      "hi": "हिन्दी (Hindi)",
+      "ja": "日本語 (Japans)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -147,7 +173,7 @@
       "title": "Documentatie",
       "label": "Frigate documentatie"
     },
-    "review": "Beoordeling",
+    "review": "Beoordeel",
     "explore": "Verkennen",
     "export": "Exporteren",
     "uiPlayground": "Testgebied voor gebruikersinterface",

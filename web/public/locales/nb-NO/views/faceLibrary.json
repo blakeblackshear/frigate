@@ -1,3 +1,71 @@
 {
-  "selectItem": "Velg {{item}}"
+  "selectItem": "Velg {{item}}",
+  "description": {
+    "addFace": "Gå gjennom prosessen med å legge til en ny samling i ansiktsbiblioteket.",
+    "placeholder": "Skriv inn et navn for denne samlingen"
+  },
+  "details": {
+    "person": "Person",
+    "confidence": "Konfidens",
+    "face": "Ansiktsdetaljer",
+    "faceDesc": "Detaljer for ansiktet og tilknyttet objekt",
+    "timestamp": "Tidsstempel"
+  },
+  "documentTitle": "Ansiktsbibliotek – Frigate",
+  "createFaceLibrary": {
+    "new": "Opprett nytt ansikt",
+    "title": "Opprett samling",
+    "desc": "Opprett en ny samling",
+    "nextSteps": "For å bygge et sterkt grunnlag:<li>Bruk Tren-fanen for å velge og trene på bilder for hver oppdaget person.</li><li>Fokuser på bilder rett forfra for best resultat; unngå å trene bilder som fanger ansikter i vinkel.</li></ul>"
+  },
+  "train": {
+    "aria": "Velg tren",
+    "title": "Tren"
+  },
+  "selectFace": "Velg ansikt",
+  "deleteFaceLibrary": {
+    "title": "Slett navn",
+    "desc": "Er du sikker på at du vil slette samlingen {{name}}? Dette vil permanent slette alle tilknyttede ansikter."
+  },
+  "trainFace": "Tren ansikt",
+  "toast": {
+    "error": {
+      "deleteFaceFailed": "Kunne ikke slette: {{errorMessage}}",
+      "uploadingImageFailed": "Kunne ikke laste opp bilde: {{errorMessage}}",
+      "trainFailed": "Kunne ikke trene: {{errorMessage}}",
+      "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsskåring: {{errorMessage}}",
+      "addFaceLibraryFailed": "Kunne ikke angi ansiktsnavn: {{errorMessage}}",
+      "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}"
+    },
+    "success": {
+      "deletedFace_one": "Slettet {{count}} ansikt.",
+      "deletedFace_other": "Slettet {{count}} ansikter.",
+      "deletedName_one": "{{count}} ansikt ble slettet.",
+      "deletedName_other": "{{count}} ansikter ble slettet.",
+      "trainedFace": "Ansiktet ble trent.",
+      "updatedFaceScore": "Ansiktsskåring ble oppdatert.",
+      "uploadedImage": "Bildet ble lastet opp.",
+      "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Slipp bildet her...",
+    "dropInstructions": "Dra og slipp et bilde her, eller klikk for å velge",
+    "maxSize": "Maks størrelse: {{size}}MB",
+    "validation": {
+      "selectImage": "Vennligst velg en bildefil."
+    }
+  },
+  "readTheDocs": "Les dokumentasjonen",
+  "button": {
+    "addFace": "Legg til ansikt",
+    "uploadImage": "Last opp bilde",
+    "deleteFaceAttempts": "Slett ansiktsforsøk",
+    "reprocessFace": "Prosesser ansiktet på nytt"
+  },
+  "uploadFaceImage": {
+    "desc": "Last opp et bilde for å skanne etter ansikter og inkludere det for {{pageToggle}}",
+    "title": "Last opp ansiktsbilde"
+  },
+  "trainFaceAs": "Tren ansikt som:"
 }
