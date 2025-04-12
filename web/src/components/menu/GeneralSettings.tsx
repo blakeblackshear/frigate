@@ -412,7 +412,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         : "flex items-center p-2 text-sm"
                     }
                     aria-label={t("menu.language.nb")}
-                    onClick={() => setLanguage("nl")}
+                    onClick={() => setLanguage("nb")}
                   >
                     {language === "nb" ? (
                       <>
