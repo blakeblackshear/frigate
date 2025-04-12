@@ -200,9 +200,9 @@ export function AnnotationSettingsPane({
                       />
                     </FormControl>
                     <FormDescription>
-                      {t(
-                        "objectLifecycle.annotationSettings.offset.millisecondsToOffset",
-                      )}
+                      <Trans ns="views/explore">
+                        objectLifecycle.annotationSettings.offset.millisecondsToOffset
+                      </Trans>
                       <div className="mt-2">
                         {t("objectLifecycle.annotationSettings.offset.tips")}
                       </div>
