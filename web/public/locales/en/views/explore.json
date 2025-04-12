@@ -180,8 +180,7 @@
   "noTrackedObjects": "No Tracked Objects Found",
   "fetchingTrackedObjectsFailed": "Error fetching tracked objects: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} tracked object ",
-  "trackedObjectsCount_few": "{{count}} tracked objects ",
-  "trackedObjectsCount_many": "{{count}} tracked objects ",
+  "trackedObjectsCount_other": "{{count}} tracked objects ",
   "searchResult": {
     "deleteTrackedObject": {
       "toast": {
