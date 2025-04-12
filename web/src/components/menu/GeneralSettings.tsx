@@ -405,6 +405,24 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span className="ml-6 mr-2">{t("menu.language.nl")}</span>
                     )}
                   </MenuItem>
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "flex items-center p-2 text-sm"
+                    }
+                    aria-label={t("menu.language.nb")}
+                    onClick={() => setLanguage("nl")}
+                  >
+                    {language === "nb" ? (
+                      <>
+                        <LuLanguages className="mr-2 size-4" />
+                        {t("menu.language.nb")}
+                      </>
+                    ) : (
+                      <span className="ml-6 mr-2">{t("menu.language.nb")}</span>
+                    )}
+                  </MenuItem>
                 </SubItemContent>
               </Portal>
             </SubItem>
