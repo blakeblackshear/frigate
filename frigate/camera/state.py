@@ -263,6 +263,27 @@ class CameraState:
                 current_detections[id],
             )
 
+            # add initial frame to frame cache
+            self.frame_cache[frame_time] = np.copy(current_frame)
+
+            # save initial thumbnail data and best object
+            thumbnail_data = {
+                "frame_time": frame_time,
+                "box": new_obj.obj_data["box"],
+                "area": new_obj.obj_data["area"],
+                "region": new_obj.obj_data["region"],
+                "score": new_obj.obj_data["score"],
+                "attributes": new_obj.obj_data["attributes"],
+                "current_estimated_speed": 0,
+                "velocity_angle": 0,
+                "path_data": [],
+                "recognized_license_plate": None,
+                "recognized_license_plate_score": None,
+            }
+            new_obj.thumbnail_data = thumbnail_data
+            tracked_objects[id].thumbnail_data = thumbnail_data
+            self.best_objects[new_obj.obj_data["label"]] = new_obj
+
             # call event handlers
             for c in self.callbacks["start"]:
                 c(self.name, new_obj, frame_name)
