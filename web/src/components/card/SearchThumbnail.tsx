@@ -3,7 +3,7 @@ import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isIOS, isSafari } from "react-device-detect";
+import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -76,7 +76,7 @@ export default function SearchThumbnail({
 
     if (!searchResult.sub_label) {
       if (hasRecognizedPlate) {
-        return `(${searchResult.data.recognized_license_plate} ${Math.round((searchResult.data.recognized_license_plate_score ?? 1) * 100)}%)`;
+        return `(${searchResult.data.recognized_license_plate})`;
       }
 
       return undefined;
@@ -90,7 +90,7 @@ export default function SearchThumbnail({
       return "";
     }
 
-    return `(${searchResult.sub_label} ${Math.round((searchResult.data.sub_label_score ?? 1) * 100)}%)`;
+    return `(${searchResult.sub_label})`;
   }, [config, hasRecognizedPlate, searchResult]);
 
   return (
