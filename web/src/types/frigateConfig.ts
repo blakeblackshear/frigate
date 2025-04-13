@@ -241,6 +241,7 @@ export interface CameraConfig {
     position: string;
     thickness: number;
   };
+  type: string;
   ui: UiConfig;
   webui_url: string | null;
   zones: {
