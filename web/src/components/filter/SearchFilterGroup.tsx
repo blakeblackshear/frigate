@@ -69,6 +69,10 @@ export default function SearchFilterGroup({
         }
       });
 
+      if (cameraConfig.type == "lpr") {
+        labels.add("license_plate");
+      }
+
       if (cameraConfig.audio.enabled_in_config) {
         cameraConfig.audio.listen.forEach((label) => {
           labels.add(label);

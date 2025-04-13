@@ -884,7 +884,7 @@ function ObjectDetailsTab({
           <>
             <div className="text-sm text-primary/40"></div>
             <Textarea
-              className="h-64"
+              className="text-md h-64"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
