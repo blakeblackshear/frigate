@@ -3,7 +3,7 @@ import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isDesktop, isIOS, isSafari } from "react-device-detect";
+import { isIOS, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
