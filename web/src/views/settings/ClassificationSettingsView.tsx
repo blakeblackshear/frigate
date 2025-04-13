@@ -45,6 +45,9 @@ type ClassificationSettings = {
   lpr: {
     enabled?: boolean;
   };
+  bird: {
+    enabled?: boolean;
+  };
 };
 
 type ClassificationSettingsViewProps = {
@@ -67,6 +70,7 @@ export default function ClassificationSettingsView({
       search: { enabled: undefined, model_size: undefined },
       face: { enabled: undefined, model_size: undefined },
       lpr: { enabled: undefined },
+      bird: { enabled: undefined },
     });
 
   const [origSearchSettings, setOrigSearchSettings] =
@@ -74,6 +78,7 @@ export default function ClassificationSettingsView({
       search: { enabled: undefined, model_size: undefined },
       face: { enabled: undefined, model_size: undefined },
       lpr: { enabled: undefined },
+      bird: { enabled: undefined },
     });
 
   useEffect(() => {
@@ -89,6 +94,9 @@ export default function ClassificationSettingsView({
             model_size: config.face_recognition.model_size,
           },
           lpr: { enabled: config.lpr.enabled },
+          bird: {
+            enabled: config.classification.bird.enabled,
+          },
         });
       }
 
@@ -102,6 +110,7 @@ export default function ClassificationSettingsView({
           model_size: config.face_recognition.model_size,
         },
         lpr: { enabled: config.lpr.enabled },
+        bird: { enabled: config.classification.bird.enabled },
       });
     }
     // we know that these deps are correct
@@ -115,6 +124,7 @@ export default function ClassificationSettingsView({
       search: { ...prevConfig.search, ...newConfig.search },
       face: { ...prevConfig.face, ...newConfig.face },
       lpr: { ...prevConfig.lpr, ...newConfig.lpr },
+      bird: { ...prevConfig.bird, ...newConfig.bird },
     }));
     setUnsavedChanges(true);
     setChangedValue(true);
@@ -125,7 +135,7 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}`,
+        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}&classification.bird.enabled=${classificationSettings.bird.enabled ? "True" : "False"}`,
         { requires_restart: 0 },
       )
       .then((res) => {
@@ -513,6 +523,50 @@ export default function ClassificationSettingsView({
                 onCheckedChange={(isChecked) => {
                   handleClassificationConfigChange({
                     lpr: { enabled: isChecked },
+                  });
+                }}
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="enabled">
+                  {t("button.enabled", { ns: "common" })}
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            {t("classification.birdClassification.title")}
+          </Heading>
+          <div className="max-w-6xl">
+            <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+              <p>{t("classification.birdClassification.desc")}</p>
+
+              <div className="flex items-center text-primary">
+                <Link
+                  to="https://docs.frigate.video/configuration/license_plate_recognition"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  {t("classification.semanticSearch.readTheDocumentation")}
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full max-w-lg flex-col space-y-6">
+            <div className="flex flex-row items-center">
+              <Switch
+                id="enabled"
+                className="mr-3"
+                disabled={classificationSettings.bird.enabled === undefined}
+                checked={classificationSettings.bird.enabled === true}
+                onCheckedChange={(isChecked) => {
+                  handleClassificationConfigChange({
+                    bird: { enabled: isChecked },
                   });
                 }}
               />
