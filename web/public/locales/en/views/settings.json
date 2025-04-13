@@ -83,6 +83,10 @@
   },
   "classification": {
     "title": "Classification Settings",
+    "birdClassification": {
+      "title": "Bird Classification",
+      "desc": "Bird classification identifies known birds using a quantized Tensorflow model. When a known bird is recognized, its common name will be added as a sub_label. This information is included in the UI, filters, as well as in notifications."
+    },
     "semanticSearch": {
       "title": "Semantic Search",
       "desc": "Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one.",

@@ -298,6 +298,13 @@ export interface FrigateConfig {
     [cameraName: string]: CameraConfig;
   };
 
+  classification: {
+    bird: {
+      enabled: boolean;
+      threshold: number;
+    };
+  };
+
   database: {
     path: string;
   };
