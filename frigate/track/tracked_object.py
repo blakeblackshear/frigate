@@ -144,8 +144,14 @@ class TrackedObject:
                 obj_data,
                 self.camera_config.frame_shape,
             ):
+                # use the current frame time if the object's frame time isn't in the frame cache
+                selected_frame_time = (
+                    current_frame_time
+                    if obj_data["frame_time"] not in self.frame_cache.keys()
+                    else obj_data["frame_time"]
+                )
                 self.thumbnail_data = {
-                    "frame_time": current_frame_time,
+                    "frame_time": selected_frame_time,
                     "box": obj_data["box"],
                     "area": obj_data["area"],
                     "region": obj_data["region"],
