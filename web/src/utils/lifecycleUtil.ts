@@ -5,11 +5,16 @@ export function getLifecycleItemDescription(
   lifecycleItem: ObjectLifecycleSequence,
 ) {
   // can't use useTranslation here
-  const label = (
-    (Array.isArray(lifecycleItem.data.sub_label)
-      ? lifecycleItem.data.sub_label[0]
-      : lifecycleItem.data.sub_label) || lifecycleItem.data.label
-  ).replaceAll("_", " ");
+  const label = t(
+    (
+      (Array.isArray(lifecycleItem.data.sub_label)
+        ? lifecycleItem.data.sub_label[0]
+        : lifecycleItem.data.sub_label) || lifecycleItem.data.label
+    )
+      .replace(" ", "_")
+      .toLowerCase(),
+    { ns: "objects" },
+  );
 
   switch (lifecycleItem.class_type) {
     case "visible":

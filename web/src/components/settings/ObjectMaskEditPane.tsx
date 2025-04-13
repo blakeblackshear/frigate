@@ -448,7 +448,7 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (
           <SelectItem key={item} value={item}>
-            {t(item, { ns: "objects" })}
+            {t(item.replace(" ", "_").toLowerCase(), { ns: "objects" })}
           </SelectItem>
         ))}
       </SelectGroup>

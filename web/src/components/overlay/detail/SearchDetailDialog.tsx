@@ -690,7 +690,9 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40">{t("details.label")}</div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              {t(search.label, { ns: "objects" })}
+              {t(search.label.replace(" ", "_").toLowerCase(), {
+                ns: "objects",
+              })}
               {search.sub_label && ` (${search.sub_label})`}
               {isAdmin && (
                 <Tooltip>
@@ -951,7 +953,9 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editSubLabel.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                    label: t(search.label.replace(" ", "_").toLowerCase(), {
+                      ns: "objects",
+                    }),
                   })
                 : t("details.editSubLabel.descNoLabel")
             }
@@ -966,7 +970,9 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editLPR.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                    label: t(search.label.replace(" ", "_").toLowerCase(), {
+                      ns: "objects",
+                    }),
                   })
                 : t("details.editLPR.descNoLabel")
             }
@@ -1112,10 +1118,20 @@ export function ObjectSnapshotTab({
                           >
                             {/^[aeiou]/i.test(search?.label || "")
                               ? t("explore.plus.review.true.true_other", {
-                                  label: search?.label,
+                                  label: t(
+                                    search?.label
+                                      .replace(" ", "_")
+                                      .toLowerCase(),
+                                    { ns: "objects" },
+                                  ),
                                 })
                               : t("explore.plus.review.true.true_one", {
-                                  label: search?.label,
+                                  label: t(
+                                    search?.label
+                                      .replace(" ", "_")
+                                      .toLowerCase(),
+                                    { ns: "objects" },
+                                  ),
                                 })}
                           </Button>
                           <Button
@@ -1129,10 +1145,20 @@ export function ObjectSnapshotTab({
                           >
                             {/^[aeiou]/i.test(search?.label || "")
                               ? t("explore.plus.review.false.false_other", {
-                                  label: search?.label,
+                                  label: t(
+                                    search?.label
+                                      .replace(" ", "_")
+                                      .toLowerCase(),
+                                    { ns: "objects" },
+                                  ),
                                 })
                               : t("explore.plus.review.false.false_one", {
-                                  label: search?.label,
+                                  label: t(
+                                    search?.label
+                                      .replace(" ", "_")
+                                      .toLowerCase(),
+                                    { ns: "objects" },
+                                  ),
                                 })}
                           </Button>
                         </>

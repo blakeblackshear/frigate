@@ -596,7 +596,9 @@ export default function ObjectLifecycle({
                       <div className="text-md mr-2 w-1/3">
                         <div className="flex flex-col items-end justify-start">
                           <p className="mb-1.5 text-sm text-primary-variant">
-                            Zones
+                            {t(
+                              "objectLifecycle.lifecycleItemDesc.header.zones",
+                            )}
                           </p>
                           {item.class_type === "entered_zone"
                             ? item.data.zones.map((zone, index) => (
@@ -627,7 +629,9 @@ export default function ObjectLifecycle({
                       <div className="text-md mr-2 w-1/3">
                         <div className="flex flex-col items-end justify-start">
                           <p className="mb-1.5 text-sm text-primary-variant">
-                            Ratio
+                            {t(
+                              "objectLifecycle.lifecycleItemDesc.header.ratio",
+                            )}
                           </p>
                           {Array.isArray(item.data.box) &&
                           item.data.box.length >= 4
@@ -641,7 +645,7 @@ export default function ObjectLifecycle({
                       <div className="text-md mr-2 w-1/3">
                         <div className="flex flex-col items-end justify-start">
                           <p className="mb-1.5 text-sm text-primary-variant">
-                            Area
+                            {t("objectLifecycle.lifecycleItemDesc.header.area")}
                           </p>
                           {Array.isArray(item.data.box) &&
                           item.data.box.length >= 4 ? (

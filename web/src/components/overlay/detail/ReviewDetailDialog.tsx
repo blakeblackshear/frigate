@@ -324,7 +324,11 @@ export default function ReviewDetailDialog({
                         ns="views/explore"
                         values={{
                           objects: missingObjects
-                            .map((x) => t(x, { ns: "objects" }))
+                            .map((x) =>
+                              t(x.replace(" ", "_").toLowerCase(), {
+                                ns: "objects",
+                              }),
+                            )
                             .join(", "),
                         }}
                       >

@@ -248,7 +248,9 @@ function GeneralFilterButton({
     }
 
     if (selectedLabels.length == 1) {
-      return t(selectedLabels[0], { ns: "objects" });
+      return t(selectedLabels[0].replace(" ", "_").toLowerCase(), {
+        ns: "objects",
+      });
     }
 
     return t("labels.count", {
@@ -355,7 +357,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={t(item, { ns: "objects" })}
+              label={t(item.replace(" ", "_").toLowerCase(), { ns: "objects" })}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
