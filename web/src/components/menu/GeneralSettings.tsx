@@ -73,6 +73,17 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
 
+  // languages
+
+  const languages = [
+    { code: "en", label: t("menu.language.en") },
+    { code: "es", label: t("menu.language.es") },
+    { code: "zh-CN", label: t("menu.language.zhCN") },
+    { code: "tr", label: t("menu.language.tr") },
+    { code: "nl", label: t("menu.language.nl") },
+    { code: "nb", label: t("menu.language.nb") },
+  ];
+
   // settings
 
   const { language, setLanguage } = useLanguage();
@@ -313,80 +324,27 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                 >
                   <span tabIndex={0} className="sr-only" />
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.en")}
-                    onClick={() => setLanguage("en")}
-                  >
-                    {language.trim() === "en" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.en")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">{t("menu.language.en")}</span>
-                    )}
-                  </MenuItem>
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.es")}
-                    onClick={() => setLanguage("es")}
-                  >
-                    {language === "es" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.es")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">{t("menu.language.es")}</span>
-                    )}
-                  </MenuItem>
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.zhCN")}
-                    onClick={() => setLanguage("zh-CN")}
-                  >
-                    {language === "zh-CN" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.zhCN")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">
-                        {t("menu.language.zhCN")}
-                      </span>
-                    )}
-                  </MenuItem>
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.tr")}
-                    onClick={() => setLanguage("tr")}
-                  >
-                    {language === "tr" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.tr")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">{t("menu.language.tr")}</span>
-                    )}
-                  </MenuItem>
+                  {languages.map(({ code, label }) => (
+                    <MenuItem
+                      key={code}
+                      className={
+                        isDesktop
+                          ? "cursor-pointer"
+                          : "flex items-center p-2 text-sm"
+                      }
+                      aria-label={label}
+                      onClick={() => setLanguage(code)}
+                    >
+                      {language.trim() === code ? (
+                        <>
+                          <LuLanguages className="mr-2 size-4" />
+                          {label}
+                        </>
+                      ) : (
+                        <span className="ml-6 mr-2">{label}</span>
+                      )}
+                    </MenuItem>
+                  ))}
                 </SubItemContent>
               </Portal>
             </SubItem>
