@@ -98,7 +98,6 @@ class ONNXDetector(DetectionApi):
                 ]
             return detections
         elif self.onnx_model_type == ModelTypeEnum.yologeneric:
-            predictions: np.ndarray = tensor_output[0]
             return post_process_yolo(tensor_output, self.w, self.h)
         else:
             raise Exception(
