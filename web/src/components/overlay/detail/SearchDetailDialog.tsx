@@ -288,7 +288,7 @@ function ObjectDetailsTab({
   setSimilarity,
   setInputFocused,
 }: ObjectDetailsTabProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
 
   const apiHost = useApiHost();
 
@@ -664,9 +664,12 @@ function ObjectDetailsTab({
         .post(`/faces/train/${trainName}/classify`, { event_id: search.id })
         .then((resp) => {
           if (resp.status == 200) {
-            toast.success(t("toast.success.trainedFace"), {
-              position: "top-center",
-            });
+            toast.success(
+              t("toast.success.trainedFace", { ns: "views/faceLibrary" }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
@@ -674,9 +677,15 @@ function ObjectDetailsTab({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(t("toast.error.trainFailed", { errorMessage }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("toast.error.trainFailed", {
+              ns: "views/faceLibrary",
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         });
     },
     [search, t],
@@ -684,6 +693,7 @@ function ObjectDetailsTab({
 
   return (
     <div className="flex flex-col gap-5">
+      {t("toast.success.trainedFace", { ns: "views/faceLibrary" })}
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
