@@ -37,7 +37,6 @@ class ModelTypeEnum(str, Enum):
     rfdetr = "rfdetr"
     ssd = "ssd"
     yolox = "yolox"
-    yolov9 = "yolov9"
     yolonas = "yolonas"
     yologeneric = "yolo-generic"
 
