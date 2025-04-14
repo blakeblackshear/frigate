@@ -81,7 +81,8 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
     { code: "zh-CN", label: t("menu.language.zhCN") },
     { code: "tr", label: t("menu.language.tr") },
     { code: "nl", label: t("menu.language.nl") },
-    { code: "nb", label: t("menu.language.nb") },
+    { code: "nb-NO", label: t("menu.language.nb") },
+    { code: "ru", label: t("menu.language.ru") },
   ];
 
   // settings
