@@ -981,5 +981,5 @@ YOLOv9 models can be exported using the below code or they [can be downloaded fr
 git clone https://github.com/WongKinYiu/yolov9
 cd yolov9
 wget -O yolov9-t.pt "https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-t-converted.pt"
-python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify
+python3 export.py --weights ./yolov9-t-converted.pt --imgsz 320 --simplify
 ```
