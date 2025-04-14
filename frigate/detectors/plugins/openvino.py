@@ -13,7 +13,7 @@ from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import (
     post_process_dfine,
     post_process_rfdetr,
-    post_process_yolov9,
+    post_process_yolo,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,6 @@ class OvDetector(DetectionApi):
         ModelTypeEnum.rfdetr,
         ModelTypeEnum.ssd,
         ModelTypeEnum.yolonas,
-        ModelTypeEnum.yolov9,
         ModelTypeEnum.yologeneric,
         ModelTypeEnum.yolox,
     ]
@@ -232,12 +231,13 @@ class OvDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
-        elif (
-            self.ov_model_type == ModelTypeEnum.yolov9
-            or self.ov_model_type == ModelTypeEnum.yologeneric
-        ):
-            out_tensor = infer_request.get_output_tensor(0).data
-            return post_process_yolov9(out_tensor, self.w, self.h)
+        elif self.ov_model_type == ModelTypeEnum.yologeneric:
+            out_tensor = []
+
+            for item in infer_request.output_tensors:
+                out_tensor.append(item.data)
+
+            return post_process_yolo(out_tensor, self.w, self.h)
         elif self.ov_model_type == ModelTypeEnum.yolox:
             out_tensor = infer_request.get_output_tensor()
             # [x, y, h, w, box_score, class_no_1, ..., class_no_80],

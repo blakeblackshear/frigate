@@ -13,7 +13,7 @@ from frigate.util.model import (
     get_ort_providers,
     post_process_dfine,
     post_process_rfdetr,
-    post_process_yolov9,
+    post_process_yolo,
 )
 
 logger = logging.getLogger(__name__)
@@ -97,12 +97,8 @@ class ONNXDetector(DetectionApi):
                     x_max / self.w,
                 ]
             return detections
-        elif (
-            self.onnx_model_type == ModelTypeEnum.yolov9
-            or self.onnx_model_type == ModelTypeEnum.yologeneric
-        ):
-            predictions: np.ndarray = tensor_output[0]
-            return post_process_yolov9(predictions, self.w, self.h)
+        elif self.onnx_model_type == ModelTypeEnum.yologeneric:
+            return post_process_yolo(tensor_output, self.w, self.h)
         else:
             raise Exception(
                 f"{self.onnx_model_type} is currently not supported for onnx. See the docs for more info on supported models."
