@@ -1,1 +1,96 @@
-{}
+{
+  "documentTitle": {
+    "default": "Einstellungen - Frigate",
+    "authentication": "Authentifizierungseinstellungen",
+    "camera": "Kameraeinstellungen",
+    "masksAndZones": "Masken und Zonen bearbeiten",
+    "object": "Objekt Einstellungen - Frigate",
+    "general": "Allgemeine Einstellungen - Frigate",
+    "frigatePlus": "Frigate+ Einstellungen",
+    "classification": "Klassifizierungseinstellungen - Frigate",
+    "motionTuner": "Bewegungsanpassung – Frigate"
+  },
+  "menu": {
+    "ui": "Benutzeroberfläche",
+    "cameras": "Kameraeinstellungen",
+    "classification": "Klassifizierung",
+    "masksAndZones": "Maskierungen / Zonen",
+    "motionTuner": "Bewegungsempflindlichkeit einstellen",
+    "debug": "Fehlerbehebung",
+    "frigateplus": "Frigate+",
+    "users": "Benutzer",
+    "notifications": "Benachrichtigungen"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Du hast nicht gespeicherte Änderungen.",
+      "desc": "Möchtest Du deine Änderungen speichern, bevor du fortfährst?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Keine Kamera"
+  },
+  "general": {
+    "title": "Allgemeine Einstellungen",
+    "liveDashboard": {
+      "title": "Live Übersicht",
+      "playAlertVideos": {
+        "label": "Spiele Videos mit Alarmierung",
+        "desc": "Standardmäßig werden die letzten Warnmeldungen auf dem Live-Dashboard als kurze Videoschleifen abgespielt. Deaktiviere diese Option, um nur ein statisches Bild der letzten Warnungen auf diesem Gerät/Browser anzuzeigen."
+      },
+      "automaticLiveView": {
+        "desc": "Wechsle automatisch zur Live Ansicht der Kamera, wenn einen Aktivität erkannt wurde. Wenn du diese Option deaktivierst, werden die statischen Kamerabilder auf der Liveübersicht nur einmal pro Minute aktualisiert.",
+        "label": "Automatische Live Ansicht"
+      }
+    },
+    "storedLayouts": {
+      "title": "Gespeicherte Ansichten",
+      "clearAll": "Lösche alle Ansichten",
+      "desc": "Das Layout der Kameras in einer Kameragruppe kann verschoben/geändert werden. Die Positionen werden im lokalen Cache des Browsers gespeichert."
+    },
+    "cameraGroupStreaming": {
+      "title": "Einstellungen für Kamera-Gruppen-Streaming",
+      "clearAll": "Alle Streamingeinstellungen löschen",
+      "desc": "Die Streaming-Einstellungen für jede Kameragruppe werden im lokalen Cache des Browsers gespeichert."
+    },
+    "recordingsViewer": {
+      "title": "Aufzeichnungsbetrachter",
+      "defaultPlaybackRate": {
+        "desc": "Standard-Wiedergabegeschwindigkeit für die Wiedergabe von Aufnahmen.",
+        "label": "Standard-Wiedergabegeschwindigkeit"
+      }
+    },
+    "calendar": {
+      "title": "Kalender",
+      "firstWeekday": {
+        "label": "Erster Wochentag",
+        "desc": "Der Tag, an dem die Wochen des Review Kalenders beginnen.",
+        "sunday": "Sonntag",
+        "monday": "Montag"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Gespeichertes Layout für {{cameraName}} gelöscht",
+        "clearStreamingSettings": "Streaming Einstellungen aller Kameragruppen bereinigt."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Das gespeicherte Layout konnte nicht gelöscht werden: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Die Streaming-Einstellungen konnten nicht gelöscht werden: {{errorMessage}}"
+      }
+    }
+  },
+  "classification": {
+    "title": "Klassifizierungseinstellungen",
+    "semanticSearch": {
+      "title": "Semantische Suche",
+      "desc": "Die semantische Suche in Frigate ermöglicht es, verfolgte Objekte innerhalb der Überprüfungselemente zu finden, indem entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwendet wird.",
+      "readTheDocumentation": "Lesen Sie die Dokumentation."
+    },
+    "birdClassification": {
+      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten.",
+      "title": "Vogel-Klassifizierung"
+    }
+  }
+}
