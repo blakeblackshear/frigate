@@ -91,7 +91,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         "frigate.detectors.api_types",
         {det_type: Mock() for det_type in DetectorTypeEnum},
     )
-    @patch("frigate.object_detection.load_labels")
+    @patch("frigate.object_detection.base.load_labels")
     def test_detect_given_tensor_input_should_return_lfiltered_detections(
         self, mock_load_labels
     ):
