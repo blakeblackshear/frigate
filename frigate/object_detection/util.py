@@ -73,3 +73,5 @@ def tensor_transform(desired_shape: InputTensorEnum):
         return (0, 3, 1, 2)
     elif desired_shape == InputTensorEnum.hwnc:
         return (1, 2, 0, 3)
+    elif desired_shape == InputTensorEnum.hwcn:
+        return (1, 2, 3, 0)
