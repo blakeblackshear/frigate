@@ -135,7 +135,7 @@ export default function SearchThumbnail({
                     onClick={() => onClick(searchResult, false, true)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
-                    {Math.round(
+                    {Math.floor(
                       (searchResult.data.score ??
                         searchResult.data.top_score ??
                         searchResult.top_score) * 100,

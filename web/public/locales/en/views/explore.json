@@ -112,6 +112,9 @@
       "desc": "Enter a new license plate value for this {{label}}",
       "descNoLabel": "Enter a new license plate value for this tracked object"
     },
+    "snapshotScore": {
+      "label": "Snapshot Score"
+    },
     "topScore": {
       "label": "Top Score",
       "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
