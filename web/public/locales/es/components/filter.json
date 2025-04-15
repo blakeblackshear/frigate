@@ -6,7 +6,9 @@
       "title": "Todas las etiquetas"
     },
     "count": "{{count}} Etiquetas",
-    "label": "Etiquetas"
+    "label": "Etiquetas",
+    "count_one": "{{count}} Etiqueta",
+    "count_other": "{{count}} Etiquetas"
   },
   "zones": {
     "all": {

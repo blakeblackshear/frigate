@@ -40,11 +40,13 @@
       "toast": {
         "success": {
           "updatedSublabel": "Subetiqueta actualizada con éxito.",
-          "regenerate": "Se ha solicitado una nueva descripción a {{provider}}. Dependiendo de la velocidad de tu proveedor, la nueva descripción puede tardar algún tiempo en regenerarse."
+          "regenerate": "Se ha solicitado una nueva descripción a {{provider}}. Dependiendo de la velocidad de tu proveedor, la nueva descripción puede tardar algún tiempo en regenerarse.",
+          "updatedLPR": "Matrícula actualizada con éxito."
         },
         "error": {
           "regenerate": "No se pudo llamar a {{provider}} para una nueva descripción: {{errorMessage}}",
-          "updatedSublabelFailed": "No se pudo actualizar la subetiqueta: {{errorMessage}}"
+          "updatedSublabelFailed": "No se pudo actualizar la subetiqueta: {{errorMessage}}",
+          "updatedLPRFailed": "No se pudo actualizar la matrícula: {{errorMessage}}"
         }
       },
       "tips": {
@@ -86,7 +88,13 @@
     },
     "objects": "Objetos",
     "estimatedSpeed": "Velocidad estimada",
-    "camera": "Cámara"
+    "camera": "Cámara",
+    "editLPR": {
+      "title": "Editar matrícula",
+      "desc": "Introduce un nuevo valor de matrícula para este {{label}}",
+      "descNoLabel": "Introduce un nuevo valor de matrícula para este objeto rastreado"
+    },
+    "recognizedLicensePlate": "Matrícula Reconocida"
   },
   "documentTitle": "Explorar - Frigate",
   "trackedObjectDetails": "Detalles del objeto rastreado",
@@ -180,5 +188,7 @@
       }
     }
   },
-  "trackedObjectsCount": "{{count}} objetos rastreados "
+  "trackedObjectsCount_one": "{{count}} objeto rastreado ",
+  "trackedObjectsCount_many": "{{count}} objetos rastreados ",
+  "trackedObjectsCount_other": "{{count}} objetos rastreados "
 }
