@@ -1,0 +1,43 @@
+{
+  "group": {
+    "label": "Grupuri de Camere",
+    "add": "Adauga Grup de Camere",
+    "edit": "Editeaza Grupul de Camere",
+    "delete": {
+      "label": "Sterge Grupul de Camere",
+      "confirm": {
+        "title": "Confirma Stergerea",
+        "desc": "Esti sigur ca doresti sa stergi gruoul de camere <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nume",
+      "placeholder": "Introdu un nume...",
+      "errorMessage": {
+        "mustLeastCharacters": "Numele grupului de cmere trebuie sa sontina minim 2 caractere.",
+        "exists": "Numele grupului de camere exista deja.",
+        "nameMustNotPeriod": "Numele grupului de camere nu trebuia sa contina punct.",
+        "invalid": "Nume invalid pentru grupul de camere."
+      }
+    },
+    "cameras": {
+      "label": "Camere",
+      "desc": "Selecteaza camere pentru acest grup."
+    },
+    "icon": "Pictograma",
+    "success": "Grupul de camere {{name}}) a fost salvat.",
+    "camera": {
+      "setting": {
+        "label": "Setarile de Stream ale Camerei",
+        "title": "{{cameraName}} Setari de Stream"
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Setari",
+      "title": "Optiuni",
+      "showOptions": "Arata Optiuni"
+    }
+  }
+}

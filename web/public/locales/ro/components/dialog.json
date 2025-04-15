@@ -1,0 +1,40 @@
+{
+  "restart": {
+    "title": "Esti sigur ca doresti sa repornesti Frigate?",
+    "button": "Reporneste",
+    "restarting": {
+      "title": "Frigate Reporneste",
+      "content": "Aceasta pagina se va reincarca in {{countdown}} secunde.",
+      "button": "Forteaza Reincarcarea Acum"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "true": {
+          "label": "Confirma aceasta eticheta pentru Frigate Plus",
+          "true_one": "Asta e o {{label}}",
+          "true_few": "Astea sunt {{label}}",
+          "true_other": "Astea sunt {{label}}"
+        },
+        "false": {
+          "label": "Nu confirma aceasta eticheta pentru Frigate Plus",
+          "false_one": "Asta nu este  {{label}}",
+          "false_few": "Astea nu sunt {{label}}",
+          "false_other": "Astea nu sunt {{label}}"
+        },
+        "state": {
+          "submitted": "Trimis"
+        }
+      },
+      "submitToPlus": {
+        "label": "Trimite catre Frigate+"
+      }
+    }
+  },
+  "recording": {
+    "button": {
+      "deleteNow": "Sterge Acum"
+    }
+  }
+}
