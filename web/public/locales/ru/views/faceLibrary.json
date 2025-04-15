@@ -1,1 +1,73 @@
-{}
+{
+  "details": {
+    "person": "Человек",
+    "timestamp": "Метка времени",
+    "face": "Подробности о лице",
+    "faceDesc": "Подробности о лице и связанном объекте",
+    "confidence": "Достоверность"
+  },
+  "documentTitle": "Библиотека лиц - Frigate",
+  "description": {
+    "placeholder": "Введите название коллекции",
+    "addFace": "Пошаговое добавление новой коллекции в Библиотеку лиц."
+  },
+  "createFaceLibrary": {
+    "desc": "Создание новой коллекции",
+    "nextSteps": "Для создания надежной базы: <li>Используйте вкладку Обучение, чтобы выбрать изображения и обучить систему для каждого обнаруженного человека.</li> <li>Используйте фронтальные изображения для лучшего результата; избегайте изображений с лицами, снятыми под углом.</li> </ul>",
+    "title": "Создать коллекцию",
+    "new": "Создать новое лицо"
+  },
+  "selectFace": "Выбор лица",
+  "uploadFaceImage": {
+    "desc": "Загрузите изображение для поиска лиц и связывания с {{pageToggle}}",
+    "title": "Загрузка изображения с лицом"
+  },
+  "selectItem": "Выбор {{item}}",
+  "train": {
+    "aria": "Выбор обучения",
+    "title": "Обучение"
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "Успешно удалено {{count}} лицо.",
+      "deletedFace_few": "Успешно удалено {{count}} лица.",
+      "deletedFace_many": "Успешно удалено {{count}} лиц.",
+      "deletedName_one": "{{count}} лицо успешно удалено.",
+      "deletedName_few": "{{count}} лица успешно удалено.",
+      "deletedName_many": "{{count}} лиц успешно удалено.",
+      "uploadedImage": "Изображение успешно загружено.",
+      "trainedFace": "Лицо успешно запомнено.",
+      "addFaceLibrary": "{{name}} успешно добавлен в Библиотеку Лиц!",
+      "updatedFaceScore": "Оценка лица успешно обновлена."
+    },
+    "error": {
+      "deleteFaceFailed": "Не удалось удалить: {{errorMessage}}",
+      "uploadingImageFailed": "Не удалось загрузить изображение: {{errorMessage}}",
+      "trainFailed": "Не удалось запомнить: {{errorMessage}}",
+      "updateFaceScoreFailed": "Не удалось обновить оценку лица: {{errorMessage}}",
+      "addFaceLibraryFailed": "Не удалось установить имя для лица: {{errorMessage}}",
+      "deleteNameFailed": "Не удалось удалить имя: {{errorMessage}}"
+    }
+  },
+  "deleteFaceLibrary": {
+    "title": "Удалить имя",
+    "desc": "Вы уверены, что хотите удалить коллекцию «{{name}}»? Это действие безвозвратно удалит все лица в коллекции."
+  },
+  "imageEntry": {
+    "dropActive": "Перетащите изображение сюда...",
+    "dropInstructions": "Перетащите изображение сюда или нажмите для выбора",
+    "maxSize": "Макс. размер: {{size}}Мб",
+    "validation": {
+      "selectImage": "Пожалуйста, выберите файл изображения."
+    }
+  },
+  "readTheDocs": "Прочитать документацию",
+  "trainFaceAs": "Запомнить Лицо как:",
+  "button": {
+    "uploadImage": "Загрузить изображение",
+    "deleteFaceAttempts": "Удалить попытки распознавания лиц",
+    "addFace": "Добавить Лицо",
+    "reprocessFace": "Переобработать Лицо"
+  },
+  "trainFace": "Запомнить Лицо"
+}
