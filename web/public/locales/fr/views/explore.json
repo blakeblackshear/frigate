@@ -1,12 +1,12 @@
 {
   "generativeAI": "IA générative",
-  "documentTitle": "Explorer - Frigate",
+  "documentTitle": "Explorateur - Frigate",
   "exploreIsUnavailable": {
     "title": "L'exploration est indisponible",
     "embeddingsReindexing": {
       "estimatedTime": "Temps restant estimé :",
       "finishingShortly": "Termine bientôt",
-      "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée",
+      "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée.",
       "startingUp": "Démarrage...",
       "step": {
         "thumbnailsEmbedded": "Vignettes intégrées : ",
@@ -23,11 +23,172 @@
         "textModel": "Modèle de texte"
       },
       "tips": {
-        "documentation": "Lire la documentation"
-      }
+        "documentation": "Lire la documentation",
+        "context": "Vous souhaiterez peut-être réindexer les incorporations de vos objets suivis une fois les modèles téléchargés."
+      },
+      "error": "Une erreur est survenue. Vérifier les logs Frigate."
     }
   },
   "details": {
-    "timestamp": "Horodatage"
+    "timestamp": "Horodatage",
+    "item": {
+      "title": "Évaluer les détails de l'élément",
+      "button": {
+        "share": "Partager cet élément d'évaluation",
+        "viewInExplore": "Afficher dans Explorer"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Une nouvelle description a été demandée à {{provider}}. Selon la vitesse de votre fournisseur, la régénération de la nouvelle description peut prendre un certain temps.",
+          "updatedSublabel": "Sous-étiquette mise à jour avec succès.",
+          "updatedLPR": "Plaque d'immatriculation mise à jour avec succès."
+        },
+        "error": {
+          "regenerate": "Échec à l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
+          "updatedSublabelFailed": "Échec à la mise à jour du sous-étiquette : {{errorMessage}}",
+          "updatedLPRFailed": "Échec à la mise à jour de la plaque d'immatriculation : {{errorMessage}}"
+        }
+      },
+      "tips": {
+        "mismatch_one": "{{count}} objet indisponible a été détecté et inclus dans cet élément d'évaluation. Cet objet n'a pas été considéré comme une alerte ou une détection, ou a déjà été nettoyé/supprimé.",
+        "mismatch_many": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément d'évaluation. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
+        "mismatch_other": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément d'évaluation. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
+        "hasMissingObjects": "Ajustez votre configuration si vous souhaitez que Frigate enregistre les objets suivis pour les étiquettes suivantes : <em>{{objects}}</em>"
+      },
+      "desc": "Vérifier les détails de l'élément"
+    },
+    "label": "Étiquette",
+    "editSubLabel": {
+      "title": "Modifier la sous-étiquette",
+      "desc": "Saisissez une nouvelle sous-étiquette pour ce {{label}}",
+      "descNoLabel": "Entrer une nouvelle sous-étiquette pour cet objet suivi"
+    },
+    "topScore": {
+      "label": "Meilleur score",
+      "info": "Le meilleur score est le score médian le plus élevé pour l'objet suivi, il peut donc différer du score affiché sur la vignette des résultats de recherche."
+    },
+    "objects": "Objets",
+    "button": {
+      "regenerate": {
+        "label": "Régénérer la description de l'objet suivi",
+        "title": "Regénérer"
+      },
+      "findSimilar": "Trouver similaire"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Description de l'objet suivi",
+      "aiTips": "Frigate ne demandera pas de description à votre fournisseur d'IA générative tant que le cycle de vie de l'objet suivi ne sera pas terminé."
+    },
+    "regenerateFromSnapshot": "Régénérer à partir d'un instantané",
+    "regenerateFromThumbnails": "Régénérer à partir des vignettes",
+    "editLPR": {
+      "title": "Modifier la plaque d'immatriculation",
+      "desc": "Saisissez une nouvelle valeur de plaque d'immatriculation pour ce {{label}}",
+      "descNoLabel": "Saisir une nouvelle valeur de plaque d'immatriculation pour cet objet suivi"
+    },
+    "recognizedLicensePlate": "Plaque d'immatriculation reconnue",
+    "estimatedSpeed": "Vitesse Estimée",
+    "zones": "Zones",
+    "expandRegenerationMenu": "Développer le menu de régénération",
+    "camera": "Caméra",
+    "tips": {
+      "descriptionSaved": "Description enregistrée avec succès",
+      "saveDescriptionFailed": "Échec à la mise à jour de la description : {{errorMessage}}"
+    }
+  },
+  "type": {
+    "details": "détails",
+    "video": "vidéo",
+    "object_lifecycle": "cycle de vie de l'objet",
+    "snapshot": "instantané"
+  },
+  "objectLifecycle": {
+    "title": "Cycle de vie de l'objet",
+    "noImageFound": "Aucune image trouvée pour cet horodatage.",
+    "createObjectMask": "Créer Masque Objet",
+    "scrollViewTips": "Faites défiler pour voir les moments importants du cycle de vie de cet objet.",
+    "adjustAnnotationSettings": "Ajuster les paramètres d'annotation",
+    "autoTrackingTips": "Les positions de la zone de délimitation seront inexactes pour les caméras de suivi automatique.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} détecté",
+      "entered_zone": "{{label}} est entré dans {{zones}}",
+      "stationary": "{{label}} est devenu stationnaire",
+      "attribute": {
+        "other": "{{label}} reconnu comme {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} détecté pour {{label}}"
+      },
+      "gone": "{{label}} parti",
+      "heard": "{{label}} entendu",
+      "external": "{{label}} détecté",
+      "active": "{{label}} est devenu actif"
+    },
+    "annotationSettings": {
+      "title": "Paramètres d'annotation",
+      "showAllZones": {
+        "title": "Montrer toutes les zones",
+        "desc": "Afficher toujours les zones sur les images où les objets sont entrés dans une zone."
+      },
+      "offset": {
+        "label": "Décalage de l'annotation",
+        "documentation": "Lire la documentation ",
+        "desc": "Ces données proviennent du flux de détection de votre caméra, mais sont superposées aux images du flux d'enregistrement. Il est peu probable que les deux flux soient parfaitement synchronisés. Par conséquent, le cadre de délimitation et la séquence ne seront pas parfaitement alignés. Cependant, le champ <code>annotation_offset</code> peut être utilisé pour ajuster ce décalage.",
+        "millisecondsToOffset": "Millisecondes pour décaler les annotations détectées. <em>Par défaut : 0</em>",
+        "tips": "ASTUCE : Imaginez un clip d'événement avec une personne marchant de gauche à droite. Si le cadre de la chronologie de l'événement est constamment à gauche de la personne, la valeur doit être diminuée. De même, si une personne marche de gauche à droite et que le cadre de la chronologie est constamment devant elle, la valeur doit être augmentée."
+      }
+    },
+    "carousel": {
+      "next": "Diapositive suivante",
+      "previous": "Diapositive précédente"
+    }
+  },
+  "trackedObjectDetails": "Détails de l'objet suivi",
+  "itemMenu": {
+    "downloadSnapshot": {
+      "label": "Télécharger l'instantané",
+      "aria": "Télécharger l'instantané"
+    },
+    "findSimilar": {
+      "label": "Trouver Similaire",
+      "aria": "Trouver des objets suivis similaires"
+    },
+    "viewObjectLifecycle": {
+      "aria": "Afficher le cycle de vie de l'objet",
+      "label": "Visualiser le cycle de vie de l'objet"
+    },
+    "viewInHistory": {
+      "label": "Afficher dans l'historique",
+      "aria": "Afficher dans l'historique"
+    },
+    "downloadVideo": {
+      "label": "Télécharger la vidéo",
+      "aria": "Télécharger la vidéo"
+    },
+    "submitToPlus": {
+      "label": "Soumettre à Frigate+",
+      "aria": "Soumettre à Frigate Plus"
+    },
+    "deleteTrackedObject": {
+      "label": "Supprimer cet objet suivi"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirmer la suppression",
+      "desc": "La suppression de cet objet suivi supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associées. Les images enregistrées de cet objet suivi dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
+    }
+  },
+  "noTrackedObjects": "Aucun objet suivi trouvé",
+  "fetchingTrackedObjectsFailed": "Erreur lors de la récupération des objets suivis : {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} objet suivi ",
+  "trackedObjectsCount_many": "{{count}} objets suivis ",
+  "trackedObjectsCount_other": "{{count}} objets suivis ",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "L'objet suivi a été supprimé avec succès.",
+        "error": "Échec à la suppression de l'objet suivi : {{errorMessage}}"
+      }
+    }
   }
 }

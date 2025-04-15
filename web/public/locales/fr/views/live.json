@@ -42,6 +42,117 @@
       "center": {
         "label": "Cliquez dans l'image pour centrer la caméra PTZ"
       }
-    }
+    },
+    "presets": "Paramètres prédéfinis pour les caméras PTZ"
+  },
+  "camera": {
+    "enable": "Activer la Caméra",
+    "disable": "Désactiver la Caméra"
+  },
+  "detect": {
+    "enable": "Activer la Détection",
+    "disable": "Désactiver la Détection"
+  },
+  "recording": {
+    "enable": "Activer l'enregistrement",
+    "disable": "Désactiver l'enregistrement"
+  },
+  "snapshots": {
+    "enable": "Activer les instantanés",
+    "disable": "Désactiver les instantanés"
+  },
+  "muteCameras": {
+    "enable": "Couper le son de toutes les caméras",
+    "disable": "Activer le son de toutes les caméras"
+  },
+  "audioDetect": {
+    "enable": "Activer la Détection Audio",
+    "disable": "Désactiver la Détection Audio"
+  },
+  "manualRecording": {
+    "playInBackground": {
+      "label": "Jouer en arrière plan",
+      "desc": "Activer cette option pour continuer à streamer lorsque le player est masqué."
+    },
+    "showStats": {
+      "label": "Afficher les statistiques",
+      "desc": "Activer cette option pour afficher les statistiques de flux en surimpression sur le flux de la caméra."
+    },
+    "debugView": "Vue de débug",
+    "start": "Démarrer l'enregistrement à la demande",
+    "failedToStart": "impossible de démarrer l'enregistrement à la demande manuel.",
+    "end": "Terminer l'enregistrement à la demande",
+    "ended": "Enregistrement à la demande terminé.",
+    "failedToEnd": "Impossible de terminer l'enregistrement à la demande.",
+    "started": "Enregistrement à la demande démarré.",
+    "recordDisabledTips": "Puisque l'enregistrement est désactivé ou restreint dans la configuration de cette caméra, seul un instantané sera enregistré.",
+    "title": "Enregistrement à la demande",
+    "tips": "Démarrez un événement manuel en fonction des paramètres de conservation d'enregistrement de cette caméra."
+  },
+  "streamingSettings": "Paramètres de streaming",
+  "notifications": "Notifications",
+  "suspend": {
+    "forTime": "Mettre en pause pour : "
+  },
+  "stream": {
+    "audio": {
+      "available": "Audio disponible pour ce flux",
+      "tips": {
+        "documentation": "Lire la documentation ",
+        "title": "L'audio doit être capté par votre caméra et configuré dans go2rtc pour ce flux."
+      },
+      "unavailable": "Audio non disponible pour ce flux"
+    },
+    "twoWayTalk": {
+      "tips": "Votre périphérique doit supporter la fonctionnalité et WebRTC doit être configuré pour supporter le dialogue bidirectionnel.",
+      "tips.documentation": "Lire la documention ",
+      "available": "Discussion bidirectionnelle disponible pour ce flux",
+      "unavailable": "Discussion bidirectionnelle non disponible pour ce flux"
+    },
+    "lowBandwidth": {
+      "tips": "La vue temps réel est en mode faible bande passante à cause d'erreurs de cache ou de flux.",
+      "resetStream": "Réinitialiser le flux"
+    },
+    "playInBackground": {
+      "tips": "Activer cette option pour continuer le streaming lorsque le player est masqué.",
+      "label": "Jouer en arrière plan"
+    },
+    "title": "Flux"
+  },
+  "cameraSettings": {
+    "objectDetection": "Détection d'objets",
+    "recording": "Enregistrement",
+    "snapshots": "Instantanés",
+    "audioDetection": "Détection audio",
+    "autotracking": "Suivi automatique",
+    "cameraEnabled": "Caméra activée",
+    "title": "Paramètres de {{camera}}"
+  },
+  "history": {
+    "label": "Afficher l'historique de capture"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Tous",
+      "motion": "Mouvement",
+      "active_objects": "Objets actifs"
+    },
+    "notAllTips": "Votre configuration de conservation d'enregistrement {{source}} est définie sur <code>mode : {{effectiveRetainMode}}</code>, donc cet enregistrement à la demande ne conservera que les segments avec {{effectiveRetainModeName}}."
+  },
+  "audio": "Audio",
+  "autotracking": {
+    "enable": "Activer le suivi automatique",
+    "disable": "Désactiver le suivi automatique"
+  },
+  "streamStats": {
+    "enable": "Afficher les statistiques du flux",
+    "disable": "Masquer les statistiques du flux"
+  },
+  "editLayout": {
+    "label": "Modifier la mise en page",
+    "group": {
+      "label": "Modifier le groupe de caméras"
+    },
+    "exitEdit": "Quitter l'édition"
   }
 }

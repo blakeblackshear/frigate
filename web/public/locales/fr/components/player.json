@@ -28,6 +28,24 @@
         "title": "Latence",
         "value": "{{seconds}} sec"
       }
+    },
+    "droppedFrames": {
+      "short": {
+        "value": "{{droppedFrames}} images",
+        "title": "Abandonné"
+      },
+      "title": "Images abandonnées :"
+    },
+    "decodedFrames": "Images décodées :",
+    "droppedFrameRate": "Proportion d'images abandonnées :",
+    "totalFrames": "Total Images :"
+  },
+  "toast": {
+    "error": {
+      "submitFrigatePlusFailed": "Échec de la soumission de l'image à Frigate+"
+    },
+    "success": {
+      "submittedFrigatePlus": "Image soumise avec succès à Frigate+"
     }
   }
 }

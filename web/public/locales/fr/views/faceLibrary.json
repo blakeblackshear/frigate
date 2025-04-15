@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Tutoriel ajouter une nouvelle collection à la librairie de visages",
+    "addFace": "Parcourez la procédure d’ajout d’une nouvelle collection à la bibliothèque de visages.",
     "placeholder": "Saisissez un nom pour cette collection"
   },
   "details": {
@@ -10,7 +10,7 @@
     "timestamp": "Horodatage",
     "faceDesc": "Détails du visage et de l'objet associé"
   },
-  "documentTitle": "Librairie de visages - Frigate",
+  "documentTitle": "Bibliothèque de visages - Frigate",
   "uploadFaceImage": {
     "title": "Télécharger l'image du visage",
     "desc": "Téléchargez une image pour rechercher des visages et l'inclure dans {{pageToggle}}"
@@ -19,20 +19,55 @@
     "title": "Créer une collection",
     "desc": "Créer une nouvelle collection",
     "new": "Créer un nouveau visage",
-    "nextSteps": "Pour construire une base solide :<li>Utilisez l’onglet Entraîner pour sélectionner et vous entraîner sur des images pour chaque personne détectée.</li><li>Concentrez-vous sur des images de face pour de meilleurs résultats ; évitez d’entraîner des images qui capturent des visages sous un angle.</li></ul>"
+    "nextSteps": "Pour construire une base solide :<li>Utilisez l’onglet Entraîner pour sélectionner et entraîner le modèle sur des images pour chaque personne détectée.</li><li>Concentrez-vous sur des images de face pour de meilleurs résultats ; évitez d’entraîner le modèle des images qui capturent des visages de biais.</li></ul>"
   },
   "train": {
-    "title": "Entraîner"
+    "title": "Entraîner",
+    "aria": "Sélectionner Entraîner"
   },
   "selectFace": "Sélectionner un visage",
   "button": {
     "addFace": "Ajouter un visage",
     "uploadImage": "Envoyer une image",
-    "deleteFaceAttempts": "Supprimer les tentatives de reconnaissance faciale"
+    "deleteFaceAttempts": "Supprimer les tentatives de reconnaissance faciale",
+    "reprocessFace": "Réanalyser le Visage"
   },
   "selectItem": "Sélectionner {{item}}",
   "deleteFaceLibrary": {
     "title": "Supprimer un nom",
     "desc": "Etes-vous certain de vouloir supprimer la collection {{name}} ? Cette action supprimera définitivement tous les visages associés."
-  }
+  },
+  "imageEntry": {
+    "dropActive": "Déposer l'image ici...",
+    "dropInstructions": "Faites glisser et déposez une image ici, ou cliquez pour sélectionner",
+    "maxSize": "Taille Max : {{size}}MB",
+    "validation": {
+      "selectImage": "Veuillez sélectionner un fichier image."
+    }
+  },
+  "readTheDocs": "Lire la documentation",
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} visage a été supprimé avec succès.",
+      "deletedName_many": "{{count}} visages ont été supprimés avec succès.",
+      "deletedName_other": "{{count}} visages ont été supprimés avec succès.",
+      "uploadedImage": "Image téléchargée avec succès.",
+      "addFaceLibrary": "{{name}} a été ajouté avec succès à la bibliothèque de visages !",
+      "updatedFaceScore": "Score du visage mis à jour avec succès.",
+      "deletedFace_one": "{{count}} visage a été supprimé avec succès.",
+      "deletedFace_many": "{{count}} visages ont été supprimés avec succès.",
+      "deletedFace_other": "{{count}} visages ont été supprimés avec succès.",
+      "trainedFace": "Visage entraîné avec succès."
+    },
+    "error": {
+      "uploadingImageFailed": "Échec du chargement de l'image : {{errorMessage}}",
+      "deleteFaceFailed": "Échec de la suppression : {{errorMessage}}",
+      "trainFailed": "Échec à l'entrainement : {{errorMessage}}",
+      "updateFaceScoreFailed": "Échec à la mise à jour du score du visage : {{errorMessage}}",
+      "addFaceLibraryFailed": "Échec de la définition du nom du visage : {{errorMessage}}",
+      "deleteNameFailed": "Échec de la suppression du nom : {{errorMessage}}"
+    }
+  },
+  "trainFaceAs": "Entraîner Visage comme :",
+  "trainFace": "Entraîner Visage"
 }

@@ -26,6 +26,132 @@
       "timestamp": "Horodatage",
       "tag": "Étiqueter",
       "message": "Message"
+    },
+    "tips": "Les logs sont diffusés en continu depuis le serveur",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Erreur lors de la récupération des logs : {{errorMessage}}",
+        "whileStreamingLogs": "Erreur lors de la diffusion des logs : {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Général",
+    "detector": {
+      "title": "Détecteurs",
+      "inferenceSpeed": "Vitesse d'inférence du détecteur",
+      "cpuUsage": "Utilisation CPU Détecteur",
+      "memoryUsage": "Utilisation Mémoire Détecteur"
+    },
+    "hardwareInfo": {
+      "title": "Info Matériel",
+      "gpuUsage": "Utilisation GPU",
+      "gpuMemory": "Mémoire GPU",
+      "gpuEncoder": "Encodeur GPU",
+      "gpuDecoder": "Décodeur GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Sortie Vainfo",
+          "returnCode": "Code de retour : {{code}}",
+          "processOutput": "Tâche de Sortie :",
+          "processError": "Erreur de tâche :"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Sortie Nvidia SMI",
+          "name": "Nom : {{name}}",
+          "cudaComputerCapability": "Capacité de calcul CUDA : {{cuda_compute}}",
+          "vbios": "Informations VBios : {{vbios}}",
+          "driver": "Pilote : {{driver}}"
+        },
+        "copyInfo": {
+          "label": "Information de copie du GPU"
+        },
+        "toast": {
+          "success": "Informations GPU copiées dans le presse-papier"
+        },
+        "closeInfo": {
+          "label": "Information de fermeture du GPU"
+        }
+      }
+    },
+    "otherProcesses": {
+      "title": "Autres tâches",
+      "processCpuUsage": "Utilisation CPU des tâches",
+      "processMemoryUsage": "Utilisation mémoire des tâches"
+    }
+  },
+  "storage": {
+    "title": "Stockage",
+    "recordings": {
+      "title": "Enregistrements",
+      "earliestRecording": "Enregistrement le plus ancien :",
+      "tips": "Cette valeur corresponds au total du stockage utilisé par les enregistrements dans la base de données Frigate. Frigate ne suit pas l'utilisation du stockage pour tous les fichiers sur votre disque."
+    },
+    "cameraStorage": {
+      "title": "Stockage de la caméra",
+      "bandwidth": "Bande passante",
+      "unused": {
+        "title": "Inutilisé",
+        "tips": "Cette valeur ne représente peut-être pas précisément l'espace libre et utilisable par Frigate si vous avez d'autres fichiers stockés sur ce disque en plus des enregistrements Frigate. Frigate ne suit pas l'utilisation du stockage en dehors de ses propres enregistrements."
+      },
+      "percentageOfTotalUsed": "Pourcentage du Total",
+      "storageUsed": "Stockage",
+      "camera": "Caméra",
+      "unusedStorageInformation": "Information sur le stockage non utilisé"
+    },
+    "overview": "Prévisualisation"
+  },
+  "cameras": {
+    "title": "Caméras",
+    "info": {
+      "cameraProbeInfo": "{{camera}} Information récupérée depuis la Caméra",
+      "fetching": "En cours de récupération des données de la Caméra",
+      "stream": "Flux {{idx}}",
+      "fps": "Images par seconde :",
+      "unknown": "Inconnu",
+      "audio": "Audio :",
+      "tips": {
+        "title": "Information récupérée depuis la Caméra"
+      },
+      "streamDataFromFFPROBE": "Le flux de données est obtenu par <code>ffprobe</code>.",
+      "resolution": "Résolution :",
+      "error": "Erreur : {{error}}",
+      "codec": "Codec :",
+      "video": "Vidéo :"
+    },
+    "framesAndDetections": "Images / Détections",
+    "label": {
+      "camera": "caméra",
+      "detect": "Détecter",
+      "skipped": "ignoré",
+      "ffmpeg": "ffmpeg",
+      "capture": "capture"
+    },
+    "overview": "Prévisualisation",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Données récupérées copiées dans le presse-papier."
+      },
+      "error": {
+        "unableToProbeCamera": "Impossible de récupérer des infos depuis la caméra : {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Dernier rafraichissement : ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU par FFMPEG ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU ({{detectAvg}}%)",
+    "healthy": "Le système est sain",
+    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)"
+  },
+  "enrichments": {
+    "title": "Améliorations",
+    "infPerSecond": "Inférences par seconde",
+    "embeddings": {
+      "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
+      "text_embedding_speed": "Vitesse de capture des données complémentaire de texte",
+      "image_embedding_speed": "Vitesse de capture des données complémentaires à l'image",
+      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation"
     }
   }
 }
