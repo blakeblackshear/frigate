@@ -16,7 +16,8 @@
       "setup": {
         "visionModel": "Modelo de visão",
         "textModel": "Modelo de texto",
-        "textTokenizer": "Tokenizador de texto"
+        "textTokenizer": "Tokenizador de texto",
+        "visionModelFeatureExtractor": "Extrator de características de modelo de visão"
       },
       "context": "O Frigate está baixando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
       "tips": {
@@ -71,6 +72,8 @@
     "carousel": {
       "previous": "Slide anterior",
       "next": "Próximo slide"
-    }
+    },
+    "noImageFound": "Nenhuma imagem encontrada para este carimbo de data/hora.",
+    "createObjectMask": "Criar Máscara de Objeto"
   }
 }

@@ -36,7 +36,12 @@
     "liveDashboard": {
       "title": "Painel ao vivo",
       "automaticLiveView": {
-        "label": "Visualização ao vivo automática"
+        "label": "Visualização ao vivo automática",
+        "desc": "Alternar automaticamente para a visualização ao vivo de uma câmera quando uma atividade for detectada. Desativar esta opção faz com que as imagens estáticas das câmeras no painel Ao Vivo sejam atualizadas apenas uma vez por minuto."
+      },
+      "playAlertVideos": {
+        "label": "Reproduzir vídeos de alerta",
+        "desc": "Por padrão, alertas recentes no painel ao vivo são reproduzidos como vídeos curtos em loop. Desative esta opção para mostrar apenas uma imagem estática dos alertas recentes neste dispositivo/navegador."
       }
     },
     "calendar": {
@@ -44,32 +49,93 @@
       "firstWeekday": {
         "label": "Primeiro dia da semana",
         "sunday": "Domingo",
-        "monday": "Segunda-feira"
+        "monday": "Segunda-feira",
+        "desc": "O dia em que as semanas do calendário de revisão começam."
       }
     },
     "storedLayouts": {
-      "title": "Layouts armazenados"
+      "title": "Layouts armazenados",
+      "desc": "O layout das câmeras em um grupo de câmeras pode ser arrastado/redimensionado. As posições são armazenadas no armazenamento local do seu navegador.",
+      "clearAll": "Limpar todos os layouts"
     },
     "recordingsViewer": {
       "defaultPlaybackRate": {
-        "label": "Taxa de reprodução padrão"
+        "label": "Taxa de reprodução padrão",
+        "desc": "Taxa de reprodução padrão para a reprodução das gravações."
+      },
+      "title": "Visualizador de gravações"
+    },
+    "cameraGroupStreaming": {
+      "desc": "As configurações de transmissão de cada grupo de câmeras são armazenadas no armazenamento local do seu navegador.",
+      "title": "Configurações de transmissão do grupo de câmeras",
+      "clearAll": "Limpar todas as configurações de transmissão"
+    },
+    "toast": {
+      "success": {
+        "clearStreamingSettings": "Configurações de transmissão para todos os grupos de câmeras limpas.",
+        "clearStoredLayout": "Limpo layout armazenado para {{cameraName}}"
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Falha ao limpar o layout armazenado: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Falha ao limpar as configurações de transmissão: {{errorMessage}}"
       }
     }
   },
   "classification": {
     "faceRecognition": {
       "modelSize": {
-        "label": "Tamanho do modelo"
+        "label": "Tamanho do modelo",
+        "small": {
+          "title": "pequeno",
+          "desc": "Usar <em>pequeno</em> utiliza um modelo de incorporação facial FaceNet que é eficiente na maioria dos CPUs."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usar <em>grande</em> utiliza um modelo de incorporação facial ArcFace e será executado automaticamente na GPU, se aplicável."
+        },
+        "desc": "O tamanho do modelo utilizado para o reconhecimento facial."
       },
-      "readTheDocumentation": "Leia a documentação"
+      "readTheDocumentation": "Leia a documentação",
+      "title": "Reconhecimento facial",
+      "desc": "O reconhecimento facial permite que pessoas sejam atribuídas a nomes e, quando o rosto delas for reconhecido, o Frigate atribuirá o nome da pessoa como um sub-rótulo. Essa informação é incluída na interface do usuário, filtros e também nas notificações."
     },
     "licensePlateRecognition": {
-      "readTheDocumentation": "Leia a documentação"
+      "readTheDocumentation": "Leia a documentação",
+      "title": "Reconhecimento de placas de veículo",
+      "desc": "O Frigate pode reconhecer placas de veículos e adicionar automaticamente os caracteres detectados ao campo placa_de_veículo_reconhecida ou um nome conhecido como sub_rótulo para objetos do tipo carro. Um caso de uso comum pode ser ler as placas de veículos que entram em uma garagem ou os carros que passam por uma rua."
     },
     "semanticSearch": {
-      "readTheDocumentation": "Leia a documentação"
+      "readTheDocumentation": "Leia a documentação",
+      "title": "Pesquisa semântica",
+      "reindexNow": {
+        "label": "Reindexar agora",
+        "desc": "A reindexação irá regenerar as incorporações de todos os objetos rastreados. Esse processo é executado em segundo plano e pode sobrecarregar seu CPU e levar um bom tempo, dependendo do número de objetos rastreados que você possui.",
+        "confirmTitle": "Confirmar reindexação",
+        "confirmDesc": "Você tem certeza de que deseja reindexar todos as incorporações dos objetos rastreados? Esse processo será executado em segundo plano, mas pode sobrecarregar seu CPU e levar um bom tempo. Você pode acompanhar o progresso na página Explorar.",
+        "confirmButton": "Reindexar",
+        "alreadyInProgress": "A reindexação já está em andamento.",
+        "error": "Falha ao iniciar a reindexação: {{errorMessage}}",
+        "success": "Reindexação iniciada com sucesso."
+      },
+      "modelSize": {
+        "label": "Tamanho do modelo",
+        "desc": "O tamanho do modelo utilizado para as incorporações de pesquisa semântica.",
+        "small": {
+          "title": "pequeno",
+          "desc": "Usar <em>pequeno</em> utiliza uma versão quantizada do modelo, que usa menos RAM e executa mais rápido no CPU, com uma diferença insignificante na qualidade da incorporação."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usar <em>grande</em> utiliza o modelo completo do Jina e será executado automaticamente na GPU, se aplicável."
+        }
+      },
+      "desc": "A Pesquisa Semântica no Frigate permite que você encontre objetos rastreados dentro dos itens de revisão usando a imagem em si, uma descrição de texto definida pelo usuário ou uma descrição gerada automaticamente."
     },
-    "title": "Configurações de classificação"
+    "title": "Configurações de classificação",
+    "toast": {
+      "success": "As configurações de classificação foram salvas. Reinicie o Frigate para aplicar as alterações.",
+      "error": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
+    }
   },
   "notification": {
     "globalSettings": {
@@ -101,10 +167,131 @@
       },
       "polygonAreaTooLarge": {
         "documentation": "Leia a documentação"
-      }
+      },
+      "label": "Máscara de movimento",
+      "desc": {
+        "documentation": "Documentação"
+      },
+      "clickDrawPolygon": "Clique para desenhar um polígono na imagem."
     },
     "zones": {
-      "label": "Zonas"
+      "label": "Zonas",
+      "documentTitle": "Editar Zona - Frigate",
+      "desc": {
+        "documentation": "Documentação",
+        "title": "As zonas permitem definir uma área específica do quadro para que você possa determinar se um objeto está ou não dentro de uma área particular."
+      },
+      "point_one": "{{count}} ponto",
+      "point_many": "{{count}} pontos",
+      "point_other": "{{count}} pontos",
+      "add": "Adicionar Zona",
+      "edit": "Editar Zona",
+      "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
+      "name": {
+        "title": "Nome",
+        "inputPlaceHolder": "Digite um nome...",
+        "tips": "O nome deve ter pelo menos 2 caracteres e não pode ser o nome de uma câmera ou de outra zona."
+      },
+      "inertia": {
+        "title": "Inércia",
+        "desc": "Especifica quantos quadros um objeto deve estar em uma zona antes de ser considerado dentro da zona. <em>Padrão: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Tempo de permanência",
+        "desc": "Define o tempo mínimo, em segundos, que o objeto deve permanecer na zona para que ela seja ativada. <em>Padrão: 0</em>"
+      },
+      "objects": {
+        "title": "Objetos",
+        "desc": "Lista de objetos que se aplicam a esta zona."
+      },
+      "allObjects": "Todos os objetos",
+      "speedEstimation": {
+        "title": "Estimativa de velocidade",
+        "desc": "Ativar estimativa de velocidade para objetos nesta zona. A zona deve ter exatamente 4 pontos."
+      },
+      "speedThreshold": {
+        "title": "Limite de velocidade ({{unit}})",
+        "desc": "Especifica uma velocidade mínima para que os objetos sejam considerados nesta zona.",
+        "toast": {
+          "error": {
+            "pointLengthError": "A estimativa de velocidade foi desativada para esta zona. Zonas com estimativa de velocidade devem ter exatamente 4 pontos.",
+            "loiteringTimeError": "Zonas com tempos de permanência maiores que 0 não devem ser usadas com estimativa de velocidade."
+          }
+        }
+      },
+      "toast": {
+        "success": "A zona ({{zoneName}}) foi salva. Reinicie o Frigate para aplicar as alterações."
+      }
+    },
+    "filter": {
+      "all": "Todas as Máscaras e Zonas"
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Coordenadas de {{polyName}} copiadas para a área de transferência."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Não foi possível copiar as coordenadas para a área de transferência."
+      }
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "O nome da zona deve ter pelo menos 2 caracteres.",
+          "mustNotContainPeriod": "O nome da zona não pode conter pontos.",
+          "hasIllegalCharacter": "O nome da zona contém caracteres ilegais.",
+          "mustNotBeSameWithCamera": "O nome da zona não pode ser o mesmo que o nome da câmera.",
+          "alreadyExists": "Já existe uma zona com esse nome para esta câmera."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "A distância deve ser maior ou igual a 0,1.",
+          "mustBeFilled": "Todos os campos de distância devem ser preenchidos para usar a estimativa de velocidade."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "A inércia deve ser maior que 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "O tempo de permanência deve ser maior ou igual a 0."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Remover o último ponto",
+        "reset": {
+          "label": "Limpar todos os pontos"
+        },
+        "snapPoints": {
+          "true": "Fixar pontos",
+          "false": "Não fixar pontos"
+        },
+        "delete": {
+          "title": "Confirmar exclusão",
+          "success": "{{name}} foi excluído.",
+          "desc": "Você tem certeza de que deseja excluir o {{type}} <em>{{name}}</em>?"
+        },
+        "error": {
+          "mustBeFinished": "A criação do polígono deve ser concluída antes de salvar."
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "Máscaras de objetos",
+      "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
+      "desc": {
+        "documentation": "Documentação"
+      },
+      "point_one": "{{count}} ponto",
+      "point_many": "{{count}} pontos",
+      "point_other": "{{count}} pontos",
+      "objects": {
+        "allObjectTypes": "Todos os tipos de objeto",
+        "title": "Objetos"
+      }
     }
   },
   "debug": {
@@ -117,7 +304,46 @@
   },
   "camera": {
     "reviewClassification": {
-      "readTheDocumentation": "Leia a documentação"
+      "readTheDocumentation": "Leia a documentação",
+      "title": "Classificação de Revisão",
+      "noDefinedZones": "Nenhuma zona está definida para esta câmera.",
+      "objectAlertsTips": "Todos os objetos {{alertsLabels}} na câmera {{cameraName}} serão exibidos como Alertas.",
+      "zoneObjectDetectionsTips": {
+        "text": "Todos os objetos {{detectionsLabels}} não categorizados na zona {{zone}} na câmera {{cameraName}} serão exibidos como Detecções.",
+        "regardlessOfZoneObjectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados na câmera {{cameraName}} serão exibidos como Detecções, independentemente da zona em que se encontram.",
+        "notSelectDetections": "Todos os objetos {{detectionsLabels}} detectados na zona {{zone}} na câmera {{cameraName}} que não forem categorizados como Alertas serão exibidos como Detecções, independentemente da zona em que se encontram."
+      },
+      "selectAlertsZones": "Selecionar zonas para Alertas",
+      "selectDetectionsZones": "Selecionar zonas para Detecções",
+      "limitDetections": "Limitar detecções a zonas específicas",
+      "desc": "O Frigate categoriza os itens de revisão como Alertas e Detecções. Por padrão, todos os objetos do tipo <em>pessoa</em> e <em>carro</em> são considerados Alertas. Você pode refinar a categorização dos seus itens de revisão configurando as zonas necessárias para eles.",
+      "objectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados na câmera {{cameraName}} serão exibidos como Detecções, independentemente da zona em que se encontram.",
+      "zoneObjectAlertsTips": "Todos os objetos {{alertsLabels}} detectados na zona {{zone}} na câmera {{cameraName}} serão exibidos como Alertas.",
+      "toast": {
+        "success": "A configuração de classificação de revisão foi salva. Reinicie o Frigate para aplicar as alterações."
+      }
+    },
+    "title": "Configurações da câmera",
+    "streams": {
+      "title": "fluxos",
+      "desc": "Desativar uma câmera interrompe completamente o processamento dos fluxos dessa câmera pelo Frigate. Detecção, gravação e depuração ficarão indisponíveis.<br /><em>Observação: Isso não desativa as retransmissões do go2rtc.</em>"
+    },
+    "review": {
+      "title": "Revisão",
+      "desc": "Ative ou desative alertas e detecções para esta câmera. Quando desativado, nenhum novo item de revisão será gerado.",
+      "alerts": "Alertas ",
+      "detections": "Detecções "
+    }
+  },
+  "motionDetectionTuner": {
+    "contourArea": {
+      "title": "Área de contorno"
+    },
+    "improveContrast": {
+      "title": "Melhorar o contraste"
+    },
+    "Threshold": {
+      "title": "Limite"
     }
   }
 }

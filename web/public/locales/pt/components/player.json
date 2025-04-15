@@ -35,8 +35,17 @@
         "value": "{{droppedFrames}} quadros"
       }
     },
-    "decodedFrames": "Quadros decodificados:"
+    "decodedFrames": "Quadros decodificados:",
+    "droppedFrameRate": "Taxa de Quadros Perdidos:"
   },
   "noRecordingsFoundForThisTime": "Nenhuma gravação encontrada para este momento",
-  "livePlayerRequiredIOSVersion": "iOS 17.1 ou superior é necessário para este tipo de transmissão ao vivo."
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ou superior é necessário para este tipo de transmissão ao vivo.",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Quadro enviado com sucesso para o Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Falha ao enviar o quadro para o Frigate+"
+    }
+  }
 }
