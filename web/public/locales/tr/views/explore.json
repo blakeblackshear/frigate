@@ -17,11 +17,13 @@
       "toast": {
         "success": {
           "updatedSublabel": "Alt etiket başarıyla gücellendi.",
-          "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir."
+          "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
+          "updatedLPR": "Plaka başarıyla güncellendi."
         },
         "error": {
           "updatedSublabelFailed": "Alt etiket güncellenemedi: {{errorMessage}}",
-          "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}"
+          "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}",
+          "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}"
         }
       }
     },
@@ -57,7 +59,13 @@
       "info": "Tepe skor, bir takip edilen nesne için en yüksek ortalama puandır ve arama sonucundaki küçük resimde gösterilen puandan farklı olabilir.",
       "label": "Tepe Skor"
     },
-    "objects": "Nesneler"
+    "objects": "Nesneler",
+    "editLPR": {
+      "title": "Plakayı düzenle",
+      "desc": "Bu {{label}} için yeni bir plaka değeri girin",
+      "descNoLabel": "Bu nesne için yeni bir plaka değeri girin"
+    },
+    "recognizedLicensePlate": "Tanınan Plaka"
   },
   "generativeAI": "Üretken Yapay Zeka",
   "exploreIsUnavailable": {
@@ -179,5 +187,6 @@
       "title": "Silmeyi onayla"
     }
   },
-  "trackedObjectsCount": "{{count}} adet takip edilen nesne "
+  "trackedObjectsCount_one": "{{count}} adet takip edilen nesne ",
+  "trackedObjectsCount_other": "{{count}} adet takip edilen nesne "
 }

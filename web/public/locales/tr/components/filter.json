@@ -5,7 +5,9 @@
       "title": "Bütün Etiketler",
       "short": "Etiketler"
     },
-    "count": "{{count}} Etiket"
+    "count": "{{count}} Etiket",
+    "count_one": "{{count}} Etiket",
+    "count_other": "{{count}} Etiket"
   },
   "dates": {
     "all": {
@@ -94,7 +96,7 @@
     "disableLogStreaming": "Günlük akışını devre dışı bırak",
     "allLogs": "Tüm günlükler",
     "loading": {
-      "title": "Yükleniyor",
+      "title": "Günlük Akışı",
       "desc": "Günlükler sayfası en aşağıya kaydırıldığında yeni günlük satırları geldikçe aşağıya eklenir."
     },
     "label": "Düzeye göre günlükleri filtrele"
