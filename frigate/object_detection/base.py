@@ -15,11 +15,12 @@ from frigate.detectors import create_detector
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     InputDTypeEnum,
-    InputTensorEnum,
 )
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.services import listen
+
+from .util import tensor_transform
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +29,6 @@ class ObjectDetector(ABC):
     @abstractmethod
     def detect(self, tensor_input, threshold: float = 0.4):
         pass
-
-
-def tensor_transform(desired_shape: InputTensorEnum):
-    # Currently this function only supports BHWC permutations
-    if desired_shape == InputTensorEnum.nhwc:
-        return None
-    elif desired_shape == InputTensorEnum.nchw:
-        return (0, 3, 1, 2)
 
 
 class LocalObjectDetector(ObjectDetector):
