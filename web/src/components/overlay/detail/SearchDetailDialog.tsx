@@ -325,7 +325,7 @@ function ObjectDetailsTab({
     config?.ui.timezone,
   );
 
-  const score = useMemo(() => {
+  const topScore = useMemo(() => {
     if (!search) {
       return 0;
     }
@@ -362,6 +362,16 @@ function ObjectDetailsTab({
     } else {
       return undefined;
     }
+  }, [search]);
+
+  const snapScore = useMemo(() => {
+    if (!search?.has_snapshot) {
+      return 0;
+    }
+
+    const value = search.data.score ?? search.score ?? 0;
+
+    return Math.floor(value * 100);
   }, [search]);
 
   const averageEstimatedSpeed = useMemo(() => {
@@ -773,9 +783,19 @@ function ObjectDetailsTab({
               </div>
             </div>
             <div className="text-sm">
-              {score}%{subLabelScore && ` (${subLabelScore}%)`}
+              {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
+          {snapScore && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">
+                <div className="flex flex-row items-center gap-1">
+                  {t("details.snapshotScore.label")}
+                </div>
+              </div>
+              <div className="text-sm">{snapScore}%</div>
+            </div>
+          )}
           {averageEstimatedSpeed && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
