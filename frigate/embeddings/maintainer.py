@@ -109,7 +109,9 @@ class EmbeddingMaintainer(threading.Thread):
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
             lpr_model_runner = LicensePlateModelRunner(
-                self.requestor, device=self.config.lpr.device
+                self.requestor,
+                device=self.config.lpr.device,
+                model_size=self.config.lpr.model_size,
             )
 
         # realtime processors
