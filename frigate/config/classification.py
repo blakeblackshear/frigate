@@ -103,6 +103,9 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         default=LPRDeviceEnum.CPU,
         title="The device used for license plate recognition.",
     )
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
     detection_threshold: float = Field(
         default=0.7,
         title="License plate object confidence score required to begin running recognition.",
