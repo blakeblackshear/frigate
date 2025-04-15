@@ -21,6 +21,11 @@
     "new": "Create New Face",
     "nextSteps": "To build a strong foundation:<li>Use the Train tab to select and train on images for each detected person.</li><li>Focus on straight-on images for best results; avoid training images that capture faces at an angle.</li></ul>"
   },
+  "steps": {
+    "faceName": "Enter Face Name",
+    "uploadFace": "Upload Face Image",
+    "nextSteps": "Next Steps"
+  },
   "train": {
     "title": "Train",
     "aria": "Select train"

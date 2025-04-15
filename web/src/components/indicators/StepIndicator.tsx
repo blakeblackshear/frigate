@@ -1,13 +1,18 @@
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type StepIndicatorProps = {
   steps: string[];
   currentStep: number;
+  translationNameSpace: string;
 };
 export default function StepIndicator({
   steps,
   currentStep,
+  translationNameSpace,
 }: StepIndicatorProps) {
+  const { t } = useTranslation(translationNameSpace);
+
   return (
     <div className="flex flex-row justify-evenly">
       {steps.map((name, idx) => (
@@ -20,7 +25,7 @@ export default function StepIndicator({
           >
             {idx + 1}
           </div>
-          <div className="w-24 text-center md:w-24">{name}</div>
+          <div className="w-24 text-center md:w-24">{t(name)}</div>
         </div>
       ))}
     </div>

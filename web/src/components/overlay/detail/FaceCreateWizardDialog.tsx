@@ -25,7 +25,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
-const STEPS = ["Enter Face Name", "Upload Face Image", "Next Steps"];
+const STEPS = ["steps.faceName", "steps.uploadFace", "steps.nextSteps"];
 
 type CreateFaceWizardDialogProps = {
   open: boolean;
@@ -107,7 +107,11 @@ export default function CreateFaceWizardDialog({
           <Title>{t("button.addFace")}</Title>
           {isDesktop && <Description>{t("description.addFace")}</Description>}
         </Header>
-        <StepIndicator steps={STEPS} currentStep={step} />
+        <StepIndicator
+          steps={STEPS}
+          currentStep={step}
+          translationNameSpace="views/faceLibrary"
+        />
         {step == 0 && (
           <TextEntry
             placeholder={t("description.placeholder")}
