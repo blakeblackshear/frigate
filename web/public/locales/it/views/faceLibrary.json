@@ -1,11 +1,73 @@
 {
   "selectItem": "Seleziona {{item}}",
   "description": {
-    "addFace": "Procedura per aggiungere una nuova raccolta alla Libreria dei volti.",
+    "addFace": "Procedura per aggiungere una nuova raccolta alla Libreria dei Volti.",
     "placeholder": "Immetti un nome per questa raccolta"
   },
   "details": {
     "confidence": "Fiducia",
-    "person": "Persona"
-  }
+    "person": "Persona",
+    "face": "Dettagli del volto",
+    "faceDesc": "Dettagli del volto e dell'oggetto associato",
+    "timestamp": "Marca temporale"
+  },
+  "train": {
+    "title": "Addestra",
+    "aria": "Seleziona addestramento"
+  },
+  "button": {
+    "addFace": "Aggiungi Volto",
+    "deleteFaceAttempts": "Elimina tentativi di riconoscimento facciale",
+    "uploadImage": "Carica Immagine",
+    "reprocessFace": "Rielabora il Volto"
+  },
+  "trainFace": "Addestra il Volto",
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} volto è stato eliminato con successo.",
+      "deletedName_many": "{{count}} volti sono stati eliminati con successo.",
+      "deletedName_other": "{{count}} volti sono stati eliminati con successo.",
+      "trainedFace": "Volto addestrato con successo.",
+      "deletedFace_one": "Eliminato con successo {{count}} volto.",
+      "deletedFace_many": "Eliminati con successo {{count}} volti.",
+      "deletedFace_other": "Eliminati con successo {{count}} volti.",
+      "updatedFaceScore": "Punteggio del volto aggiornato con successo.",
+      "uploadedImage": "Immagine caricata correttamente.",
+      "addFaceLibrary": "{{name}} è stato aggiunto con successo alla Libreria dei Volti!"
+    },
+    "error": {
+      "addFaceLibraryFailed": "Impossibile impostare il nome del volto: {{errorMessage}}",
+      "uploadingImageFailed": "Impossibile caricare l'immagine: {{errorMessage}}",
+      "deleteFaceFailed": "Impossibile eliminare: {{errorMessage}}",
+      "trainFailed": "Impossibile addestrare: {{errorMessage}}",
+      "updateFaceScoreFailed": "Impossibile aggiornare il punteggio del volto: {{errorMessage}}",
+      "deleteNameFailed": "Impossibile eliminare il nome: {{errorMessage}}"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Rilascia l'immagine qui...",
+    "dropInstructions": "Trascina e rilascia un'immagine qui oppure fai clic per selezionarla",
+    "maxSize": "Dimensione massima: {{size}} MB",
+    "validation": {
+      "selectImage": "Seleziona un file immagine."
+    }
+  },
+  "createFaceLibrary": {
+    "title": "Crea Raccolta",
+    "nextSteps": "Per costruire una base solida:<li>Usa la scheda Addestra per selezionare e addestrare le immagini per ogni persona rilevata.</li><li>Concentrati sulle immagini dritte per ottenere risultati migliori; evita di addestrare immagini che catturano i volti da un'angolazione.</li></ul>",
+    "desc": "Crea una nuova raccolta",
+    "new": "Crea nuovo Volto"
+  },
+  "readTheDocs": "Leggi la documentazione",
+  "selectFace": "Seleziona Volto",
+  "documentTitle": "Libreria dei Volti - Frigate",
+  "uploadFaceImage": {
+    "desc": "Carica un'immagine per scansionare i volti e includerla in {{pageToggle}}",
+    "title": "Carica l'immagine del Volto"
+  },
+  "deleteFaceLibrary": {
+    "title": "Elimina Nome",
+    "desc": "Vuoi davvero eliminare la raccolta {{name}}? Questa operazione eliminerà definitivamente tutti i volti associati."
+  },
+  "trainFaceAs": "Addestra il Volto come:"
 }
