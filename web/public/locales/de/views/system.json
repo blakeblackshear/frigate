@@ -1,1 +1,101 @@
-{}
+{
+  "general": {
+    "hardwareInfo": {
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Ergebnis der Vainfo-Abfrage",
+          "returnCode": "Rückgabecode: {{code}}",
+          "processError": "Prozess Fehler:",
+          "processOutput": "Prozess-Output:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI Ausgabe",
+          "cudaComputerCapability": "CUDA Rechenleistung:{{cuda_compute}}",
+          "name": "Name: {{name}}",
+          "driver": "Treiber: {{driver}}",
+          "vbios": "VBios Info: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Schhließe GPU Info"
+        },
+        "copyInfo": {
+          "label": "Kopiere GPU Info"
+        },
+        "toast": {
+          "success": "GPU-Infos in die Zwischenablage kopiert"
+        }
+      },
+      "title": "Hardwareinformationen",
+      "gpuUsage": "GPU Auslastung",
+      "gpuMemory": "Grafikspeicher",
+      "gpuDecoder": "GPU Decoder",
+      "gpuEncoder": "GPU Encoder"
+    },
+    "title": "Allgemein",
+    "detector": {
+      "title": "Detektoren",
+      "cpuUsage": "CPU-Auslastung des Detektors",
+      "memoryUsage": "Arbeitsspeichernutzung des Detektors",
+      "inferenceSpeed": "Detektoren Inferenzgeschwindigkeit"
+    },
+    "otherProcesses": {
+      "title": "Andere Prozesse",
+      "processCpuUsage": "CPU Auslastung für Prozess",
+      "processMemoryUsage": "Prozessspeicherauslastung"
+    }
+  },
+  "documentTitle": {
+    "cameras": "Kamerastatistiken – Frigate",
+    "storage": "Speicherstatistiken - Frigate",
+    "general": "Allgemeine Statistiken - Frigate",
+    "logs": {
+      "frigate": "Frigate Protokolle – Frigate",
+      "go2rtc": "Go2RTC Protokolle - Frigate",
+      "nginx": "Nginx Protokolle - Frigate"
+    },
+    "enrichments": "Erweiterte Statistiken - Frigate"
+  },
+  "title": "System",
+  "logs": {
+    "download": {
+      "label": "Protokolldateien herunterladen"
+    },
+    "copy": {
+      "success": "Protokolle in die Zwischenablage kopiert",
+      "label": "In die Zwischenablage kopieren",
+      "error": "Protokolle konnten nicht in die Zwischenablage kopiert werden"
+    },
+    "type": {
+      "message": "Nachricht",
+      "timestamp": "Zeitstempel",
+      "label": "Art",
+      "tag": "Tag"
+    },
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Fehler beim Abrufen der Protokolle: {{errorMessage}}",
+        "whileStreamingLogs": "Beim Übertragen der Protokolle ist ein Fehler aufgetreten: {{errorMessage}}"
+      }
+    },
+    "tips": "Protokolle werden in Echtzeit vom Server übertragen"
+  },
+  "metrics": "Systemmetriken",
+  "storage": {
+    "recordings": {
+      "earliestRecording": "Älteste verfügbare Aufzeichnung:",
+      "title": "Aufnahmen",
+      "tips": "Dieser Wert gibt den Gesamtspeicherplatz an, den die Aufzeichnungen in der Datenbank von Frigate belegen. Frigate erfasst nicht die Speichernutzung für alle Dateien auf Ihrer Festplatte."
+    },
+    "cameraStorage": {
+      "camera": "Kamera",
+      "title": "Kamera Speicher"
+    },
+    "title": "Speicher",
+    "overview": "Übersicht"
+  },
+  "cameras": {
+    "info": {
+      "stream": "Stream {{idx}}"
+    }
+  }
+}

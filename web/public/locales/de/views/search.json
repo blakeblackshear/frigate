@@ -2,7 +2,7 @@
   "savedSearches": "Gespeicherte Suchen",
   "searchFor": "Suche nach {{inputValue}}",
   "button": {
-    "save": "Suche sichern",
+    "save": "Suche speichern",
     "filterActive": "Filter aktiv",
     "delete": "Gespeicherte Suche löschen",
     "filterInformation": "Information filtern",
