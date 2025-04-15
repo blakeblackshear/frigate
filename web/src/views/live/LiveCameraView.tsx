@@ -1376,7 +1376,7 @@ function FrigateCameraFeatures({
                           ) : (
                             <>
                               <LuX className="size-4 text-danger" />
-                              <div>{t("stream.twoWayTalk.available")}</div>
+                              <div>{t("stream.twoWayTalk.unavailable")}</div>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
