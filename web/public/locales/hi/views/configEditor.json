@@ -1,0 +1,15 @@
+{
+  "saveOnly": "केवल सहेजें",
+  "saveAndRestart": "सहेजें और पुनः प्रारंभ करें",
+  "configEditor": "विन्यास संपादक",
+  "copyConfig": "विन्यास कॉपी करें",
+  "toast": {
+    "error": {
+      "savingError": "विन्यास सहेजने में त्रुटि हुई"
+    },
+    "success": {
+      "copyToClipboard": "विन्यास क्लिपबोर्ड पर कॉपी कर लिया गया है।"
+    }
+  },
+  "documentTitle": "विन्यास संपादक - Frigate"
+}
