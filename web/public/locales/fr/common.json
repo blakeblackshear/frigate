@@ -22,24 +22,53 @@
     "pm": "PM",
     "am": "AM",
     "yr": "{{time}}a",
-    "year": "{{time}} années",
+    "year_one": "{{time}} année",
+    "year_many": "{{time}} années",
+    "year_other": "{{time}} années",
     "mo": "{{time}}m",
-    "month": "{{time}} mois",
+    "month_one": "{{time}} mois",
+    "month_many": "{{time}} mois",
+    "month_other": "{{time}} mois",
     "s": "{{time}}s",
-    "second": "{{time}} secondes",
+    "second_one": "{{time}} seconde",
+    "second_many": "{{time}} secondes",
+    "second_other": "{{time}} secondes",
     "m": "{{time}}m",
-    "hour": "{{time}} heures",
+    "hour_one": "{{time}} heure",
+    "hour_many": "{{time}} heures",
+    "hour_other": "{{time}} heures",
     "24hours": "24 heures",
-    "minute": "{{time}} minutes",
+    "minute_one": "{{time}} minute",
+    "minute_many": "{{time}} minutes",
+    "minute_other": "{{time}} minutes",
     "d": "{{time}}j",
-    "day": "{{time}} jours",
-    "1hour": "1 heure"
+    "day_one": "{{time}} jour",
+    "day_many": "{{time}} jours",
+    "day_other": "{{time}} jours",
+    "1hour": "1 heure",
+    "formattedTimestamp": {
+      "12hour": "%b %-d, %I:%M:%S %p",
+      "24hour": "%d %b, %H:%M:%S"
+    },
+    "formattedTimestampWithYear": {
+      "24hour": "%b %-d %Y, %H:%M",
+      "12hour": "%b %-d %Y, %I:%M %p"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
+    },
+    "formattedTimestamp2": {
+      "12hour": "%m/%d %I:%M:%S%P",
+      "24hour": "%d %b %H:%M:%S"
+    }
   },
   "button": {
     "apply": "Appliquer",
     "reset": "Réinitialiser",
     "disabled": "Désactivé",
-    "save": "Sauvegarder",
+    "save": "Enregistrer",
     "saving": "Sauvegarde ...",
     "close": "Fermer",
     "copy": "Copier",
@@ -54,7 +83,7 @@
     "yes": "Oui",
     "no": "Non",
     "unsuspended": "Ré-activer",
-    "play": "Play",
+    "play": "Lire",
     "unselect": "Désélectionner",
     "suspended": "Suspendu",
     "enable": "Activer",
@@ -75,7 +104,37 @@
   "menu": {
     "configuration": "Configuration",
     "language": {
-      "en": "Anglais"
+      "en": "Anglais",
+      "withSystem": {
+        "label": "Utiliser les paramètres système pour la langue"
+      },
+      "zhCN": "简体中文 (Chinois simplifié)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Français)",
+      "ja": "日本語 (Japanonais)",
+      "tr": "Türkçe (Turc)",
+      "it": "Italiano (Italien)",
+      "nl": "Nederlands (Néerlandais)",
+      "sv": "Svenska (Suédois)",
+      "cs": "Čeština (Tchèque)",
+      "nb": "Norsk Bokmål (Bokmål Norvégien)",
+      "ko": "한국어 (Coréen)",
+      "fa": "فارسی (Perse)",
+      "pl": "Polski (Polonais)",
+      "el": "Ελληνικά (Grec)",
+      "ro": "Română (Roumain)",
+      "hu": "Magyar (Hongrois)",
+      "he": "עברית (Hebreu)",
+      "ru": "Русский (Russe)",
+      "de": "Deutsch (Allemand)",
+      "es": "Español (Espagnol)",
+      "ar": "العربية (Arabe)",
+      "da": "Dansk (Danois)",
+      "fi": "Suomi (Finlandais)",
+      "pt": "Português (Portugais)",
+      "sk": "Slovenčina (Slave)",
+      "uk": "Українська (Ukrainien)",
+      "vi": "Tiếng Việt (Vietnamien)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -120,9 +179,9 @@
     "restart": "Redémarrer Frigate",
     "live": {
       "cameras": {
-        "count_one": "{{count}} Camera",
-        "count_many": "{{count}} Cameras",
-        "count_other": "",
+        "count_one": "{{count}} Caméra",
+        "count_many": "{{count}} Caméras",
+        "count_other": "{{count}} Caméras",
         "title": "Caméras"
       },
       "allCameras": "Toutes les caméras",
@@ -134,7 +193,11 @@
   },
   "toast": {
     "save": {
-      "title": "Sauvegarder"
+      "title": "Sauvegarder",
+      "error": {
+        "noMessage": "Echec lors de l'enregistrement des changements de configuration",
+        "title": "Echec lors de l'enregistrement des changements de configuration : {{errorMessage}}"
+      }
     },
     "copyUrlToClipboard": "Lien copié dans le presse-papier."
   },
@@ -169,5 +232,11 @@
   },
   "label": {
     "back": "Retour"
+  },
+  "unit": {
+    "speed": {
+      "kph": "kph",
+      "mph": "mph"
+    }
   }
 }

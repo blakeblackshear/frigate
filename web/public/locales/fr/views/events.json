@@ -17,7 +17,7 @@
     "aria": "Sélectionner les événements",
     "noFoundForTimePeriod": "Aucun événement trouvé pour cette plage de temps."
   },
-  "documentTitle": "Revue - Frigate",
+  "documentTitle": "Évaluations - Frigate",
   "recordings": {
     "documentTitle": "Enregistrements - Frigate"
   },
@@ -25,5 +25,11 @@
     "last24Hours": "Dernières 24 heures"
   },
   "timeline.aria": "Sélectionner une chronologie",
-  "markAsReviewed": "Marqué comme révisé"
+  "markAsReviewed": "Marqué comme révisé",
+  "newReviewItems": {
+    "button": "Nouveaux éléments à évaluer",
+    "label": "Afficher les nouveaux éléments d'évaluation"
+  },
+  "camera": "Caméra",
+  "markTheseItemsAsReviewed": "Marquer ces éléments comme évalués"
 }

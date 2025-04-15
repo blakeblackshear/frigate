@@ -5,7 +5,9 @@
       "title": "Toutes les étiquettes",
       "short": "Étiquettes"
     },
-    "count": "{{count}} Étiquettes"
+    "count": "{{count}} Étiquettes",
+    "count_one": "{{count}} Étiquette",
+    "count_other": "{{count}} Étiquettes"
   },
   "filter": "Filtre",
   "zones": {
@@ -31,5 +33,94 @@
     "all": "Toutes les sous-étiquettes"
   },
   "score": "Score",
-  "estimatedSpeed": "Vitesse estimée ({{unit}})"
+  "estimatedSpeed": "Vitesse estimée ({{unit}})",
+  "sort": {
+    "label": "Tri",
+    "dateDesc": "Date (ordre chronologique inverse)",
+    "dateAsc": "Date (ordre chronologique)",
+    "scoreDesc": "Score Objet (Descendant)",
+    "scoreAsc": "Score Objet (Ascendant)",
+    "speedAsc": "Vitesse Estimée (Ascendant)",
+    "speedDesc": "Vitesse Estimée (Descendant)",
+    "relevance": "Pertinence"
+  },
+  "features": {
+    "submittedToFrigatePlus": {
+      "tips": "Vous devez d'abord filtrer les objets suivis qui ont un instantané.<br /><br />Les objets suivis sans instantané ne peuvent pas être soumis à Frigate+.",
+      "label": "Soumis à Frigate+"
+    },
+    "hasVideoClip": "A un clip vidéo",
+    "hasSnapshot": "A un instantané",
+    "label": "Caractéristiques"
+  },
+  "explore": {
+    "settings": {
+      "title": "Paramètres",
+      "defaultView": {
+        "title": "Vue par défaut",
+        "summary": "Résumé",
+        "unfilteredGrid": "Grille non filtrée",
+        "desc": "Lorsqu'aucun filtre n'est sélectionné, afficher un résumé des objets suivis les plus récents par étiquette ou affichez une grille non filtrée."
+      },
+      "gridColumns": {
+        "desc": "Sélectionner le nombre de colonnes dans la vue grille.",
+        "title": "Colonnes de la grille"
+      },
+      "searchSource": {
+        "label": "Source de recherche",
+        "options": {
+          "thumbnailImage": "Image de la vignette",
+          "description": "Description"
+        },
+        "desc": "Choisissez si vous souhaitez rechercher les vignettes ou les descriptions de vos objets suivis."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Sélectionner une date pour filtrer par"
+      }
+    }
+  },
+  "review": {
+    "showReviewed": "Montrer les évalués"
+  },
+  "cameras": {
+    "label": "Filtre des caméras",
+    "all": {
+      "short": "Caméras",
+      "title": "Toutes les Caméras"
+    }
+  },
+  "motion": {
+    "showMotionOnly": "Afficher le mouvement uniquement"
+  },
+  "logSettings": {
+    "filterBySeverity": "Filtrer les logs par sévérité",
+    "loading": {
+      "title": "Chargement",
+      "desc": "Lorsque le volet de la log défile vers le bas, les nouvelles logs sont automatiquement diffusées au fur et à mesure de leur ajout."
+    },
+    "label": "Niveau de log du filtre",
+    "disableLogStreaming": "Désactiver la diffusion des logs",
+    "allLogs": "Toutes les logs"
+  },
+  "recognizedLicensePlates": {
+    "placeholder": "Tapez pour rechercher des plaques d'immatriculation...",
+    "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée.",
+    "loading": "Chargement des plaques d'immatriculation reconnues...",
+    "title": "Plaques d'immatriculation reconnues",
+    "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
+    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques dans la liste."
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmer la suppression",
+    "toast": {
+      "success": "Les objets suivis ont été supprimés avec succès.",
+      "error": "Échec à la suppression des objets suivis : {{errorMessage}}"
+    },
+    "desc": "La suppression de ces objets suivis {{objectLength}} supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
+  },
+  "zoneMask": {
+    "filterBy": "Filtrer par masque de zone"
+  }
 }
