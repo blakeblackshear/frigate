@@ -1,1 +1,157 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Statystyki kamer - Frigate",
+    "storage": "Statystyki Magazynowania - Frigate",
+    "general": "Statystyki Ogólne - Frigate",
+    "enrichments": "Statystyki Wzbogaceń - Frigate",
+    "logs": {
+      "frigate": "Logi Frigate - Frigate",
+      "go2rtc": "Logi Go2RTC - Frigate",
+      "nginx": "Logi Nginx - Frigate"
+    }
+  },
+  "general": {
+    "hardwareInfo": {
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Wynik Vainfo",
+          "returnCode": "Kod zwrotny: {{code}}",
+          "processOutput": "Wynik procesu:",
+          "processError": "Błąd procesu:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Wynik Nvidia SMI",
+          "name": "Nazwa: {{name}}",
+          "driver": "Sterownik: {{driver}}",
+          "cudaComputerCapability": "Możliwości obliczeniowe CUDA: {{cuda_compute}}",
+          "vbios": "Informacje VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zamknij informacje o GPU"
+        },
+        "copyInfo": {
+          "label": "Kopiuj informacje o GPU"
+        },
+        "toast": {
+          "success": "Skopiowano informacje o GPU do schowka"
+        }
+      },
+      "title": "Informacje o sprzęcie",
+      "gpuEncoder": "Enkoder GPU",
+      "gpuDecoder": "Dekoder GPU",
+      "gpuMemory": "Pamięć GPU",
+      "gpuUsage": "Użycie GPU"
+    },
+    "title": "Ogólne",
+    "detector": {
+      "title": "Detektory",
+      "inferenceSpeed": "Szybkość wnioskowania detektora",
+      "cpuUsage": "Użycie CPU przez detektor",
+      "memoryUsage": "Użycie pamięci przez detektor"
+    },
+    "otherProcesses": {
+      "title": "Inne procesy",
+      "processCpuUsage": "Użycie CPU przez proces",
+      "processMemoryUsage": "Użycie pamięci przez proces"
+    }
+  },
+  "cameras": {
+    "info": {
+      "stream": "Strumień {{idx}}",
+      "cameraProbeInfo": "{{camera}} Informacje o sondowaniu kamery",
+      "streamDataFromFFPROBE": "Dane strumienia są pozyskiwane za pomocą <code>ffprobe</code>.",
+      "video": "Wideo:",
+      "codec": "Kodek:",
+      "resolution": "Rozdzielczość:",
+      "fps": "FPS:",
+      "unknown": "Nieznany",
+      "audio": "Audio:",
+      "error": "Błąd: {{error}}",
+      "tips": {
+        "title": "Informacje o sondowaniu kamery"
+      },
+      "fetching": "Pobieranie danych kamery"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Skopiowano dane sondowania do schowka."
+      },
+      "error": {
+        "unableToProbeCamera": "Nie można sondować kamery: {{errorMessage}}"
+      }
+    },
+    "title": "Kamery",
+    "overview": "Przegląd",
+    "framesAndDetections": "Klatki / Detekcje",
+    "label": {
+      "camera": "kamera",
+      "detect": "wykryj",
+      "skipped": "pominięte",
+      "ffmpeg": "ffmpeg",
+      "capture": "przechwytywanie"
+    }
+  },
+  "storage": {
+    "cameraStorage": {
+      "unused": {
+        "title": "Niewykorzystane",
+        "tips": "Ta wartość może niedokładnie przedstawiać wolne miejsce dostępne dla Frigate, jeśli masz inne pliki przechowywane na dysku poza nagraniami Frigate. Frigate nie śledzi wykorzystania magazynu poza swoimi nagraniami."
+      },
+      "title": "Magazyn kamery",
+      "camera": "Kamera",
+      "storageUsed": "Wykorzystany magazyn",
+      "percentageOfTotalUsed": "Procent całości",
+      "bandwidth": "Przepustowość",
+      "unusedStorageInformation": "Informacja o niewykorzystanym magazynie"
+    },
+    "title": "Magazyn",
+    "overview": "Przegląd",
+    "recordings": {
+      "title": "Nagrania",
+      "tips": "Ta wartość reprezentuje całkowite miejsce zajmowane przez nagrania w bazie danych Frigate. Frigate nie śledzi wykorzystania magazynu dla wszystkich plików na twoim dysku.",
+      "earliestRecording": "Najwcześniejsze dostępne nagranie:"
+    }
+  },
+  "logs": {
+    "copy": {
+      "error": "Nie udało się skopiować logów do schowka",
+      "label": "Kopiuj do Schowka",
+      "success": "Skopiowano logi do schowka"
+    },
+    "download": {
+      "label": "Pobierz Logi"
+    },
+    "type": {
+      "label": "Typ",
+      "timestamp": "Znacznik czasu",
+      "tag": "Tag",
+      "message": "Wiadomość"
+    },
+    "tips": "Logi są przesyłane strumieniowo z serwera",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Błąd pobierania logów: {{errorMessage}}",
+        "whileStreamingLogs": "Błąd podczas strumieniowania logów: {{errorMessage}}"
+      }
+    }
+  },
+  "title": "System",
+  "metrics": "Metryki systemowe",
+  "lastRefreshed": "Ostatnie odświeżenie: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez FFMPEG ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez detekcję ({{detectAvg}}%)",
+    "healthy": "System jest sprawny",
+    "reindexingEmbeddings": "Ponowne indeksowanie osadzeń ({{processed}}% ukończone)"
+  },
+  "enrichments": {
+    "title": "Wzbogacenia",
+    "infPerSecond": "Wnioskowania na sekundę",
+    "embeddings": {
+      "image_embedding_speed": "Szybkość osadzania obrazów",
+      "face_embedding_speed": "Szybkość osadzania twarzy",
+      "plate_recognition_speed": "Szybkość rozpoznawania tablic rejestracyjnych",
+      "text_embedding_speed": "Szybkość osadzania tekstu"
+    }
+  }
+}
