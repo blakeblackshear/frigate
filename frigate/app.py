@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
+import threading
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
@@ -101,7 +102,9 @@ class FrigateApp:
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.frame_manager = SharedMemoryFrameManager()
+        self.frame_manager = SharedMemoryFrameManager(
+            frame_shape=(config.model.height, config.model.width, 3)
+        )
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -359,9 +362,12 @@ class FrigateApp:
             try:
                 largest_frame = max(
                     [
-                        det.model.height * det.model.width * 3
-                        if det.model is not None
-                        else 320
+                        (
+                            det.model.height * det.model.width * 3 * det.model.max_batch
+                            + 8
+                            if det.model is not None
+                            else 320
+                        )
                         for det in self.config.detectors.values()
                     ]
                 )
@@ -375,7 +381,9 @@ class FrigateApp:
 
             try:
                 shm_out = UntrackedSharedMemory(
-                    name=f"out-{name}", create=True, size=20 * 6 * 4
+                    name=f"out-{name}",
+                    create=True,
+                    size=20 * 6 * 4 * self.config.model.max_batch + 8,
                 )
             except FileExistsError:
                 shm_out = UntrackedSharedMemory(name=f"out-{name}")
