@@ -6,7 +6,9 @@
       "title": "Alle merkelapper",
       "short": "Merkelapper"
     },
-    "count": "{{count}} merkelapper"
+    "count": "{{count}} merkelapper",
+    "count_other": "{{count}} Merkelapper",
+    "count_one": "{{count}} Merkelapp"
   },
   "features": {
     "hasVideoClip": "Har et videoklipp",
@@ -67,7 +69,7 @@
   },
   "trackedObjectDelete": {
     "title": "Bekreft sletting",
-    "desc": "Sletting av disse {{objectLength}} sporede objektene fjerner øyeblikksbildet, eventuelle lagrede innebygginger og tilhørende objekt livssyklusoppføringer. Opptak av disse sporede objektene i Historikkvisning vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?<br /><br />Hold <em>Shift</em>-tasten for å unngå denne dialogboksen i fremtiden.",
+    "desc": "Sletting av disse {{objectLength}} sporede objektene fjerner øyeblikksbildet, eventuelle lagrede vektorrepresentasjoner og tilhørende objekt livssyklusoppføringer. Opptak av disse sporede objektene i Historikkvisning vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?<br /><br />Hold <em>Shift</em>-tasten for å unngå denne dialogboksen i fremtiden.",
     "toast": {
       "success": "Sporede objekter ble slettet.",
       "error": "Kunne ikke slette sporede objekter: {{errorMessage}}"
@@ -77,12 +79,12 @@
     "filterBy": "Filtrer etter sonemaske"
   },
   "recognizedLicensePlates": {
-    "noLicensePlatesFound": "Ingen bilskilt funnet.",
-    "selectPlatesFromList": "Velg ett eller flere bilskilt fra listen.",
-    "title": "Gjenkjente bilskilt",
-    "loadFailed": "Kunne ikke laste inn gjenkjente bilskilt.",
-    "loading": "Laster inn gjenkjente bilskilt...",
-    "placeholder": "Skriv for å søke etter bilskilt..."
+    "noLicensePlatesFound": "Ingen kjennemerker funnet.",
+    "selectPlatesFromList": "Velg ett eller flere kjennemerker fra listen.",
+    "title": "Gjenkjente kjennemerker",
+    "loadFailed": "Kunne ikke laste inn gjenkjente kjennemerker.",
+    "loading": "Laster inn gjenkjente kjennemerker...",
+    "placeholder": "Skriv for å søke etter kjennemerker..."
   },
   "dates": {
     "all": {
@@ -109,7 +111,7 @@
     "label": "Kamerafilter"
   },
   "review": {
-    "showReviewed": "Vis vurdert"
+    "showReviewed": "Vis inspiserte"
   },
   "motion": {
     "showMotionOnly": "Vis kun bevegelse"

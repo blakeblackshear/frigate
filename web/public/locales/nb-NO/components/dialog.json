@@ -101,12 +101,12 @@
     "confirmDelete": {
       "title": "Bekreft sletting",
       "desc": {
-        "selected": "Er du sikker på at du vil slette alle opptak knyttet til dette vurderingselementet?<br /><br />Hold inne <em>Shift</em>-tasten for å hoppe over denne dialogen i fremtiden."
+        "selected": "Er du sikker på at du vil slette alle opptak knyttet til dette inspeksjonselementet?<br /><br />Hold inne <em>Shift</em>-tasten for å hoppe over denne dialogen i fremtiden."
       }
     },
     "button": {
       "export": "Eksportér",
-      "markAsReviewed": "Merk som vurdert",
+      "markAsReviewed": "Merk som inspisert",
       "deleteNow": "Slett nå"
     }
   }

@@ -3,7 +3,7 @@
     "downloadVideo": {
       "label": "Last ned video",
       "toast": {
-        "success": "Videoen for vurderingsobjektet ditt har startet nedlasting."
+        "success": "Videoen for inspeksjonselementet ditt har startet nedlasting."
       }
     }
   }

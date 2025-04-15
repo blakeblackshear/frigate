@@ -1,1 +1,157 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Kamerastatistikk - Frigate",
+    "storage": "Lagringsstatistikk - Frigate",
+    "logs": {
+      "frigate": "Frigate-logger - Frigate",
+      "go2rtc": "Go2RTC-logger - Frigate",
+      "nginx": "Nginx-logger - Frigate"
+    },
+    "general": "Generell statistikk - Frigate",
+    "enrichments": "Berikelsesstatistikk - Frigate"
+  },
+  "logs": {
+    "copy": {
+      "success": "Logger kopiert til utklippstavlen",
+      "error": "Kunne ikke kopiere logger til utklippstavlen",
+      "label": "Kopier til utklippstavle"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Tidsstempel",
+      "tag": "Merke",
+      "message": "Melding"
+    },
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Feil ved henting av logger: {{errorMessage}}",
+        "whileStreamingLogs": "Feil under strømming av logger: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Last ned logger"
+    },
+    "tips": "Logger strømmer fra serveren"
+  },
+  "general": {
+    "title": "Generelt",
+    "detector": {
+      "inferenceSpeed": "Detektor inferenshastighet",
+      "title": "Detektorer",
+      "cpuUsage": "Detektor CPU-bruk",
+      "memoryUsage": "Detektor minnebruk"
+    },
+    "hardwareInfo": {
+      "gpuMemory": "GPU-minne",
+      "gpuEncoder": "GPU-koder",
+      "gpuDecoder": "GPU-dekoder",
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "CUDA beregningsevne: {{cuda_compute}}",
+          "vbios": "VBios-info: {{vbios}}",
+          "title": "Nvidia SMI-utdata",
+          "name": "Navn: {{name}}"
+        },
+        "copyInfo": {
+          "label": "Kopier GPU-informasjon"
+        },
+        "toast": {
+          "success": "GPU-informasjon kopiert til utklippstavlen"
+        },
+        "vainfoOutput": {
+          "title": "Vainfo-utdata",
+          "returnCode": "Returkode: {{code}}",
+          "processOutput": "Prosessutdata:",
+          "processError": "Prosessfeil:"
+        },
+        "closeInfo": {
+          "label": "Lukk GPU-informasjon"
+        }
+      },
+      "title": "Maskinvareinformasjon",
+      "gpuUsage": "GPU-bruk"
+    },
+    "otherProcesses": {
+      "title": "Andre prosesser",
+      "processCpuUsage": "Prosessens CPU-bruk",
+      "processMemoryUsage": "Prosessens minnebruk"
+    }
+  },
+  "storage": {
+    "overview": "Oversikt",
+    "recordings": {
+      "earliestRecording": "Tidligste tilgjengelige opptak:",
+      "title": "Opptak",
+      "tips": "Denne verdien representerer total lagringsplass brukt av opptakene i Frigates database. Frigate sporer ikke lagringsbruk for alle filer på disken din."
+    },
+    "cameraStorage": {
+      "storageUsed": "Lagringsbruk",
+      "bandwidth": "Båndbredde",
+      "title": "Kameralagring",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Ubrukt lagringsinformasjon",
+      "percentageOfTotalUsed": "Prosentandel av totalt brukt",
+      "unused": {
+        "title": "Ubrukt",
+        "tips": "Denne verdien representerer kanskje ikke nøyaktig den ledige plassen Frigate har tilgang til, dersom det finnes andre filer lagret på disken. Frigate sporer kun lagring brukt av egne opptak."
+      }
+    },
+    "title": "Lagring"
+  },
+  "cameras": {
+    "info": {
+      "codec": "Kodek:",
+      "resolution": "Oppløsning:",
+      "audio": "Lyd:",
+      "error": "Feil: {{error}}",
+      "cameraProbeInfo": "{{camera}} - kamerainformasjon",
+      "streamDataFromFFPROBE": "Strømmedata er hentet med <code>ffprobe</code>.",
+      "fetching": "Henter kameradata",
+      "stream": "Strøm {{idx}}",
+      "video": "Video:",
+      "fps": "Bilder per sekund:",
+      "unknown": "Ukjent",
+      "tips": {
+        "title": "Kamerainformasjon"
+      }
+    },
+    "framesAndDetections": "Bilder / Deteksjoner",
+    "title": "Kameraer",
+    "overview": "Oversikt",
+    "label": {
+      "camera": "kamera",
+      "detect": "detekter",
+      "skipped": "hoppet over",
+      "ffmpeg": "ffmpeg",
+      "capture": "fangst"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Kameradata kopiert til utklippstavlen."
+      },
+      "error": {
+        "unableToProbeCamera": "Kunne ikke hente informasjon fra kamera: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "plate_recognition_speed": "Indekseringshastighet for kjennemerke",
+      "face_embedding_speed": "Indekseringshastighet for ansikt",
+      "text_embedding_speed": "Indekseringshastighet for tekst",
+      "image_embedding_speed": "Indekseringshastighet for bilde"
+    },
+    "title": "Utvidelser",
+    "infPerSecond": "Inferenser per sekund"
+  },
+  "title": "System",
+  "metrics": "Systemmålinger",
+  "lastRefreshed": "Sist oppdatert: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-bruk for FFMPEG ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} har høy CPU-bruk for detektering ({{detectAvg}}%)",
+    "healthy": "Systemet fungerer som det skal",
+    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)"
+  }
+}

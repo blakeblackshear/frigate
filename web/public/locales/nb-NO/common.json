@@ -1,10 +1,13 @@
 {
   "time": {
     "yr": "{{time}} år",
-    "year": "{{time}} år",
-    "minute": "{{time}} minutter",
+    "year_one": "{{time}} år",
+    "year_other": "{{time}} år",
+    "minute_one": "{{time}} minutt",
+    "minute_other": "{{time}} minutter",
     "s": "{{time}}s",
-    "second": "{{time}} sekunder",
+    "second_one": "{{time}} sekund",
+    "second_other": "{{time}} sekunder",
     "formattedTimestampExcludeSeconds": {
       "24hour": "%-d. %b, %H:%M",
       "12hour": "%-d. %b, %I:%M %p"
@@ -31,12 +34,15 @@
     "24hours": "24 timer",
     "pm": "pm",
     "am": "am",
-    "mo": "{{time}} md",
-    "month": "{{time}} måneder",
+    "mo": "{{time}} mnd",
+    "month_one": "{{time}} måned",
+    "month_other": "{{time}} måneder",
     "d": "{{time}}d",
-    "day": "{{time}} dager",
+    "day_one": "{{time}} dag",
+    "day_other": "{{time}} dager",
     "h": "{{time}}t",
-    "hour": "{{time}} timer",
+    "hour_one": "{{time}} time",
+    "hour_other": "{{time}} timer",
     "m": "{{time}}m",
     "formattedTimestamp": {
       "12hour": "%-d. %b, %I:%M:%S %p",
@@ -105,7 +111,7 @@
         "count_other": "{{count}} kameraer"
       }
     },
-    "review": "Granske",
+    "review": "Inspiser",
     "explore": "Utforsk",
     "export": "Eksporter",
     "uiPlayground": "UI Sandkasse",
@@ -126,11 +132,37 @@
     "configurationEditor": "Konfigurasjonsredigering",
     "languages": "Språk",
     "language": {
-      "en": "Engelsk",
+      "en": "English (Engelsk)",
       "zhCN": "简体中文 (Forenklet kinesisk)",
       "withSystem": {
         "label": "Bruk systemets språkinnstillinger"
-      }
+      },
+      "fr": "Fransk (Français)",
+      "es": "Español (Spansk)",
+      "hi": "हिन्दी (Hindi)",
+      "ar": "العربية (Arabisk)",
+      "pt": "Português (Portugisisk)",
+      "ru": "Русский (Russisk)",
+      "de": "Deutsch (Tysk)",
+      "ja": "日本語 (Japansk)",
+      "tr": "Türkçe (Tyrkisk)",
+      "it": "Italiano (Italiensk)",
+      "nl": "Nederlands (Nederlandsk)",
+      "sv": "Svenska (Svensk)",
+      "cs": "Čeština (Tsjekkisk)",
+      "nb": "Norsk Bokmål",
+      "ko": "한국어 (Koreansk)",
+      "vi": "Tiếng Việt (Vietnamesisk)",
+      "fa": "فارسی (Persisk)",
+      "he": "עברית (Hebraisk)",
+      "el": "Ελληνικά (Gresk)",
+      "ro": "Română (Rumensk)",
+      "hu": "Magyar (Ungarsk)",
+      "fi": "Suomi (Finsk)",
+      "da": "Dansk (Dansk)",
+      "sk": "Slovenčina (Slovensk)",
+      "pl": "Polski (Polsk)",
+      "uk": "Українська (Ukrainiansk)"
     },
     "appearance": "Utseende",
     "darkMode": {
@@ -185,9 +217,9 @@
   },
   "role": {
     "title": "Rolle",
-    "admin": "Admin",
+    "admin": "Administrator",
     "viewer": "Visningsbruker",
-    "desc": "Administratorer har full tilgang til alle funksjoner i Frigate UI. Visningsbrukere er begrenset til å se kameraer, gjennomgå hendelser og historisk opptak i UI."
+    "desc": "Administratorer har full tilgang til alle funksjoner i Frigate brukergrensesnitt. Visningsbrukere er begrenset til å se kameraer, inspisere elementer og historisk opptak i brukergrensesnittet."
   },
   "accessDenied": {
     "documentTitle": "Ingen tilgang – Frigate",
