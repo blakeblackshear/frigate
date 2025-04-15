@@ -1,7 +1,7 @@
 """Object detection utilities."""
 
-import threading
 import queue
+import threading
 
 from numpy import ndarray
 
@@ -71,3 +71,5 @@ def tensor_transform(desired_shape: InputTensorEnum):
         return None
     elif desired_shape == InputTensorEnum.nchw:
         return (0, 3, 1, 2)
+    elif desired_shape == InputTensorEnum.hwnc:
+        return (1, 2, 0, 3)
