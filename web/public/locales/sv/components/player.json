@@ -9,5 +9,21 @@
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
   "streamOffline": {
     "title": "Ström ej tillgänglig"
-  }
+  },
+  "stats": {
+    "streamType": {
+      "short": "Typ"
+    },
+    "bandwidth": {
+      "title": "Bandbredd:",
+      "short": "Bandbredd"
+    },
+    "latency": {
+      "title": "Latens:",
+      "short": {
+        "title": "Latens"
+      }
+    }
+  },
+  "cameraDisabled": "Kameran är disablead"
 }
