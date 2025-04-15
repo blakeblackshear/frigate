@@ -1246,20 +1246,20 @@ class LicensePlateProcessingMixin:
         else:
             id = obj_data["id"]
 
-            # don't run for non car or non license plate (dedicated lpr with frigate+) objects
+            # don't run for non car/motorcycle or non license plate (dedicated lpr with frigate+) objects
             if (
-                obj_data.get("label") != "car"
+                obj_data.get("label") not in ["car", "motorcycle"]
                 and obj_data.get("label") != "license_plate"
             ):
                 logger.debug(
-                    f"{camera}: Not a processing license plate for non car object."
+                    f"{camera}: Not a processing license plate for non car/motorcycle object."
                 )
                 return
 
             # don't run for stationary car objects
             if obj_data.get("stationary") == True:
                 logger.debug(
-                    f"{camera}: Not a processing license plate for a stationary car object."
+                    f"{camera}: Not a processing license plate for a stationary car/motorcycle object."
                 )
                 return
 
@@ -1298,7 +1298,7 @@ class LicensePlateProcessingMixin:
 
                 if not license_plate:
                     logger.debug(
-                        f"{camera}: Detected no license plates for car object."
+                        f"{camera}: Detected no license plates for car/motorcycle object."
                     )
                     return
 
@@ -1330,7 +1330,7 @@ class LicensePlateProcessingMixin:
                     logger.debug(f"{camera}: No attributes to parse.")
                     return
 
-                if obj_data.get("label") == "car":
+                if obj_data.get("label") in ["car", "motorcycle"]:
                     attributes: list[dict[str, any]] = obj_data.get(
                         "current_attributes", []
                     )
