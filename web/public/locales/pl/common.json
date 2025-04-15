@@ -23,16 +23,26 @@
     "pm": "po południu",
     "am": "przed południem",
     "yr": "{{time}}r.",
-    "year": "{{time}} lat",
+    "year_one": "{{time}} rok",
+    "year_few": "{{time}} lata",
+    "year_many": "{{time}} lat",
     "mo": "{{time}}m.",
     "d": "{{time}}d.",
-    "day": "{{time}} dni",
+    "day_one": "{{time}} dzień",
+    "day_few": "{{time}} dni",
+    "day_many": "{{time}} dni",
     "h": "{{time}}godz.",
     "m": "{{time}}min.",
     "s": "{{time}}s.",
-    "month": "{{time}} miesięcy",
-    "hour": "{{time}} godzin",
-    "minute": "{{time}} minut",
+    "month_one": "{{time}} miesiąc",
+    "month_few": "{{time}} miesiące",
+    "month_many": "{{time}} miesięcy",
+    "hour_one": "{{time}} godzina",
+    "hour_few": "{{time}} godziny",
+    "hour_many": "{{time}} godzin",
+    "minute_one": "{{time}} minuta",
+    "minute_few": "{{time}} minuty",
+    "minute_many": "{{time}} minut",
     "formattedTimestamp": {
       "12hour": "%b %-d, %I:%M:%S %p",
       "24hour": "%b %-d, %H:%M:%S"
@@ -50,7 +60,9 @@
       "24hour": "%b %-d %Y, %H:%M"
     },
     "formattedTimestampOnlyMonthAndDay": "%b %-d",
-    "second": "{{time}} sekund"
+    "second_one": "{{time}} sekunda",
+    "second_few": "{{time}} sekundy",
+    "second_many": "{{time}} sekund"
   },
   "unit": {
     "speed": {
@@ -105,11 +117,37 @@
     "systemLogs": "Logi systemowe",
     "languages": "Języki",
     "language": {
-      "en": "Angielski",
+      "en": "English (Angielski)",
       "zhCN": "简体中文 (Uproszczony Chiński)",
       "withSystem": {
         "label": "Użyj ustawień systemowych dla języka"
-      }
+      },
+      "es": "Español (Hiszpański)",
+      "cs": "Čeština (Czeski)",
+      "pl": "Polski (Polski)",
+      "hi": "हिन्दी (hinduski)",
+      "ar": "العربية (arabski)",
+      "fr": "Français (francuski)",
+      "pt": "Português (portugalski)",
+      "ru": "Русский (rosyjski)",
+      "de": "Deutsch (niemiecki)",
+      "ja": "日本語 (japoński)",
+      "tr": "Türkçe (Turecki)",
+      "it": "Italiano (Włoski)",
+      "nl": "Nederlands (Holenderski)",
+      "sv": "Svenska (Szwedzki)",
+      "nb": "Norsk Bokmål (Norweski)",
+      "ko": "한국어 (Koreański)",
+      "fa": "فارسی (Perski)",
+      "uk": "Українська (Ukraiński)",
+      "he": "עברית (Hebrajski)",
+      "el": "Ελληνικά (Grecki)",
+      "hu": "Magyar (Węgierski)",
+      "da": "Dansk (Duński)",
+      "sk": "Slovenčina (Słowacki)",
+      "vi": "Tiếng Việt (Wietnamski)",
+      "ro": "Română (Rumuński)",
+      "fi": "Suomi (Fiński)"
     },
     "appearance": "Wygląd",
     "darkMode": {

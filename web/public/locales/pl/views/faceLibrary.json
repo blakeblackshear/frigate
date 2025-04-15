@@ -1,3 +1,73 @@
 {
-  "selectItem": "Wybierz {{item}}"
+  "selectItem": "Wybierz {{item}}",
+  "description": {
+    "addFace": "Poznaj proces dodawania nowej kolekcji do biblioteki twarzy.",
+    "placeholder": "Wprowadź nazwę tej kolekcji"
+  },
+  "details": {
+    "person": "Osoba",
+    "confidence": "Pewność",
+    "face": "Szczegóły twarzy",
+    "faceDesc": "Szczegóły twarzy i powiązanego obiektu",
+    "timestamp": "Znacznik czasu"
+  },
+  "documentTitle": "Biblioteka twarzy - Frigate",
+  "uploadFaceImage": {
+    "title": "Wgraj zdjęcie twarzy",
+    "desc": "Wgraj obraz do skanowania twarzy i dołącz do {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Utwórz kolekcję",
+    "desc": "Utwórz nową kolekcję",
+    "new": "Utwórz nową twarz",
+    "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Trenuj, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
+  },
+  "train": {
+    "aria": "Wybierz trenowanie",
+    "title": "Trenuj"
+  },
+  "selectFace": "Wybierz twarz",
+  "deleteFaceLibrary": {
+    "title": "Usuń nazwę",
+    "desc": "Czy na pewno chcesz usunąć kolekcję {{name}}? Spowoduje to trwałe usunięcie wszystkich powiązanych twarzy."
+  },
+  "button": {
+    "addFace": "Dodaj twarz",
+    "uploadImage": "Wgraj obraz",
+    "reprocessFace": "Przetwórz twarz ponownie",
+    "deleteFaceAttempts": "Usuń próby rozpoznania twarzy"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Proszę wybrać plik obrazu."
+    },
+    "dropActive": "Upuść obraz tutaj...",
+    "dropInstructions": "Przeciągnij i upuść obraz tutaj lub kliknij, aby wybrać",
+    "maxSize": "Maksymalny rozmiar: {{size}}MB"
+  },
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} twarz została pomyślnie usunięta.",
+      "deletedName_few": "{{count}} twarze zostały pomyślnie usunięte.",
+      "deletedName_many": "{{count}} twarzy zostało pomyślnie usuniętych.",
+      "deletedFace_one": "Pomyślnie usunięto {{count}} twarz.",
+      "deletedFace_few": "Pomyślnie usunięto {{count}} twarze.",
+      "deletedFace_many": "Pomyślnie usunięto {{count}} twarzy.",
+      "uploadedImage": "Pomyślnie wgrano obraz.",
+      "addFaceLibrary": "{{name}} został pomyślnie dodany do Biblioteki Twarzy!",
+      "trainedFace": "Pomyślnie wytrenowano twarz.",
+      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy."
+    },
+    "error": {
+      "addFaceLibraryFailed": "Nie udało się ustawić nazwy twarzy: {{errorMessage}}",
+      "deleteFaceFailed": "Nie udało się usunąć: {{errorMessage}}",
+      "deleteNameFailed": "Nie udało się usunąć nazwy: {{errorMessage}}",
+      "trainFailed": "Nie udało się przeprowadzić treningu: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nie udało się zaktualizować wyniku twarzy: {{errorMessage}}",
+      "uploadingImageFailed": "Nie udało się wgrać obrazu: {{errorMessage}}"
+    }
+  },
+  "readTheDocs": "Przeczytaj dokumentację",
+  "trainFaceAs": "Trenuj twarz jako:",
+  "trainFace": "Trenuj twarz"
 }
