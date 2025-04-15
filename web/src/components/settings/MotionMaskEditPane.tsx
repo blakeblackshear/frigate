@@ -242,7 +242,9 @@ export default function MotionMaskEditPane({
       </Heading>
       <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
-          <Trans ns="views/settings">masksAndZones.motionMasks.context</Trans>
+          <Trans ns="views/settings">
+            masksAndZones.motionMasks.context.title
+          </Trans>
         </p>
 
         <div className="flex items-center text-primary">
