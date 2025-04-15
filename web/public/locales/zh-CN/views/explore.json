@@ -90,11 +90,13 @@
       "toast": {
         "success": {
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
-          "updatedSublabel": "成功更新子标签。"
+          "updatedSublabel": "成功更新子标签。",
+          "updatedLPR": "成功更新车牌。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
-          "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}"
+          "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}",
+          "updatedLPRFailed": "更新车牌失败：{{errorMessage}}"
         }
       }
     },
@@ -131,7 +133,13 @@
     "tips": {
       "descriptionSaved": "已保存描述",
       "saveDescriptionFailed": "更新描述失败：{{errorMessage}}"
-    }
+    },
+    "editLPR": {
+      "desc": "为 {{label}} 输入新的车牌值",
+      "descNoLabel": "为探测到的对象输入新的车牌值",
+      "title": "编辑车牌"
+    },
+    "recognizedLicensePlate": "识别的车牌"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -170,7 +178,7 @@
   },
   "noTrackedObjects": "未找到跟踪对象",
   "fetchingTrackedObjectsFailed": "获取跟踪对象失败：{{errorMessage}}",
-  "trackedObjectsCount": "{{count}} 个跟踪对象 ",
+  "trackedObjectsCount_other": "{{count}} 个跟踪对象 ",
   "searchResult": {
     "deleteTrackedObject": {
       "toast": {

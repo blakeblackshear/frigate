@@ -6,7 +6,9 @@
       "title": "所有标签",
       "short": "标签"
     },
-    "count": "{{count}} 个标签"
+    "count": "{{count}} 个标签",
+    "count_other": "{{count}} 个标签",
+    "count_one": "{{count}} 个标签"
   },
   "zones": {
     "all": {
