@@ -15,7 +15,7 @@ from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
-from frigate.object_detection import ObjectDetectProcess
+from frigate.object_detection.base import ObjectDetectProcess
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     get_amd_gpu_stats,

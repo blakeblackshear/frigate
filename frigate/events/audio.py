@@ -29,7 +29,7 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
-from frigate.object_detection import load_labels
+from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
