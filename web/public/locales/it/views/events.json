@@ -7,7 +7,8 @@
   },
   "empty": {
     "alert": "Non ci sono avvisi da rivedere",
-    "detection": "Non ci sono rilevamenti da rivedere"
+    "detection": "Non ci sono rilevamenti da rivedere",
+    "motion": "Nessun dato di movimento trovato"
   },
   "newReviewItems": {
     "label": "Visualizza i nuovi elementi da rivedere",
@@ -15,5 +16,20 @@
   },
   "markTheseItemsAsReviewed": "Segna questi oggetti come visti",
   "markAsReviewed": "Segna come Visto",
-  "documentTitle": "Rivedi - Frigate"
+  "documentTitle": "Rivedi - Frigate",
+  "allCameras": "Tutte le Camere",
+  "timeline": "Cronologia",
+  "timeline.aria": "Seleziona la cronologia",
+  "events": {
+    "label": "Eventi",
+    "aria": "Seleziona eventi",
+    "noFoundForTimePeriod": "Nessun evento trovato per questo periodo di tempo."
+  },
+  "recordings": {
+    "documentTitle": "Registrazioni - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Ultime 24 ore"
+  },
+  "camera": "Telecamera"
 }

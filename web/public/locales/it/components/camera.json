@@ -3,8 +3,32 @@
     "label": "Gruppo di Telecamere",
     "add": "Aggiungi Gruppo di Telecamere",
     "delete": {
-      "label": "Cancella Gruppo di Telecamere"
+      "label": "Cancella Gruppo di Telecamere",
+      "confirm": {
+        "title": "Conferma eliminazione",
+        "desc": "Sei sicuro di voler eliminare il gruppo di telecamere <em>{{name}}</em>?"
+      }
     },
-    "edit": "Modifica Gruppo di Telecamere"
+    "edit": "Modifica Gruppo di Telecamere",
+    "name": {
+      "label": "Nome",
+      "placeholder": "Inserisci un nome...",
+      "errorMessage": {
+        "exists": "Il nome scelto per il gruppo telecamere è già presente.",
+        "invalid": "Nome del gruppo di telecamere non valido.",
+        "mustLeastCharacters": "Il nome del gruppo di telecamere deve conternere almeno 2 caratteri."
+      }
+    },
+    "camera": {
+      "setting": {
+        "label": "Impostazioni di trasmissione della telecamera"
+      }
+    },
+    "cameras": {
+      "desc": "Seleziona le telecamere per questo gruppo.",
+      "label": "Telecamere"
+    },
+    "icon": "Icona",
+    "success": "Il gruppo di telecamere ({{name}}) è stato salvato."
   }
 }

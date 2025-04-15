@@ -6,5 +6,8 @@
     "embeddingsReindexing": {
       "context": "Potrai usare Esplora dopo che l'incorporamento degli oggetti tracciati avrà terminato la ricostruzione dell'indice."
     }
+  },
+  "details": {
+    "timestamp": "Marca temporale"
   }
 }
