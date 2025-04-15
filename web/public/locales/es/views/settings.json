@@ -135,6 +135,10 @@
     "toast": {
       "success": "Los ajustes de clasificación han sido guardados. Reinicia Frigate para aplicar tus cambios.",
       "error": "No se pudieron guardar los cambios de configuración: {{errorMessage}}"
+    },
+    "birdClassification": {
+      "title": "Clasificación de Aves",
+      "desc": "La clasificación de aves identifica aves conocidas utilizando un modelo de TensorFlow cuantizado. Cuando se reconoce una ave conocida, su nombre común se añadirá como una subetiqueta. Esta información se incluye en la interfaz de usuario, en los filtros y en las notificaciones."
     }
   },
   "camera": {
