@@ -693,7 +693,6 @@ function ObjectDetailsTab({
 
   return (
     <div className="flex flex-col gap-5">
-      {t("toast.success.trainedFace", { ns: "views/faceLibrary" })}
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
