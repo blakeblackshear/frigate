@@ -16,17 +16,17 @@
     "motion": "Geen bewegingsgegevens gevonden"
   },
   "events": {
-    "aria": "Selecteer evenementen",
-    "noFoundForTimePeriod": "Er zijn geen evenementen gevonden voor deze periode.",
-    "label": "Evenementen"
+    "aria": "Selecteer activiteiten",
+    "noFoundForTimePeriod": "Er zijn geen activiteiten gevonden voor deze periode.",
+    "label": "Activiteiten"
   },
   "calendarFilter": {
     "last24Hours": "Laatste 24 uur"
   },
   "alerts": "Mededelingen",
   "motion": {
-    "label": "Beweging",
-    "only": "Alleen beweging"
+    "label": "Bewegingen",
+    "only": "Alleen bewegingen"
   },
   "allCameras": "Alle camera's",
   "markAsReviewed": "Markeren als beoordeeld",

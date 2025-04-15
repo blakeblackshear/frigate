@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Configuratie-editor - Frigate",
+  "documentTitle": "Configuratie-bewerken - Frigate",
   "copyConfig": "Configuratie kopiëren",
   "saveAndRestart": "Opslaan en opnieuw opstarten",
   "toast": {
@@ -10,6 +10,6 @@
       "copyToClipboard": "Configuratie gekopieerd naar klembord."
     }
   },
-  "configEditor": "Configuratie-editor",
+  "configEditor": "Configuratie Bewerken",
   "saveOnly": "Alleen opslaan"
 }

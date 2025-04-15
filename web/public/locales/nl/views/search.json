@@ -39,7 +39,7 @@
       }
     },
     "tips": {
-      "title": "Tekstfilters gebruiken",
+      "title": "Hoe tekstfilters te gebruiken",
       "desc": {
         "example": "Voorbeeld: <code className=\"text-primary\">camera's:voordeur label:persoon vóór:01012024 tijdsbereik:15:00-16:00</code>",
         "text": "Filters helpen je om je zoekresultaten te beperken. Zo gebruik je ze in het invoerveld:",

@@ -57,7 +57,7 @@
         "desc": "Deze gegevens zijn afkomstig van de detectiestroom van je camera, maar worden weergegeven op beelden uit de opnamestroom. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Het veld <code>annotation_offset</code> kan echter worden gebruikt om deze annotatie-afwijking te corrigeren.",
         "documentation": "Lees de documentatie ",
         "label": "Annotatie-afwijking",
-        "tips": "TIP: Stel je voor dat er een gebeurtenisclip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van de gebeurtenis steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden."
+        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van het object steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden."
       },
       "showAllZones": {
         "title": "Toon alle zones",
@@ -91,11 +91,13 @@
       "toast": {
         "success": {
           "regenerate": "Er is een nieuwe beschrijving aangevraagd bij {{provider}}. Afhankelijk van de snelheid van je provider kan het regenereren van de nieuwe beschrijving enige tijd duren.",
-          "updatedSublabel": "Sublabel succesvol bijgewerkt."
+          "updatedSublabel": "Sublabel succesvol bijgewerkt.",
+          "updatedLPR": "Kenteken succesvol bijgewerkt."
         },
         "error": {
           "updatedSublabelFailed": "Het is niet gelukt om het sublabel bij te werken: {{errorMessage}}",
-          "regenerate": "Het is niet gelukt om {{provider}} aan te roepen voor een nieuwe beschrijving: {{errorMessage}}"
+          "regenerate": "Het is niet gelukt om {{provider}} aan te roepen voor een nieuwe beschrijving: {{errorMessage}}",
+          "updatedLPRFailed": "Kentekenplaat bijwerken mislukt: {{errorMessage}}"
         }
       }
     },
@@ -132,7 +134,13 @@
     "timestamp": "Tijdstempel",
     "regenerateFromThumbnails": "Regeneratie van Thumbnails",
     "camera": "Camera",
-    "estimatedSpeed": "Geschatte snelheid"
+    "estimatedSpeed": "Geschatte snelheid",
+    "editLPR": {
+      "title": "Kenteken bewerken",
+      "desc": "Voer een nieuwe kentekenwaarde in voor deze {{label}}",
+      "descNoLabel": "Voer een nieuwe kentekenwaarde in voor dit gevolgde object"
+    },
+    "recognizedLicensePlate": "Erkende kentekenplaat"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -164,7 +172,8 @@
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
-  "trackedObjectsCount": "{{count}} gevolgde objecten ",
+  "trackedObjectsCount_one": "{{count}} gevolgd object ",
+  "trackedObjectsCount_other": "{{count}} gevolgde objecten ",
   "searchResult": {
     "deleteTrackedObject": {
       "toast": {
