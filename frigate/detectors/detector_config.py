@@ -25,6 +25,8 @@ class PixelFormatEnum(str, Enum):
 class InputTensorEnum(str, Enum):
     nchw = "nchw"
     nhwc = "nhwc"
+    hwnc = "hwnc"
+    hwcn = "hwcn"
 
 
 class InputDTypeEnum(str, Enum):
