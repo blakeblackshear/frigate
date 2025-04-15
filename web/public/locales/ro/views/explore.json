@@ -1,0 +1,20 @@
+{
+  "documentTitle": "Exploreaza - Frigate",
+  "generativeAI": "AI Generativ",
+  "exploreIsUnavailable": {
+    "title": "Explorarea este Indisponibila",
+    "embeddingsReindexing": {
+      "startingUp": "Porneste...",
+      "estimatedTime": "Timp ramas estimat:",
+      "finishingShortly": "Termina curand"
+    }
+  },
+  "type": {
+    "details": "detalii"
+  },
+  "objectLifecycle": {
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectata"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": {
+    "addFace": "Parcurge adaugare unei colectii noi la Libraria de Fete",
+    "placeholder": "Introduceti un nume pentru aceasta colectie"
+  },
+  "details": {
+    "person": "Persoana"
+  }
+}
