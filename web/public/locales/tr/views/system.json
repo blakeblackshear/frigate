@@ -73,7 +73,7 @@
       },
       "percentageOfTotalUsed": "Toplam Yüzde",
       "storageUsed": "Depolama",
-      "bandwidth": "Bant Genişliği",
+      "bandwidth": "Saatlik Veri Kullanımı",
       "unusedStorageInformation": "Kullanılmayan Depolama Bilgisi"
     }
   },

@@ -27,9 +27,12 @@
       "24hour": "%b %d %H:%M:%S",
       "12hour": "%m/%d %I:%M:%S%P"
     },
-    "second": "{{time}} saniye",
-    "year": "{{time}} yıl",
-    "hour": "{{time}} saat",
+    "second_one": "{{time}} saniye",
+    "second_other": "{{time}} saniye",
+    "year_one": "{{time}} yıl",
+    "year_other": "{{time}} yıl",
+    "hour_one": "{{time}} saat",
+    "hour_other": "{{time}} saat",
     "h": "{{time}} s",
     "yr": "{{time}} yıl",
     "mo": "{{time}} ay",
@@ -37,9 +40,11 @@
     "pm": "ÖS",
     "am": "ÖÖ",
     "d": "{{time}} gün",
-    "day": "{{time}} gün",
+    "day_one": "{{time}} gün",
+    "day_other": "{{time}} gün",
     "m": "{{time}}d",
-    "minute": "{{time}} dakika",
+    "minute_one": "{{time}} dakika",
+    "minute_other": "{{time}} dakika",
     "formattedTimestampWithYear": {
       "12hour": "%-d %b %Y, %I:%M %p",
       "24hour": "%-d %b %Y, %H:%M"
@@ -50,7 +55,8 @@
       "24hour": "%-d %b, %H:%M"
     },
     "s": "{{time}}sn",
-    "month": "{{time}} ay"
+    "month_one": "{{time}} ay",
+    "month_other": "{{time}} ay"
   },
   "button": {
     "off": "KAPALI",
@@ -106,7 +112,33 @@
       "zhCN": "简体中文 (Basitleştirilmiş Çince)",
       "withSystem": {
         "label": "Dil için sistem tercihini kullan"
-      }
+      },
+      "hi": "हिन्दी (Hintçe)",
+      "fr": "Français (Fransızca)",
+      "pt": "Português (Portekizce)",
+      "de": "Deutsch (Almanca)",
+      "ja": "日本語 (Japonca)",
+      "tr": "Türkçe (Türkçe)",
+      "it": "Italiano (İtalyanca)",
+      "nl": "Nederlands (Felemenkçe)",
+      "sv": "Svenska (İsveççe)",
+      "cs": "Čeština (Çekçe)",
+      "nb": "Norsk Bokmål (Bokmål Norveç Dili)",
+      "ko": "한국어 (Korece)",
+      "vi": "Tiếng Việt (Vietnamca)",
+      "pl": "Polski (Lehçe)",
+      "uk": "Українська (Ukraynaca)",
+      "he": "עברית (İbranice)",
+      "el": "Ελληνικά (Yunanca)",
+      "ro": "Română (Rumence)",
+      "hu": "Magyar (Macarca)",
+      "fi": "Suomi (Fince)",
+      "da": "Dansk (Danimarka Dili)",
+      "sk": "Slovenčina (Slovakça)",
+      "fa": "فارسی (Farsça)",
+      "es": "Español (İspanyolca)",
+      "ar": "العربية (Arapça)",
+      "ru": "Русский (Rusça)"
     },
     "withSystem": "Sistem",
     "theme": {

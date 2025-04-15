@@ -114,7 +114,7 @@
         "desc": "Yüz tanıma için kullanılan modelin boyutu."
       },
       "title": "Yüz Tanıma",
-      "desc": "Yüz tanıma, tanınan insanlara isim vermenize olanak tanır ve bu yüzler tanındığında Frigate, kişinin adını alt etiket olarak otmatikman ekler. Bu bilgi; kullanıcı arayüzü, filtreler ve bildirimlerde gösterilir.",
+      "desc": "Yüz tanıma, tanınan insanlara isim vermenize olanak tanır ve bu yüzler tanındığında Frigate, kişinin adını alt etiket olarak ekler. Bu bilgi; kullanıcı arayüzü, filtreler ve bildirimlerde gösterilir.",
       "readTheDocumentation": "Dökümantasyonu Oku"
     },
     "toast": {
@@ -125,6 +125,10 @@
       "desc": "Frigate araç plakalarını tanıyabilir ve algılanan karakterleri otomatik olarak recognized_license_plate alanına veya belirli bir plaka için tanımladığınız bir takma ismi alt etiket olarak ilgili aracın tanımlanan nesnesine ekleyebilir. Bu sistem, garajınıza giren veya caddeden geçen araçların plakalarını okumak için kullanılabilir.",
       "title": "Plaka Tanıma",
       "readTheDocumentation": "Dökümantasyonu Oku"
+    },
+    "birdClassification": {
+      "title": "Kuş Sınıflandırma",
+      "desc": "Kuş Sınıflandırma özelliği, bilinen kuş türlerini kuantize edilmiş bir Tensorflow modeli kullanarak teşhis etmenizi sağlar. Model bir kuş türünü teşhis ettiğinde, Frigate, bu türün adını alt etiket olarak ekler. Bu bilgi; kullanıcı arayüzü, filtreler ve bildirimlerde gösterilir."
     }
   },
   "cameraSetting": {
