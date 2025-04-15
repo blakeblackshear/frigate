@@ -69,6 +69,9 @@ Fine-tune the LPR feature using these optional parameters at the global level of
 - **`device`**: Device to use to run license plate recognition models.
   - Default: `CPU`
   - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model.
+- **`model_size`**: The size of the model used to detect text on plates.
+  - Default: `small`
+  - This can be `small` or `large`. The `large` model uses an enhanced text detector and is more accurate at finding text on plates but slower than the `small` model. For most users, the small model is recommended. For users in countries with multiple lines of text on plates, the large model is recommended. Note that using the large does not improve _text recognition_, but it may improve _text detection_.
 
 ### Recognition
 
@@ -93,7 +96,7 @@ Fine-tune the LPR feature using these optional parameters at the global level of
 ### Image Enhancement
 
 - **`enhancement`**: A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
-  - **Default:** `0` (no enhancement)
+  - Default: `0` (no enhancement)
   - Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters, actually making them much harder for Frigate to recognize.
   - This setting is best adjusted at the camera level if running LPR on multiple cameras.
   - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 5 and adjusting as needed. You should see how different enhancement levels affect your plates. Use the `debug_save_plates` configuration option (see below).
