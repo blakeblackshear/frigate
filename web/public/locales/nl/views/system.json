@@ -38,13 +38,13 @@
   "general": {
     "detector": {
       "title": "Detectoren",
-      "cpuUsage": "Detector CPU Gebruik",
+      "cpuUsage": "Detector CPU-verbruik",
       "memoryUsage": "Detector Geheugen Gebruik",
       "inferenceSpeed": "Detector Interferentie Snelheid"
     },
     "hardwareInfo": {
       "title": "Systeem Gegevens",
-      "gpuUsage": "GPU Belasting",
+      "gpuUsage": "GPU-verbruik",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo Resultaat",
@@ -71,11 +71,11 @@
       },
       "gpuDecoder": "GPU Decodeerder",
       "gpuEncoder": "GPU Encodeerder",
-      "gpuMemory": "GPU Geheugen"
+      "gpuMemory": "GPU-geheugen"
     },
     "otherProcesses": {
       "processMemoryUsage": "Process Geheugen Gebruik",
-      "processCpuUsage": "Process CPU Belasting",
+      "processCpuUsage": "Process CPU-verbruik",
       "title": "Verdere Processen"
     },
     "title": "Algemeen"
@@ -105,14 +105,14 @@
     "title": "Cameras",
     "overview": "Overzicht",
     "info": {
-      "cameraProbeInfo": "{{camera}} Camera Onderzoek Informatie",
-      "streamDataFromFFPROBE": "Stream gegevens zijn ontvangen van <code>ffprobe</code>.",
+      "cameraProbeInfo": "{{camera}} Informatie opgehaald uit de camerastream",
+      "streamDataFromFFPROBE": "Streamgegevens zijn ontvangen via <code>ffprobe</code>.",
       "stream": "Stream {{idx}}",
       "resolution": "Resolutie:",
       "unknown": "Onbekend",
       "error": "Fout: {{error}}",
       "tips": {
-        "title": "Camera Opgevraagde Informatie"
+        "title": "Informatie ophalen uit de camerastream"
       },
       "fps": "FPS:",
       "codec": "Codec:",
@@ -137,7 +137,7 @@
       }
     }
   },
-  "lastRefreshed": "Laast vernieuwd: ",
+  "lastRefreshed": "Voor het laatst vernieuwd: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFMPEG CPU belasting ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",

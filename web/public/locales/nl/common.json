@@ -5,41 +5,45 @@
     "untilRestart": "Tot herstart",
     "12hours": "12 uur",
     "lastWeek": "Vorige week",
-    "last7": "Laatste 7 dagen",
-    "last30": "Laatste 30 dagen",
+    "last7": "Afgelopen 7 dagen",
+    "last30": "Afgelopen 30 dagen",
     "yr": "{{time}} jaar",
     "5minutes": "5 minuten",
     "10minutes": "10 minuten",
     "24hours": "24 uur",
     "30minutes": "30 minuten",
     "ago": "{{timeAgo}} geleden",
-    "justNow": "Zo juist",
+    "justNow": "Zojuist",
     "today": "Vandaag",
     "yesterday": "Gisteren",
-    "last14": "Laatste 14 dagen",
+    "last14": "Afgelopen 14 dagen",
     "thisWeek": "Deze week",
     "thisMonth": "Deze maand",
     "lastMonth": "Vorige maand",
     "1hour": "1 uur",
     "pm": "pm",
     "am": "am",
-    "year": "{{time}} Jaren",
-    "mo": "{{time}}maand",
-    "month": "{{time}} maanden",
+    "year_one": "{{time}} Jaar",
+    "year_other": "{{time}} Jaren",
+    "mo": "{{time}} maand",
+    "month_one": "{{time}} maand",
+    "month_other": "{{time}} maanden",
     "formattedTimestamp2": {
       "12hour": "%d-%m %H:%M:%S",
       "24hour": "%d %b %H:%M:%S"
     },
-    "s": "{{time}}seconde",
+    "s": "{{time}}s",
     "formattedTimestamp": {
       "12hour": "%d %b %H:%M:%S",
       "24hour": "%-d %b, %H:%M:%S"
     },
     "formattedTimestampOnlyMonthAndDay": "%-d %b",
     "d": "{{time}}dag",
-    "day": "{{time}} dagen",
-    "h": "{{time}}uur",
-    "hour": "{{time}} uren",
+    "day_one": "{{time}} dag",
+    "day_other": "{{time}} dagen",
+    "h": "{{time}}u",
+    "hour_one": "{{time}} uur",
+    "hour_other": "{{time}} uren",
     "m": "{{time}}minuut",
     "formattedTimestampWithYear": {
       "12hour": "%-d %b %Y, %H:%M",
@@ -49,8 +53,10 @@
       "24hour": "%-d %b, %H:%M",
       "12hour": "%-d %b, %H:%M"
     },
-    "minute": "{{time}} minuten",
-    "second": "{{time}} seconden"
+    "minute_one": "{{time}} minuut",
+    "minute_other": "{{time}} minuten",
+    "second_one": "{{time}} seconde",
+    "second_other": "{{time}} seconden"
   },
   "button": {
     "enabled": "Ingeschakeld",
@@ -73,7 +79,7 @@
     "cameraAudio": "Camera geluid",
     "on": "aan",
     "copyCoordinates": "Coördinaten kopiëren",
-    "delete": "Verwijder",
+    "delete": "Verwijderen",
     "yes": "Ja",
     "no": "Nee",
     "suspended": "Opgeschort",
@@ -107,11 +113,37 @@
     "configurationEditor": "Configuratie bewerker",
     "languages": "Talen",
     "language": {
-      "en": "Engels",
+      "en": "English (Engels)",
       "zhCN": "简体中文 (Vereenvoudigd Chinees)",
       "withSystem": {
         "label": "Gebruik de systeeminstellingen voor de taal"
-      }
+      },
+      "ar": "العربية (Arabisch)",
+      "pt": "Português (Portugees)",
+      "ru": "Русский (Russisch)",
+      "de": "Deutsch (Duits)",
+      "tr": "Türkçe (Turks)",
+      "it": "Italiano (Italiaans)",
+      "nl": "Nederlands (Nederlands)",
+      "sv": "Svenska (Zweeds)",
+      "cs": "Čeština (Tsjechisch)",
+      "fa": "فارسی (Perzisch)",
+      "pl": "Polski (Pools)",
+      "he": "עברית (Hebreeuws)",
+      "el": "Ελληνικά (Grieks)",
+      "ro": "Română (Roemeense)",
+      "hu": "Magyar (Hongaars)",
+      "fi": "Suomi (Fins)",
+      "da": "Dansk (Deens)",
+      "sk": "Slovenčina (Slowaaks)",
+      "ko": "한국어 (Koreaans)",
+      "nb": "Norsk Bokmål (Noors Bokmål)",
+      "fr": "Français (Frans)",
+      "uk": "Українська (Oekraïens)",
+      "es": "Español (Spaans)",
+      "vi": "Tiếng Việt (Vietnamees)",
+      "hi": "हिन्दी (Hindi)",
+      "ja": "日本語 (Japans)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -121,13 +153,13 @@
         "label": "Gebruik de systeeminstellingen voor de lichte of donkere modus"
       }
     },
-    "appearance": "Verschijning",
+    "appearance": "Opmaak",
     "theme": {
       "blue": "Blauw",
       "contrast": "Hoog contrast",
       "label": "Thema",
       "green": "Groen",
-      "nord": "Noord",
+      "nord": "Nord",
       "red": "Rood",
       "default": "Standaard"
     },
@@ -147,7 +179,7 @@
       "title": "Documentatie",
       "label": "Frigate documentatie"
     },
-    "review": "Beoordeling",
+    "review": "Beoordeel",
     "explore": "Verkennen",
     "export": "Exporteren",
     "uiPlayground": "Testgebied voor gebruikersinterface",
@@ -174,7 +206,7 @@
   "role": {
     "title": "Rol",
     "admin": "Beheerder",
-    "viewer": "Waarnemer",
+    "viewer": "Gebruiker",
     "desc": "Beheerders hebben volledige toegang tot alle functies in de Frigate-interface. Kijkers kunnen alleen camera’s bekijken, items beoordelen en historische beelden terugkijken."
   },
   "pagination": {

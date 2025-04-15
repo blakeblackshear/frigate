@@ -3,7 +3,7 @@
     "title": "Weet je zeker dat je Frigate opnieuw wilt opstarten?",
     "button": "Herstart",
     "restarting": {
-      "title": "Frigate herstart",
+      "title": "Frigate wordt opnieuw gestart",
       "button": "Forceer herladen nu",
       "content": "Deze pagina zal herladen in {{countdown}} seconden."
     }

@@ -5,7 +5,9 @@
       "short": "Labels",
       "title": "Alle labels"
     },
-    "label": "Labels"
+    "label": "Labels",
+    "count_one": "{{count}} Label",
+    "count_other": "{{count}} Labels"
   },
   "zones": {
     "label": "Zones",
