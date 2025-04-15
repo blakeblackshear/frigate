@@ -33,7 +33,9 @@
   },
   "button": {
     "addFace": "Adicionar rosto",
-    "uploadImage": "Carregar imagem"
+    "uploadImage": "Carregar imagem",
+    "deleteFaceAttempts": "Apagar tentativas de detecção facial",
+    "reprocessFace": "Reprocessar Rosto"
   },
   "imageEntry": {
     "validation": {
@@ -47,13 +49,25 @@
   "toast": {
     "success": {
       "updatedFaceScore": "Pontuação facial atualizada com sucesso.",
-      "trainedFace": "Rosto treinado com sucesso."
+      "trainedFace": "Rosto treinado com sucesso.",
+      "deletedFace_one": "{{count}} rosto excluído com sucesso.",
+      "deletedFace_many": "{{count}} rostos excluídos com sucesso.",
+      "deletedFace_other": "{{count}} rostos excluídos com sucesso.",
+      "deletedName_one": "{{count}} rosto foi excluído com sucesso.",
+      "deletedName_many": "{{count}} rostos foram excluídos com sucesso.",
+      "deletedName_other": "{{count}} rostos foram excluídos com sucesso.",
+      "uploadedImage": "Imagem carregada com sucesso.",
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à biblioteca de rostos!"
     },
     "error": {
       "uploadingImageFailed": "Falha ao carregar a imagem: {{errorMessage}}",
       "deleteFaceFailed": "Falha ao excluir: {{errorMessage}}",
-      "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}"
+      "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}",
+      "addFaceLibraryFailed": "Falhou ao definir nome do rosto: {{errorMessage}}",
+      "trainFailed": "Falhou ao treinar: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falhou ao atualizar pontuação da face: {{errorMessage}}"
     }
   },
-  "readTheDocs": "Leia a documentação"
+  "readTheDocs": "Leia a documentação",
+  "trainFaceAs": "Treinar rosto como:"
 }

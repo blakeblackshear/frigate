@@ -56,7 +56,7 @@
   "yodeling": "Yodeling",
   "chant": "Canto",
   "synthetic_singing": "Canto sintético",
-  "rapping": "Rapping",
+  "rapping": "Cantando rap",
   "groan": "Gemido",
   "snicker": "Risada",
   "animal": "Animal",
@@ -146,5 +146,7 @@
   "mouse": "Rato",
   "vehicle": "Veículo",
   "hair_dryer": "Secador de cabelo",
-  "toothbrush": "Escova de dentes"
+  "toothbrush": "Escova de dentes",
+  "sink": "Pia",
+  "blender": "Liquidificador"
 }

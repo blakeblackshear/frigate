@@ -24,7 +24,9 @@
       "max_score": "Pontuação máxima",
       "min_speed": "Velocidade mínima",
       "max_speed": "Velocidade máxima",
-      "recognized_license_plate": "Placa reconhecida"
+      "recognized_license_plate": "Placa reconhecida",
+      "has_clip": "Tem Clipe",
+      "has_snapshot": "Tem Captura de Imagem"
     },
     "searchType": {
       "thumbnail": "Miniatura",
@@ -32,11 +34,21 @@
     },
     "header": {
       "noFilters": "Filtros",
-      "activeFilters": "Filtros ativos"
+      "activeFilters": "Filtros ativos",
+      "currentFilterType": "Valores de filtro"
     },
     "tips": {
       "desc": {
-        "text": "Os filtros ajudam você a restringir os resultados da sua pesquisa. Veja como usá-los no campo de entrada:"
+        "text": "Os filtros ajudam você a restringir os resultados da sua pesquisa. Veja como usá-los no campo de entrada:",
+        "example": "Exemplo: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>"
+      },
+      "title": "Como usar filtros de texto"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "A data 'antes' deve ser posterior à data 'depois'.",
+        "minScoreMustBeLessOrEqualMaxScore": "O 'min_score' deve ser inferior ou igual ao 'max_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "O 'min_speed' deve ser inferior ou igual ao 'max_speed'."
       }
     }
   },
@@ -44,6 +56,8 @@
     "search": "Pesquisar..."
   },
   "similaritySearch": {
-    "title": "Pesquisa de similaridade"
+    "title": "Pesquisa de similaridade",
+    "active": "Busca de semelhança ativa",
+    "clear": "Pesquisa de semelhança clara"
   }
 }

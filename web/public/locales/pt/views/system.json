@@ -49,7 +49,12 @@
       "title": "Armazenamento da câmera"
     },
     "title": "Armazenamento",
-    "overview": "Visão geral"
+    "overview": "Visão geral",
+    "recordings": {
+      "title": "Gravações",
+      "earliestRecording": "Primeira gravação disponível:",
+      "tips": "Esse valor representa o armazenamento total usado pelas gravações no banco de dados do Frigate. O Frigate não acompanha o uso de armazenamento de todos os arquivos no seu disco."
+    }
   },
   "cameras": {
     "title": "Câmeras",
@@ -62,7 +67,12 @@
       "codec": "Codec:",
       "fps": "FPS:",
       "stream": "Transmissão {{idx}}",
-      "audio": "Áudio:"
+      "audio": "Áudio:",
+      "cameraProbeInfo": "{{camera}} Explorar informações da Camera",
+      "tips": {
+        "title": "Explorar informações da Camera"
+      },
+      "streamDataFromFFPROBE": "Os dados de fluxo são obtidos com <code>ffprobe</code>."
     },
     "framesAndDetections": "Quadros / Detecções",
     "label": {
@@ -72,20 +82,30 @@
       "skipped": "pulado",
       "ffmpeg": "ffmpeg"
     },
-    "overview": "Visão geral"
+    "overview": "Visão geral",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dados de Exploração copiados para a área de transferência."
+      },
+      "error": {
+        "unableToProbeCamera": "Não foi possível explorar a câmera: {{errorMessage}}"
+      }
+    }
   },
   "lastRefreshed": "Última atualização: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} tem alto uso de CPU FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} tem alto uso de CPU de detecção ({{detectAvg}}%)",
-    "healthy": "O sistema está saudável"
+    "healthy": "O sistema está saudável",
+    "reindexingEmbeddings": "Reindexando incorporações ({{processed}}% completo)"
   },
   "general": {
     "title": "Geral",
     "detector": {
       "title": "Detectores",
       "cpuUsage": "Uso da CPU do detector",
-      "memoryUsage": "Uso da memória do detector"
+      "memoryUsage": "Uso da memória do detector",
+      "inferenceSpeed": "Velocidade de Inferência do Detector"
     },
     "hardwareInfo": {
       "title": "Informações de hardware",
@@ -96,15 +116,32 @@
           "driver": "Driver: {{driver}}",
           "vbios": "Informação VBios: {{vbios}}",
           "name": "Nome: {{name}}",
-          "cudaComputerCapability": "Capacidade de computação CUDA: {{cuda_compute}}"
+          "cudaComputerCapability": "Capacidade de computação CUDA: {{cuda_compute}}",
+          "title": "Saída Nvidia SMI"
         },
         "copyInfo": {
           "label": "Copiar informações da GPU"
+        },
+        "closeInfo": {
+          "label": "Fechar informações da GPU"
+        },
+        "toast": {
+          "success": "Informações da GPU copiadas para a área de transferência"
+        },
+        "vainfoOutput": {
+          "title": "Saída do Vainfo",
+          "returnCode": "Código de retorno: {{code}}",
+          "processOutput": "Saída do processo:",
+          "processError": "Erro no processo:"
         }
-      }
+      },
+      "gpuEncoder": "Codificador de GPU",
+      "gpuDecoder": "Decodificador de GPU"
     },
     "otherProcesses": {
-      "title": "Outros processos"
+      "title": "Outros processos",
+      "processCpuUsage": "Uso de CPU do processo",
+      "processMemoryUsage": "Uso de memória do processo"
     }
   },
   "enrichments": {
