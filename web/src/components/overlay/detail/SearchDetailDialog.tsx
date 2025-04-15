@@ -365,7 +365,7 @@ function ObjectDetailsTab({
   }, [search]);
 
   const snapScore = useMemo(() => {
-    if (!search) {
+    if (!search?.has_snapshot) {
       return 0;
     }
 
@@ -786,14 +786,16 @@ function ObjectDetailsTab({
               {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              <div className="flex flex-row items-center gap-1">
-                {t("details.snapshotScore.label")}
+          {snapScore && (
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm text-primary/40">
+                <div className="flex flex-row items-center gap-1">
+                  {t("details.snapshotScore.label")}
+                </div>
               </div>
+              <div className="text-sm">{snapScore}%</div>
             </div>
-            <div className="text-sm">{snapScore}%</div>
-          </div>
+          )}
           {averageEstimatedSpeed && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
