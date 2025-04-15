@@ -80,7 +80,7 @@ def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
             return False
 
     # check license_plate on car
-    if label == "car":
+    if label in ["car", "motorcycle"]:
         if has_better_attr(current_thumb, new_obj, "license_plate"):
             return True
         # if the current thumb has a license_plate attr, dont update unless it gets better

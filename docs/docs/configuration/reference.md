@@ -566,6 +566,10 @@ face_recognition:
 lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
+  # Optional: The device to run the models on (default: shown below)
+  device: CPU
+  # Optional: Set the model size used for text detection. (default: shown below)
+  model_size: small
   # Optional: License plate object confidence score required to begin running recognition (default: shown below)
   detection_threshold: 0.7
   # Optional: Minimum area of license plate to begin running recognition (default: shown below)

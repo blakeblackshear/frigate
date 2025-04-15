@@ -38,6 +38,7 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
         "ups",
         "usps",
     ],
+    "motorcycle": ["license_plate"],
 }
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
