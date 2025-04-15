@@ -1,0 +1,228 @@
+{
+  "time": {
+    "untilRestart": "còn lại đến khi khởi động lại",
+    "untilForTime": "Cho đến khi {{time}}",
+    "untilForRestart": "Cho đến khi Frigate khởi động lại.",
+    "ago": "{{timeAgo}} trước",
+    "formattedTimestamp": {
+      "12hour": "định dạng thời gian 12 giờ",
+      "24hour": "định dạng thời gian 24 giờ"
+    },
+    "year_other": "{{time}} năm",
+    "month_other": "{{time}} tháng",
+    "day_other": "{{time}} ngày",
+    "hour_other": "{{time}} giờ",
+    "minute_other": "{{time}} phút",
+    "second_other": "{{time}} giây",
+    "justNow": "vừa xong",
+    "today": "hôm nay",
+    "yesterday": "hôm qua",
+    "last7": "7 ngày qua",
+    "last14": "14 ngày qua",
+    "last30": "30 ngày qua",
+    "thisWeek": "tuần này",
+    "lastWeek": "tuần trước",
+    "thisMonth": "tháng này",
+    "lastMonth": "tháng trước",
+    "5minutes": "5 phút",
+    "10minutes": "10 phút",
+    "30minutes": "30 phút",
+    "1hour": "1 giờ",
+    "12hours": "12 giờ",
+    "24hours": "24 giờ",
+    "pm": "chiều",
+    "am": "sáng",
+    "mo": "{{time}}tháng",
+    "d": "{{time}}ngày",
+    "m": "{{time}}phút",
+    "s": "{{time}}giây",
+    "formattedTimestamp2": {
+      "12hour": "định dạng thời gian 12 giờ (2)",
+      "24hour": "định dạng thời gian 24 giờ (2)"
+    },
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "thời gian 12 giờ (không giây)",
+      "24hour": "thời gian 24 giờ (không giây)"
+    },
+    "formattedTimestampWithYear": {
+      "12hour": "thời gian 12 giờ kèm năm",
+      "24hour": "thời gian 24 giờ kèm năm"
+    },
+    "formattedTimestampOnlyMonthAndDay": "chỉ tháng và ngày",
+    "yr": "{{time}}năm",
+    "h": "{{time}}giờ"
+  },
+  "menu": {
+    "systemLogs": "nhật ký hệ thống",
+    "user": {
+      "account": "tài khoản",
+      "anonymous": "ẩn danh",
+      "logout": "đăng xuất",
+      "setPassword": "đặt mật khẩu",
+      "current": "Người dùng hiện tại: {{user}}",
+      "title": "người dùng"
+    },
+    "language": {
+      "en": "Tiếng Anh",
+      "es": "Tiếng Tây Ban Nha",
+      "zhCN": "Tiếng Trung (Giản thể)",
+      "ar": "Tiếng Ả Rập",
+      "hi": "Tiếng Hindi",
+      "fr": "Tiếng Pháp",
+      "pt": "Tiếng Bồ Đào Nha",
+      "ru": "Tiếng Nga",
+      "de": "Tiếng Đức",
+      "ja": "Tiếng Nhật",
+      "tr": "Tiếng Thổ Nhĩ Kỳ",
+      "it": "Tiếng Ý",
+      "nl": "Tiếng Hà Lan",
+      "sv": "Tiếng Thụy Điển",
+      "cs": "Tiếng Séc",
+      "nb": "Tiếng Na Uy",
+      "ko": "Tiếng Hàn",
+      "pl": "Tiếng Ba Lan",
+      "vi": "Tiếng Việt",
+      "fa": "Tiếng Ba Tư",
+      "uk": "Tiếng Ukraina",
+      "he": "Tiếng Do Thái",
+      "el": "Tiếng Hy Lạp",
+      "ro": "Tiếng Romania",
+      "hu": "Tiếng Hungary",
+      "fi": "Tiếng Phần Lan",
+      "da": "Tiếng Đan Mạch",
+      "sk": "Tiếng Slovakia",
+      "withSystem": {
+        "label": "Theo hệ thống"
+      }
+    },
+    "system": "hệ thống",
+    "systemMetrics": "thông số hệ thống",
+    "configuration": "cấu hình",
+    "settings": "cài đặt",
+    "configurationEditor": "trình chỉnh sửa cấu hình",
+    "languages": "ngôn ngữ",
+    "appearance": "giao diện",
+    "darkMode": {
+      "label": "chế độ tối",
+      "light": "sáng",
+      "dark": "tối",
+      "withSystem": {
+        "label": "theo hệ thống"
+      }
+    },
+    "withSystem": "theo hệ thống",
+    "theme": {
+      "label": "giao diện",
+      "red": "đỏ",
+      "contrast": "tương phản",
+      "blue": "xanh dương",
+      "green": "xanh lá",
+      "nord": "nord",
+      "default": "mặc định"
+    },
+    "help": "trợ giúp",
+    "documentation": {
+      "title": "tài liệu",
+      "label": "hướng dẫn"
+    },
+    "restart": "khởi động lại",
+    "live": {
+      "title": "trực tiếp",
+      "allCameras": "tất cả camera",
+      "cameras": {
+        "title": "camera",
+        "count_other": "{{count}} Camera"
+      }
+    },
+    "review": "xem lại",
+    "explore": "khám phá",
+    "export": "xuất",
+    "uiPlayground": "UI Playground",
+    "faceLibrary": "thư viện khuôn mặt"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph (dặm/giờ)",
+      "kph": "km/h (kilômét/giờ)"
+    }
+  },
+  "label": {
+    "back": "quay lại"
+  },
+  "button": {
+    "apply": "áp dụng",
+    "reset": "đặt lại",
+    "done": "xong",
+    "enabled": "đã bật",
+    "enable": "bật",
+    "disabled": "đã tắt",
+    "disable": "tắt",
+    "save": "lưu",
+    "cancel": "hủy",
+    "close": "đóng",
+    "copy": "sao chép",
+    "back": "quay lại",
+    "history": "lịch sử",
+    "fullscreen": "toàn màn hình",
+    "on": "bật",
+    "exitFullscreen": "thoát toàn màn hình",
+    "pictureInPicture": "hình trong hình",
+    "twoWayTalk": "đàm thoại hai chiều",
+    "cameraAudio": "âm thanh camera",
+    "off": "tắt",
+    "edit": "chỉnh sửa",
+    "copyCoordinates": "sao chép tọa độ",
+    "delete": "xóa",
+    "yes": "có",
+    "no": "không",
+    "download": "tải xuống",
+    "info": "thông tin",
+    "suspended": "tạm dừng",
+    "unsuspended": "khôi phục",
+    "play": "phát",
+    "unselect": "bỏ chọn",
+    "export": "xuất",
+    "deleteNow": "xóa ngay",
+    "next": "tiếp theo",
+    "saving": "Đang lưu..."
+  },
+  "toast": {
+    "copyUrlToClipboard": "Đã sao chép liên kết.",
+    "save": {
+      "title": "lưu thành công",
+      "error": {
+        "noMessage": "không có thông báo lỗi",
+        "title": "Lỗi khi lưu thay đổi cấu hình: {{errorMessage}}"
+      }
+    }
+  },
+  "role": {
+    "title": "vai trò",
+    "admin": "quản trị viên",
+    "viewer": "người xem",
+    "desc": "Quản trị viên có toàn quyền truy cập tất cả các tính năng trong giao diện Frigate. Người xem chỉ được phép xem camera, mục đã ghi lại và các đoạn video lịch sử trong giao diện."
+  },
+  "pagination": {
+    "label": "trang",
+    "previous": {
+      "title": "trước đó",
+      "label": "trước"
+    },
+    "next": {
+      "title": "kế tiếp",
+      "label": "tiếp"
+    },
+    "more": "xem thêm"
+  },
+  "accessDenied": {
+    "documentTitle": "từ chối truy cập",
+    "title": "truy cập bị từ chối",
+    "desc": "Bạn không có quyền truy cập vào trang này."
+  },
+  "notFound": {
+    "documentTitle": "không tìm thấy",
+    "title": "không tìm thấy",
+    "desc": "trang bạn đang tìm không tồn tại"
+  },
+  "selectItem": "Chọn mục {{item}}"
+}
