@@ -152,7 +152,7 @@ function ThumbnailRow({
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="flex flex-row items-center text-lg capitalize">
-        {t(objectType.replace(" ", "_").toLowerCase(), { ns: "objects" })}
+        {t(objectType, { ns: "objects" })}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
             {t("trackedObjectsCount", {

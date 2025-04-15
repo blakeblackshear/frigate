@@ -79,9 +79,7 @@ export default function CameraSettingsView({
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
       ? cameraConfig.review.alerts.labels
-          .map((label) =>
-            t(label.replace(" ", "_").toLowerCase(), { ns: "objects" }),
-          )
+          .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
   }, [cameraConfig, t]);
@@ -89,9 +87,7 @@ export default function CameraSettingsView({
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
       ? cameraConfig.review.detections.labels
-          .map((label) =>
-            t(label.replace(" ", "_").toLowerCase(), { ns: "objects" }),
-          )
+          .map((label) => t(label, { ns: "objects" }))
           .join(", ")
       : "";
   }, [cameraConfig, t]);

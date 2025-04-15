@@ -325,7 +325,7 @@ export default function ReviewDetailDialog({
                         values={{
                           objects: missingObjects
                             .map((x) =>
-                              t(x.replace(" ", "_").toLowerCase(), {
+                              t(x, {
                                 ns: "objects",
                               }),
                             )

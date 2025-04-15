@@ -419,7 +419,7 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return t((filterValues as string).replace(" ", "_").toLowerCase(), {
+      return t(filterValues as string, {
         ns: "objects",
       });
     } else if (filterType === "search_type") {
@@ -809,7 +809,7 @@ export default function InputWithTags({
                           >
                             {t("filter.label." + filterType)}:{" "}
                             {filterType === "labels"
-                              ? t(value.replace(" ", "_").toLowerCase(), {
+                              ? t(value, {
                                   ns: "objects",
                                 })
                               : value.replaceAll("_", " ")}

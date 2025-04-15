@@ -127,9 +127,7 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) =>
-                    t(text.replace(" ", "_").toLowerCase(), { ns: "objects" }),
-                  )
+                  .map((text) => t(text, { ns: "objects" }))
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}

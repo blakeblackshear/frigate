@@ -936,7 +936,7 @@ export function ZoneObjectSelector({
                 className="w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
-                {t(item.replace(" ", "_").toLowerCase(), { ns: "objects" })}
+                {t(item, { ns: "objects" })}
               </Label>
               <Switch
                 key={item}
