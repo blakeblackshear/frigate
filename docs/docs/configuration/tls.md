@@ -36,8 +36,8 @@ Note that certbot uses symlinks, and those can't be followed by the container un
 frigate:
   ...
   volumes:
-    - /etc/letsencrypt/live/frigate:/etc/letsencrypt/live/frigate:ro
-    - /etc/letsencrypt/archive/frigate:/etc/letsencrypt/archive/frigate:ro
+    - /etc/letsencrypt/live/your.fqdn.net:/etc/letsencrypt/live/frigate:ro
+    - /etc/letsencrypt/archive/your.fqdn.net:/etc/letsencrypt/archive/your.fqdn.net:ro
   ...
 
 ```
