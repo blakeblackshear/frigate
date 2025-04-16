@@ -3,15 +3,9 @@ id: index
 title: Models
 ---
 
-<a href="https://frigate.video/plus" target="_blank" rel="nofollow">Frigate+</a> offers models trained on images submitted by Frigate+ users from their security cameras and is specifically designed for the way Frigate NVR analyzes video footage. These models offer higher accuracy with less resources. The images you upload are used to fine tune a baseline model trained from images uploaded by all Frigate+ users. This fine tuning process results in a model that is optimized for accuracy in your specific conditions.
+<a href="https://frigate.video/plus" target="_blank" rel="nofollow">Frigate+</a> offers models trained on images submitted by Frigate+ users from their security cameras and is specifically designed for the way Frigate NVR analyzes video footage. These models offer higher accuracy with less resources. The images you upload are used to fine tune a base model trained from images uploaded by all Frigate+ users. This fine tuning process results in a model that is optimized for accuracy in your specific conditions.
 
-:::info
-
-The baseline model isn't directly available after subscribing. This may change in the future, but for now you will need to submit a model request with the minimum number of images.
-
-:::
-
-With a subscription, 12 model trainings per year are included. If you cancel your subscription, you will retain access to any trained models. An active subscription is required to submit model requests or purchase additional trainings.
+With a subscription, 12 model trainings to fine tune your model per year are included. In addition, you will have access to any base models published while your subscription is active. If you cancel your subscription, you will retain access to any trained and base models in your account. An active subscription is required to submit model requests or purchase additional trainings. New base models are published quarterly with target dates of January 15th, April 15th, July 15th, and October 15th.
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
@@ -19,7 +13,7 @@ Information on how to integrate Frigate+ with Frigate can be found in the [integ
 
 There are two model types offered in Frigate+, `mobiledet` and `yolonas`. Both of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
 
-Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types).
+Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
 
 | Model Type  | Description                                                                                                                                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -36,13 +30,13 @@ Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15
 
 :::
 
-| Hardware                                                                                                                     | Recommended Detector Type | Recommended Model Type |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
-| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)                                                       | `cpu`                     | `mobiledet`            |
-| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector)                                             | `edgetpu`                 | `mobiledet`            |
-| [Intel](/configuration/object_detectors.md#openvino-detector)                                                                | `openvino`                | `yolonas`              |
-| [NVidia GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#onnx)\*                   | `onnx`                    | `yolonas`              |
-| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `rocm`                    | `yolonas`              |
+| Hardware                                                                         | Recommended Detector Type | Recommended Model Type |
+| -------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)           | `cpu`                     | `mobiledet`            |
+| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector) | `edgetpu`                 | `mobiledet`            |
+| [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                | `yolonas`              |
+| [NVidia GPU](/configuration/object_detectors#onnx)\*                             | `onnx`                    | `yolonas`              |
+| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)\*           | `rocm`                    | `yolonas`              |
 
 _\* Requires Frigate 0.15_
 
