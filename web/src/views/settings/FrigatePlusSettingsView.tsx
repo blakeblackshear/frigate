@@ -26,6 +26,8 @@ import {
 type FrigatePlusModel = {
   id: string;
   type: string;
+  name: string;
+  isBaseModel: boolean;
   supportedDetectors: string[];
   trainDate: string;
   baseModel: string;
@@ -336,6 +338,10 @@ export default function FrigatePlusSettingsView({
                                       frigatePlusSettings.model.id
                                     ].trainDate,
                                   ).toLocaleString() +
+                                  " " +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .name +
+                                  " " +
                                   " (" +
                                   availableModels[frigatePlusSettings.model.id]
                                     .width +
@@ -366,7 +372,15 @@ export default function FrigatePlusSettingsView({
                                       {new Date(
                                         model.trainDate,
                                       ).toLocaleString()}{" "}
-                                      ({model.baseModel})
+                                      {model.name} ({model.baseModel}) (
+                                      {model.isBaseModel
+                                        ? t(
+                                            "frigatePlus.modelInfo.plusModelType.baseModel",
+                                          )
+                                        : t(
+                                            "frigatePlus.modelInfo.plusModelType.userModel",
+                                          )}
+                                      )
                                       <div>
                                         {t(
                                           "frigatePlus.modelInfo.supportedDetectors",

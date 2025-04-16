@@ -565,6 +565,10 @@
       "modelType": "Model Type",
       "trainDate": "Train Date",
       "baseModel": "Base Model",
+      "plusModelType": {
+        "baseModel": "Base Model",
+        "userModel": "User Model"
+      },
       "supportedDetectors": "Supported Detectors",
       "dimensions": "Dimensions",
       "cameras": "Cameras",
