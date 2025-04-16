@@ -142,7 +142,10 @@
     "ffmpegHighCpuUsage": "{{camera}} has high FFMPEG CPU usage ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
-    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
+    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
+    "cameraIsOffline": "{{camera}} is offline",
+    "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Enrichments",
