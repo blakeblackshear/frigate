@@ -78,6 +78,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const languages = [
     { code: "en", label: t("menu.language.en") },
     { code: "es", label: t("menu.language.es") },
+    { code: "fr", label: t("menu.language.fr") },
     { code: "zh-CN", label: t("menu.language.zhCN") },
     { code: "tr", label: t("menu.language.tr") },
     { code: "nl", label: t("menu.language.nl") },
