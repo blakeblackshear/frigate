@@ -983,7 +983,7 @@ cd yolov9
 
 # setup the virtual environment so installation doesn't affect main system
 python3 -m venv ./
-bin/pip install -r requiremnts.txt
+bin/pip install -r requirements.txt
 bin/pip install onnx onnxruntime onnx-simplifier>=0.4.1
 
 # download the weights
