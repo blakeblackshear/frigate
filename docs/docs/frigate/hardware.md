@@ -118,7 +118,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
 | Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
 | Intel i7 12650H      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 42 ms | 336: 50 ms                |                                        |
-| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms              |                           |                                        |
+| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms     |                                        |
 | Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                           |                                        |
 
 ### TensorRT - Nvidia GPU
@@ -145,7 +145,7 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 
 | Name            | YoloV9 Inference Time | YOLO-NAS Inference Time   |
 | --------------- | --------------------- | ------------------------- |
-| AMD 780M        | ~ 14 ms               | ~ 60 ms                   |
+| AMD 780M        | ~ 14 ms               | 320: ~ 60 ms 640: ~ 80 ms |
 
 ## Community Supported Detectors
 
