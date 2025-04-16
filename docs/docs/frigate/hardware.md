@@ -145,7 +145,7 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 
 | Name            | YoloV9 Inference Time | YOLO-NAS Inference Time   |
 | --------------- | --------------------- | ------------------------- |
-| AMD 780M        | ~ 14 ms               | 320: ~ 60 ms 640: ~ 80 ms |
+| AMD 780M        | ~ 14 ms               | 320: ~ 30 ms 640: ~ 60 ms |
 
 ## Community Supported Detectors
 
