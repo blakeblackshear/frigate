@@ -366,7 +366,7 @@ function ObjectDetailsTab({
 
   const snapScore = useMemo(() => {
     if (!search?.has_snapshot) {
-      return 0;
+      return undefined;
     }
 
     const value = search.data.score ?? search.score ?? 0;
