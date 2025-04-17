@@ -882,7 +882,7 @@ output_name: "{input_basename}"
 config:
   mean_values: [[0, 0, 0]]
   std_values: [[255, 255, 255]]
-  quant_img_rgb2bgr: true
+  quant_img_RGB2BGR: true
 ```
 
 Explanation of the paramters:

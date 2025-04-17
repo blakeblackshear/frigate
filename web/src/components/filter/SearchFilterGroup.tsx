@@ -63,6 +63,11 @@ export default function SearchFilterGroup({
         return;
       }
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       cameraConfig.objects.track.forEach((label) => {
         if (!config.model.all_attributes.includes(label)) {
           labels.add(label);
@@ -99,7 +104,13 @@ export default function SearchFilterGroup({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       Object.entries(cameraConfig.zones).map(([name, _]) => {
         zones.add(name);
       });

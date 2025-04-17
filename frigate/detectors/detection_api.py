@@ -4,7 +4,7 @@ from typing import List
 
 import numpy as np
 
-from frigate.detectors.detector_config import ModelTypeEnum
+from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ class DetectionApi(ABC):
     supported_models: List[ModelTypeEnum]
 
     @abstractmethod
-    def __init__(self, detector_config):
+    def __init__(self, detector_config: BaseDetectorConfig):
         self.detector_config = detector_config
         self.thresh = 0.5
         self.height = detector_config.model.height

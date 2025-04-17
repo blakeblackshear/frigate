@@ -107,7 +107,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
       });
@@ -139,7 +145,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       Object.entries(cameraConfig.zones).map(([name, _]) => {
         zones.add(name);
       });
