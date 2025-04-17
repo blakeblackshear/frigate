@@ -73,7 +73,7 @@ import { LuInfo, LuSearch } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
@@ -366,7 +366,7 @@ function ObjectDetailsTab({
 
   const snapScore = useMemo(() => {
     if (!search?.has_snapshot) {
-      return 0;
+      return undefined;
     }
 
     const value = search.data.score ?? search.score ?? 0;
@@ -1017,7 +1017,7 @@ export function ObjectSnapshotTab({
   search,
   onEventUploaded,
 }: ObjectSnapshotTabProps) {
-  const { t } = useTranslation(["components/dialog"]);
+  const { t, i18n } = useTranslation(["components/dialog"]);
   type SubmissionState = "reviewing" | "uploading" | "submitted";
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -1128,42 +1128,67 @@ export function ObjectSnapshotTab({
                       </div>
                     </div>
 
-                    <div className="flex flex-row justify-center gap-2 md:justify-end">
+                    <div className="flex w-full flex-1 flex-col justify-center gap-2 md:ml-8 md:w-auto md:justify-end">
                       {state == "reviewing" && (
                         <>
-                          <Button
-                            className="bg-success"
-                            aria-label={t("explore.plus.review.true.label")}
-                            onClick={() => {
-                              setState("uploading");
-                              onSubmitToPlus(false);
-                            }}
-                          >
-                            {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.true.true_other", {
-                                  label: search?.label,
-                                })
-                              : t("explore.plus.review.true.true_one", {
-                                  label: search?.label,
-                                })}
-                          </Button>
-                          <Button
-                            className="text-white"
-                            aria-label={t("explore.plus.review.false.label")}
-                            variant="destructive"
-                            onClick={() => {
-                              setState("uploading");
-                              onSubmitToPlus(true);
-                            }}
-                          >
-                            {/^[aeiou]/i.test(search?.label || "")
-                              ? t("explore.plus.review.false.false_other", {
-                                  label: search?.label,
-                                })
-                              : t("explore.plus.review.false.false_one", {
-                                  label: search?.label,
-                                })}
-                          </Button>
+                          <div>
+                            {i18n.language === "en" ? (
+                              // English with a/an logic plus label
+                              <>
+                                {/^[aeiou]/i.test(search?.label || "") ? (
+                                  <Trans
+                                    ns="components/dialog"
+                                    values={{ label: search?.label }}
+                                  >
+                                    explore.plus.review.question.ask_an
+                                  </Trans>
+                                ) : (
+                                  <Trans
+                                    ns="components/dialog"
+                                    values={{ label: search?.label }}
+                                  >
+                                    explore.plus.review.question.ask_a
+                                  </Trans>
+                                )}
+                              </>
+                            ) : (
+                              // For other languages
+                              <Trans
+                                ns="components/dialog"
+                                values={{
+                                  untranslatedLabel: search?.label,
+                                  translatedLabel: t(
+                                    "filter.label." + search?.label,
+                                  ),
+                                }}
+                              >
+                                explore.plus.review.question.ask_full
+                              </Trans>
+                            )}
+                          </div>
+                          <div className="flex w-full flex-row gap-2">
+                            <Button
+                              className="flex-1 bg-success"
+                              aria-label={t("button.yes", { ns: "common" })}
+                              onClick={() => {
+                                setState("uploading");
+                                onSubmitToPlus(false);
+                              }}
+                            >
+                              {t("button.yes", { ns: "common" })}
+                            </Button>
+                            <Button
+                              className="flex-1 text-white"
+                              aria-label={t("button.no", { ns: "common" })}
+                              variant="destructive"
+                              onClick={() => {
+                                setState("uploading");
+                                onSubmitToPlus(true);
+                              }}
+                            >
+                              {t("button.no", { ns: "common" })}
+                            </Button>
+                          </div>
                         </>
                       )}
                       {state == "uploading" && <ActivityIndicator />}

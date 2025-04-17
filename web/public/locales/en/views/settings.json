@@ -385,12 +385,12 @@
     "motion": {
       "title": "Motion boxes",
       "desc": "Show boxes around areas where motion is detected",
-      "tips": "<p className=\"mb-2\"><strong>Motion Boxes</strong></p><br><p>Red boxes will be overlaid on areas of the frame where motion is currently being detected</p>"
+      "tips": "<p><strong>Motion Boxes</strong></p><br><p>Red boxes will be overlaid on areas of the frame where motion is currently being detected</p>"
     },
     "regions": {
       "title": "Regions",
       "desc": "Show a box of the region of interest sent to the object detector",
-      "tips": "<p className=\"mb-2\"><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
+      "tips": "<p><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Object Shape Filter Drawing",
@@ -474,7 +474,7 @@
       "deleteUser": {
         "title": "Delete User",
         "desc": "This action cannot be undone. This will permanently delete the user account and remove all associated data.",
-        "warn": "Are you sure you want to delete <span className=\"font-bold\">{{username}}</span>?"
+        "warn": "Are you sure you want to delete"
       },
       "passwordSetting": {
         "updatePassword": "Update Password for {{username}}",
@@ -483,8 +483,14 @@
       },
       "changeRole": {
         "title": "Change User Role",
-        "desc": "Update permissions for <span className=\"font-medium\">{{username}}</span>",
-        "roleInfo": "<p>Select the appropriate role for this user:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Admin:</span> Full access to all features. </li><li> • <span className=\"font-medium\">Viewer:</span> Limited to Live dashboards, Review, Explore, and Exports only.</li></ul>"
+        "desc": "Update permissions for",
+        "roleInfo": {
+          "intro": "Select the appropriate role for this user:",
+          "admin": "Admin",
+          "adminDesc": "Full access to all features.",
+          "viewer": "Viewer",
+          "viewerDesc": "Limited to Live dashboards, Review, Explore, and Exports only."
+        }
       }
     }
   },

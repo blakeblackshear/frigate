@@ -15,15 +15,11 @@
         "desc": "Objects in locations you want to avoid are not false positives. Submitting them as false positives will confuse the model."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Confirm this label for Frigate Plus",
-          "true_one": "This is a {{label}}",
-          "true_other": "This is an {{label}}"
-        },
-        "false": {
-          "label": "Do not confirm this label for Frigate Plus",
-          "false_one": "This is not a {{label}}",
-          "false_other": "This is not an {{label}}"
+          "ask_a": "Is this object a <code>{{label}}</code>?",
+          "ask_an": "Is this object an <code>{{label}}</code>?",
+          "ask_full": "Is this object a <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Submitted"
