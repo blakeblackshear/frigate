@@ -1,16 +1,16 @@
 {
-  "noPreviewFound": "Nessuna Anteprima Trovata",
+  "noPreviewFound": "Nessuna anteprima trovata",
   "noRecordingsFoundForThisTime": "Nessuna registrazione trovata per questo intervallo",
-  "noPreviewFoundFor": "Nessuna Anteprima Trovata per {{cameraName}}",
+  "noPreviewFoundFor": "Nessuna anteprima trovata per {{cameraName}}",
   "submitFrigatePlus": {
-    "title": "Vuoi inviare questo frame a Frigate+?",
+    "title": "Vuoi inviare questo fotogramma a Frigate+?",
     "submit": "Invia"
   },
   "livePlayerRequiredIOSVersion": "Per questo tipo di trasmissione dal vivo è richiesto iOS 17.1 o versione successiva.",
   "stats": {
     "streamType": {
       "short": "Tipo",
-      "title": "Tipo di Flusso:"
+      "title": "Tipo di trasmissione:"
     },
     "bandwidth": {
       "title": "Larghezza di banda:",
@@ -32,12 +32,12 @@
       }
     },
     "decodedFrames": "Fotogrammi decodificati:",
-    "totalFrames": "Totale Fotogrammi:",
-    "droppedFrameRate": "Percentuali Fotogrammi Persi:"
+    "totalFrames": "Totale fotogrammi:",
+    "droppedFrameRate": "Percentuali fotogrammi persi:"
   },
   "streamOffline": {
     "desc": "Nessun frame ricevuto sul flusso <code>detect</code> di {{cameraName}}, controlla i registri degli errori",
-    "title": "Trasmissione Disconnessa"
+    "title": "Trasmissione disconnessa"
   },
   "toast": {
     "success": {

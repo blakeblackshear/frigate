@@ -1,27 +1,62 @@
 {
   "group": {
-    "label": "Gruppo di Telecamere",
-    "add": "Aggiungi Gruppo di Telecamere",
+    "label": "Gruppo di telecamere",
+    "add": "Aggiungi gruppo di telecamere",
     "delete": {
-      "label": "Cancella Gruppo di Telecamere",
+      "label": "Elimina gruppo di telecamere",
       "confirm": {
         "title": "Conferma eliminazione",
         "desc": "Sei sicuro di voler eliminare il gruppo di telecamere <em>{{name}}</em>?"
       }
     },
-    "edit": "Modifica Gruppo di Telecamere",
+    "edit": "Modifica gruppo di telecamere",
     "name": {
       "label": "Nome",
       "placeholder": "Inserisci un nome...",
       "errorMessage": {
         "exists": "Il nome scelto per il gruppo telecamere è già presente.",
         "invalid": "Nome del gruppo di telecamere non valido.",
-        "mustLeastCharacters": "Il nome del gruppo di telecamere deve conternere almeno 2 caratteri."
+        "mustLeastCharacters": "Il nome del gruppo di telecamere deve contenere almeno 2 caratteri.",
+        "nameMustNotPeriod": "Il nome del gruppo di telecamere non deve contenere punti."
       }
     },
     "camera": {
       "setting": {
-        "label": "Impostazioni di trasmissione della telecamera"
+        "label": "Impostazioni di trasmissione della telecamera",
+        "title": "Impostazioni di trasmissione di {{cameraName}}",
+        "audioIsAvailable": "L'audio è disponibile per questo flusso",
+        "streamMethod": {
+          "label": "Metodo di trasmissione",
+          "method": {
+            "smartStreaming": {
+              "label": "Trasmissione intelligente (consigliato)",
+              "desc": "La trasmissione intelligente aggiorna l'immagine della telecamera una volta al minuto quando non si verifica alcuna attività rilevabile, per risparmiare larghezza di banda e risorse. Quando viene rilevata un'attività, l'immagine passa automaticamente alla trasmissione dal vivo."
+            },
+            "continuousStreaming": {
+              "label": "Trasmissione continua",
+              "desc": {
+                "warning": "La trasmissione continua può causare un elevato utilizzo di larghezza di banda e problemi di prestazioni. Da usare con cautela.",
+                "title": "L'immagine della telecamera sarà sempre trasmessa dal vivo quando è visibile sul cruscotto, anche se non viene rilevata alcuna attività."
+              }
+            },
+            "noStreaming": {
+              "label": "Nessuna trasmissione",
+              "desc": "Le immagini delle telecamere verranno aggiornate solo una volta al minuto e non verrà effettuato alcuna trasmissione dal vivo."
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Modalità di compatibilità",
+          "desc": "Abilita questa opzione solo se la trasmissione dal vivo della tua telecamera mostra artefatti cromatici e presenta una linea diagonale sul lato destro dell'immagine."
+        },
+        "audio": {
+          "tips": {
+            "document": "Leggi la documentazione ",
+            "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso."
+          }
+        },
+        "audioIsUnavailable": "L'audio non è disponibile per questo flusso",
+        "desc": "Modifica le opzioni di trasmissione dal vivo per il cruscotto di questo gruppo di telecamere. <em>TQueste impostazioni sono specifiche del dispositivo/browser.</em>"
       }
     },
     "cameras": {
@@ -30,5 +65,19 @@
     },
     "icon": "Icona",
     "success": "Il gruppo di telecamere ({{name}}) è stato salvato."
+  },
+  "debug": {
+    "options": {
+      "label": "Impostazioni",
+      "title": "Opzioni",
+      "showOptions": "Mostra opzioni",
+      "hideOptions": "Nascondi opzioni"
+    },
+    "boundingBox": "Riquadro di delimitazione",
+    "timestamp": "Orario",
+    "zones": "Zone",
+    "mask": "Maschera",
+    "motion": "Movimento",
+    "regions": "Regioni"
   }
 }

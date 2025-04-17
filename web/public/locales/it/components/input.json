@@ -2,9 +2,9 @@
   "button": {
     "downloadVideo": {
       "toast": {
-        "success": "Il video dell'oggetto da te visto ha iniziato il download."
+        "success": "Il video dell'oggetto da te visto ha iniziato a scaricarsi."
       },
-      "label": "Scarica Video"
+      "label": "Scarica video"
     }
   }
 }

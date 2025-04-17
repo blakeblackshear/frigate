@@ -20,10 +20,10 @@
     "justNow": "Adesso",
     "today": "Oggi",
     "last7": "Ultimi 7 giorni",
-    "thisWeek": "Questa Settimana",
-    "lastWeek": "Settimana Scorsa",
-    "thisMonth": "Questo Mese",
-    "lastMonth": "Mese Scorso",
+    "thisWeek": "Questa settimana",
+    "lastWeek": "Settimana scorsa",
+    "thisMonth": "Questo mese",
+    "lastMonth": "Mese scorso",
     "10minutes": "10 minuti",
     "30minutes": "30 minuti",
     "1hour": "1 ora",
@@ -44,8 +44,8 @@
     "mo": "{{time}}mese",
     "d": "{{time}}giorno",
     "h": "{{time}}ora",
-    "m": "{{time}}minuto",
-    "s": "{{time}}secondo",
+    "m": "{{time}}min",
+    "s": "{{time}}sec",
     "formattedTimestamp": {
       "12hour": "%b %-d, %I:%M:%S %p",
       "24hour": "%b %-d, %H:%M:%S"
@@ -84,22 +84,22 @@
     "copy": "Copia",
     "history": "Storico",
     "exitFullscreen": "Esci da schermo intero",
-    "on": "ON",
+    "on": "ACCESO",
     "copyCoordinates": "Copia coordinate",
     "download": "Scarica",
-    "info": "Info",
+    "info": "Informazioni",
     "suspended": "Sospeso",
     "unsuspended": "Riattiva",
     "play": "Riproduci",
-    "deleteNow": "Elimina Ora",
+    "deleteNow": "Elimina ora",
     "next": "Successivo",
-    "off": "OFF",
+    "off": "SPENTO",
     "delete": "Elimina",
     "close": "Chiudi",
     "back": "Indietro",
-    "pictureInPicture": "Picture in Picture",
+    "pictureInPicture": "Immagine nell'immagine",
     "twoWayTalk": "Comunicazione a 2 vie",
-    "cameraAudio": "Audio della Telecamera"
+    "cameraAudio": "Audio della telecamera"
   },
   "unit": {
     "speed": {
@@ -114,13 +114,13 @@
     "configuration": "Configurazione",
     "languages": "Lingue",
     "appearance": "Aspetto",
-    "systemMetrics": "Metriche di Sistema",
-    "systemLogs": "Eventi di sistema",
+    "systemMetrics": "Metriche di sistema",
+    "systemLogs": "Registri di sistema",
     "settings": "Impostazioni",
-    "configurationEditor": "Editor di Configurazione",
+    "configurationEditor": "Editor di configurazione",
     "language": {
       "en": "English (Inglese)",
-      "zhCN": "Cinese Semplificato",
+      "zhCN": "简体中文 (Cinese semplificato)",
       "withSystem": {
         "label": "Usa la lingua di sistema"
       },
@@ -152,7 +152,7 @@
       "it": "Italiano (Italiano)"
     },
     "darkMode": {
-      "label": "Modalità Scura",
+      "label": "Modalità scura",
       "light": "Chiara",
       "dark": "Scura",
       "withSystem": {
@@ -163,7 +163,7 @@
     "theme": {
       "label": "Tema",
       "blue": "Blu",
-      "contrast": "Alto Contrasto",
+      "contrast": "Alto contrasto",
       "green": "Verde",
       "default": "Predefinito",
       "red": "Rosso",
@@ -188,17 +188,17 @@
     "review": "Rivedi",
     "explore": "Esplora",
     "export": "Esporta",
-    "uiPlayground": "Interfaccia Laboratorio",
+    "uiPlayground": "Interfaccia area prove",
     "user": {
       "account": "Account",
-      "current": "Utente Attuale: {{user}}",
+      "current": "Utente attuale: {{user}}",
       "anonymous": "anonimo",
       "logout": "Esci",
       "title": "Utente",
-      "setPassword": "Imposta Password"
+      "setPassword": "Imposta password"
     },
     "withSystem": "Sistema",
-    "faceLibrary": "Raccolta Volti"
+    "faceLibrary": "Raccolta volti"
   },
   "pagination": {
     "next": {
@@ -220,12 +220,12 @@
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",
-    "documentTitle": "Accesso Vietato - Frigate",
-    "title": "Accesso Vietato"
+    "documentTitle": "Accesso vietato - Frigate",
+    "title": "Accesso vietato"
   },
   "notFound": {
     "desc": "Pagina non trovata",
-    "documentTitle": "Non Trovato - Frigate",
+    "documentTitle": "Non trovato - Frigate",
     "title": "404"
   },
   "toast": {
