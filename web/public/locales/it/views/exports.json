@@ -1,13 +1,13 @@
 {
   "documentTitle": "Esporta - Frigate",
   "search": "Cerca",
-  "noExports": "Nessuna Esportazione Trovata",
-  "deleteExport": "Elimina Esportazione",
+  "noExports": "Nessuna esportazione trovata",
+  "deleteExport": "Elimina esportazione",
   "deleteExport.desc": "Sei sicuro di voler eliminare {{exportName}}?",
   "editExport": {
     "desc": "Inserisci un nuovo nome per questa esportazione.",
-    "title": "Rinomina Esportazione",
-    "saveExport": "Salva Esportazione"
+    "title": "Rinomina esportazione",
+    "saveExport": "Salva esportazione"
   },
   "toast": {
     "error": {

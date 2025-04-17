@@ -2,26 +2,26 @@
   "selectItem": "Seleziona {{item}}",
   "description": {
     "addFace": "Procedura per aggiungere una nuova raccolta alla Libreria dei Volti.",
-    "placeholder": "Immetti un nome per questa raccolta"
+    "placeholder": "Inserisci un nome per questa raccolta"
   },
   "details": {
     "confidence": "Fiducia",
     "person": "Persona",
     "face": "Dettagli del volto",
     "faceDesc": "Dettagli del volto e dell'oggetto associato",
-    "timestamp": "Marca temporale"
+    "timestamp": "Orario"
   },
   "train": {
     "title": "Addestra",
     "aria": "Seleziona addestramento"
   },
   "button": {
-    "addFace": "Aggiungi Volto",
+    "addFace": "Aggiungi volto",
     "deleteFaceAttempts": "Elimina tentativi di riconoscimento facciale",
-    "uploadImage": "Carica Immagine",
-    "reprocessFace": "Rielabora il Volto"
+    "uploadImage": "Carica immagine",
+    "reprocessFace": "Rielabora il volto"
   },
-  "trainFace": "Addestra il Volto",
+  "trainFace": "Addestra il volto",
   "toast": {
     "success": {
       "deletedName_one": "{{count}} volto è stato eliminato con successo.",
@@ -53,21 +53,26 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Crea Raccolta",
+    "title": "Crea raccolta",
     "nextSteps": "Per costruire una base solida:<li>Usa la scheda Addestra per selezionare e addestrare le immagini per ogni persona rilevata.</li><li>Concentrati sulle immagini dritte per ottenere risultati migliori; evita di addestrare immagini che catturano i volti da un'angolazione.</li></ul>",
     "desc": "Crea una nuova raccolta",
-    "new": "Crea nuovo Volto"
+    "new": "Crea nuovo volto"
   },
   "readTheDocs": "Leggi la documentazione",
-  "selectFace": "Seleziona Volto",
+  "selectFace": "Seleziona volto",
   "documentTitle": "Libreria dei Volti - Frigate",
   "uploadFaceImage": {
     "desc": "Carica un'immagine per scansionare i volti e includerla in {{pageToggle}}",
-    "title": "Carica l'immagine del Volto"
+    "title": "Carica l'immagine del volto"
   },
   "deleteFaceLibrary": {
-    "title": "Elimina Nome",
+    "title": "Elimina nome",
     "desc": "Vuoi davvero eliminare la raccolta {{name}}? Questa operazione eliminerà definitivamente tutti i volti associati."
   },
-  "trainFaceAs": "Addestra il Volto come:"
+  "trainFaceAs": "Addestra il volto come:",
+  "steps": {
+    "faceName": "Inserisci il nome del volto",
+    "nextSteps": "Prossimi passi",
+    "uploadFace": "Carica l'immagine del volto"
+  }
 }

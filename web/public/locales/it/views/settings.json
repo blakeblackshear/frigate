@@ -4,5 +4,30 @@
     "default": "Impostazioni - Frigate",
     "classification": "Impostazioni di Classificazione - Frigate",
     "camera": "Impostazioni Telecamera - Frigate"
+  },
+  "frigatePlus": {
+    "snapshotConfig": {
+      "cleanCopyWarning": "Alcune telecamere hanno le istantanee abilitate ma la copia pulita disabilitata. È necessario abilitare <code>clean_copy</code> nella configurazione delle istantanee per poter inviare le immagini da queste telecamere a Frigate+.",
+      "table": {
+        "snapshots": "Istantanee",
+        "camera": "Telecamera",
+        "cleanCopySnapshots": "<code>clean_copy</code> Istantanee"
+      },
+      "desc": "Per inviare a Frigate+ è necessario che nella configurazione siano abilitate sia le istantanee che le istantanee <code>clean_copy</code>.",
+      "documentation": "Leggi la documentazione"
+    }
+  },
+  "debug": {
+    "timestamp": {
+      "desc": "Sovrapponi l'orario all'immagine",
+      "title": "Orario"
+    }
+  },
+  "masksAndZones": {
+    "motionMasks": {
+      "context": {
+        "title": "Le maschere di movimento vengono utilizzate per impedire che tipi di movimento indesiderati attivino il rilevamento (ad esempio: rami di alberi, orari di telecamere). Le maschere di movimento dovrebbero essere utilizzate con <em>molta parsimonia</em>: un uso eccessivo renderebbe più difficile il tracciamento degli oggetti."
+      }
+    }
   }
 }

@@ -4,5 +4,10 @@
   "searchFor": "Cerca {{inputValue}}",
   "button": {
     "clear": "Azzera Ricerca"
+  },
+  "filter": {
+    "label": {
+      "has_snapshot": "Contiene istantanea"
+    }
   }
 }

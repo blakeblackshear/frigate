@@ -4,5 +4,18 @@
   "lowBandwidthMode": "Modalità banda-ridotta",
   "twoWayTalk": {
     "enable": "Abilita Audio a 2 Vie"
+  },
+  "snapshots": {
+    "enable": "Abilita istantanee",
+    "disable": "Disabilita istantanee"
+  },
+  "manualRecording": {
+    "recordDisabledTips": "Poiché la registrazione è disabilitata o limitata nella configurazione di questa telecamera, verrà salvata solo un'istantanea."
+  },
+  "cameraSettings": {
+    "snapshots": "Istantanee"
+  },
+  "history": {
+    "label": "Mostra filmati storici"
   }
 }
