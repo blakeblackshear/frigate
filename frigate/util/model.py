@@ -230,24 +230,13 @@ def post_process_yolo(output: list[np.ndarray], width: int, height: int) -> np.n
         return __post_process_nms_yolo(output[0], width, height)
 
 
-def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.ndarray:
-    grids = []
-    expanded_strides = []
-
-    # decode and orient predictions
-    strides = [8, 16, 32]
-    hsizes = [height // stride for stride in strides]
-    wsizes = [width // stride for stride in strides]
-
-    for hsize, wsize, stride in zip(hsizes, wsizes, strides):
-        xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
-        grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
-        grids.append(grid)
-        shape = grid.shape[:2]
-        expanded_strides.append(np.full((*shape, 1), stride))
-
-    grids = np.concatenate(grids, 1)
-    expanded_strides = np.concatenate(expanded_strides, 1)
+def post_process_yolox(
+    predictions: np.ndarray,
+    width: int,
+    height: int,
+    grids: np.ndarray,
+    expanded_strides: np.ndarray,
+) -> np.ndarray:
     predictions[..., :2] = (predictions[..., :2] + grids) * expanded_strides
     predictions[..., 2:4] = np.exp(predictions[..., 2:4]) * expanded_strides
 
@@ -269,15 +258,6 @@ def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.n
         boxes_xyxy, scores, score_threshold=0.4, nms_threshold=0.4
     )
 
-    final_boxes = boxes_xyxy[indices]
-    final_scores = scores[indices]
-    final_cls_inds = cls_inds[indices]
-
-    print(f"frig boxes: {final_boxes}")
-    print(f"frig cls: {final_cls_inds}")
-    print(f"frig scores: {final_scores}")
-
-
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
         zip(boxes_xyxy[indices], scores[indices], cls_inds[indices])
@@ -288,10 +268,10 @@ def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.n
         detections[i] = [
             class_id,
             confidence,
-            bbox[1],
-            bbox[0],
-            bbox[3],
-            bbox[2],
+            bbox[1] / height,
+            bbox[0] / width,
+            bbox[3] / height,
+            bbox[2] / width,
         ]
         print(f"got {detections[i]}")
 
