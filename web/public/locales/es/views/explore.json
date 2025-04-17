@@ -94,7 +94,10 @@
       "desc": "Introduce un nuevo valor de matrícula para este {{label}}",
       "descNoLabel": "Introduce un nuevo valor de matrícula para este objeto rastreado"
     },
-    "recognizedLicensePlate": "Matrícula Reconocida"
+    "recognizedLicensePlate": "Matrícula Reconocida",
+    "snapshotScore": {
+      "label": "Puntuación de Instantánea"
+    }
   },
   "documentTitle": "Explorar - Frigate",
   "trackedObjectDetails": "Detalles del objeto rastreado",
