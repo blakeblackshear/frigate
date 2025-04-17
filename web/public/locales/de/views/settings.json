@@ -86,11 +86,152 @@
     "semanticSearch": {
       "title": "Semantische Suche",
       "desc": "Die semantische Suche in Frigate ermöglicht es, verfolgte Objekte innerhalb der Überprüfungselemente zu finden, indem entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwendet wird.",
-      "readTheDocumentation": "Lesen Sie die Dokumentation."
+      "readTheDocumentation": "Lesen Sie die Dokumentation.",
+      "reindexNow": {
+        "alreadyInProgress": "Neu-Indizierung läufts bereits.",
+        "label": "Neuindizieren",
+        "confirmTitle": "Bestätige Neu-Indizierung",
+        "confirmButton": "Neu-Indizieren",
+        "success": "Neuindizierung erfolgreich gestartet.",
+        "error": "Starten der Neuindizierung fehlgeschlagen: {{errorMessage}}"
+      },
+      "modelSize": {
+        "large": {
+          "title": "groß"
+        },
+        "label": "Model Größe",
+        "small": {
+          "title": "klein"
+        }
+      }
     },
     "birdClassification": {
       "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten.",
       "title": "Vogel-Klassifizierung"
+    },
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Lies die Dokumentation",
+      "title": "Nummernschilderkennung"
+    },
+    "faceRecognition": {
+      "readTheDocumentation": "Lies die Dokumentation",
+      "modelSize": {
+        "small": {
+          "title": "klein"
+        },
+        "label": "Model Größe",
+        "large": {
+          "title": "groß"
+        }
+      },
+      "title": "Gesichtserkennung"
+    },
+    "toast": {
+      "error": "Sichern der Konfigurationsänderungen fehlgeschlagen: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "reviewClassification": {
+      "toast": {
+        "success": "Die Konfiguration der Klassifizierung wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen."
+      },
+      "title": "Überprüfung der Klassifikation",
+      "selectAlertsZones": "Zonen für Warnungen auswählen",
+      "limitDetections": "Begrenzung der Erkennungen auf bestimmte Zonen",
+      "readTheDocumentation": "Lies die Dokumentation",
+      "noDefinedZones": "Für diese Kamera sind keine Zonen definiert.",
+      "selectDetectionsZones": "Zonen für Erkennungen auswählen"
+    },
+    "streams": {
+      "title": "Streams"
+    },
+    "review": {
+      "title": "Überprüfung",
+      "alerts": "Warnungen ",
+      "detections": "Erkennungen "
+    },
+    "title": "Kamera-Einstellungen"
+  },
+  "masksAndZones": {
+    "form": {
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "Zonenname enthält unzulässige Zeichen.",
+          "alreadyExists": "Für diese Kamera existiert bereits eine Zone mit diesem Namen.",
+          "mustBeAtLeastTwoCharacters": "Der Zonenname muss aus mindestens 2 Zeichen bestehen.",
+          "mustNotBeSameWithCamera": "Der Zonenname darf nicht mit dem Kameranamen identisch sein.",
+          "mustNotContainPeriod": "Der Zonenname darf keine Punkte enthalten."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Die Verweildauer muss größer oder gleich 0 sein."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Der Abstand muss größer als oder gleich 0.1 sein.",
+          "mustBeFilled": "Alle Entfernungsfelder müssen ausgefüllt werden, um die Geschwindigkeitsschätzung zu verwenden."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Die Trägheit muss über 0 liegen."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Letzten Punkt entfernen",
+        "reset": {
+          "label": "Alle Punkte löschen"
+        },
+        "snapPoints": {
+          "true": "Fangpunkte"
+        },
+        "delete": {
+          "title": "Löschen bestätigen",
+          "success": "{{name}} wurde gelöscht."
+        }
+      }
+    },
+    "toast": {
+      "error": {
+        "copyCoordinatesFailed": "Die Koordinaten konnten nicht in die Zwischenablage kopiert werden."
+      },
+      "success": {
+        "copyCoordinates": "Koordinaten von {{polyName}} wurden in die Zwischenablage kopiert."
+      }
+    },
+    "filter": {
+      "all": "Alle Maskierungen und Zonen"
+    },
+    "zones": {
+      "edit": "Zone bearbeiten",
+      "toast": {
+        "success": "Die Zone ({{zoneName}}) wurde gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
+      },
+      "desc": {
+        "documentation": "Dokumentation"
+      },
+      "allObjects": "Alle Objekte",
+      "speedEstimation": {
+        "title": "Geschwindigkeitsschätzung"
+      },
+      "label": "Zonen",
+      "documentTitle": "Zone bearbeiten - Frigate",
+      "add": "Zone hinzufügen",
+      "name": {
+        "title": "Name",
+        "inputPlaceHolder": "Geben Sie einen Namen ein...",
+        "tips": "Der Name muss aus mindestens 2 Zeichen bestehen und sollte nicht den Namen einer Kamera oder anderen Zone entsprechen."
+      },
+      "objects": {
+        "title": "Objekte"
+      }
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Dokumentation"
+      }
     }
   }
 }

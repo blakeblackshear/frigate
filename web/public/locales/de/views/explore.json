@@ -64,6 +64,9 @@
     "tips": {
       "descriptionSaved": "Erfolgreich gespeicherte Beschreibung",
       "saveDescriptionFailed": "Die Aktualisierung der Beschreibung ist fehlgeschlagen: {{errorMessage}}"
+    },
+    "snapshotScore": {
+      "label": "Schnappschuss Bewertung"
     }
   },
   "documentTitle": "Erkunden - Frigate",
