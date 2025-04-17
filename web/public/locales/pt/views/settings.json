@@ -135,6 +135,9 @@
     "toast": {
       "success": "As configurações de classificação foram salvas. Reinicie o Frigate para aplicar as alterações.",
       "error": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
+    },
+    "birdClassification": {
+      "title": "Classificação de Pássaros"
     }
   },
   "notification": {
