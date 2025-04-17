@@ -31,6 +31,7 @@ class InputTensorEnum(str, Enum):
 
 class InputDTypeEnum(str, Enum):
     float = "float"
+    float_denorm = "float_denorm"  # non-normalized float
     int = "int"
 
 
