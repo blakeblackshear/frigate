@@ -1,1 +1,10 @@
-{}
+{
+  "filter": "Lọc",
+  "labels": {
+    "label": "Nhãn",
+    "all": {
+      "title": "Tất cả các nhãn",
+      "short": "Nhãn"
+    }
+  }
+}

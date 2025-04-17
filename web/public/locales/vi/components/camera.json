@@ -1,1 +1,10 @@
-{}
+{
+  "group": {
+    "delete": {
+      "label": "Xóa nhóm camera",
+      "confirm": {
+        "title": "Xác nhận xóa"
+      }
+    }
+  }
+}

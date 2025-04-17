@@ -1,1 +1,5 @@
-{}
+{
+  "noRecordingsFoundForThisTime": "Không tìm thấy bản ghi nào cho thời điểm này",
+  "noPreviewFound": "Không tìm thấy bản xem trước",
+  "noPreviewFoundFor": "Không tìm thấy bản xem trước cho {{cameraName}}"
+}

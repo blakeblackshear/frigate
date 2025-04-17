@@ -1,1 +1,10 @@
-{}
+{
+  "search": "Tìm kiếm",
+  "savedSearches": "Lưu tìm kiếm",
+  "searchFor": "Tìm kiếm {{inputValue}}",
+  "button": {
+    "clear": "Xóa tìm kiếm",
+    "save": "Lưu tìm kiếm",
+    "delete": "Xóa lưu tìm kiếm"
+  }
+}

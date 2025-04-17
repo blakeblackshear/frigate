@@ -1,1 +1,10 @@
-{}
+{
+  "restart": {
+    "title": "Bạn có chắc chắn muốn khởi động lại Frigate không?",
+    "button": "Khởi động lại",
+    "restarting": {
+      "title": "Đang khởi động lại Frigate",
+      "content": "Trang này sẽ tải lại sau {{countdown}} giây."
+    }
+  }
+}

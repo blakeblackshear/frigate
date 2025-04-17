@@ -1,3 +1,9 @@
 {
-  "camera": "tiếng máy ảnh"
+  "camera": "tiếng máy ảnh",
+  "alerts": "Cảnh báo",
+  "detections": "Phát hiện",
+  "motion": {
+    "only": "Chỉ chuyển động"
+  },
+  "allCameras": "Tất cả Camera"
 }
