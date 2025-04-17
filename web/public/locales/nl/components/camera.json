@@ -39,7 +39,7 @@
           "method": {
             "smartStreaming": {
               "label": "Slim streamen (aanbevolen)",
-              "desc": "Slimme streaming werkt het camerabeeld één keer per minuut bij wanneer er geen detecteerbare activiteit is, om bandbreedte en systeembronnen te besparen. Zodra er activiteit wordt gedetecteerd, schakelt het beeld automatisch over naar een live stream."
+              "desc": "Slim streamen werkt het camerabeeld één keer per minuut bij wanneer er geen detecteerbare activiteit is, om bandbreedte en systeembronnen te besparen. Zodra er activiteit wordt gedetecteerd, schakelt het beeld automatisch over naar een livestream."
             },
             "continuousStreaming": {
               "label": "Continue streaming",
@@ -59,7 +59,7 @@
           "desc": "Schakel deze optie alleen in als de live stream van je camera kleurvervormingen toont en een diagonale lijn aan de rechterkant van het beeld heeft.",
           "label": "Compatibiliteitsmodus"
         },
-        "desc": "Wijzig de live streaming-opties voor het dashboard van deze cameragroep.<em>Deze instellingen zijn specifiek voor het apparaat en de browser.</em>",
+        "desc": "Wijzig de live streaming-opties voor het dashboard van deze cameragroep. <em>Deze instellingen zijn specifiek voor het apparaat en de browser.</em>",
         "label": "Camera streaming-instellingen",
         "title": "{{cameraName}} Streaming-instellingen"
       }

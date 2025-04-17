@@ -44,7 +44,7 @@
     "h": "{{time}}u",
     "hour_one": "{{time}} uur",
     "hour_other": "{{time}} uren",
-    "m": "{{time}}minuut",
+    "m": "{{time}} min",
     "formattedTimestampWithYear": {
       "12hour": "%-d %b %Y, %H:%M",
       "24hour": "%-d %b %Y, %H:%M"

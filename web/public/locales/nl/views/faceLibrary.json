@@ -67,5 +67,10 @@
   },
   "trainFaceAs": "Train Face als:",
   "trainFace": "Train Face",
-  "readTheDocs": "Lees de documentatie"
+  "readTheDocs": "Lees de documentatie",
+  "steps": {
+    "nextSteps": "Volgende stappen",
+    "faceName": "Voer gezichtsnaam in",
+    "uploadFace": "Upload gezichtsafbeelding"
+  }
 }
