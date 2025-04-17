@@ -567,7 +567,7 @@
       "baseModel": "Base Model",
       "plusModelType": {
         "baseModel": "Base Model",
-        "userModel": "Fine-Tuned Model"
+        "userModel": "Fine-Tuned"
       },
       "supportedDetectors": "Supported Detectors",
       "cameras": "Cameras",
