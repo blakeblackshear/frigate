@@ -340,29 +340,45 @@ export default function FrigatePlusSettingsView({
                               })
                             }
                           >
-                            <SelectTrigger>
-                              {frigatePlusSettings.model.id &&
-                              availableModels?.[frigatePlusSettings.model.id]
-                                ? new Date(
-                                    availableModels[
-                                      frigatePlusSettings.model.id
-                                    ].trainDate,
-                                  ).toLocaleString() +
+                            {frigatePlusSettings.model.id &&
+                            availableModels?.[frigatePlusSettings.model.id] ? (
+                              <SelectTrigger>
+                                {new Date(
+                                  availableModels[
+                                    frigatePlusSettings.model.id
+                                  ].trainDate,
+                                ).toLocaleString() +
                                   " " +
                                   availableModels[frigatePlusSettings.model.id]
+                                    .baseModel +
+                                  " (" +
+                                  (availableModels[frigatePlusSettings.model.id]
+                                    .isBaseModel
+                                    ? t(
+                                        "frigatePlus.modelInfo.plusModelType.baseModel",
+                                      )
+                                    : t(
+                                        "frigatePlus.modelInfo.plusModelType.userModel",
+                                      )) +
+                                  ") " +
+                                  availableModels[frigatePlusSettings.model.id]
                                     .name +
-                                  " " +
                                   " (" +
                                   availableModels[frigatePlusSettings.model.id]
                                     .width +
                                   "x" +
                                   availableModels[frigatePlusSettings.model.id]
                                     .height +
-                                  ")"
-                                : t(
-                                    "frigatePlus.modelInfo.loadingAvailableModels",
-                                  )}
-                            </SelectTrigger>
+                                  ")"}
+                              </SelectTrigger>
+                            ) : (
+                              <SelectTrigger>
+                                {t(
+                                  "frigatePlus.modelInfo.loadingAvailableModels",
+                                )}
+                              </SelectTrigger>
+                            )}
+
                             <SelectContent>
                               <SelectGroup>
                                 {Object.entries(availableModels || {}).map(
@@ -382,15 +398,17 @@ export default function FrigatePlusSettingsView({
                                       {new Date(
                                         model.trainDate,
                                       ).toLocaleString()}{" "}
-                                      ({model.baseModel}) (
-                                      {model.isBaseModel
-                                        ? t(
-                                            "frigatePlus.modelInfo.plusModelType.baseModel",
-                                          )
-                                        : t(
-                                            "frigatePlus.modelInfo.plusModelType.userModel",
-                                          )}
-                                      )<div></div>
+                                      <div>
+                                        {model.baseModel} {" ("}
+                                        {model.isBaseModel
+                                          ? t(
+                                              "frigatePlus.modelInfo.plusModelType.baseModel",
+                                            )
+                                          : t(
+                                              "frigatePlus.modelInfo.plusModelType.userModel",
+                                            )}
+                                        {")"}
+                                      </div>
                                       <div>
                                         {model.name} (
                                         {model.width + "x" + model.height})
