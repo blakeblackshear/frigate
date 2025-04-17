@@ -99,6 +99,27 @@
     "loading": {
       "title": "Lade",
       "desc": "Wenn das Protokollfenster nach unten gescrollt wird, werden neue Protokolle automatisch geladen, sobald sie hinzugefügt werden."
-    }
+    },
+    "disableLogStreaming": "Log des Streams deaktvieren",
+    "allLogs": "Alle Logs"
+  },
+  "trackedObjectDelete": {
+    "title": "Bestätige Löschung",
+    "toast": {
+      "success": "Erkannte Objekte erfolgreich gelöscht.",
+      "error": "Das Löschen von verfolgten Objekten ist fehlgeschlagen: {{errorMessage}}"
+    },
+    "desc": "Beim Löschen dieser {{objectLength}} verfolgten Objekte werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Objektlebenszykluseinträge entfernt. Aufgezeichnetes Filmmaterial dieser verfolgten Objekte in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Bist du sicher, dass du fortfahren möchtest?<br /><br />Halte die <em>Shift-Taste</em> gedrückt, um diesen Dialog in Zukunft zu umgehen."
+  },
+  "zoneMask": {
+    "filterBy": "Nach Zonenmaskierung filtern"
+  },
+  "recognizedLicensePlates": {
+    "noLicensePlatesFound": "Keine Kennzeichen gefunden.",
+    "title": "Bekannte Kennzeichen",
+    "loadFailed": "Bekannte Nummernschilder konnten nicht geladen werden.",
+    "loading": "Lade bekannte Nummernschilder...",
+    "placeholder": "Tippe, um Kennzeichen zu suchen...",
+    "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus."
   }
 }

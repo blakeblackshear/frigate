@@ -88,14 +88,70 @@
     },
     "cameraStorage": {
       "camera": "Kamera",
-      "title": "Kamera Speicher"
+      "title": "Kamera Speicher",
+      "unused": {
+        "title": "Ungenutzt",
+        "tips": "Dieser Wert gibt möglicherweise nicht genau den freien Speicherplatz an, der Frigate zur Verfügung steht, wenn neben den Aufzeichnungen von Frigate noch andere Dateien auf der Festplatte gespeichert sind. Frigate verfolgt die Speichernutzung außerhalb der Aufzeichnungen nicht."
+      },
+      "unusedStorageInformation": "Info zum ungenutzten Speicher",
+      "storageUsed": "Speicher",
+      "percentageOfTotalUsed": "Prozentualer Anteil am Gesamtanteil",
+      "bandwidth": "Bandbreite"
     },
     "title": "Speicher",
     "overview": "Übersicht"
   },
   "cameras": {
     "info": {
-      "stream": "Stream {{idx}}"
+      "stream": "Stream {{idx}}",
+      "video": "Video:",
+      "codec": "Codec:",
+      "fetching": "Lade Kamera Daten",
+      "resolution": "Auflösung:",
+      "fps": "FPS:",
+      "unknown": "Unbekannt",
+      "audio": "Audio:",
+      "error": "Fehler: {{error}}",
+      "cameraProbeInfo": "{{camera}} Kamera-Untersuchsungsinfo",
+      "streamDataFromFFPROBE": "Stream-Daten werden mit <code>ffprobe</code> erhalten.",
+      "tips": {
+        "title": "Kamera-Untersuchsungsinfo"
+      }
+    },
+    "overview": "Übersicht",
+    "label": {
+      "detect": "erkennen",
+      "camera": "Kamera",
+      "skipped": "übersprungene",
+      "ffmpeg": "ffmpeg",
+      "capture": "aufnehmen"
+    },
+    "title": "Kameras",
+    "framesAndDetections": "Bilder / Erkennungen",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Kopiert Untersuchungsdaten in die Zwischenablage."
+      },
+      "error": {
+        "unableToProbeCamera": "Die Kamera kann nicht getestet werden: {{errorMessage}}"
+      }
     }
-  }
+  },
+  "enrichments": {
+    "embeddings": {
+      "image_embedding_speed": "Geschwindigkeit der Bildeinbettung",
+      "face_embedding_speed": "Geschwindigkeit der Gesichtseinbettung",
+      "plate_recognition_speed": "Geschwindigkeit der Kennzeichenerkennung",
+      "text_embedding_speed": "Geschwindigkeit der Texteinbettung"
+    },
+    "title": "Optimierungen",
+    "infPerSecond": "Rückschlüsse pro Sekunde"
+  },
+  "stats": {
+    "healthy": "Das System läuft problemlos",
+    "ffmpegHighCpuUsage": "{{camera}} hat eine hohe FFMPEG CPU Auslastung ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} hat eine hohe CPU Auslastung bei der Erkennung ({{detectAvg}}%)",
+    "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)"
+  },
+  "lastRefreshed": "Zuletzt aktualisiert: "
 }

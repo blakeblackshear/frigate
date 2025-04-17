@@ -67,5 +67,10 @@
       "updateFaceScoreFailed": "Aktualisierung der Gesichtsbewertung fehlgeschlagen: {{errorMessage}}",
       "deleteNameFailed": "Name kann nicht gelöscht werden: {{errorMessage}}"
     }
+  },
+  "steps": {
+    "uploadFace": "Lade Bild des Gesichts hoch",
+    "nextSteps": "Nächste Schritte",
+    "faceName": "Gib den Namen zum Gesicht ein"
   }
 }
