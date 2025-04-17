@@ -307,5 +307,9 @@
   "truck": "Nákladní auto",
   "static": "Šum",
   "engine_knocking": "Klepání v motoru",
-  "skateboard": "Skateboard"
+  "skateboard": "Skateboard",
+  "chant": "Skandování",
+  "rapping": "Rapování",
+  "gasp": "Zalapání po dechu",
+  "heart_murmur": "Srdeční šelest"
 }
