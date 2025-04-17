@@ -257,10 +257,10 @@ def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.n
     scores = predictions[:, 4:5] * predictions[:, 5:]
 
     boxes_xyxy = np.ones_like(boxes)
-    boxes_xyxy[:, 0] = boxes[:, 0] - boxes[:, 2] / 2.0
-    boxes_xyxy[:, 1] = boxes[:, 1] - boxes[:, 3] / 2.0
-    boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2.0
-    boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2.0
+    boxes_xyxy[:, 0] = boxes[:, 0] - boxes[:, 2] / 2
+    boxes_xyxy[:, 1] = boxes[:, 1] - boxes[:, 3] / 2
+    boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2
+    boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2
 
     cls_inds = scores.argmax(1)
     scores = scores[np.arange(len(cls_inds)), cls_inds]
@@ -268,6 +268,15 @@ def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.n
     indices = cv2.dnn.NMSBoxes(
         boxes_xyxy, scores, score_threshold=0.4, nms_threshold=0.4
     )
+
+    final_boxes = boxes_xyxy[indices]
+    final_scores = scores[indices]
+    final_cls_inds = cls_inds[indices]
+
+    print(f"frig boxes: {final_boxes}")
+    print(f"frig cls: {final_cls_inds}")
+    print(f"frig scores: {final_scores}")
+
 
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
@@ -278,14 +287,13 @@ def post_process_yolox(predictions: np.ndarray, width: int, height: int) -> np.n
 
         detections[i] = [
             class_id,
-            0.75,
-            bbox[1] / height,
-            bbox[0] / width,
-            bbox[3] / height,
-            bbox[2] / width,
+            confidence,
+            bbox[1],
+            bbox[0],
+            bbox[3],
+            bbox[2],
         ]
-
-        # print(f"raw det is {detections[i]}")
+        print(f"got {detections[i]}")
 
     return detections
 
