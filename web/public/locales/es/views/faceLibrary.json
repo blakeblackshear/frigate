@@ -69,5 +69,10 @@
   },
   "readTheDocs": "Leer la documentación",
   "trainFaceAs": "Entrenar rostro como:",
-  "trainFace": "Entrenar rostro"
+  "trainFace": "Entrenar rostro",
+  "steps": {
+    "faceName": "Introducir Nombre de Rostro",
+    "uploadFace": "Subir Imagen de Rostro",
+    "nextSteps": "Próximos Pasos"
+  }
 }
