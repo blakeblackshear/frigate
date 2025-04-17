@@ -71,9 +71,9 @@
   "recognizedLicensePlates": {
     "loadFailed": "Het laden van herkende kentekenplaten is mislukt.",
     "placeholder": "Type om kentekens te zoeken...",
-    "title": "Erkende kentekenplaten",
+    "title": "Herkende kentekenplaten",
     "noLicensePlatesFound": "Geen kentekenplaten gevonden.",
-    "selectPlatesFromList": "Selecteer een of meer platen uit de lijst.",
+    "selectPlatesFromList": "Selecteer een of meer kentekens uit de lijst.",
     "loading": "Herkende kentekenplaten laden..."
   },
   "score": "Score",

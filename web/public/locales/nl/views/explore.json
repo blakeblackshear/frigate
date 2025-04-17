@@ -140,7 +140,10 @@
       "desc": "Voer een nieuwe kentekenwaarde in voor deze {{label}}",
       "descNoLabel": "Voer een nieuwe kentekenwaarde in voor dit gevolgde object"
     },
-    "recognizedLicensePlate": "Erkende kentekenplaat"
+    "recognizedLicensePlate": "Erkende kentekenplaat",
+    "snapshotScore": {
+      "label": "Snapshot scoren"
+    }
   },
   "itemMenu": {
     "downloadVideo": {

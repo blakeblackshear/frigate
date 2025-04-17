@@ -345,7 +345,7 @@
     },
     "contourArea": {
       "title": "Contourgebied",
-      "desc": "De waarde voor het contourgebied wordt gebruikt om te bepalen welke groepen gewijzigde pixels in aanmerking komen als beweging. <em>Vastgesteld: 10</em>"
+      "desc": "De waarde voor het contourgebied wordt gebruikt om te bepalen welke groepen gewijzigde pixels in aanmerking komen als beweging. <em>Standaard: 10</em>"
     },
     "improveContrast": {
       "title": "Contrast verbeteren",
@@ -392,7 +392,7 @@
       "tips": "<p className=\"mb-2\"><strong>Interessekaders</strong></p><br><p>Heldergroene kaders worden over het beeld geplaatst op de interessegebieden die naar de objectdetector worden gestuurd.</p>"
     },
     "objectShapeFilterDrawing": {
-      "title": "Weergave van objectvormfilter",
+      "title": "Objectvormfilter tekenen",
       "desc": "Teken een rechthoek op het beeld om details over oppervlakte en verhouding te bekijken",
       "document": "Lees de documentatie ",
       "area": "Gebied",
