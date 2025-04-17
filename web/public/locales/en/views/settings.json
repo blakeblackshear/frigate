@@ -385,12 +385,12 @@
     "motion": {
       "title": "Motion boxes",
       "desc": "Show boxes around areas where motion is detected",
-      "tips": "<p className=\"mb-2\"><strong>Motion Boxes</strong></p><br><p>Red boxes will be overlaid on areas of the frame where motion is currently being detected</p>"
+      "tips": "<p><strong>Motion Boxes</strong></p><br><p>Red boxes will be overlaid on areas of the frame where motion is currently being detected</p>"
     },
     "regions": {
       "title": "Regions",
       "desc": "Show a box of the region of interest sent to the object detector",
-      "tips": "<p className=\"mb-2\"><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
+      "tips": "<p><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Object Shape Filter Drawing",
