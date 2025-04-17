@@ -566,7 +566,7 @@
       "trainDate": "Train Date",
       "baseModel": "Base Model",
       "plusModelType": {
-        "baseModel": "Base Model",
+        "baseModel": "Default",
         "userModel": "Fine-Tuned"
       },
       "supportedDetectors": "Supported Detectors",
