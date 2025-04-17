@@ -1,1 +1,7 @@
-{}
+{
+  "documentTitle": {
+    "default": "Cài đặt - Frigate",
+    "authentication": "Cài đặt xác thực - Frigate",
+    "camera": "Cài đặt camera - Frigate"
+  }
+}

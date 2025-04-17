@@ -1,3 +1,9 @@
 {
-  "selectItem": "Chọn mục {{item}}"
+  "selectItem": "Chọn mục {{item}}",
+  "description": {
+    "addFace": "Hướng dẫn thêm bộ sưu tập mới vào Thư viện khuôn mặt."
+  },
+  "details": {
+    "person": "Người"
+  }
 }
