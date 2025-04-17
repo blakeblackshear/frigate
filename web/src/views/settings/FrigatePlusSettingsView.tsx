@@ -275,13 +275,17 @@ export default function FrigatePlusSettingsView({
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.modelType")}
+                            {t("frigatePlus.modelInfo.baseModel")}
                           </Label>
                           <p>
-                            {config.model.plus.name} (
-                            {config.model.plus.width +
-                              "x" +
-                              config.model.plus.height}
+                            {config.model.plus.baseModel} (
+                            {availableModels[config.model.plus.id].isBaseModel
+                              ? t(
+                                  "frigatePlus.modelInfo.plusModelType.baseModel",
+                                )
+                              : t(
+                                  "frigatePlus.modelInfo.plusModelType.userModel",
+                                )}
                             )
                           </p>
                         </div>
@@ -297,9 +301,15 @@ export default function FrigatePlusSettingsView({
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.baseModel")}
+                            {t("frigatePlus.modelInfo.modelType")}
                           </Label>
-                          <p>{config.model.plus.baseModel}</p>
+                          <p>
+                            {config.model.plus.name} (
+                            {config.model.plus.width +
+                              "x" +
+                              config.model.plus.height}
+                            )
+                          </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
