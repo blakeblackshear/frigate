@@ -128,7 +128,7 @@
   },
   "cameraSettings": {
     "title": "Настройки {{camera}}",
-    "objectDetection": "Детекция объектов",
+    "objectDetection": "Обнаружение объектов",
     "recording": "Запись",
     "audioDetection": "Детекция аудио",
     "snapshots": "Снимки",
