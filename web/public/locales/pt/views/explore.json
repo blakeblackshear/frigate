@@ -32,13 +32,72 @@
     "timestamp": "Carimbo de hora",
     "item": {
       "title": "Revisar detalhes do item",
-      "desc": "Revisar detalhes do item"
+      "desc": "Revisar detalhes do item",
+      "tips": {
+        "hasMissingObjects": "Ajuste sua configuração se você quiser que o Frigate salve os objetos rastreados para os seguintes rótulos: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} objeto indisponível foi detectado e incluído neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
+        "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
+        "mismatch_other": ""
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Uma nova descrição foi solicitada pelo {{provider}}. Dependendo da velocidade do seu provedor, a nova descrição pode levar algum tempo para ser regenerada.",
+          "updatedSublabel": "Sub-rotulo atualizado com sucesso.",
+          "updatedLPR": "Placa de veículo atualizada com sucesso."
+        },
+        "error": {
+          "regenerate": "Falha ao chamar {{provider}} para uma nova descrição: {{errorMessage}}",
+          "updatedSublabelFailed": "Falha ao atualizar o sub-rotulo: {{errorMessage}}",
+          "updatedLPRFailed": "Falha ao atualizar a placa de veículo: {{errorMessage}}"
+        }
+      },
+      "button": {
+        "share": "Compartilhe este item para análise",
+        "viewInExplore": "Ver no Explorar"
+      }
     },
     "zones": "Zonas",
     "description": {
-      "label": "Descrição"
+      "label": "Descrição",
+      "aiTips": "O Frigate não solicitará uma descrição do seu provedor de IA Generativa até que o ciclo de vida do objeto rastreado tenha terminado.",
+      "placeholder": "Descrição do objeto rastreado"
     },
-    "camera": "Câmera"
+    "camera": "Câmera",
+    "snapshotScore": {
+      "label": "Pontuação da captura"
+    },
+    "topScore": {
+      "label": "Maior pontuação",
+      "info": "A maior pontuação é a maior pontuação mediana para o objeto rastreado, portanto, isso pode diferir da pontuação exibida na miniatura do resultado da pesquisa."
+    },
+    "button": {
+      "findSimilar": "Encontrar similar",
+      "regenerate": {
+        "title": "Regenerar",
+        "label": "Regenerar descrição do objeto rastreado"
+      }
+    },
+    "label": "Rótulo",
+    "editSubLabel": {
+      "title": "Editar sub-rotulo",
+      "desc": "Digite um novo sub-rotulo para este {{label}}",
+      "descNoLabel": "Digite um novo sub-rotulo para este objeto rastreado"
+    },
+    "editLPR": {
+      "title": "Editar placa de veículo",
+      "desc": "Digite um novo valor de placa de veículo para este {{label}}",
+      "descNoLabel": "Digite um novo valor de placa de veículo para este objeto rastreado"
+    },
+    "recognizedLicensePlate": "Placa de veículo reconhecida",
+    "estimatedSpeed": "Velocidade estimada",
+    "objects": "Objetos",
+    "expandRegenerationMenu": "Expandir menu de regeneração",
+    "regenerateFromSnapshot": "Regenerar a partir da captura",
+    "regenerateFromThumbnails": "Regenerar a partir das miniaturas",
+    "tips": {
+      "descriptionSaved": "Descrição salva com sucesso",
+      "saveDescriptionFailed": "Falha ao atualizar a descrição: {{errorMessage}}"
+    }
   },
   "documentTitle": "Explorar - Frigate",
   "trackedObjectDetails": "Detalhes do objeto rastreado",
@@ -58,15 +117,23 @@
       "gone": "{{label}} saiu",
       "heard": "{{label}} ouvido",
       "visible": "{{label}} detectado",
-      "external": "{{label}} detectado"
+      "external": "{{label}} detectado",
+      "entered_zone": "{{label}} entrou em {{zones}}",
+      "active": "{{label}} se tornou ativo",
+      "stationary": "{{label}} se tornou estacionário"
     },
     "annotationSettings": {
       "title": "Configurações de anotação",
       "offset": {
-        "documentation": "Leia a documentação "
+        "documentation": "Leia a documentação ",
+        "desc": "Esses dados vêm do feed de detecção da sua câmera, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
+        "tips": "DICA: Imagine que há um clipe de evento com uma pessoa andando da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento estiver consistentemente à esquerda da pessoa, o valor deve ser diminuído. Da mesma forma, se uma pessoa estiver andando da esquerda para a direita e a caixa delimitadora estiver consistentemente à frente da pessoa, o valor deve ser aumentado.",
+        "label": "Annotation Offset",
+        "millisecondsToOffset": "Milissegundos para deslocar as anotações de detecção. <em>Padrão: 0</em>"
       },
       "showAllZones": {
-        "title": "Mostrar todas as zonas"
+        "title": "Mostrar todas as zonas",
+        "desc": "Sempre mostrar zonas nos quadros onde os objetos entraram em uma zona."
       }
     },
     "carousel": {
@@ -74,6 +141,35 @@
       "next": "Próximo slide"
     },
     "noImageFound": "Nenhuma imagem encontrada para este carimbo de data/hora.",
-    "createObjectMask": "Criar Máscara de Objeto"
+    "createObjectMask": "Criar Máscara de Objeto",
+    "adjustAnnotationSettings": "Ajustar configurações de anotação",
+    "autoTrackingTips": "As posições da caixa delimitadora serão imprecisas para câmeras com rastreamento automático.",
+    "scrollViewTips": "Role para ver os momentos significativos do ciclo de vida deste objeto."
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "aria": "Baixar captura",
+      "label": "Baixar captura"
+    },
+    "viewObjectLifecycle": {
+      "label": "Ver ciclo de vida do objeto",
+      "aria": "Mostrar o ciclo de vida do objeto"
+    },
+    "viewInHistory": {
+      "label": "Ver no Histórico",
+      "aria": "Ver no Histórico"
+    },
+    "downloadVideo": {
+      "label": "Baixar vídeo",
+      "aria": "Baixar vídeo"
+    },
+    "findSimilar": {
+      "label": "Encontrar similar",
+      "aria": "Encontrar objetos rastreados similares"
+    },
+    "submitToPlus": {
+      "label": "Enviar para o Frigate+",
+      "aria": "Enviar para o Frigate Plus"
+    }
   }
 }

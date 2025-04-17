@@ -45,7 +45,24 @@
     "m": "{{time}}m",
     "s": "{{time}}s",
     "yr": "{{time}}ano",
-    "mo": "{{time}}mês"
+    "mo": "{{time}}mês",
+    "formattedTimestamp": {
+      "12hour": "%b %-d, %I:%M:%S %p",
+      "24hour": "%b %-d, %H:%M:%S"
+    },
+    "formattedTimestamp2": {
+      "12hour": "%m/%d %I:%M:%S%P",
+      "24hour": "%d %b %H:%M:%S"
+    },
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
+    },
+    "formattedTimestampWithYear": {
+      "12hour": "%b %-d %Y, %I:%M %p",
+      "24hour": "%b %-d %Y, %H:%M"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%b %-d"
   },
   "unit": {
     "speed": {
