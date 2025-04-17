@@ -570,7 +570,6 @@
         "userModel": "Fine-Tuned Model"
       },
       "supportedDetectors": "Supported Detectors",
-      "dimensions": "Dimensions",
       "cameras": "Cameras",
       "loading": "Loading model information...",
       "error": "Failed to load model information",
