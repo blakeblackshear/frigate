@@ -279,7 +279,7 @@ export default function FrigatePlusSettingsView({
                           </Label>
                           <p>
                             {config.model.plus.baseModel} (
-                            {availableModels[config.model.plus.id].isBaseModel
+                            {availableModels[config.model.plus.id]?.isBaseModel
                               ? t(
                                   "frigatePlus.modelInfo.plusModelType.baseModel",
                                 )
