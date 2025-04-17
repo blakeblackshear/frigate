@@ -372,7 +372,7 @@ export default function FrigatePlusSettingsView({
                                       {new Date(
                                         model.trainDate,
                                       ).toLocaleString()}{" "}
-                                      (
+                                      ({model.baseModel}) (
                                       {model.isBaseModel
                                         ? t(
                                             "frigatePlus.modelInfo.plusModelType.baseModel",
@@ -380,13 +380,10 @@ export default function FrigatePlusSettingsView({
                                         : t(
                                             "frigatePlus.modelInfo.plusModelType.userModel",
                                           )}
-                                      )
+                                      )<div></div>
                                       <div>
-                                        {model.name} ({model.baseModel})
-                                      </div>
-                                      <div>
-                                        {t("frigatePlus.modelInfo.dimensions")}:{" "}
-                                        {model.width + "x" + model.height}
+                                        {model.name} (
+                                        {model.width + "x" + model.height})
                                       </div>
                                       <div>
                                         {t(
