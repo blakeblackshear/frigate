@@ -133,6 +133,9 @@
       "title": "Rediger under-merkelapp",
       "desc": "Skriv inn en ny under-merkelapp for dette {{label}}",
       "descNoLabel": "Skriv inn en ny under-merkelapp for dette sporede objektet"
+    },
+    "snapshotScore": {
+      "label": "Øyeblikksbilde poengsum"
     }
   },
   "itemMenu": {

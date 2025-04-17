@@ -391,11 +391,11 @@
       "ratio": "Forhold",
       "area": "Område",
       "title": "Tegning av objektformfilter",
-      "desc": "Tegn et rektangel på bildet for å vise område- og forholdsdetaljer",
+      "desc": "Tegn et rektangel på bildet for å vise areal- og størrelsesforhold",
       "tips": "Aktiver dette alternativet for å tegne et rektangel på kamerabildet for å vise området og forholdet. Disse verdiene kan deretter brukes til å sette filterparametere for objektform i konfigurasjonen."
     },
     "detectorDesc": "Frigate bruker dine detektorer ({{detectors}}) for å oppdage objekter i kameraets videostrøm.",
-    "desc": "Feilsøkingsvisningen viser en sanntidvisning av sporede objekter og deres statistikk. Objektlisten viser en tidsforsinket oppsummering av detekterte objekter.",
+    "desc": "Feilsøkingsvisningen viser sporede objekter i sanntid og deres statistikk. Objektlisten viser en tidsforsinket oppsummering av detekterte objekter.",
     "debugging": "Feilsøking",
     "mask": {
       "title": "Bevegelsesmasker",
@@ -490,7 +490,7 @@
   },
   "notification": {
     "notificationSettings": {
-      "desc": "Frigate kan sende push-varsler til enheten din når den kjører i nettleseren eller er installert som en PWA.",
+      "desc": "Frigate kan sende push-varsler til enheten din når den kjører i nettleseren eller er installert som en progressiv webapplikasjon (PWA).",
       "documentation": "Les dokumentasjonen",
       "title": "Innstillinger for meldingsvarsler"
     },
