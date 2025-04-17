@@ -2,8 +2,8 @@
   "configEditor": "Éditeur de configuration",
   "documentTitle": "Éditeur de configuration - Frigate",
   "copyConfig": "Copier la configuration",
-  "saveOnly": "Sauvegarder seulement",
-  "saveAndRestart": "Sauvegarder & redémarrer",
+  "saveOnly": "Enregistrer seulement",
+  "saveAndRestart": "Enregistrer & redémarrer",
   "toast": {
     "success": {
       "copyToClipboard": "Configuration copiée dans le presse-papiers."

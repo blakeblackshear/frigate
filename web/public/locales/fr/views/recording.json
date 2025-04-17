@@ -6,7 +6,7 @@
   "toast": {
     "error": {
       "noValidTimeSelected": "Pas de période valide sélectionnée",
-      "endTimeMustAfterStartTime": "L'instant de fin doit être aprés le début"
+      "endTimeMustAfterStartTime": "L'heure de fin doit être après l'heure de début"
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "savedSearches": "Recherches sauvegardées",
+  "savedSearches": "Recherches enregistrées",
   "search": "Chercher",
   "searchFor": "Chercher {{inputValue}}",
   "button": {
@@ -13,15 +13,15 @@
   "filter": {
     "label": {
       "zones": "Zones",
-      "sub_labels": "Sous-étiquette",
+      "sub_labels": "Sous-étiquettes",
       "search_type": "Type de recherche",
       "time_range": "Plage de temps",
       "labels": "Étiquettes",
       "cameras": "Caméras",
       "after": "Après",
       "before": "Avant",
-      "min_speed": "Vitesse Min",
-      "max_speed": "Vitesse Max",
+      "min_speed": "Vitesse minimum",
+      "max_speed": "Vitesse maximum",
       "min_score": "Score minimum",
       "recognized_license_plate": "Plaques d'immatriculation reconnues",
       "has_clip": "Contient un clip",
@@ -59,7 +59,7 @@
   "similaritySearch": {
     "title": "Recherche par similarité",
     "active": "Recherche par similarité activée",
-    "clear": "Réinitialiser la recherche par similarité"
+    "clear": "Effacer la recherche par similarité"
   },
   "placeholder": {
     "search": "Rechercher..."
