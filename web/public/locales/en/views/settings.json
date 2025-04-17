@@ -483,8 +483,14 @@
       },
       "changeRole": {
         "title": "Change User Role",
-        "desc": "Update permissions for <span className=\"font-medium\">{{username}}</span>",
-        "roleInfo": "<p>Select the appropriate role for this user:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Admin:</span> Full access to all features. </li><li> • <span className=\"font-medium\">Viewer:</span> Limited to Live dashboards, Review, Explore, and Exports only.</li></ul>"
+        "desc": "Update permissions for",
+        "roleInfo": {
+          "intro": "Select the appropriate role for this user:",
+          "admin": "Admin",
+          "adminDesc": "Full access to all features.",
+          "viewer": "Viewer",
+          "viewerDesc": "Limited to Live dashboards, Review, Explore, and Exports only."
+        }
       }
     }
   },
