@@ -25,10 +25,10 @@
     "last24Hours": "Dernières 24 heures"
   },
   "timeline.aria": "Sélectionner une chronologie",
-  "markAsReviewed": "Marqué comme révisé",
+  "markAsReviewed": "Marqué comme évalué",
   "newReviewItems": {
     "button": "Nouveaux éléments à évaluer",
-    "label": "Afficher les nouveaux éléments d'évaluation"
+    "label": "Afficher les nouveaux éléments à évaluer"
   },
   "camera": "Caméra",
   "markTheseItemsAsReviewed": "Marquer ces éléments comme évalués"

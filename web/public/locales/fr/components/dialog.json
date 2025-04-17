@@ -44,20 +44,20 @@
       "lastHour_many": "{{count}} dernières heures",
       "lastHour_other": "{{count}} dernières heures",
       "end": {
-        "label": "Sélectionner l'instant de fin",
-        "title": "Instant de fin"
+        "label": "Sélectionner l'heure de fin",
+        "title": "Heure de fin"
       },
       "start": {
-        "label": "Sélectionner l'instant de démarrage",
-        "title": "Instant de démarrage"
+        "label": "Sélectionner une heure de début",
+        "title": "Heure de début"
       }
     },
     "selectOrExport": "Sélectionner ou Exporter",
     "toast": {
       "error": {
-        "failed": "Impossible de démarrer l'export : {{error}}",
-        "endTimeMustAfterStartTime": "L'instant de fin doit être aprés l'instant de début",
-        "noVaildTimeSelected": "La période temporelle sélectionnée n'est pas valide"
+        "failed": "Échec du démarrage de l'export : {{error}}",
+        "endTimeMustAfterStartTime": "L'heure de fin doit être après l'heure de début",
+        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide"
       },
       "success": "Exportation démarrée. Consulter le fichier dans le dossier /exports."
     },
@@ -73,8 +73,8 @@
   },
   "search": {
     "saveSearch": {
-      "desc": "Fournir un nom pour cette recherche sauvegardée.",
-      "label": "Sauvergarder la recherche",
+      "desc": "Fournissez un nom pour cette recherche enregistrée.",
+      "label": "Enregistrer la recherche",
       "success": "La recherche ({{searchName}}) a été enregistrée.",
       "button": {
         "save": {
@@ -82,7 +82,7 @@
         }
       },
       "overwrite": "{{searchName}} existe déjà. L'enregistrement écrasera la recherche existante.",
-      "placeholder": "Renseigner un nom pour votre recherche"
+      "placeholder": "Renseignez un nom pour votre recherche"
     }
   },
   "streaming": {
@@ -91,26 +91,26 @@
       "disabled": "Le renvoi du flux n'est pas activé pour cette caméra.",
       "desc": {
         "readTheDocumentation": "Lire la documentation ",
-        "title": "Paramétrer go2rtc pour accéder à des options supplémentaires concernant le flux temps réel et l'audio pour cette caméra."
+        "title": "Installer go2rtc pour accéder à des options supplémentaires de visionnage en direct et l'audio pour cette caméra."
       }
     },
     "showStats": {
-      "label": "Afficher les statistiques des flux",
+      "label": "Afficher les statistiques de flux",
       "desc": "Activer cette option pour afficher les statistiques des flux en surimpression sur le flux de la caméra."
     },
-    "debugView": "Vue debogage"
+    "debugView": "Vue de débogage"
   },
   "recording": {
     "confirmDelete": {
       "desc": {
-        "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet objet Review ? <br /><br />Presser la touche <em>Maj</em> pour éviter cette boîte de dialogue."
+        "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet élément Review ? <br /><br />Pressez la touche <em>Maj</em> pour éviter cette boîte de dialogue dans le futur."
       },
       "title": "Confirmer la suppression"
     },
     "button": {
       "export": "Exporter",
       "markAsReviewed": "Marquer comme vérifié",
-      "deleteNow": "Supprimer immédiatement"
+      "deleteNow": "Supprimer maintenant"
     }
   }
 }

@@ -15,7 +15,7 @@
     "classification": "Classification",
     "masksAndZones": "Masques / Zones",
     "motionTuner": "Réglages du mouvement",
-    "debug": "Debug",
+    "debug": "Débogage",
     "cameras": "Paramètres des caméras",
     "users": "Utilisateurs",
     "notifications": "Notifications",
@@ -29,7 +29,7 @@
   },
   "cameraSetting": {
     "camera": "Caméra",
-    "noCamera": "Aucun Caméra"
+    "noCamera": "Aucune caméra"
   },
   "general": {
     "title": "Paramètres généraux",
@@ -40,7 +40,7 @@
         "desc": "Basculez automatiquement vers la vue en direct d'une caméra lorsqu'une activité est détectée. La désactivation de cette option limite la mise à jour des images statiques de la caméra sur le tableau de bord en direct à une fois par minute seulement."
       },
       "playAlertVideos": {
-        "label": "Lire les vidéos d'alerte",
+        "label": "Lire les vidéos d'alertes",
         "desc": "Par défaut, les alertes récentes du tableau de bord en direct sont diffusées sous forme de petites vidéos en boucle. Désactivez cette option pour afficher uniquement une image statique des alertes récentes sur cet appareil/navigateur."
       }
     },
@@ -57,14 +57,14 @@
     "recordingsViewer": {
       "title": "Visionneuse d'enregistrements",
       "defaultPlaybackRate": {
-        "label": "Taux de lecture par défaut",
+        "label": "Vitesse de lecture par défaut",
         "desc": "Vitesse de lecture par défaut pour la lecture des enregistrements."
       }
     },
     "calendar": {
       "firstWeekday": {
         "label": "Premier jour de la semaine",
-        "desc": "Le jour où commencent les semaines du calendrier de révision.",
+        "desc": "Le jour du début de semaine du calendrier de révision.",
         "sunday": "Dimanche",
         "monday": "Lundi"
       },
@@ -73,7 +73,7 @@
     "toast": {
       "error": {
         "clearStoredLayoutFailed": "Échec à l'effacement de la mise en page enregistrée : {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Échec à l'effacement des paramètres de diffusion : {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Échec de l'effacement des paramètres de diffusion : {{errorMessage}}"
       },
       "success": {
         "clearStreamingSettings": "Paramètres de diffusion effacés pour tous les groupes de caméras.",
@@ -177,11 +177,11 @@
     "semanticSearch": {
       "title": "Recherche sémantique",
       "reindexNow": {
-        "label": "Réindexé Maintenant",
+        "label": "Réindexé maintenant",
         "confirmTitle": "Confirmer la réindexation",
         "error": "Échec du démarrage de la réindexation : {{errorMessage}}",
-        "desc": "La réindexation régénère des intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut solliciter au maximum votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
-        "confirmDesc": "Êtes-vous sûr de vouloir réindexer toutes les incorporations d'objets suivies ? Ce processus s'exécutera en arrière-plan, mais il risque de solliciter au maximum votre processeur et de prendre un certain temps. Vous pouvez suivre la progression sur la page Explorateur.",
+        "desc": "La réindexation régénère les intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
+        "confirmDesc": "Êtes-vous sûr de vouloir réindexer toutes les incorporations d'objets suivis ? Ce processus s'exécutera en arrière-plan, mais il risque de saturer votre processeur et de prendre un certain temps. Vous pouvez suivre la progression sur la page Explorateur.",
         "success": "La réindexation a démarré avec succès.",
         "alreadyInProgress": "La réindexation est déjà en cours.",
         "confirmButton": "Réindexer"
@@ -189,43 +189,47 @@
       "desc": "La recherche sémantique dans Frigate vous permet de trouver des objets suivis dans vos éléments d'évaluation en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement.",
       "modelSize": {
         "small": {
-          "desc": "L'utilisation de <em>small</em> utilise une version quantifiée du modèle qui utilise moins de RAM et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité d'intégration.",
+          "desc": "L'utilisation de <em>petit</em> utilise une version quantifiée du modèle qui utilise moins de RAM et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité d'intégration.",
           "title": "petit"
         },
         "large": {
-          "desc": "L'utilisation de <em>large</em> utilise le modèle Jina complet et s'exécutera automatiquement sur le GPU si applicable.",
-          "title": "large"
+          "desc": "L'utilisation de <em>grand</em> utilise le modèle Jina complet et s'exécutera automatiquement sur le GPU si applicable.",
+          "title": "grand"
         },
         "desc": "La taille du modèle utilisé pour les intégrations de recherche sémantique.",
-        "label": "Taille du Modèle"
+        "label": "Taille du modèle"
       },
       "readTheDocumentation": "Lire la documentation"
     },
     "faceRecognition": {
-      "readTheDocumentation": "Lire la Documentation",
+      "readTheDocumentation": "Lire la documentation",
       "modelSize": {
         "large": {
-          "title": "large",
-          "desc": "L'utilisation de <em>large</em> utilise un modèle d'intégration de visage ArcFace et s'exécutera automatiquement sur le GPU si applicable."
+          "title": "grand",
+          "desc": "L'utilisation de <em>grand</em> utilise un modèle d'intégration de visage ArcFace et s'exécutera automatiquement sur le GPU si applicable."
         },
         "small": {
-          "desc": "L'utilisation de <em>small</em> utilise un modèle d'intégration de visage FaceNet qui fonctionne efficacement sur la plupart des processeurs.",
+          "desc": "L'utilisation de <em>petit</em> utilise un modèle d'intégration de visage FaceNet qui fonctionne efficacement sur la plupart des processeurs.",
           "title": "petit"
         },
-        "label": "Taille du Modèle",
+        "label": "Taille du modèle",
         "desc": "La taille du modèle utilisé pour la reconnaissance faciale."
       },
       "desc": "La reconnaissance faciale permet d'attribuer un nom aux personnes. Une fois leur visage reconnu, Frigate attribuera le nom de la personne comme sous-étiquette. Ces informations sont incluses dans l'interface utilisateur, les filtres et les notifications.",
-      "title": "Reconnaissance Faciale"
+      "title": "Reconnaissance faciale"
     },
     "licensePlateRecognition": {
-      "desc": "Frigate peut reconnaître les plaques d'immatriculation des véhicules et ajouter automatiquement les caractères détectés au champ recognized_license_plate ou un nom connu comme sous-étiquette aux objets de type voiture. Un cas d'utilisation courant est la lecture des plaques d'immatriculation des voitures entrant dans une allée ou circulant dans la rue.",
-      "readTheDocumentation": "Lire la Documentation",
+      "desc": "Frigate peut reconnaître les plaques d'immatriculation des véhicules et ajouter automatiquement les caractères détectés au champ recognized_license_plate, ou un nom connu comme sous-étiquette aux objets de type voiture. Un cas d'utilisation courant est la lecture des plaques d'immatriculation des voitures entrant dans une allée ou circulant dans la rue.",
+      "readTheDocumentation": "Lire la documentation",
       "title": "Reconnaissance de plaque d'immatriculation"
     },
     "toast": {
       "success": "Les paramètres de classification ont été enregistrés. Redémarrez Frigate pour appliquer vos modifications.",
-      "error": "Échec à l'enregistrement des modifications de configuration : {{errorMessage}}"
+      "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}"
+    },
+    "birdClassification": {
+      "title": "Classification des oiseaux",
+      "desc": "La classification des oiseaux identifie les oiseaux connus à l'aide d'un modèle Tensorflow quantifié. Lorsqu'un oiseau connu est reconnu, son nom commun sera ajouté en tant que sous-étiquette. Cette information est incluse dans l'interface utilisateur, les filtres, ainsi que dans les notifications."
     }
   },
   "camera": {

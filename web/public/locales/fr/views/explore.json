@@ -1,6 +1,6 @@
 {
   "generativeAI": "IA générative",
-  "documentTitle": "Explorateur - Frigate",
+  "documentTitle": "Explorer - Frigate",
   "exploreIsUnavailable": {
     "title": "L'exploration est indisponible",
     "embeddingsReindexing": {
@@ -15,7 +15,7 @@
       }
     },
     "downloadingModels": {
-      "context": "Frigate télécharge les modèles de représentation vectorielle nécessaires à la prise en charge de la recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
+      "context": "Frigate télécharge les modèles d'incorporation nécessaires pour prendre en charge la fonctionnalité de recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
       "setup": {
         "visionModelFeatureExtractor": "Extracteur de caractéristiques de modèle de vision",
         "textTokenizer": "Tokeniseur de texte",
@@ -26,7 +26,7 @@
         "documentation": "Lire la documentation",
         "context": "Vous souhaiterez peut-être réindexer les incorporations de vos objets suivis une fois les modèles téléchargés."
       },
-      "error": "Une erreur est survenue. Vérifier les logs Frigate."
+      "error": "Une erreur est survenue. Vérifier les journaux Frigate."
     }
   },
   "details": {
@@ -44,8 +44,8 @@
           "updatedLPR": "Plaque d'immatriculation mise à jour avec succès."
         },
         "error": {
-          "regenerate": "Échec à l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
-          "updatedSublabelFailed": "Échec à la mise à jour du sous-étiquette : {{errorMessage}}",
+          "regenerate": "Échec de l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
+          "updatedSublabelFailed": "Échec de la mise à jour de la sous-étiquette : {{errorMessage}}",
           "updatedLPRFailed": "Échec à la mise à jour de la plaque d'immatriculation : {{errorMessage}}"
         }
       },
@@ -88,13 +88,16 @@
       "descNoLabel": "Saisir une nouvelle valeur de plaque d'immatriculation pour cet objet suivi"
     },
     "recognizedLicensePlate": "Plaque d'immatriculation reconnue",
-    "estimatedSpeed": "Vitesse Estimée",
+    "estimatedSpeed": "Vitesse estimée",
     "zones": "Zones",
     "expandRegenerationMenu": "Développer le menu de régénération",
     "camera": "Caméra",
     "tips": {
       "descriptionSaved": "Description enregistrée avec succès",
-      "saveDescriptionFailed": "Échec à la mise à jour de la description : {{errorMessage}}"
+      "saveDescriptionFailed": "Échec de la mise à jour de la description : {{errorMessage}}"
+    },
+    "snapshotScore": {
+      "label": "Score du cliché"
     }
   },
   "type": {
@@ -106,7 +109,7 @@
   "objectLifecycle": {
     "title": "Cycle de vie de l'objet",
     "noImageFound": "Aucune image trouvée pour cet horodatage.",
-    "createObjectMask": "Créer Masque Objet",
+    "createObjectMask": "Créer un masque d'objet",
     "scrollViewTips": "Faites défiler pour voir les moments importants du cycle de vie de cet objet.",
     "adjustAnnotationSettings": "Ajuster les paramètres d'annotation",
     "autoTrackingTips": "Les positions de la zone de délimitation seront inexactes pour les caméras de suivi automatique.",
@@ -149,7 +152,7 @@
       "aria": "Télécharger l'instantané"
     },
     "findSimilar": {
-      "label": "Trouver Similaire",
+      "label": "Trouver similaire",
       "aria": "Trouver des objets suivis similaires"
     },
     "viewObjectLifecycle": {
@@ -175,7 +178,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmer la suppression",
-      "desc": "La suppression de cet objet suivi supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associées. Les images enregistrées de cet objet suivi dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
+      "desc": "La suppression de cet objet suivi supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associé. Les images enregistrées de cet objet suivi dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
     }
   },
   "noTrackedObjects": "Aucun objet suivi trouvé",
@@ -187,7 +190,7 @@
     "deleteTrackedObject": {
       "toast": {
         "success": "L'objet suivi a été supprimé avec succès.",
-        "error": "Échec à la suppression de l'objet suivi : {{errorMessage}}"
+        "error": "Échec de la suppression de l'objet suivi : {{errorMessage}}"
       }
     }
   }

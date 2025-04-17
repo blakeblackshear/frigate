@@ -38,10 +38,10 @@
     "label": "Tri",
     "dateDesc": "Date (ordre chronologique inverse)",
     "dateAsc": "Date (ordre chronologique)",
-    "scoreDesc": "Score Objet (Descendant)",
-    "scoreAsc": "Score Objet (Ascendant)",
-    "speedAsc": "Vitesse Estimée (Ascendant)",
-    "speedDesc": "Vitesse Estimée (Descendant)",
+    "scoreDesc": "Score d'objet (Descendant)",
+    "scoreAsc": "Score d'objet (Ascendant)",
+    "speedAsc": "Vitesse estimée (Ascendant)",
+    "speedDesc": "Vitesse estimée (Descendant)",
     "relevance": "Pertinence"
   },
   "features": {
@@ -60,7 +60,7 @@
         "title": "Vue par défaut",
         "summary": "Résumé",
         "unfilteredGrid": "Grille non filtrée",
-        "desc": "Lorsqu'aucun filtre n'est sélectionné, afficher un résumé des objets suivis les plus récents par étiquette ou affichez une grille non filtrée."
+        "desc": "Lorsqu'aucun filtre n'est sélectionné, affiche un résumé des objets suivis les plus récents par étiquette, ou affiche une grille non filtrée."
       },
       "gridColumns": {
         "desc": "Sélectionner le nombre de colonnes dans la vue grille.",
@@ -82,7 +82,7 @@
     }
   },
   "review": {
-    "showReviewed": "Montrer les évalués"
+    "showReviewed": "Montrer les éléments évalués"
   },
   "cameras": {
     "label": "Filtre des caméras",
@@ -92,17 +92,17 @@
     }
   },
   "motion": {
-    "showMotionOnly": "Afficher le mouvement uniquement"
+    "showMotionOnly": "Afficher uniquement le mouvement"
   },
   "logSettings": {
-    "filterBySeverity": "Filtrer les logs par sévérité",
+    "filterBySeverity": "Filtrer les journaux par sévérité",
     "loading": {
       "title": "Chargement",
-      "desc": "Lorsque le volet de la log défile vers le bas, les nouvelles logs sont automatiquement diffusées au fur et à mesure de leur ajout."
+      "desc": "Lorsque le volet des journaux est défilé jusqu'en bas, les nouveaux enregistrements sont automatiquement diffusées au fur et à mesure de leur ajout."
     },
-    "label": "Niveau de log du filtre",
-    "disableLogStreaming": "Désactiver la diffusion des logs",
-    "allLogs": "Toutes les logs"
+    "label": "Niveau de journal du filtre",
+    "disableLogStreaming": "Désactiver la diffusion des journaux",
+    "allLogs": "Tous les journaux"
   },
   "recognizedLicensePlates": {
     "placeholder": "Tapez pour rechercher des plaques d'immatriculation...",
@@ -110,13 +110,13 @@
     "loading": "Chargement des plaques d'immatriculation reconnues...",
     "title": "Plaques d'immatriculation reconnues",
     "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
-    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques dans la liste."
+    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste."
   },
   "trackedObjectDelete": {
     "title": "Confirmer la suppression",
     "toast": {
       "success": "Les objets suivis ont été supprimés avec succès.",
-      "error": "Échec à la suppression des objets suivis : {{errorMessage}}"
+      "error": "Échec de la suppression des objets suivis : {{errorMessage}}"
     },
     "desc": "La suppression de ces objets suivis {{objectLength}} supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
   },

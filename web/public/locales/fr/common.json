@@ -69,20 +69,20 @@
     "reset": "Réinitialiser",
     "disabled": "Désactivé",
     "save": "Enregistrer",
-    "saving": "Sauvegarde ...",
+    "saving": "Enregistrement...",
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",
     "history": "Historique",
     "pictureInPicture": "Image en incrustation",
-    "twoWayTalk": "Discussion dans les 2 sens",
+    "twoWayTalk": "Conversation bidirectionnelle",
     "off": "Inactif",
     "edit": "Editer",
     "copyCoordinates": "Copier les coordonnées",
     "delete": "Supprimer",
     "yes": "Oui",
     "no": "Non",
-    "unsuspended": "Ré-activer",
+    "unsuspended": "Reprendre",
     "play": "Lire",
     "unselect": "Désélectionner",
     "suspended": "Suspendu",
@@ -97,21 +97,21 @@
     "cameraAudio": "Son de la caméra",
     "on": "Actif",
     "export": "Exporter",
-    "deleteNow": "Supprimer immédiatement",
+    "deleteNow": "Supprimer maintenant",
     "download": "Télécharger",
     "done": "Terminé"
   },
   "menu": {
     "configuration": "Configuration",
     "language": {
-      "en": "Anglais",
+      "en": "Anglais (Anglais)",
       "withSystem": {
         "label": "Utiliser les paramètres système pour la langue"
       },
       "zhCN": "简体中文 (Chinois simplifié)",
       "hi": "हिन्दी (Hindi)",
       "fr": "Français (Français)",
-      "ja": "日本語 (Japanonais)",
+      "ja": "日本語 (Japonais)",
       "tr": "Türkçe (Turc)",
       "it": "Italiano (Italien)",
       "nl": "Nederlands (Néerlandais)",
@@ -132,27 +132,27 @@
       "da": "Dansk (Danois)",
       "fi": "Suomi (Finlandais)",
       "pt": "Português (Portugais)",
-      "sk": "Slovenčina (Slave)",
+      "sk": "Slovenčina (Slovaque)",
       "uk": "Українська (Ukrainien)",
       "vi": "Tiếng Việt (Vietnamien)"
     },
     "appearance": "Apparence",
     "darkMode": {
-      "light": "Mode clair",
+      "light": "Clair",
       "dark": "Sombre",
       "withSystem": {
         "label": "Utiliser les paramètres système pour le mode clair ou sombre"
       },
       "label": "Mode sombre"
     },
-    "review": "Contrôler",
+    "review": "Visionner",
     "explore": "Explorer",
     "export": "Exporter",
     "user": {
       "account": "Compte",
       "logout": "Se déconnecter",
       "setPassword": "Configurer un mot de passe",
-      "current": "Utilisateur : {{user}}",
+      "current": "Utilisateur actuel : {{user}}",
       "title": "Utilisateur",
       "anonymous": "anonyme"
     },
@@ -185,7 +185,7 @@
         "title": "Caméras"
       },
       "allCameras": "Toutes les caméras",
-      "title": "Temps réel"
+      "title": "Direct"
     },
     "uiPlayground": "Gestion de l'interface",
     "faceLibrary": "Librairie des visages",
@@ -193,7 +193,7 @@
   },
   "toast": {
     "save": {
-      "title": "Sauvegarder",
+      "title": "Enregistrer",
       "error": {
         "noMessage": "Echec lors de l'enregistrement des changements de configuration",
         "title": "Echec lors de l'enregistrement des changements de configuration : {{errorMessage}}"
@@ -203,9 +203,9 @@
   },
   "role": {
     "title": "Rôle",
-    "viewer": "Spectateur",
+    "viewer": "Observateur",
     "admin": "Administrateur",
-    "desc": "Les Administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les Spectateurs sont limités à la consultation des caméras, au contrôle des évènements et à l'historique des enregistrements."
+    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, au contrôle des évènements, et à l'historique des enregistrements."
   },
   "pagination": {
     "next": {
@@ -226,8 +226,8 @@
   },
   "selectItem": "Sélectionner {{item}}",
   "accessDenied": {
-    "title": "Accés refusé",
-    "documentTitle": "Accés refusé - Frigate",
+    "title": "Accès refusé",
+    "documentTitle": "Accès refusé - Frigate",
     "desc": "Vous n'avez pas l'autorisation de voir cette page."
   },
   "label": {
@@ -235,7 +235,7 @@
   },
   "unit": {
     "speed": {
-      "kph": "kph",
+      "kph": "km/h",
       "mph": "mph"
     }
   }
