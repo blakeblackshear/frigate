@@ -571,8 +571,11 @@
       "modelType": "Model Type",
       "trainDate": "Train Date",
       "baseModel": "Base Model",
+      "plusModelType": {
+        "baseModel": "Base Model",
+        "userModel": "Fine-Tuned"
+      },
       "supportedDetectors": "Supported Detectors",
-      "dimensions": "Dimensions",
       "cameras": "Cameras",
       "loading": "Loading model information...",
       "error": "Failed to load model information",

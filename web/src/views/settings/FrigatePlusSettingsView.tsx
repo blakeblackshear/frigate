@@ -26,6 +26,8 @@ import {
 type FrigatePlusModel = {
   id: string;
   type: string;
+  name: string;
+  isBaseModel: boolean;
   supportedDetectors: string[];
   trainDate: string;
   baseModel: string;
@@ -273,13 +275,17 @@ export default function FrigatePlusSettingsView({
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.modelType")}
+                            {t("frigatePlus.modelInfo.baseModel")}
                           </Label>
                           <p>
-                            {config.model.plus.name} (
-                            {config.model.plus.width +
-                              "x" +
-                              config.model.plus.height}
+                            {config.model.plus.baseModel} (
+                            {config.model.plus.isBaseModel
+                              ? t(
+                                  "frigatePlus.modelInfo.plusModelType.baseModel",
+                                )
+                              : t(
+                                  "frigatePlus.modelInfo.plusModelType.userModel",
+                                )}
                             )
                           </p>
                         </div>
@@ -295,9 +301,15 @@ export default function FrigatePlusSettingsView({
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
-                            {t("frigatePlus.modelInfo.baseModel")}
+                            {t("frigatePlus.modelInfo.modelType")}
                           </Label>
-                          <p>{config.model.plus.baseModel}</p>
+                          <p>
+                            {config.model.plus.name} (
+                            {config.model.plus.width +
+                              "x" +
+                              config.model.plus.height}
+                            )
+                          </p>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">
@@ -328,25 +340,45 @@ export default function FrigatePlusSettingsView({
                               })
                             }
                           >
-                            <SelectTrigger>
-                              {frigatePlusSettings.model.id &&
-                              availableModels?.[frigatePlusSettings.model.id]
-                                ? new Date(
-                                    availableModels[
-                                      frigatePlusSettings.model.id
-                                    ].trainDate,
-                                  ).toLocaleString() +
+                            {frigatePlusSettings.model.id &&
+                            availableModels?.[frigatePlusSettings.model.id] ? (
+                              <SelectTrigger>
+                                {new Date(
+                                  availableModels[
+                                    frigatePlusSettings.model.id
+                                  ].trainDate,
+                                ).toLocaleString() +
+                                  " " +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .baseModel +
+                                  " (" +
+                                  (availableModels[frigatePlusSettings.model.id]
+                                    .isBaseModel
+                                    ? t(
+                                        "frigatePlus.modelInfo.plusModelType.baseModel",
+                                      )
+                                    : t(
+                                        "frigatePlus.modelInfo.plusModelType.userModel",
+                                      )) +
+                                  ") " +
+                                  availableModels[frigatePlusSettings.model.id]
+                                    .name +
                                   " (" +
                                   availableModels[frigatePlusSettings.model.id]
                                     .width +
                                   "x" +
                                   availableModels[frigatePlusSettings.model.id]
                                     .height +
-                                  ")"
-                                : t(
-                                    "frigatePlus.modelInfo.loadingAvailableModels",
-                                  )}
-                            </SelectTrigger>
+                                  ")"}
+                              </SelectTrigger>
+                            ) : (
+                              <SelectTrigger>
+                                {t(
+                                  "frigatePlus.modelInfo.loadingAvailableModels",
+                                )}
+                              </SelectTrigger>
+                            )}
+
                             <SelectContent>
                               <SelectGroup>
                                 {Object.entries(availableModels || {}).map(
@@ -366,16 +398,26 @@ export default function FrigatePlusSettingsView({
                                       {new Date(
                                         model.trainDate,
                                       ).toLocaleString()}{" "}
-                                      ({model.baseModel})
+                                      <div>
+                                        {model.baseModel} {" ("}
+                                        {model.isBaseModel
+                                          ? t(
+                                              "frigatePlus.modelInfo.plusModelType.baseModel",
+                                            )
+                                          : t(
+                                              "frigatePlus.modelInfo.plusModelType.userModel",
+                                            )}
+                                        {")"}
+                                      </div>
+                                      <div>
+                                        {model.name} (
+                                        {model.width + "x" + model.height})
+                                      </div>
                                       <div>
                                         {t(
                                           "frigatePlus.modelInfo.supportedDetectors",
                                         )}
                                         : {model.supportedDetectors.join(", ")}
-                                      </div>
-                                      <div>
-                                        {t("frigatePlus.modelInfo.dimensions")}:{" "}
-                                        {model.width + "x" + model.height}
                                       </div>
                                       <div className="text-xs text-muted-foreground">
                                         {id}
