@@ -8,7 +8,7 @@
       "nginx": "Nginx-logger - Frigate"
     },
     "general": "Generell statistikk - Frigate",
-    "enrichments": "Berikelsesstatistikk - Frigate"
+    "enrichments": "Statistikk for utvidelser - Frigate"
   },
   "logs": {
     "copy": {
@@ -38,7 +38,7 @@
     "detector": {
       "inferenceSpeed": "Detektor inferenshastighet",
       "title": "Detektorer",
-      "cpuUsage": "Detektor CPU-bruk",
+      "cpuUsage": "Detektor CPU-belastning",
       "memoryUsage": "Detektor minnebruk"
     },
     "hardwareInfo": {
@@ -70,12 +70,12 @@
         }
       },
       "title": "Maskinvareinformasjon",
-      "gpuUsage": "GPU-bruk"
+      "gpuUsage": "GPU-belastning"
     },
     "otherProcesses": {
       "title": "Andre prosesser",
-      "processCpuUsage": "Prosessens CPU-bruk",
-      "processMemoryUsage": "Prosessens minnebruk"
+      "processCpuUsage": "Prosessenes CPU-belastning",
+      "processMemoryUsage": "Prosessenes minnebruk"
     }
   },
   "storage": {
@@ -149,8 +149,8 @@
   "metrics": "Systemmålinger",
   "lastRefreshed": "Sist oppdatert: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-bruk for FFMPEG ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} har høy CPU-bruk for detektering ({{detectAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFMPEG ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
     "healthy": "Systemet fungerer som det skal",
     "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)"
   }

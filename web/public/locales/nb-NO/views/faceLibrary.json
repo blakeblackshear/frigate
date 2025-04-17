@@ -67,5 +67,10 @@
     "desc": "Last opp et bilde for å skanne etter ansikter og inkludere det for {{pageToggle}}",
     "title": "Last opp ansiktsbilde"
   },
-  "trainFaceAs": "Tren ansikt som:"
+  "trainFaceAs": "Tren ansikt som:",
+  "steps": {
+    "faceName": "Skriv inn ansiktsnavn",
+    "uploadFace": "Last opp ansiktsbilde",
+    "nextSteps": "Neste trinn"
+  }
 }
