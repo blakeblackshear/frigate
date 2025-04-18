@@ -697,8 +697,8 @@ model:
   model_type: yolox
   width: 416 # <--- should match the imgsize set during model export
   height: 416 # <--- should match the imgsize set during model export
-  input_tensor: nchw_denorm
-  input_dtype: float
+  input_tensor: nchw
+  input_dtype: float_denorm
   path: /config/model_cache/yolox_tiny.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
