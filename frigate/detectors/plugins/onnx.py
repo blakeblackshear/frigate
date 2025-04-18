@@ -52,8 +52,6 @@ class ONNXDetector(DetectionApi):
             path, providers=providers, provider_options=options
         )
 
-        self.h = detector_config.model.height
-        self.w = detector_config.model.width
         self.onnx_model_type = detector_config.model.model_type
         self.onnx_model_px = detector_config.model.input_pixel_format
         self.onnx_model_shape = detector_config.model.input_tensor
@@ -70,10 +68,12 @@ class ONNXDetector(DetectionApi):
                 None,
                 {
                     "images": tensor_input,
-                    "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64),
+                    "orig_target_sizes": np.array(
+                        [[self.height, self.width]], dtype=np.int64
+                    ),
                 },
             )
-            return post_process_dfine(tensor_output, self.w, self.h)
+            return post_process_dfine(tensor_output, self.width, self.height)
 
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
@@ -95,17 +95,21 @@ class ONNXDetector(DetectionApi):
                 detections[i] = [
                     class_id,
                     confidence,
-                    y_min / self.h,
-                    x_min / self.w,
-                    y_max / self.h,
-                    x_max / self.w,
+                    y_min / self.height,
+                    x_min / self.width,
+                    y_max / self.height,
+                    x_max / self.width,
                 ]
             return detections
         elif self.onnx_model_type == ModelTypeEnum.yologeneric:
-            return post_process_yolo(tensor_output, self.w, self.h)
+            return post_process_yolo(tensor_output, self.width, self.height)
         elif self.onnx_model_type == ModelTypeEnum.yolox:
             return post_process_yolox(
-                tensor_output[0], self.w, self.h, self.grids, self.expanded_strides
+                tensor_output[0],
+                self.width,
+                self.height,
+                self.grids,
+                self.expanded_strides,
             )
         else:
             raise Exception(
