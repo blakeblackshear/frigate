@@ -4,6 +4,7 @@ import re
 import urllib.request
 from typing import Literal
 
+import cv2
 import numpy as np
 from pydantic import Field
 
@@ -17,7 +18,10 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
-supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
+supported_models = {
+    ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$",
+    ModelTypeEnum.yolox: None,
+}
 
 model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 
@@ -40,6 +44,9 @@ class Rknn(DetectionApi):
         model_path = config.model.path or "deci-fp16-yolonas_s"
 
         model_props = self.parse_model_input(model_path, soc)
+
+        if self.detector_config.model.model_type == ModelTypeEnum.yolox:
+            self.calculate_grids_strides(expanded=False)
 
         if model_props["preset"]:
             config.model.model_type = model_props["model_type"]
@@ -199,9 +206,86 @@ class Rknn(DetectionApi):
 
         return np.resize(results, (20, 6))
 
+    def post_process_yolox(
+        self,
+        predictions: list[np.ndarray],
+        grids: np.ndarray,
+        expanded_strides: np.ndarray,
+    ) -> np.ndarray:
+        def sp_flatten(_in: np.ndarray):
+            ch = _in.shape[1]
+            _in = _in.transpose(0, 2, 3, 1)
+            return _in.reshape(-1, ch)
+
+        boxes, scores, classes_conf = [], [], []
+
+        input_data = [
+            _in.reshape([1, -1] + list(_in.shape[-2:])) for _in in predictions
+        ]
+
+        for i in range(len(input_data)):
+            unprocessed_box = input_data[i][:, :4, :, :]
+            box_xy = unprocessed_box[:, :2, :, :]
+            box_wh = np.exp(unprocessed_box[:, 2:4, :, :]) * expanded_strides[i]
+
+            box_xy += grids[i]
+            box_xy *= expanded_strides[i]
+            box = np.concatenate((box_xy, box_wh), axis=1)
+
+            # Convert [c_x, c_y, w, h] to [x1, y1, x2, y2]
+            xyxy = np.copy(box)
+            xyxy[:, 0, :, :] = box[:, 0, :, :] - box[:, 2, :, :] / 2  # top left x
+            xyxy[:, 1, :, :] = box[:, 1, :, :] - box[:, 3, :, :] / 2  # top left y
+            xyxy[:, 2, :, :] = box[:, 0, :, :] + box[:, 2, :, :] / 2  # bottom right x
+            xyxy[:, 3, :, :] = box[:, 1, :, :] + box[:, 3, :, :] / 2  # bottom right y
+
+            boxes.append(xyxy)
+            scores.append(input_data[i][:, 4:5, :, :])
+            classes_conf.append(input_data[i][:, 5:, :, :])
+
+        # flatten data
+        boxes = np.concatenate([sp_flatten(_v) for _v in boxes])
+        classes_conf = np.concatenate([sp_flatten(_v) for _v in classes_conf])
+        scores = np.concatenate([sp_flatten(_v) for _v in scores])
+
+        # reshape and filter boxes
+        box_confidences = scores.reshape(-1)
+        class_max_score = np.max(classes_conf, axis=-1)
+        classes = np.argmax(classes_conf, axis=-1)
+        _class_pos = np.where(class_max_score * box_confidences >= 0.4)
+        scores = (class_max_score * box_confidences)[_class_pos]
+        boxes = boxes[_class_pos]
+        classes = classes[_class_pos]
+
+        # run nms
+        indices = cv2.dnn.NMSBoxes(
+            bboxes=boxes,
+            scores=scores,
+            score_threshold=0.4,
+            nms_threshold=0.4,
+        )
+
+        results = np.zeros((20, 6), np.float32)
+
+        if len(indices) > 0:
+            for i, idx in enumerate(indices.flatten()[:20]):
+                box = boxes[idx]
+                results[i] = [
+                    classes[idx],
+                    scores[idx],
+                    box[1] / self.height,
+                    box[0] / self.width,
+                    box[3] / self.height,
+                    box[2] / self.width,
+                ]
+
+        return results
+
     def post_process(self, output):
         if self.detector_config.model.model_type == ModelTypeEnum.yolonas:
             return self.post_process_yolonas(output)
+        elif self.detector_config.model.model_type == ModelTypeEnum.yolox:
+            return self.post_process_yolox(output, self.grids, self.expanded_strides)
         else:
             raise ValueError(
                 f'Model type "{self.detector_config.model.model_type}" is currently not supported.'

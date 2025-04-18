@@ -180,7 +180,7 @@ def __post_process_multipart_yolo(
                 x2 / width,
             ]
 
-    return np.array(results, dtype=np.float32)
+    return results
 
 
 def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarray:
