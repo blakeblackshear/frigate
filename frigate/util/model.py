@@ -273,7 +273,6 @@ def post_process_yolox(
             bbox[3] / height,
             bbox[2] / width,
         ]
-        print(f"got {detections[i]}")
 
     return detections
 
