@@ -184,7 +184,7 @@ cameras:
     ffmpeg: ... # add your streams
     detect:
       enabled: True
-      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.
+      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 15 is unnecessary and is not recommended.
       min_initialized: 2
       width: 1920
       height: 1080
@@ -267,7 +267,7 @@ With this setup:
 - Review items will always be classified as a `detection`.
 - Snapshots will always be saved.
 - Zones and object masks are **not** used.
-- The `frigate/events` MQTT topic will **not** publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
+- The `frigate/events` MQTT topic will **not** publish tracked object updates with the license plate bounding box and score, though `frigate/reviews` will publish if recordings are enabled. If a plate is recognized as a known plate, publishing will occur with an updated `sub_label` field. If characters are recognized, publishing will occur with an updated `recognized_license_plate` field.
 - License plate snapshots are saved at the highest-scoring moment and appear in Explore.
 - Debug view will not show `license_plate` bounding boxes.
 
@@ -280,7 +280,7 @@ With this setup:
 | Object Detection        | Standard Frigate+ detection applies                    | Bypasses standard object detection                              |
 | Zones & Object Masks    | Supported                                              | Not supported                                                   |
 | Debug View              | May show `license_plate` bounding boxes                | May **not** show `license_plate` bounding boxes                 |
-| MQTT `frigate/events`   | Publishes tracked object updates                       | Does **not** publish tracked object updates                     |
+| MQTT `frigate/events`   | Publishes tracked object updates                       | Publishes limited updates                                       |
 | Explore                 | Recognized plates available in More Filters            | Recognized plates available in More Filters                     |
 
 By selecting the appropriate configuration, users can optimize their dedicated LPR cameras based on whether they are using a Frigate+ model or the secondary LPR pipeline.
