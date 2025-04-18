@@ -865,6 +865,7 @@ model: # required
   # - deci-fp16-yolonas_s
   # - deci-fp16-yolonas_m
   # - deci-fp16-yolonas_l
+  # your yolonas_model.rknn
   path: deci-fp16-yolonas_s
   model_type: yolonas
   width: 320
@@ -888,6 +889,7 @@ model: # required
   # possible values are:
   # - yolov9-t
   # - yolov9-s
+  # your yolo_model.rknn
   path: /config/model_cache/rknn_cache/yolov9-t.rknn
   model_type: yolo-generic
   width: 320
@@ -905,6 +907,7 @@ model: # required
   # possible values are:
   # - yolox_nano
   # - yolox_tiny
+  # your yolox_model.rknn
   path: yolox_tiny
   model_type: yolox
   width: 416
