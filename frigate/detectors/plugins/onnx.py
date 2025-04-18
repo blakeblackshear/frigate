@@ -31,6 +31,8 @@ class ONNXDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: ONNXDetectorConfig):
+        super().__init__(detector_config)
+
         try:
             import onnxruntime as ort
 

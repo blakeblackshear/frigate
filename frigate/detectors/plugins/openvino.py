@@ -38,6 +38,7 @@ class OvDetector(DetectionApi):
     ]
 
     def __init__(self, detector_config: OvDetectorConfig):
+        super().__init__(detector_config)
         self.ov_core = ov.Core()
         self.ov_model_type = detector_config.model.model_type
 
