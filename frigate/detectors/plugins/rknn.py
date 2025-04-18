@@ -61,9 +61,6 @@ class Rknn(DetectionApi):
                 "Error initializing rknn runtime. Do you run docker in privileged mode?"
             )
 
-        if self.detector_config.model.model_type == ModelTypeEnum.yolox:
-            self.calculate_grids_strides()
-
     def __del__(self):
         self.rknn.release()
 
