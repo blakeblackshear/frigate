@@ -11,6 +11,7 @@ from pydantic import Field
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.model import post_process_yolo
 
 logger = logging.getLogger(__name__)
 
@@ -284,6 +285,8 @@ class Rknn(DetectionApi):
     def post_process(self, output):
         if self.detector_config.model.model_type == ModelTypeEnum.yolonas:
             return self.post_process_yolonas(output)
+        elif self.detector_config.model.model_type == ModelTypeEnum.yologeneric:
+            return post_process_yolo(output, self.width, self.height)
         elif self.detector_config.model.model_type == ModelTypeEnum.yolox:
             return self.post_process_yolox(output, self.grids, self.expanded_strides)
         else:
