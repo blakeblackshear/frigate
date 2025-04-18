@@ -200,9 +200,14 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
 
     # Rescale box
     boxes = predictions[:, :4]
+    boxes_xyxy = np.ones_like(boxes)
+    boxes_xyxy[:, 0] = boxes[:, 0] - boxes[:, 2] / 2
+    boxes_xyxy[:, 1] = boxes[:, 1] - boxes[:, 3] / 2
+    boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2
+    boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2
+    boxes = boxes_xyxy
 
-    input_shape = np.array([width, height, width, height])
-    boxes = np.divide(boxes, input_shape, dtype=np.float32)
+    # run NMS
     indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
@@ -214,10 +219,10 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
         detections[i] = [
             class_id,
             confidence,
-            bbox[1] - bbox[3] / 2,
-            bbox[0] - bbox[2] / 2,
-            bbox[1] + bbox[3] / 2,
-            bbox[0] + bbox[2] / 2,
+            bbox[1] / height,
+            bbox[0] / width,
+            bbox[3] / height,
+            bbox[2] / width,
         ]
 
     return detections
