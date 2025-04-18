@@ -659,7 +659,7 @@ YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) model
 
 :::tip
 
-The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.  See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
 
 :::
 
@@ -677,6 +677,29 @@ model:
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/yolo.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+#### YOLOx
+
+[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX) models are supported, but not included by default. See [the models section](#downloading-yolo-models) for more information on downloading the YOLOx model for use in Frigate.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolox
+  width: 416 # <--- should match the imgsize set during model export
+  height: 416 # <--- should match the imgsize set during model export
+  input_tensor: nchw_denorm
+  input_dtype: float
+  path: /config/model_cache/yolox_tiny.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -961,6 +984,10 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
 
 ### Downloading YOLO Models
+
+#### YOLOx
+
+YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
 
 #### YOLOv3, YOLOv4, and YOLOv7
 

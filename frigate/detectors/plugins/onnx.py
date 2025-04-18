@@ -14,6 +14,7 @@ from frigate.util.model import (
     post_process_dfine,
     post_process_rfdetr,
     post_process_yolo,
+    post_process_yolox,
 )
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,25 @@ class ONNXDetector(DetectionApi):
         self.onnx_model_shape = detector_config.model.input_tensor
         path = detector_config.model.path
 
+        if self.onnx_model_type == ModelTypeEnum.yolox:
+            grids = []
+            expanded_strides = []
+
+            # decode and orient predictions
+            strides = [8, 16, 32]
+            hsizes = [self.h // stride for stride in strides]
+            wsizes = [self.w // stride for stride in strides]
+
+            for hsize, wsize, stride in zip(hsizes, wsizes, strides):
+                xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
+                grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
+                grids.append(grid)
+                shape = grid.shape[:2]
+                expanded_strides.append(np.full((*shape, 1), stride))
+
+            self.grids = np.concatenate(grids, 1)
+            self.expanded_strides = np.concatenate(expanded_strides, 1)
+
         logger.info(f"ONNX: {path} loaded")
 
     def detect_raw(self, tensor_input: np.ndarray):
@@ -99,6 +119,10 @@ class ONNXDetector(DetectionApi):
             return detections
         elif self.onnx_model_type == ModelTypeEnum.yologeneric:
             return post_process_yolo(tensor_output, self.w, self.h)
+        elif self.onnx_model_type == ModelTypeEnum.yolox:
+            return post_process_yolox(
+                tensor_output[0], self.w, self.h, self.grids, self.expanded_strides
+            )
         else:
             raise Exception(
                 f"{self.onnx_model_type} is currently not supported for onnx. See the docs for more info on supported models."
