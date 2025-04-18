@@ -138,11 +138,13 @@ class TrackedObject:
 
         if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
-            if self.thumbnail_data is None or is_better_thumbnail(
-                self.obj_data["label"],
-                self.thumbnail_data,
-                obj_data,
-                self.camera_config.frame_shape,
+            if self.thumbnail_data is None or (
+                better_thumb := is_better_thumbnail(
+                    self.obj_data["label"],
+                    self.thumbnail_data,
+                    obj_data,
+                    self.camera_config.frame_shape,
+                )
             ):
                 # use the current frame time if the object's frame time isn't in the frame cache
                 selected_frame_time = (
@@ -150,6 +152,13 @@ class TrackedObject:
                     if obj_data["frame_time"] not in self.frame_cache.keys()
                     else obj_data["frame_time"]
                 )
+                if (
+                    obj_data["frame_time"] not in self.frame_cache.keys()
+                    and not better_thumb
+                ):
+                    logger.warning(
+                        f"Frame time {obj_data['frame_time']} not in frame cache, using current frame time {selected_frame_time}"
+                    )
                 self.thumbnail_data = {
                     "frame_time": selected_frame_time,
                     "box": obj_data["box"],

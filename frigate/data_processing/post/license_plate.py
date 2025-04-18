@@ -54,6 +54,9 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         Returns:
             None.
         """
+        # don't run LPR post processing for now
+        return
+
         event_id = data["event_id"]
         camera_name = data["camera"]
 
