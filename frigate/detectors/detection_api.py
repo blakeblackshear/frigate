@@ -45,7 +45,9 @@ class DetectionApi(ABC):
                 xv = xv.reshape(1, 1, hsize, wsize)
                 yv = yv.reshape(1, 1, hsize, wsize)
                 grids.extend(np.concatenate((xv, yv), axis=1).tolist())
-                expanded_strides.extend(np.array([stride, stride]).reshape(1, 2, 1, 1).tolist())
+                expanded_strides.extend(
+                    np.array([stride, stride]).reshape(1, 2, 1, 1).tolist()
+                )
 
         if expanded:
             self.grids = np.concatenate(grids, 1)
@@ -53,6 +55,3 @@ class DetectionApi(ABC):
         else:
             self.grids = grids
             self.expanded_strides = expanded_strides
-
-        print(f"grids {self.grids}")
-        print(f"expanded strides {self.expanded_strides}")
