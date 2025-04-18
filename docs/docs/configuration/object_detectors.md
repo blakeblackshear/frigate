@@ -682,6 +682,29 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+#### YOLOx
+
+[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX) models are supported, but not included by default.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolox
+  width: 416 # <--- should match the imgsize set during model export
+  height: 416 # <--- should match the imgsize set during model export
+  input_tensor: nchw_denorm
+  input_dtype: float
+  path: /config/model_cache/yolox_tiny.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
 #### RF-DETR
 
 [RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more information on downloading the RF-DETR model for use in Frigate.
@@ -961,6 +984,10 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
 
 ### Downloading YOLO Models
+
+#### YOLOx
+
+YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
 
 #### YOLOv3, YOLOv4, and YOLOv7
 
