@@ -38,6 +38,7 @@ class OvDetector(DetectionApi):
     ]
 
     def __init__(self, detector_config: OvDetectorConfig):
+        super().__init__(detector_config)
         self.ov_core = ov.Core()
         self.ov_model_type = detector_config.model.model_type
 
@@ -133,25 +134,7 @@ class OvDetector(DetectionApi):
                     break
             self.num_classes = tensor_shape[2] - 5
             logger.info(f"YOLOX model has {self.num_classes} classes")
-            self.set_strides_grids()
-
-    def set_strides_grids(self):
-        grids = []
-        expanded_strides = []
-
-        strides = [8, 16, 32]
-
-        hsize_list = [self.h // stride for stride in strides]
-        wsize_list = [self.w // stride for stride in strides]
-
-        for hsize, wsize, stride in zip(hsize_list, wsize_list, strides):
-            xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
-            grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
-            grids.append(grid)
-            shape = grid.shape[:2]
-            expanded_strides.append(np.full((*shape, 1), stride))
-        self.grids = np.concatenate(grids, 1)
-        self.expanded_strides = np.concatenate(expanded_strides, 1)
+            self.calculate_grids_strides()
 
     ## Takes in class ID, confidence score, and array of [x, y, w, h] that describes detection position,
     ## returns an array that's easily passable back to Frigate.

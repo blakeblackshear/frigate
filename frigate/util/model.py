@@ -148,27 +148,17 @@ def __post_process_multipart_yolo(
                     bw = ((dw * 2.0) ** 2) * anchor_w
                     bh = ((dh * 2.0) ** 2) * anchor_h
 
-                    x1 = max(0, bx - bw / 2) / width
-                    y1 = max(0, by - bh / 2) / height
-                    x2 = min(width, bx + bw / 2) / width
-                    y2 = min(height, by + bh / 2) / height
+                    x1 = max(0, bx - bw / 2)
+                    y1 = max(0, by - bh / 2)
+                    x2 = min(width, bx + bw / 2)
+                    y2 = min(height, by + bh / 2)
 
                     all_boxes.append([x1, y1, x2, y2])
                     all_scores.append(conf)
                     all_class_ids.append(class_id)
 
-    formatted_boxes = [
-        [
-            int(x1 * width),
-            int(y1 * height),
-            int((x2 - x1) * width),
-            int((y2 - y1) * height),
-        ]
-        for x1, y1, x2, y2 in all_boxes
-    ]
-
     indices = cv2.dnn.NMSBoxes(
-        bboxes=formatted_boxes,
+        bboxes=all_boxes,
         scores=all_scores,
         score_threshold=0.4,
         nms_threshold=0.4,
@@ -181,7 +171,14 @@ def __post_process_multipart_yolo(
             class_id = all_class_ids[idx]
             conf = all_scores[idx]
             x1, y1, x2, y2 = all_boxes[idx]
-            results[i] = [class_id, conf, y1, x1, y2, x2]
+            results[i] = [
+                class_id,
+                conf,
+                y1 / height,
+                x1 / width,
+                y2 / height,
+                x2 / width,
+            ]
 
     return np.array(results, dtype=np.float32)
 
@@ -200,9 +197,14 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
 
     # Rescale box
     boxes = predictions[:, :4]
+    boxes_xyxy = np.ones_like(boxes)
+    boxes_xyxy[:, 0] = boxes[:, 0] - boxes[:, 2] / 2
+    boxes_xyxy[:, 1] = boxes[:, 1] - boxes[:, 3] / 2
+    boxes_xyxy[:, 2] = boxes[:, 0] + boxes[:, 2] / 2
+    boxes_xyxy[:, 3] = boxes[:, 1] + boxes[:, 3] / 2
+    boxes = boxes_xyxy
 
-    input_shape = np.array([width, height, width, height])
-    boxes = np.divide(boxes, input_shape, dtype=np.float32)
+    # run NMS
     indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
@@ -214,10 +216,10 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
         detections[i] = [
             class_id,
             confidence,
-            bbox[1] - bbox[3] / 2,
-            bbox[0] - bbox[2] / 2,
-            bbox[1] + bbox[3] / 2,
-            bbox[0] + bbox[2] / 2,
+            bbox[1] / height,
+            bbox[0] / width,
+            bbox[3] / height,
+            bbox[2] / width,
         ]
 
     return detections
