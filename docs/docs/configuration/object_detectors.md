@@ -849,6 +849,7 @@ The inference time was determined on a rk3588 with 3 NPU cores.
 | deci-fp16-yolonas_s | 24         | 25                   |
 | deci-fp16-yolonas_m | 62         | 35                   |
 | deci-fp16-yolonas_l | 81         | 45                   |
+| yolov9_tiny         | 8          | 35                   |
 | yolox_nano          | 3          | 16                   |
 | yolox_tiny          | 6          | 20                   |
 
@@ -864,7 +865,9 @@ model: # required
   # - deci-fp16-yolonas_s
   # - deci-fp16-yolonas_m
   # - deci-fp16-yolonas_l
+  # your yolonas_model.rknn
   path: deci-fp16-yolonas_s
+  model_type: yolonas
   width: 320
   height: 320
   input_pixel_format: bgr
@@ -878,6 +881,24 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 
 :::
 
+#### YOLO (v9)
+
+```yaml
+model: # required
+  # name of model (will be automatically downloaded) or path to your own .rknn model file
+  # possible values are:
+  # - yolov9-t
+  # - yolov9-s
+  # your yolo_model.rknn
+  path: /config/model_cache/rknn_cache/yolov9-t.rknn
+  model_type: yolo-generic
+  width: 320
+  height: 320
+  input_tensor: nhwc
+  input_dtype: float
+  labelmap_path: /labelmap/coco-80.txt
+```
+
 #### YOLOx
 
 ```yaml
@@ -886,7 +907,9 @@ model: # required
   # possible values are:
   # - yolox_nano
   # - yolox_tiny
+  # your yolox_model.rknn
   path: yolox_tiny
+  model_type: yolox
   width: 416
   height: 416
   input_tensor: nhwc
