@@ -659,7 +659,7 @@ YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) model
 
 :::tip
 
-The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.  See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
 
 :::
 
@@ -684,7 +684,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 #### YOLOx
 
-[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX) models are supported, but not included by default.
+[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX) models are supported, but not included by default. See [the models section](#downloading-yolo-models) for more information on downloading the YOLOx model for use in Frigate.
 
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
