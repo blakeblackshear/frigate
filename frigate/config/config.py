@@ -513,9 +513,13 @@ class FrigateConfig(FrigateBaseModel):
                     )
 
             # Warn if detect fps > 10
-            if camera_config.detect.fps > 10:
+            if camera_config.detect.fps > 10 and camera_config.type != "lpr":
                 logger.warning(
                     f"{camera_config.name} detect fps is set to {camera_config.detect.fps}. This does NOT need to match your camera's frame rate. High values could lead to reduced performance. Recommended value is 5."
+                )
+            if camera_config.detect.fps > 15 and camera_config.type == "lpr":
+                logger.warning(
+                    f"{camera_config.name} detect fps is set to {camera_config.detect.fps}. This does NOT need to match your camera's frame rate. High values could lead to reduced performance. Recommended value for LPR cameras are between 5-15."
                 )
 
             # Default min_initialized configuration

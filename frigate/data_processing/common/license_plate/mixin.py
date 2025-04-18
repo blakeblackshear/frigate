@@ -490,10 +490,6 @@ class LicensePlateProcessingMixin:
                 merged_boxes.append(current_box)
                 current_box = next_box
 
-            logger.debug(
-                f"Provided plate_width: {plate_width}, max_gap: {max_gap}, horizontal_gap: {horizontal_gap}"
-            )
-
         # Add the last box
         merged_boxes.append(current_box)
 
@@ -1133,7 +1129,7 @@ class LicensePlateProcessingMixin:
         # 4. Log the comparison
         logger.debug(
             f"Plate comparison - Current: {top_plate} (score: {curr_score:.3f}, min_conf: {curr_min_conf:.2f}) vs "
-            f"Previous: {prev_plate} (score: {prev_score:.3f}, min_conf: {prev_min_conf:.2f})\n"
+            f"Previous: {prev_plate} (score: {prev_score:.3f}, min_conf: {prev_min_conf:.2f}) "
             f"Metrics - Length: {len(top_plate)} vs {len(prev_plate)} (scores: {curr_length_score:.2f} vs {prev_length_score:.2f}), "
             f"Area: {top_area} vs {prev_area}, "
             f"Avg Conf: {avg_confidence:.2f} vs {prev_avg_confidence:.2f}, "
@@ -1260,6 +1256,15 @@ class LicensePlateProcessingMixin:
             if obj_data.get("stationary") == True:
                 logger.debug(
                     f"{camera}: Not a processing license plate for a stationary car/motorcycle object."
+                )
+                return
+
+            # don't run for objects with no position changes
+            # this is the initial state after registering a new tracked object
+            # LPR will run 2 frames after detect.min_initialized is reached
+            if obj_data.get("position_changes", 0) == 0:
+                logger.debug(
+                    f"{camera}: Plate detected in {self.config.cameras[camera].detect.min_initialized + 1} concurrent frames, LPR frame threshold ({self.config.cameras[camera].detect.min_initialized + 2})"
                 )
                 return
 
@@ -1400,6 +1405,8 @@ class LicensePlateProcessingMixin:
                     f"debug/frames/license_plate_frame_{current_time}.jpg",
                     license_plate_frame,
                 )
+
+        logger.debug(f"{camera}: Running plate recognition.")
 
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
