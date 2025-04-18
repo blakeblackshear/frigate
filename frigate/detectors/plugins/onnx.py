@@ -60,23 +60,7 @@ class ONNXDetector(DetectionApi):
         path = detector_config.model.path
 
         if self.onnx_model_type == ModelTypeEnum.yolox:
-            grids = []
-            expanded_strides = []
-
-            # decode and orient predictions
-            strides = [8, 16, 32]
-            hsizes = [self.h // stride for stride in strides]
-            wsizes = [self.w // stride for stride in strides]
-
-            for hsize, wsize, stride in zip(hsizes, wsizes, strides):
-                xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
-                grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
-                grids.append(grid)
-                shape = grid.shape[:2]
-                expanded_strides.append(np.full((*shape, 1), stride))
-
-            self.grids = np.concatenate(grids, 1)
-            self.expanded_strides = np.concatenate(expanded_strides, 1)
+            self.calculate_grids_strides()
 
         logger.info(f"ONNX: {path} loaded")
 
