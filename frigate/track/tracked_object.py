@@ -157,7 +157,7 @@ class TrackedObject:
                     and not better_thumb
                 ):
                     logger.warning(
-                        f"Frame time {obj_data['frame_time']} not not in frame cache, using current frame time {selected_frame_time}"
+                        f"Frame time {obj_data['frame_time']} not in frame cache, using current frame time {selected_frame_time}"
                     )
                 self.thumbnail_data = {
                     "frame_time": selected_frame_time,
