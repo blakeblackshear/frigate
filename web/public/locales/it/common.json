@@ -98,7 +98,7 @@
     "close": "Chiudi",
     "back": "Indietro",
     "pictureInPicture": "Immagine nell'immagine",
-    "twoWayTalk": "Comunicazione a 2 vie",
+    "twoWayTalk": "Comunicazione bidirezionale",
     "cameraAudio": "Audio della telecamera"
   },
   "unit": {
@@ -215,8 +215,8 @@
   "role": {
     "title": "Ruolo",
     "admin": "Amministratore",
-    "viewer": "Osservatore",
-    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Osservatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
+    "viewer": "Spettatore",
+    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Spettatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",

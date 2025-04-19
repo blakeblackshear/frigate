@@ -1,6 +1,6 @@
 {
   "alerts": "Avvisi",
-  "detections": "Rilevazioni",
+  "detections": "Rilevamento",
   "motion": {
     "label": "Movimento",
     "only": "Solo movimento"
