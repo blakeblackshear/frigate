@@ -953,9 +953,7 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editSubLabel.desc", {
-                    label: t(search.label, {
-                      ns: "objects",
-                    }),
+                    label: search.label,
                   })
                 : t("details.editSubLabel.descNoLabel")
             }
@@ -970,9 +968,7 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editLPR.desc", {
-                    label: t(search.label, {
-                      ns: "objects",
-                    }),
+                    label: search.label,
                   })
                 : t("details.editLPR.descNoLabel")
             }
@@ -1118,20 +1114,10 @@ export function ObjectSnapshotTab({
                           >
                             {/^[aeiou]/i.test(search?.label || "")
                               ? t("explore.plus.review.true.true_other", {
-                                  label: t(
-                                    search?.label
-                                      .replace(" ", "_")
-                                      .toLowerCase(),
-                                    { ns: "objects" },
-                                  ),
+                                  label: search?.label,
                                 })
                               : t("explore.plus.review.true.true_one", {
-                                  label: t(
-                                    search?.label
-                                      .replace(" ", "_")
-                                      .toLowerCase(),
-                                    { ns: "objects" },
-                                  ),
+                                  label: search?.label,
                                 })}
                           </Button>
                           <Button
@@ -1145,20 +1131,10 @@ export function ObjectSnapshotTab({
                           >
                             {/^[aeiou]/i.test(search?.label || "")
                               ? t("explore.plus.review.false.false_other", {
-                                  label: t(
-                                    search?.label
-                                      .replace(" ", "_")
-                                      .toLowerCase(),
-                                    { ns: "objects" },
-                                  ),
+                                  label: search?.label,
                                 })
                               : t("explore.plus.review.false.false_one", {
-                                  label: t(
-                                    search?.label
-                                      .replace(" ", "_")
-                                      .toLowerCase(),
-                                    { ns: "objects" },
-                                  ),
+                                  label: search?.label,
                                 })}
                           </Button>
                         </>
