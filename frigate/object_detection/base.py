@@ -1,4 +1,5 @@
 import datetime
+import time
 import logging
 import multiprocessing as mp
 import os
@@ -142,6 +143,95 @@ def run_detector(
     logger.info("Exited detection process...")
 
 
+def async_run_detector(
+    name: str,
+    detection_queue: mp.Queue,
+    out_events: dict[str, mp.Event],
+    avg_speed,
+    start,
+    detector_config,
+):
+    # Set thread and process titles for logging and debugging
+    threading.current_thread().name = f"detector:{name}"
+    logger.info(f"Starting detection process: {os.getpid()}")
+    setproctitle(f"frigate.detector.{name}")
+
+    stop_event = mp.Event()  # Used to gracefully stop threads on signal
+
+    def receiveSignal(signalNumber, frame):
+        stop_event.set()
+
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
+    # Initialize shared memory and detector
+    frame_manager = SharedMemoryFrameManager()
+    object_detector = LocalObjectDetector(detector_config=detector_config)
+
+    # Create shared memory buffers for detector outputs
+    outputs = {}
+    for name in out_events.keys():
+        out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
+        out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
+        outputs[name] = {"shm": out_shm, "np": out_np}
+
+    def detect_worker():
+        # Continuously fetch frames and send them to the async detector
+        logger.info("Starting Detect Worker Thread")
+        while not stop_event.is_set():
+            try:
+                connection_id = detection_queue.get(timeout=1)
+            except queue.Empty:
+                continue
+
+            # Retrieve the input frame from shared memory
+            input_frame = frame_manager.get(
+                connection_id,
+                (1, detector_config.model.height, detector_config.model.width, 3),
+            )
+
+            if input_frame is None:
+                logger.warning(f"Failed to get frame {connection_id} from SHM")
+                continue
+
+            # send input to Accelator
+            start.value = datetime.datetime.now().timestamp()
+            object_detector.detect_api.send_input(connection_id, input_frame)
+
+    def result_worker():
+        # Continuously receive detection results from the async detector
+        logger.info("Starting Result Worker Thread")
+        while not stop_event.is_set():
+            connection_id, detections = object_detector.detect_api.receive_output()
+            duration = datetime.datetime.now().timestamp() - start.value
+
+            frame_manager.close(connection_id)
+
+            # Update moving average inference time
+            avg_speed.value = (avg_speed.value * 9 + duration) / 10
+
+            if connection_id in outputs and detections is not None:
+                outputs[connection_id]["np"][:] = detections[:]
+                out_events[connection_id].set()
+
+    # Initialize tracking variables
+    start.value = 0.0
+    avg_speed.value = 0.0
+
+    # Start threads for detection input and result output
+    detect_thread = threading.Thread(target=detect_worker, daemon=True)
+    result_thread = threading.Thread(target=result_worker, daemon=True)
+    detect_thread.start()
+    result_thread.start()
+
+    # Keep the main process alive while threads run
+    while not stop_event.is_set():
+        time.sleep(5)
+
+    logger.info("Exited async detection process...")
+
+
 class ObjectDetectProcess:
     def __init__(
         self,
@@ -176,18 +266,33 @@ class ObjectDetectProcess:
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = util.Process(
-            target=run_detector,
-            name=f"detector:{self.name}",
-            args=(
-                self.name,
-                self.detection_queue,
-                self.out_events,
-                self.avg_inference_speed,
-                self.detection_start,
-                self.detector_config,
-            ),
-        )
+        if self.detector_config.type == "memryx":
+            # MemryX requires asynchronous detection handling using async_run_detector
+            self.detect_process = util.Process(
+                target=async_run_detector,
+                name=f"detector:{self.name}",
+                args=(
+                    self.name,
+                    self.detection_queue,
+                    self.out_events,
+                    self.avg_inference_speed,
+                    self.detection_start,
+                    self.detector_config,
+                ),
+            )
+        else:
+            self.detect_process = util.Process(
+                target=run_detector,
+                name=f"detector:{self.name}",
+                args=(
+                    self.name,
+                    self.detection_queue,
+                    self.out_events,
+                    self.avg_inference_speed,
+                    self.detection_start,
+                    self.detector_config,
+                ),
+            )
         self.detect_process.daemon = True
         self.detect_process.start()
 

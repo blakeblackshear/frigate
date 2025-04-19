@@ -138,6 +138,9 @@ RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/da
 RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite
 COPY audio-labelmap.txt .
 
+# Copy 81 class coco label map
+RUN wget -O coco_81class_labelmap.txt https://developer.memryx.com/example_files/1p2_frigate/labelmap.txt
+
 
 FROM wget AS s6-overlay
 ARG TARGETARCH
@@ -175,6 +178,9 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
+
+# Build MemryX SDK wheel
+RUN pip3 wheel --wheel-dir=/wheels/memx/ --extra-index-url https://developer.memryx.com/pip memryx~=1.2.0
 
 COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
@@ -240,10 +246,35 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    pip3 install -U /deps/wheels/*.whl
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    bash -euo pipefail -c '\
+      echo "→ Installing MemryX SDK wheels…"; \
+      pip3 install --no-deps /wheels/memx/*.whl; \
+      echo "→ Installing/overwriting with project wheels…"; \
+      pip3 install --no-deps --upgrade /wheels/*.whl; \
+    '
 
 COPY --from=deps-rootfs / /
+
+# Install memx-accl using a custom function that installs the latest 1.2.x version and holds it.
+RUN curl -fsSL https://developer.memryx.com/deb/memryx.asc | tee /etc/apt/trusted.gpg.d/memryx.asc && \
+    echo "deb https://developer.memryx.com/deb stable main" > /etc/apt/sources.list.d/memryx.list && \
+    apt-get update -qq && \
+    bash -c '\
+    install_and_hold() { \
+      echo "Processing package: $1..."; \
+      local versions; \
+      versions=$(apt-cache policy "$1" | grep -E "^\s*(\*{3}\s*)?1\.2" | awk "{if(\$1==\"***\") print \$2; else print \$1}"); \
+      if [ -z \"$versions\" ]; then \
+        echo "No 1.2 versions found for package $1" >&2; exit 1; \
+      fi; \
+      local latest; \
+      latest=$(echo "$versions" | sort -V | tail -n 1); \
+      echo "Installing $1 version $latest..."; \
+      apt install -y --no-install-recommends "$1=${latest}" || { echo "Install failed." >&2; exit 1; }; \
+      apt-mark hold "$1"; \
+    }; \
+    install_and_hold memx-accl'
 
 RUN ldconfig
 
