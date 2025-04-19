@@ -70,7 +70,9 @@
         }
       },
       "title": "Maskinvareinformasjon",
-      "gpuUsage": "GPU-belastning"
+      "gpuUsage": "GPU-belastning",
+      "npuMemory": "NPU minne",
+      "npuUsage": "NPU belastning"
     },
     "otherProcesses": {
       "title": "Andre prosesser",
@@ -140,7 +142,8 @@
       "plate_recognition_speed": "Indekseringshastighet for kjennemerke",
       "face_embedding_speed": "Indekseringshastighet for ansikt",
       "text_embedding_speed": "Indekseringshastighet for tekst",
-      "image_embedding_speed": "Indekseringshastighet for bilde"
+      "image_embedding_speed": "Indekseringshastighet for bilde",
+      "face_recognition_speed": "Ansiktsgjenkjenning hastighet"
     },
     "title": "Utvidelser",
     "infPerSecond": "Inferenser per sekund"
@@ -152,6 +155,9 @@
     "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
     "healthy": "Systemet fungerer som det skal",
-    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)"
+    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",
+    "cameraIsOffline": "{{camera}} er frakoblet",
+    "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)"
   }
 }

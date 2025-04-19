@@ -27,6 +27,12 @@
           "label": "Ikke bekreft denne merkelappen for Frigate Plus",
           "false_one": "Dette er ikke en {{label}}",
           "false_other": "Dette er ikke en {{label}}"
+        },
+        "question": {
+          "label": "Bekreft denne merkelapp for Frigate Plus",
+          "ask_an": "Er dette objekt en <code>{{label}}</code>?",
+          "ask_a": "Er dette objektet en <code>{{label}}</code>?",
+          "ask_full": "Er dette objekt en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
