@@ -419,7 +419,9 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return t(filterValues as string, { ns: "objects" });
+      return t(filterValues as string, {
+        ns: "objects",
+      });
     } else if (filterType === "search_type") {
       return t("filter.searchType." + (filterValues as string));
     } else {
@@ -817,7 +819,11 @@ export default function InputWithTags({
                             className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                           >
                             {t("filter.label." + filterType)}:{" "}
-                            {value.replaceAll("_", " ")}
+                            {filterType === "labels"
+                              ? t(value, {
+                                  ns: "objects",
+                                })
+                              : value.replaceAll("_", " ")}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)

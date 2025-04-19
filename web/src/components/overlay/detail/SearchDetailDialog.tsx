@@ -709,7 +709,9 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40">{t("details.label")}</div>
             <div className="flex flex-row items-center gap-2 text-sm capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              {t(search.label, { ns: "objects" })}
+              {t(search.label, {
+                ns: "objects",
+              })}
               {search.sub_label && ` (${search.sub_label})`}
               {isAdmin && (
                 <Tooltip>
@@ -980,7 +982,7 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editSubLabel.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                    label: search.label,
                   })
                 : t("details.editSubLabel.descNoLabel")
             }
@@ -995,7 +997,7 @@ function ObjectDetailsTab({
             description={
               search.label
                 ? t("details.editLPR.desc", {
-                    label: t(search.label, { ns: "objects" }),
+                    label: search.label,
                   })
                 : t("details.editLPR.descNoLabel")
             }

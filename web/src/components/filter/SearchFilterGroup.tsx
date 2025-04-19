@@ -263,7 +263,9 @@ function GeneralFilterButton({
     }
 
     if (selectedLabels.length == 1) {
-      return t(selectedLabels[0], { ns: "objects" });
+      return t(selectedLabels[0], {
+        ns: "objects",
+      });
     }
 
     return t("labels.count", {

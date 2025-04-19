@@ -498,7 +498,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={item.replaceAll("_", " ")}
+              label={t(item, { ns: "objects" })}
               isChecked={filter.labels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {

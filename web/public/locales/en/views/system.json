@@ -142,7 +142,10 @@
     "ffmpegHighCpuUsage": "{{camera}} has high FFMPEG CPU usage ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
-    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)"
+    "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
+    "cameraIsOffline": "{{camera}} is offline",
+    "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Enrichments",
@@ -150,6 +153,7 @@
     "embeddings": {
       "image_embedding_speed": "Image Embedding Speed",
       "face_embedding_speed": "Face Embedding Speed",
+      "face_recognition_speed": "Face Recognition Speed",
       "plate_recognition_speed": "Plate Recognition Speed",
       "text_embedding_speed": "Text Embedding Speed"
     }

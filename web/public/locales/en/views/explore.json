@@ -54,7 +54,12 @@
       },
       "gone": "{{label}} left",
       "heard": "{{label}} heard",
-      "external": "{{label}} detected"
+      "external": "{{label}} detected",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Ratio",
+        "area": "Area"
+      }
     },
     "annotationSettings": {
       "title": "Annotation Settings",

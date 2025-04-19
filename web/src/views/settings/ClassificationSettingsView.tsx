@@ -336,7 +336,9 @@ export default function ClassificationSettingsView({
               }
             >
               <SelectTrigger className="w-20">
-                {classificationSettings.search.model_size}
+                {t(
+                  `classification.semanticSearch.modelSize.${classificationSettings.search.model_size}.title`,
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -466,7 +468,9 @@ export default function ClassificationSettingsView({
               }
             >
               <SelectTrigger className="w-20">
-                {classificationSettings.face.model_size}
+                {t(
+                  `classification.faceRecognition.modelSize.${classificationSettings.face.model_size}.title`,
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>

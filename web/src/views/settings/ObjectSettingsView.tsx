@@ -366,7 +366,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                     {getIconForLabel(obj.label, "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
-                    {capitalizeFirstLetter(obj.label.replaceAll("_", " "))}
+                    {t(obj.label, { ns: "objects" })}
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-center justify-end">
