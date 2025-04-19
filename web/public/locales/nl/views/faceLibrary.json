@@ -59,7 +59,7 @@
   },
   "uploadFaceImage": {
     "desc": "Upload een afbeelding om te scannen op gezichten en op te nemen voor {{pageToggle}}",
-    "title": "Upload gezichtsafbeelding"
+    "title": "Upload een afbeelding van het gezicht"
   },
   "deleteFaceLibrary": {
     "title": "Verwijder Naam",
@@ -70,7 +70,7 @@
   "readTheDocs": "Lees de documentatie",
   "steps": {
     "nextSteps": "Volgende stappen",
-    "faceName": "Voer gezichtsnaam in",
-    "uploadFace": "Upload gezichtsafbeelding"
+    "faceName": "Voer een naam in",
+    "uploadFace": "Upload een afbeelding van het gezicht"
   }
 }
