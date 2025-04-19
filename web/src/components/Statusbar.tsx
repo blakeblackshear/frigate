@@ -101,6 +101,9 @@ export default function Statusbar() {
             case "intel-qsv":
               gpuTitle = "Intel GPU";
               break;
+            case "rockchip":
+              gpuTitle = "Rockchip GPU";
+              break;
             default:
               gpuTitle = name;
               break;

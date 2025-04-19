@@ -24,6 +24,7 @@ from frigate.util.services import (
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
+    get_rockchip_gpu_stats,
     get_rockchip_npu_stats,
     is_vaapi_amd_driver,
 )
@@ -232,6 +233,11 @@ async def set_gpu_stats(
                 else:
                     stats["intel-vaapi"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
+        elif "preset-rk" in args:
+            rga_usage = get_rockchip_gpu_stats()
+
+            if rga_usage:
+                stats["rockchip"] = rga_usage
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
             stats["rpi-v4l2m2m"] = {"gpu": "", "mem": ""}

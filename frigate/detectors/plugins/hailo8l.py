@@ -175,6 +175,7 @@ class HailoAsyncInference:
         return self.hef.get_input_vstream_infos()[0].shape
 
     def run(self) -> None:
+        job = None
         with self.infer_model.configure() as configured_infer_model:
             while True:
                 batch_data = self.input_store.get()
@@ -202,7 +203,9 @@ class HailoAsyncInference:
                         bindings_list=bindings_list,
                     ),
                 )
-            job.wait(100)
+
+            if job is not None:
+                job.wait(100)
 
 
 # ----------------- HailoDetector Class ----------------- #
