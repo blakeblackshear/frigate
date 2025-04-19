@@ -388,12 +388,12 @@
     "motion": {
       "title": "Cajas de movimiento",
       "desc": "Mostrar cajas alrededor de las áreas donde se detecta movimiento",
-      "tips": "<p className=\"mb-2\"><strong>Cajas de Movimiento</strong></p><br><p>Se superpondrán cajas rojas en las áreas del marco donde se está detectando movimiento actualmente</p>"
+      "tips": "<p><strong>Cajas de Movimiento</strong></p><br><p>Se superpondrán cajas rojas en las áreas del fotograma donde se está detectando movimiento actualmente</p>"
     },
     "regions": {
       "title": "Regiones",
       "desc": "Mostrar una caja de la región de interés enviada al detector de objetos",
-      "tips": "<p className=\"mb-2\"><strong>Cajas de Región</strong></p><br><p>Se superpondrán cajas verdes brillantes en las áreas de interés del marco que se están enviando al detector de objetos.</p>"
+      "tips": "<p><strong>Cajas de Región</strong></p><br><p>Se superpondrán cajas verdes brillantes en las áreas de interés del fotograma que se envían al detector de objetos.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Dibujo de Filtro de Forma de Objetos",
@@ -480,11 +480,17 @@
       },
       "changeRole": {
         "title": "Cambiar rol de usuario",
-        "desc": "Actualizar permisos para <span className=\"font-medium\">{{username}}</span>",
-        "roleInfo": "<p>Selecciona el rol adecuado para este usuario:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Admin:</span> Acceso completo a todas las funciones. </li><li> • <span className=\"font-medium\">Viewer:</span> Limitado solo a los paneles en vivo, Revisión, Explorar y Exportaciones.</li></ul>"
+        "desc": "Actualizar permisos para",
+        "roleInfo": {
+          "intro": "Selecciona el rol adecuado para este usuario:",
+          "adminDesc": "Acceso completo a todas las funciones.",
+          "viewerDesc": "Limitado a paneles en vivo, revisión, exploración y exportaciones únicamente.",
+          "viewer": "Espectador",
+          "admin": "Administrador"
+        }
       },
       "deleteUser": {
-        "warn": "¿Estás seguro de que quieres eliminar a <span className=\"font-bold\">{{username}}</span>?",
+        "warn": "Estás seguro de que quieres eliminar",
         "title": "Eliminar usuario",
         "desc": "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario y eliminará todos los datos asociados."
       }
@@ -575,7 +581,11 @@
       "availableModels": "Modelos disponibles",
       "loadingAvailableModels": "Cargando modelos disponibles...",
       "modelSelect": "Tus modelos disponibles en Frigate+ se pueden seleccionar aquí. Ten en cuenta que solo se pueden seleccionar modelos compatibles con tu configuración actual de detectores.",
-      "trainDate": "Fecha de entrenamiento"
+      "trainDate": "Fecha de entrenamiento",
+      "plusModelType": {
+        "baseModel": "Modelo Base",
+        "userModel": "Ajustado Finamente"
+      }
     },
     "toast": {
       "success": "La configuración de Frigate+ se ha guardado. Reinicia Frigate para aplicar los cambios.",

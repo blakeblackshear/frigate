@@ -124,7 +124,12 @@
       "heard": "{{label}} escuchado",
       "external": "{{label}} detectado",
       "active": "{{label}} se activó",
-      "stationary": "{{label}} se volvió estacionario"
+      "stationary": "{{label}} se volvió estacionario",
+      "header": {
+        "zones": "Zonas",
+        "ratio": "Proporción",
+        "area": "Área"
+      }
     },
     "annotationSettings": {
       "offset": {
