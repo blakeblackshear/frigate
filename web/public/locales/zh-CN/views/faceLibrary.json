@@ -65,5 +65,10 @@
       "trainFailed": "训练失败：{{errorMessage}}",
       "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}"
     }
+  },
+  "steps": {
+    "faceName": "输入人脸姓名",
+    "uploadFace": "上传人脸照片",
+    "nextSteps": "下一步"
   }
 }
