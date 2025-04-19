@@ -165,6 +165,8 @@ devices:
   - /dev/dma_heap
   - /dev/rga
   - /dev/mpp_service
+volumes:
+  - /sys/:/sys/:ro
 ```
 
 or add these options to your `docker run` command:
@@ -175,7 +177,8 @@ or add these options to your `docker run` command:
 --device /dev/dri \
 --device /dev/dma_heap \
 --device /dev/rga \
---device /dev/mpp_service
+--device /dev/mpp_service \
+--volume /sys/:/sys/:ro
 ```
 
 #### Configuration
