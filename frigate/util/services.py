@@ -399,7 +399,7 @@ def get_rockchip_gpu_stats() -> dict[str, str]:
     if not load_values:
         return None
 
-    average_load = str(round(sum(load_values) / len(load_values), 2))
+    average_load = f"{round(sum(load_values) / len(load_values), 2)}%"
     return {"gpu": average_load, "mem": "-"}
 
 
