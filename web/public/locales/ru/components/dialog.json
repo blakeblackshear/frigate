@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Отправлено"
+        },
+        "question": {
+          "ask_an": "Это объект — <code>{{label}}</code> ?",
+          "label": "Подтвердить эту метку для Frigate Plus",
+          "ask_a": "Это объект — <code>{{label}}</code>?",
+          "ask_full": "Это объект — <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
