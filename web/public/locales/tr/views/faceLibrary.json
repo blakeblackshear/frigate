@@ -67,5 +67,8 @@
   },
   "readTheDocs": "Dokümantasyonu oku",
   "selectFace": "Yüz Seçin",
-  "trainFace": "Yüzü Eğit"
+  "trainFace": "Yüzü Eğit",
+  "steps": {
+    "faceName": "Yüze isim verin"
+  }
 }
