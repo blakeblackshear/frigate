@@ -382,6 +382,23 @@ def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
         return results
 
 
+def get_rockchip_npu_stats() -> dict[str, str]:
+    """Get stats using rk."""
+    try:
+        with open("/sys/kernel/debug/rknpu/load", "r") as f:
+            npu_output = f.read()
+            core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+    except FileNotFoundError:
+        core_loads = None
+
+    if not core_loads:
+        return None
+
+    percentages = [int(load) for load in core_loads]
+    mean = round(sum(percentages) / len(percentages), 2)
+    return {"npu": mean, "mem": "-"}
+
+
 def try_get_info(f, h, default="N/A"):
     try:
         if h:

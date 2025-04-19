@@ -4,6 +4,7 @@ export interface FrigateStats {
   detectors: { [detectorKey: string]: DetectorStats };
   embeddings?: EmbeddingsStats;
   gpu_usages?: { [gpuKey: string]: GpuStats };
+  npu_usages?: { [npuKey: string]: NpuStats };
   processes: { [processKey: string]: ExtraProcessStats };
   service: ServiceStats;
   detection_fps: number;
@@ -52,6 +53,11 @@ export type GpuStats = {
   enc?: string;
   dec?: string;
   pstate?: string;
+};
+
+export type NpuStats = {
+  npu: number;
+  mem: string;
 };
 
 export type GpuInfo = "vainfo" | "nvinfo";

@@ -72,7 +72,9 @@
         "toast": {
           "success": "Copied GPU info to clipboard"
         }
-      }
+      },
+      "npuUsage": "NPU Usage",
+      "npuMemory": "NPU Memory"
     },
     "otherProcesses": {
       "title": "Other Processes",

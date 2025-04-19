@@ -24,6 +24,7 @@ from frigate.util.services import (
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
+    get_rockchip_npu_stats,
     is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
@@ -109,6 +110,7 @@ def get_processing_stats(
         stats_tasks = [
             asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
             asyncio.create_task(set_cpu_stats(stats)),
+            asyncio.create_task(set_npu_usages(config, stats)),
         ]
 
         if config.telemetry.stats.network_bandwidth:
@@ -236,6 +238,19 @@ async def set_gpu_stats(
 
     if stats:
         all_stats["gpu_usages"] = stats
+
+
+async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
+    stats: dict[str, dict] = {}
+
+    for detector in config.detectors.values():
+        if detector.type == "rknn":
+            # Rockchip NPU usage
+            rk_usage = get_rockchip_npu_stats()
+            stats["rockchip"] = rk_usage
+
+    if stats:
+        all_stats["npu_usages"] = stats
 
 
 def stats_snapshot(
