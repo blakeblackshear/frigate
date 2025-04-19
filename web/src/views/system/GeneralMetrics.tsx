@@ -408,8 +408,8 @@ export default function GeneralMetrics({
   // other processes stats
 
   const hardwareType = useMemo(() => {
-    const hasGpu = statsHistory[0]?.gpu_usages != undefined;
-    const hasNpu = statsHistory[0]?.npu_usages != undefined;
+    const hasGpu = gpuSeries.length > 0;
+    const hasNpu = npuSeries.length > 0;
 
     if (hasGpu && !hasNpu) {
       return "GPUs";
@@ -418,7 +418,7 @@ export default function GeneralMetrics({
     } else {
       return "GPUs / NPUs";
     }
-  }, [statsHistory]);
+  }, [gpuSeries, npuSeries]);
 
   const otherProcessCpuSeries = useMemo(() => {
     if (!statsHistory) {
