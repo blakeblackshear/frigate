@@ -124,7 +124,12 @@
       "gone": "{{label}} parti",
       "heard": "{{label}} entendu",
       "external": "{{label}} détecté",
-      "active": "{{label}} est devenu actif"
+      "active": "{{label}} est devenu actif",
+      "header": {
+        "zones": "Zones",
+        "area": "Aire",
+        "ratio": "Ratio"
+      }
     },
     "annotationSettings": {
       "title": "Paramètres d'annotation",

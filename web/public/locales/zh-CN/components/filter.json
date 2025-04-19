@@ -61,7 +61,7 @@
     }
   },
   "review": {
-    "showReviewed": "显示已查看的项目"
+    "showReviewed": "显示已核查的项目"
   },
   "motion": {
     "showMotionOnly": "仅显示运动"

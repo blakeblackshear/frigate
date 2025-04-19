@@ -44,7 +44,7 @@
     "h": "{{time}}u",
     "hour_one": "{{time}} uur",
     "hour_other": "{{time}} uren",
-    "m": "{{time}} min",
+    "m": "{{time}}min",
     "formattedTimestampWithYear": {
       "12hour": "%-d %b %Y, %H:%M",
       "24hour": "%-d %b %Y, %H:%M"
@@ -74,7 +74,7 @@
     "save": "Opslaan",
     "history": "Geschiedenis",
     "fullscreen": "Volledig scherm",
-    "pictureInPicture": "Foto in foto",
+    "pictureInPicture": "Pop-up venster",
     "twoWayTalk": "Tweerichtingsgesprek",
     "cameraAudio": "Camera geluid",
     "on": "aan",
@@ -179,7 +179,7 @@
       "title": "Documentatie",
       "label": "Frigate documentatie"
     },
-    "review": "Beoordeel",
+    "review": "Beoordelen",
     "explore": "Verkennen",
     "export": "Exporteren",
     "uiPlayground": "Testgebied voor gebruikersinterface",

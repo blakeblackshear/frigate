@@ -60,7 +60,7 @@
           "title": "Вывод Nvidia SMI",
           "name": "Название: {{name}}",
           "driver": "Драйвер: {{driver}}",
-          "cudaComputerCapability": "CUDA Compute Capability: {{cuda_compute}}",
+          "cudaComputerCapability": "Вычислительные возможности CUDA: {{cuda_compute}}",
           "vbios": "Информация VBios: {{vbios}}"
         },
         "closeInfo": {
@@ -72,7 +72,9 @@
         "toast": {
           "success": "Информация GPU скопирована в буфер обмена"
         }
-      }
+      },
+      "npuMemory": "Память NPU",
+      "npuUsage": "Использование NPU"
     },
     "otherProcesses": {
       "title": "Другие процессы",
@@ -142,16 +144,20 @@
     "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "Камера {{camera}} использует слишком много ресурсов CPU для детекции ({{detectAvg}}%)",
     "healthy": "Система в порядке",
-    "reindexingEmbeddings": "Переиндексация эмбеддингов ({{processed}}% завершено)"
+    "reindexingEmbeddings": "Переиндексация эмбеддингов ({{processed}}% завершено)",
+    "cameraIsOffline": "{{camera}} отключена",
+    "detectIsVerySlow": "{{detect}} идёт очень медленно ({{speed}} мс)",
+    "detectIsSlow": "{{detect}} идёт медленно ({{speed}} мс)"
   },
   "enrichments": {
-    "title": "Обогащения данных",
+    "title": "Обогащение данных",
     "infPerSecond": "Выводов в секунду",
     "embeddings": {
       "image_embedding_speed": "Скорость генерации эмбеддингов изображений",
       "plate_recognition_speed": "Скорость распознавания номеров",
       "text_embedding_speed": "Скорость генерации текстовых эмбеддингов",
-      "face_embedding_speed": "Скорость генерации эмбеддингов лиц"
+      "face_embedding_speed": "Скорость генерации эмбеддингов лиц",
+      "face_recognition_speed": "Скорость распознавания лиц"
     }
   }
 }

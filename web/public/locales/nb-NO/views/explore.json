@@ -45,7 +45,12 @@
       "external": "{{label}} oppdaget",
       "entered_zone": "{{label}} gikk inn i {{zones}}",
       "active": "{{label}} ble aktiv",
-      "stationary": "{{label}} ble stasjonær"
+      "stationary": "{{label}} ble stasjonær",
+      "header": {
+        "zones": "Soner",
+        "ratio": "Forhold",
+        "area": "Areal"
+      }
     },
     "annotationSettings": {
       "title": "Annotasjonsinnstillinger",

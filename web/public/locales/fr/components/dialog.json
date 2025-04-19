@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Soumis"
+        },
+        "question": {
+          "label": "Confirmez cette étiquette pour Frigate Plus",
+          "ask_an": "Est-ce que cet objet est un <code>{{label}}</code> ?",
+          "ask_a": "Est-ce un objet pour un <code>{{label}}</code> ?",
+          "ask_full": "Est-ce-que cet objet est un(e) <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) ?"
         }
       }
     },

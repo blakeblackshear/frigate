@@ -165,7 +165,11 @@
       "availableModels": "Modèles disponibles",
       "dimensions": "Dimensions",
       "loadingAvailableModels": "Chargement des modèles disponibles...",
-      "modelSelect": "Vous pouvez sélectionner ici vos modèles disponibles sur Frigate+. Notez que seuls les modèles compatibles avec votre configuration de détecteur actuelle peuvent être sélectionnés."
+      "modelSelect": "Vous pouvez sélectionner ici vos modèles disponibles sur Frigate+. Notez que seuls les modèles compatibles avec votre configuration de détecteur actuelle peuvent être sélectionnés.",
+      "plusModelType": {
+        "baseModel": "Modèle de base",
+        "userModel": "Optimisé"
+      }
     },
     "toast": {
       "success": "Les paramètres de Frigate+ ont été enregistrés. Redémarrez Frigate pour appliquer les modifications.",
@@ -475,12 +479,12 @@
     "motion": {
       "desc": "Afficher des cadres autour des zones où un mouvement est détecté",
       "title": "Cadres de mouvement",
-      "tips": "<p className=\"mb-2\"><strong>Cadres de mouvement</strong></p><br><p>Des cadres rouges seront superposées sur les zones de l'image où un mouvement est actuellement détecté</p>"
+      "tips": "<p><strong>Cadres de mouvement</strong></p><br><p>Des cadres rouges seront superposées sur les zones de l'image où un mouvement est actuellement détecté</p>"
     },
     "regions": {
       "title": "Régions",
       "desc": "Afficher une boîte de la région d'intérêt envoyée au détecteur d'objet",
-      "tips": "<p className=\"mb-2\"><strong>Cadres de région</strong></p><br><p>Des cadres verts lumineux seront superposés sur les zones d'intérêt de l'image qui sont envoyées au détecteur d'objets.</p>"
+      "tips": "<p><strong>Cadres de région</strong></p><br><p>Des cadres verts lumineux seront superposés sur les zones d'intérêt de l'image qui sont envoyées au détecteur d'objets.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Dessin de filtre de forme d'objet",
@@ -563,7 +567,7 @@
       "deleteUser": {
         "title": "Supprimer un utilisateur",
         "desc": "Cette action est irréversible. Elle supprimera définitivement le compte utilisateur et toutes les données associées.",
-        "warn": "Êtes-vous sûr de vouloir supprimer <span className=\"font-bold\">{{username}}</span> ?"
+        "warn": "Êtes-vous sûr de vouloir supprimer"
       },
       "passwordSetting": {
         "updatePassword": "Mettre à jour le mot de passe pour {{username}}",
@@ -572,8 +576,14 @@
       },
       "changeRole": {
         "title": "Changer le rôle de l'utilisateur",
-        "desc": "Mettre à jour les autorisations pour <span className=\"font-medium\">{{username}}</span>",
-        "roleInfo": "<p>Sélectionnez le rôle approprié pour cet utilisateur :</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Administrateur :</span> Accès complet à toutes les fonctionnalités. </li><li> • <span className=\"font-medium\">Observateur :</span> Limité aux tableaux de bord en direct, à la révision, à l'exploration et aux exportations uniquement.</li></ul>"
+        "desc": "Mettre à jour les autorisations pour",
+        "roleInfo": {
+          "intro": "Sélectionnez le rôle approprié pour cet utilisateur :",
+          "admin": "Administrateur",
+          "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
+          "viewer": "Observateur",
+          "viewerDesc": "Limité aux tableaux de bord Direct, Examiner, Explorer et Exports."
+        }
       },
       "createUser": {
         "title": "Créer un nouvel utilisateur",

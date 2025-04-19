@@ -119,7 +119,7 @@
     "configurationEditor": "配置编辑器",
     "languages": "Languages / 语言",
     "language": {
-      "en": "English",
+      "en": "英语 (English)",
       "zhCN": "简体中文",
       "withSystem": {
         "label": "使用系统语言设置"
@@ -183,7 +183,7 @@
         "count_other": "{{count}} 个摄像头"
       }
     },
-    "review": "回放",
+    "review": "核查",
     "explore": "探测",
     "export": "导出",
     "uiPlayground": "UI 演示",
@@ -211,8 +211,8 @@
   "role": {
     "title": "权限组",
     "admin": "管理员",
-    "viewer": "查看者",
-    "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
+    "viewer": "成员",
+    "desc": "管理员可以完全访问Frigate界面上所有功能。成员则仅能查看摄像头、核查项和历史录像。"
   },
   "accessDenied": {
     "documentTitle": "没有权限 - Frigate",

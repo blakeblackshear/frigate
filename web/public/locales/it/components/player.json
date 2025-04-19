@@ -36,7 +36,7 @@
     "droppedFrameRate": "Percentuali fotogrammi persi:"
   },
   "streamOffline": {
-    "desc": "Nessun frame ricevuto sul flusso <code>detect</code> di {{cameraName}}, controlla i registri degli errori",
+    "desc": "Nessun fotogramma ricevuto sul flusso <code>detect</code> di {{cameraName}}, controlla i registri degli errori",
     "title": "Trasmissione disconnessa"
   },
   "toast": {

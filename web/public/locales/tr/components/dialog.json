@@ -23,6 +23,11 @@
           "label": "Bu etiketi Frigate+ için onaylamaktan vazgeç",
           "false_one": "Bu bir {{label}} değil",
           "false_other": "Bu bir {{label}} değil"
+        },
+        "question": {
+          "ask_an": "Bu nesne bir <code>{{label}}</code> mi?",
+          "label": "Etiketi Frigate+ için onaylayın",
+          "ask_a": "Bu nesne bir <code>{{label}}</code>?"
         }
       },
       "submitToPlus": {

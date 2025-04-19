@@ -34,7 +34,8 @@
       "desc": {
         "text": "Filtreler arama sonuçlarınızı daraltmanıza yardımcı olur. Giriş alanındaki kullanımları şöyledir:",
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"> <li>Bir filtre adı yazın ve iki nokta üst üste (:) ile bitirin (örn. \"kameralar:\").</li> <li>Önerilerden bir değer seçin veya kendiniz yazın.</li> <li>Birden fazla filtreyi aralarına boşluk koyarak art arda ekleyip kullanın.</li> <li>Tarih filtreleri (before: ve after:) <em>{{DateFormat}}</em> biçimini kullanır.</li> <li>Zaman aralığı filtresi <em>{{exampleTime}}</em> biçimini kullanır.</li> <li>Filtreleri kaldırmak için yanlarındaki 'x'e tıklayın.</li></ul>",
-        "example": "Örnek(anahtar kelimeler ingilizce olmalıdır): <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>"
+        "example": "Örnek(anahtar kelimeler ingilizce olmalıdır): <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "exampleLabel": "Örnek:"
       }
     },
     "toast": {

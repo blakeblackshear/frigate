@@ -6,6 +6,43 @@
     "disable": "Avaktivera Two Way Talk"
   },
   "cameraAudio": {
-    "disable": "Inaktivera kameraljud"
-  }
+    "disable": "Inaktivera kameraljud",
+    "enable": "Aktivera kameraljud"
+  },
+  "ptz": {
+    "zoom": {
+      "in": {
+        "label": "Zooma in PTZ kamera"
+      },
+      "out": {
+        "label": "Zooma ut PTZ kamera"
+      }
+    }
+  },
+  "streamStats": {
+    "enable": "Visa videostatistik",
+    "disable": "Dölj videostatistik"
+  },
+  "detect": {
+    "enable": "Aktivera detektering",
+    "disable": "Avaktivera detektering"
+  },
+  "recording": {
+    "enable": "Aktivera inspelning",
+    "disable": "Avaktivera inspelning"
+  },
+  "snapshots": {
+    "enable": "Aktivera ögonblicksbilder",
+    "disable": "Avaktivera ögonblicksbilder"
+  },
+  "audioDetect": {
+    "enable": "Aktivera ljudaktivering",
+    "disable": "Avaktivera ljudaktivering"
+  },
+  "autotracking": {
+    "enable": "Aktivera automatisk panorering",
+    "disable": "Avaktivera automatisk panorering"
+  },
+  "notifications": "Notifikationer",
+  "audio": "Ljud"
 }

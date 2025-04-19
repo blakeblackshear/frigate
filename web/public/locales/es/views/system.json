@@ -72,7 +72,9 @@
           "label": "Cerrar información de GPU"
         }
       },
-      "gpuMemory": "Memoria de GPU"
+      "gpuMemory": "Memoria de GPU",
+      "npuMemory": "Memoria de NPU",
+      "npuUsage": "Uso de NPU"
     },
     "otherProcesses": {
       "title": "Otros Procesos",
@@ -144,7 +146,8 @@
       "plate_recognition_speed": "Velocidad de Reconocimiento de Matrículas",
       "face_embedding_speed": "Velocidad de Incrustación de Rostros",
       "image_embedding_speed": "Velocidad de Incrustación de Imágenes",
-      "text_embedding_speed": "Velocidad de Incrustación de Texto"
+      "text_embedding_speed": "Velocidad de Incrustación de Texto",
+      "face_recognition_speed": "Velocidad de Reconocimiento Facial"
     },
     "title": "Enriquecimientos"
   },
@@ -152,6 +155,9 @@
     "ffmpegHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por detección ({{detectAvg}}%)",
     "healthy": "El sistema está saludable",
-    "reindexingEmbeddings": "Reindexando incrustaciones ({{processed}}% completado)"
+    "reindexingEmbeddings": "Reindexando incrustaciones ({{processed}}% completado)",
+    "detectIsSlow": "{{detect}} es lento ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} está desconectada",
+    "detectIsVerySlow": "{{detect}} es muy lento ({{speed}} ms)"
   }
 }

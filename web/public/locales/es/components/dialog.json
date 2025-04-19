@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Enviado"
+        },
+        "question": {
+          "label": "Confirmar esta etiqueta para Frigate Plus",
+          "ask_a": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_an": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_full": "¿Es este objeto un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },

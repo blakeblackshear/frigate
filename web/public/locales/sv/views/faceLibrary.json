@@ -26,6 +26,7 @@
     "title": "Träna"
   },
   "uploadFaceImage": {
-    "title": "Ladda upp ansiktsbild"
+    "title": "Ladda upp ansiktsbild",
+    "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
   }
 }
