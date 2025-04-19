@@ -240,9 +240,7 @@ async def set_gpu_stats(
         all_stats["gpu_usages"] = stats
 
 
-async def set_npu_usages(
-    config: FrigateConfig, all_stats: dict[str, Any]
-) -> None:
+async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
     stats: dict[str, dict] = {}
 
     for detector in config.detectors.values():
