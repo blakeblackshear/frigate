@@ -483,7 +483,7 @@
       },
       "changeRole": {
         "title": "Change User Role",
-        "desc": "Update permissions for",
+        "desc": "Update permissions for <strong>{{username}}</strong>",
         "roleInfo": {
           "intro": "Select the appropriate role for this user:",
           "admin": "Admin",
