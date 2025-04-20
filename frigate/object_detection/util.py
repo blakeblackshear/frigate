@@ -28,12 +28,12 @@ class RequestStore:
 
     def put(self, tensor_input: ndarray) -> int:
         request_id = self.__get_request_id()
-        self.input_queue.get((request_id, tensor_input))
+        self.input_queue.put((request_id, tensor_input))
         return request_id
 
     def get(self) -> tuple[int, ndarray] | None:
         try:
-            return self.input_queue.get_nowait()
+            return self.input_queue.get()
         except Exception:
             return None
 
