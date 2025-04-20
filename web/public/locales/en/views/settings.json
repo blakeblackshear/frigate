@@ -474,7 +474,7 @@
       "deleteUser": {
         "title": "Delete User",
         "desc": "This action cannot be undone. This will permanently delete the user account and remove all associated data.",
-        "warn": "Are you sure you want to delete"
+        "warn": "Are you sure you want to delete <strong>{{username}}</strong>?"
       },
       "passwordSetting": {
         "updatePassword": "Update Password for {{username}}",
