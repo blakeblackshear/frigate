@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -46,8 +46,14 @@ export default function RoleChangeDialog({
             {t("users.dialog.changeRole.title")}
           </DialogTitle>
           <DialogDescription>
-            {t("users.dialog.changeRole.desc")}
-            <span className="font-medium"> {username}</span>
+            <Trans
+              i18nKey="users.dialog.changeRole.desc"
+              ns="views/settings"
+              values={{ username }}
+              components={{
+                strong: <span className="font-medium" />,
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
 
