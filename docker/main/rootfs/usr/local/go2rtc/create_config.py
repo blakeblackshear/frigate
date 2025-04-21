@@ -102,7 +102,7 @@ elif go2rtc_config["ffmpeg"].get("bin") is None:
 
 # need to replace ffmpeg command when using ffmpeg4
 if LIBAVFORMAT_VERSION_MAJOR < 59:
-    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 10000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
     if go2rtc_config.get("ffmpeg") is None:
         go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:
