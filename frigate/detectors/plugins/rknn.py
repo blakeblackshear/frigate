@@ -19,10 +19,7 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
-supported_models = {
-    ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$",
-    ModelTypeEnum.yolox: None,
-}
+supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
 model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 
