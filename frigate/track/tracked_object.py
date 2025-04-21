@@ -165,7 +165,7 @@ class TrackedObject:
                     thumb_update = True
                 else:
                     logger.debug(
-                        f"Object frame time {obj_data['frame_time']} is not equal to the current frame time {current_frame_time}, not updating thumbnail"
+                        f"{self.camera_config.name}: Object frame time {obj_data['frame_time']} is not equal to the current frame time {current_frame_time}, not updating thumbnail"
                     )
 
         # check zones
