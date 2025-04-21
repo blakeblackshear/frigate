@@ -118,6 +118,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
 | Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
 | Intel i7 12650H      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 42 ms | 336: 50 ms                |                                        |
+| Intel N100           | ~ 15 ms                    | 320: ~ 20 ms              |                           |                                        |
 | Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms     |                                        |
 | Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                           |                                        |
 
@@ -128,7 +129,7 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YoloV7 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
+| Name            | YOLOv7 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
 | --------------- | --------------------- | ------------------------- | ------------------------- |
 | GTX 1060 6GB    | ~ 7 ms                |                           |                           |
 | GTX 1070        | ~ 6 ms                |                           |                           |
@@ -143,7 +144,7 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name            | YoloV9 Inference Time | YOLO-NAS Inference Time   |
+| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
 | --------------- | --------------------- | ------------------------- |
 | AMD 780M        | ~ 14 ms               | 320: ~ 30 ms 640: ~ 60 ms |
 
