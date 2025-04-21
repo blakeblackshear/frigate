@@ -176,7 +176,6 @@ async def review_summary(
 
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
-    month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).timestamp()
 
     cameras = params.cameras
     labels = params.labels
@@ -276,8 +275,6 @@ async def review_summary(
         .dicts()
         .get()
     )
-
-    clauses = [(ReviewSegment.start_time > month_ago)]
 
     if cameras != "all":
         camera_list = cameras.split(",")
