@@ -32,7 +32,7 @@ export default function CalendarFilterButton({
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    t("time.formattedTimestampOnlyMonthAndDay", { ns: "common" }),
+    t("time.formattedTimestampMonthDay", { ns: "common" }),
   );
 
   const trigger = (
@@ -103,7 +103,7 @@ export function CalendarRangeFilterButton({
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    t("time.formattedTimestampOnlyMonthAndDay", { ns: "common" }),
+    t("time.formattedTimestampMonthDay", { ns: "common" }),
   );
 
   const trigger = (
