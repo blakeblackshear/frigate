@@ -158,7 +158,7 @@ export default function FrigatePlusSettingsView({
       .finally(() => {
         addMessage(
           "plus_restart",
-          "Restart required (Frigate+ model changed)",
+          t("frigatePlus.restart_required"),
           undefined,
           "plus_restart",
         );

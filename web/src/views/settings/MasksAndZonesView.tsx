@@ -194,11 +194,11 @@ export default function MasksAndZonesView({
     setUnsavedChanges(false);
     addMessage(
       "masks_zones",
-      "Restart required (masks/zones changed)",
+      t("masksAndZones.restart_required"),
       undefined,
       "masks_zones",
     );
-  }, [editingPolygons, setUnsavedChanges, addMessage]);
+  }, [t, editingPolygons, setUnsavedChanges, addMessage]);
 
   useEffect(() => {
     if (isLoading) {
