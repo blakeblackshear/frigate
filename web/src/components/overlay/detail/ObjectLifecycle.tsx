@@ -578,7 +578,7 @@ export default function ObjectLifecycle({
                         <div className="text-sm text-primary-variant">
                           {formatUnixTimestampToDateTime(item.timestamp, {
                             timezone: config.ui.timezone,
-                            strftime_fmt:
+                            date_format:
                               config.ui.time_format == "24hour"
                                 ? t("time.formattedTimestamp2.24hour", {
                                     ns: "common",
