@@ -65,12 +65,14 @@ export function ThresholdBarGraph({
       if (dateIndex < 0) {
         timeOffset = 5 * Math.abs(dateIndex);
       }
-      const timestamp = updateTimes[Math.max(1, dateIndex) - 1] - timeOffset;
-      return formatUnixTimestampToDateTime(timestamp, {
-        timezone: config?.ui.timezone,
-        date_format: format,
-        locale,
-      });
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.max(1, dateIndex) - 1] - timeOffset,
+        {
+          timezone: config?.ui.timezone,
+          date_format: format,
+          locale,
+        },
+      );
     },
     [config?.ui.timezone, format, locale, updateTimes],
   );

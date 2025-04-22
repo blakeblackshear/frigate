@@ -55,12 +55,14 @@ export function CameraLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      const timestamp = updateTimes[Math.round(val as number)];
-      return formatUnixTimestampToDateTime(timestamp, {
-        timezone: config?.ui.timezone,
-        date_format: format,
-        locale,
-      });
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.round(val as number)],
+        {
+          timezone: config?.ui.timezone,
+          date_format: format,
+          locale,
+        },
+      );
     },
     [config?.ui.timezone, format, locale, updateTimes],
   );
@@ -190,12 +192,14 @@ export function EventsPerSecondsLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      const timestamp = updateTimes[Math.round(val as number) - 1];
-      return formatUnixTimestampToDateTime(timestamp, {
-        timezone: config?.ui.timezone,
-        date_format: format,
-        locale,
-      });
+      return formatUnixTimestampToDateTime(
+        updateTimes[Math.round(val as number) - 1],
+        {
+          timezone: config?.ui.timezone,
+          date_format: format,
+          locale,
+        },
+      );
     },
     [config?.ui.timezone, format, locale, updateTimes],
   );
