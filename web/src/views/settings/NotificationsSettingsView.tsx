@@ -44,6 +44,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -645,6 +646,8 @@ export function CameraNotificationSwitch({
     sendNotificationSuspend(0);
   };
 
+  const locale = useDateLocale();
+
   const formatSuspendedUntil = (timestamp: string) => {
     // Some languages require a change in word order
     if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
@@ -653,10 +656,15 @@ export function CameraNotificationSwitch({
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt:
+      date_format:
         config?.ui.time_format == "24hour"
-          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-          : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
+          ? t("time.formattedTimestampMonthDayHourMinute.24hour", {
+              ns: "common",
+            })
+          : t("time.formattedTimestampMonthDayHourMinute.12hour", {
+              ns: "common",
+            }),
+      locale: locale,
     });
     return t("time.untilForTime", { ns: "common", time });
   };
