@@ -117,7 +117,8 @@ server {
   set $port           8971;
 
   listen 80;
-  listen 443 ssl http2;
+  listen 443 ssl;
+  http2 on;
 
   server_name frigate.domain.com;
 }
