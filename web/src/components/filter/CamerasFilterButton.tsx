@@ -62,7 +62,7 @@ export function CamerasFilterButton({
 
   const trigger = (
     <Button
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("cameras.label")}
       variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
@@ -172,7 +172,7 @@ export function CamerasFilterContent({
               return (
                 <div
                   key={name}
-                  className="w-full cursor-pointer rounded-lg px-2 py-0.5 text-sm capitalize text-primary hover:bg-muted"
+                  className="w-full cursor-pointer rounded-lg px-2 py-0.5 text-sm text-primary smart-capitalize hover:bg-muted"
                   onClick={() => {
                     setCurrentCameras([...conf.cameras]);
                   }}

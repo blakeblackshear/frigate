@@ -361,7 +361,7 @@ export default function LivePlayer({
                 </TooltipTrigger>
               </div>
               <TooltipPortal>
-                <TooltipContent className="capitalize">
+                <TooltipContent className="smart-capitalize">
                   {[
                     ...new Set([
                       ...(objects || []).map(({ label, sub_label }) =>

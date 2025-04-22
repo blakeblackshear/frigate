@@ -265,7 +265,7 @@ export default function LiveContextMenu({
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
           <div className="flex flex-col items-start gap-1 py-1 pl-2">
-            <div className="text-md capitalize text-primary-variant">
+            <div className="text-md text-primary-variant smart-capitalize">
               {camera.replaceAll("_", " ")}
             </div>
             {preferredLiveMode == "jsmpeg" && isRestreamed && (

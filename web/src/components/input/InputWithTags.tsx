@@ -816,7 +816,7 @@ export default function InputWithTags({
                         .map((value, index) => (
                           <span
                             key={`${filterType}-${index}`}
-                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                           >
                             {t("filter.label." + filterType)}:{" "}
                             {filterType === "labels"
@@ -838,7 +838,7 @@ export default function InputWithTags({
                     : !(filterType == "event_id" && isSimilaritySearch) && (
                         <span
                           key={filterType}
-                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                         >
                           {filterType === "event_id"
                             ? t("trackedObjectId")

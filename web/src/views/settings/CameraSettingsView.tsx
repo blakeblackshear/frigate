@@ -431,7 +431,7 @@ export default function CameraSettingsView({
                                           }}
                                         />
                                       </FormControl>
-                                      <FormLabel className="font-normal capitalize">
+                                      <FormLabel className="font-normal smart-capitalize">
                                         {zone.name.replaceAll("_", " ")}
                                       </FormLabel>
                                     </FormItem>
@@ -536,7 +536,7 @@ export default function CameraSettingsView({
                                             }}
                                           />
                                         </FormControl>
-                                        <FormLabel className="font-normal capitalize">
+                                        <FormLabel className="font-normal smart-capitalize">
                                           {zone.name.replaceAll("_", " ")}
                                         </FormLabel>
                                       </FormItem>

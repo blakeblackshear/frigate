@@ -354,7 +354,7 @@ function GeneralFilterButton({
       variant={
         selectedLabels?.length || selectedZones?.length ? "select" : "default"
       }
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("filter")}
     >
       <FaFilter

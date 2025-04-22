@@ -233,7 +233,7 @@ export default function ReviewDetailDialog({
                     <div className="text-sm text-primary/40">
                       {t("details.camera")}
                     </div>
-                    <div className="text-sm capitalize">
+                    <div className="text-sm smart-capitalize">
                       {review.camera.replaceAll("_", " ")}
                     </div>
                   </div>
@@ -249,12 +249,12 @@ export default function ReviewDetailDialog({
                     <div className="text-sm text-primary/40">
                       {t("details.objects")}
                     </div>
-                    <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm capitalize">
+                    <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm smart-capitalize">
                       {events?.map((event) => {
                         return (
                           <div
                             key={event.id}
-                            className="flex flex-row items-center gap-2 capitalize"
+                            className="flex flex-row items-center gap-2 smart-capitalize"
                           >
                             {getIconForLabel(
                               event.label,
@@ -290,12 +290,12 @@ export default function ReviewDetailDialog({
                       <div className="text-sm text-primary/40">
                         {t("details.zones")}
                       </div>
-                      <div className="flex flex-col items-start gap-2 text-sm capitalize">
+                      <div className="flex flex-col items-start gap-2 text-sm smart-capitalize">
                         {review.data.zones.map((zone) => {
                           return (
                             <div
                               key={zone}
-                              className="flex flex-row items-center gap-2 capitalize"
+                              className="flex flex-row items-center gap-2 smart-capitalize"
                             >
                               {zone.replaceAll("_", " ")}
                             </div>

@@ -231,7 +231,7 @@ export default function SearchDetailDialog({
                   {item == "object_lifecycle" && (
                     <FaRotate className="size-4" />
                   )}
-                  <div className="capitalize">{t(`type.${item}`)}</div>
+                  <div className="smart-capitalize">{t(`type.${item}`)}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -711,7 +711,7 @@ function ObjectDetailsTab({
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.label")}</div>
-            <div className="flex flex-row items-center gap-2 text-sm capitalize">
+            <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
               {t(search.label, {
                 ns: "objects",
@@ -831,7 +831,7 @@ function ObjectDetailsTab({
           )}
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.camera")}</div>
-            <div className="text-sm capitalize">
+            <div className="text-sm smart-capitalize">
               {search.camera.replaceAll("_", " ")}
             </div>
           </div>

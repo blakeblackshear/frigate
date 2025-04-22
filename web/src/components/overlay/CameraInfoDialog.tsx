@@ -83,7 +83,7 @@ export default function CameraInfoDialog({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="capitalize">
+            <DialogTitle className="smart-capitalize">
               {t("cameras.info.cameraProbeInfo", {
                 camera: camera.name.replaceAll("_", " "),
               })}

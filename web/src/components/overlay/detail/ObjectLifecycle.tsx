@@ -572,7 +572,7 @@ export default function ObjectLifecycle({
                         </div>
                       </div>
                       <div className="mx-3 text-lg">
-                        <div className="flex flex-row items-center capitalize text-primary">
+                        <div className="flex flex-row items-center text-primary smart-capitalize">
                           {getLifecycleItemDescription(item)}
                         </div>
                         <div className="text-sm text-primary-variant">
@@ -616,7 +616,7 @@ export default function ObjectLifecycle({
                                   )}
                                   <div
                                     key={index}
-                                    className="cursor-pointer capitalize"
+                                    className="cursor-pointer smart-capitalize"
                                     onClick={() => setSelectedZone(zone)}
                                   >
                                     {zone.replaceAll("_", " ")}
@@ -722,7 +722,7 @@ export default function ObjectLifecycle({
                           />
                         </TooltipTrigger>
                         <TooltipPortal>
-                          <TooltipContent className="capitalize">
+                          <TooltipContent className="smart-capitalize">
                             {getLifecycleItemDescription(item)}
                           </TooltipContent>
                         </TooltipPortal>

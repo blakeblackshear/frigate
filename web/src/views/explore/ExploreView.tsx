@@ -151,7 +151,7 @@ function ThumbnailRow({
 
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
-      <div className="flex flex-row items-center text-lg capitalize">
+      <div className="flex flex-row items-center text-lg smart-capitalize">
         {t(objectType, { ns: "objects" })}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
@@ -190,7 +190,7 @@ function ThumbnailRow({
               />
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent className="capitalize">
+              <TooltipContent className="smart-capitalize">
                 <ExploreMoreLink objectType={objectType} />
               </TooltipContent>
             </TooltipPortal>

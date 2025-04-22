@@ -933,7 +933,7 @@ export function ZoneObjectSelector({
           {allLabels.map((item) => (
             <div key={item} className="flex items-center justify-between">
               <Label
-                className="w-full cursor-pointer capitalize text-primary"
+                className="w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
                 {t(item, { ns: "objects" })}

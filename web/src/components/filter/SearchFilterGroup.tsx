@@ -285,7 +285,7 @@ function GeneralFilterButton({
     <Button
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("labels.label")}
     >
       <MdLabel
@@ -457,7 +457,7 @@ function SortTypeButton({
           ? "select"
           : "default"
       }
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("labels.label")}
     >
       <MdSort

@@ -597,7 +597,7 @@ export default function SearchView({
                           <Tooltip>
                             <TooltipTrigger>
                               <Chip
-                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
+                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs text-white smart-capitalize`}
                               >
                                 {value.search_source == "thumbnail" ? (
                                   <LuImage className="size-3" />

@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+const plugin = require("tailwindcss/plugin");
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -166,5 +169,16 @@ module.exports = {
     require("tailwindcss-animate"),
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require("tailwind-scrollbar")({ nocompatible: true }),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".smart-capitalize": {
+          ':root[lang="ru"] &, :root[lang="ar"] &, :root[lang="he"] &, :root[lang="zh"] &, :root[lang="ja"] &, :root[lang="ko"] &, :root[lang="hi"] &, :root[lang="th"] &':
+            {
+              textTransform: "none",
+            },
+          textTransform: "capitalize",
+        },
+      });
+    }),
   ],
 };

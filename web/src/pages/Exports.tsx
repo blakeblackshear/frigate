@@ -151,7 +151,7 @@ function Exports() {
         <DialogContent
           className={cn("max-w-[80%]", isMobile && "landscape:max-w-[60%]")}
         >
-          <DialogTitle className="capitalize">
+          <DialogTitle className="smart-capitalize">
             {selected?.name?.replaceAll("_", " ")}
           </DialogTitle>
           <video

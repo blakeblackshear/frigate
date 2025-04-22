@@ -222,7 +222,7 @@ export default function ExportCard({
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
         <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
-          <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm capitalize text-white">
+          <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white smart-capitalize">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
         </div>
