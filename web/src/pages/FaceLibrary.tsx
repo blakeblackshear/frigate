@@ -395,7 +395,7 @@ function LibrarySelector({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="flex justify-between capitalize">
+          <Button className="flex justify-between smart-capitalize">
             {pageToggle || t("selectFace")}
             <span className="ml-2 text-primary-variant">
               ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
@@ -432,7 +432,7 @@ function LibrarySelector({
               className="group flex items-center justify-between"
             >
               <div
-                className="flex-grow cursor-pointer capitalize"
+                className="flex-grow cursor-pointer smart-capitalize"
                 onClick={() => setPageToggle(face)}
               >
                 {face}
@@ -562,7 +562,7 @@ function TrainingGrid({
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
-            <div className="text-sm capitalize">
+            <div className="text-sm smart-capitalize">
               {selectedEvent?.sub_label ?? "Unknown"}
             </div>
           </div>
@@ -571,7 +571,7 @@ function TrainingGrid({
               <div className="text-sm text-primary/40">
                 {t("details.confidence")}
               </div>
-              <div className="text-sm capitalize">
+              <div className="text-sm smart-capitalize">
                 {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
               </div>
             </div>
@@ -694,7 +694,7 @@ function FaceAttemptGroup({
       }}
     >
       <div className="flex flex-row justify-between">
-        <div className="select-none capitalize">
+        <div className="select-none smart-capitalize">
           Person
           {event?.sub_label
             ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
@@ -873,7 +873,7 @@ function FaceAttempt({
         <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="capitalize">{data.name}</div>
+              <div className="smart-capitalize">{data.name}</div>
               <div
                 className={cn(
                   "",
@@ -957,7 +957,7 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="capitalize">{name}</div>
+            <div className="smart-capitalize">{name}</div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>

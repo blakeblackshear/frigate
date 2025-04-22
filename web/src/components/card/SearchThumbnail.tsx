@@ -146,7 +146,7 @@ export default function SearchThumbnail({
               </TooltipTrigger>
             </div>
             <TooltipPortal>
-              <TooltipContent className="capitalize">
+              <TooltipContent className="smart-capitalize">
                 {[searchResult.sub_label ?? objectLabel]
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),

@@ -80,7 +80,7 @@ i18n
           .join(" ");
       }
 
-      // For single keys, just capitalize and format
+      // For single keys, just smart-capitalize and format
       return key
         .split("_")
         .map(

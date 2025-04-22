@@ -680,7 +680,7 @@ export function CameraNotificationSwitch({
           )}
           <div className="flex flex-col">
             <Label
-              className="text-md cursor-pointer capitalize text-primary"
+              className="text-md cursor-pointer text-primary smart-capitalize"
               htmlFor="camera"
             >
               {camera.replaceAll("_", " ")}

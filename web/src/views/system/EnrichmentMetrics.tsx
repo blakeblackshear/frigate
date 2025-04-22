@@ -105,7 +105,7 @@ export default function EnrichmentMetrics({
             <>
               {embeddingInferenceTimeSeries.map((series) => (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5 capitalize">{series.name}</div>
+                  <div className="mb-5 smart-capitalize">{series.name}</div>
                   {series.name.endsWith("Speed") ? (
                     <ThresholdBarGraph
                       key={series.name}

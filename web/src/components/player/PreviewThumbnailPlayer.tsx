@@ -262,7 +262,7 @@ export default function PreviewThumbnailPlayer({
                 </div>
               </TooltipTrigger>
             </div>
-            <TooltipContent className="capitalize">
+            <TooltipContent className="smart-capitalize">
               {[
                 ...new Set([
                   ...(review.data.objects || []),

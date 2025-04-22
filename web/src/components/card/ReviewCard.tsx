@@ -175,7 +175,7 @@ export default function ReviewCard({
               <div className="font-extra-light text-xs">{formattedDate}</div>
             </div>
           </TooltipTrigger>
-          <TooltipContent className="capitalize">
+          <TooltipContent className="smart-capitalize">
             {[
               ...new Set([
                 ...(event.data.objects || []),

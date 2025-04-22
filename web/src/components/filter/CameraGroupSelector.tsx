@@ -196,7 +196,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                   </Button>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent className="capitalize" side="right">
+                  <TooltipContent className="smart-capitalize" side="right">
                     {name}
                   </TooltipContent>
                 </TooltipPortal>
@@ -847,7 +847,7 @@ export function CameraGroupEdit({
                   <FormControl key={camera}>
                     <div className="flex items-center justify-between gap-1">
                       <Label
-                        className="mx-2 w-full cursor-pointer capitalize text-primary"
+                        className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                         htmlFor={camera.replaceAll("_", " ")}
                       >
                         {camera.replaceAll("_", " ")}

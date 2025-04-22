@@ -93,7 +93,7 @@ function System() {
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
               {isDesktop && (
-                <div className="capitalize">{t(item + ".title")}</div>
+                <div className="smart-capitalize">{t(item + ".title")}</div>
               )}
             </ToggleGroupItem>
           ))}

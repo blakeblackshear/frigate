@@ -22,7 +22,7 @@ export function ZoneMaskFilterButton({
     <Button
       size="sm"
       variant={selectedZoneMask?.length ? "select" : "default"}
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("zoneMask.filterBy")}
     >
       <FaFilter
@@ -96,7 +96,7 @@ export function GeneralFilterContent({
           {["zone", "motion_mask", "object_mask"].map((item) => (
             <div key={item} className="flex items-center justify-between">
               <Label
-                className="mx-2 w-full cursor-pointer capitalize text-primary"
+                className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
                 {t(
