@@ -1,4 +1,5 @@
 import { useTheme } from "@/context/theme-provider";
+import { useDateLocale } from "@/hooks/use-date-locale";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo } from "react";
@@ -24,7 +25,7 @@ export function CameraLineGraph({
   updateTimes,
   data,
 }: CameraLineGraphProps) {
-  const { t } = useTranslation(["views/system"]);
+  const { t } = useTranslation(["views/system", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -43,18 +44,27 @@ export function CameraLineGraph({
 
   const { theme, systemTheme } = useTheme();
 
+  const locale = useDateLocale();
+
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
+      ns: "common",
+    });
+  }, [t, timeFormat]);
+
   const formatTime = useCallback(
     (val: unknown) => {
       return formatUnixTimestampToDateTime(
         updateTimes[Math.round(val as number)],
         {
           timezone: config?.ui.timezone,
-          strftime_fmt:
-            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+          date_format: format,
+          locale,
         },
       );
     },
-    [config, updateTimes],
+    [config?.ui.timezone, format, locale, updateTimes],
   );
 
   const options = useMemo(() => {
@@ -170,18 +180,28 @@ export function EventsPerSecondsLineGraph({
     [data],
   );
 
+  const locale = useDateLocale();
+  const { t } = useTranslation(["common"]);
+
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
+      ns: "common",
+    });
+  }, [t, timeFormat]);
+
   const formatTime = useCallback(
     (val: unknown) => {
       return formatUnixTimestampToDateTime(
         updateTimes[Math.round(val as number) - 1],
         {
           timezone: config?.ui.timezone,
-          strftime_fmt:
-            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+          date_format: format,
+          locale,
         },
       );
     },
-    [config, updateTimes],
+    [config?.ui.timezone, format, locale, updateTimes],
   );
 
   const options = useMemo(() => {

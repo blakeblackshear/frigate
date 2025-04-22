@@ -45,6 +45,7 @@ import {
   useNotificationSuspend,
 } from "@/api/ws";
 import { useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -235,18 +236,25 @@ export default function LiveContextMenu({
     }
   };
 
+  const locale = useDateLocale();
+
   const formatSuspendedUntil = (timestamp: string) => {
     // Some languages require a change in word order
     if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
 
-    const time = formatUnixTimestampToDateTime(Number.parseInt(timestamp), {
+    const time = formatUnixTimestampToDateTime(parseInt(timestamp), {
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt:
+      date_format:
         config?.ui.time_format == "24hour"
-          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-          : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
+          ? t("time.formattedTimestampMonthDayHourMinute.24hour", {
+              ns: "common",
+            })
+          : t("time.formattedTimestampMonthDayHourMinute.12hour", {
+              ns: "common",
+            }),
+      locale: locale,
     });
     return t("time.untilForTime", { ns: "common", time });
   };
