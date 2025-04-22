@@ -42,6 +42,16 @@ go2rtc:
       - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
+If your camera does not support AAC audio or are having problems with Live view, try transcoding to AAC audio directly:
+
+```yaml
+go2rtc:
+  streams:
+    rtsp_cam: # <- for RTSP streams
+      - "ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac" # <- copies video stream and transcodes to aac audio
+      - "ffmpeg:rtsp_cam#audio=opus" # <- provides support for WebRTC
+```
+
 If your camera does not have audio and you are having problems with Live view, you should have go2rtc send video only:
 
 ```yaml
