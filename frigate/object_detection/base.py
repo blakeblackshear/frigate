@@ -100,7 +100,7 @@ def run_detector(
     setproctitle(f"frigate.detector.{name}")
     listen()
 
-    stop_even: MpEvent = mp.Event()
+    stop_event: MpEvent = mp.Event()
 
     def receiveSignal(signalNumber, frame):
         stop_event.set()
