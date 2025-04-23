@@ -1,5 +1,6 @@
 import datetime
 import logging
+import multiprocessing as mp
 import os
 import queue
 import signal
@@ -443,7 +444,7 @@ class CameraCapture(threading.Thread):
 def capture_camera(
     name, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
 ):
-    stop_event = MpEvent()
+    stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
         stop_event.set()
@@ -480,7 +481,7 @@ def track_camera(
     ptz_metrics: PTZMetrics,
     region_grid: list[list[dict[str, Any]]],
 ):
-    stop_event = MpEvent()
+    stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
         stop_event.set()

@@ -1,5 +1,6 @@
 import datetime
 import logging
+import multiprocessing as mp
 import os
 import queue
 import signal
@@ -99,7 +100,7 @@ def run_detector(
     setproctitle(f"frigate.detector.{name}")
     listen()
 
-    stop_event = MpEvent()
+    stop_event: MpEvent = mp.Event()
 
     def receiveSignal(signalNumber, frame):
         stop_event.set()
