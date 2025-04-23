@@ -1,11 +1,12 @@
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import queue
 import signal
 import threading
 from abc import ABC, abstractmethod
+from multiprocessing import Queue, Value
+from multiprocessing.synchronize import Event as MpEvent
 
 import numpy as np
 from setproctitle import setproctitle
@@ -15,6 +16,7 @@ from frigate.detectors import create_detector
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     InputDTypeEnum,
+    ModelConfig,
 )
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
@@ -85,11 +87,11 @@ class LocalObjectDetector(ObjectDetector):
 
 def run_detector(
     name: str,
-    detection_queue: mp.Queue,
-    out_events: dict[str, mp.Event],
-    avg_speed,
-    start,
-    detector_config,
+    detection_queue: Queue,
+    out_events: dict[str, MpEvent],
+    avg_speed: Value,
+    start: Value,
+    detector_config: BaseDetectorConfig,
 ):
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
@@ -97,7 +99,7 @@ def run_detector(
     setproctitle(f"frigate.detector.{name}")
     listen()
 
-    stop_event = mp.Event()
+    stop_event = MpEvent()
 
     def receiveSignal(signalNumber, frame):
         stop_event.set()
@@ -145,17 +147,17 @@ def run_detector(
 class ObjectDetectProcess:
     def __init__(
         self,
-        name,
-        detection_queue,
-        out_events,
-        detector_config,
+        name: str,
+        detection_queue: Queue,
+        out_events: dict[str, MpEvent],
+        detector_config: BaseDetectorConfig,
     ):
         self.name = name
         self.out_events = out_events
         self.detection_queue = detection_queue
-        self.avg_inference_speed = mp.Value("d", 0.01)
-        self.detection_start = mp.Value("d", 0.0)
-        self.detect_process = None
+        self.avg_inference_speed = Value("d", 0.01)
+        self.detection_start = Value("d", 0.0)
+        self.detect_process: util.Process | None = None
         self.detector_config = detector_config
         self.start_or_restart()
 
@@ -193,7 +195,15 @@ class ObjectDetectProcess:
 
 
 class RemoteObjectDetector:
-    def __init__(self, name, labels, detection_queue, event, model_config, stop_event):
+    def __init__(
+        self,
+        name: str,
+        labels: dict[int, str],
+        detection_queue: Queue,
+        event: MpEvent,
+        model_config: ModelConfig,
+        stop_event: MpEvent,
+    ):
         self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()

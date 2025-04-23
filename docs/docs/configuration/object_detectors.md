@@ -813,6 +813,22 @@ Hardware accelerated object detection is supported on the following SoCs:
 
 This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.2.
 
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming NPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  rknn_0:
+    type: rknn
+    num_cores: 0
+  rknn_1:
+    type: rknn
+    num_cores: 0
+```
+
+:::
+
 ### Prerequisites
 
 Make sure to follow the [Rockchip specific installation instructions](/frigate/installation#rockchip-platform).
