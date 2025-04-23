@@ -1758,7 +1758,7 @@ function FrigateCameraFeatures({
                 isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
               )}
             >
-              {t("manualRecording." + isRecording ? "end" : "start")}
+              {t("manualRecording." + (isRecording ? "end" : "start"))}
             </Button>
             <p className="text-sm text-muted-foreground">
               {t("manualRecording.tips")}
