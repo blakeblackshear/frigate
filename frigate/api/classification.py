@@ -280,9 +280,13 @@ def rename_face(request: Request, old_name: str, body: RenameFaceBody):
             status_code=200,
         )
     except ValueError as e:
+        logger.error(e)
         return JSONResponse(
             status_code=400,
-            content={"message": str(e), "success": False},
+            content={
+                "message": "Error renaming face. Check Frigate logs.",
+                "success": False,
+            },
         )
 
 
