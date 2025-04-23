@@ -5,11 +5,13 @@ import json
 import logging
 import multiprocessing as mp
 import os
+import re
 import signal
 import threading
 from types import FrameType
 from typing import Optional, Union
 
+from pathvalidate import ValidationError, sanitize_filename
 from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
@@ -235,6 +237,42 @@ class EmbeddingsContext:
 
         if len(os.listdir(folder)) == 0:
             os.rmdir(folder)
+
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
+    def rename_face(self, old_name: str, new_name: str) -> None:
+        valid_name_pattern = r"^[a-zA-Z0-9_-]{1,50}$"
+
+        try:
+            sanitized_old_name = sanitize_filename(old_name, replacement_text="_")
+            sanitized_new_name = sanitize_filename(new_name, replacement_text="_")
+        except ValidationError as e:
+            raise ValueError(f"Invalid face name: {str(e)}")
+
+        if not re.match(valid_name_pattern, old_name):
+            raise ValueError(f"Invalid old face name: {old_name}")
+        if not re.match(valid_name_pattern, new_name):
+            raise ValueError(f"Invalid new face name: {new_name}")
+        if sanitized_old_name != old_name:
+            raise ValueError(f"Old face name contains invalid characters: {old_name}")
+        if sanitized_new_name != new_name:
+            raise ValueError(f"New face name contains invalid characters: {new_name}")
+
+        old_path = os.path.normpath(os.path.join(FACE_DIR, old_name))
+        new_path = os.path.normpath(os.path.join(FACE_DIR, new_name))
+
+        # Prevent path traversal
+        if not old_path.startswith(
+            os.path.normpath(FACE_DIR)
+        ) or not new_path.startswith(os.path.normpath(FACE_DIR)):
+            raise ValueError("Invalid path detected")
+
+        if not os.path.exists(old_path):
+            raise ValueError(f"Face {old_name} not found.")
+
+        os.rename(old_path, new_path)
 
         self.requestor.send_data(
             EmbeddingsRequestEnum.clear_face_classifier.value, None
