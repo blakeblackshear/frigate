@@ -662,6 +662,7 @@ function TrainingGrid({
           </div>
           <img
             className="w-full"
+            loading="lazy"
             src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
         </DialogContent>
