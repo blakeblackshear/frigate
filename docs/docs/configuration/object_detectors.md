@@ -844,14 +844,14 @@ detectors: # required
 
 The inference time was determined on a rk3588 with 3 NPU cores.
 
-| Model               | Size in mb | Inference time in ms |
-| ------------------- | ---------- | -------------------- |
-| deci-fp16-yolonas_s | 24         | 25                   |
-| deci-fp16-yolonas_m | 62         | 35                   |
-| deci-fp16-yolonas_l | 81         | 45                   |
-| yolov9_tiny         | 8          | 35                   |
-| yolox_nano          | 3          | 16                   |
-| yolox_tiny          | 6          | 20                   |
+| Model                 | Size in mb | Inference time in ms |
+| --------------------- | ---------- | -------------------- |
+| deci-fp16-yolonas_s   | 24         | 25                   |
+| deci-fp16-yolonas_m   | 62         | 35                   |
+| deci-fp16-yolonas_l   | 81         | 45                   |
+| frigate-fp16-yolov9-t | 6          | 35                   |
+| rock-i8-yolox_nano    | 3          | 14                   |
+| rock-i8_yolox_tiny    | 6          | 18                   |
 
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
@@ -887,10 +887,13 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
   # possible values are:
-  # - yolov9-t
-  # - yolov9-s
+  # - frigate-fp16-yolov9-t
+  # - frigate-fp16-yolov9-s
+  # - frigate-fp16-yolov9-m
+  # - frigate-fp16-yolov9-c
+  # - frigate-fp16-yolov9-e
   # your yolo_model.rknn
-  path: /config/model_cache/rknn_cache/yolov9-t.rknn
+  path: frigate-fp16-yolov9-t
   model_type: yolo-generic
   width: 320
   height: 320
@@ -905,10 +908,12 @@ model: # required
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
   # possible values are:
-  # - yolox_nano
-  # - yolox_tiny
+  # - rock-i8-yolox_nano
+  # - rock-i8-yolox_tiny
+  # - rock-fp16-yolox_nano
+  # - rock-fp16-yolox_tiny
   # your yolox_model.rknn
-  path: yolox_tiny
+  path: rock-i8-yolox_nano
   model_type: yolox
   width: 416
   height: 416
