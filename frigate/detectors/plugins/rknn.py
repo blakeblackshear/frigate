@@ -19,7 +19,11 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
-supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
+supported_models = {
+    ModelTypeEnum.yologeneric: "^frigate-fp16-yolov9-[cemst]$",
+    ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$",
+    ModelTypeEnum.yolox: "^rock-(fp16|i8)-yolox_(nano|tiny)$",
+}
 
 model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 
@@ -115,7 +119,7 @@ class Rknn(DetectionApi):
                     model_props["model_type"] = model_type
 
             if model_matched:
-                model_props["filename"] = model_path + f"-{soc}-v2.3.0-1.rknn"
+                model_props["filename"] = model_path + f"-{soc}-v2.3.2-1.rknn"
 
                 model_props["path"] = model_cache_dir + model_props["filename"]
 
@@ -136,7 +140,7 @@ class Rknn(DetectionApi):
             os.mkdir(model_cache_dir)
 
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.0/{filename}",
+            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.2/{filename}",
             model_cache_dir + filename,
         )
 
