@@ -45,6 +45,9 @@ export function LanguageProvider({
   }, []);
 
   useEffect(() => {
+    // set document lang for smart capitalization
+    document.documentElement.lang = language;
+
     if (language === systemLanguage) return;
     i18next.changeLanguage(language);
   }, [language, systemLanguage]);
