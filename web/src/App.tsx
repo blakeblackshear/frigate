@@ -6,13 +6,12 @@ import Sidebar from "@/components/navigation/Sidebar";
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "@/context/auth-context";
-import { useTranslation } from "react-i18next";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -27,13 +26,6 @@ const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
 
 function App() {
-  const { i18n } = useTranslation();
-
-  // Set the lang attribute on the html element when language changes
-  React.useEffect(() => {
-    document.documentElement.lang = i18n.language;
-  }, [i18n.language]);
-
   return (
     <Providers>
       <AuthProvider>
