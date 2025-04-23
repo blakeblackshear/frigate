@@ -157,7 +157,7 @@ class ObjectDetectProcess:
         self.detection_queue = detection_queue
         self.avg_inference_speed = Value("d", 0.01)
         self.detection_start = Value("d", 0.0)
-        self.detect_process = None
+        self.detect_process: util.Process | None = None
         self.detector_config = detector_config
         self.start_or_restart()
 

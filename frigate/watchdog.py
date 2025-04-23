@@ -33,9 +33,9 @@ class FrigateWatchdog(threading.Thread):
                     detector.start_or_restart()
                 elif (
                     detector.detect_process is not None
-                    and not detector.detect_process.is_alive()  # type: ignore[unreachable]
+                    and not detector.detect_process.is_alive()
                 ):
-                    logger.info("Detection appears to have stopped. Exiting Frigate...")  # type: ignore[unreachable]
+                    logger.info("Detection appears to have stopped. Exiting Frigate...")
                     restart_frigate()
 
         logger.info("Exiting watchdog...")
