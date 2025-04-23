@@ -792,7 +792,7 @@ function ObjectDetailsTab({
               {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
-          {snapScore && (
+          {snapScore != undefined && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
                 <div className="flex flex-row items-center gap-1">

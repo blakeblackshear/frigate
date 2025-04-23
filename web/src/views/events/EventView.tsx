@@ -279,32 +279,29 @@ export default function EventView({
             value="alert"
             aria-label={t("alerts")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_alert",
-                  severityToggle == "alert" ? "font-semibold" : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_alert sm:hidden",
+                severityToggle == "alert" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.alert > -1 ? (
+                reviewCounts.alert
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("alerts")}
                 {reviewCounts.alert > -1 ? (
-                  reviewCounts.alert
+                  ` ∙ ${reviewCounts.alert}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  {t("alerts")}
-                  {reviewCounts.alert > -1 ? (
-                    ` ∙ ${reviewCounts.alert}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
@@ -313,34 +310,29 @@ export default function EventView({
             value="detection"
             aria-label={t("detections")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_detection",
-                  severityToggle == "detection"
-                    ? "font-semibold"
-                    : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_detection sm:hidden",
+                severityToggle == "detection" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.detection > -1 ? (
+                reviewCounts.detection
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("detections")}
                 {reviewCounts.detection > -1 ? (
-                  reviewCounts.detection
+                  ` ∙ ${reviewCounts.detection}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  {t("detections")}
-                  {reviewCounts.detection > -1 ? (
-                    ` ∙ ${reviewCounts.detection}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
@@ -350,14 +342,11 @@ export default function EventView({
             value="significant_motion"
             aria-label={t("motion.label")}
           >
-            {isMobileOnly ? (
-              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">{t("motion.label")}</div>
-              </>
-            )}
+            <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion sm:hidden" />
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
+              <div className="hidden md:block">{t("motion.label")}</div>
+            </div>
           </ToggleGroupItem>
         </ToggleGroup>
 
