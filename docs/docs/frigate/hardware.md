@@ -168,7 +168,7 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 
 | Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time     | YOLOx Inference Time      |
 | --------------- | --------------------- | --------------------------- | ------------------------- |
-| rk3588 3 cores  | ~ 35 ms               | small: ~ 20 ms med: ~ 30 ms | nano: 18 ms tiny: 20 ms   |
+| rk3588 3 cores  | tiny: ~ 35 ms         | small: ~ 20 ms med: ~ 30 ms | nano: 14 ms tiny: 18 ms   |
 | rk3566 1 core   |                       | small: ~ 96 ms              |                           |
 
 
