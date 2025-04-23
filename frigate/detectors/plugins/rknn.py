@@ -119,7 +119,7 @@ class Rknn(DetectionApi):
                     model_props["model_type"] = model_type
 
             if model_matched:
-                model_props["filename"] = model_path + f"-{soc}-v2.3.0-1.rknn"
+                model_props["filename"] = model_path + f"-{soc}-v2.3.2-1.rknn"
 
                 model_props["path"] = model_cache_dir + model_props["filename"]
 
