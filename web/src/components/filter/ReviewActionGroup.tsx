@@ -95,7 +95,13 @@ export default function ReviewActionGroup({
 
       <div className="absolute inset-x-2 inset-y-0 flex items-center justify-between gap-2 bg-background py-2 md:left-auto">
         <div className="mx-1 flex items-center justify-center text-sm text-muted-foreground">
-          <div className="p-1">{`${selectedReviews.length} selected`}</div>
+          <div className="p-1">
+            {selectedReviews.length}{" "}
+            {t("selected", {
+              ns: "views/events",
+              count: selectedReviews.length,
+            })}
+          </div>
           <div className="p-1">{"|"}</div>
           <div
             className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"

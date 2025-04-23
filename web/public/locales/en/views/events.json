@@ -31,5 +31,6 @@
     "label": "View new review items",
     "button": "New Items To Review"
   },
+  "selected": "selected",
   "camera": "Camera"
 }

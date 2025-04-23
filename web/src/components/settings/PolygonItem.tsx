@@ -222,7 +222,7 @@ export default function PolygonItem({
     saveToConfig(polygon);
     addMessage(
       "masks_zones",
-      "Restart required (masks/zones changed)",
+      t("masksAndZones.restart_required"),
       undefined,
       "masks_zones",
     );
