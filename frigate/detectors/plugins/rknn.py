@@ -140,7 +140,7 @@ class Rknn(DetectionApi):
             os.mkdir(model_cache_dir)
 
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.0/{filename}",
+            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.2/{filename}",
             model_cache_dir + filename,
         )
 
