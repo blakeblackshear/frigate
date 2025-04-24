@@ -898,8 +898,7 @@ function PtzControlPanel({
               <p>
                 {clickOverlay
                   ? t("ptz.move.clickMove.disable")
-                  : t("ptz.move.clickMove.enable")}{" "}
-                click to move
+                  : t("ptz.move.clickMove.enable")}
               </p>
             </TooltipContent>
           </Tooltip>
