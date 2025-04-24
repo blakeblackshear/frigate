@@ -56,7 +56,7 @@ Like the other real-time processors in Frigate, license plate recognition runs o
 
 ## Advanced Configuration
 
-Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that should be set at the camera level are `enabled`, `min_area`, and `enhancement`.
+Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled`, `min_area`, and `enhancement`.
 
 ### Detection
 
