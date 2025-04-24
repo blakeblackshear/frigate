@@ -1221,7 +1221,10 @@ class LicensePlateProcessingMixin:
             license_plate_area = (license_plate[2] - license_plate[0]) * (
                 license_plate[3] - license_plate[1]
             )
-            if license_plate_area < self.lpr_config.min_area:
+            if (
+                license_plate_area
+                < self.config.cameras[obj_data["camera"]].lpr.min_area
+            ):
                 logger.debug(f"{camera}: License plate area below minimum threshold.")
                 return
 

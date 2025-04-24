@@ -472,8 +472,24 @@ class FrigateConfig(FrigateBaseModel):
         )
 
         for name, camera in self.cameras.items():
+            modified_global_config = global_config.copy()
+
+            # only populate some fields down to the camera level for specific keys
+            allowed_fields_map = {
+                "face_recognition": ["enabled", "min_area"],
+                "lpr": ["enabled", "expire_time", "min_area", "enhancement"],
+            }
+
+            for section in allowed_fields_map:
+                if section in modified_global_config:
+                    modified_global_config[section] = {
+                        k: v
+                        for k, v in modified_global_config[section].items()
+                        if k in allowed_fields_map[section]
+                    }
+
             merged_config = deep_merge(
-                camera.model_dump(exclude_unset=True), global_config
+                camera.model_dump(exclude_unset=True), modified_global_config
             )
             camera_config: CameraConfig = CameraConfig.model_validate(
                 {"name": name, **merged_config}
