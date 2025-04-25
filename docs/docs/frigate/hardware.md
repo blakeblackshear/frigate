@@ -109,16 +109,13 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 
 | Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    | Notes                                  |
 | -------------------- | -------------------------- | ------------------------- | ------------------------- | -------------------------------------- |
-| Intel i3 6100T       | 15 - 35 ms                 |                           |                           | Can only run one detector instance     |
-| Intel i5 6500        | ~ 15 ms                    |                           |                           |                                        |
-| Intel i5 7200u       | 15 - 25 ms                 |                           |                           |                                        |
-| Intel i5 7500        | ~ 15 ms                    |                           |                           |                                        |
-| Intel i3 8100        | ~ 15 ms                    |                           |                           |                                        |
-| Intel i5 1135G7      | 10 - 15 ms                 |                           |                           |                                        |
-| Intel i3 12000       |                            | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
-| Intel i5 12600K      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
-| Intel i7 12650H      | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 42 ms | 336: 50 ms                |                                        |
+| Intel HD 530         | 15 - 35 ms                 |                           |                           | Can only run one detector instance     |
+| Intel HD 620         | 15 - 25 ms                 | 320: ~ 35 ms              |                           |                                        |
+| Intel HD 630         | ~ 15 ms                    | 320: ~ 30 ms              |                           |                                        |
+| Intel UHD 730        | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
+| Intel UHD 770        | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
 | Intel N100           | ~ 15 ms                    | 320: ~ 20 ms              |                           |                                        |
+| Intel Iris XE        | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                           |                                        |
 | Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms     |                                        |
 | Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                           |                                        |
 
