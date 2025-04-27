@@ -1143,7 +1143,7 @@ class PtzAutoTracker:
             tilt = (0.5 - (centroid_y / camera_height)) * 2
 
             logger.debug(
-                f"{camera}: Zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
+                f"{camera}: Zoom amount: {zoom}, zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
             )
 
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
