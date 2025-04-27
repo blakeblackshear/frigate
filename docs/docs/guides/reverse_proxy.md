@@ -181,6 +181,7 @@ It will also add a router, routing requests to "traefik.example.com" to your loc
 Note that with this approach, you don't need to expose any ports for the Frigate instance since all traffic will be routed over the internal Docker network.
 
 ## Caddy Reverse Proxy
+
 This example shows a working example of frigate running under a subdomain with logging and a tls cert (in this case a wildcard domain cert obtained independently of caddy) handled via imports
 
 ```caddy
