@@ -206,6 +206,7 @@ class PtzAutoTracker:
         self.calibrating: dict[str, object] = {}
         self.intercept: dict[str, object] = {}
         self.move_coefficients: dict[str, object] = {}
+        self.zoom_time: dict[str, float] = {}
         self.zoom_factor: dict[str, object] = {}
 
         # if cam is set to autotrack, onvif should be set up
@@ -292,7 +293,7 @@ class PtzAutoTracker:
             self.move_threads[camera].start()
 
             if camera_config.onvif.autotracking.movement_weights:
-                if len(camera_config.onvif.autotracking.movement_weights) == 5:
+                if len(camera_config.onvif.autotracking.movement_weights) == 6:
                     camera_config.onvif.autotracking.movement_weights = [
                         float(val)
                         for val in camera_config.onvif.autotracking.movement_weights
@@ -311,7 +312,10 @@ class PtzAutoTracker:
                         camera_config.onvif.autotracking.movement_weights[2]
                     )
                     self.move_coefficients[camera] = (
-                        camera_config.onvif.autotracking.movement_weights[3:]
+                        camera_config.onvif.autotracking.movement_weights[3:5]
+                    )
+                    self.zoom_time[camera] = (
+                        camera_config.onvif.autotracking.movement_weights[5]
                     )
                 else:
                     camera_config.onvif.autotracking.enabled = False
@@ -362,6 +366,7 @@ class PtzAutoTracker:
             logger.info(f"Calibration for {camera} in progress: 0% complete")
 
             for i in range(2):
+                start_time = time.time()
                 # absolute move to 0 - fully zoomed out
                 self.onvif._zoom_absolute(
                     camera,
@@ -384,6 +389,9 @@ class PtzAutoTracker:
                     self.onvif.get_camera_status(camera)
 
                 zoom_in_values.append(self.ptz_metrics[camera].zoom_level.value)
+                stop_time = time.time()
+
+                self.zoom_time[camera] = stop_time - start_time
 
                 if (
                     self.config.cameras[camera].onvif.autotracking.zooming
@@ -421,12 +429,13 @@ class PtzAutoTracker:
             self.ptz_metrics[camera].min_zoom.value = min(zoom_out_values)
 
             logger.debug(
-                f"{camera}: Calibration values: max zoom: {self.ptz_metrics[camera].max_zoom.value}, min zoom: {self.ptz_metrics[camera].min_zoom.value}"
+                f"{camera}: Calibration values: max zoom: {self.ptz_metrics[camera].max_zoom.value}, min zoom: {self.ptz_metrics[camera].min_zoom.value}, zoom time: {self.zoom_time[camera]}"
             )
 
         else:
             self.ptz_metrics[camera].max_zoom.value = 1
             self.ptz_metrics[camera].min_zoom.value = 0
+            self.zoom_time[camera] = 0
 
         self.onvif._move_to_preset(
             camera,
@@ -537,6 +546,7 @@ class PtzAutoTracker:
                     self.ptz_metrics[camera].max_zoom.value,
                     self.intercept[camera],
                     *self.move_coefficients[camera],
+                    self.zoom_time[camera],
                 ]
             )
 
@@ -1111,6 +1121,31 @@ class PtzAutoTracker:
             camera, obj, predicted_box, predicted_movement_time, debug_zoom=True
         )
 
+        if (
+            camera_config.onvif.autotracking.movement_weights
+            and camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative
+            and zoom != 0
+        ):
+            zoom_predicted_movement_time = abs(zoom) * self.zoom_time[camera]
+
+            zoom_predicted_box = (
+                predicted_box
+                + camera_fps * zoom_predicted_movement_time * average_velocity
+            )
+
+            zoom_predicted_box = np.round(zoom_predicted_box).astype(int)
+
+            centroid_x = round((zoom_predicted_box[0] + zoom_predicted_box[2]) / 2)
+            centroid_y = round((zoom_predicted_box[1] + zoom_predicted_box[3]) / 2)
+
+            # recalculate pan and tilt with new centroid
+            pan = ((centroid_x / camera_width) - 0.5) * 2
+            tilt = (0.5 - (centroid_y / camera_height)) * 2
+
+            logger.debug(
+                f"{camera}: Zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
+            )
+
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
 
     def _autotrack_move_zoom_only(self, camera, obj):
@@ -1242,7 +1277,7 @@ class PtzAutoTracker:
                 return
 
             # this is a brand new object that's on our camera, has our label, entered the zone,
-            # is not a false positive, and is not initially motionless
+            # is not a false positive, and is active
             if (
                 # new object
                 self.tracked_object[camera] is None
@@ -1252,7 +1287,7 @@ class PtzAutoTracker:
                 and not obj.previous["false_positive"]
                 and not obj.false_positive
                 and not self.tracked_object_history[camera]
-                and obj.obj_data["motionless_count"] == 0
+                and obj.active
             ):
                 logger.debug(
                     f"{camera}: New object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
