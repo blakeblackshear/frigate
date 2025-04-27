@@ -182,7 +182,7 @@ Note that with this approach, you don't need to expose any ports for the Frigate
 
 ## Caddy Reverse Proxy
 
-This example shows a working example of frigate running under a subdomain with logging and a tls cert (in this case a wildcard domain cert obtained independently of caddy) handled via imports
+This example shows Frigate running under a subdomain with logging and a tls cert (in this case a wildcard domain cert obtained independently of caddy) handled via imports
 
 ```caddy
 (logging) {
