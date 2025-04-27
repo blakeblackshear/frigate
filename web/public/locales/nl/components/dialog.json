@@ -15,15 +15,9 @@
         "desc": "Objecten op locaties die je wilt vermijden, zijn geen valspositieven. Als je ze als valspositieven indient, brengt dit het model in verwarring."
       },
       "review": {
-        "true": {
-          "true_one": "Dit is een {{label}}",
-          "true_other": "Dit zijn {{label}}",
-          "label": "Bevestig dit label voor Frigate Plus"
-        },
-        "false": {
-          "false_one": "Dit is geen {{label}}",
-          "false_other": "Dit zijn geen {{label}}",
-          "label": "Bevestig dit label niet voor Frigate Plus"
+        "question": {
+          "label": "Bevestig dit label voor Frigate Plus",
+          "ask_full": "Dit zijn <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Ingediend"

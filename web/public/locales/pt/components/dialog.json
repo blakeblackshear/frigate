@@ -15,20 +15,12 @@
         "desc": "Objetos em locais que você quer evitar não são falsos positivos. Enviá-los como falsos positivos confundirá o modelo."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Confirme esta etiqueta para Frigate Plus",
-          "true_one": "Este é um {{label}}",
-          "true_many": "Estes são muitos {{label}}",
-          "true_other": "Estão são {{label}}"
+          "ask_full": "Estão são <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Enviado"
-        },
-        "false": {
-          "label": "Não confirmar esta etiqueta para Frigate Plus",
-          "false_one": "Este não é um {{label}}",
-          "false_many": "Estes não são muitos {{label}}",
-          "false_other": "Estes não são {{label}}"
         }
       }
     },

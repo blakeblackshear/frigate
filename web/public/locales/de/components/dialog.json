@@ -10,24 +10,18 @@
   },
   "explore": {
     "plus": {
-      "review": {
-        "true": {
-          "label": "Bestätigen Sie das Label für Frigate Plus",
-          "true_one": "Das ist ein/eine {{label}}",
-          "true_other": "Dies sind {{label}}"
-        },
-        "state": {
-          "submitted": "Übermittelt"
-        },
-        "false": {
-          "false_one": "Das ist kein(e) {{label}}",
-          "false_other": "Das sind kein(e) {{label}}",
-          "label": "Bestätige dieses Label nicht für Frigate Plus"
-        }
-      },
       "submitToPlus": {
         "label": "An Frigate+ übermitteln",
         "desc": "Objekte an Orten die du vermeiden möchtest, sind keine Fehlalarme. Wenn du sie als Fehlalarme meldest, verwirrst du das Modell."
+      },
+      "review": {
+        "question": {
+          "label": "Bestätigen Sie das Label für Frigate Plus",
+          "ask_full": "Dies sind <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Übermittelt"
+        }
       }
     },
     "video": {

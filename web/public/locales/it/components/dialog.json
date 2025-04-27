@@ -15,17 +15,9 @@
         "desc": "Gli oggetti in posizioni che si desidera evitare non sono falsi positivi. Inviarli come falsi positivi confonderà il modello."
       },
       "review": {
-        "false": {
-          "label": "Non confermare questa etichetta per Frigate Plus",
-          "false_one": "Questo non è un {{label}}",
-          "false_many": "Questi non sono un {{label}}",
-          "false_other": "Questi non sono un {{label}}"
-        },
-        "true": {
+        "question": {
           "label": "Conferma questa etichetta per Frigate Plus",
-          "true_one": "Questo è un {{label}}",
-          "true_many": "Questi sono {{label}}",
-          "true_other": "Questi sono {{label}}"
+          "ask_full": "Questi sono <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Inviato"

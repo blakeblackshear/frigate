@@ -15,15 +15,9 @@
         "desc": "您希望避开的地点中的物体不应被视为误报。若将其作为误报提交，可能会导致AI模型容易混淆相关物体的识别。"
       },
       "review": {
-        "true": {
+        "question": {
           "label": "为 Frigate Plus 确认此标签",
-          "true_one": "这是 {{label}}",
-          "true_other": "这是 {{label}}"
-        },
-        "false": {
-          "label": "不为 Frigate Plus 确认此标签",
-          "false_one": "这不是 {{label}}",
-          "false_other": "这不是 {{label}}"
+          "ask_full": "这是 <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "已提交"

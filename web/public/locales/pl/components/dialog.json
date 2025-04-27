@@ -15,17 +15,9 @@
         "desc": "Obiekty w miejscach, których chcesz unikać, nie są fałszywymi alarmami. Zgłaszanie ich jako fałszywe alarmy zdezorientuje model."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Potwierdź tę etykietę dla Frigate Plus",
-          "true_one": "To jest {{label}}",
-          "true_few": "To są {{label}}",
-          "true_many": "To są {{label}}"
-        },
-        "false": {
-          "label": "Nie potwierdzaj tej etykiety dla Frigate Plus",
-          "false_one": "To nie jest {{label}}",
-          "false_few": "To nie są {{label}}",
-          "false_many": "To nie są {{label}}"
+          "ask_full": "To są <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Przesłano"

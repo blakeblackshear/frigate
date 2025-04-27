@@ -10,24 +10,18 @@
   },
   "explore": {
     "plus": {
-      "review": {
-        "state": {
-          "submitted": "Gönderildi"
-        },
-        "true": {
-          "true_one": "Bu bir {{label}}",
-          "true_other": "Bu bir {{label}}",
-          "label": "Frigate+ için bu etiketi onaylayın"
-        },
-        "false": {
-          "label": "Bu etiketi Frigate+ için onaylamaktan vazgeç",
-          "false_one": "Bu bir {{label}} değil",
-          "false_other": "Bu bir {{label}} değil"
-        }
-      },
       "submitToPlus": {
         "label": "Frigate+'ya Gönder",
         "desc": "Görülmesini istemediğiniz yerlerdeki nesneler yanlış pozitif değildir. Bunları yanlış pozitif olarak göndermek modeli yanıltacaktır."
+      },
+      "review": {
+        "question": {
+          "label": "Frigate+ için bu etiketi onaylayın",
+          "ask_full": "Bu bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Gönderildi"
+        }
       }
     },
     "video": {

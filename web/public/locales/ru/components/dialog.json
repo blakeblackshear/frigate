@@ -15,17 +15,9 @@
         "desc": "Объекты в местах, которых вы хотите избежать, не являются ложными срабатываниями. Отправка их как ложных срабатываний запутает модель."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Подтвердите метку для Frigate Plus",
-          "true_one": "Это {{label}}",
-          "true_few": "Это {{label}}",
-          "true_many": "Это {{label}}"
-        },
-        "false": {
-          "label": "Не подтверждать эту метку для Frigate Plus",
-          "false_one": "Это не {{label}}",
-          "false_few": "Это не {{label}}",
-          "false_many": "Это не {{label}}"
+          "ask_full": "Это <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Отправлено"

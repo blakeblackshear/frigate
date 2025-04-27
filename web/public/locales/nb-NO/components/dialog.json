@@ -15,18 +15,12 @@
         "desc": "Objekter på steder du vil unngå er ikke falske positiver. Å sende dem som falske positiver vil forvirre modellen."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Bekreft denne merkelappen for Frigate Plus",
-          "true_one": "Dette er en {{label}}",
-          "true_other": "Dette er en {{label}}"
+          "ask_full": "Dette er en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Sendt inn"
-        },
-        "false": {
-          "label": "Ikke bekreft denne merkelappen for Frigate Plus",
-          "false_one": "Dette er ikke en {{label}}",
-          "false_other": "Dette er ikke en {{label}}"
         }
       }
     },

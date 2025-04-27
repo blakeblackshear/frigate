@@ -15,17 +15,9 @@
         "desc": "Les objets situés dans des endroits que vous souhaitez éviter ne sont pas des faux positifs. Les soumettre comme faux positifs perturberait le modèle."
       },
       "review": {
-        "true": {
+        "question": {
           "label": "Confirmez cette étiquette pour Frigate Plus",
-          "true_one": "C'est un {{label}}",
-          "true_many": "Ce sont des {{label}}",
-          "true_other": "Ce sont des {{label}}"
-        },
-        "false": {
-          "false_one": "Ceci n'est pas un {{label}}",
-          "false_many": "Ceux-ci ne sont pas des {{label}}",
-          "false_other": "Ceux-ci ne sont pas des {{label}}",
-          "label": "Ne pas confirmer cette étiquette pour Frigate Plus"
+          "ask_full": "Ce sont des <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Soumis"
