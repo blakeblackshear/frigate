@@ -137,19 +137,37 @@
       "error": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
     },
     "birdClassification": {
-      "title": "Classificação de Pássaros"
+      "title": "Classificação de Pássaros",
+      "desc": "A classificação de aves/pássaros identifica aves conhecidas usando um modelo Tensorflow quantizado. Quando uma ave/ pássaro conhecida(o) for reconhecida(o), o seu nome comum será adicionado como um sub_rótulo. Estas informações estão incluídas na interface do utilizador, nos filtros e também nas notificações."
     }
   },
   "notification": {
     "globalSettings": {
-      "title": "Configurações globais"
+      "title": "Configurações globais",
+      "desc": "Suspenda temporariamente as notificações para câmaras específicas em todos os dispositivos registados."
     },
     "notificationSettings": {
-      "documentation": "Leia a documentação"
+      "documentation": "Leia a documentação",
+      "title": "Configurações de notificação",
+      "desc": "O Frigate pode enviar notificações push para o seu dispositivo quando está a ser executado no browser ou instalado como um PWA."
     },
     "notificationUnavailable": {
-      "documentation": "Leia a documentação"
-    }
+      "documentation": "Leia a documentação",
+      "title": "Notificações indisponíveis"
+    },
+    "cameras": {
+      "title": "Câmeras",
+      "noCameras": "Nenhuma câmara disponível",
+      "desc": "Selecione para que câmaras as notificações serão ativadas."
+    },
+    "deviceSpecific": "Configurações específicas do dispositivo",
+    "registerDevice": "Registe este dispositivo",
+    "email": {
+      "placeholder": "por exemplo: exemplo@email.com",
+      "desc": "É necessário um e-mail válido que será utilizado para o notificar caso haja algum problema com o serviço push.",
+      "title": "E-mail"
+    },
+    "title": "Notificações"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -158,6 +176,10 @@
         "snapshots": "Snapshots",
         "camera": "Câmera"
       }
+    },
+    "toast": {
+      "success": "As definições do Frigate+ foram guardadas. Reinicie o Frigate para aplicar as alterações.",
+      "error": "Falha ao guardar alterações de configuração: {{errorMessage}}"
     }
   },
   "masksAndZones": {
@@ -175,7 +197,12 @@
       "desc": {
         "documentation": "Documentação"
       },
-      "clickDrawPolygon": "Clique para desenhar um polígono na imagem."
+      "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
+      "toast": {
+        "success": {
+          "noName": "O filtro de movimento foi guardado. Reinicie o Frigate para aplicar as alterações."
+        }
+      }
     },
     "zones": {
       "label": "Zonas",
@@ -294,8 +321,12 @@
       "objects": {
         "allObjectTypes": "Todos os tipos de objeto",
         "title": "Objetos"
-      }
-    }
+      },
+      "add": "Adicionar filtro para objecto",
+      "edit": "Editar filtro de objecto",
+      "documentTitle": "Editar filtro de movimento - Frigate"
+    },
+    "restart_required": "É necessário reiniciar (máscaras/zonas alteradas)"
   },
   "debug": {
     "zones": {
