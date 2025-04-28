@@ -135,6 +135,7 @@ class EmbeddingMaintainer(threading.Thread):
             self.realtime_processors.append(
                 LicensePlateRealTimeProcessor(
                     self.config,
+                    self.requestor,
                     self.event_metadata_publisher,
                     metrics,
                     lpr_model_runner,
@@ -149,6 +150,7 @@ class EmbeddingMaintainer(threading.Thread):
             self.post_processors.append(
                 LicensePlatePostProcessor(
                     self.config,
+                    self.requestor,
                     self.event_metadata_publisher,
                     metrics,
                     lpr_model_runner,
@@ -583,6 +585,7 @@ class EmbeddingMaintainer(threading.Thread):
                 "type": TrackedObjectUpdateTypesEnum.description,
                 "id": event.id,
                 "description": description,
+                "camera": event.camera,
             },
         )
 

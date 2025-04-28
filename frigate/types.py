@@ -25,3 +25,5 @@ class ModelStatusTypesEnum(str, Enum):
 
 class TrackedObjectUpdateTypesEnum(str, Enum):
     description = "description"
+    face = "face"
+    lpr = "lpr"

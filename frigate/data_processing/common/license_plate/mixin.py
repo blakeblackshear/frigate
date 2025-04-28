@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import math
 import os
@@ -23,6 +24,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
@@ -1510,6 +1512,20 @@ class LicensePlateProcessingMixin:
             )
 
         # always publish to recognized_license_plate field
+        self.requestor.send_data(
+            "tracked_object_update",
+            json.dumps(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.lpr,
+                    "name": sub_label,
+                    "plate": top_plate,
+                    "score": avg_confidence,
+                    "id": id,
+                    "camera": camera,
+                    "timestamp": start,
+                }
+            ),
+        )
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
             (id, top_plate, avg_confidence),
