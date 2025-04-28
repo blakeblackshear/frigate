@@ -156,7 +156,11 @@ export default function ReviewDetailDialog({
 
   return (
     <>
-      <Overlay open={isOpen ?? false} onOpenChange={handleOpenChange}>
+      <Overlay
+        open={isOpen ?? false}
+        onOpenChange={handleOpenChange}
+        enableHistoryBack={true}
+      >
         <FrigatePlusDialog
           upload={upload}
           onClose={() => setUpload(undefined)}
