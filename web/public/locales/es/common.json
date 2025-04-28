@@ -16,8 +16,8 @@
       "12hour": "%b %-d, %I:%M %p"
     },
     "formattedTimestamp": {
-      "24hour": "%b %-d, %H:%M:%S",
-      "12hour": "%b %-d, %I:%M:%S %p"
+      "24hour": "MMM d, HH:mm:ss",
+      "12hour": "MMM d, h:mm:ss aaa"
     },
     "day_one": "{{time}} día",
     "day_many": "{{time}} días",
@@ -54,15 +54,36 @@
     "minute_other": "{{time}} minutos",
     "s": "{{time}}s",
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "5minutes": "5 minutos",
     "am": "am",
     "d": "{{time}}d",
     "hour_one": "{{time}} hora",
     "hour_many": "{{time}} horas",
-    "hour_other": "{{time}} horas"
+    "hour_other": "{{time}} horas",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    }
   },
   "menu": {
     "settings": "Ajustes",
@@ -193,7 +214,7 @@
     "next": "Siguiente",
     "edit": "Editar",
     "enabled": "Habilitado",
-    "saving": "Guardando...",
+    "saving": "Guardando…",
     "exitFullscreen": "Salir de pantalla completa",
     "on": "ENCENDIDO"
   },

@@ -3,7 +3,7 @@
   "exploreIsUnavailable": {
     "title": "Explorar no está disponible",
     "embeddingsReindexing": {
-      "startingUp": "Iniciando...",
+      "startingUp": "Iniciando…",
       "estimatedTime": "Tiempo estimado restante:",
       "finishingShortly": "Finalizando en breve",
       "step": {
@@ -124,7 +124,12 @@
       "heard": "{{label}} escuchado",
       "external": "{{label}} detectado",
       "active": "{{label}} se activó",
-      "stationary": "{{label}} se volvió estacionario"
+      "stationary": "{{label}} se volvió estacionario",
+      "header": {
+        "zones": "Zonas",
+        "ratio": "Proporción",
+        "area": "Área"
+      }
     },
     "annotationSettings": {
       "offset": {
