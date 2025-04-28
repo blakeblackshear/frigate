@@ -153,6 +153,7 @@
       "fi": "Suomi (Finnish)",
       "da": "Dansk (Danish)",
       "sk": "Slovenčina (Slovak)",
+      "yue": "粵語 (Cantonese)",
       "withSystem": {
         "label": "Use the system settings for language"
       }
