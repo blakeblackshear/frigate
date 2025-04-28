@@ -6,5 +6,6 @@
       "endTimeMustAfterStartTime": "समाप्ति समय प्रारंभ समय के बाद होना चाहिए"
     }
   },
-  "export": "निर्यात"
+  "export": "निर्यात",
+  "filter": "फ़िल्टर"
 }
