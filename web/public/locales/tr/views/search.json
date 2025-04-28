@@ -34,7 +34,14 @@
       "desc": {
         "text": "Filtreler arama sonuçlarınızı daraltmanıza yardımcı olur. Giriş alanındaki kullanımları şöyledir:",
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"> <li>Bir filtre adı yazın ve iki nokta üst üste (:) ile bitirin (örn. \"kameralar:\").</li> <li>Önerilerden bir değer seçin veya kendiniz yazın.</li> <li>Birden fazla filtreyi aralarına boşluk koyarak art arda ekleyip kullanın.</li> <li>Tarih filtreleri (before: ve after:) <em>{{DateFormat}}</em> biçimini kullanır.</li> <li>Zaman aralığı filtresi <em>{{exampleTime}}</em> biçimini kullanır.</li> <li>Filtreleri kaldırmak için yanlarındaki 'x'e tıklayın.</li></ul>",
-        "example": "Örnek(anahtar kelimeler ingilizce olmalıdır): <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>"
+        "example": "Örnek(anahtar kelimeler ingilizce olmalıdır): <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "exampleLabel": "Örnek:",
+        "step1": "Bir filtre anahtarını iki nokta üst üste ile beraber yazın (örn. belli kameraları seçmek için \"cameras:\").",
+        "step2": "Önerilen bir değer seçin veya kendiniz girin.",
+        "step3": "Birden fazla filtreyi aralarında boşluk bırakarak kullanabilirsiniz.",
+        "step4": "Tarih filtreleri (before: ve after:) {{DateFormat}} formatını kullanır.",
+        "step5": "Zaman aralığı filtreleri {{exampleTime}} formatını kullanır.",
+        "step6": "Filtreleri kaldırmak için yanlarındaki çarpıya basın."
       }
     },
     "toast": {
@@ -54,7 +61,7 @@
     }
   },
   "placeholder": {
-    "search": "Ara..."
+    "search": "Ara…"
   },
   "similaritySearch": {
     "active": "Benzerlik araması aktif",

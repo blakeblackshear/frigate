@@ -129,7 +129,8 @@
     "birdClassification": {
       "title": "Kuş Sınıflandırma",
       "desc": "Kuş Sınıflandırma özelliği, bilinen kuş türlerini kuantize edilmiş bir Tensorflow modeli kullanarak teşhis etmenizi sağlar. Model bir kuş türünü teşhis ettiğinde, Frigate, bu türün adını alt etiket olarak ekler. Bu bilgi; kullanıcı arayüzü, filtreler ve bildirimlerde gösterilir."
-    }
+    },
+    "restart_required": "Yeniden Başlatma Gerekli (Sınıflandırma ayarları değiştirildi)"
   },
   "cameraSetting": {
     "camera": "Kamera",
@@ -331,7 +332,8 @@
       "documentTitle": "Nesne Maskesini Düzenle - Frigate",
       "label": "Nesne Maskeleri",
       "clickDrawPolygon": "Görüntü üzerinde bir çokgen çizmek için tıklayın."
-    }
+    },
+    "restart_required": "Yeniden Başlatma Gerekli (maskeler/alanlar değiştirildi)"
   },
   "motionDetectionTuner": {
     "title": "Hareket Algılama Ayarlayıcı",
@@ -372,12 +374,12 @@
     "motion": {
       "title": "Hareket kutuları",
       "desc": "Hareketin algılandığı alanların etrafında çerçeve göster",
-      "tips": "<p className=\"mb-2\"><strong>Hareket Kutuları</strong></p><br><p>Hareketin algılandığı alanlar kırmızı çerçeve ile gösterilecektir.</p>"
+      "tips": "<p><strong>Hareket Kutuları</strong></p><br><p>Hareketin algılandığı alanlar kırmızı çerçeve ile gösterilecektir.</p>"
     },
     "regions": {
       "title": "Tespit Bölgeleri",
       "desc": "Nesne algılayıcıya gönderilen tespit alanlarını göster",
-      "tips": "<p className=\"mb-2\"><strong>Bölge Kutuları</strong></p><br><p>Görüntüdeki nesne dedektörüne gönderilen tespit alanları parlak yeşil renk çerçeve ile gösterilir.</p>"
+      "tips": "<p><strong>Bölge Kutuları</strong></p><br><p>Görüntüdeki nesne dedektörüne gönderilen tespit alanları parlak yeşil renk çerçeve ile gösterilir.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Nesne Şekil Filtresi Çizimi",
@@ -472,7 +474,7 @@
       },
       "deleteUser": {
         "title": "Kullanıcıyı Sil",
-        "warn": "<span className=\"font-bold\">{{username}}</span>'i silmek istediğinizden emin misiniz?",
+        "warn": "<strong>{{username}}</strong>'i silmek istediğinizden emin misiniz?",
         "desc": "Bu işlem geri alınamaz. Bu, kullanıcı hesabını kalıcı olarak silecek ve tüm ilişkili verileri kaldıracaktır."
       },
       "passwordSetting": {
@@ -482,8 +484,14 @@
       },
       "changeRole": {
         "title": "Kullanıcı Rolünü Değiştir",
-        "desc": "<span className=\"font-medium\">{{username}}</span> için izinleri güncelle",
-        "roleInfo": "<p>Bu kullanıcı için uygun rolü seçin:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Yönetici:</span> Tüm özelliklere tam erişim. </li><li> • <span className=\"font-medium\">Görüntüleyici:</span> Yalnızca Canlı kontrol panelleri, İnceleme, Keşfet ve Dışa Aktarmalar panelleri ile sınırlıdır, ayarları düzenleyemez.</li></ul>"
+        "desc": "<strong>{{username}}</strong> için izinleri güncelle",
+        "roleInfo": {
+          "adminDesc": "Tüm özelliklere tam erişim.",
+          "intro": "Bu kullanıcı için bir rol seçin:",
+          "admin": "Yönetici",
+          "viewer": "Görüntüleyici",
+          "viewerDesc": "Yalnızca Canlı, İncele, Keşfet ve Dışa Aktar'a girebilir."
+        }
       }
     },
     "updatePassword": "Parola Belirle"
@@ -572,11 +580,16 @@
       "title": "Model Bilgileri",
       "trainDate": "Eğitim Tarihi",
       "supportedDetectors": "Desteklenen Algılayıcılar",
-      "cameras": "Kameralar"
+      "cameras": "Kameralar",
+      "plusModelType": {
+        "userModel": "İnce Ayarlı",
+        "baseModel": "Baz Model"
+      }
     },
     "toast": {
       "success": "Frigate+ ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
       "error": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
-    }
+    },
+    "restart_required": "Yeniden Başlatma Gerekli (Frigate+ modeli değiştirildi)"
   }
 }

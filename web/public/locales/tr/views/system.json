@@ -41,7 +41,9 @@
       "gpuUsage": "GPU Kullanımı",
       "gpuMemory": "GPU Belleği",
       "gpuEncoder": "GPU Kodlayıcı",
-      "title": "Donanım Bilgisi"
+      "title": "Donanım Bilgisi",
+      "npuUsage": "NPU Kullanımı",
+      "npuMemory": "NPU Bellek Kullanımı"
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",
@@ -118,14 +120,24 @@
     "ffmpegHighCpuUsage": "{{camera}} FFMPEG'te yüksek miktarda CPU kullanıyor (%{{ffmpegAvg}})",
     "reindexingEmbeddings": "Gömüler yeniden dizinleniyor (%{{processed}} tamamlandı)",
     "detectHighCpuUsage": "{{camera}} tespitte yüksek miktarda CPU kullanıyor (%{{detectAvg}})",
-    "healthy": "Sistem sağlıklı"
+    "healthy": "Sistem sağlıklı",
+    "detectIsVerySlow": "{{detect}} çok yavaş çalışıyor ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} çevrimdışı",
+    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)"
   },
   "enrichments": {
     "embeddings": {
       "image_embedding_speed": "Resim Gömü Hızı",
       "text_embedding_speed": "Metin Gömü Hızı",
       "plate_recognition_speed": "Plaka Tanıma Hızı",
-      "face_embedding_speed": "Yüz Gömü Hızı"
+      "face_embedding_speed": "Yüz Gömü Hızı",
+      "image_embedding": "Resim Gömüleme",
+      "text_embedding": "Metin Gömülüeme",
+      "face_recognition": "Yüz Tanıma",
+      "plate_recognition": "Plaka Tanıma",
+      "face_recognition_speed": "Yüz Tanıma Hızı",
+      "yolov9_plate_detection_speed": "YOLOv9 Plaka Tanıma Hızı",
+      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma"
     },
     "infPerSecond": "Saniye Başına Çıkarım",
     "title": "Zenginleştirmeler"
