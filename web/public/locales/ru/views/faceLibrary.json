@@ -37,8 +37,9 @@
       "deletedName_many": "{{count}} лиц успешно удалено.",
       "uploadedImage": "Изображение успешно загружено.",
       "trainedFace": "Лицо успешно запомнено.",
-      "addFaceLibrary": "{{name}} успешно добавлен в Библиотеку Лиц!",
-      "updatedFaceScore": "Оценка лица успешно обновлена."
+      "addFaceLibrary": "{{name}} успешно добавлен(а) в Библиотеку лиц!",
+      "updatedFaceScore": "Оценка лица успешно обновлена.",
+      "renamedFace": "Лицо успешно переименовано в {{name}}"
     },
     "error": {
       "deleteFaceFailed": "Не удалось удалить: {{errorMessage}}",
@@ -46,7 +47,8 @@
       "trainFailed": "Не удалось запомнить: {{errorMessage}}",
       "updateFaceScoreFailed": "Не удалось обновить оценку лица: {{errorMessage}}",
       "addFaceLibraryFailed": "Не удалось установить имя для лица: {{errorMessage}}",
-      "deleteNameFailed": "Не удалось удалить имя: {{errorMessage}}"
+      "deleteNameFailed": "Не удалось удалить имя: {{errorMessage}}",
+      "renameFaceFailed": "Не удалось переименовать лицо: {{errorMessage}}"
     }
   },
   "deleteFaceLibrary": {
@@ -54,7 +56,7 @@
     "desc": "Вы уверены, что хотите удалить коллекцию «{{name}}»? Это действие безвозвратно удалит все лица в коллекции."
   },
   "imageEntry": {
-    "dropActive": "Перетащите изображение сюда...",
+    "dropActive": "Перетащите изображение сюда…",
     "dropInstructions": "Перетащите изображение сюда или нажмите для выбора",
     "maxSize": "Макс. размер: {{size}}Мб",
     "validation": {
@@ -62,17 +64,23 @@
     }
   },
   "readTheDocs": "Прочитать документацию",
-  "trainFaceAs": "Запомнить Лицо как:",
+  "trainFaceAs": "Запомнить лицо как:",
   "button": {
     "uploadImage": "Загрузить изображение",
     "deleteFaceAttempts": "Удалить попытки распознавания лиц",
-    "addFace": "Добавить Лицо",
-    "reprocessFace": "Переобработать Лицо"
+    "addFace": "Добавить лицо",
+    "reprocessFace": "Обработать лицо повторно",
+    "renameFace": "Переименовать лицо",
+    "deleteFace": "Удалить лицо"
   },
-  "trainFace": "Запомнить Лицо",
+  "trainFace": "Запомнить лицо",
   "steps": {
     "faceName": "Введите имя лица",
     "nextSteps": "Следующие шаги",
     "uploadFace": "Загрузить изображение лица"
+  },
+  "renameFace": {
+    "desc": "Введите новое имя для {{name}}",
+    "title": "Переименовать лицо"
   }
 }
