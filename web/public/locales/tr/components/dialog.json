@@ -23,6 +23,12 @@
           "label": "Bu etiketi Frigate+ için onaylamaktan vazgeç",
           "false_one": "Bu bir {{label}} değil",
           "false_other": "Bu bir {{label}} değil"
+        },
+        "question": {
+          "ask_an": "Bu nesne bir <code>{{label}}</code> mi?",
+          "label": "Bu etikeri Frigate+ için onaylayın",
+          "ask_a": "Bu nesne bir <code>{{label}}</code> mi?",
+          "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) mi?"
         }
       },
       "submitToPlus": {
@@ -73,7 +79,7 @@
     "restreaming": {
       "disabled": "Bu kamera için Yeniden Akış devre dışı.",
       "desc": {
-        "readTheDocumentation": "Dökümantasyonu oku ",
+        "readTheDocumentation": "Dökümantasyonu oku",
         "title": "Bu kameradan ek canlı gösterim seçenekleri ve sesli yayın almak için go2rtc'yi yapılandırın."
       }
     },
