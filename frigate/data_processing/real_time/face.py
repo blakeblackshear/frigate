@@ -26,6 +26,7 @@ from frigate.data_processing.common.face.model import (
     FaceNetRecognizer,
     FaceRecognizer,
 )
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
@@ -295,7 +296,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.requestor.send_data(
             "tracked_object_update",
             json.dumps({
-                "type": "face",
+                "type": TrackedObjectUpdateTypesEnum.face,
                 "name": weighted_sub_label,
                 "score": weighted_score,
                 "id": id,

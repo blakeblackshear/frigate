@@ -24,6 +24,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
@@ -1514,7 +1515,7 @@ class LicensePlateProcessingMixin:
         self.requestor.send_data(
             "tracked_object_update",
             json.dumps({
-                "type": "lpr",
+                "type": TrackedObjectUpdateTypesEnum.lpr,
                 "name": sub_label,
                 "plate": top_plate,
                 "score": avg_confidence,
