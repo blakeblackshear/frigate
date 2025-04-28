@@ -27,6 +27,12 @@
         },
         "state": {
           "submitted": "Ingediend"
+        },
+        "question": {
+          "ask_an": "Is dit object een <code>{{label}}</code>?",
+          "label": "Bevestig dit label voor Frigate Plus",
+          "ask_a": "Is dit object een <code>{{label}}</code>?",
+          "ask_full": "Is dit object een <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
@@ -73,7 +79,7 @@
     "restreaming": {
       "desc": {
         "title": "Stel go2rtc in voor extra liveweergaveopties en audio voor deze camera.",
-        "readTheDocumentation": "Lees de documentatie "
+        "readTheDocumentation": "Lees de documentatie"
       },
       "disabled": "Herstreamen is niet ingeschakeld voor deze camera."
     },

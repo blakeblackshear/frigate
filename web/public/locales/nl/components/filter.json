@@ -32,7 +32,7 @@
     }
   },
   "review": {
-    "showReviewed": "Toon beoordeelden"
+    "showReviewed": "Toon beoordeelde items"
   },
   "motion": {
     "showMotionOnly": "Alleen bewegingen weergeven"
@@ -74,7 +74,7 @@
     "title": "Herkende kentekenplaten",
     "noLicensePlatesFound": "Geen kentekenplaten gevonden.",
     "selectPlatesFromList": "Selecteer een of meer kentekens uit de lijst.",
-    "loading": "Herkende kentekenplaten laden..."
+    "loading": "Herkende kentekenplaten laden…"
   },
   "score": "Score",
   "sort": {

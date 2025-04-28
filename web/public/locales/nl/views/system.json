@@ -71,7 +71,9 @@
       },
       "gpuDecoder": "GPU Decodeerder",
       "gpuEncoder": "GPU Encodeerder",
-      "gpuMemory": "GPU-geheugen"
+      "gpuMemory": "GPU-geheugen",
+      "npuUsage": "NPU-gebruik",
+      "npuMemory": "NPU-geheugen"
     },
     "otherProcesses": {
       "processMemoryUsage": "Process Geheugen Gebruik",
@@ -142,7 +144,10 @@
     "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFMPEG CPU belasting ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",
     "healthy": "Systeem is gezond",
-    "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)"
+    "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
+    "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} is erg traag ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} is offline"
   },
   "enrichments": {
     "title": "Verrijkingen",
@@ -151,7 +156,14 @@
       "image_embedding_speed": "Afbeelding Inplaatsings Snelheid",
       "face_embedding_speed": "Gezicht Inplaatsings Snelheid",
       "text_embedding_speed": "Text Inplaatsing Snelheid",
-      "plate_recognition_speed": "Kentekenplaat Herkenning Snelheid"
+      "plate_recognition_speed": "Kentekenplaat Herkenning Snelheid",
+      "face_recognition_speed": "Snelheid van gezichtsherkenning",
+      "image_embedding": "Afbeelding Inbedden",
+      "text_embedding": "Tekstinbedden",
+      "face_recognition": "Gezichtsherkenning",
+      "yolov9_plate_detection_speed": "YOLOv9 Kentekenplaat Detectiesnelheid",
+      "yolov9_plate_detection": "YOLOv9 Kentekenplaatdetectie",
+      "plate_recognition": "Kentekenherkenning"
     }
   }
 }
