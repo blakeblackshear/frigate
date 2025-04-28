@@ -26,7 +26,7 @@
       "value": "{{seconds}} sekund",
       "short": {
         "title": "Latence",
-        "value": "{{seconds}} sek."
+        "value": "{{seconds}} sek"
       }
     },
     "totalFrames": "Celkový počet snímků:",
