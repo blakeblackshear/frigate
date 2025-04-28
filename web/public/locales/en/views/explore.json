@@ -5,7 +5,7 @@
     "title": "Explore is Unavailable",
     "embeddingsReindexing": {
       "context": "Explore can be used after tracked object embeddings have finished reindexing.",
-      "startingUp": "Starting up...",
+      "startingUp": "Starting up…",
       "estimatedTime": "Estimated time remaining:",
       "finishingShortly": "Finishing shortly",
       "step": {
