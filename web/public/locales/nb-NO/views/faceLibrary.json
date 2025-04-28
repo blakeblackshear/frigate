@@ -35,7 +35,8 @@
       "trainFailed": "Kunne ikke trene: {{errorMessage}}",
       "updateFaceScoreFailed": "Kunne ikke oppdatere ansiktsskåring: {{errorMessage}}",
       "addFaceLibraryFailed": "Kunne ikke angi ansiktsnavn: {{errorMessage}}",
-      "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}"
+      "deleteNameFailed": "Kunne ikke slette navn: {{errorMessage}}",
+      "renameFaceFailed": "Kunne ikke gi nytt navn til ansikt: {{errorMessage}}"
     },
     "success": {
       "deletedFace_one": "Slettet {{count}} ansikt.",
@@ -45,11 +46,12 @@
       "trainedFace": "Ansiktet ble trent.",
       "updatedFaceScore": "Ansiktsskåring ble oppdatert.",
       "uploadedImage": "Bildet ble lastet opp.",
-      "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!"
+      "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!",
+      "renamedFace": "Nytt navn ble gitt til ansikt {{name}}"
     }
   },
   "imageEntry": {
-    "dropActive": "Slipp bildet her...",
+    "dropActive": "Slipp bildet her…",
     "dropInstructions": "Dra og slipp et bilde her, eller klikk for å velge",
     "maxSize": "Maks størrelse: {{size}}MB",
     "validation": {
@@ -61,7 +63,9 @@
     "addFace": "Legg til ansikt",
     "uploadImage": "Last opp bilde",
     "deleteFaceAttempts": "Slett ansiktsforsøk",
-    "reprocessFace": "Prosesser ansiktet på nytt"
+    "reprocessFace": "Prosesser ansiktet på nytt",
+    "deleteFace": "Slett ansikt",
+    "renameFace": "Gi nytt navn til ansikt"
   },
   "uploadFaceImage": {
     "desc": "Last opp et bilde for å skanne etter ansikter og inkludere det for {{pageToggle}}",
@@ -72,5 +76,9 @@
     "faceName": "Skriv inn ansiktsnavn",
     "uploadFace": "Last opp ansiktsbilde",
     "nextSteps": "Neste trinn"
+  },
+  "renameFace": {
+    "desc": "Skriv inn et nytt navn for {{name}}",
+    "title": "Gi nytt navn til ansikt"
   }
 }
