@@ -86,7 +86,7 @@
     "semanticSearch": {
       "title": "Semantische Suche",
       "desc": "Die semantische Suche in Frigate ermöglicht es, verfolgte Objekte innerhalb der Überprüfungselemente zu finden, indem entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwendet wird.",
-      "readTheDocumentation": "Lesen Sie die Dokumentation.",
+      "readTheDocumentation": "Lesen Sie die Dokumentation",
       "reindexNow": {
         "alreadyInProgress": "Neu-Indizierung läufts bereits.",
         "label": "Neuindizieren",
