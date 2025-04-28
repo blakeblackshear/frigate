@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import math
 import os
@@ -1510,6 +1511,18 @@ class LicensePlateProcessingMixin:
             )
 
         # always publish to recognized_license_plate field
+        self.requestor.send_data(
+            "tracked_object_update",
+            json.dumps({
+                "type": "lpr",
+                "name": sub_label,
+                "plate": top_plate,
+                "score": avg_confidence,
+                "id": id,
+                "camera": camera,
+                "timestamp": start,
+            }),
+        )
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
             (id, top_plate, avg_confidence),
