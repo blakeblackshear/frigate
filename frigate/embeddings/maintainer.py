@@ -585,6 +585,7 @@ class EmbeddingMaintainer(threading.Thread):
                 "type": TrackedObjectUpdateTypesEnum.description,
                 "id": event.id,
                 "description": description,
+                "camera": event.camera,
             },
         )
 
