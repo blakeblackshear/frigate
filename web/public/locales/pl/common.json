@@ -44,12 +44,12 @@
     "minute_few": "{{time}} minuty",
     "minute_many": "{{time}} minut",
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%b %-d, %H:%M:%S"
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampExcludeSeconds": {
       "12hour": "%b %-d, %I:%M %p",
@@ -62,7 +62,28 @@
     "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "second_one": "{{time}} sekunda",
     "second_few": "{{time}} sekundy",
-    "second_many": "{{time}} sekund"
+    "second_many": "{{time}} sekund",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    }
   },
   "unit": {
     "speed": {
@@ -99,7 +120,7 @@
     "next": "Dalej",
     "disabled": "Wyłączone",
     "back": "Wstecz",
-    "saving": "Zapisywanie...",
+    "saving": "Zapisywanie…",
     "on": "WŁĄCZ",
     "cancel": "Anuluj",
     "twoWayTalk": "Komunikacja dwustronna",

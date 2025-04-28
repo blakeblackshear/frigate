@@ -139,7 +139,8 @@
     "birdClassification": {
       "desc": "Klasyfikacja ptaków identyfikuje znane ptaki przy użyciu skwantyzowanego modelu Tensorflow. Gdy znany ptak zostanie rozpoznany, jego popularna nazwa zostanie dodana jako sub_label. Ta informacja jest uwzględniana w interfejsie użytkownika, filtrach oraz powiadomieniach.",
       "title": "Klasyfikacja Ptaków"
-    }
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (Zmienione ustawienia klasyfikacji)"
   },
   "camera": {
     "title": "Ustawienia Kamery",
@@ -334,7 +335,8 @@
       "error": {
         "copyCoordinatesFailed": "Nie udało się skopiować współrzędnych do schowka."
       }
-    }
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (maski/strefy zmienione)"
   },
   "debug": {
     "objectList": "Lista Obiektów",
@@ -366,12 +368,12 @@
     "motion": {
       "title": "Ramki ruchu",
       "desc": "Pokaż ramki wokół obszarów, gdzie wykryto ruch",
-      "tips": "<p className=\"mb-2\"><strong>Ramki Ruchu</strong></p><br><p>Czerwone ramki będą nakładane na obszary kadru, gdzie aktualnie wykrywany jest ruch</p>"
+      "tips": "<p><strong>Ramki Ruchu</strong></p><br><p>Czerwone ramki będą nakładane na obszary kadru, gdzie aktualnie wykrywany jest ruch</p>"
     },
     "regions": {
       "title": "Regiony",
       "desc": "Pokaż ramkę regionu zainteresowania wysyłanego do detektora obiektów",
-      "tips": "<p className=\"mb-2\"><strong>Ramki Regionów</strong></p><br><p>Jasnozielone ramki będą nakładane na obszary zainteresowania w kadrze, które są wysyłane do detektora obiektów.</p>"
+      "tips": "<p><strong>Ramki Regionów</strong></p><br><p>Jasnozielone ramki będą nakładane na obszary zainteresowania w kadrze, które są wysyłane do detektora obiektów.</p>"
     },
     "objectShapeFilterDrawing": {
       "document": "Przeczytaj dokumentację ",
@@ -465,8 +467,14 @@
         "usernameIsRequired": "Nazwa użytkownika jest wymagana"
       },
       "changeRole": {
-        "desc": "Aktualizuj uprawnienia dla <span className=\"font-medium\">{{username}}</span>",
-        "roleInfo": "<p>Wybierz odpowiednią rolę dla tego użytkownika:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Administrator:</span> Pełny dostęp do wszystkich funkcji. </li><li> • <span className=\"font-medium\">Przeglądający:</span> Ograniczony do pulpitów Live, Przeglądania, Eksploracji i Eksportów.</li></ul>",
+        "desc": "Aktualizuj uprawnienia dla <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Wybierz właściwą rolę dla tego użytkownika:",
+          "admin": "Admin",
+          "adminDesc": "Pełny dostęp do wszystkich funkcjonalności.",
+          "viewerDesc": "Ograniczony wyłącznie do pulpitów na żywo, przeglądania, eksploracji i eksportu.",
+          "viewer": "Przeglądający"
+        },
         "title": "Zmień rolę użytkownika"
       },
       "createUser": {
@@ -477,7 +485,7 @@
       "deleteUser": {
         "title": "Usuń użytkownika",
         "desc": "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie konta użytkownika i wszystkich powiązanych danych.",
-        "warn": "Czy na pewno chcesz usunąć <span className=\"font-bold\">{{username}}</span>?"
+        "warn": "Czy na pewno chcesz usunąć <strong>{{username}}</strong>?"
       },
       "passwordSetting": {
         "updatePassword": "Aktualizuj hasło dla {{username}}",
@@ -575,11 +583,16 @@
       "availableModels": "Dostępne modele",
       "loadingAvailableModels": "Ładowanie dostępnych modeli...",
       "baseModel": "Model bazowy",
-      "modelSelect": "Tutaj możesz wybrać swoje dostępne modele w Frigate+. Pamiętaj, że można wybrać tylko modele kompatybilne z Twoją aktualną konfiguracją detektora."
+      "modelSelect": "Tutaj możesz wybrać swoje dostępne modele w Frigate+. Pamiętaj, że można wybrać tylko modele kompatybilne z Twoją aktualną konfiguracją detektora.",
+      "plusModelType": {
+        "baseModel": "Model bazowy",
+        "userModel": "Dostrojony"
+      }
     },
     "toast": {
       "success": "Ustawienia Frigate+ zostały zapisane. Uruchom ponownie Frigate, aby zastosować zmiany.",
       "error": "Nie udało się zapisać zmian konfiguracji: {{errorMessage}}"
-    }
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (Zmieniony model Frigate+)"
   }
 }
