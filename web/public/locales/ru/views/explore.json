@@ -1,8 +1,8 @@
 {
   "exploreIsUnavailable": {
     "embeddingsReindexing": {
-      "context": "Обзор станет доступен после завершения переиндексации эмбеддингов отслеживаемых объектов.",
-      "startingUp": "Запуск...",
+      "context": "Поиск станет доступен после завершения переиндексации эмбеддингов отслеживаемых объектов.",
+      "startingUp": "Запуск…",
       "estimatedTime": "Оставшееся время:",
       "finishingShortly": "Скоро завершится",
       "step": {
@@ -11,7 +11,7 @@
         "thumbnailsEmbedded": "Встроенные миниатюры: "
       }
     },
-    "title": "Обзор недоступен",
+    "title": "Поиск событий недоступен",
     "downloadingModels": {
       "setup": {
         "visionModel": "Модель компьютерного зрения",
@@ -28,7 +28,7 @@
     }
   },
   "generativeAI": "Генеративный ИИ",
-  "documentTitle": "Обзор - Frigate",
+  "documentTitle": "Поиск событий - Frigate",
   "details": {
     "timestamp": "Метка времени",
     "item": {
@@ -36,7 +36,7 @@
       "desc": "Детали элемента просмотра",
       "button": {
         "share": "Поделиться этим элементом просмотра",
-        "viewInExplore": "Смотреть в Обзоре"
+        "viewInExplore": "Смотреть в Поиске событий"
       },
       "tips": {
         "hasMissingObjects": "Настройте конфигурацию, если хотите, чтобы Frigate сохранял отслеживаемые объекты для следующих меток: <em>{{objects}}</em>",
@@ -125,7 +125,12 @@
       },
       "gone": "{{label}} покинул(а) зону",
       "heard": "Обнаружен звук {{label}}",
-      "external": "Обнаружен(а) {{label}}"
+      "external": "Обнаружен(а) {{label}}",
+      "header": {
+        "zones": "Зоны",
+        "ratio": "Соотношение",
+        "area": "Область"
+      }
     },
     "annotationSettings": {
       "title": "Настройки аннотаций",

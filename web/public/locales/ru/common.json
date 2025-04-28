@@ -55,30 +55,51 @@
       "12hour": "%b %-d %Y, %I:%M %p"
     },
     "formattedTimestamp2": {
-      "24hour": "%d %b %H:%M:%S",
-      "12hour": "%m/%d %I:%M:%S%P"
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "MM/dd h:mm:ssa"
     },
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%b %-d, %H:%M:%S"
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d"
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampFilename": {
+      "24hour": "MM-dd-yy-HH-mm-ss",
+      "12hour": "MM-dd-yy-h-mm-ss-a"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    }
   },
   "selectItem": "Выбор {{item}}",
   "button": {
-    "apply": "Принять",
+    "apply": "Применить",
     "done": "Готово",
     "enabled": "Включено",
     "enable": "Включить",
     "save": "Сохранить",
-    "saving": "Сохранение...",
+    "saving": "Сохранение…",
     "fullscreen": "Полноэкранный режим",
     "pictureInPicture": "Картинка в картинке",
     "twoWayTalk": "Двусторонняя связь",
     "cameraAudio": "Аудио с камеры",
     "on": "Вкл",
     "edit": "Редактировать",
-    "copyCoordinates": "Копировать координаты",
+    "copyCoordinates": "Скопировать координаты",
     "delete": "Удалить",
     "yes": "Да",
     "no": "Нет",
@@ -90,7 +111,7 @@
     "reset": "Сбросить",
     "disabled": "Отключено",
     "close": "Закрыть",
-    "copy": "Копировать",
+    "copy": "Скопировать",
     "back": "Назад",
     "history": "История",
     "off": "Выкл",
@@ -98,7 +119,7 @@
     "unsuspended": "Возобновить",
     "play": "Воспроизвести",
     "unselect": "Снять выбор",
-    "export": "Экспорт",
+    "export": "Экспортировать",
     "deleteNow": "Удалить сейчас",
     "next": "Следующий"
   },
@@ -113,7 +134,7 @@
   },
   "menu": {
     "configuration": "Конфигурация",
-    "systemLogs": "Системные логи",
+    "systemLogs": "Логи системы",
     "settings": "Настройки",
     "configurationEditor": "Редактор конфигурации",
     "system": "Система",
@@ -149,18 +170,18 @@
       "ko": "한국어 (Корейский)",
       "he": "עברית (Иврит)",
       "withSystem": {
-        "label": "Использовать системные языковые настройки"
+        "label": "Использовать системные настройки языка"
       }
     },
     "darkMode": {
       "withSystem": {
-        "label": "Использовать системные настройки светлого или тёмного режимов"
+        "label": "Использовать системные настройки светлой/тёмной темы"
       },
       "label": "Тёмный режим",
       "light": "Светлый",
       "dark": "Тёмный"
     },
-    "withSystem": "Система",
+    "withSystem": "Системный",
     "theme": {
       "label": "Тема",
       "blue": "Синяя",
@@ -175,7 +196,7 @@
       "title": "Документация",
       "label": "Документация по Frigate"
     },
-    "explore": "Обзор",
+    "explore": "Поиск событий",
     "restart": "Перезапуск Frigate",
     "live": {
       "title": "Прямой эфир",
@@ -187,10 +208,10 @@
         "title": "Камеры"
       }
     },
-    "review": "Просмотр",
-    "export": "Экспорт",
+    "review": "Обзор событий",
+    "export": "Экспортировать",
     "uiPlayground": "Среда тестирования интерфейсов",
-    "faceLibrary": "Библиотека Лиц",
+    "faceLibrary": "Библиотека лиц",
     "user": {
       "title": "Пользователь",
       "account": "Аккаунт",
