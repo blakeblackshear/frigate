@@ -35,13 +35,15 @@
     "addFace": "Dodaj twarz",
     "uploadImage": "Wgraj obraz",
     "reprocessFace": "Przetwórz twarz ponownie",
-    "deleteFaceAttempts": "Usuń próby rozpoznania twarzy"
+    "deleteFaceAttempts": "Usuń próby rozpoznania twarzy",
+    "renameFace": "Zmień nazwę twarzy",
+    "deleteFace": "Usuń twarz"
   },
   "imageEntry": {
     "validation": {
       "selectImage": "Proszę wybrać plik obrazu."
     },
-    "dropActive": "Upuść obraz tutaj...",
+    "dropActive": "Upuść obraz tutaj…",
     "dropInstructions": "Przeciągnij i upuść obraz tutaj lub kliknij, aby wybrać",
     "maxSize": "Maksymalny rozmiar: {{size}}MB"
   },
@@ -56,7 +58,8 @@
       "uploadedImage": "Pomyślnie wgrano obraz.",
       "addFaceLibrary": "{{name}} został pomyślnie dodany do Biblioteki Twarzy!",
       "trainedFace": "Pomyślnie wytrenowano twarz.",
-      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy."
+      "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy.",
+      "renamedFace": "Pomyślnie zmieniono nazwę twarzy na {{name}}"
     },
     "error": {
       "addFaceLibraryFailed": "Nie udało się ustawić nazwy twarzy: {{errorMessage}}",
@@ -64,10 +67,20 @@
       "deleteNameFailed": "Nie udało się usunąć nazwy: {{errorMessage}}",
       "trainFailed": "Nie udało się przeprowadzić treningu: {{errorMessage}}",
       "updateFaceScoreFailed": "Nie udało się zaktualizować wyniku twarzy: {{errorMessage}}",
-      "uploadingImageFailed": "Nie udało się wgrać obrazu: {{errorMessage}}"
+      "uploadingImageFailed": "Nie udało się wgrać obrazu: {{errorMessage}}",
+      "renameFaceFailed": "Nie udało się zmienić nazwy twarzy: {{errorMessage}}"
     }
   },
   "readTheDocs": "Przeczytaj dokumentację",
   "trainFaceAs": "Trenuj twarz jako:",
-  "trainFace": "Trenuj twarz"
+  "trainFace": "Trenuj twarz",
+  "steps": {
+    "faceName": "Wprowadź nazwę twarzy",
+    "uploadFace": "Prześlij obraz twarzy",
+    "nextSteps": "Kolejne kroki"
+  },
+  "renameFace": {
+    "title": "Zmień nazwę twarzy",
+    "desc": "Wprowadź nową nazwę dla {{name}}"
+  }
 }

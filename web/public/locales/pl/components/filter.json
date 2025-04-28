@@ -80,7 +80,7 @@
     "allLogs": "Wszystkie logi"
   },
   "recognizedLicensePlates": {
-    "loading": "Ładowanie rozpoznanych tablic rejestracyjnych...",
+    "loading": "Ładowanie rozpoznanych tablic rejestracyjnych…",
     "placeholder": "Wpisz, aby wyszukać tablice rejestracyjne...",
     "noLicensePlatesFound": "Nie znaleziono tablic rejestracyjnych.",
     "title": "Rozpoznane Tablice Rejestracyjne",
