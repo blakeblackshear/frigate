@@ -31,5 +31,8 @@
     "label": "Afficher les nouveaux éléments à évaluer"
   },
   "camera": "Caméra",
-  "markTheseItemsAsReviewed": "Marquer ces éléments comme évalués"
+  "markTheseItemsAsReviewed": "Marquer ces éléments comme évalués",
+  "selected": "{{count}} sélectionné(s)",
+  "selected_other": "{{count}} sélectionné(s)",
+  "selected_one": "{{count}} sélectionné(s)"
 }

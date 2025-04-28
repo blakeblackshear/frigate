@@ -38,7 +38,7 @@
     "desc": "Etes-vous certain de vouloir supprimer la collection {{name}} ? Cette action supprimera définitivement tous les visages associés."
   },
   "imageEntry": {
-    "dropActive": "Déposez l'image ici...",
+    "dropActive": "Déposez l'image ici…",
     "dropInstructions": "Glissez et déposez une image ici, ou cliquez pour sélectionner",
     "maxSize": "Taille max : {{size}}MB",
     "validation": {
