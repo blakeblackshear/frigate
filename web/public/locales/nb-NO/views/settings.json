@@ -4,7 +4,7 @@
     "authentication": "Autentiseringsinnstillinger - Frigate",
     "camera": "Kamerainnstillinger - Frigate",
     "masksAndZones": "Maske- og soneeditor - Frigate",
-    "motionTuner": "Bevegelsestilpasning - Frigate",
+    "motionTuner": "Bevegelsesjustering - Frigate",
     "object": "Objektinnstillinger - Frigate",
     "general": "Generelle innstillinger - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
@@ -14,7 +14,7 @@
     "classification": "Klassifisering",
     "cameras": "Kamerainnstillinger",
     "masksAndZones": "Masker / Soner",
-    "motionTuner": "Bevegelsestilpasning",
+    "motionTuner": "Finjustering av bevegelse",
     "debug": "Feilsøking",
     "users": "Brukere",
     "frigateplus": "Frigate+",
@@ -92,7 +92,7 @@
         "confirmButton": "Reindekser",
         "success": "Reindeksering startet.",
         "alreadyInProgress": "Reindeksering pågår allerede.",
-        "desc": "Reindeksering vil regenerere vektorrepresentasjoner for alle sporede objekter. Prosessen kjøres i bakgrunnen og kan belaste CPU-en maksimalt og ta tid avhengig av antall sporede objekter.",
+        "desc": "Reindeksering vil regenerere vektorrepresentasjoner for alle sporede objekter. Prosessen kjøres i bakgrunnen, kan belaste CPU-en maksimalt og ta mye tid avhengig av antall sporede objekter.",
         "confirmDesc": "Er du sikker på at du vil reindeksere vektorrepresentasjoner for alle sporede objekter? Dette vil kjøres i bakgrunnen, men kan bruke all CPU og ta tid. Du kan følge fremdriften på Utforsk-siden."
       },
       "readTheDocumentation": "Les dokumentasjonen",
@@ -139,7 +139,8 @@
     "birdClassification": {
       "title": "Artsbestemmelse for fugler",
       "desc": "Artsbestemmelse identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en kjent fugl gjenkjennes, legges det vanlige navnet til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, i filtre, samt i meldingsvarsler."
-    }
+    },
+    "restart_required": "Omstart påkrevd (Klassifiseringsinnstillinger endret)"
   },
   "camera": {
     "streams": {
@@ -331,10 +332,11 @@
           "noName": "Objektmasken er lagret. Start Frigate på nytt for å bruke endringene."
         }
       }
-    }
+    },
+    "restart_required": "Omstart påkrevd (masker/soner endret)"
   },
   "motionDetectionTuner": {
-    "title": "Tilpasning for bevegelsesdeteksjon",
+    "title": "Finjustering av bevegelsesdeteksjon",
     "Threshold": {
       "title": "Terskel",
       "desc": "Terskelverdien bestemmer hvor mye endring i en piksels lysstyrke som kreves for å bli betraktet som bevegelse. <em>Standard: 30</em>"
@@ -356,7 +358,7 @@
     }
   },
   "debug": {
-    "title": "Feilsøking",
+    "title": "Test og feilsøking",
     "objectList": "Objektliste",
     "noObjects": "Ingen objekter",
     "boundingBoxes": {
@@ -377,11 +379,11 @@
     },
     "motion": {
       "desc": "Vis bokser rundt områder der bevegelse er detektert",
-      "tips": "<p className=\"mb-2\"><strong>Bevegelsesbokser</strong></p><br><p>Røde bokser vil vises på områder i bildet hvor bevegelse for øyeblikket blir detektert</p>",
+      "tips": "<p><strong>Bevegelsesbokser</strong></p><br><p>Røde bokser vil vises på områder i bildet hvor bevegelse for øyeblikket blir detektert</p>",
       "title": "Bevegelsesbokser"
     },
     "regions": {
-      "tips": "<p className=\"mb-2\"><strong>Regionbokser</strong></p><br><p>Lysegrønne bokser vil vises på områder av interesse i bildet som blir sendt til objektdetektoren.</p>",
+      "tips": "<p><strong>Regionbokser</strong></p><br><p>Lysegrønne bokser vil vises på områder av interesse i bildet som blir sendt til objektdetektoren.</p>",
       "title": "Regioner",
       "desc": "Vis en boks for interesseområdet sendt til objektdetektoren"
     },
@@ -395,8 +397,8 @@
       "tips": "Aktiver dette alternativet for å tegne et rektangel på kamerabildet for å vise området og forholdet. Disse verdiene kan deretter brukes til å sette filterparametere for objektform i konfigurasjonen."
     },
     "detectorDesc": "Frigate bruker dine detektorer ({{detectors}}) for å oppdage objekter i kameraets videostrøm.",
-    "desc": "Feilsøkingsvisningen viser sporede objekter i sanntid og deres statistikk. Objektlisten viser en tidsforsinket oppsummering av detekterte objekter.",
-    "debugging": "Feilsøking",
+    "desc": "Test og feilsøk viser sporede objekter i sanntid og deres statistikk. Objektlisten viser en tidsforsinket oppsummering av detekterte objekter.",
+    "debugging": "Test og feilsøk",
     "mask": {
       "title": "Bevegelsesmasker",
       "desc": "Vis polygoner for bevegelsesmasker"
@@ -458,9 +460,15 @@
         "usernameIsRequired": "Brukernavn er påkrevd"
       },
       "changeRole": {
-        "desc": "Oppdater tillatelser for <span className=\"font-medium\">{{username}}</span>",
+        "desc": "Oppdater tillatelser for <strong>{{username}}</strong>",
         "title": "Endre brukerrolle",
-        "roleInfo": "<p>Velg riktig rolle for denne brukeren:</p><ul className=\"mt-2 space-y-1 pl-5\"><li> • <span className=\"font-medium\">Administrator:</span> Full tilgang til alle funksjoner. </li><li> • <span className=\"font-medium\">Seer:</span> Begrenset til Direkte-dashbord, Inspeksjon, Utforsk og Eksport.</li></ul>"
+        "roleInfo": {
+          "intro": "Velg en passende rolle for denne bruker:",
+          "admin": "Administrator",
+          "adminDesc": "Full tilgang til alle funksjoner.",
+          "viewer": "Visningsbruker",
+          "viewerDesc": "Begrenset til kun Direkte-dashbord, Inspiser, Utforsk og Eksporter."
+        }
       },
       "createUser": {
         "title": "Opprett ny bruker",
@@ -470,7 +478,7 @@
       "deleteUser": {
         "title": "Slett bruker",
         "desc": "Denne handlingen kan ikke angres. Dette vil permanent slette brukerkontoen og fjerne alle tilknyttede data.",
-        "warn": "Er du sikker på at du vil slette <span className=\"font-bold\">{{username}}</span>?"
+        "warn": "Er du sikker på at du vil slette <strong>{{username}}</strong>?"
       },
       "passwordSetting": {
         "updatePassword": "Oppdater passord for {{username}}",
@@ -560,7 +568,11 @@
       "dimensions": "Dimensjoner",
       "cameras": "Kameraer",
       "availableModels": "Tilgjengelige modeller",
-      "modelSelect": "Dine tilgjengelige modeller på Frigate+ kan velges her. Merk at bare modeller som er kompatible med din nåværende detektorkonfigurasjon kan velges."
+      "modelSelect": "Dine tilgjengelige modeller på Frigate+ kan velges her. Merk at bare modeller som er kompatible med din nåværende detektorkonfigurasjon kan velges.",
+      "plusModelType": {
+        "userModel": "Finjustert",
+        "baseModel": "Basismodell"
+      }
     },
     "title": "Frigate+ Innstillinger",
     "snapshotConfig": {
@@ -577,6 +589,7 @@
     "toast": {
       "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å bruke endringene.",
       "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
-    }
+    },
+    "restart_required": "Omstart påkrevd (Frigate+ modell endret)"
   }
 }

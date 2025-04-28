@@ -31,5 +31,7 @@
     "last24Hours": "Siste 24 timer"
   },
   "markAsReviewed": "Merk som inspisert",
-  "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte"
+  "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
+  "selected_one": "{{count}} valgt",
+  "selected_other": "{{count}} valgt"
 }

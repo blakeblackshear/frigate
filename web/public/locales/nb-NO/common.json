@@ -45,18 +45,39 @@
     "hour_other": "{{time}} timer",
     "m": "{{time}}m",
     "formattedTimestamp": {
-      "12hour": "%-d. %b, %I:%M:%S %p",
-      "24hour": "%-d. %b, %H:%M:%S"
+      "12hour": "d. MMM, h:mm:ss aaa",
+      "24hour": "d. MMM, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d. %b %H:%M:%S"
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d. MMM HH:mm:ss"
     },
     "formattedTimestampWithYear": {
       "12hour": "%-d. %b %Y, %I:%M %p",
       "24hour": "%-d. %b %Y, %H:%M"
     },
-    "formattedTimestampOnlyMonthAndDay": "%-d. %b"
+    "formattedTimestampOnlyMonthAndDay": "%-d. %b",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d. MMM, h:mm aaa",
+      "24hour": "d. MMM, HH:mm"
+    },
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d. MMM yyyy, h:mm aaa",
+      "24hour": "d. MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d. MMM"
   },
   "button": {
     "copy": "Kopier",
@@ -69,7 +90,7 @@
     "disabled": "Deaktivert",
     "disable": "Deaktiver",
     "save": "Lagre",
-    "saving": "Lagrer...",
+    "saving": "Lagrer…",
     "cancel": "Avbryt",
     "close": "Lukk",
     "back": "Tilbake",
@@ -137,7 +158,7 @@
       "withSystem": {
         "label": "Bruk systemets språkinnstillinger"
       },
-      "fr": "Fransk (Français)",
+      "fr": "Français (Fransk)",
       "es": "Español (Spansk)",
       "hi": "हिन्दी (Hindi)",
       "ar": "العربية (Arabisk)",

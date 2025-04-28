@@ -43,7 +43,7 @@
     },
     "hardwareInfo": {
       "gpuMemory": "GPU-minne",
-      "gpuEncoder": "GPU-koder",
+      "gpuEncoder": "GPU-enkoder",
       "gpuDecoder": "GPU-dekoder",
       "gpuInfo": {
         "nvidiaSMIOutput": {
@@ -70,7 +70,9 @@
         }
       },
       "title": "Maskinvareinformasjon",
-      "gpuUsage": "GPU-belastning"
+      "gpuUsage": "GPU-belastning",
+      "npuMemory": "NPU minne",
+      "npuUsage": "NPU belastning"
     },
     "otherProcesses": {
       "title": "Andre prosesser",
@@ -137,10 +139,17 @@
   },
   "enrichments": {
     "embeddings": {
-      "plate_recognition_speed": "Indekseringshastighet for kjennemerke",
-      "face_embedding_speed": "Indekseringshastighet for ansikt",
-      "text_embedding_speed": "Indekseringshastighet for tekst",
-      "image_embedding_speed": "Indekseringshastighet for bilde"
+      "plate_recognition_speed": "Hastighet for kjennemerkegjenkjenning",
+      "face_embedding_speed": "Hastighet ansikt-vektorrepresentasjon",
+      "text_embedding_speed": "Hastighet tekst-vektorrepresentasjoner",
+      "image_embedding_speed": "Hastighet bilde-vektorrepresentasjoner",
+      "face_recognition_speed": "Hastighet for ansiktsgjenkjenning",
+      "image_embedding": "Bilde-vektorrepresentasjoner",
+      "face_recognition": "Ansiktsgjenkjenning",
+      "text_embedding": "Tekst-vektorrepresentasjoner",
+      "plate_recognition": "Kjennemerke gjenkjenning",
+      "yolov9_plate_detection_speed": "Hastighet for YOLOv9 kjennemerkedeteksjon",
+      "yolov9_plate_detection": "YOLOv9 kjennemerkedeteksjon"
     },
     "title": "Utvidelser",
     "infPerSecond": "Inferenser per sekund"
@@ -152,6 +161,9 @@
     "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
     "healthy": "Systemet fungerer som det skal",
-    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)"
+    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",
+    "cameraIsOffline": "{{camera}} er frakoblet",
+    "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)"
   }
 }

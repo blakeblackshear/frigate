@@ -4,7 +4,7 @@
   "exploreIsUnavailable": {
     "title": "Utforsk er utilgjengelig",
     "embeddingsReindexing": {
-      "startingUp": "Starter opp...",
+      "startingUp": "Starter opp…",
       "estimatedTime": "Estimert gjenværende tid:",
       "context": "Utforsk kan brukes etter at reindekseringen av vektorrepresentasjoner for sporede objekter er fullført.",
       "finishingShortly": "Avsluttes snart",
@@ -45,7 +45,12 @@
       "external": "{{label}} oppdaget",
       "entered_zone": "{{label}} gikk inn i {{zones}}",
       "active": "{{label}} ble aktiv",
-      "stationary": "{{label}} ble stasjonær"
+      "stationary": "{{label}} ble stasjonær",
+      "header": {
+        "zones": "Soner",
+        "ratio": "Forhold",
+        "area": "Areal"
+      }
     },
     "annotationSettings": {
       "title": "Annotasjonsinnstillinger",

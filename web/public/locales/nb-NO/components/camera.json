@@ -2,7 +2,7 @@
   "group": {
     "label": "Kameragrupper",
     "name": {
-      "placeholder": "Skriv inn et navn...",
+      "placeholder": "Skriv inn et navn…",
       "errorMessage": {
         "mustLeastCharacters": "Navnet på kameragruppen må være minst 2 tegn.",
         "exists": "Navnet på kameragruppen finnes allerede.",
