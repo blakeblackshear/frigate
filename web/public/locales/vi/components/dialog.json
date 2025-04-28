@@ -6,5 +6,57 @@
       "title": "Đang khởi động lại Frigate",
       "content": "Trang này sẽ tải lại sau {{countdown}} giây."
     }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_a": "Đây có phải là <code>{{label}}</code> không?",
+          "ask_an": "Đây có phải là <code>{{label}}</code> không?",
+          "label": "Xác nhận nhãn này cho Frigate Plus",
+          "ask_full": "Đây có phải là <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) không?"
+        },
+        "state": {
+          "submitted": "Đã gửi"
+        }
+      },
+      "submitToPlus": {
+        "label": "Gửi lên Frigate+",
+        "desc": "Đối tượng xuất hiện ở các khu vực bạn muốn tránh không được xem là phát hiện sai. Gửi chúng lên dưới dạng phát hiện sai có thể làm mô hình bị nhầm lẫn."
+      }
+    },
+    "video": {
+      "viewInHistory": "Xem lại trong Lịch sử"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Chọn từ Dòng thời gian",
+      "custom": "Tuỳ chọn",
+      "start": {
+        "title": "Thời gian bắt đầu",
+        "label": "Chọn thời gian bắt đầu"
+      },
+      "end": {
+        "title": "Thời gian kết thúc",
+        "label": "Chọn thời gian kết thúc"
+      }
+    },
+    "name": {
+      "placeholder": "Đặt tên cho bản xuất"
+    },
+    "select": "Chọn",
+    "export": "Xuất",
+    "selectOrExport": "Chọn hay xuất",
+    "toast": {
+      "error": {
+        "endTimeMustAfterStartTime": "Thời gian kết thúc phải sau thời gian bắt đầu",
+        "noVaildTimeSelected": "Chưa chọn khoảng thời gian hợp lệ"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Lưu bản xuất",
+      "previewExport": "Xem trước bản xuất"
+    }
   }
 }
