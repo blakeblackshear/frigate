@@ -164,7 +164,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.metrics.face_rec_fps.value = self.faces_per_second.eps()
         camera = obj_data["camera"]
 
-
         if not self.config.cameras[camera].face_recognition.enabled:
             return
 
@@ -295,14 +294,16 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         self.requestor.send_data(
             "tracked_object_update",
-            json.dumps({
-                "type": TrackedObjectUpdateTypesEnum.face,
-                "name": weighted_sub_label,
-                "score": weighted_score,
-                "id": id,
-                "camera": camera,
-                "timestamp": start,
-            }),
+            json.dumps(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.face,
+                    "name": weighted_sub_label,
+                    "score": weighted_score,
+                    "id": id,
+                    "camera": camera,
+                    "timestamp": start,
+                }
+            ),
         )
 
         if weighted_score >= self.face_config.recognition_threshold:

@@ -1514,15 +1514,17 @@ class LicensePlateProcessingMixin:
         # always publish to recognized_license_plate field
         self.requestor.send_data(
             "tracked_object_update",
-            json.dumps({
-                "type": TrackedObjectUpdateTypesEnum.lpr,
-                "name": sub_label,
-                "plate": top_plate,
-                "score": avg_confidence,
-                "id": id,
-                "camera": camera,
-                "timestamp": start,
-            }),
+            json.dumps(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.lpr,
+                    "name": sub_label,
+                    "plate": top_plate,
+                    "score": avg_confidence,
+                    "id": id,
+                    "camera": camera,
+                    "timestamp": start,
+                }
+            ),
         )
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
