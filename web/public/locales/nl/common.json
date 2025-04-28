@@ -29,13 +29,13 @@
     "month_one": "{{time}} maand",
     "month_other": "{{time}} maanden",
     "formattedTimestamp2": {
-      "12hour": "%d-%m %H:%M:%S",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "dd-MM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
     },
     "s": "{{time}}s",
     "formattedTimestamp": {
-      "12hour": "%d %b %H:%M:%S",
-      "24hour": "%-d %b, %H:%M:%S"
+      "12hour": "d MMMM, HH:mm:ss",
+      "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestampOnlyMonthAndDay": "%-d %b",
     "d": "{{time}}dag",
@@ -44,7 +44,7 @@
     "h": "{{time}}u",
     "hour_one": "{{time}} uur",
     "hour_other": "{{time}} uren",
-    "m": "{{time}} min",
+    "m": "{{time}}min",
     "formattedTimestampWithYear": {
       "12hour": "%-d %b %Y, %H:%M",
       "24hour": "%-d %b %Y, %H:%M"
@@ -56,7 +56,28 @@
     "minute_one": "{{time}} minuut",
     "minute_other": "{{time}} minuten",
     "second_one": "{{time}} seconde",
-    "second_other": "{{time}} seconden"
+    "second_other": "{{time}} seconden",
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMMM yyyy, HH:mm",
+      "24hour": "d MMMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-HH-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "HH:mm:ss",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMMM, HH:mm",
+      "24hour": "d MMMM, HH:mm"
+    }
   },
   "button": {
     "enabled": "Ingeschakeld",
@@ -69,12 +90,12 @@
     "close": "Sluiten",
     "copy": "Kopieer",
     "done": "Klaar",
-    "saving": "Opslaan...",
+    "saving": "Opslaan…",
     "disable": "Uitschakelen",
     "save": "Opslaan",
     "history": "Geschiedenis",
     "fullscreen": "Volledig scherm",
-    "pictureInPicture": "Foto in foto",
+    "pictureInPicture": "Pop-up venster",
     "twoWayTalk": "Tweerichtingsgesprek",
     "cameraAudio": "Camera geluid",
     "on": "aan",
@@ -179,7 +200,7 @@
       "title": "Documentatie",
       "label": "Frigate documentatie"
     },
-    "review": "Beoordeel",
+    "review": "Beoordelen",
     "explore": "Verkennen",
     "export": "Exporteren",
     "uiPlayground": "Testgebied voor gebruikersinterface",

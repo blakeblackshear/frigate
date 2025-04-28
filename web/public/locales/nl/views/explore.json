@@ -10,7 +10,7 @@
       },
       "context": "Verkennen kan worden gebruikt nadat de embeddings van gevolgde objecten opnieuw zijn geïndexeerd.",
       "estimatedTime": "Geschatte resterende tijd:",
-      "startingUp": "Opstarten..."
+      "startingUp": "Opstarten…"
     },
     "downloadingModels": {
       "setup": {
@@ -26,7 +26,7 @@
         "documentation": "Lees de documentatie"
       }
     },
-    "title": "Explore is niet beschikbaar"
+    "title": "Verkennen is niet beschikbaar"
   },
   "trackedObjectDetails": "Details getraceerd object",
   "type": {
@@ -48,7 +48,12 @@
       "gone": "{{label}} Links",
       "active": "{{label}} Werd actief",
       "stationary": "{{label}} werd stationair",
-      "external": "{{label}} gedetecteerd"
+      "external": "{{label}} gedetecteerd",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Verhouding",
+        "area": "Gebied"
+      }
     },
     "annotationSettings": {
       "title": "Annotatie-instellingen",
