@@ -1,1 +1,31 @@
-{}
+{
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_a": "Чи є цей об'єкт <code>{{label}}</code>?",
+          "ask_full": "Чи є цей об'єкт <code>{{untranslatedLabel}}</code>{{translatedLabel}}?"
+        },
+        "state": {
+          "submitted": "Поданi"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Перегляд у історії"
+    }
+  },
+  "streaming": {
+    "label": "Потік",
+    "restreaming": {
+      "desc": {
+        "readTheDocumentation": "Прочитати документацію"
+      }
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Зберегти пошук"
+    }
+  }
+}
