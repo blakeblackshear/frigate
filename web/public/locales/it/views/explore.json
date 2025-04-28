@@ -10,7 +10,7 @@
         "thumbnailsEmbedded": "Miniature incorporate: ",
         "trackedObjectsProcessed": "Oggetti tracciati elaborati: "
       },
-      "startingUp": "Avvio...",
+      "startingUp": "Avvio…",
       "estimatedTime": "Tempo rimanente stimato:",
       "finishingShortly": "Completamento a breve"
     },
@@ -126,7 +126,12 @@
       "visible": "{{label}} rilevato",
       "entered_zone": "{{label}} è entrato in {{zones}}",
       "active": "{{label}} è diventato attivo",
-      "stationary": "{{label}} è diventato stazionario"
+      "stationary": "{{label}} è diventato stazionario",
+      "header": {
+        "ratio": "Rapporto",
+        "area": "Area",
+        "zones": "Zone"
+      }
     },
     "title": "Ciclo di vita dell'oggetto",
     "createObjectMask": "Crea maschera oggetto",

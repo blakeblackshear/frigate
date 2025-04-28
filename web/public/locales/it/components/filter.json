@@ -95,7 +95,7 @@
     "title": "Targhe riconosciute",
     "selectPlatesFromList": "Seleziona una o più targhe dall'elenco.",
     "loadFailed": "Impossibile caricare le targhe riconosciute.",
-    "loading": "Caricamento targhe riconosciute...",
+    "loading": "Caricamento targhe riconosciute…",
     "placeholder": "Digita per cercare le targhe...",
     "noLicensePlatesFound": "Nessuna targa trovata."
   },
