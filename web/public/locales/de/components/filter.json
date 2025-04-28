@@ -118,7 +118,7 @@
     "noLicensePlatesFound": "Keine Kennzeichen gefunden.",
     "title": "Bekannte Kennzeichen",
     "loadFailed": "Bekannte Nummernschilder konnten nicht geladen werden.",
-    "loading": "Lade bekannte Nummernschilder...",
+    "loading": "Lade bekannte Nummernschilder…",
     "placeholder": "Tippe, um Kennzeichen zu suchen...",
     "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus."
   }
