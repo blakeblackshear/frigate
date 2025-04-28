@@ -72,7 +72,9 @@
         "closeInfo": {
           "label": "Information de fermeture du GPU"
         }
-      }
+      },
+      "npuUsage": "Utilisation NPU",
+      "npuMemory": "Mémoire NPU"
     },
     "otherProcesses": {
       "title": "Autres tâches",
@@ -142,7 +144,10 @@
     "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU par FFMPEG ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU ({{detectAvg}}%)",
     "healthy": "Le système est sain",
-    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)"
+    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)",
+    "cameraIsOffline": "{{camera}} est hors ligne",
+    "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Améliorations",
@@ -151,7 +156,14 @@
       "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
       "text_embedding_speed": "Vitesse de capture des données complémentaire de texte",
       "image_embedding_speed": "Vitesse de capture des données complémentaires à l'image",
-      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation"
+      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation",
+      "face_recognition_speed": "Vitesse de reconnaissance faciale",
+      "plate_recognition": "Reconnaissance de plaques d'immatriculation",
+      "image_embedding": "Représentation vectorielle d'image",
+      "yolov9_plate_detection": "Détection de plaques d'immatriculation YOLOv9",
+      "face_recognition": "Reconnaissance faciale",
+      "text_embedding": "Représentation vectorielle de texte",
+      "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9"
     }
   }
 }

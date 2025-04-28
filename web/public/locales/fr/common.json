@@ -47,8 +47,8 @@
     "day_other": "{{time}} jours",
     "1hour": "1 heure",
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%d %b, %H:%M:%S"
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
     "formattedTimestampWithYear": {
       "24hour": "%b %-d %Y, %H:%M",
@@ -60,8 +60,29 @@
       "24hour": "%b %-d, %H:%M"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "h:mm aaa"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
     }
   },
   "button": {
@@ -69,7 +90,7 @@
     "reset": "Réinitialiser",
     "disabled": "Désactivé",
     "save": "Enregistrer",
-    "saving": "Enregistrement...",
+    "saving": "Enregistrement…",
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",

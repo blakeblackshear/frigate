@@ -107,7 +107,7 @@
   "recognizedLicensePlates": {
     "placeholder": "Tapez pour rechercher des plaques d'immatriculation...",
     "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée.",
-    "loading": "Chargement des plaques d'immatriculation reconnues...",
+    "loading": "Chargement des plaques d'immatriculation reconnues…",
     "title": "Plaques d'immatriculation reconnues",
     "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
     "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste."
