@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "Name",
-      "placeholder": "Enter a name...",
+      "placeholder": "Enter a name…",
       "errorMessage": {
         "mustLeastCharacters": "Camera group name must be at least 2 characters.",
         "exists": "Camera group name already exists.",

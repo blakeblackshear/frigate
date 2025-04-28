@@ -52,7 +52,7 @@
     "validation": {
       "selectImage": "Please select an image file."
     },
-    "dropActive": "Drop the image here...",
+    "dropActive": "Drop the image here…",
     "dropInstructions": "Drag and drop an image here, or click to select",
     "maxSize": "Max size: {{size}}MB"
   },
@@ -65,7 +65,6 @@
       "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
       "deletedFace_one": "Successfully deleted {{count}} face.",
       "deletedFace_other": "Successfully deleted {{count}} faces.",
-      "deletedName_zero": "Empty collection deleted successfully.",
       "deletedName_one": "{{count}} face has been successfully deleted.",
       "deletedName_other": "{{count}} faces have been successfully deleted.",
       "renamedFace": "Successfully renamed face to {{name}}",
