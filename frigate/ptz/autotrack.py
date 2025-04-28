@@ -364,9 +364,9 @@ class PtzAutoTracker:
             != ZoomingModeEnum.disabled
         ):
             logger.info(f"Calibration for {camera} in progress: 0% complete")
+            self.zoom_time[camera] = 0
 
             for i in range(2):
-                start_time = time.time()
                 # absolute move to 0 - fully zoomed out
                 self.onvif._zoom_absolute(
                     camera,
@@ -389,9 +389,6 @@ class PtzAutoTracker:
                     self.onvif.get_camera_status(camera)
 
                 zoom_in_values.append(self.ptz_metrics[camera].zoom_level.value)
-                stop_time = time.time()
-
-                self.zoom_time[camera] = stop_time - start_time
 
                 if (
                     self.config.cameras[camera].onvif.autotracking.zooming
@@ -411,6 +408,7 @@ class PtzAutoTracker:
 
                     zoom_out_values.append(self.ptz_metrics[camera].zoom_level.value)
 
+                    zoom_start_time = time.time()
                     # relative move to 0.01
                     self.onvif._move_relative(
                         camera,
@@ -422,6 +420,38 @@ class PtzAutoTracker:
 
                     while not self.ptz_metrics[camera].motor_stopped.is_set():
                         self.onvif.get_camera_status(camera)
+
+                    zoom_stop_time = time.time()
+
+                    full_relative_start_time = time.time()
+
+                    self.onvif._move_relative(
+                        camera,
+                        -1,
+                        -1,
+                        -1e-2,
+                        1,
+                    )
+
+                    while not self.ptz_metrics[camera].motor_stopped.is_set():
+                        self.onvif.get_camera_status(camera)
+
+                    full_relative_stop_time = time.time()
+
+                    self.onvif._move_relative(
+                        camera,
+                        1,
+                        1,
+                        1e-2,
+                        1,
+                    )
+
+                    while not self.ptz_metrics[camera].motor_stopped.is_set():
+                        self.onvif.get_camera_status(camera)
+
+                    self.zoom_time[camera] = (
+                        full_relative_stop_time - full_relative_start_time
+                    ) - (zoom_stop_time - zoom_start_time)
 
                     zoom_in_values.append(self.ptz_metrics[camera].zoom_level.value)
 
@@ -435,7 +465,6 @@ class PtzAutoTracker:
         else:
             self.ptz_metrics[camera].max_zoom.value = 1
             self.ptz_metrics[camera].min_zoom.value = 0
-            self.zoom_time[camera] = 0
 
         self.onvif._move_to_preset(
             camera,
@@ -1071,6 +1100,7 @@ class PtzAutoTracker:
 
         average_velocity = np.zeros((4,))
         predicted_box = obj.obj_data["box"]
+        zoom_predicted_box = obj.obj_data["box"]
 
         centroid_x = obj.obj_data["centroid"][0]
         centroid_y = obj.obj_data["centroid"][1]
@@ -1079,19 +1109,19 @@ class PtzAutoTracker:
         pan = ((centroid_x / camera_width) - 0.5) * 2
         tilt = (0.5 - (centroid_y / camera_height)) * 2
 
+        _, average_velocity = (
+            self._get_valid_velocity(camera, obj)
+            if "velocity" not in self.tracked_object_metrics[camera]
+            else (
+                self.tracked_object_metrics[camera]["valid_velocity"],
+                self.tracked_object_metrics[camera]["velocity"],
+            )
+        )
+
         if (
             camera_config.onvif.autotracking.movement_weights
         ):  # use estimates if we have available coefficients
             predicted_movement_time = self._predict_movement_time(camera, pan, tilt)
-
-            _, average_velocity = (
-                self._get_valid_velocity(camera, obj)
-                if "velocity" not in self.tracked_object_metrics[camera]
-                else (
-                    self.tracked_object_metrics[camera]["valid_velocity"],
-                    self.tracked_object_metrics[camera]["velocity"],
-                )
-            )
 
             if np.any(average_velocity):
                 # this box could exceed the frame boundaries if velocity is high
@@ -1126,21 +1156,24 @@ class PtzAutoTracker:
             and camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative
             and zoom != 0
         ):
-            zoom_predicted_movement_time = abs(zoom) * self.zoom_time[camera]
+            zoom_predicted_movement_time = 0
 
-            zoom_predicted_box = (
-                predicted_box
-                + camera_fps * zoom_predicted_movement_time * average_velocity
-            )
+            if np.any(average_velocity):
+                zoom_predicted_movement_time = abs(zoom) * self.zoom_time[camera]
 
-            zoom_predicted_box = np.round(zoom_predicted_box).astype(int)
+                zoom_predicted_box = (
+                    predicted_box
+                    + camera_fps * zoom_predicted_movement_time * average_velocity
+                )
 
-            centroid_x = round((zoom_predicted_box[0] + zoom_predicted_box[2]) / 2)
-            centroid_y = round((zoom_predicted_box[1] + zoom_predicted_box[3]) / 2)
+                zoom_predicted_box = np.round(zoom_predicted_box).astype(int)
 
-            # recalculate pan and tilt with new centroid
-            pan = ((centroid_x / camera_width) - 0.5) * 2
-            tilt = (0.5 - (centroid_y / camera_height)) * 2
+                centroid_x = round((zoom_predicted_box[0] + zoom_predicted_box[2]) / 2)
+                centroid_y = round((zoom_predicted_box[1] + zoom_predicted_box[3]) / 2)
+
+                # recalculate pan and tilt with new centroid
+                pan = ((centroid_x / camera_width) - 0.5) * 2
+                tilt = (0.5 - (centroid_y / camera_height)) * 2
 
             logger.debug(
                 f"{camera}: Zoom amount: {zoom}, zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
