@@ -187,7 +187,11 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay open={isOpen} onOpenChange={handleOpenChange}>
+    <Overlay
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      enableHistoryBack={true}
+    >
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",
