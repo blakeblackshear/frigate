@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "Nome",
-      "placeholder": "Digite um nome...",
+      "placeholder": "Digite um nome…",
       "errorMessage": {
         "exists": "O nome do grupo de câmeras já existe.",
         "nameMustNotPeriod": "O nome do grupo de câmeras não deve conter ponto.",

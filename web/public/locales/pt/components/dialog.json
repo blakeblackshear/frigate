@@ -79,7 +79,7 @@
     "restreaming": {
       "desc": {
         "title": "Configure o go2rtc para obter opções adicionais de visualização ao vivo e áudio para esta câmera.",
-        "readTheDocumentation": "Leia a documentação "
+        "readTheDocumentation": "Leia a documentação"
       },
       "disabled": "A retransmissão não está habilitada para esta câmera."
     },
