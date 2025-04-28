@@ -3,12 +3,12 @@
   "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
   "lowBandwidthMode": "低带宽模式",
   "twoWayTalk": {
-    "enable": "开启双向对话",
-    "disable": "关闭双向对话"
+    "enable": "开启实时对话",
+    "disable": "关闭实时通话"
   },
   "cameraAudio": {
-    "enable": "开启摄像头音频",
-    "disable": "关闭摄像头音频"
+    "enable": "开启音频输出",
+    "disable": "关闭音频输出"
   },
   "ptz": {
     "move": {

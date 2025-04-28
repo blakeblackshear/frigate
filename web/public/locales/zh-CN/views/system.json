@@ -72,7 +72,9 @@
         "toast": {
           "success": "已复制GPU信息到剪贴板"
         }
-      }
+      },
+      "npuMemory": "NPU内存",
+      "npuUsage": "NPU使用率"
     },
     "otherProcesses": {
       "title": "其他进程",
@@ -142,7 +144,10 @@
     "ffmpegHighCpuUsage": "{{camera}} 的 FFMPEG CPU 使用率较高（{{ffmpegAvg}}%）",
     "detectHighCpuUsage": "{{camera}} 的 探测 CPU 使用率较高（{{detectAvg}}%）",
     "healthy": "系统运行正常",
-    "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）"
+    "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
+    "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",
+    "detectIsVerySlow": "{{detect}} 运行非常缓慢（{{speed}}毫秒）",
+    "cameraIsOffline": "{{camera}} 已离线"
   },
   "enrichments": {
     "title": "增强功能",
@@ -151,7 +156,14 @@
       "image_embedding_speed": "图像特征提取速度",
       "face_embedding_speed": "人脸特征提取速度",
       "plate_recognition_speed": "车牌识别速度",
-      "text_embedding_speed": "文本编码速度"
+      "text_embedding_speed": "文本编码速度",
+      "face_recognition_speed": "人脸识别速度",
+      "image_embedding": "图像特征提取",
+      "text_embedding": "文字编码",
+      "face_recognition": "人脸特征提取",
+      "plate_recognition": "车牌识别",
+      "yolov9_plate_detection_speed": "YOLOv9 车牌检测速度",
+      "yolov9_plate_detection": "YOLOv9 车牌检测"
     }
   }
 }
