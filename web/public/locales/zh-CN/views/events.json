@@ -1,5 +1,5 @@
 {
-  "alerts": "警告",
+  "alerts": "警报",
   "detections": "检测",
   "motion": {
     "label": "运动",
@@ -7,8 +7,8 @@
   },
   "allCameras": "所有摄像头",
   "empty": {
-    "alert": "还没有“警告”类回放",
-    "detection": "还没有“探测”类回放",
+    "alert": "还没有“警报”类核查项",
+    "detection": "还没有“探测”类核查项",
     "motion": "还没有运动类数据"
   },
   "timeline": "时间线",
@@ -18,18 +18,21 @@
     "aria": "选择事件",
     "noFoundForTimePeriod": "未找到该时间段的事件。"
   },
-  "documentTitle": "预览 - Frigate",
+  "documentTitle": "核查 - Frigate",
   "recordings": {
     "documentTitle": "回放 - Frigate"
   },
   "calendarFilter": {
     "last24Hours": "过去24小时"
   },
-  "markAsReviewed": "标记为已审核",
-  "markTheseItemsAsReviewed": "将这些项目标记为已审核",
+  "markAsReviewed": "标记为已核查",
+  "markTheseItemsAsReviewed": "将这些项目标记为已核查",
   "newReviewItems": {
-    "label": "查看新的审核项目",
-    "button": "新的待审核项目"
+    "label": "查看新的核查项目",
+    "button": "核查新项目"
   },
-  "camera": "摄像头"
+  "camera": "摄像头",
+  "selected": "已选择 {{count}} 个",
+  "selected_one": "已选择 {{count}} 个",
+  "selected_other": "已选择 {{count}} 个"
 }
