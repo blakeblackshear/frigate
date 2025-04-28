@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "Nume",
-      "placeholder": "Introdu un nume...",
+      "placeholder": "Introdu un nume…",
       "errorMessage": {
         "mustLeastCharacters": "Numele grupului de cmere trebuie sa sontina minim 2 caractere.",
         "exists": "Numele grupului de camere exista deja.",
