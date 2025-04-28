@@ -1,5 +1,17 @@
 {
   "speech": "Puhe",
   "yell": "Huutaa",
-  "babbling": "Pulina"
+  "babbling": "Pulina",
+  "boat": "Vene",
+  "cat": "Kissa",
+  "dog": "Koira",
+  "horse": "Hevonen",
+  "sheep": "Lammas",
+  "bird": "Lintu",
+  "car": "Auto",
+  "motorcycle": "Moottoripyörä",
+  "bus": "Bussi",
+  "train": "Juna",
+  "bicycle": "Pyörä",
+  "skateboard": "Rullalauta"
 }

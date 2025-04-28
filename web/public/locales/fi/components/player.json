@@ -1,1 +1,4 @@
-{}
+{
+  "noPreviewFound": "Esikatselua ei löytynyt",
+  "noPreviewFoundFor": "Ei esikatselua {{cameraName}}lle"
+}
