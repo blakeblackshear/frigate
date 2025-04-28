@@ -19,7 +19,9 @@
     "addFace": "Aggiungi volto",
     "deleteFaceAttempts": "Elimina tentativi di riconoscimento facciale",
     "uploadImage": "Carica immagine",
-    "reprocessFace": "Rielabora il volto"
+    "reprocessFace": "Rielabora il volto",
+    "deleteFace": "Elimina volto",
+    "renameFace": "Rinomina volto"
   },
   "trainFace": "Addestra il volto",
   "toast": {
@@ -33,7 +35,8 @@
       "deletedFace_other": "Eliminati con successo {{count}} volti.",
       "updatedFaceScore": "Punteggio del volto aggiornato con successo.",
       "uploadedImage": "Immagine caricata correttamente.",
-      "addFaceLibrary": "{{name}} è stato aggiunto con successo alla Libreria dei Volti!"
+      "addFaceLibrary": "{{name}} è stato aggiunto con successo alla Libreria dei Volti!",
+      "renamedFace": "Rinominato correttamente il volto in {{name}}"
     },
     "error": {
       "addFaceLibraryFailed": "Impossibile impostare il nome del volto: {{errorMessage}}",
@@ -41,11 +44,12 @@
       "deleteFaceFailed": "Impossibile eliminare: {{errorMessage}}",
       "trainFailed": "Impossibile addestrare: {{errorMessage}}",
       "updateFaceScoreFailed": "Impossibile aggiornare il punteggio del volto: {{errorMessage}}",
-      "deleteNameFailed": "Impossibile eliminare il nome: {{errorMessage}}"
+      "deleteNameFailed": "Impossibile eliminare il nome: {{errorMessage}}",
+      "renameFaceFailed": "Impossibile rinominare il volto: {{errorMessage}}"
     }
   },
   "imageEntry": {
-    "dropActive": "Rilascia l'immagine qui...",
+    "dropActive": "Rilascia l'immagine qui…",
     "dropInstructions": "Trascina e rilascia un'immagine qui oppure fai clic per selezionarla",
     "maxSize": "Dimensione massima: {{size}} MB",
     "validation": {
@@ -74,5 +78,9 @@
     "faceName": "Inserisci il nome del volto",
     "nextSteps": "Prossimi passi",
     "uploadFace": "Carica l'immagine del volto"
+  },
+  "renameFace": {
+    "title": "Rinomina volto",
+    "desc": "Inserisci un nuovo nome per {{name}}"
   }
 }

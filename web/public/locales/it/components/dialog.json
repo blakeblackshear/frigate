@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Inviato"
+        },
+        "question": {
+          "label": "Conferma questa etichetta per Frigate Plus",
+          "ask_a": "Questo oggetto è un <code>{{label}}</code>?",
+          "ask_an": "Questo oggetto è un <code>{{label}}</code>?",
+          "ask_full": "Questo oggetto è un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
@@ -74,15 +80,15 @@
   "streaming": {
     "label": "Trasmissione",
     "showStats": {
-      "label": "Mostra statistiche della trasmissione",
+      "label": "Mostra statistiche di trasmissione",
       "desc": "Abilita questa opzione per visualizzare le statistiche della trasmissione come sovrapposizione sul flusso della telecamera."
     },
-    "debugView": "Vista di debug",
+    "debugView": "Vista correzioni",
     "restreaming": {
       "disabled": "La ritrasmissione non è abilitata per questa telecamera.",
       "desc": {
         "title": "Imposta go2rtc per opzioni aggiuntive di visualizzazione dal vivo e audio per questa telecamera.",
-        "readTheDocumentation": "Leggi la documentazione "
+        "readTheDocumentation": "Leggi la documentazione"
       }
     }
   },

@@ -47,12 +47,12 @@
     "m": "{{time}}min",
     "s": "{{time}}sec",
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%b %-d, %H:%M:%S"
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampExcludeSeconds": {
       "12hour": "%b %-d, %I:%M %p",
@@ -62,7 +62,28 @@
       "12hour": "%b %-d %Y, %I:%M %p",
       "24hour": "%b %-d %Y, %H:%M"
     },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d"
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "24hour": "MM-dd-yy-HH-mm-ss",
+      "12hour": "MM-dd-yy-h-mm-ss-a"
+    }
   },
   "button": {
     "cancel": "Annulla",
@@ -80,7 +101,7 @@
     "done": "Fatto",
     "enabled": "Abilitato",
     "enable": "Abilita",
-    "saving": "Salvataggio...",
+    "saving": "Salvataggio…",
     "copy": "Copia",
     "history": "Storico",
     "exitFullscreen": "Esci da schermo intero",
@@ -98,7 +119,7 @@
     "close": "Chiudi",
     "back": "Indietro",
     "pictureInPicture": "Immagine nell'immagine",
-    "twoWayTalk": "Comunicazione a 2 vie",
+    "twoWayTalk": "Comunicazione bidirezionale",
     "cameraAudio": "Audio della telecamera"
   },
   "unit": {
@@ -215,8 +236,8 @@
   "role": {
     "title": "Ruolo",
     "admin": "Amministratore",
-    "viewer": "Osservatore",
-    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Osservatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
+    "viewer": "Spettatore",
+    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Spettatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",

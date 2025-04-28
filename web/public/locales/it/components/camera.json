@@ -12,7 +12,7 @@
     "edit": "Modifica gruppo di telecamere",
     "name": {
       "label": "Nome",
-      "placeholder": "Inserisci un nome...",
+      "placeholder": "Inserisci un nome…",
       "errorMessage": {
         "exists": "Il nome scelto per il gruppo telecamere è già presente.",
         "invalid": "Nome del gruppo di telecamere non valido.",
@@ -36,12 +36,12 @@
               "label": "Trasmissione continua",
               "desc": {
                 "warning": "La trasmissione continua può causare un elevato utilizzo di larghezza di banda e problemi di prestazioni. Da usare con cautela.",
-                "title": "L'immagine della telecamera sarà sempre trasmessa dal vivo quando è visibile sul cruscotto, anche se non viene rilevata alcuna attività."
+                "title": "L'immagine della telecamera sarà sempre trasmessa dal vivo quando è visibile sulla schermata, anche se non viene rilevata alcuna attività."
               }
             },
             "noStreaming": {
               "label": "Nessuna trasmissione",
-              "desc": "Le immagini delle telecamere verranno aggiornate solo una volta al minuto e non verrà effettuato alcuna trasmissione dal vivo."
+              "desc": "Le immagini delle telecamere verranno aggiornate solo una volta al minuto e non verrà effettuata alcuna trasmissione dal vivo."
             }
           }
         },
@@ -56,7 +56,7 @@
           }
         },
         "audioIsUnavailable": "L'audio non è disponibile per questo flusso",
-        "desc": "Modifica le opzioni di trasmissione dal vivo per il cruscotto di questo gruppo di telecamere. <em>TQueste impostazioni sono specifiche del dispositivo/browser.</em>"
+        "desc": "Modifica le opzioni di trasmissione dal vivo per la schermata di questo gruppo di telecamere. <em>Queste impostazioni sono specifiche del dispositivo/browser.</em>"
       }
     },
     "cameras": {
