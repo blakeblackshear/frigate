@@ -251,8 +251,8 @@ export default function CameraSettingsView({
   }
 
   useEffect(() => {
-    document.title = "Camera Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.camera");
+  }, [t]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
