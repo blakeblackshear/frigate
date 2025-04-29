@@ -1,15 +1,14 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import i18next from "i18next";
+import { supportedLanguageKeys } from "@/lib/const";
 
 type LanguageProviderState = {
   language: string;
-  systemLanguage: string;
   setLanguage: (language: string) => void;
 };
 
 const initialState: LanguageProviderState = {
   language: i18next.language || "en",
-  systemLanguage: "en",
   setLanguage: () => null,
 };
 
@@ -26,10 +25,22 @@ export function LanguageProvider({
   defaultLanguage?: string;
   storageKey?: string;
 }) {
+  const systemLanguage = useMemo<string>(() => {
+    if (typeof window === "undefined") return defaultLanguage;
+
+    const systemLanguage = window.navigator.language;
+
+    if (supportedLanguageKeys.includes(systemLanguage)) {
+      return systemLanguage;
+    }
+
+    return defaultLanguage;
+  }, [defaultLanguage]);
+
   const [language, setLanguage] = useState<string>(() => {
     try {
       const storedData = localStorage.getItem(storageKey);
-      const newLanguage = storedData || defaultLanguage;
+      const newLanguage = storedData || systemLanguage;
       i18next.changeLanguage(newLanguage);
       return newLanguage;
     } catch (error) {
@@ -38,11 +49,6 @@ export function LanguageProvider({
       return defaultLanguage;
     }
   });
-
-  const systemLanguage = useMemo<string>(() => {
-    if (typeof window === "undefined") return "en";
-    return window.navigator.language;
-  }, []);
 
   useEffect(() => {
     // set document lang for smart capitalization
@@ -54,7 +60,6 @@ export function LanguageProvider({
 
   const value = {
     language,
-    systemLanguage,
     setLanguage: (language: string) => {
       localStorage.setItem(storageKey, language);
       setLanguage(language);
