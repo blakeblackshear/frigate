@@ -79,8 +79,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const languages = useMemo(() => {
     // Handle language keys that aren't directly used for translation key
     const specialKeyMap: { [key: string]: string } = {
-      "zh-CN": "zhCN",
+      "nb-NO": "nb",
       "yue-Hant": "yue",
+      "zh-CN": "zhCN",
     };
 
     return supportedLanguageKeys.map((key) => {
