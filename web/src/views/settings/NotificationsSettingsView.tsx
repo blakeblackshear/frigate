@@ -299,6 +299,10 @@ export default function NotificationView({
     saveToConfig(values as NotificationSettingsValueType);
   }
 
+  useEffect(() => {
+    document.title = t("documentTitle.notifications");
+  }, [t]);
+
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">

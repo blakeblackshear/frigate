@@ -240,7 +240,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -316,7 +316,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -350,7 +350,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -386,7 +386,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.npu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.npu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }

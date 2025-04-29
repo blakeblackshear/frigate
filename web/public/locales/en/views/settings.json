@@ -6,9 +6,10 @@
     "classification": "Classification Settings - Frigate",
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
-    "object": "Object Settings - Frigate",
+    "object": "Debug - Frigate",
     "general": "General Settings - Frigate",
-    "frigatePlus": "Frigate+ Settings - Frigate"
+    "frigatePlus": "Frigate+ Settings - Frigate",
+    "notifications": "Notification Settings - Frigate"
   },
   "menu": {
     "ui": "UI",
