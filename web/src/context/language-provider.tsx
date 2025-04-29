@@ -34,6 +34,15 @@ export function LanguageProvider({
       return systemLanguage;
     }
 
+    // browser languages may include a -REGION (ex: en-US)
+    if (systemLanguage.includes("-")) {
+      const shortenedSystemLanguage = systemLanguage.split("-")[0];
+
+      if (supportedLanguageKeys.includes(shortenedSystemLanguage)) {
+        return shortenedSystemLanguage;
+      }
+    }
+
     return defaultLanguage;
   }, [defaultLanguage]);
 
