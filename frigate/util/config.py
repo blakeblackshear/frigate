@@ -330,7 +330,7 @@ def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
 
             if movement_weights and len(movement_weights.split(",")) == 5:
                 onvif_config["autotracking"]["movement_weights"] = (
-                    movement_weights + ", 1"
+                    movement_weights + ", 0"
                 )
             camera_config["onvif"] = onvif_config
 
