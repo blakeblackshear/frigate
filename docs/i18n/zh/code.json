@@ -1,0 +1,444 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "页面崩溃",
+    "description": "页面崩溃时显示的标题"
+  },
+  "theme.blog.archive.title": {
+    "message": "归档",
+    "description": "博客归档页面的标题"
+  },
+  "theme.blog.archive.description": {
+    "message": "归档",
+    "description": "博客归档页面的描述"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "返回顶部",
+    "description": "返回顶部按钮的ARIA标签"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "博客列表导航",
+    "description": "博客分页导航的ARIA标签"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "更新的文章",
+    "description": "导航到较新博客文章的标签"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "更早的文章",
+    "description": "导航到较旧博客文章的标签"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "博客文章导航",
+    "description": "博客文章分页导航的ARIA标签"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "更新的文章",
+    "description": "导航到较新博客文章的按钮标签"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "更早的文章",
+    "description": "导航到较旧博客文章的按钮标签"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "切换暗色/亮色模式(当前为{mode})",
+    "description": "导航栏颜色模式切换的ARIA标签"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "暗色模式",
+    "description": "暗色模式的名称"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "亮色模式",
+    "description": "亮色模式的名称"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "面包屑导航",
+    "description": "面包屑导航的ARIA标签"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "1个项目|{count}个项目",
+    "description": "分类卡片默认描述，显示该分类包含的项目数量"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "文档页面导航",
+    "description": "文档分页导航的ARIA标签"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "上一篇",
+    "description": "导航到上一篇文档的标签"
+  },
+  "theme.docs.paginator.next": {
+    "message": "下一篇",
+    "description": "导航到下一篇文档的标签"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "查看所有标签",
+    "description": "指向标签列表页面的链接标签"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "1篇文档标记|{count}篇文档标记",
+    "description": "\"{count}篇文档标记\"的复数化标签"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} \"{tagName}\"",
+    "description": "文档标签页面的标题"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "版本: {versionLabel}"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "这是{siteTitle} {versionLabel}版本的未发布文档。",
+    "description": "告知用户正在浏览未发布文档版本的标签"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "这是{siteTitle} {versionLabel}版本的文档，已不再积极维护。",
+    "description": "告知用户正在浏览未维护文档版本的标签"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "查看最新文档，请访问{latestVersionLink}({versionLabel})。",
+    "description": "建议用户查看最新版本的标签"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "最新版本",
+    "description": "最新版本建议链接的标签"
+  },
+  "theme.common.editThisPage": {
+    "message": "编辑此页",
+    "description": "编辑当前页面的链接标签"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "直达{heading}",
+    "description": "指向标题的链接标题"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": "于{date}",
+    "description": "描述页面最后更新日期的词语"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": "由{user}",
+    "description": "描述页面最后更新者的词语"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "最后更新{atDate}{byUser}",
+    "description": "显示页面最后更新时间和更新者的句子"
+  },
+  "theme.NotFound.title": {
+    "message": "页面未找到",
+    "description": "404页面的标题"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "版本",
+    "description": "移动视图下导航栏版本下拉菜单的标签"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "标签:",
+    "description": "标签列表旁的标签"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "关闭",
+    "description": "公告栏关闭按钮的ARIA标签"
+  },
+  "theme.admonition.caution": {
+    "message": "注意",
+    "description": "Caution警告框(:::caution)的默认标签"
+  },
+  "theme.admonition.danger": {
+    "message": "危险",
+    "description": "Danger警告框(:::danger)的默认标签"
+  },
+  "theme.admonition.info": {
+    "message": "信息",
+    "description": "Info提示框(:::info)的默认标签"
+  },
+  "theme.admonition.note": {
+    "message": "备注",
+    "description": "Note提示框(:::note)的默认标签"
+  },
+  "theme.admonition.tip": {
+    "message": "提示",
+    "description": "Tip提示框(:::tip)的默认标签"
+  },
+  "theme.admonition.warning": {
+    "message": "警告",
+    "description": "Warning警告框(:::warning)的默认标签"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "博客最新文章导航",
+    "description": "博客侧边栏最新文章的ARIA标签"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "已复制",
+    "description": "代码块复制按钮的标签"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "复制代码到剪贴板",
+    "description": "代码块复制按钮的ARIA标签"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "复制",
+    "description": "代码块复制按钮的标签"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "切换自动换行",
+    "description": "代码块自动换行切换按钮的标题属性"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "展开侧边栏分类'{label}'",
+    "description": "展开侧边栏分类的ARIA标签"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "折叠侧边栏分类'{label}'",
+    "description": "折叠侧边栏分类的ARIA标签"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "主导航",
+    "description": "主导航的ARIA标签"
+  },
+  "theme.NotFound.p1": {
+    "message": "找不到您要访问的内容。",
+    "description": "404页面的第一段文字"
+  },
+  "theme.NotFound.p2": {
+    "message": "请联系该网站所有者，告知他们原始URL的链接已失效。",
+    "description": "404页面的第二段文字"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "语言",
+    "description": "移动端语言切换下拉菜单的标签"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "本页目录",
+    "description": "可折叠目录组件的按钮标签"
+  },
+  "theme.blog.post.readMore": {
+    "message": "阅读更多",
+    "description": "博客文章摘要中链接到全文的标签"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "阅读更多关于{title}",
+    "description": "从摘要链接到完整博客文章的ARIA标签"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "1分钟阅读|{readingTime}分钟阅读",
+    "description": "\"{readingTime}分钟阅读\"的复数化标签"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "首页",
+    "description": "面包屑导航中首页的ARIA标签"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "收起侧边栏",
+    "description": "文档侧边栏收起按钮的标题属性"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "收起侧边栏",
+    "description": "文档侧边栏收起按钮的ARIA标签"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "文档侧边栏",
+    "description": "侧边栏导航的ARIA标签"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "关闭导航栏",
+    "description": "移动端侧边栏关闭按钮的ARIA标签"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← 返回主菜单",
+    "description": "移动端导航栏二级菜单中返回主菜单的按钮标签"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "切换导航栏",
+    "description": "移动端导航汉堡菜单按钮的ARIA标签"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "展开侧边栏",
+    "description": "文档侧边栏展开按钮的标题和ARIA标签"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "展开侧边栏",
+    "description": "文档侧边栏展开按钮的ARIA标签"
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "查看全部{count}个结果"
+  },
+  "theme.SearchPage.documentsFound.plurals": {
+    "message": "找到1篇文档|找到{count}篇文档",
+    "description": "\"{count}篇文档\"的复数化标签"
+  },
+  "theme.SearchPage.existingResultsTitle": {
+    "message": "搜索\"{query}\"的结果",
+    "description": "非空查询的搜索页面标题"
+  },
+  "theme.SearchPage.emptyResultsTitle": {
+    "message": "搜索文档",
+    "description": "空查询的搜索页面标题"
+  },
+  "theme.SearchPage.inputPlaceholder": {
+    "message": "输入搜索内容",
+    "description": "搜索页面输入框的占位符"
+  },
+  "theme.SearchPage.inputLabel": {
+    "message": "搜索",
+    "description": "搜索页面输入框的ARIA标签"
+  },
+  "theme.SearchPage.algoliaLabel": {
+    "message": "由Algolia提供搜索",
+    "description": "Algolia标识的ARIA标签"
+  },
+  "theme.SearchPage.noResultsText": {
+    "message": "未找到结果",
+    "description": "空搜索结果的提示文本"
+  },
+  "theme.SearchPage.fetchingNewResults": {
+    "message": "正在获取新结果...",
+    "description": "获取新搜索结果的提示文本"
+  },
+  "theme.SearchBar.label": {
+    "message": "搜索",
+    "description": "搜索按钮的ARIA标签和占位符"
+  },
+  "theme.SearchModal.searchBox.resetButtonTitle": {
+    "message": "清空搜索",
+    "description": "搜索框重置按钮的标签和ARIA标签"
+  },
+  "theme.SearchModal.searchBox.cancelButtonText": {
+    "message": "取消",
+    "description": "搜索框取消按钮的标签和ARIA标签"
+  },
+  "theme.SearchModal.startScreen.recentSearchesTitle": {
+    "message": "最近搜索",
+    "description": "最近搜索的标题"
+  },
+  "theme.SearchModal.startScreen.noRecentSearchesText": {
+    "message": "无最近搜索记录",
+    "description": "无最近搜索时的提示文本"
+  },
+  "theme.SearchModal.startScreen.saveRecentSearchButtonTitle": {
+    "message": "保存此搜索",
+    "description": "保存最近搜索按钮的标签"
+  },
+  "theme.SearchModal.startScreen.removeRecentSearchButtonTitle": {
+    "message": "从历史记录中移除",
+    "description": "移除最近搜索按钮的标签"
+  },
+  "theme.SearchModal.startScreen.favoriteSearchesTitle": {
+    "message": "收藏搜索",
+    "description": "收藏搜索的标题"
+  },
+  "theme.SearchModal.startScreen.removeFavoriteSearchButtonTitle": {
+    "message": "从收藏中移除",
+    "description": "移除收藏搜索按钮的标签"
+  },
+  "theme.SearchModal.errorScreen.titleText": {
+    "message": "无法获取结果",
+    "description": "搜索模态框错误界面的标题"
+  },
+  "theme.SearchModal.errorScreen.helpText": {
+    "message": "请检查您的网络连接。",
+    "description": "搜索模态框错误界面的帮助文本"
+  },
+  "theme.SearchModal.footer.selectText": {
+    "message": "选择",
+    "description": "回车键功能的说明文本"
+  },
+  "theme.SearchModal.footer.selectKeyAriaLabel": {
+    "message": "回车键",
+    "description": "选择功能的回车键ARIA标签"
+  },
+  "theme.SearchModal.footer.navigateText": {
+    "message": "导航",
+    "description": "上下箭头键功能的说明文本"
+  },
+  "theme.SearchModal.footer.navigateUpKeyAriaLabel": {
+    "message": "上箭头键",
+    "description": "向上导航的上箭头键ARIA标签"
+  },
+  "theme.SearchModal.footer.navigateDownKeyAriaLabel": {
+    "message": "下箭头键",
+    "description": "向下导航的下箭头键ARIA标签"
+  },
+  "theme.SearchModal.footer.closeText": {
+    "message": "关闭",
+    "description": "ESC键功能的说明文本"
+  },
+  "theme.SearchModal.footer.closeKeyAriaLabel": {
+    "message": "ESC键",
+    "description": "关闭模态框的ESC键ARIA标签"
+  },
+  "theme.SearchModal.footer.searchByText": {
+    "message": "搜索由",
+    "description": "Algolia搜索标识的说明文本"
+  },
+  "theme.SearchModal.noResultsScreen.noResultsText": {
+    "message": "没有找到",
+    "description": "无搜索结果时的提示文本前缀"
+  },
+  "theme.SearchModal.noResultsScreen.suggestedQueryText": {
+    "message": "尝试搜索",
+    "description": "无结果时建议查询的提示文本"
+  },
+  "theme.SearchModal.noResultsScreen.reportMissingResultsText": {
+    "message": "认为应该有搜索结果？",
+    "description": "报告缺失结果的问题文本"
+  },
+  "theme.SearchModal.noResultsScreen.reportMissingResultsLinkText": {
+    "message": "告诉我们。",
+    "description": "报告缺失结果的链接文本"
+  },
+  "theme.SearchModal.placeholder": {
+    "message": "搜索文档",
+    "description": "文档搜索弹出框输入框的占位符"
+  },
+  "theme.blog.post.plurals": {
+    "message": "1篇文章|{count}篇文章",
+    "description": "\"{count}篇文章\"的复数化标签"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts}篇\"{tagName}\"标签的文章",
+    "description": "博客标签页面的标题"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}篇文章",
+    "description": "博客作者页面的标题"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "作者列表",
+    "description": "作者列表页面的标题"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "查看所有作者",
+    "description": "博客作者列表页面的链接标签"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "该作者尚未发表任何文章。",
+    "description": "作者无文章时的提示文本"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "未列出页面",
+    "description": "未列出内容横幅的标题"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "此页面未列出。搜索引擎不会索引它，只有拥有直接链接的用户可以访问。",
+    "description": "未列出内容横幅的消息"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "草稿页面",
+    "description": "草稿内容横幅的标题"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "此页面是草稿。仅在开发环境可见，不会包含在生产构建中。",
+    "description": "草稿内容横幅的消息"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "重试",
+    "description": "React错误边界捕获错误后重试渲染的按钮标签"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "跳至主内容",
+    "description": "无障碍访问的跳过导航标签，允许通过键盘快速导航到主要内容"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "标签",
+    "description": "标签列表页面的标题"
+  }
+}

@@ -17,6 +17,18 @@ const config: Config = {
   markdown: {
     mermaid: true,
   },
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'zh'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+      },
+      zh: {
+        label: '简体中文',
+      },
+    },
+  },
   themeConfig: {
     algolia: {
       appId: 'WIURGBNBPY',
@@ -80,6 +92,10 @@ const config: Config = {
         {
           href: 'http://demo.frigate.video',
           label: 'Demo',
+          position: 'right',
+        },
+        {
+          type: 'localeDropdown',
           position: 'right',
         },
         {
