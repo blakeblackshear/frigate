@@ -108,7 +108,7 @@ export default function GPUInfoDialog({
               <br />
               <div>
                 {t("general.hardwareInfo.gpuInfo.nvidiaSMIOutput.driver", {
-                  name: nvinfo["0"].driver,
+                  driver: nvinfo["0"].driver,
                 })}
               </div>
               <br />
@@ -116,14 +116,14 @@ export default function GPUInfoDialog({
                 {t(
                   "general.hardwareInfo.gpuInfo.nvidiaSMIOutput.cudaComputerCapability",
                   {
-                    name: nvinfo["0"].cuda_compute,
+                    cuda_compute: nvinfo["0"].cuda_compute,
                   },
                 )}
               </div>
               <br />
               <div>
                 {t("general.hardwareInfo.gpuInfo.nvidiaSMIOutput.vbios", {
-                  name: nvinfo["0"].vbios,
+                  vbios: nvinfo["0"].vbios,
                 })}
               </div>
             </div>
