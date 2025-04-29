@@ -1491,7 +1491,9 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "onvif": {
-                        "autotracking": {"movement_weights": "0, 1, 1.23, 2.34, 0.50"}
+                        "autotracking": {
+                            "movement_weights": "0, 1, 1.23, 2.34, 0.50, 1"
+                        }
                     },
                 }
             },
@@ -1504,6 +1506,7 @@ class TestConfig(unittest.TestCase):
             "1.23",
             "2.34",
             "0.5",
+            "1.0",
         ]
 
     def test_fails_invalid_movement_weights(self):
