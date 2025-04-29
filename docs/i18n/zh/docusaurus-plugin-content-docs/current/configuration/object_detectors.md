@@ -15,22 +15,22 @@ Frigate支持多种不同类型的检测器，可在不同硬件上运行：
 
 **通用硬件**
 
-- [Coral EdgeTPU](#edge-tpu-detector)：Google Coral EdgeTPU提供USB和m.2两种接口，兼容多种设备。
-- [Hailo](#hailo-8)：Hailo8和Hailo8L AI加速模块提供m.2接口和树莓派HAT，兼容多种设备。
+- [Coral EdgeTPU](#edge-tpu检测器)：Google Coral EdgeTPU提供USB和m.2两种接口，兼容多种设备。
+- [Hailo](#hailo-8检测器)：Hailo8和Hailo8L AI加速模块提供m.2接口和树莓派HAT，兼容多种设备。
 
 **AMD**
 
-- [ROCm](#amdrocm-gpu-detector)：ROCm可在AMD独立显卡上运行，提供高效对象检测。
+- [ROCm](#amdrocm-gpu检测器)：ROCm可在AMD独立显卡上运行，提供高效对象检测。
 - [ONNX](#onnx)：当配置了支持的ONNX模型时，ROCm会在`-rocm`版Frigate镜像中自动被检测并使用。
 
 **Intel**
 
-- [OpenVino](#openvino-detector)：OpenVino可在Intel Arc 显卡、集成显卡和CPU上运行，提供高效对象检测。
+- [OpenVino](#openvino检测器)：OpenVino可在Intel Arc 显卡、集成显卡和CPU上运行，提供高效对象检测。
 - [ONNX](#onnx)：当配置了支持的ONNX模型时，OpenVINO会在标准Frigate镜像中自动被检测并使用。
 
 **NVIDIA**
 
-- [TensortRT](#nvidia-tensorrt-detector)：TensorRT可在NVIDIA GPU和Jetson设备上运行，使用多种预设模型。
+- [TensortRT](#nvidia-tensorrt检测器)：TensorRT可在NVIDIA GPU和Jetson设备上运行，使用多种预设模型。
 - [ONNX](#onnx)：当配置了支持的ONNX模型时，TensorRT会在`-tensorrt`或`-tensorrt-jp6`版Frigate镜像中自动被检测并使用。
 
 **Rockchip**
@@ -39,7 +39,7 @@ Frigate支持多种不同类型的检测器，可在不同硬件上运行：
 
 **测试用途**
 
-- [CPU检测器(不推荐实际使用)](#cpu-detector-not-recommended)：使用CPU运行tflite模型，不推荐使用，在大多数情况下使用OpenVINO CPU模式可获得更好效果。
+- [CPU检测器(不推荐实际使用)](#cpu检测器不推荐使用)：使用CPU运行tflite模型，不推荐使用，在大多数情况下使用OpenVINO CPU模式可获得更好效果。
 
 :::
 
@@ -294,7 +294,7 @@ model:
 
 #### YOLO-NAS模型
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md)模型受支持，但默认不包含。有关下载YOLO-NAS模型用于Frigate的更多信息，请参阅[模型部分](#downloading-yolo-nas-model)。
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md)模型受支持，但默认不包含。有关下载YOLO-NAS模型用于Frigate的更多信息，请参阅[模型部分](#下载yolo-nas模型)。
 
 将下载的onnx模型放入配置文件夹后，可以使用以下配置：
 
@@ -348,7 +348,7 @@ model:
 
 #### RF-DETR模型
 
-[RF-DETR](https://github.com/roboflow/rf-detr)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载RF-DETR模型用于Frigate的更多信息，请参阅[模型部分](#downloading-rf-detr-model)。
+[RF-DETR](https://github.com/roboflow/rf-detr)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载RF-DETR模型用于Frigate的更多信息，请参阅[模型部分](#下载rf-detr模型)。
 
 :::warning
 
@@ -375,7 +375,7 @@ model:
 
 #### D-FINE模型
 
-[D-FINE](https://github.com/Peterande/D-FINE)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载D-FINE模型用于Frigate的更多信息，请参阅[模型部分](#downloading-d-fine-model)。
+[D-FINE](https://github.com/Peterande/D-FINE)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载D-FINE模型用于Frigate的更多信息，请参阅[模型部分](#下载d-fine模型)。
 
 :::warning
 
@@ -591,12 +591,12 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 
 ### 支持的模型
 
-有关支持的模型，请参阅[ONNX支持的模型](#supported-models)，但有以下注意事项：
+有关支持的模型，请参阅[ONNX支持的模型](#支持的模型-3)，但有以下注意事项：
 
 - 不支持D-FINE模型
 - 已知YOLO-NAS模型在集成显卡上运行不佳
 
-## ONNX检测器
+## ONNX
 
 ONNX是一种用于构建机器学习模型的开放格式，Frigate支持在CPU、OpenVINO、ROCm和TensorRT上运行ONNX模型。启动时，Frigate会自动尝试使用可用的GPU。
 
@@ -638,7 +638,7 @@ detectors:
 
 #### YOLO-NAS
 
-[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md)模型受支持，但默认不包含。有关下载YOLO-NAS模型用于Frigate的更多信息，请参阅[模型部分](#downloading-yolo-nas-model)。
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md)模型受支持，但默认不包含。有关下载YOLO-NAS模型用于Frigate的更多信息，请参阅[模型部分](#下载yolo-nas模型)。
 
 将下载的onnx模型放入配置文件夹后，可以使用以下配置：
 
@@ -663,7 +663,7 @@ YOLOv3、YOLOv4、YOLOv7和[YOLOv9](https://github.com/WongKinYiu/yolov9)模型�
 
 :::tip
 
-YOLO检测器设计用于支持YOLOv3、YOLOv4、YOLOv7和YOLOv9模型，但也可能支持其他YOLO模型架构。有关下载YOLO模型用于Frigate的更多信息，请参阅[模型部分](#downloading-yolo-models)。
+YOLO检测器设计用于支持YOLOv3、YOLOv4、YOLOv7和YOLOv9模型，但也可能支持其他YOLO模型架构。有关下载YOLO模型用于Frigate的更多信息，请参阅[模型部分](#下载yolo模型)。
 
 :::
 
@@ -688,7 +688,7 @@ model:
 
 #### YOLOx
 
-[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX)模型受支持，但默认不包含。有关下载YOLOx模型用于Frigate的更多信息，请参阅[模型部分](#downloading-yolo-models)。
+[YOLOx](https://github.com/Megvii-BaseDetection/YOLOX)模型受支持，但默认不包含。有关下载YOLOx模型用于Frigate的更多信息，请参阅[模型部分](#下载yolo模型)。
 
 将下载的onnx模型放入配置文件夹后，可以使用以下配置：
 
@@ -711,7 +711,7 @@ model:
 
 #### RF-DETR
 
-[RF-DETR](https://github.com/roboflow/rf-detr)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载RF-DETR模型用于Frigate的更多信息，请参阅[模型部分](#downloading-rf-detr-model)。
+[RF-DETR](https://github.com/roboflow/rf-detr)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载RF-DETR模型用于Frigate的更多信息，请参阅[模型部分](#下载rf-detr模型)。
 
 将下载的onnx模型放入`config/model_cache`文件夹后，可以使用以下配置：
 
@@ -731,7 +731,7 @@ model:
 
 #### D-FINE
 
-[D-FINE](https://github.com/Peterande/D-FINE)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载D-FINE模型用于Frigate的更多信息，请参阅[模型部分](#downloading-d-fine-model)。
+[D-FINE](https://github.com/Peterande/D-FINE)是基于DETR的模型。支持导出的ONNX模型，但默认不包含。有关下载D-FINE模型用于Frigate的更多信息，请参阅[模型部分](#下载d-fine模型)。
 
 将下载的onnx模型放入`config/model_cache`文件夹后，可以使用以下配置：
 

@@ -13,7 +13,7 @@ title: 模型
 
 订阅包含每年12次模型训练。取消订阅后，您仍可保留已训练模型的使用权。提交模型请求或购买额外训练需要有效订阅。
 
-集成Frigate+的方法请参阅[集成文档](../integrations/plus.md)。
+集成Frigate+的方法请参阅[集成文档](/integrations/plus.md)。
 
 ## 可用模型类型
 

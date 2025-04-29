@@ -218,7 +218,7 @@ https://HA_URL/api/frigate/notifications/<review-id>/review_preview.gif
 
 #### RTSP URL模板
 
-对于高级用例，可以使用[RTSP URL模板](#options)选项更改此行为。设置后，此字符串将覆盖从上述默认行为派生的默认流地址。此选项支持[jinja2模板](https://jinja.palletsprojects.com/)，并且有来自[Frigate API](../integrations/api)的`camera`字典变量可用于模板。注意，模板中没有Home Assistant状态可用，只有来自Frigate的摄像头字典。
+对于高级用例，可以使用[RTSP URL模板](#options)选项更改此行为。设置后，此字符串将覆盖从上述默认行为派生的默认流地址。此选项支持[jinja2模板](https://jinja.palletsprojects.com/)，并且有来自[Frigate API](/integrations/api)的`camera`字典变量可用于模板。注意，模板中没有Home Assistant状态可用，只有来自Frigate的摄像头字典。
 
 当Frigate位于反向代理后面，和/或当默认流端口因其他原因（例如防火墙规则）无法访问Home Assistant时，这可能很有用。
 

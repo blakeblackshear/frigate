@@ -154,7 +154,7 @@ record:
 
 ### 延时摄影导出
 
-延时摄影导出只能通过[HTTP API](../integrations/api/export-recording-export-camera-name-start-start-time-end-end-time-post.api.mdx)实现。
+延时摄影导出只能通过[HTTP API](/integrations/api/export-recording-export-camera-name-start-start-time-end-end-time-post.api.mdx)实现。
 
 默认情况下，延时摄影以25倍速和30FPS导出。这意味着每25秒的实际录像会被压缩为1秒的延时视频（无音频）。
 

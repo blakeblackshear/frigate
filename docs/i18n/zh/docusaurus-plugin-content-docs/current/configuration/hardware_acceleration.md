@@ -78,7 +78,7 @@ done
 
 :::note
 
-默认驱动是`iHD`。如需要改为i965驱动，可能需要通过添加环境变量`LIBVA_DRIVER_NAME=i965`（在docker-compose文件中或[HA插件的config.yml](advanced.md#environment_vars)中）。
+默认驱动是`iHD`。如需要改为i965驱动，可能需要通过添加环境变量`LIBVA_DRIVER_NAME=i965`（在docker-compose文件中或[HA插件的config.yml](advanced.md#环境变量)中）。
 
 参考[Intel文档](https://www.intel.com/content/www/us/en/support/articles/000005505/processors.html)确认您的CPU是第几代的。
 

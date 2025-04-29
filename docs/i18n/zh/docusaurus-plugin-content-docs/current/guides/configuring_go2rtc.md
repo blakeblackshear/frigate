@@ -19,7 +19,7 @@ title: 配置 go2rtc
 
 为获得最佳体验，你应该将 `go2rtc` 下的流名称设置为与摄像头名称相匹配，这样 Frigate 就可以自动映射并为摄像头使用更好的实时查看选项。
 
-更多信息请参见[实时查看文档](../configuration/live.md#setting-stream-for-live-ui)。
+更多信息请参见[实时查看文档](../configuration/live.md#为实时页面设置视频流)。
 
 :::
 

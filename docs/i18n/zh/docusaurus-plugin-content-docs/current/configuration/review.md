@@ -66,7 +66,7 @@ cameras:
 
 ## 将回放条目限制在特定区域
 
-默认情况下，如果在摄像头画面的任何位置检测到任何`review -> alerts -> labels`和`review -> detections -> labels`，就会创建一个回放条目。您可能需要配置回放条目，使其仅在对象进入感兴趣区域时才创建，[详见区域文档](./zones.md#restricting-alerts-and-detections-to-specific-zones)
+默认情况下，如果在摄像头画面的任何位置检测到任何`review -> alerts -> labels`和`review -> detections -> labels`，就会创建一个回放条目。您可能需要配置回放条目，使其仅在对象进入感兴趣区域时才创建，[详见区域文档](./zones.md#限定警报和检测到特定区)
 
 :::info
 

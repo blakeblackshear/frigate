@@ -43,7 +43,7 @@ cameras:
 input_args: preset-http-jpeg-generic
 ```
 
-流输出参数和注意事项与[MJPEG摄像头](#mjpeg-cameras)相同
+流输出参数和注意事项与[MJPEG摄像头](#mjpeg摄像头)相同
 
 ## RTMP摄像头
 

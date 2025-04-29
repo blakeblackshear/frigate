@@ -3,7 +3,7 @@ id: snapshots
 title: 快照功能
 ---
 
-Frigate可以为每个检测到的对象保存快照图片到`/media/frigate/clips`目录，文件命名为`<摄像头名称>-<ID>.jpg`格式。这些快照也可以通过[API接口](../integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx)访问。
+Frigate可以为每个检测到的对象保存快照图片到`/media/frigate/clips`目录，文件命名为`<摄像头名称>-<ID>.jpg`格式。这些快照也可以通过[API接口](/integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx)访问。
 
 对于启用了Frigate+的用户，快照可以在Frigate+面板中查看，方便快速提交到Frigate+服务。
 

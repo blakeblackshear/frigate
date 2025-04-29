@@ -5,7 +5,7 @@ title: 重流功能
 
 ## RTSP重流
 
-Frigate可以将您的视频流重新以RTSP协议流式传输，供其他应用程序（如Home Assistant）使用，地址为`rtsp://<frigate_host>:8554/<camera_name>`。必须开放8554端口。[这样您就可以同时使用一个视频流进行Frigate检测和Home Assistant实时查看，而无需与摄像头建立两个独立连接](#reduce-connections-to-camera)。视频流直接从原始视频流复制，避免重新编码。此流不包含Frigate的任何标注。
+Frigate可以将您的视频流重新以RTSP协议流式传输，供其他应用程序（如Home Assistant）使用，地址为`rtsp://<frigate_host>:8554/<camera_name>`。必须开放8554端口。[这样您就可以同时使用一个视频流进行Frigate检测和Home Assistant实时查看，而无需与摄像头建立两个独立连接](#减少摄像头连接数)。视频流直接从原始视频流复制，避免重新编码。此流不包含Frigate的任何标注。
 
 Frigate使用[go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.9.9)提供重流和MSE/WebRTC功能。go2rtc配置位于配置文件的`go2rtc`部分，更多高级配置和功能请参阅[go2rtc文档](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#configuration)。
 

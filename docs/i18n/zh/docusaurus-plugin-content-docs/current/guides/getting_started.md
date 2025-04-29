@@ -314,4 +314,4 @@ cameras:
 2. [区域](../configuration/zones.md)
 3. [回顾](../configuration/review.md)
 4. [遮罩](../configuration/masks.md)
-5. [Home Assistant集成](../integrations/home-assistant.md) - 与Home Assistant集成
+5. [Home Assistant集成](/integrations/home-assistant.md) - 与Home Assistant集成

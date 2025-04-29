@@ -149,7 +149,7 @@ ui:
   unit_system: metric
 ```
 
-估算速度会显示在调试视图和MQTT事件中，详见[MQTT文档](../integrations/mqtt.md#frigateevents)。
+估算速度会显示在调试视图和MQTT事件中，详见[MQTT文档](/integrations/mqtt.md#frigateevents)。
 
 #### 最佳实践与注意事项
 

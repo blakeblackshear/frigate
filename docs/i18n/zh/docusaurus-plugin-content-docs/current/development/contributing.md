@@ -13,9 +13,9 @@ title: 向主代码库贡献代码
 
 从这里，按照以下指南进行操作：
 
-- [核心](#core)
-- [Web界面](#web-interface)
-- [文档](#documentation)
+- [核心](#核心)
+- [Web界面](#web界面)
+- [文档](#文档)
 
 ### Frigate Home Assistant插件
 
@@ -25,7 +25,7 @@ title: 向主代码库贡献代码
 
 ### Frigate Home Assistant集成
 
-这个仓库包含了自定义集成，可以让你的Home Assistant安装自动为Frigate实例创建实体，无论你是将Frigate作为独立的Docker容器运行还是作为[Home Assistant插件](#frigate-home-assistant-add-on)运行。
+这个仓库包含了自定义集成，可以让你的Home Assistant安装自动为Frigate实例创建实体，无论你是将Frigate作为独立的Docker容器运行还是作为[Home Assistant插件](#frigate-home-assistant插件)运行。
 
 将[blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshear/frigate-hass-integration)复制到你自己的GitHub账户，然后将复制的仓库克隆到你的本地机器。
 

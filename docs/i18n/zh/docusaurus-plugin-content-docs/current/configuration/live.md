@@ -109,7 +109,7 @@ cameras:
         特殊流: test_cam_another_sub
 ```
 
-### WebRTC额外配置：
+### WebRTC额外配置
 
 WebRTC通过在端口`8555`上创建TCP或UDP连接工作。但是，它需要额外配置：
 
@@ -170,7 +170,7 @@ services:
 
 对于支持双向通话的设备，可以配置Frigate从Web UI的摄像头实时视图中使用该功能。您应该：
 
-- 设置go2rtc与[WebRTC](#webrtc-extra-configuration)。
+- 设置go2rtc与[WebRTC](#webrtc额外配置)。
 - 确保通过https访问Frigate(可能需要[打开端口8971](/frigate/installation/#端口))。
 - 对于Home Assistant Frigate卡片，[按照文档](https://github.com/dermotduffy/frigate-hass-card?tab=readme-ov-file#using-2-way-audio)获取正确的源。
 
@@ -217,7 +217,7 @@ Frigate在摄像头组编辑面板中提供了一个对话框，其中包含几�
 
    如果使用连续流媒体或在仪表板上同时加载多个高分辨率流，浏览器可能在超时前难以开始播放流。Frigate始终优先尽可能快地显示实时流，即使是较低质量的jsmpeg流。可以使用"重置"链接/按钮尝试再次加载高分辨率流。
 
-   如果Frigate仍然回退到低带宽模式，可能需要根据[上述建议](#camera_settings_recommendations)调整摄像头设置。
+   如果Frigate仍然回退到低带宽模式，可能需要根据[上述建议](#摄像头设置建议)调整摄像头设置。
 
 3. **我的摄像头似乎没有在实时仪表板上实时播放。为什么？**
 
