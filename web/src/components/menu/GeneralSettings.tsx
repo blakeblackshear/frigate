@@ -76,13 +76,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   // languages
 
-  const languages = useMemo(
-    () =>
-      supportedLanguageKeys.map((key) => {
-        return { code: key, label: t(`menu.language.${key}`) };
-      }),
-    [t],
-  );
+  const languages = useMemo(() => {
+    // Handle language keys that aren't directly used for translation key
+    const specialKeyMap: { [key: string]: string } = {
+      "zh-CN": "zhCN",
+      "yue-Hant": "yue",
+    };
+
+    return supportedLanguageKeys.map((key) => {
+      return {
+        code: key,
+        label: t(`menu.language.${specialKeyMap[key] || key}`),
+      };
+    });
+  }, [t]);
 
   // settings
 
