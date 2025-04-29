@@ -120,7 +120,7 @@ class EmbeddingMaintainer(threading.Thread):
         if self.config.face_recognition.enabled:
             self.realtime_processors.append(
                 FaceRealTimeProcessor(
-                    self.config, self.event_metadata_publisher, metrics
+                    self.config, self.requestor, self.event_metadata_publisher, metrics
                 )
             )
 
