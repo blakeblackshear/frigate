@@ -529,6 +529,7 @@
     "active": "Notifications Active",
     "suspended": "Notifications suspended {{time}}",
     "suspendTime": {
+      "suspend": "Suspend",
       "5minutes": "Suspend for 5 minutes",
       "10minutes": "Suspend for 10 minutes",
       "30minutes": "Suspend for 30 minutes",

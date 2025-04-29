@@ -174,7 +174,7 @@
       "green": "Green",
       "nord": "Nord",
       "red": "Red",
-      "contrast": "High Contrast",
+      "highcontrast": "High Contrast",
       "default": "Default"
     },
     "help": "Help",

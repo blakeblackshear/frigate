@@ -704,7 +704,7 @@ export function CameraNotificationSwitch({
       {!isSuspended ? (
         <Select onValueChange={handleSuspend}>
           <SelectTrigger className="w-auto">
-            <SelectValue placeholder="Suspend" />
+            <SelectValue placeholder={t("notification.suspendTime.suspend")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="5">

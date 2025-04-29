@@ -528,7 +528,9 @@ export default function GeneralMetrics({
             <>
               {detTempSeries && (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5">Detector Temperature</div>
+                  <div className="mb-5">
+                    {t("general.detector.temperature")}
+                  </div>
                   {detTempSeries.map((series) => (
                     <ThresholdBarGraph
                       key={series.name}
