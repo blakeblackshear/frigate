@@ -38,7 +38,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         model_runner: LicensePlateModelRunner,
         detected_license_plates: dict[str, dict[str, any]],
     ):
-        self.requestor = self.requestor
+        self.requestor = requestor
         self.detected_license_plates = detected_license_plates
         self.model_runner = model_runner
         self.lpr_config = config.lpr
