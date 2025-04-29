@@ -13,7 +13,7 @@ Frigate可运行在任何拥有Docker的主机上，甚至可以作为[Home Assi
 
 ## 依赖项
 
-**MQTT代理 (可选)** - Frigate本身可以不依赖MQTT代理运行，但如果你想使用Home Assistant集成功能就必须要安装并配置MQTT。Frigate 和 Home Assistant 必须连接至同一个 MQTT 代理服务器。
+**MQTT Broker(可选)** - Frigate本身可以不依赖MQTT Broker运行，但如果你想使用Home Assistant集成功能就必须要安装并配置MQTT。Frigate 和 Home Assistant 必须连接至同一个 MQTT Broker服务器。
 
 ## 硬件准备
 
