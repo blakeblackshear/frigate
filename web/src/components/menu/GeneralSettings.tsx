@@ -34,7 +34,7 @@ import {
   useTheme,
 } from "@/context/theme-provider";
 import { IoColorPalette } from "react-icons/io5";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRestart } from "@/api/ws";
 import {
   Tooltip,
@@ -62,6 +62,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { supportedLanguageKeys } from "@/lib/const";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -75,20 +76,21 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   // languages
 
-  const languages = [
-    { code: "en", label: t("menu.language.en") },
-    { code: "es", label: t("menu.language.es") },
-    { code: "fr", label: t("menu.language.fr") },
-    { code: "de", label: t("menu.language.de") },
-    { code: "it", label: t("menu.language.it") },
-    { code: "nl", label: t("menu.language.nl") },
-    { code: "nb-NO", label: t("menu.language.nb") },
-    { code: "tr", label: t("menu.language.tr") },
-    { code: "pl", label: t("menu.language.pl") },
-    { code: "zh-CN", label: t("menu.language.zhCN") },
-    { code: "yue-Hant", label: t("menu.language.yue") },
-    { code: "ru", label: t("menu.language.ru") },
-  ];
+  const languages = useMemo(() => {
+    // Handle language keys that aren't directly used for translation key
+    const specialKeyMap: { [key: string]: string } = {
+      "nb-NO": "nb",
+      "yue-Hant": "yue",
+      "zh-CN": "zhCN",
+    };
+
+    return supportedLanguageKeys.map((key) => {
+      return {
+        code: key,
+        label: t(`menu.language.${specialKeyMap[key] || key}`),
+      };
+    });
+  }, [t]);
 
   // settings
 
