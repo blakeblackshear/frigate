@@ -40,6 +40,7 @@
     "detector": {
       "title": "Detectors",
       "inferenceSpeed": "Detector Inference Speed",
+      "temperature": "Detector Temperature",
       "cpuUsage": "Detector CPU Usage",
       "memoryUsage": "Detector Memory Usage"
     },
