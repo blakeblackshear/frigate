@@ -129,7 +129,16 @@
       "detect": "detect",
       "skipped": "skipped",
       "ffmpeg": "ffmpeg",
-      "capture": "capture"
+      "capture": "capture",
+      "overallFramesPerSecond": "overall frames per second",
+      "overallDetectionsPerSecond": "overall detections per second",
+      "overallSkippedDetectionsPerSecond": "overall skipped detections per second",
+      "cameraFfmpeg": "{{camName}} ffmpeg",
+      "cameraCapture": "{{camName}} capture",
+      "cameraDetect": "{{camName}} detect",
+      "cameraFramesPerSecond": "{{camName}} frames per second",
+      "cameraDetectionsPerSecond": "{{camName}} detections per second",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} skipped detections per second"
     },
     "toast": {
       "success": {
