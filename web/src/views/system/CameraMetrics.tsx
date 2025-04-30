@@ -79,12 +79,9 @@ export default function CameraMetrics({
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
 
-    series["overall_fps"] = { name: "overall frames per second", data: [] };
-    series["overall_dps"] = { name: "overall detections per second", data: [] };
-    series["overall_skipped_dps"] = {
-      name: "overall skipped detections per second",
-      data: [],
-    };
+    series["overall_fps"] = { name: t("cameras.label.overallFramesPerSecond"), data: [] };
+    series["overall_dps"] = { name: t("cameras.label.overallDetectionsPerSecond"), data: [] };
+    series["overall_skipped_dps"] = { name: t("cameras.label.overallSkippedDetectionsPerSecond"),data: [],};
 
     statsHistory.forEach((stats, statsIdx) => {
       if (!stats) {
@@ -143,9 +140,9 @@ export default function CameraMetrics({
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
-          series[key]["ffmpeg"] = { name: `${camName} ffmpeg`, data: [] };
-          series[key]["capture"] = { name: `${camName} capture`, data: [] };
-          series[key]["detect"] = { name: `${camName} detect`, data: [] };
+          series[key]["ffmpeg"] = { name: t("cameras.label.cameraFfmpeg", {camName: camName}), data: [] };
+          series[key]["capture"] = { name: t("cameras.label.cameraCapture", {camName: camName}), data: [] };
+          series[key]["detect"] = { name: t("cameras.label.cameraCapture", {camName: camName}), data: [] };
         }
 
         series[key]["ffmpeg"].data.push({
@@ -186,15 +183,15 @@ export default function CameraMetrics({
           const camName = key.replaceAll("_", " ");
           series[key] = {};
           series[key]["fps"] = {
-            name: `${camName} frames per second`,
+            name: t("cameras.label.cameraFramesPerSecond", {camName: camName}),
             data: [],
           };
           series[key]["det"] = {
-            name: `${camName} detections per second`,
+            name: t("cameras.label.cameraDetectionsPerSecond", {camName: camName}),
             data: [],
           };
           series[key]["skip"] = {
-            name: `${camName} skipped detections per second`,
+            name: t("cameras.label.cameraSkippedDetectionsPerSecond", {camName: camName}),
             data: [],
           };
         }
