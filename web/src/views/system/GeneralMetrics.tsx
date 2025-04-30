@@ -399,7 +399,6 @@ export default function GeneralMetrics({
     });
 
     if (!hasValidNpu) {
-      console.log(`returning blank`);
       return [];
     }
 
