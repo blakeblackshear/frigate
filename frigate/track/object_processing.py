@@ -28,7 +28,7 @@ from frigate.config import (
     RecordConfig,
     SnapshotsConfig,
 )
-from frigate.const import UPDATE_CAMERA_ACTIVITY
+from frigate.const import FAST_QUEUE_TIMEOUT, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event, Timeline
 from frigate.track.tracked_object import TrackedObject
@@ -682,7 +682,9 @@ class TrackedObjectProcessor(threading.Thread):
 
             # cleanup event finished queue
             while not self.stop_event.is_set():
-                update = self.event_end_subscriber.check_for_update(timeout=0.01)
+                update = self.event_end_subscriber.check_for_update(
+                    timeout=FAST_QUEUE_TIMEOUT
+                )
 
                 if not update:
                     break
