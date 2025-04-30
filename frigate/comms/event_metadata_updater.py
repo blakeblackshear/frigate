@@ -39,9 +39,6 @@ class EventMetadataSubscriber(Subscriber):
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
         super().__init__(topic.value)
 
-    def check_for_update(self, timeout: float = 1) -> tuple | None:
-        return super().check_for_update(timeout)
-
     def _return_object(self, topic: str, payload: tuple) -> tuple:
         if payload is None:
             return (None, None)
