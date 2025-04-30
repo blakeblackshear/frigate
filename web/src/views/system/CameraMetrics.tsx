@@ -79,9 +79,18 @@ export default function CameraMetrics({
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
 
-    series["overall_fps"] = { name: t("cameras.label.overallFramesPerSecond"), data: [] };
-    series["overall_dps"] = { name: t("cameras.label.overallDetectionsPerSecond"), data: [] };
-    series["overall_skipped_dps"] = { name: t("cameras.label.overallSkippedDetectionsPerSecond"),data: [],};
+    series["overall_fps"] = {
+      name: t("cameras.label.overallFramesPerSecond"),
+      data: [],
+    };
+    series["overall_dps"] = {
+      name: t("cameras.label.overallDetectionsPerSecond"),
+      data: [],
+    };
+    series["overall_skipped_dps"] = {
+      name: t("cameras.label.overallSkippedDetectionsPerSecond"),
+      data: [],
+    };
 
     statsHistory.forEach((stats, statsIdx) => {
       if (!stats) {
@@ -114,7 +123,7 @@ export default function CameraMetrics({
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   const cameraCpuSeries = useMemo(() => {
     if (!statsHistory || statsHistory.length == 0) {
@@ -140,9 +149,18 @@ export default function CameraMetrics({
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
-          series[key]["ffmpeg"] = { name: t("cameras.label.cameraFfmpeg", {camName: camName}), data: [] };
-          series[key]["capture"] = { name: t("cameras.label.cameraCapture", {camName: camName}), data: [] };
-          series[key]["detect"] = { name: t("cameras.label.cameraCapture", {camName: camName}), data: [] };
+          series[key]["ffmpeg"] = {
+            name: t("cameras.label.cameraFfmpeg", { camName: camName }),
+            data: [],
+          };
+          series[key]["capture"] = {
+            name: t("cameras.label.cameraCapture", { camName: camName }),
+            data: [],
+          };
+          series[key]["detect"] = {
+            name: t("cameras.label.cameraCapture", { camName: camName }),
+            data: [],
+          };
         }
 
         series[key]["ffmpeg"].data.push({
@@ -160,7 +178,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [config, statsHistory]);
+  }, [config, statsHistory, t]);
 
   const cameraFpsSeries = useMemo(() => {
     if (!statsHistory) {
@@ -183,15 +201,21 @@ export default function CameraMetrics({
           const camName = key.replaceAll("_", " ");
           series[key] = {};
           series[key]["fps"] = {
-            name: t("cameras.label.cameraFramesPerSecond", {camName: camName}),
+            name: t("cameras.label.cameraFramesPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
           series[key]["det"] = {
-            name: t("cameras.label.cameraDetectionsPerSecond", {camName: camName}),
+            name: t("cameras.label.cameraDetectionsPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
           series[key]["skip"] = {
-            name: t("cameras.label.cameraSkippedDetectionsPerSecond", {camName: camName}),
+            name: t("cameras.label.cameraSkippedDetectionsPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
         }
@@ -211,7 +235,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   useEffect(() => {
     if (!showCameraInfoDialog) {
