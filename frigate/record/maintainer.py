@@ -27,6 +27,7 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
+    FAST_QUEUE_TIMEOUT,
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
     MAX_SEGMENTS_IN_CACHE,
@@ -37,8 +38,6 @@ from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
-
-QUEUE_READ_TIMEOUT = 0.00001  # seconds
 
 
 class SegmentInfo:
@@ -536,7 +535,7 @@ class RecordingMaintainer(threading.Thread):
             # empty the object recordings info queue
             while True:
                 (topic, data) = self.detection_subscriber.check_for_update(
-                    timeout=QUEUE_READ_TIMEOUT
+                    timeout=FAST_QUEUE_TIMEOUT
                 )
 
                 if not topic:
