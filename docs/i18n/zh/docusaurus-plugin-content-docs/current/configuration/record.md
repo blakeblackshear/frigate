@@ -174,6 +174,10 @@ record:
 
 :::
 
+## Apple设备H.265流兼容性说明
+
+使用Safari浏览器的Apple设备在播放H.265格式录像时可能出现兼容性问题。为确保在Apple设备上的正常播放，建议启用[Apple兼容性选项](/configuration/camera_specific.md#safari浏览器下的h265摄像头支持)。
+
 ## 录像与磁盘同步
 
 在某些情况下，录像文件可能被删除但Frigate不知情。可以启用录像同步功能，让Frigate检查文件系统并删除数据库中不存在的文件记录。

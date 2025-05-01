@@ -15,6 +15,17 @@ title: 摄像头品牌特定配置
 
 :::
 
+## Safari浏览器下的H.265摄像头支持
+
+部分摄像头虽然支持H.265编码，但可能采用不同的封装格式。需注意Safari浏览器仅支持annexb格式的H.265流。当使用H.265摄像头进行录像且需要兼容Safari浏览器设备时，应当启用`apple_compatibility`配置选项。
+
+```yaml
+cameras:
+  h265_cam: # <------ 摄像头名称可自定义
+    ffmpeg:
+      apple_compatibility: true # <- 启用MacOS和iPhone设备兼容模式
+```
+
 ## MJPEG摄像头
 
 注意MJPEG摄像头需要将视频编码为H264才能用于录制和重流角色。这将比直接支持H264的摄像头消耗更多CPU资源。建议使用重流角色创建H264重流，然后将其作为ffmpeg的输入源。
