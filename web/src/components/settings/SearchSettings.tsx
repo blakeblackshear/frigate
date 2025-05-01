@@ -92,7 +92,7 @@ export default function ExploreSettings({
           </SelectContent>
         </Select>
       </div>
-      {!isMobileOnly && (
+      {!isMobileOnly && defaultView == "grid" && (
         <>
           <DropdownMenuSeparator />
           <div className="flex w-full flex-col space-y-4">
