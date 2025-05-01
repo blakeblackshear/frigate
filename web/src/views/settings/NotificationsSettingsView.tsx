@@ -321,9 +321,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationSettings.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationSettings.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -345,9 +343,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationUnavailable.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationUnavailable.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>

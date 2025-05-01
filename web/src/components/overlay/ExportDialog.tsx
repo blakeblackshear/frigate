@@ -549,7 +549,7 @@ function CustomTimeSelector({
                 ? [...clock.split(":"), "00"]
                 : clock.split(":");
 
-              const end = new Date(startTime * 1000);
+              const end = new Date(endTime * 1000);
               end.setHours(
                 parseInt(hour),
                 parseInt(minute),
