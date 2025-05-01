@@ -127,7 +127,6 @@ export default function Explore() {
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
-          in_progress: 0,
           include_thumbnails: 0,
         },
       ];

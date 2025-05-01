@@ -391,7 +391,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        if (stats.npu) {
+        if (stats?.npu) {
           hasValidNpu = true;
           series[key].data.push({ x: statsIdx + 1, y: stats.npu });
         }
@@ -585,8 +585,8 @@ export default function GeneralMetrics({
         </div>
 
         {(statsHistory.length == 0 ||
-          statsHistory[0].gpu_usages ||
-          statsHistory[0].npu_usages) && (
+          gpuSeries.length > 0 ||
+          npuSeries.length > 0) && (
           <>
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm font-medium text-muted-foreground">

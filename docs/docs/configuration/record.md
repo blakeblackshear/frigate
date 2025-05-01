@@ -174,6 +174,10 @@ To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (whe
 
 :::
 
+## Apple Compatibility with H.265 Streams
+
+Apple devices running the Safari browser may fail to playback h.265 recordings. The [apple compatibility option](../configuration/camera_specific.md#h265-cameras-via-safari) should be used to ensure seamless playback on Apple devices.
+
 ## Syncing Recordings With Disk
 
 In some cases the recordings files may be deleted but Frigate will not know this has happened. Recordings sync can be enabled which will tell Frigate to check the file system and delete any db entries for files which don't exist.
