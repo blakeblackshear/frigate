@@ -9,7 +9,7 @@ Some of Frigate's enrichments can use a discrete GPU for accelerated processing.
 
 ## Requirements
 
-Object detection and enrichments (like Semantic Search, Face Recognition, and License Plate Recognition) are independent features. To use a GPU for object detection, see the [Object Detectors](/configuration/object_detectors.md) documentation. If you want to use your GPU for any supported enrichments, you must choose the appropriate Frigate Docker image for your GPU and configure the enrichment appropriately according to its specific documentation.
+Object detection and enrichments (like Semantic Search, Face Recognition, and License Plate Recognition) are independent features. To use a GPU for object detection, see the [Object Detectors](/configuration/object_detectors.md) documentation. If you want to use your GPU for any supported enrichments, you must choose the appropriate Frigate Docker image for your GPU and configure the enrichment according to its specific documentation.
 
 - **AMD**
 
