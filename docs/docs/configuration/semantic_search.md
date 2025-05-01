@@ -90,7 +90,7 @@ semantic_search:
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
+**NOTE:** Object detection and Semantic Search (as well as Frigate's other enrichments) are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
 
 - **AMD**
 
@@ -102,7 +102,7 @@ If the correct build is used for your GPU and the `large` model is configured, t
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used for Semantic Search in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used for Semantic Search in the `-tensorrt-jp(4/5)` Frigate image.
+  - Jetson devices will automatically be detected and used for Semantic Search in the `-tensorrt-jp6` Frigate image.
 
 :::
 
