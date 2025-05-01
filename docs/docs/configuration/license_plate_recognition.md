@@ -7,13 +7,14 @@ Frigate can recognize license plates on vehicles and automatically add the detec
 
 LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. However, LPR does not run on stationary vehicles.
 
-When a plate is recognized, the recognized name is:
+When a plate is recognized, the details are:
 
 - Added as a `sub_label` (if known) or the `recognized_license_plate` field (if unknown) to a tracked object.
 - Viewable in the Review Item Details pane in Review (sub labels).
 - Viewable in the Tracked Object Details pane in Explore (sub labels and recognized license plates).
 - Filterable through the More Filters menu in Explore.
 - Published via the `frigate/events` MQTT topic as a `sub_label` (known) or `recognized_license_plate` (unknown) for the `car` tracked object.
+- Published via the `frigate/tracked_object_update` MQTT topic with `name` (if known) and `plate`.
 
 ## Model Requirements
 
@@ -68,10 +69,10 @@ Fine-tune the LPR feature using these optional parameters at the global level of
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 - **`device`**: Device to use to run license plate recognition models.
   - Default: `CPU`
-  - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model.
+  - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 - **`model_size`**: The size of the model used to detect text on plates.
   - Default: `small`
-  - This can be `small` or `large`. The `large` model uses an enhanced text detector and is more accurate at finding text on plates but slower than the `small` model. For most users, the small model is recommended. For users in countries with multiple lines of text on plates, the large model is recommended. Note that using the large does not improve _text recognition_, but it may improve _text detection_.
+  - This can be `small` or `large`. The `large` model uses an enhanced text detector and is more accurate at finding text on plates but slower than the `small` model. For most users, the small model is recommended. For users in countries with multiple lines of text on plates, the large model is recommended. Note that using the large model does not improve _text recognition_, but it may improve _text detection_.
 
 ### Recognition
 
@@ -184,7 +185,7 @@ cameras:
     ffmpeg: ... # add your streams
     detect:
       enabled: True
-      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 15 is unnecessary and is not recommended.
+      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.
       min_initialized: 2
       width: 1920
       height: 1080
@@ -228,7 +229,7 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 # LPR global configuration
 lpr:
   enabled: True
-  device: CPU # can also be GPU if available
+  device: CPU # can also be GPU if available and correct Docker image is used
   detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration

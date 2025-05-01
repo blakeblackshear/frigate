@@ -38,6 +38,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
+
   - [Supports many model architectures](../../configuration/object_detectors#configuration)
   - Runs best with tiny or small size models
 
@@ -73,10 +74,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 ### Hailo-8
 
-
 Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
 
 **Default Model Configuration:**
+
 - **Hailo-8L:** Default model is **YOLOv6n**.
 - **Hailo-8:** Default model is **YOLOv6n**.
 
@@ -90,6 +91,7 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 ### Google Coral TPU
 
 Frigate supports both the USB and M.2 versions of the Google Coral.
+
 - The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
 - The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
 
@@ -107,17 +109,17 @@ More information is available [in the detector docs](/configuration/object_detec
 
 Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
 
-| Name                 | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    | Notes                                  |
-| -------------------- | -------------------------- | ------------------------- | ------------------------- | -------------------------------------- |
-| Intel HD 530         | 15 - 35 ms                 |                           |                           | Can only run one detector instance     |
-| Intel HD 620         | 15 - 25 ms                 | 320: ~ 35 ms              |                           |                                        |
-| Intel HD 630         | ~ 15 ms                    | 320: ~ 30 ms              |                           |                                        |
-| Intel UHD 730        | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                           |                                        |
-| Intel UHD 770        | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                           |                                        |
-| Intel N100           | ~ 15 ms                    | 320: ~ 20 ms              |                           |                                        |
-| Intel Iris XE        | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                           |                                        |
-| Intel Arc A380       | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms     |                                        |
-| Intel Arc A750       | ~ 4 ms                     | 320: ~ 8 ms               |                           |                                        |
+| Name           | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
+| -------------- | -------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
+| Intel HD 530   | 15 - 35 ms                 |                           |                        | Can only run one detector instance |
+| Intel HD 620   | 15 - 25 ms                 | 320: ~ 35 ms              |                        |                                    |
+| Intel HD 630   | ~ 15 ms                    | 320: ~ 30 ms              |                        |                                    |
+| Intel UHD 730  | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
+| Intel UHD 770  | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
+| Intel N100     | ~ 15 ms                    | 320: ~ 20 ms              |                        |                                    |
+| Intel Iris XE  | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel Arc A380 | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
+| Intel Arc A750 | ~ 4 ms                     | 320: ~ 8 ms               |                        |                                    |
 
 ### TensorRT - Nvidia GPU
 
@@ -141,15 +143,15 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
-| --------------- | --------------------- | ------------------------- |
-| AMD 780M        | ~ 14 ms               | 320: ~ 30 ms 640: ~ 60 ms |
+| Name     | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
+| -------- | --------------------- | ------------------------- |
+| AMD 780M | ~ 14 ms               | 320: ~ 30 ms 640: ~ 60 ms |
 
 ## Community Supported Detectors
 
 ### Nvidia Jetson
 
-Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
@@ -163,11 +165,10 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 - RK3576
 - RK3588
 
-| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time     | YOLOx Inference Time      |
-| --------------- | --------------------- | --------------------------- | ------------------------- |
-| rk3588 3 cores  | tiny: ~ 35 ms         | small: ~ 20 ms med: ~ 30 ms | nano: 14 ms tiny: 18 ms   |
-| rk3566 1 core   |                       | small: ~ 96 ms              |                           |
-
+| Name           | YOLOv9 Inference Time | YOLO-NAS Inference Time     | YOLOx Inference Time    |
+| -------------- | --------------------- | --------------------------- | ----------------------- |
+| rk3588 3 cores | tiny: ~ 35 ms         | small: ~ 20 ms med: ~ 30 ms | nano: 14 ms tiny: 18 ms |
+| rk3566 1 core  |                       | small: ~ 96 ms              |                         |
 
 The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
 

@@ -484,7 +484,7 @@ frigate:
 
 ### Configuration Parameters
 
-The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
+The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration_video.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
 
@@ -610,7 +610,7 @@ If the correct build is used for your GPU then the GPU will be detected and used
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp(4/5)` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
 
 :::
 
@@ -659,7 +659,7 @@ YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) model
 
 :::tip
 
-The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.  See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well. See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
 
 :::
 

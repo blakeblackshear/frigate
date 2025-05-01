@@ -26,7 +26,7 @@ In both cases, a lightweight face landmark detection model is also used to align
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
 
-The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended.
+The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 ## Configuration
 
@@ -133,6 +133,7 @@ No, using another face recognition service will interfere with Frigate's built i
 ### Does face recognition run on the recording stream?
 
 Face recognition does not run on the recording stream, this would be suboptimal for many reasons:
+
 1. The latency of accessing the recordings means the notifications would not include the names of recognized people because recognition would not complete until after.
 2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
 3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
