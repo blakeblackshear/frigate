@@ -84,7 +84,13 @@ Only car objects can trigger the `front_yard_street` zone and only person can tr
 
 ### Zone Loitering
 
-Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
+Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time after which the object will be considered in the zone.
+
+:::note
+
+When using loitering zones, a review item will remain active until the object leaves. Loitering zones are only meant to be used in areas where loitering is not expected behavior.
+
+:::
 
 ```yaml
 cameras:
