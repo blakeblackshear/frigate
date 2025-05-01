@@ -1,15 +1,15 @@
 ---
-id: hardware_acceleration
-title: Hardware Acceleration
+id: hardware_acceleration_video
+title: Video Decoding
 ---
 
-# Hardware Acceleration
+# Video Decoding
 
-It is highly recommended to use a GPU for hardware acceleration in Frigate. Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg.
+It is highly recommended to use a GPU for hardware acceleration video decoding in Frigate. Some types of hardware acceleration are detected and used automatically, but you may need to update your configuration to enable hardware accelerated decoding in ffmpeg.
 
 Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
-# Officially Supported
+# Object Detection
 
 ## Raspberry Pi 3/4
 
@@ -69,12 +69,12 @@ Or map in all the `/dev/video*` devices.
 
 **Recommended hwaccel Preset**
 
-| CPU Generation | Intel Driver | Recommended Preset | Notes                               |
-| -------------- | ------------ | ------------------ | ----------------------------------- |
-| gen1 - gen7    | i965         | preset-vaapi       | qsv is not supported                |
-| gen8 - gen12   | iHD          | preset-vaapi       | preset-intel-qsv-* can also be used |
-| gen13+         | iHD / Xe     | preset-intel-qsv-* |                                     |
-| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-* |                                     |
+| CPU Generation | Intel Driver | Recommended Preset  | Notes                                |
+| -------------- | ------------ | ------------------- | ------------------------------------ |
+| gen1 - gen7    | i965         | preset-vaapi        | qsv is not supported                 |
+| gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used |
+| gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                      |
+| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                      |
 
 :::
 

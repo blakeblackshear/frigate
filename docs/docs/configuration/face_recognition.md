@@ -26,7 +26,7 @@ In both cases, a lightweight face landmark detection model is also used to align
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
 
-The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended. Intel users should use the default Docker image to run on an iGPU with OpenVINO and Nvidia users should use the `-tensorrt` Docker image to run on dedicated Nvidia GPUs. Face recognition does not run on a Google Coral.
+The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 ## Configuration
 
