@@ -5,7 +5,7 @@ title: Enrichments
 
 # Enrichments
 
-Some of Frigate's enrichments can use a discrete GPU for accelerated processing. If the correct Docker build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
+Some of Frigate's enrichments can use a discrete GPU for accelerated processing.
 
 ## Requirements
 
