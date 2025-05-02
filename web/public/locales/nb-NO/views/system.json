@@ -39,7 +39,8 @@
       "inferenceSpeed": "Detektor inferenshastighet",
       "title": "Detektorer",
       "cpuUsage": "Detektor CPU-belastning",
-      "memoryUsage": "Detektor minnebruk"
+      "memoryUsage": "Detektor minnebruk",
+      "temperature": "Detektor temperatur"
     },
     "hardwareInfo": {
       "gpuMemory": "GPU-minne",
@@ -83,7 +84,7 @@
   "storage": {
     "overview": "Oversikt",
     "recordings": {
-      "earliestRecording": "Tidligste tilgjengelige opptak:",
+      "earliestRecording": "Tidligste opptak tilgjengelig:",
       "title": "Opptak",
       "tips": "Denne verdien representerer total lagringsplass brukt av opptakene i Frigates database. Frigate sporer ikke lagringsbruk for alle filer på disken din."
     },
@@ -93,7 +94,7 @@
       "title": "Kameralagring",
       "camera": "Kamera",
       "unusedStorageInformation": "Ubrukt lagringsinformasjon",
-      "percentageOfTotalUsed": "Prosentandel av totalt brukt",
+      "percentageOfTotalUsed": "Prosentandel av tilgjengelig",
       "unused": {
         "title": "Ubrukt",
         "tips": "Denne verdien representerer kanskje ikke nøyaktig den ledige plassen Frigate har tilgang til, dersom det finnes andre filer lagret på disken. Frigate sporer kun lagring brukt av egne opptak."
@@ -124,9 +125,18 @@
     "label": {
       "camera": "kamera",
       "detect": "detekter",
-      "skipped": "hoppet over",
-      "ffmpeg": "ffmpeg",
-      "capture": "fangst"
+      "skipped": "forkastet",
+      "ffmpeg": "FFmpeg",
+      "capture": "fangst",
+      "cameraDetectionsPerSecond": "{{camName}} deteksjoner per sekund",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} forkastede deteksjoner per sekund",
+      "cameraFramesPerSecond": "{{camName}} bilder per sekund",
+      "cameraCapture": "{{camName}} fangst",
+      "cameraDetect": "{{camName}} detekt",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "overallDetectionsPerSecond": "totale deteksjoner per sekund",
+      "overallSkippedDetectionsPerSecond": "totalt forkastede deteksjoner per sekund",
+      "overallFramesPerSecond": "totalt bilder per sekund"
     },
     "toast": {
       "success": {
@@ -158,7 +168,7 @@
   "metrics": "Systemmålinger",
   "lastRefreshed": "Sist oppdatert: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFMPEG ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
     "healthy": "Systemet fungerer som det skal",
     "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",

@@ -31,7 +31,7 @@
   },
   "objectLifecycle": {
     "createObjectMask": "Lag objektmaske",
-    "adjustAnnotationSettings": "Juster annotasjonsinnstillinger",
+    "adjustAnnotationSettings": "Juster annoteringsinnstillinger",
     "scrollViewTips": "Rull for å se de viktigste øyeblikkene i dette objektets livssyklus.",
     "autoTrackingTips": "Posisjoner for omsluttende boks vil være unøyaktige for kameraer med automatisk sporing.",
     "lifecycleItemDesc": {
@@ -53,16 +53,16 @@
       }
     },
     "annotationSettings": {
-      "title": "Annotasjonsinnstillinger",
+      "title": "Annoteringsinnstillinger",
       "showAllZones": {
         "title": "Vis alle soner",
         "desc": "Vis alltid soner på bilder der objekter har gått inn i en sone."
       },
       "offset": {
         "documentation": "Les dokumentasjonen ",
-        "label": "Annotasjonsforskyvning",
+        "label": "Annoteringsforskyvning",
         "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er usannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil ikke den omsluttende boksen og opptakene stemme perfekt overens. Imidlertid kan feltet <code>annotation_offset</code> brukes til å justere dette.",
-        "millisecondsToOffset": "Millisekunder for å forskyve annotasjonsdata. <em>Standard: 0</em>",
+        "millisecondsToOffset": "Millisekunder å forskyve annoteringsdata. <em>Standard: 0</em>",
         "tips": "TIPS: Tenk deg et hendelsesklipp med en person som går fra venstre til høyre. Hvis den omsluttende boksen i hendelsestidslinjen konsekvent er til venstre for personen, bør verdien reduseres. Tilsvarende, hvis en person går fra venstre til høyre og den omsluttende boksen konsekvent er foran personen, bør verdien økes."
       }
     },

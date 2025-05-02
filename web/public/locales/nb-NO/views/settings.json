@@ -5,17 +5,18 @@
     "camera": "Kamerainnstillinger - Frigate",
     "masksAndZones": "Maske- og soneeditor - Frigate",
     "motionTuner": "Bevegelsesjustering - Frigate",
-    "object": "Objektinnstillinger - Frigate",
+    "object": "Test og feilsøk - Frigate",
     "general": "Generelle innstillinger - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
-    "frigatePlus": "Frigate+ innstillinger - Frigate"
+    "frigatePlus": "Frigate+ innstillinger - Frigate",
+    "notifications": "Meldingsvarsler Innstillinger - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
     "cameras": "Kamerainnstillinger",
     "masksAndZones": "Masker / Soner",
     "motionTuner": "Finjustering av bevegelse",
-    "debug": "Feilsøking",
+    "debug": "Test og feilsøk",
     "users": "Brukere",
     "frigateplus": "Frigate+",
     "ui": "Brukergrensesnitt",
@@ -250,7 +251,7 @@
       "add": "Legg til sone",
       "name": {
         "title": "Navn",
-        "inputPlaceHolder": "Skriv inn et navn...",
+        "inputPlaceHolder": "Skriv inn et navn…",
         "tips": "Navnet må være minst 2 tegn langt og må ikke være det samme som et kamera- eller sone-navn."
       },
       "loiteringTime": {
@@ -281,7 +282,7 @@
       }
     },
     "motionMasks": {
-      "label": "Bevegelsesmaske",
+      "label": "Bevegelsesmasker",
       "desc": {
         "documentation": "Dokumentasjon",
         "title": "Bevegelsesmasker brukes til å hindre uønsket type bevegelse fra å utløse deteksjon. For mye maskering kan gjøre det vanskeligere å spore objekter."
@@ -351,7 +352,7 @@
     },
     "desc": {
       "title": "Frigate bruker bevegelsesdeteksjon som en første sjekk for å se om det skjer noe i bildet som er verdt å sjekke med objektdeteksjon.",
-      "documentation": "Les guiden for bevegelsestilpasning"
+      "documentation": "Les guiden for bevegelsesjustering"
     },
     "toast": {
       "success": "Bevegelsesinnstillingene er lagret."
@@ -505,7 +506,7 @@
     "notificationUnavailable": {
       "documentation": "Les dokumentasjonen",
       "title": "Meldingsvarsler utilgjengelig",
-      "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://...</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler."
+      "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://…</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler."
     },
     "email": {
       "title": "E-post",
@@ -527,7 +528,8 @@
       "1hour": "Suspender i 1 time",
       "12hours": "Suspender i 12 timer",
       "24hours": "Suspender i 24 timer",
-      "untilRestart": "Suspender til omstart"
+      "untilRestart": "Suspender til omstart",
+      "suspend": "Suspender"
     },
     "suspended": "Meldingsvarsler suspendert {{time}}",
     "toast": {
@@ -559,9 +561,9 @@
     "modelInfo": {
       "trainDate": "Treningsdato",
       "baseModel": "Basismodell",
-      "loading": "Laster modellinformasjon...",
+      "loading": "Laster modellinformasjon…",
       "error": "Kunne ikke laste modellinformasjon",
-      "loadingAvailableModels": "Laster tilgjengelige modeller...",
+      "loadingAvailableModels": "Laster tilgjengelige modeller…",
       "title": "Modellinformasjon",
       "modelType": "Modelltype",
       "supportedDetectors": "Støttede detektorer",
