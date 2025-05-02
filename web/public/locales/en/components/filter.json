@@ -118,7 +118,7 @@
     "title": "Recognized License Plates",
     "loadFailed": "Failed to load recognized license plates.",
     "loading": "Loading recognized license plates…",
-    "placeholder": "Type to search license plates...",
+    "placeholder": "Type to search license plates…",
     "noLicensePlatesFound": "No license plates found.",
     "selectPlatesFromList": "Select one or more plates from the list."
   }
