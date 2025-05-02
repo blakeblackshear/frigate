@@ -3,7 +3,7 @@
   "labels": {
     "label": "Merkelapper",
     "all": {
-      "title": "Alle merkelapper",
+      "title": "Alle masker / soner",
       "short": "Merkelapper"
     },
     "count": "{{count}} merkelapper",
@@ -84,7 +84,7 @@
     "title": "Gjenkjente kjennemerker",
     "loadFailed": "Kunne ikke laste inn gjenkjente kjennemerker.",
     "loading": "Laster inn gjenkjente kjennemerker…",
-    "placeholder": "Skriv for å søke etter kjennemerker..."
+    "placeholder": "Skriv for å søke etter kjennemerker…"
   },
   "dates": {
     "all": {

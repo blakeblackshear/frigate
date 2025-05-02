@@ -183,7 +183,8 @@
       "da": "Dansk (Dansk)",
       "sk": "Slovenčina (Slovensk)",
       "pl": "Polski (Polsk)",
-      "uk": "Українська (Ukrainiansk)"
+      "uk": "Українська (Ukrainsk)",
+      "yue": "粵語 (Kantonesisk)"
     },
     "appearance": "Utseende",
     "darkMode": {
@@ -202,7 +203,8 @@
       "nord": "Nord",
       "red": "Rød",
       "contrast": "Høy kontrast",
-      "default": "Standard"
+      "default": "Standard",
+      "highcontrast": "Høy kontrast"
     }
   },
   "pagination": {
@@ -240,7 +242,7 @@
     "title": "Rolle",
     "admin": "Administrator",
     "viewer": "Visningsbruker",
-    "desc": "Administratorer har full tilgang til alle funksjoner i Frigate brukergrensesnitt. Visningsbrukere er begrenset til å se kameraer, inspisere elementer og historisk opptak i brukergrensesnittet."
+    "desc": "Administratorer har full tilgang til alle funksjoner i Frigate brukergrensesnittet. Visningsbrukere er begrenset til å se kameraer, inspisere elementer og se historiske opptak."
   },
   "accessDenied": {
     "documentTitle": "Ingen tilgang – Frigate",
