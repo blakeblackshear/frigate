@@ -41,7 +41,8 @@
       "title": "Детекторы",
       "inferenceSpeed": "Скорость вывода детектора",
       "cpuUsage": "Использование CPU детектором",
-      "memoryUsage": "Использование памяти детектором"
+      "memoryUsage": "Использование памяти детектором",
+      "temperature": "Температура детектора"
     },
     "hardwareInfo": {
       "title": "Информация об оборудовании",
@@ -124,11 +125,20 @@
     },
     "framesAndDetections": "Кадры/детекции",
     "label": {
-      "ffmpeg": "ffmpeg",
+      "ffmpeg": "FFmpeg",
       "camera": "камера",
       "capture": "захват",
       "skipped": "пропущено",
-      "detect": "детекция"
+      "detect": "детекция",
+      "cameraDetectionsPerSecond": "{{camName}} обнаружений в секунду",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} пропущенных обнаружений в секунду",
+      "cameraFramesPerSecond": "{{camName}} кадров в секунду",
+      "overallFramesPerSecond": "общее количество кадров в секунду",
+      "overallDetectionsPerSecond": "общее количество обнаружений в секунду",
+      "overallSkippedDetectionsPerSecond": "общее количество пропущенных обнаружений в секунду",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} захват",
+      "cameraDetect": "{{camName}} обнаружения"
     },
     "toast": {
       "success": {
@@ -141,7 +151,7 @@
   },
   "lastRefreshed": "Обновлено: ",
   "stats": {
-    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFMPEG ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "Камера {{camera}} использует слишком много ресурсов CPU для детекции ({{detectAvg}}%)",
     "healthy": "Система в порядке",
     "reindexingEmbeddings": "Переиндексация эмбеддингов (выполнено {{processed}} %)",
