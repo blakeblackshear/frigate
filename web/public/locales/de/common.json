@@ -56,6 +56,27 @@
     "formattedTimestampExcludeSeconds": {
       "24hour": "%-d %b, %H:%M",
       "12hour": "%-d %b, %H:%M"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
     }
   },
   "button": {
@@ -132,7 +153,8 @@
       "fa": "Persisch",
       "uk": "Ukrainisch",
       "he": "Hebräisch",
-      "sk": "Slowakisch"
+      "sk": "Slowakisch",
+      "yue": "粵語 (Kantonesisch)"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -142,7 +164,8 @@
       "default": "Standard",
       "nord": "Norden",
       "red": "Rot",
-      "contrast": "Hoher Kontrast"
+      "contrast": "Hoher Kontrast",
+      "highcontrast": "Hoher Kontrast"
     },
     "help": "Hilfe",
     "documentation": {
