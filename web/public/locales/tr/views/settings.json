@@ -243,7 +243,7 @@
       "point_one": "{{count}} nokta",
       "point_other": "{{count}} nokta",
       "name": {
-        "inputPlaceHolder": "Bir isim girin...",
+        "inputPlaceHolder": "Bir isim girin…",
         "title": "İsim",
         "tips": "Ad en az 2 karakter olmalı ve bir kamera veya başka bir bölgenin adı olmamalıdır."
       },
@@ -506,7 +506,7 @@
     "notificationUnavailable": {
       "title": "Bildirimler Kullanılamıyor",
       "documentation": "Dökümantasyonu Oku",
-      "desc": "Web push bildirimleri güvenli bağlantı (<code>https://...</code>) gerektirir. Bu tarayıcınızın bir sınırlandırmasıdır. Bildirimleri kullanmak için Frigate arayüzüne HTTPS ile erişin."
+      "desc": "Web push bildirimleri güvenli bağlantı (<code>https://…</code>) gerektirir. Bu tarayıcınızın bir sınırlandırmasıdır. Bildirimleri kullanmak için Frigate arayüzüne HTTPS ile erişin."
     },
     "globalSettings": {
       "title": "Genel Ayarlar",
@@ -570,8 +570,8 @@
     },
     "modelInfo": {
       "error": "Model bilgileri yüklenemedi",
-      "loadingAvailableModels": "Kullanılabilir modeller yükleniyor...",
-      "loading": "Model bilgileri yükleniyor...",
+      "loadingAvailableModels": "Kullanılabilir modeller yükleniyor…",
+      "loading": "Model bilgileri yükleniyor…",
       "modelType": "Model Türü",
       "dimensions": "Boyutlar",
       "availableModels": "Kullanılabilir Modeller",
