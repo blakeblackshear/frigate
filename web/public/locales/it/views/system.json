@@ -71,7 +71,8 @@
       "inferenceSpeed": "Velocità inferenza rilevatore",
       "title": "Rilevatori",
       "cpuUsage": "Utilizzo CPU rilevatore",
-      "memoryUsage": "Utilizzo memoria rilevatore"
+      "memoryUsage": "Utilizzo memoria rilevatore",
+      "temperature": "Temperatura del rilevatore"
     },
     "title": "Generale",
     "otherProcesses": {
@@ -121,8 +122,17 @@
       "camera": "telecamera",
       "detect": "rileva",
       "skipped": "saltato",
-      "ffmpeg": "ffmpeg",
-      "capture": "cattura"
+      "ffmpeg": "FFmpeg",
+      "capture": "cattura",
+      "overallFramesPerSecond": "fotogrammi totali al secondo",
+      "overallDetectionsPerSecond": "rilevamenti totali al secondo",
+      "overallSkippedDetectionsPerSecond": "rilevamenti totali saltati al secondo",
+      "cameraCapture": "{{camName}} cattura",
+      "cameraDetect": "{{camName}} rileva",
+      "cameraFramesPerSecond": "{{camName}} fotogrammi al secondo",
+      "cameraDetectionsPerSecond": "{{camName}} rilevamenti al secondo",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} rilevamenti saltati al secondo",
+      "cameraFfmpeg": "{{camName}} FFmpeg"
     },
     "toast": {
       "success": {
@@ -135,7 +145,7 @@
   },
   "stats": {
     "detectHighCpuUsage": "{{camera}} ha un utilizzo elevato della CPU con il rilevamento ({{detectAvg}}%)",
-    "ffmpegHighCpuUsage": "{{camera}} ha un elevato utilizzo della CPU con FFMPEG ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} ha un elevato utilizzo della CPU con FFmpeg ({{ffmpegAvg}}%)",
     "healthy": "Il sistema è integro",
     "reindexingEmbeddings": "Reindicizzazione degli incorporamenti (completata al {{processed}}%)",
     "cameraIsOffline": "{{camera}} è disconnessa",
