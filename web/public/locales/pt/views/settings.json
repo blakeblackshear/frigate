@@ -219,7 +219,7 @@
       "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
       "name": {
         "title": "Nome",
-        "inputPlaceHolder": "Digite um nome...",
+        "inputPlaceHolder": "Digite um nome…",
         "tips": "O nome deve ter pelo menos 2 caracteres e não pode ser o nome de uma câmera ou de outra zona."
       },
       "inertia": {
