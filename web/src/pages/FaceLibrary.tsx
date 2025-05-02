@@ -661,7 +661,7 @@ function TrainingGrid({
             <div className="text-sm">{formattedDate}</div>
           </div>
           <img
-            className="w-full"
+            className="mx-auto max-h-[60dvh] object-contain"
             loading="lazy"
             src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
