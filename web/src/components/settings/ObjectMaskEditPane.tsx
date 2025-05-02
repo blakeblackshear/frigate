@@ -37,7 +37,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { getAttributeLabels } from "@/utils/iconUtil";
 import { useTranslation } from "react-i18next";
 
 type ObjectMaskEditPaneProps = {
@@ -401,14 +400,6 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
   const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const attributeLabels = useMemo(() => {
-    if (!config) {
-      return [];
-    }
-
-    return getAttributeLabels(config);
-  }, [config]);
-
   const cameraConfig = useMemo(() => {
     if (config && camera) {
       return config.cameras[camera];
@@ -424,20 +415,16 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
 
     Object.values(config.cameras).forEach((camera) => {
       camera.objects.track.forEach((label) => {
-        if (!attributeLabels.includes(label)) {
-          labels.add(label);
-        }
+        labels.add(label);
       });
     });
 
     cameraConfig.objects.track.forEach((label) => {
-      if (!attributeLabels.includes(label)) {
-        labels.add(label);
-      }
+      labels.add(label);
     });
 
     return [...labels].sort();
-  }, [config, cameraConfig, attributeLabels]);
+  }, [config, cameraConfig]);
 
   return (
     <>
