@@ -3,16 +3,17 @@
     "default": "設定 - Frigate",
     "authentication": "認證設定 - Frigate",
     "camera": "鏡頭設定 - Frigate",
-    "classification": "分類設定 - Frigate",
+    "classification": "進階功能設定 - Frigate",
     "masksAndZones": "遮罩與區域編輯器 - Frigate",
     "motionTuner": "移動調校器 - Frigate",
-    "object": "物件設定 - Frigate",
+    "object": "除錯 - Frigate",
     "general": "一般設定 - Frigate",
-    "frigatePlus": "Frigate+ 設定 - Frigate"
+    "frigatePlus": "Frigate+ 設定 - Frigate",
+    "notifications": "通知設定 - Frigate"
   },
   "menu": {
     "ui": "介面",
-    "classification": "分類",
+    "classification": "進階功能",
     "cameras": "鏡頭設定",
     "masksAndZones": "遮罩／區域",
     "motionTuner": "移動調校器",
@@ -140,7 +141,7 @@
       "error": "儲存設定變更失敗：{{errorMessage}}",
       "success": "分類設定已儲存。請重新啟動 Frigate 以套用你的更改。"
     },
-    "title": "分類設定"
+    "title": "進階功能設定"
   },
   "camera": {
     "title": "鏡頭設定",
@@ -237,7 +238,7 @@
       "clickDrawPolygon": "在圖片上點擊以繪製多邊形。",
       "name": {
         "title": "名稱",
-        "inputPlaceHolder": "請輸入名稱...",
+        "inputPlaceHolder": "請輸入名稱…",
         "tips": "名稱必須至少有2個字元，且不可與鏡頭或其他區域同名。"
       },
       "inertia": {
@@ -502,7 +503,7 @@
     },
     "notificationUnavailable": {
       "title": "無法使用通知功能",
-      "desc": "網頁推送通知需在安全環境下運作（<code>https://...</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。",
+      "desc": "網頁推送通知需在安全環境下運作（<code>https://…</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。",
       "documentation": "閱讀文件"
     },
     "globalSettings": {
@@ -532,7 +533,8 @@
       "24hours": "暫停24小時",
       "5minutes": "暫停5分鐘",
       "1hour": "暫停1小時",
-      "untilRestart": "暫停至重新啟動"
+      "untilRestart": "暫停至重新啟動",
+      "suspend": "暫停"
     },
     "toast": {
       "error": {
@@ -577,9 +579,9 @@
       "supportedDetectors": "支援的偵測器",
       "cameras": "鏡頭",
       "availableModels": "可用模型",
-      "loadingAvailableModels": "正在載入可用模型...",
+      "loadingAvailableModels": "正在載入可用模型…",
       "modelSelect": "可於此選擇你在Frigate+上的可用模型。請注意，只能選擇與當前偵測器設定相容的模型。",
-      "loading": "正在載入模型資料...",
+      "loading": "正在載入模型資料…",
       "error": "載入模型資料失敗"
     },
     "toast": {

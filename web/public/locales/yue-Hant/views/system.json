@@ -1,9 +1,9 @@
 {
   "documentTitle": {
     "cameras": "鏡頭統計 - Frigate",
-    "storage": "儲存統計 - Frigate",
+    "storage": "儲存裝置統計 - Frigate",
     "general": "一般統計 - Frigate",
-    "enrichments": "強化統計 - Frigate",
+    "enrichments": "進階功能統計 - Frigate",
     "logs": {
       "frigate": "Frigate 日誌 - Frigate",
       "nginx": "Nginx 日誌 - Frigate",
@@ -40,7 +40,8 @@
       "inferenceSpeed": "偵測器推理速度",
       "memoryUsage": "偵測器記憶體使用量",
       "title": "偵測器",
-      "cpuUsage": "偵測器 CPU 使用率"
+      "cpuUsage": "偵測器 CPU 使用率",
+      "temperature": "偵測器溫度"
     },
     "hardwareInfo": {
       "gpuUsage": "GPU 使用率",
@@ -125,8 +126,17 @@
       "camera": "鏡頭",
       "detect": "偵測",
       "skipped": "略過",
-      "ffmpeg": "ffmpeg",
-      "capture": "讀取影像"
+      "ffmpeg": "FFmpeg",
+      "capture": "讀取影像",
+      "overallFramesPerSecond": "整體每秒畫面數",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraDetect": "{{camName}} 偵測",
+      "cameraFramesPerSecond": "{{camName}} 每秒畫面數",
+      "cameraDetectionsPerSecond": "{{camName}} 每秒偵測次數",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒略過偵測次數",
+      "overallSkippedDetectionsPerSecond": "整體每秒略過偵測次數",
+      "cameraCapture": "{{camName}} 讀取影像",
+      "overallDetectionsPerSecond": "整體每秒偵測次數"
     },
     "title": "鏡頭",
     "overview": "概覽",
@@ -146,11 +156,11 @@
     "cameraIsOffline": "{{camera}} 已離線",
     "detectHighCpuUsage": "{{camera}} 的偵測 CPU 使用率過高 ({{detectAvg}}%)",
     "healthy": "系統運作正常",
-    "ffmpegHighCpuUsage": "{{camera}} 的 FFMPEG CPU 使用率過高 ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率過高 ({{ffmpegAvg}}%)",
     "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)"
   },
   "enrichments": {
-    "title": "強化功能",
+    "title": "進階功能",
     "infPerSecond": "每秒推理次數",
     "embeddings": {
       "image_embedding": "圖片嵌入",
