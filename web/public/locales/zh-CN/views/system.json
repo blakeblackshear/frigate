@@ -41,7 +41,8 @@
       "title": "探测器",
       "inferenceSpeed": "探测器推理速度",
       "cpuUsage": "探测器CPU使用率",
-      "memoryUsage": "探测器内存使用率"
+      "memoryUsage": "探测器内存使用率",
+      "temperature": "探测器温度"
     },
     "hardwareInfo": {
       "title": "硬件信息",
@@ -127,7 +128,7 @@
       "camera": "摄像头",
       "detect": "探测",
       "skipped": "跳过",
-      "ffmpeg": "ffmpeg编码器",
+      "ffmpeg": "FFmpeg编码器",
       "capture": "捕获"
     },
     "toast": {

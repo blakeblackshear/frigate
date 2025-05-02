@@ -6,9 +6,10 @@
     "classification": "分类设置 - Frigate",
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
     "motionTuner": "运动调整器 - Frigate",
-    "object": "对象设置 - Frigate",
+    "object": "调试 - Frigate",
     "general": "常规设置 - Frigate",
-    "frigatePlus": "Frigate+ 设置 - Frigate"
+    "frigatePlus": "Frigate+ 设置 - Frigate",
+    "notifications": "通知设置 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -506,7 +507,7 @@
     },
     "notificationUnavailable": {
       "title": "通知功能不可用",
-      "desc": "网页推送通知需要安全连接（<code>https://...</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
+      "desc": "网页推送通知需要安全连接（<code>https://…</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
       "documentation": "阅读文档（英文）"
     },
     "email": {
@@ -532,7 +533,8 @@
       "1hour": "暂停 1 小时",
       "12hours": "暂停 12 小时",
       "24hours": "暂停 24 小时",
-      "untilRestart": "暂停直到重启"
+      "untilRestart": "暂停直到重启",
+      "suspend": "暂停"
     },
     "cancelSuspension": "取消暂停",
     "toast": {
@@ -573,10 +575,10 @@
       "supportedDetectors": "支持的检测器",
       "dimensions": "大小",
       "cameras": "摄像头",
-      "loading": "正在加载模型信息...",
+      "loading": "正在加载模型信息…",
       "error": "加载模型信息失败",
       "availableModels": "可用模型",
-      "loadingAvailableModels": "正在加载可用模型...",
+      "loadingAvailableModels": "正在加载可用模型…",
       "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前探测器配置兼容的模型。",
       "plusModelType": {
         "baseModel": "基础模型",
