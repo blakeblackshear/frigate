@@ -5,7 +5,8 @@
   },
   "details": {
     "person": "Person",
-    "confidence": "Confidence",
+    "subLabelScore": "Sub Label Score",
+    "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
     "faceDesc": "Details for the face and associated object",
     "timestamp": "Timestamp"

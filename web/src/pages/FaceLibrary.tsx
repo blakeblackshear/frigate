@@ -21,6 +21,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -42,6 +47,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
   LuImagePlus,
+  LuInfo,
   LuPencil,
   LuRefreshCw,
   LuScanFace,
@@ -647,10 +653,23 @@ function TrainingGrid({
           {selectedEvent?.data.sub_label_score && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                {t("details.confidence")}
+                <div className="flex flex-row items-center gap-1">
+                  {t("details.subLabelScore")}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="cursor-pointer p-0">
+                        <LuInfo className="size-4" />
+                        <span className="sr-only">Info</span>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      {t("details.scoreInfo")}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               <div className="text-sm smart-capitalize">
-                {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
+                {Math.round((selectedEvent?.data?.sub_label_score || 0) * 100)}%
               </div>
             </div>
           )}
