@@ -134,7 +134,8 @@
       "pt": "Português (Portugues)",
       "cs": "Čeština (Checo)",
       "nl": "Nederlands (Neerlandés)",
-      "fr": "Français (Frances)"
+      "fr": "Français (Frances)",
+      "yue": "粵語 (Cantonés)"
     },
     "appearance": "Apariencia",
     "darkMode": {
@@ -153,7 +154,8 @@
       "nord": "Nord",
       "red": "Rojo",
       "contrast": "Alto contraste",
-      "default": "Predeterminado"
+      "default": "Predeterminado",
+      "highcontrast": "Alto Contraste"
     },
     "documentation": {
       "title": "Documentación",

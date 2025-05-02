@@ -1,14 +1,15 @@
 {
   "documentTitle": {
     "masksAndZones": "Editor de máscaras y zonas - Frigate",
-    "object": "Configuración de objetos - Frigate",
+    "object": "Depurar - Frigate",
     "default": "Configuración - Frigate",
     "authentication": "Configuración de autenticación - Frigate",
     "camera": "Configuración de cámara - Frigate",
     "motionTuner": "Ajuste de movimiento - Frigate",
     "classification": "Configuración de clasificación - Frigate",
     "general": "Configuración general - Frigate",
-    "frigatePlus": "Configuración de Frigate+ - Frigate"
+    "frigatePlus": "Configuración de Frigate+ - Frigate",
+    "notifications": "Configuración de Notificaciones - Frigate"
   },
   "menu": {
     "cameras": "Configuración de cámara",
@@ -243,7 +244,7 @@
       },
       "name": {
         "title": "Nombre",
-        "inputPlaceHolder": "Introduce un nombre...",
+        "inputPlaceHolder": "Introduce un nombre…",
         "tips": "El nombre debe tener al menos 2 caracteres y no debe ser el nombre de una cámara ni de otra zona."
       },
       "documentTitle": "Editar Zona - Frigate",
@@ -509,7 +510,7 @@
     "notificationUnavailable": {
       "title": "Notificaciones no disponibles",
       "documentation": "Leer la documentación",
-      "desc": "Las notificaciones push web requieren un contexto seguro (<code>https://...</code>). Esto es una limitación del navegador. Accede a Frigate de forma segura para usar las notificaciones."
+      "desc": "Las notificaciones push web requieren un contexto seguro (<code>https://…</code>). Esto es una limitación del navegador. Accede a Frigate de forma segura para usar las notificaciones."
     },
     "globalSettings": {
       "title": "Configuración global",
@@ -537,7 +538,8 @@
       "untilRestart": "Suspender hasta reiniciar",
       "30minutes": "Suspender por 30 minutos",
       "24hours": "Suspender por 24 horas",
-      "10minutes": "Suspender por 10 minutos"
+      "10minutes": "Suspender por 10 minutos",
+      "suspend": "Suspender"
     },
     "cancelSuspension": "Cancelar suspensión",
     "toast": {
@@ -578,10 +580,10 @@
       "supportedDetectors": "Detectores compatibles",
       "dimensions": "Dimensiones",
       "cameras": "Cámaras",
-      "loading": "Cargando información del modelo...",
+      "loading": "Cargando información del modelo…",
       "error": "No se pudo cargar la información del modelo",
       "availableModels": "Modelos disponibles",
-      "loadingAvailableModels": "Cargando modelos disponibles...",
+      "loadingAvailableModels": "Cargando modelos disponibles…",
       "modelSelect": "Tus modelos disponibles en Frigate+ se pueden seleccionar aquí. Ten en cuenta que solo se pueden seleccionar modelos compatibles con tu configuración actual de detectores.",
       "trainDate": "Fecha de entrenamiento",
       "plusModelType": {
