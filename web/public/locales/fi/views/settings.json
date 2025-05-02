@@ -248,7 +248,7 @@
       "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan.",
       "name": {
         "title": "Nimi",
-        "inputPlaceHolder": "Anna nimi...",
+        "inputPlaceHolder": "Anna nimi…",
         "tips": "Nimen on oltava vähintään kaksi merkkiä pitkä, eikä se saa olla kameran tai toisen vyöhykkeen nimi."
       },
       "point_one": "{{count}} piste",
