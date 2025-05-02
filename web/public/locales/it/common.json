@@ -170,7 +170,8 @@
       "pl": "Polski (Polacco)",
       "de": "Deutsch (Tedesco)",
       "he": "עברית (Ebraico)",
-      "it": "Italiano (Italiano)"
+      "it": "Italiano (Italiano)",
+      "yue": "粵語 (Cantonese)"
     },
     "darkMode": {
       "label": "Modalità scura",
@@ -188,7 +189,8 @@
       "green": "Verde",
       "default": "Predefinito",
       "red": "Rosso",
-      "nord": "Nord"
+      "nord": "Nord",
+      "highcontrast": "Contrasto elevato"
     },
     "live": {
       "cameras": {

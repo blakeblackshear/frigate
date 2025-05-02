@@ -6,9 +6,10 @@
     "camera": "Impostazioni telecamera - Frigate",
     "masksAndZones": "Editor di maschere e zone - Frigate",
     "motionTuner": "Regolatore di movimento - Frigate",
-    "object": "Impostazioni di oggetti - Frigate",
+    "object": "Correzioni - Frigate",
     "general": "Impostazioni generali - Frigate",
-    "frigatePlus": "Impostazioni Frigate+ - Frigate"
+    "frigatePlus": "Impostazioni Frigate+ - Frigate",
+    "notifications": "Impostazioni di notifiche - Frigate"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -38,13 +39,13 @@
         "baseModel": "Modello base"
       },
       "availableModels": "Modelli disponibili",
-      "loadingAvailableModels": "Caricamento dei modelli disponibili...",
+      "loadingAvailableModels": "Caricamento dei modelli disponibili…",
       "supportedDetectors": "Rilevatori supportati",
       "error": "Impossibile caricare le informazioni sul modello",
       "modelType": "Tipo di modello",
       "modelSelect": "Qui puoi selezionare i modelli disponibili su Frigate+. Nota: puoi selezionare solo i modelli compatibili con la configurazione attuale del tuo rilevatore.",
       "title": "Informazioni sul modello",
-      "loading": "Caricamento informazioni sul modello..."
+      "loading": "Caricamento informazioni sul modello…"
     },
     "toast": {
       "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
@@ -208,7 +209,7 @@
       },
       "edit": "Modifica zona",
       "name": {
-        "inputPlaceHolder": "Inserisci un nome...",
+        "inputPlaceHolder": "Inserisci un nome…",
         "title": "Nome",
         "tips": "Il nome deve essere composto da almeno 2 caratteri e non deve essere il nome di una telecamera o di un'altra zona."
       },
@@ -564,7 +565,8 @@
       "1hour": "Sospendi per 1 ora",
       "12hours": "Sospendi per 12 ore",
       "24hours": "Sospendi per 24 ore",
-      "untilRestart": "Sospendi fino al riavvio"
+      "untilRestart": "Sospendi fino al riavvio",
+      "suspend": "Sospendi"
     },
     "globalSettings": {
       "desc": "Sospendi temporaneamente le notifiche per telecamere specifiche su tutti i dispositivi registrati.",
