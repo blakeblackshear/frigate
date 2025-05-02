@@ -497,7 +497,7 @@ function LibrarySelector({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
                         setRenameFace(face);
@@ -515,7 +515,7 @@ function LibrarySelector({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
                         setConfirmDelete(face);
