@@ -1,1 +1,59 @@
-{}
+{
+  "notification": {
+    "notificationSettings": {
+      "documentation": "Прочитати документацію"
+    },
+    "notificationUnavailable": {
+      "desc": "Веб-повідомлення вимагають безпечного контексту (<code>https://…</code>). Це обмеження браузера. Безпечний доступ до фрегатів для використання сповіщень.",
+      "documentation": "Прочитати документацію"
+    }
+  },
+  "camera": {
+    "streams": {
+      "title": "Потоки"
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "Прочитати документацію"
+    }
+  },
+  "masksAndZones": {
+    "motionMasks": {
+      "polygonAreaTooLarge": {
+        "documentation": "Прочитати документацію"
+      },
+      "context": {
+        "documentation": "Прочитати документацію",
+        "title": "Маски руху використовуються для запобігання виявлення небажаних типів руху (наприклад: гілки дерева, часові мітки камери). Слід використовувати маски руху<em>дуже економно</em>, надмірне маскування ускладнить відстеження об'єктів."
+      }
+    },
+    "zones": {
+      "label": "Зони",
+      "name": {
+        "inputPlaceHolder": "Введіть назву…"
+      }
+    }
+  },
+  "debug": {
+    "zones": {
+      "title": "Зони"
+    },
+    "objectShapeFilterDrawing": {
+      "document": "Прочитати документацію "
+    }
+  },
+  "classification": {
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Прочитати документацію",
+      "title": "Розпізнавання номерних знаків"
+    },
+    "faceRecognition": {
+      "readTheDocumentation": "Прочитати документацію"
+    }
+  },
+  "frigatePlus": {
+    "modelInfo": {
+      "loading": "Завантаження інформації про модель…",
+      "loadingAvailableModels": "Завантаження доступних моделей…"
+    }
+  }
+}
