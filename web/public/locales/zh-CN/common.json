@@ -170,7 +170,8 @@
       "da": "丹麦语 (Dansk)",
       "sk": "斯拉夫语 (Slovenčina)",
       "ru": "俄语 (Русский)",
-      "cs": "捷克语 (Čeština)"
+      "cs": "捷克语 (Čeština)",
+      "yue": "粤语 (粵語)"
     },
     "appearance": "外观",
     "darkMode": {
@@ -189,7 +190,8 @@
       "nord": "Nord",
       "red": "红色",
       "contrast": "高对比度",
-      "default": "默认"
+      "default": "默认",
+      "highcontrast": "高对比"
     },
     "help": "帮助",
     "documentation": {

@@ -119,7 +119,7 @@
     "title": "识别的车牌",
     "loadFailed": "加载识别的车牌失败。",
     "loading": "正在加载识别的车牌…",
-    "placeholder": "输入以搜索车牌...",
+    "placeholder": "输入以搜索车牌…",
     "noLicensePlatesFound": "未找到车牌。",
     "selectPlatesFromList": "从列表中选择一个或多个车牌。"
   }
