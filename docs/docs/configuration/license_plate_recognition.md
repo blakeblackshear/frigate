@@ -358,3 +358,11 @@ LPR's performance impact depends on your hardware. Ensure you have at least 4GB 
 The YOLOv9 license plate detector model will run (and the metric will appear) if you've enabled LPR but haven't defined `license_plate` as an object to track, either at the global or camera level.
 
 If you are detecting `car` on cameras where you don't want to run LPR, make sure you disable LPR it at the camera level. And if you do want to run LPR on those cameras, make sure you define `license_plate` as an object to track.
+
+### It looks like Frigate picked up my camera's timestamp as the license plate. How can I prevent this?
+
+This could happen if cars travel close to your camera's timestamp. You could either move the timestamp through your camera's firmware, or apply a mask to it in Frigate.
+
+If you are using a model that natively detects `license_plate`, add an _object mask_ of type `license_plate` and a _motion mask_ over your timestamp.
+
+If you are using dedicated LPR camera mode, only a _motion mask_ over your timestamp is required.
