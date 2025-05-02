@@ -6,9 +6,10 @@
     "motionTuner": "Motion Tuner - Frigate",
     "classification": "Classificatie-instellingen - Frigate",
     "masksAndZones": "Masker- en zone-editor - Frigate",
-    "object": "Objectinstellingen - Frigate",
+    "object": "Foutopsporing Frigate",
     "general": "Algemene instellingen - Frigate",
-    "frigatePlus": "Frigate+ Instellingen - Frigate"
+    "frigatePlus": "Frigate+ Instellingen - Frigate",
+    "notifications": "Meldingsinstellingen - Frigate"
   },
   "menu": {
     "ui": "Gebruikersinterface",
@@ -242,7 +243,7 @@
       "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
       "name": {
         "title": "Naam",
-        "inputPlaceHolder": "Voer een naam in...",
+        "inputPlaceHolder": "Voer een naam in…",
         "tips": "De naam moet minimaal 2 tekens lang zijn en mag niet gelijk zijn aan de naam van een camera of een andere zone."
       },
       "inertia": {
@@ -498,14 +499,14 @@
   },
   "notification": {
     "notificationSettings": {
-      "title": "Notificatie-instellingen",
+      "title": "Meldingen instellen",
       "desc": "Frigate kan rechtstreeks pushmeldingen naar uw apparaat verzenden als het in de browser actief is of als een PWA geïnstalleerd is.",
       "documentation": "Lees de documentatie"
     },
     "notificationUnavailable": {
       "title": "Meldingen niet beschikbaar",
       "documentation": "Lees de documentatie",
-      "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://...</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
+      "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://…</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
     },
     "globalSettings": {
       "title": "Globale instellingen",
@@ -530,7 +531,8 @@
       "12hours": "Onderbreek voor 12 uur",
       "24hours": "Onderbreek voor 24 uur",
       "untilRestart": "Opschorten tot herstart",
-      "10minutes": "Onderbreek voor 10 minuten"
+      "10minutes": "Onderbreek voor 10 minuten",
+      "suspend": "Pauzeren"
     },
     "cancelSuspension": "Onderbreking annuleren",
     "toast": {
@@ -575,12 +577,12 @@
       "baseModel": "Basismodel",
       "cameras": "Camera's",
       "error": "Het laden van modelinformatie is mislukt",
-      "loadingAvailableModels": "Beschikbare modellen laden...",
+      "loadingAvailableModels": "Beschikbare modellen laden…",
       "modelSelect": "Je beschikbare modellen op Frigate+ kunnen hier worden geselecteerd. Houd er rekening mee dat alleen modellen die compatibel zijn met je huidige detectorconfiguratie geselecteerd kunnen worden.",
       "dimensions": "Afmetingen",
       "supportedDetectors": "Ondersteunde detectoren",
       "availableModels": "Beschikbare modellen",
-      "loading": "Modelinformatie laden...",
+      "loading": "Modelinformatie laden…",
       "plusModelType": {
         "baseModel": "Basismodel",
         "userModel": "Verfijnd"

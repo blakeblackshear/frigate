@@ -100,7 +100,7 @@
     "cameraAudio": "Camera geluid",
     "on": "aan",
     "copyCoordinates": "Coördinaten kopiëren",
-    "delete": "Verwijderen",
+    "delete": "Verwijder",
     "yes": "Ja",
     "no": "Nee",
     "suspended": "Opgeschort",
@@ -164,7 +164,8 @@
       "es": "Español (Spaans)",
       "vi": "Tiếng Việt (Vietnamees)",
       "hi": "हिन्दी (Hindi)",
-      "ja": "日本語 (Japans)"
+      "ja": "日本語 (Japans)",
+      "yue": "粵語 (Kantonees)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -182,7 +183,8 @@
       "green": "Groen",
       "nord": "Nord",
       "red": "Rood",
-      "default": "Standaard"
+      "default": "Standaard",
+      "highcontrast": "Hoog contrast"
     },
     "withSystem": "Systeem",
     "help": "Help",

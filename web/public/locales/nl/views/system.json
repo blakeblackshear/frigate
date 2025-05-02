@@ -40,7 +40,8 @@
       "title": "Detectoren",
       "cpuUsage": "Detector CPU-verbruik",
       "memoryUsage": "Detector Geheugen Gebruik",
-      "inferenceSpeed": "Detector Interferentie Snelheid"
+      "inferenceSpeed": "Detector Interferentie Snelheid",
+      "temperature": "Detectortemperatuur"
     },
     "hardwareInfo": {
       "title": "Systeem Gegevens",
@@ -127,8 +128,17 @@
       "camera": "camera",
       "detect": "detectie",
       "skipped": "overgeslagen",
-      "ffmpeg": "ffmpeg",
-      "capture": "registratie"
+      "ffmpeg": "FFmpeg",
+      "capture": "registratie",
+      "overallSkippedDetectionsPerSecond": "totaal aantal overgeslagen detecties per seconde",
+      "overallFramesPerSecond": "totale aantal frames per seconde",
+      "overallDetectionsPerSecond": "totale aantal detecties per seconde",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFramesPerSecond": "{{camName}} frames per seconde",
+      "cameraDetectionsPerSecond": "{{camName}} detecties per seconde",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} overgeslagen detecties per seconde",
+      "cameraCapture": "{{camName}} opname",
+      "cameraDetect": "{{camName}} detecteren"
     },
     "toast": {
       "success": {
@@ -141,7 +151,7 @@
   },
   "lastRefreshed": "Voor het laatst vernieuwd: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFMPEG CPU belasting ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFmpeg CPU belasting ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",
     "healthy": "Systeem is gezond",
     "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
