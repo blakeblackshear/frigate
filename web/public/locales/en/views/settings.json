@@ -248,7 +248,7 @@
       "clickDrawPolygon": "Click to draw a polygon on the image.",
       "name": {
         "title": "Name",
-        "inputPlaceHolder": "Enter a name...",
+        "inputPlaceHolder": "Enter a name…",
         "tips": "Name must be at least 2 characters and must not be the name of a camera or another zone."
       },
       "inertia": {
@@ -506,7 +506,7 @@
     },
     "notificationUnavailable": {
       "title": "Notifications Unavailable",
-      "desc": "Web push notifications require a secure context (<code>https://...</code>). This is a browser limitation. Access Frigate securely to use notifications.",
+      "desc": "Web push notifications require a secure context (<code>https://…</code>). This is a browser limitation. Access Frigate securely to use notifications.",
       "documentation": "Read the Documentation"
     },
     "globalSettings": {
@@ -581,10 +581,10 @@
       },
       "supportedDetectors": "Supported Detectors",
       "cameras": "Cameras",
-      "loading": "Loading model information...",
+      "loading": "Loading model information…",
       "error": "Failed to load model information",
       "availableModels": "Available Models",
-      "loadingAvailableModels": "Loading available models...",
+      "loadingAvailableModels": "Loading available models…",
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
     "restart_required": "Restart required (Frigate+ model changed)",
