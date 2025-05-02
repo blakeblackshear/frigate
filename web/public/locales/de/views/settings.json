@@ -221,7 +221,7 @@
       "add": "Zone hinzufügen",
       "name": {
         "title": "Name",
-        "inputPlaceHolder": "Geben Sie einen Namen ein...",
+        "inputPlaceHolder": "Geben Sie einen Namen ein…",
         "tips": "Der Name muss aus mindestens 2 Zeichen bestehen und sollte nicht den Namen einer Kamera oder anderen Zone entsprechen."
       },
       "objects": {

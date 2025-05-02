@@ -29,14 +29,17 @@
       "gpuUsage": "GPU Auslastung",
       "gpuMemory": "Grafikspeicher",
       "gpuDecoder": "GPU Decoder",
-      "gpuEncoder": "GPU Encoder"
+      "gpuEncoder": "GPU Encoder",
+      "npuUsage": "NPU Verwendung",
+      "npuMemory": "NPU Speicher"
     },
     "title": "Allgemein",
     "detector": {
       "title": "Detektoren",
       "cpuUsage": "CPU-Auslastung des Detektors",
       "memoryUsage": "Arbeitsspeichernutzung des Detektors",
-      "inferenceSpeed": "Detektoren Inferenzgeschwindigkeit"
+      "inferenceSpeed": "Detektoren Inferenzgeschwindigkeit",
+      "temperature": "Temperatur des Detektors"
     },
     "otherProcesses": {
       "title": "Andere Prozesse",
@@ -142,7 +145,11 @@
       "image_embedding_speed": "Geschwindigkeit der Bildeinbettung",
       "face_embedding_speed": "Geschwindigkeit der Gesichtseinbettung",
       "plate_recognition_speed": "Geschwindigkeit der Kennzeichenerkennung",
-      "text_embedding_speed": "Geschwindigkeit der Texteinbettung"
+      "text_embedding_speed": "Geschwindigkeit der Texteinbettung",
+      "plate_recognition": "Kennzeichen Erkennung",
+      "face_recognition_speed": "Gesichts Erkennungs Geschwindigkeit",
+      "text_embedding": "Einbettung von Bildern",
+      "face_recognition": "Gesichts Erkennung"
     },
     "title": "Optimierungen",
     "infPerSecond": "Rückschlüsse pro Sekunde"
@@ -151,7 +158,10 @@
     "healthy": "Das System läuft problemlos",
     "ffmpegHighCpuUsage": "{{camera}} hat eine hohe FFMPEG CPU Auslastung ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} hat eine hohe CPU Auslastung bei der Erkennung ({{detectAvg}}%)",
-    "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)"
+    "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)",
+    "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} ist sehr langsam ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} ist offline"
   },
   "lastRefreshed": "Zuletzt aktualisiert: "
 }
