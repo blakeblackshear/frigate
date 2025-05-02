@@ -236,7 +236,7 @@
       "edit": "Edytuj Strefę",
       "name": {
         "title": "Nazwa",
-        "inputPlaceHolder": "Wprowadź nazwę...",
+        "inputPlaceHolder": "Wprowadź nazwę…",
         "tips": "Nazwa musi mieć co najmniej 2 znaki i nie może być taka sama jak nazwa kamery lub innej strefy."
       },
       "objects": {
@@ -508,7 +508,7 @@
     },
     "notificationUnavailable": {
       "title": "Powiadomienia niedostępne",
-      "desc": "Powiadomienia push w przeglądarce wymagają bezpiecznego kontekstu (<code>https://...</code>). To jest ograniczenie przeglądarki. Uzyskaj dostęp do Frigate przez bezpieczne połączenie, aby korzystać z powiadomień.",
+      "desc": "Powiadomienia push w przeglądarce wymagają bezpiecznego kontekstu (<code>https://…</code>). To jest ograniczenie przeglądarki. Uzyskaj dostęp do Frigate przez bezpieczne połączenie, aby korzystać z powiadomień.",
       "documentation": "Przeczytaj dokumentację"
     },
     "globalSettings": {
@@ -578,10 +578,10 @@
       "supportedDetectors": "Wspierane detektory",
       "dimensions": "Wymiary",
       "cameras": "Kamery",
-      "loading": "Ładowanie informacji o modelu...",
+      "loading": "Ładowanie informacji o modelu…",
       "error": "Nie udało się załadować informacji o modelu",
       "availableModels": "Dostępne modele",
-      "loadingAvailableModels": "Ładowanie dostępnych modeli...",
+      "loadingAvailableModels": "Ładowanie dostępnych modeli…",
       "baseModel": "Model bazowy",
       "modelSelect": "Tutaj możesz wybrać swoje dostępne modele w Frigate+. Pamiętaj, że można wybrać tylko modele kompatybilne z Twoją aktualną konfiguracją detektora.",
       "plusModelType": {
