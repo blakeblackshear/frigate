@@ -30,7 +30,9 @@
     "addFace": "Ajouter un visage",
     "uploadImage": "Téléverser une image",
     "deleteFaceAttempts": "Supprimer les tentatives de reconnaissance faciale",
-    "reprocessFace": "Réanalyser le visage"
+    "reprocessFace": "Réanalyser le visage",
+    "renameFace": "Renommer le visage",
+    "deleteFace": "Supprimer le visage"
   },
   "selectItem": "Sélectionner {{item}}",
   "deleteFaceLibrary": {
@@ -57,7 +59,8 @@
       "deletedFace_one": "{{count}} visage a été supprimé avec succès.",
       "deletedFace_many": "{{count}} visages ont été supprimés avec succès.",
       "deletedFace_other": "{{count}} visages ont été supprimés avec succès.",
-      "trainedFace": "Visage entraîné avec succès."
+      "trainedFace": "Visage entraîné avec succès.",
+      "renamedFace": "Visage renommé avec succés en {{name}}"
     },
     "error": {
       "uploadingImageFailed": "Échec du téléversement de l'image : {{errorMessage}}",
@@ -65,7 +68,8 @@
       "trainFailed": "Échec de l'entrainement : {{errorMessage}}",
       "updateFaceScoreFailed": "Échec de la mise à jour du score du visage : {{errorMessage}}",
       "addFaceLibraryFailed": "Échec du nommage du visage : {{errorMessage}}",
-      "deleteNameFailed": "Échec de la suppression du nom : {{errorMessage}}"
+      "deleteNameFailed": "Échec de la suppression du nom : {{errorMessage}}",
+      "renameFaceFailed": "Échec du renommage du visage : {{errorMessage}}"
     }
   },
   "trainFaceAs": "Entraîner un visage comme :",
@@ -74,5 +78,9 @@
     "uploadFace": "Téléverser l'image de visage",
     "faceName": "Entrer un nom pour le visage",
     "nextSteps": "Prochaines étapes"
+  },
+  "renameFace": {
+    "title": "Renommer le visage",
+    "desc": "Saisissez un nouveau nom pour {{name}}"
   }
 }

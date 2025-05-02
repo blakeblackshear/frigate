@@ -7,8 +7,9 @@
     "motionTuner": "Réglages du mouvement - Frigate",
     "general": "Paramètres généraux - Frigate",
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
-    "object": "Paramètres d'objets - Frigate",
-    "frigatePlus": "Paramètres Frigate+ - Frigate"
+    "object": "Débogage - Frigate",
+    "frigatePlus": "Paramètres Frigate+ - Frigate",
+    "notifications": "Paramètres de notification - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -89,7 +90,8 @@
       "12hours": "Suspendre pendant 12 heures",
       "5minutes": "Suspendre pendant 5 minutes",
       "1hour": "Suspendre pendant 1 heure",
-      "30minutes": "Suspendre pendant 30 minutes"
+      "30minutes": "Suspendre pendant 30 minutes",
+      "suspend": "Suspendre"
     },
     "toast": {
       "success": {
@@ -109,7 +111,7 @@
     "notificationUnavailable": {
       "title": "Notifications indisponibles",
       "documentation": "Lire la Documentation",
-      "desc": "Les notifications push Web nécessitent un contexte sécurisé (<code>https://...</code>). Il s'agit d'une limitation du navigateur. Accédez à Frigate en toute sécurité pour utiliser les notifications."
+      "desc": "Les notifications push Web nécessitent un contexte sécurisé (<code>https://…</code>). Il s'agit d'une limitation du navigateur. Accédez à Frigate en toute sécurité pour utiliser les notifications."
     },
     "globalSettings": {
       "title": "Paramètres globaux",
@@ -158,13 +160,13 @@
       "modelType": "Type de Modèle",
       "cameras": "Caméras",
       "supportedDetectors": "Détecteurs pris en charge",
-      "loading": "Chargement des informations sur le modèle...",
+      "loading": "Chargement des informations sur le modèle…",
       "title": "Informations sur le modèle",
       "trainDate": "Date d'entrainement",
       "error": "Échec au chargement des informations du modèle",
       "availableModels": "Modèles disponibles",
       "dimensions": "Dimensions",
-      "loadingAvailableModels": "Chargement des modèles disponibles...",
+      "loadingAvailableModels": "Chargement des modèles disponibles…",
       "modelSelect": "Vous pouvez sélectionner ici vos modèles disponibles sur Frigate+. Notez que seuls les modèles compatibles avec votre configuration de détecteur actuelle peuvent être sélectionnés.",
       "plusModelType": {
         "baseModel": "Modèle de base",
@@ -327,7 +329,7 @@
       "edit": "Modifier une Zone",
       "name": {
         "title": "Nom",
-        "inputPlaceHolder": "Entrer un nom...",
+        "inputPlaceHolder": "Entrer un nom…",
         "tips": "Le nom doit comporter au moins 2 caractères et ne doit pas être le nom d'une caméra ou d'une autre zone."
       },
       "loiteringTime": {
@@ -371,7 +373,7 @@
       "documentTitle": "Modifier Masque de Mouvement - Frigate",
       "context": {
         "documentation": "Lire la Documentation",
-        "title": "Les masques de mouvement servent à empêcher les mouvements indésirables de déclencher la détection (par exemple : branches d'arbres, horodatage des caméras). Ils doivent être utilisés  <em>avec parcimonie</em>, car un surmasquage complique le suivi des objets."
+        "title": "Les masques de mouvement servent à empêcher les mouvements indésirables de déclencher la détection (par exemple : branches d'arbres, horodatage des caméras). Ils doivent être utilisés <em>avec parcimonie</em>, car un surmasquage complique le suivi des objets."
       },
       "polygonAreaTooLarge": {
         "title": "Le masque de mouvement couvre {{polygonArea}} % du cadre de la caméra. Les grands masques de mouvement ne sont pas recommandés.",
