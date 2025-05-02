@@ -158,7 +158,7 @@ export default function CameraMetrics({
             data: [],
           };
           series[key]["detect"] = {
-            name: t("cameras.label.cameraCapture", { camName: camName }),
+            name: t("cameras.label.cameraDetect", { camName: camName }),
             data: [],
           };
         }
