@@ -47,8 +47,8 @@
     "day_other": "{{time}} jours",
     "1hour": "1 heure",
     "formattedTimestamp": {
-      "12hour": "MMM d, h:mm:ss aaa",
-      "24hour": "MMM d, HH:mm:ss"
+      "12hour": "d MMM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampWithYear": {
       "24hour": "%b %-d %Y, %H:%M",
@@ -60,29 +60,29 @@
       "24hour": "%b %-d, %H:%M"
     },
     "formattedTimestamp2": {
-      "12hour": "MM/dd h:mm:ssa",
+      "12hour": "dd/MM HH:mm:ss",
       "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm",
-      "12hour": "h:mm aaa"
+      "12hour": "HH:mm"
     },
-    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampFilename": {
-      "12hour": "MM-dd-yy-h-mm-ss-a",
-      "24hour": "MM-dd-yy-HH-mm-ss"
+      "12hour": "dd-MM-yy-HH-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "MMM d, h:mm aaa",
-      "24hour": "MMM d, HH:mm"
+      "12hour": "d MMM HH:mm",
+      "24hour": "d MMM HH:mm"
     },
     "formattedTimestampHourMinuteSecond": {
       "24hour": "HH:mm:ss",
-      "12hour": "h:mm:ss aaa"
+      "12hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "MMM d yyyy, h:mm aaa",
-      "24hour": "MMM d yyyy, HH:mm"
+      "12hour": "d MMM yyyy, HH:mm",
+      "24hour": "d MMM yyyy HH:mm"
     }
   },
   "button": {
@@ -155,7 +155,8 @@
       "pt": "Português (Portugais)",
       "sk": "Slovenčina (Slovaque)",
       "uk": "Українська (Ukrainien)",
-      "vi": "Tiếng Việt (Vietnamien)"
+      "vi": "Tiếng Việt (Vietnamien)",
+      "yue": "粵語 (Cantonais)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -192,7 +193,8 @@
       "nord": "Nord",
       "red": "Rouge",
       "default": "Défaut",
-      "label": "Thème"
+      "label": "Thème",
+      "highcontrast": "Contraste élevé"
     },
     "systemMetrics": "Indicateurs systèmes",
     "settings": "Paramètres",

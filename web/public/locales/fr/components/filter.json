@@ -105,7 +105,7 @@
     "allLogs": "Tous les journaux"
   },
   "recognizedLicensePlates": {
-    "placeholder": "Tapez pour rechercher des plaques d'immatriculation...",
+    "placeholder": "Tapez pour rechercher des plaques d'immatriculation…",
     "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée.",
     "loading": "Chargement des plaques d'immatriculation reconnues…",
     "title": "Plaques d'immatriculation reconnues",
