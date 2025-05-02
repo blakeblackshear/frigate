@@ -149,7 +149,8 @@
       "ar": "العربية (阿拉伯文)",
       "pt": "Português (葡萄牙文)",
       "uk": "Українська (烏克蘭文)",
-      "he": "עברית (希伯來文)"
+      "he": "עברית (希伯來文)",
+      "yue": "粵語 (廣東話)"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -168,7 +169,8 @@
       "nord": "北歐風",
       "red": "紅色",
       "default": "預設",
-      "contrast": "高對比"
+      "contrast": "高對比",
+      "highcontrast": "高對比度"
     },
     "documentation": {
       "title": "文件",

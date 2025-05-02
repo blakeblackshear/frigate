@@ -89,7 +89,7 @@
     "loading": "載入已識別車牌中…",
     "noLicensePlatesFound": "找不到車牌。",
     "selectPlatesFromList": "從列表中選取一個或多個車牌。",
-    "placeholder": "輸入以搜尋車牌...",
+    "placeholder": "輸入以搜尋車牌…",
     "title": "已識別車牌",
     "loadFailed": "載入已識別車牌失敗。"
   },
