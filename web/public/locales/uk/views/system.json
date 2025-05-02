@@ -1,1 +1,30 @@
-{}
+{
+  "cameras": {
+    "label": {
+      "ffmpeg": "FFmpeg",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} пропущених виявлень на секунду",
+      "cameraDetect": "{{camName}} виявлення",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "overallDetectionsPerSecond": "загальна кiлькiсть виявлень за секунду",
+      "cameraDetectionsPerSecond": "{{camName}} виявлень на секунду",
+      "overallFramesPerSecond": "загальна кiлкiсть кадрiв на секунду",
+      "overallSkippedDetectionsPerSecond": "загальна кiлкiсть пропущених виявлень за секунду",
+      "cameraCapture": "{{camName}} захоплення",
+      "cameraFramesPerSecond": "{{camName}} кадрiв на секунду",
+      "skipped": "пропущено"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Тестові дані копіюються в буфер обміну."
+      }
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "plate_recognition": "Розпiзнавання номерiв"
+    }
+  },
+  "general": {
+    "title": "Загальний"
+  }
+}

@@ -1,1 +1,10 @@
-{}
+{
+  "exploreIsUnavailable": {
+    "downloadingModels": {
+      "tips": {
+        "documentation": "Прочитати документацію"
+      }
+    }
+  },
+  "documentTitle": "Пошук подій - Frigate"
+}
