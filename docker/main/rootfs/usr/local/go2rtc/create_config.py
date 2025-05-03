@@ -53,7 +53,7 @@ elif go2rtc_config["api"].get("origin") is None:
 
 # Need to set default location for HA config
 if go2rtc_config.get("hass") is None:
-    go2rtc_config["hass"] = {"config": "/config"}
+    go2rtc_config["hass"] = {"config": "/homeassistant"}
 
 # we want to ensure that logs are easy to read
 if go2rtc_config.get("log") is None:
