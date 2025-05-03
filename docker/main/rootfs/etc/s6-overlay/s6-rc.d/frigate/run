@@ -4,6 +4,11 @@
 
 set -o errexit -o nounset -o pipefail
 
+# opt out of openvino telemetry
+if [ -e /usr/local/bin/opt_in_out ]; then
+  /usr/local/bin/opt_in_out --opt_out
+fi
+
 # Logs should be sent to stdout so that s6 can collect them
 
 # Tell S6-Overlay not to restart this service
