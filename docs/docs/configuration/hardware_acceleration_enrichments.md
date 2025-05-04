@@ -24,3 +24,9 @@ Object detection and enrichments (like Semantic Search, Face Recognition, and Li
   - Jetson devices will automatically be detected and used for enrichments in the `-tensorrt-jp6` Frigate image.
 
 Utilizing a GPU for enrichments does not require you to use the same GPU for object detection. For example, you can run the `tensorrt` Docker image for enrichments and still use other dedicated hardware for object detection.
+
+:::note
+
+A Google Coral is a TPU (Tensor Processing Unit), not a dedicated GPU (Graphics Processing Unit) and therefore does not provide any kind of acceleration for Frigate's enrichments.
+
+:::
