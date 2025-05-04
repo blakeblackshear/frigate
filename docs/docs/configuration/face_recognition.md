@@ -28,6 +28,8 @@ Frigate has support for two face recognition model types:
 
 In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
 
+All of these features run locally on your system.
+
 ## Minimum System Requirements
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
