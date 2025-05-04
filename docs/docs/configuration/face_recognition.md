@@ -3,7 +3,7 @@ id: face_recognition
 title: Face Recognition
 ---
 
-Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known person is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
 ## Model Requirements
 
@@ -12,6 +12,12 @@ Face recognition identifies known individuals by matching detected faces with pr
 When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
 When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
+
+:::note
+
+Frigate needs to first detect a `person` before it can detect and recognize a face.
+
+:::
 
 ### Face Recognition
 
