@@ -3,7 +3,7 @@ id: face_recognition
 title: Face Recognition
 ---
 
-Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known person is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
 ## Model Requirements
 
@@ -13,6 +13,12 @@ When running a Frigate+ model (or any custom model that natively detects faces) 
 
 When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
 
+:::note
+
+Frigate needs to first detect a `person` before it can detect and recognize a face.
+
+:::
+
 ### Face Recognition
 
 Frigate has support for two face recognition model types:
@@ -21,6 +27,8 @@ Frigate has support for two face recognition model types:
 - **large**: Frigate will run a large ArcFace embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
 
 In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
+
+All of these features run locally on your system.
 
 ## Minimum System Requirements
 
@@ -61,6 +69,13 @@ Fine-tune face recognition with these optional parameters:
   - Default: `100`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
+
+## Usage
+
+1. **Enable face recognition** in your configuration file and restart Frigate.
+2. **Upload your face** using the **Add Face** button's wizard in the Face Library section of the Frigate UI.
+3. When Frigate detects and attempts to recognize a face, it will appear in the **Train** tab of the Face Library, along with its associated recognition confidence.
+4. From the **Train** tab, you can **assign the face** to a new or existing person to improve recognition accuracy for the future.
 
 ## Creating a Robust Training Set
 
