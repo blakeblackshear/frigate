@@ -408,7 +408,13 @@ def get_rockchip_npu_stats() -> dict[str, str]:
     try:
         with open("/sys/kernel/debug/rknpu/load", "r") as f:
             npu_output = f.read()
-            core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+
+            if "Core0:" in npu_output:
+                # multi core NPU
+                core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+            else:
+                # single core NPU
+                core_loads = re.findall(r"NPU load:\s+(\d+)%", npu_output)
     except FileNotFoundError:
         core_loads = None
 
