@@ -152,7 +152,7 @@ Use this configuration for YOLO-based models. When no custom model path or URL i
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
@@ -185,7 +185,7 @@ For SSD-based models, provide either a model path or URL to your compiled SSD mo
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
@@ -209,7 +209,7 @@ The Hailo detector supports all YOLO models compiled for Hailo hardware that inc
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
