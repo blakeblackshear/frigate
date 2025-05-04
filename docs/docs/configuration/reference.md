@@ -560,6 +560,8 @@ face_recognition:
   save_attempts: 100
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
   blur_confidence_filter: True
+  # Optional: Set the model size used face recognition. (default: shown below)
+  model_size: small
 
 # Optional: Configuration for license plate recognition capability
 # NOTE: enabled, min_area, and enhancement can be overridden at the camera level
