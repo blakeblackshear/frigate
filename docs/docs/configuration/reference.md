@@ -543,9 +543,9 @@ semantic_search:
   model_size: "small"
 
 # Optional: Configuration for face recognition capability
-# NOTE: Can (enabled, min_area) be overridden at the camera level
+# NOTE: enabled, min_area can be overridden at the camera level
 face_recognition:
-  # Optional: Enable semantic search (default: shown below)
+  # Optional: Enable face recognition (default: shown below)
   enabled: False
   # Optional: Minimum face distance score required to mark as a potential match (default: shown below)
   unknown_score: 0.8
