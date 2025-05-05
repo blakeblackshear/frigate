@@ -169,7 +169,12 @@ class PtzAutoTrackerThread(threading.Thread):
                     continue
 
                 if camera_config.onvif.autotracking.enabled:
-                    asyncio.run(self.ptz_autotracker.camera_maintenance(camera))
+                    future = asyncio.run_coroutine_threadsafe(
+                        self.ptz_autotracker.camera_maintenance(camera),
+                        self.ptz_autotracker.onvif.loop,
+                    )
+                    # Wait for the coroutine to complete
+                    future.result()
                 else:
                     # disabled dynamically by mqtt
                     if self.ptz_autotracker.tracked_object.get(camera):
@@ -219,7 +224,11 @@ class PtzAutoTracker:
                 camera_config.onvif.autotracking.enabled
                 and camera_config.onvif.autotracking.enabled_in_config
             ):
-                asyncio.run(self._autotracker_setup(camera_config, camera))
+                future = asyncio.run_coroutine_threadsafe(
+                    self._autotracker_setup(camera_config, camera), self.onvif.loop
+                )
+                # Wait for the coroutine to complete
+                future.result()
 
     async def _autotracker_setup(self, camera_config: CameraConfig, camera: str):
         logger.debug(f"{camera}: Autotracker init")
@@ -741,27 +750,44 @@ class PtzAutoTracker:
                         self.config.cameras[camera].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
                     ):
-                        asyncio.run(
-                            self.onvif._move_relative(camera, pan, tilt, zoom, 1)
+                        future = asyncio.run_coroutine_threadsafe(
+                            self.onvif._move_relative(camera, pan, tilt, zoom, 1),
+                            self.onvif.loop,
                         )
+                        future.result()
 
                     else:
                         if pan != 0 or tilt != 0:
-                            self.onvif._move_relative(camera, pan, tilt, 0, 1)
+                            future = asyncio.run_coroutine_threadsafe(
+                                self.onvif._move_relative(camera, pan, tilt, 0, 1),
+                                self.onvif.loop,
+                            )
+                            future.result()
 
                             # Wait until the camera finishes moving
                             while not self.ptz_metrics[camera].motor_stopped.is_set():
-                                asyncio.run(self.onvif.get_camera_status(camera))
+                                future = asyncio.run_coroutine_threadsafe(
+                                    self.onvif.get_camera_status(camera),
+                                    self.onvif.loop,
+                                )
+                                future.result()
 
                         if (
                             zoom > 0
                             and self.ptz_metrics[camera].zoom_level.value != zoom
                         ):
-                            self.onvif._zoom_absolute(camera, zoom, 1)
+                            future = asyncio.run_coroutine_threadsafe(
+                                self.onvif._zoom_absolute(camera, zoom, 1),
+                                self.onvif.loop,
+                            )
+                            future.result()
 
                     # Wait until the camera finishes moving
                     while not self.ptz_metrics[camera].motor_stopped.is_set():
-                        asyncio.run(self.onvif.get_camera_status(camera))
+                        future = asyncio.run_coroutine_threadsafe(
+                            self.onvif.get_camera_status(camera), self.onvif.loop
+                        )
+                        future.result()
 
                     if self.config.cameras[camera].onvif.autotracking.movement_weights:
                         logger.debug(
