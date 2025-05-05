@@ -52,13 +52,14 @@ class OnvifController:
         self.loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
         self.loop_thread.start()
 
+        self.camera_configs = {}
         for cam_name, cam in config.cameras.items():
             if not cam.enabled:
                 continue
             if cam.onvif.host:
-                result = self._create_onvif_camera(cam_name, cam)
-                if result:
-                    self.cams[cam_name] = result
+                self.camera_configs[cam_name] = cam
+
+        asyncio.run_coroutine_threadsafe(self._init_cameras(), self.loop)
 
     def _run_event_loop(self) -> None:
         """Run the event loop in a separate thread."""
@@ -68,33 +69,34 @@ class OnvifController:
         except Exception as e:
             logger.error(f"Onvif event loop terminated unexpectedly: {e}")
 
-    def _create_onvif_camera(self, cam_name: str, cam) -> dict | None:
+    async def _init_cameras(self) -> None:
         """Create an ONVIF camera instance and handle failures."""
-        try:
-            return {
-                "onvif": ONVIFCamera(
-                    cam.onvif.host,
-                    cam.onvif.port,
-                    cam.onvif.user,
-                    cam.onvif.password,
-                    wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
-                    adjust_time=cam.onvif.ignore_time_mismatch,
-                    encrypt=not cam.onvif.tls_insecure,
-                ),
-                "init": False,
-                "active": False,
-                "features": [],
-                "presets": {},
-            }
-        except (Fault, ONVIFError, TransportError, Exception) as e:
-            logger.error(f"Failed to create ONVIF camera instance for {cam_name}: {e}")
-            # track initial failures
-            self.failed_cams[cam_name] = {
-                "retry_attempts": 0,
-                "last_error": str(e),
-                "last_attempt": time.time(),
-            }
-            return None
+        for cam_name, cam in self.camera_configs.items():
+            try:
+                self.cams[cam_name] = {
+                    "onvif": ONVIFCamera(
+                        cam.onvif.host,
+                        cam.onvif.port,
+                        cam.onvif.user,
+                        cam.onvif.password,
+                        wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
+                        adjust_time=cam.onvif.ignore_time_mismatch,
+                        encrypt=not cam.onvif.tls_insecure,
+                    ),
+                    "init": False,
+                    "active": False,
+                    "features": [],
+                    "presets": {},
+                }
+            except (Fault, ONVIFError, TransportError, Exception) as e:
+                logger.error(
+                    f"Failed to create ONVIF camera instance for {cam_name}: {e}"
+                )
+                self.failed_cams[cam_name] = {
+                    "retry_attempts": 0,
+                    "last_error": str(e),
+                    "last_attempt": time.time(),
+                }
 
     async def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
