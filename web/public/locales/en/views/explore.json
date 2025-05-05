@@ -190,6 +190,7 @@
   "trackedObjectsCount_one": "{{count}} tracked object ",
   "trackedObjectsCount_other": "{{count}} tracked objects ",
   "searchResult": {
+    "tooltip": "Matched {{type}} at {{confidence}}%",
     "deleteTrackedObject": {
       "toast": {
         "success": "Tracked object deleted successfully.",
