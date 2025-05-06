@@ -3,11 +3,9 @@
 import asyncio
 import copy
 import logging
-import queue
 import threading
 import time
 from collections import deque
-from functools import partial
 from multiprocessing.synchronize import Event as MpEvent
 
 import cv2
@@ -251,8 +249,8 @@ class PtzAutoTracker:
         self.intercept[camera] = None
         self.move_coefficients[camera] = []
 
-        self.move_queues[camera] = queue.Queue()
-        self.move_queue_locks[camera] = threading.Lock()
+        self.move_queues[camera] = asyncio.Queue()
+        self.move_queue_locks[camera] = asyncio.Lock()
 
         # handle onvif constructor failing due to no connection
         if camera not in self.onvif.cams:
@@ -298,13 +296,10 @@ class PtzAutoTracker:
         if self.onvif.cams[camera]["init"]:
             await self.onvif.get_camera_status(camera)
 
-            # movement thread per camera
-            self.move_threads[camera] = threading.Thread(
-                name=f"ptz_move_thread_{camera}",
-                target=partial(self._process_move_queue, camera),
+            # movement queue with asyncio on OnvifController loop
+            asyncio.run_coroutine_threadsafe(
+                self._process_move_queue(camera), self.onvif.loop
             )
-            self.move_threads[camera].daemon = True
-            self.move_threads[camera].start()
 
             if camera_config.onvif.autotracking.movement_weights:
                 if len(camera_config.onvif.autotracking.movement_weights) == 6:
@@ -718,18 +713,17 @@ class PtzAutoTracker:
             centroid_distance < self.tracked_object_metrics[camera]["distance"]
         )
 
-    def _process_move_queue(self, camera):
-        camera_config = self.config.cameras[camera]
-        camera_config.frame_shape[1]
-        camera_config.frame_shape[0]
+    async def _process_move_queue(self, camera):
+        move_queue = self.move_queues[camera]
 
         while not self.stop_event.is_set():
             try:
-                move_data = self.move_queues[camera].get(True, 0.1)
-            except queue.Empty:
+                # Asynchronously wait for move data with a timeout
+                move_data = await asyncio.wait_for(move_queue.get(), timeout=0.1)
+            except asyncio.TimeoutError:
                 continue
 
-            with self.move_queue_locks[camera]:
+            async with self.move_queue_locks[camera]:
                 frame_time, pan, tilt, zoom = move_data
 
                 # if we're receiving move requests during a PTZ move, ignore them
@@ -738,8 +732,6 @@ class PtzAutoTracker:
                     self.ptz_metrics[camera].start_time.value,
                     self.ptz_metrics[camera].stop_time.value,
                 ):
-                    # instead of dequeueing this might be a good place to preemptively move based
-                    # on an estimate - for fast moving objects, etc.
                     logger.debug(
                         f"{camera}: Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, final pan: {pan}, final tilt: {tilt}, final zoom: {zoom}"
                     )
@@ -750,44 +742,24 @@ class PtzAutoTracker:
                         self.config.cameras[camera].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
                     ):
-                        future = asyncio.run_coroutine_threadsafe(
-                            self.onvif._move_relative(camera, pan, tilt, zoom, 1),
-                            self.onvif.loop,
-                        )
-                        future.result()
-
+                        await self.onvif._move_relative(camera, pan, tilt, zoom, 1)
                     else:
                         if pan != 0 or tilt != 0:
-                            future = asyncio.run_coroutine_threadsafe(
-                                self.onvif._move_relative(camera, pan, tilt, 0, 1),
-                                self.onvif.loop,
-                            )
-                            future.result()
+                            await self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
                             # Wait until the camera finishes moving
                             while not self.ptz_metrics[camera].motor_stopped.is_set():
-                                future = asyncio.run_coroutine_threadsafe(
-                                    self.onvif.get_camera_status(camera),
-                                    self.onvif.loop,
-                                )
-                                future.result()
+                                await self.onvif.get_camera_status(camera)
 
                         if (
                             zoom > 0
                             and self.ptz_metrics[camera].zoom_level.value != zoom
                         ):
-                            future = asyncio.run_coroutine_threadsafe(
-                                self.onvif._zoom_absolute(camera, zoom, 1),
-                                self.onvif.loop,
-                            )
-                            future.result()
+                            await self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # Wait until the camera finishes moving
                     while not self.ptz_metrics[camera].motor_stopped.is_set():
-                        future = asyncio.run_coroutine_threadsafe(
-                            self.onvif.get_camera_status(camera), self.onvif.loop
-                        )
-                        future.result()
+                        await self.onvif.get_camera_status(camera)
 
                     if self.config.cameras[camera].onvif.autotracking.movement_weights:
                         logger.debug(
@@ -824,6 +796,10 @@ class PtzAutoTracker:
                     # calculate new coefficients if we have enough data
                     self._calculate_move_coefficients(camera)
 
+        # Clean up the queue on exit
+        while not move_queue.empty():
+            await move_queue.get()
+
     def _enqueue_move(self, camera, frame_time, pan, tilt, zoom):
         def split_value(value, suppress_diff=True):
             clipped = np.clip(value, -1, 1)
@@ -852,7 +828,9 @@ class PtzAutoTracker:
                     f"{camera}: Enqueue movement for frame time: {frame_time} pan: {pan}, tilt: {tilt}, zoom: {zoom}"
                 )
                 move_data = (frame_time, pan, tilt, zoom)
-                self.move_queues[camera].put(move_data)
+                self.onvif.loop.call_soon_threadsafe(
+                    self.move_queues[camera].put_nowait, move_data
+                )
 
                 # reset values to not split up large movements
                 pan = 0
@@ -1482,10 +1460,6 @@ class PtzAutoTracker:
             # clear tracked object and reset zoom level
             self.tracked_object[camera] = None
             self.tracked_object_history[camera].clear()
-
-            # empty move queue
-            while not self.move_queues[camera].empty():
-                self.move_queues[camera].get()
 
             self.ptz_metrics[camera].motor_stopped.wait()
             logger.debug(
