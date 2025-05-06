@@ -657,7 +657,7 @@ class OnvifController:
                 f"Error executing command {command} for camera {camera_name}: {e}"
             )
 
-    async def get_camera_info(self, camera_name: str) -> dict[str, any]:
+    def get_camera_info(self, camera_name: str) -> dict[str, any]:
         """
         Get ptz capabilities and presets, attempting to reconnect if ONVIF is configured
         but not initialized.
@@ -685,8 +685,21 @@ class OnvifController:
             }
 
         if camera_name not in self.cams.keys() and camera_name in self.config.cameras:
-            success = await self._init_single_camera(camera_name)
-            if not success:
+            # Schedule _init_single_camera in the OnvifController's event loop
+            future = asyncio.run_coroutine_threadsafe(
+                self._init_single_camera(camera_name), self.loop
+            )
+            try:
+                success = future.result(timeout=10)
+                if not success:
+                    return {}
+            except asyncio.TimeoutError:
+                logger.error(f"_init_single_camera timed out for camera {camera_name}")
+                return {}
+            except Exception as e:
+                logger.error(
+                    f"Error in _init_single_camera for camera {camera_name}: {e}"
+                )
                 return {}
 
         # Reset retry count after timeout
@@ -704,7 +717,12 @@ class OnvifController:
                 f"Attempting ONVIF initialization for {camera_name} (retry {attempts + 1}/{self.max_retries})"
             )
             try:
-                if await self._init_onvif(camera_name):
+                # Schedule _init_onvif in the OnvifController's event loop
+                future = asyncio.run_coroutine_threadsafe(
+                    self._init_onvif(camera_name), self.loop
+                )
+                success = future.result(timeout=10)
+                if success:
                     if camera_name in self.failed_cams:
                         del self.failed_cams[camera_name]
                     return {
@@ -714,6 +732,8 @@ class OnvifController:
                     }
                 else:
                     logger.warning(f"ONVIF initialization failed for {camera_name}")
+            except asyncio.TimeoutError:
+                logger.error(f"_init_onvif timed out for camera {camera_name}")
             except Exception as e:
                 logger.error(
                     f"Error during ONVIF initialization for {camera_name}: {e}"

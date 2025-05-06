@@ -111,7 +111,7 @@ def imagestream(
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
         return JSONResponse(
-            content=await request.app.onvif.get_camera_info(camera_name),
+            content=request.app.onvif.get_camera_info(camera_name),
         )
     else:
         return JSONResponse(
