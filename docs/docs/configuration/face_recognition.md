@@ -47,7 +47,7 @@ face_recognition:
 
 ## Advanced Configuration
 
-Fine-tune face recognition with these optional parameters:
+Fine-tune face recognition with these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled` and `min_area`.
 
 ### Detection
 
