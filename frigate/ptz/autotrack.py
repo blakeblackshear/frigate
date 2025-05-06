@@ -334,7 +334,7 @@ class PtzAutoTracker:
                     )
 
             if camera_config.onvif.autotracking.calibrate_on_startup:
-                self._calibrate_camera(camera)
+                await self._calibrate_camera(camera)
 
         self.ptz_metrics[camera].tracking_active.clear()
         self.dispatcher.publish(f"{camera}/ptz_autotracker/active", "OFF", retain=False)
@@ -377,7 +377,7 @@ class PtzAutoTracker:
 
             for i in range(2):
                 # absolute move to 0 - fully zoomed out
-                self.onvif._zoom_absolute(
+                await self.onvif._zoom_absolute(
                     camera,
                     self.onvif.cams[camera]["absolute_zoom_range"]["XRange"]["Min"],
                     1,
@@ -388,7 +388,7 @@ class PtzAutoTracker:
 
                 zoom_out_values.append(self.ptz_metrics[camera].zoom_level.value)
 
-                self.onvif._zoom_absolute(
+                await self.onvif._zoom_absolute(
                     camera,
                     self.onvif.cams[camera]["absolute_zoom_range"]["XRange"]["Max"],
                     1,
@@ -475,7 +475,7 @@ class PtzAutoTracker:
             self.ptz_metrics[camera].max_zoom.value = 1
             self.ptz_metrics[camera].min_zoom.value = 0
 
-        self.onvif._move_to_preset(
+        await self.onvif._move_to_preset(
             camera,
             self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
         )

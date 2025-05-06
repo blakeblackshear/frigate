@@ -107,6 +107,7 @@ class OnvifController:
             return True
         except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.error(f"Failed to create ONVIF camera instance for {cam_name}: {e}")
+            # track initial failures
             self.failed_cams[cam_name] = {
                 "retry_attempts": 0,
                 "last_error": str(e),
@@ -595,12 +596,6 @@ class OnvifController:
         self, camera_name: str, command: OnvifCommandEnum, param: str = ""
     ) -> None:
         """Handle ONVIF commands asynchronously"""
-        current_loop = asyncio.get_running_loop()
-        expected_loop = self.loop
-        if current_loop is not expected_loop:
-            logger.error(
-                f"Wrong event loop in _move! Expected {expected_loop}, got {current_loop}"
-            )
         if camera_name not in self.cams.keys():
             logger.error(f"ONVIF is not configured for {camera_name}")
             return
