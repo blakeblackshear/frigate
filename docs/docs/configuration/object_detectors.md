@@ -1069,5 +1069,5 @@ wget -O yolov9-t.pt "https://github.com/WongKinYiu/yolov9/releases/download/v0.1
 
 # prepare and run export script
 sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" ./models/experimental.py
-python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify --include onnx
+bin/python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify --include onnx
 ```
