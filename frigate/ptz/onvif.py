@@ -595,7 +595,6 @@ class OnvifController:
         self, camera_name: str, command: OnvifCommandEnum, param: str = ""
     ) -> None:
         """Handle ONVIF commands asynchronously"""
-        # logger.debug(f"handling async: {camera_name}, {command}, {param}")
         current_loop = asyncio.get_running_loop()
         expected_loop = self.loop
         if current_loop is not expected_loop:
