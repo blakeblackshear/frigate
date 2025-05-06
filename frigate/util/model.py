@@ -340,7 +340,6 @@ def get_ort_providers(
             providers.append(provider)
             options.append(
                 {
-                    "arena_extend_strategy": "kSameAsRequested",
                     "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
                     "device_type": device,
                 }
