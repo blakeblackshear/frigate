@@ -46,6 +46,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
+  LuFolderCheck,
   LuImagePlus,
   LuInfo,
   LuPencil,
@@ -69,7 +70,7 @@ export default function FaceLibrary() {
     document.title = t("documentTitle");
   }, [t]);
 
-  const [page, setPage] = useState<string>();
+  const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
   // face data
@@ -91,20 +92,6 @@ export default function FaceLibrary() {
     () => faceData?.["train"] || [],
     [faceData],
   );
-
-  useEffect(() => {
-    if (!pageToggle) {
-      if (trainImages.length > 0) {
-        setPageToggle("train");
-      } else if (faces) {
-        setPageToggle(faces[0]);
-      }
-    } else if (pageToggle == "train" && trainImages.length == 0) {
-      setPageToggle(faces[0]);
-    }
-    // we need to listen on the value of the faces list
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trainImages, faces]);
 
   // upload
 
@@ -371,7 +358,7 @@ type LibrarySelectorProps = {
   faceData?: FaceLibraryData;
   faces: string[];
   trainImages: string[];
-  setPageToggle: (toggle: string | undefined) => void;
+  setPageToggle: (toggle: string) => void;
   onDelete: (name: string, ids: string[], isName: boolean) => void;
   onRename: (old_name: string, new_name: string) => void;
 };
@@ -463,18 +450,16 @@ function LibrarySelector({
           className="scrollbar-container max-h-[40dvh] min-w-[220px] overflow-y-auto"
           align="start"
         >
-          {trainImages.length > 0 && (
-            <DropdownMenuItem
-              className="flex cursor-pointer items-center justify-start gap-2"
-              aria-label={t("train.aria")}
-              onClick={() => setPageToggle("train")}
-            >
-              <div>{t("train.title")}</div>
-              <div className="text-secondary-foreground">
-                ({trainImages.length})
-              </div>
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center justify-start gap-2"
+            aria-label={t("train.aria")}
+            onClick={() => setPageToggle("train")}
+          >
+            <div>{t("train.title")}</div>
+            <div className="text-secondary-foreground">
+              ({trainImages.length})
+            </div>
+          </DropdownMenuItem>
           {trainImages.length > 0 && faces.length > 0 && (
             <>
               <DropdownMenuSeparator />
@@ -623,6 +608,15 @@ function TrainingGrid({
         }),
     config?.ui.timezone,
   );
+
+  if (attemptImages.length == 0) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuFolderCheck className="size-16" />
+        {t("train.empty")}
+      </div>
+    );
+  }
 
   return (
     <>
