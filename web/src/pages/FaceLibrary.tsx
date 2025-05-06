@@ -3,6 +3,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
+import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -41,6 +47,8 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
   LuImagePlus,
+  LuInfo,
+  LuPencil,
   LuRefreshCw,
   LuScanFace,
   LuSearch,
@@ -221,6 +229,32 @@ export default function FaceLibrary() {
     [faceImages, refreshFaces, setPageToggle, t],
   );
 
+  const onRename = useCallback(
+    (oldName: string, newName: string) => {
+      axios
+        .put(`/faces/${oldName}/rename`, { new_name: newName })
+        .then((resp) => {
+          if (resp.status === 200) {
+            toast.success(t("toast.success.renamedFace", { name: newName }), {
+              position: "top-center",
+            });
+            setPageToggle("train");
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.renameFaceFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [setPageToggle, refreshFaces, t],
+  );
+
   // keyboard
 
   useKeyboardListener(["a", "Escape"], (key, modifiers) => {
@@ -274,6 +308,7 @@ export default function FaceLibrary() {
           trainImages={trainImages}
           setPageToggle={setPageToggle}
           onDelete={onDelete}
+          onRename={onRename}
         />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
@@ -338,6 +373,7 @@ type LibrarySelectorProps = {
   trainImages: string[];
   setPageToggle: (toggle: string | undefined) => void;
   onDelete: (name: string, ids: string[], isName: boolean) => void;
+  onRename: (old_name: string, new_name: string) => void;
 };
 function LibrarySelector({
   pageToggle,
@@ -346,9 +382,11 @@ function LibrarySelector({
   trainImages,
   setPageToggle,
   onDelete,
+  onRename,
 }: LibrarySelectorProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [renameFace, setRenameFace] = useState<string | null>(null);
 
   const handleDeleteFace = useCallback(
     (faceName: string) => {
@@ -359,6 +397,13 @@ function LibrarySelector({
       setPageToggle("train");
     },
     [faceData, onDelete, setPageToggle],
+  );
+
+  const handleSetOpen = useCallback(
+    (open: boolean) => {
+      setRenameFace(open ? renameFace : null);
+    },
+    [renameFace],
   );
 
   return (
@@ -392,6 +437,18 @@ function LibrarySelector({
           </div>
         </DialogContent>
       </Dialog>
+
+      <TextEntryDialog
+        open={!!renameFace}
+        setOpen={handleSetOpen}
+        title={t("renameFace.title")}
+        description={t("renameFace.desc", { name: renameFace })}
+        onSave={(newName) => {
+          onRename(renameFace!, newName);
+          setRenameFace(null);
+        }}
+        defaultValue={renameFace || ""}
+      />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -440,17 +497,44 @@ function LibrarySelector({
                   ({faceData?.[face].length})
                 </span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setConfirmDelete(face);
-                }}
-              >
-                <LuTrash2 className="size-4 text-destructive" />
-              </Button>
+              <div className="flex gap-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRenameFace(face);
+                      }}
+                    >
+                      <LuPencil className="size-4 text-primary" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>{t("button.renameFace")}</TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDelete(face);
+                      }}
+                    >
+                      <LuTrash2 className="size-4 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>{t("button.deleteFace")}</TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              </div>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -569,10 +653,23 @@ function TrainingGrid({
           {selectedEvent?.data.sub_label_score && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                {t("details.confidence")}
+                <div className="flex flex-row items-center gap-1">
+                  {t("details.subLabelScore")}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="cursor-pointer p-0">
+                        <LuInfo className="size-4" />
+                        <span className="sr-only">Info</span>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      {t("details.scoreInfo")}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               <div className="text-sm smart-capitalize">
-                {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
+                {Math.round((selectedEvent?.data?.sub_label_score || 0) * 100)}%
               </div>
             </div>
           )}
@@ -583,7 +680,8 @@ function TrainingGrid({
             <div className="text-sm">{formattedDate}</div>
           </div>
           <img
-            className="w-full"
+            className="mx-auto max-h-[60dvh] object-contain"
+            loading="lazy"
             src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
         </DialogContent>

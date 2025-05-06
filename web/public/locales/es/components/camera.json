@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "Nombre",
-      "placeholder": "Introduce un nombre...",
+      "placeholder": "Introduce un nombre…",
       "errorMessage": {
         "mustLeastCharacters": "El nombre del grupo de cámaras debe tener al menos 2 caracteres.",
         "nameMustNotPeriod": "El nombre del grupo de cámaras no debe contener un punto.",

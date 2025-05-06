@@ -67,7 +67,10 @@
     },
     "recognizedLicensePlate": "Rozpoznana tablica rejestracyjna",
     "regenerateFromSnapshot": "Regeneruj ze zrzutu ekranu",
-    "regenerateFromThumbnails": "Regeneruj z miniatur"
+    "regenerateFromThumbnails": "Regeneruj z miniatur",
+    "snapshotScore": {
+      "label": "Wynik zrzutu"
+    }
   },
   "objectLifecycle": {
     "annotationSettings": {
@@ -99,7 +102,12 @@
       },
       "gone": "{{label}} zniknął",
       "heard": "{{label}} usłyszany",
-      "external": "{{label}} wykryty"
+      "external": "{{label}} wykryty",
+      "header": {
+        "ratio": "Współczynnik",
+        "area": "Obszar",
+        "zones": "Strefy"
+      }
     },
     "carousel": {
       "previous": "Poprzedni slajd",
@@ -112,7 +120,7 @@
     "title": "Eksploracja jest niedostępna",
     "embeddingsReindexing": {
       "context": "Eksploracja będzie dostępna po zakończeniu ponownego indeksowania osadzenia śledzonych obiektów.",
-      "startingUp": "Uruchamianie...",
+      "startingUp": "Uruchamianie…",
       "estimatedTime": "Szacowany pozostały czas:",
       "finishingShortly": "Zakańczanie",
       "step": {

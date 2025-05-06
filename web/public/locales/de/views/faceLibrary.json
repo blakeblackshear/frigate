@@ -24,7 +24,7 @@
   "selectItem": "Wähle {{item}}",
   "selectFace": "Wähle Gesicht",
   "imageEntry": {
-    "dropActive": "Ziehe das Bild hierher ...",
+    "dropActive": "Ziehe das Bild hierher…",
     "dropInstructions": "Ziehe ein Bild hier her oder klicke um eines auszuwählen",
     "maxSize": "Maximale Größe: {{size}} MB",
     "validation": {
@@ -35,7 +35,9 @@
     "addFace": "Gesicht hinzufügen",
     "uploadImage": "Bild hochladen",
     "deleteFaceAttempts": "Lösche Gesichtsversuche",
-    "reprocessFace": "Gesichter erneut verarbeiten"
+    "reprocessFace": "Gesichter erneut verarbeiten",
+    "renameFace": "Gesicht umbenennen",
+    "deleteFace": "Lösche Gesicht"
   },
   "train": {
     "title": "Trainiere",
@@ -72,5 +74,9 @@
     "uploadFace": "Lade Bild des Gesichts hoch",
     "nextSteps": "Nächste Schritte",
     "faceName": "Gib den Namen zum Gesicht ein"
+  },
+  "renameFace": {
+    "title": "Gesicht umbenennen",
+    "desc": "Gib den neuen Namen für das Gesicht von {{name}} ein."
   }
 }

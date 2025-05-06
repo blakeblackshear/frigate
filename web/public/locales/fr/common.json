@@ -47,8 +47,8 @@
     "day_other": "{{time}} jours",
     "1hour": "1 heure",
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%d %b, %H:%M:%S"
+      "12hour": "d MMM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampWithYear": {
       "24hour": "%b %-d %Y, %H:%M",
@@ -60,8 +60,29 @@
       "24hour": "%b %-d, %H:%M"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "dd/MM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-HH-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM HH:mm",
+      "24hour": "d MMM HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, HH:mm",
+      "24hour": "d MMM yyyy HH:mm"
     }
   },
   "button": {
@@ -69,7 +90,7 @@
     "reset": "Réinitialiser",
     "disabled": "Désactivé",
     "save": "Enregistrer",
-    "saving": "Enregistrement...",
+    "saving": "Enregistrement…",
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",
@@ -134,7 +155,8 @@
       "pt": "Português (Portugais)",
       "sk": "Slovenčina (Slovaque)",
       "uk": "Українська (Ukrainien)",
-      "vi": "Tiếng Việt (Vietnamien)"
+      "vi": "Tiếng Việt (Vietnamien)",
+      "yue": "粵語 (Cantonais)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -171,7 +193,8 @@
       "nord": "Nord",
       "red": "Rouge",
       "default": "Défaut",
-      "label": "Thème"
+      "label": "Thème",
+      "highcontrast": "Contraste élevé"
     },
     "systemMetrics": "Indicateurs systèmes",
     "settings": "Paramètres",

@@ -11,7 +11,7 @@
       }
     },
     "name": {
-      "placeholder": "Saisissez un nom...",
+      "placeholder": "Saisissez un nom…",
       "label": "Nom",
       "errorMessage": {
         "mustLeastCharacters": "Le nom du groupe de caméras doit comporter au moins 2 caractères.",

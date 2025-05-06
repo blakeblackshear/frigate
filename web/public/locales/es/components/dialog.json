@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Enviado"
+        },
+        "question": {
+          "label": "Confirmar esta etiqueta para Frigate Plus",
+          "ask_a": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_an": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_full": "¿Es este objeto un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
@@ -76,7 +82,7 @@
       "disabled": "La retransmisión no está habilitada para esta cámara.",
       "desc": {
         "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara.",
-        "readTheDocumentation": "Leer la documentación "
+        "readTheDocumentation": "Leer la documentación"
       }
     },
     "debugView": "Vista de depuración",

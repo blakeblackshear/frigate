@@ -90,19 +90,7 @@ semantic_search:
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
-
-- **AMD**
-
-  - ROCm will automatically be detected and used for Semantic Search in the `-rocm` Frigate image.
-
-- **Intel**
-
-  - OpenVINO will automatically be detected and used for Semantic Search in the default Frigate image.
-
-- **Nvidia**
-  - Nvidia GPUs will automatically be detected and used for Semantic Search in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used for Semantic Search in the `-tensorrt-jp(4/5)` Frigate image.
+See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 :::
 

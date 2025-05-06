@@ -1,1 +1,9 @@
-{}
+{
+  "logs": {
+    "type": {
+      "timestamp": "Aikaleima",
+      "tag": "Tagi",
+      "message": "Viesti"
+    }
+  }
+}

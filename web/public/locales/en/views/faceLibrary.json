@@ -5,7 +5,8 @@
   },
   "details": {
     "person": "Person",
-    "confidence": "Confidence",
+    "subLabelScore": "Sub Label Score",
+    "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
     "faceDesc": "Details for the face and associated object",
     "timestamp": "Timestamp"
@@ -36,9 +37,15 @@
     "title": "Delete Name",
     "desc": "Are you sure you want to delete the collection {{name}}? This will permanently delete all associated faces."
   },
+  "renameFace": {
+    "title": "Rename Face",
+    "desc": "Enter a new name for {{name}}"
+  },
   "button": {
     "deleteFaceAttempts": "Delete Face Attempts",
     "addFace": "Add Face",
+    "renameFace": "Rename Face",
+    "deleteFace": "Delete Face",
     "uploadImage": "Upload Image",
     "reprocessFace": "Reprocess Face"
   },
@@ -46,7 +53,7 @@
     "validation": {
       "selectImage": "Please select an image file."
     },
-    "dropActive": "Drop the image here...",
+    "dropActive": "Drop the image here…",
     "dropInstructions": "Drag and drop an image here, or click to select",
     "maxSize": "Max size: {{size}}MB"
   },
@@ -62,6 +69,7 @@
       "deletedName_zero": "Empty collection deleted successfully.",
       "deletedName_one": "{{count}} face has been successfully deleted.",
       "deletedName_other": "{{count}} faces have been successfully deleted.",
+      "renamedFace": "Successfully renamed face to {{name}}",
       "trainedFace": "Successfully trained face.",
       "updatedFaceScore": "Successfully updated face score."
     },
@@ -70,6 +78,7 @@
       "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
       "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
       "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
+      "renameFaceFailed": "Failed to rename face: {{errorMessage}}",
       "trainFailed": "Failed to train: {{errorMessage}}",
       "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
     }

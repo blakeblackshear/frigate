@@ -65,13 +65,16 @@
       "desc": "Bu {{label}} için yeni bir plaka değeri girin",
       "descNoLabel": "Bu nesne için yeni bir plaka değeri girin"
     },
-    "recognizedLicensePlate": "Tanınan Plaka"
+    "recognizedLicensePlate": "Tanınan Plaka",
+    "snapshotScore": {
+      "label": "Fotoğraf Skoru"
+    }
   },
   "generativeAI": "Üretken Yapay Zeka",
   "exploreIsUnavailable": {
     "title": "Keşfet şu anda kullanılamıyor",
     "embeddingsReindexing": {
-      "startingUp": "Başlatılıyor.",
+      "startingUp": "Başlatılıyor…",
       "estimatedTime": "Tahmini kalan süre:",
       "step": {
         "thumbnailsEmbedded": "Gömü eklenen küçük resimler: ",
@@ -119,7 +122,12 @@
         "other": "{{label}} {{attribute}} olarak tespit edildi",
         "faceOrLicense_plate": "{{label}} için {{attribute}} tespit edildi"
       },
-      "gone": "{{label}} ayrıldı"
+      "gone": "{{label}} ayrıldı",
+      "header": {
+        "zones": "Alanlar",
+        "ratio": "Oran",
+        "area": "Alan"
+      }
     },
     "annotationSettings": {
       "offset": {

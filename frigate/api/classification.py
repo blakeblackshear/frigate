@@ -14,6 +14,7 @@ from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import require_role
+from frigate.api.defs.request.classification_body import RenameFaceBody
 from frigate.api.defs.tags import Tags
 from frigate.config.camera import DetectConfig
 from frigate.const import FACE_DIR
@@ -258,6 +259,35 @@ def deregister_faces(request: Request, name: str, body: dict = None):
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
     )
+
+
+@router.put("/faces/{old_name}/rename", dependencies=[Depends(require_role(["admin"]))])
+def rename_face(request: Request, old_name: str, body: RenameFaceBody):
+    if not request.app.frigate_config.face_recognition.enabled:
+        return JSONResponse(
+            status_code=400,
+            content={"message": "Face recognition is not enabled.", "success": False},
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    try:
+        context.rename_face(old_name, body.new_name)
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Successfully renamed face to {body.new_name}.",
+            },
+            status_code=200,
+        )
+    except ValueError as e:
+        logger.error(e)
+        return JSONResponse(
+            status_code=400,
+            content={
+                "message": "Error renaming face. Check Frigate logs.",
+                "success": False,
+            },
+        )
 
 
 @router.put("/lpr/reprocess")

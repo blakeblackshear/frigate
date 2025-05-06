@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import math
 import os
@@ -23,6 +24,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
@@ -1221,7 +1223,7 @@ class LicensePlateProcessingMixin:
             license_plate_area = (license_plate[2] - license_plate[0]) * (
                 license_plate[3] - license_plate[1]
             )
-            if license_plate_area < self.lpr_config.min_area:
+            if license_plate_area < self.config.cameras[camera].lpr.min_area:
                 logger.debug(f"{camera}: License plate area below minimum threshold.")
                 return
 
@@ -1315,10 +1317,7 @@ class LicensePlateProcessingMixin:
 
                 # check that license plate is valid
                 # double the value because we've doubled the size of the car
-                if (
-                    license_plate_area
-                    < self.config.cameras[obj_data["camera"]].lpr.min_area * 2
-                ):
+                if license_plate_area < self.config.cameras[camera].lpr.min_area * 2:
                     logger.debug(f"{camera}: License plate is less than min_area")
                     return
 
@@ -1362,10 +1361,10 @@ class LicensePlateProcessingMixin:
                 if (
                     not license_plate_box
                     or area(license_plate_box)
-                    < self.config.cameras[obj_data["camera"]].lpr.min_area
+                    < self.config.cameras[camera].lpr.min_area
                 ):
                     logger.debug(
-                        f"{camera}: Area for license plate box {area(license_plate_box)} is less than min_area {self.config.cameras[obj_data['camera']].lpr.min_area}"
+                        f"{camera}: Area for license plate box {area(license_plate_box)} is less than min_area {self.config.cameras[camera].lpr.min_area}"
                     )
                     return
 
@@ -1513,6 +1512,20 @@ class LicensePlateProcessingMixin:
             )
 
         # always publish to recognized_license_plate field
+        self.requestor.send_data(
+            "tracked_object_update",
+            json.dumps(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.lpr,
+                    "name": sub_label,
+                    "plate": top_plate,
+                    "score": avg_confidence,
+                    "id": id,
+                    "camera": camera,
+                    "timestamp": start,
+                }
+            ),
+        )
         self.sub_label_publisher.publish(
             EventMetadataTypeEnum.recognized_license_plate,
             (id, top_plate, avg_confidence),

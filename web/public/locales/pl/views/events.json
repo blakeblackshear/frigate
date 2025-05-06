@@ -1,5 +1,5 @@
 {
-  "camera": "Aparat",
+  "camera": "Kamera",
   "alerts": "Alerty",
   "detections": "Wykrycia",
   "motion": {
@@ -31,5 +31,7 @@
   "newReviewItems": {
     "label": "Zobacz nowe elementy do przeglądu",
     "button": "Nowe elementy do przeglądu"
-  }
+  },
+  "selected_one": "{{count}} wybrane",
+  "selected_other": "{{count}} wybrane"
 }

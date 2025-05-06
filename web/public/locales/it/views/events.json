@@ -1,6 +1,6 @@
 {
   "alerts": "Avvisi",
-  "detections": "Rilevazioni",
+  "detections": "Rilevamento",
   "motion": {
     "label": "Movimento",
     "only": "Solo movimento"
@@ -31,5 +31,8 @@
   "calendarFilter": {
     "last24Hours": "Ultime 24 ore"
   },
-  "camera": "Telecamera"
+  "camera": "Telecamera",
+  "selected": "{{count}} selezionati",
+  "selected_one": "{{count}} selezionati",
+  "selected_other": "{{count}} selezionati"
 }

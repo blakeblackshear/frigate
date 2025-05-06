@@ -183,7 +183,7 @@ or add these options to your `docker run` command:
 
 #### Configuration
 
-Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration#rockchip-platform).
+Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration_video#rockchip-platform).
 
 ## Docker
 
@@ -316,7 +316,8 @@ If you choose to run Frigate via LXC in Proxmox the setup can be complex so be p
 
 :::
 
- Suggestions include:
+Suggestions include:
+
 - For Intel-based hardware acceleration, to allow access to the `/dev/dri/renderD128` device with major number 226 and minor number 128, add the following lines to the `/etc/pve/lxc/<id>.conf` LXC configuration:
   - `lxc.cgroup2.devices.allow: c 226:128 rwm`
   - `lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file`
@@ -407,7 +408,7 @@ mkdir -p /share/share_vol2/frigate/media
 # Also replace the time zone value for 'TZ' in the sample command.
 # Example command will create a docker container that uses at most 2 CPUs and 4G RAM.
 # You may need to add "--env=LIBVA_DRIVER_NAME=i965 \" to the following docker run command if you
-# have certain CPU (e.g., J4125). See https://docs.frigate.video/configuration/hardware_acceleration.
+# have certain CPU (e.g., J4125). See https://docs.frigate.video/configuration/hardware_acceleration_video.
 docker run \
   --name=frigate \
   --shm-size=256m \

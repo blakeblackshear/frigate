@@ -11,7 +11,7 @@
       }
     },
     "name": {
-      "placeholder": "Wprowadź nazwę...",
+      "placeholder": "Wprowadź nazwę…",
       "label": "Nazwa",
       "errorMessage": {
         "mustLeastCharacters": "Nazwa grupy kamer musi mieć co najmniej 2 znaki.",

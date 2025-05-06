@@ -319,6 +319,21 @@ def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
 
             camera_config["live"] = live_config
 
+        # add another value to movement_weights for autotracking cams
+        onvif_config = camera_config.get("onvif", {})
+        if "autotracking" in onvif_config:
+            movement_weights = (
+                camera_config.get("onvif", {})
+                .get("autotracking")
+                .get("movement_weights", {})
+            )
+
+            if movement_weights and len(movement_weights.split(",")) == 5:
+                onvif_config["autotracking"]["movement_weights"] = (
+                    movement_weights + ", 0"
+                )
+            camera_config["onvif"] = onvif_config
+
         new_config["cameras"][name] = camera_config
 
     new_config["version"] = "0.16-0"

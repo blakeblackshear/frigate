@@ -31,5 +31,7 @@
   },
   "timeline.aria": "Zaman şeridi seçin",
   "markTheseItemsAsReviewed": "Bunları incelendi olarak işaretle",
-  "allCameras": "Tüm Kameralar"
+  "allCameras": "Tüm Kameralar",
+  "selected_one": "{{count}} seçildi",
+  "selected_other": "{{count}} seçildi"
 }

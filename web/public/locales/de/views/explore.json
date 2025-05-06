@@ -75,7 +75,7 @@
     "title": "Erkunden ist nicht Verfügbar",
     "embeddingsReindexing": {
       "context": "Erkunden kann nach der Re-Indexierung der verfolgten Objekte verwendet werden.",
-      "startingUp": "Startet...",
+      "startingUp": "Startet…",
       "estimatedTime": "Voraussichtlich verbleibende Zeit:",
       "finishingShortly": "Bald erledigt",
       "step": {

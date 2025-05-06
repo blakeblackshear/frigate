@@ -111,8 +111,8 @@
   },
   "recognizedLicensePlates": {
     "selectPlatesFromList": "Listeden bir veya birden fazla plaka seçin.",
-    "placeholder": "Plaka ara...",
-    "loading": "Tanınan plakalar yükleniyor...",
+    "placeholder": "Plaka ara…",
+    "loading": "Tanınan plakalar yükleniyor…",
     "title": "Tanınan Plakalar",
     "noLicensePlatesFound": "Plaka bulunamadı.",
     "loadFailed": "Tanınan plakalar yüklenemedi."

@@ -20,12 +20,12 @@
     "last14": "Son 14 gün",
     "24hours": "24 saat",
     "formattedTimestamp": {
-      "24hour": "%-d %b , %H:%M:%S",
-      "12hour": "%-d %b, %I:%M:%S %p"
+      "24hour": "d MMM, HH:mm:ss",
+      "12hour": "d MMM, h:mm:ss aaa"
     },
     "formattedTimestamp2": {
-      "24hour": "%b %d %H:%M:%S",
-      "12hour": "%m/%d %I:%M:%S%P"
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "dd/MM h:mm:ssa"
     },
     "second_one": "{{time}} saniye",
     "second_other": "{{time}} saniye",
@@ -56,12 +56,33 @@
     },
     "s": "{{time}}sn",
     "month_one": "{{time}} ay",
-    "month_other": "{{time}} ay"
+    "month_other": "{{time}} ay",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    }
   },
   "button": {
     "off": "KAPALI",
     "next": "Sonraki",
-    "saving": "Kaydediliyor...",
+    "saving": "Kaydediliyor…",
     "back": "Geri",
     "unselect": "Seçimi kaldır",
     "info": "Bilgi",

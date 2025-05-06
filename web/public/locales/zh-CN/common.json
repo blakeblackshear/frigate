@@ -35,12 +35,12 @@
     "s": "{{time}}秒",
     "second_other": "{{time}}秒",
     "formattedTimestamp": {
-      "12hour": "%m月%-d日 %I:%M:%S %p",
-      "24hour": "%m月%-d日 %H:%M:%S"
+      "12hour": "M月d日 ah:mm:ss",
+      "24hour": "M月d日 HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d日%m月 %H:%M:%S"
+      "12hour": "MM月dd日 ah:mm:ss",
+      "24hour": "MM月dd日 HH:mm:ss"
     },
     "formattedTimestampExcludeSeconds": {
       "12hour": "%m月%-d日 %I:%M %p",
@@ -50,7 +50,28 @@
       "12hour": "%Y年%m月%-d日 %I:%M:%S %p",
       "24hour": "%Y年%m月%-d日 %H:%M"
     },
-    "formattedTimestampOnlyMonthAndDay": "%m月%-d日"
+    "formattedTimestampOnlyMonthAndDay": "%m月%-d日",
+    "formattedTimestampHourMinute": {
+      "12hour": "a h:mm",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "ah:mm:ss",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "M月d日 ah:mm",
+      "24hour": "M月d日 HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "24hour": "yyyy年M月d日 HH:mm",
+      "12hour": "yyyy年M月d日 ah:mm"
+    },
+    "formattedTimestampMonthDay": "M月d日",
+    "formattedTimestampFilename": {
+      "12hour": "yy年MM月dd日 ah时mm分ss秒",
+      "24hour": "yy年MM月dd日 HH时mm分ss秒"
+    }
   },
   "unit": {
     "speed": {
@@ -82,7 +103,7 @@
     "disabled": "禁用",
     "disable": "禁用",
     "save": "保存",
-    "saving": "保存中……",
+    "saving": "保存中…",
     "cancel": "取消",
     "close": "关闭",
     "copy": "复制",
@@ -119,7 +140,7 @@
     "configurationEditor": "配置编辑器",
     "languages": "Languages / 语言",
     "language": {
-      "en": "English",
+      "en": "英语 (English)",
       "zhCN": "简体中文",
       "withSystem": {
         "label": "使用系统语言设置"
@@ -149,7 +170,8 @@
       "da": "丹麦语 (Dansk)",
       "sk": "斯拉夫语 (Slovenčina)",
       "ru": "俄语 (Русский)",
-      "cs": "捷克语 (Čeština)"
+      "cs": "捷克语 (Čeština)",
+      "yue": "粤语 (粵語)"
     },
     "appearance": "外观",
     "darkMode": {
@@ -168,7 +190,8 @@
       "nord": "Nord",
       "red": "红色",
       "contrast": "高对比度",
-      "default": "默认"
+      "default": "默认",
+      "highcontrast": "高对比"
     },
     "help": "帮助",
     "documentation": {
@@ -183,7 +206,7 @@
         "count_other": "{{count}} 个摄像头"
       }
     },
-    "review": "回放",
+    "review": "核查",
     "explore": "探测",
     "export": "导出",
     "uiPlayground": "UI 演示",
@@ -211,8 +234,8 @@
   "role": {
     "title": "权限组",
     "admin": "管理员",
-    "viewer": "查看者",
-    "desc": "管理员可以完全访问 Frigate UI 的所有功能。查看者则仅限于在 UI 中查看摄像头、审核项和历史录像。"
+    "viewer": "成员",
+    "desc": "管理员可以完全访问Frigate界面上所有功能。成员则仅能查看摄像头、核查项和历史录像。"
   },
   "accessDenied": {
     "documentTitle": "没有权限 - Frigate",

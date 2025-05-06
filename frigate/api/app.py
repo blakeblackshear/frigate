@@ -74,7 +74,7 @@ def go2rtc_streams():
         )
     stream_data = r.json()
     for data in stream_data.values():
-        for producer in data.get("producers", []):
+        for producer in data.get("producers") or []:
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
     return JSONResponse(content=stream_data)
 

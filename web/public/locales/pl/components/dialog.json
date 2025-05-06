@@ -29,6 +29,12 @@
         },
         "state": {
           "submitted": "Przesłano"
+        },
+        "question": {
+          "ask_a": "Czy ten obiekt to <code>{{label}}</code>?",
+          "ask_an": "Czy ten obiekt to <code>{{label}}</code>?",
+          "ask_full": "Czy ten obiekt to <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Potwierdź tę etykietę dla Frigate Plus"
         }
       }
     },
@@ -90,7 +96,7 @@
       "disabled": "Restreaming nie jest włączony dla tej kamery.",
       "desc": {
         "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery.",
-        "readTheDocumentation": "Przeczytaj dokumentację· "
+        "readTheDocumentation": "Przeczytaj dokumentację"
       }
     },
     "showStats": {

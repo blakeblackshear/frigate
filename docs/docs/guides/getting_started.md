@@ -162,7 +162,7 @@ FFmpeg arguments for other types of cameras can be found [here](../configuration
 
 ### Step 3: Configure hardware acceleration (recommended)
 
-Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration.md) config reference for examples applicable to your hardware.
+Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration_video.md) config reference for examples applicable to your hardware.
 
 Here is an example configuration with hardware acceleration configured to work with most Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
 
@@ -303,6 +303,7 @@ By default, Frigate will retain video of all tracked objects for 10 days. The fu
 ### Step 7: Complete config
 
 At this point you have a complete config with basic functionality.
+
 - View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
 - View [full config reference](../configuration/reference.md) for a complete list of configuration options.
 

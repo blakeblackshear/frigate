@@ -46,7 +46,14 @@
       "desc": {
         "text": "Filtre hjelper deg med å begrense søkeresultatene dine. Slik bruker du dem i inndatafeltet:",
         "example": "Eksempel: <code className=\"text-primary\">cameras:inngangsdør label:person before:01012024 time_range:3:00PM-4:00PM </code>",
-        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Skriv inn et filternavn etterfulgt av et kolon (f.eks. \"cameras:\").</li><li>Velg en verdi fra forslagene eller skriv inn din egen.</li><li>Bruk flere filtre ved å legge dem til etter hverandre med mellomrom imellom.</li><li>Dato-filtre (before: og after:) bruker <em>{{DateFormat}}</em>-formatet.</li><li>Tidsintervall-filteret bruker <em>{{exampleTime}}</em>-formatet.</li><li>Fjern filtre ved å klikke på 'x' ved siden av dem.</li></ul>"
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Skriv inn et filternavn etterfulgt av et kolon (f.eks. \"cameras:\").</li><li>Velg en verdi fra forslagene eller skriv inn din egen.</li><li>Bruk flere filtre ved å legge dem til etter hverandre med mellomrom imellom.</li><li>Dato-filtre (before: og after:) bruker <em>{{DateFormat}}</em>-formatet.</li><li>Tidsintervall-filteret bruker <em>{{exampleTime}}</em>-formatet.</li><li>Fjern filtre ved å klikke på 'x' ved siden av dem.</li></ul>",
+        "step2": "Velg en verdi fra forslagene eller skriv inn din egen.",
+        "step4": "Dato-filtre (before: and after:) bruker {{DateFormat}} format.",
+        "step5": "Tidsintervall-filter bruker {{exampleTime}} format.",
+        "step6": "Fjern filtre ved å klikke på 'x'en ved siden av dem.",
+        "exampleLabel": "Eksempel:",
+        "step1": "Skriv inn et filter-nøkkelnavn etterfulgt av et kolon (f.eks \"cameras:\").",
+        "step3": "Bruk flere filtre ved å legge dem til en etter en, med mellomrom."
       }
     },
     "header": {
@@ -56,7 +63,7 @@
     }
   },
   "placeholder": {
-    "search": "Søk..."
+    "search": "Søk…"
   },
   "trackedObjectId": "Sporings-ID for objekt",
   "similaritySearch": {

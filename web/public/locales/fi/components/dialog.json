@@ -1,1 +1,19 @@
-{}
+{
+  "restart": {
+    "title": "Haluatko varmasti käynnistää Frigaten uudelleen?",
+    "button": "Uudelleenkäynnistys",
+    "restarting": {
+      "title": "Fregatti käynnistyy uudelleen",
+      "content": "Tämä sivu latautuu uudelleen {{countdown}} sekunnin kuluttua.",
+      "button": "Pakota uudelleenlataus nyt"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Lähetä Frigate+:lle",
+        "desc": "Välttämissäsi paikoissa olevat kohteet eivät ole vääriä positiivisia. Niiden lähettäminen väärinä positiivisina sekoittaa mallia."
+      }
+    }
+  }
+}

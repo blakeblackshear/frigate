@@ -31,5 +31,7 @@
   "markTheseItemsAsReviewed": "Diese Objekte als geprüft kennzeichnen",
   "camera": "Kamera",
   "allCameras": "Alle Kameras",
-  "markAsReviewed": "Als geprüft kennzeichnen"
+  "markAsReviewed": "Als geprüft kennzeichnen",
+  "selected_one": "{{count}} ausgewählt",
+  "selected_other": "{{count}} ausgewählt"
 }

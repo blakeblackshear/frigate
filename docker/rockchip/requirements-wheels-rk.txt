@@ -1,2 +1,2 @@
-rknn-toolkit2 == 2.3.0
-rknn-toolkit-lite2 == 2.3.0
+rknn-toolkit2 == 2.3.2
+rknn-toolkit-lite2 == 2.3.2

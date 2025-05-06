@@ -6,7 +6,7 @@
   "toast": {
     "error": {
       "endTimeMustAfterStartTime": "Конечное время должно быть позже начального",
-      "noValidTimeSelected": "Выыбран недопустимый временной диапазон"
+      "noValidTimeSelected": "Выбран недопустимый временной диапазон"
     }
   }
 }

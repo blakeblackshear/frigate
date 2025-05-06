@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import os
 import random
@@ -17,6 +18,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
@@ -24,6 +26,7 @@ from frigate.data_processing.common.face.model import (
     FaceNetRecognizer,
     FaceRecognizer,
 )
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import area
 
@@ -42,11 +45,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
+        requestor: InterProcessRequestor,
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
         self.face_config = config.face_recognition
+        self.requestor = requestor
         self.sub_label_publisher = sub_label_publisher
         self.face_detector: cv2.FaceDetectorYN = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
@@ -157,8 +162,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
         self.metrics.face_rec_fps.value = self.faces_per_second.eps()
+        camera = obj_data["camera"]
 
-        if not self.config.cameras[obj_data["camera"]].face_recognition.enabled:
+        if not self.config.cameras[camera].face_recognition.enabled:
             return
 
         start = datetime.datetime.now().timestamp()
@@ -245,7 +251,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if (
                 not face_box
                 or area(face_box)
-                < self.config.cameras[obj_data["camera"]].face_recognition.min_area
+                < self.config.cameras[camera].face_recognition.min_area
             ):
                 logger.debug(f"Invalid face box {face}")
                 return
@@ -284,6 +290,20 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         )
         (weighted_sub_label, weighted_score) = self.weighted_average(
             self.person_face_history[id]
+        )
+
+        self.requestor.send_data(
+            "tracked_object_update",
+            json.dumps(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.face,
+                    "name": weighted_sub_label,
+                    "score": weighted_score,
+                    "id": id,
+                    "camera": camera,
+                    "timestamp": start,
+                }
+            ),
         )
 
         if weighted_score >= self.face_config.recognition_threshold:

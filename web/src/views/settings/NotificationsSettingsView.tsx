@@ -299,6 +299,10 @@ export default function NotificationView({
     saveToConfig(values as NotificationSettingsValueType);
   }
 
+  useEffect(() => {
+    document.title = t("documentTitle.notifications");
+  }, [t]);
+
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
@@ -317,9 +321,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationSettings.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationSettings.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -341,9 +343,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationUnavailable.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationUnavailable.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -704,7 +704,7 @@ export function CameraNotificationSwitch({
       {!isSuspended ? (
         <Select onValueChange={handleSuspend}>
           <SelectTrigger className="w-auto">
-            <SelectValue placeholder="Suspend" />
+            <SelectValue placeholder={t("notification.suspendTime.suspend")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="5">

@@ -41,7 +41,8 @@
       "title": "Détecteurs",
       "inferenceSpeed": "Vitesse d'inférence du détecteur",
       "cpuUsage": "Utilisation CPU Détecteur",
-      "memoryUsage": "Utilisation Mémoire Détecteur"
+      "memoryUsage": "Utilisation Mémoire Détecteur",
+      "temperature": "Température du détecteur"
     },
     "hardwareInfo": {
       "title": "Info Matériel",
@@ -72,7 +73,9 @@
         "closeInfo": {
           "label": "Information de fermeture du GPU"
         }
-      }
+      },
+      "npuUsage": "Utilisation NPU",
+      "npuMemory": "Mémoire NPU"
     },
     "otherProcesses": {
       "title": "Autres tâches",
@@ -124,8 +127,17 @@
       "camera": "caméra",
       "detect": "Détecter",
       "skipped": "ignoré",
-      "ffmpeg": "ffmpeg",
-      "capture": "capture"
+      "ffmpeg": "FFmpeg",
+      "capture": "capture",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} détections manquées par seconde",
+      "overallDetectionsPerSecond": "Moyenne de détections par seconde",
+      "overallFramesPerSecond": "Moyenne d'images par seconde",
+      "overallSkippedDetectionsPerSecond": "Moyenne de détections manquées par seconde",
+      "cameraCapture": "{{camName}} capture",
+      "cameraDetect": "{{camName}} détection",
+      "cameraFramesPerSecond": "{{camName}} images par seconde",
+      "cameraDetectionsPerSecond": "{{camName}} détections par seconde"
     },
     "overview": "Prévisualisation",
     "toast": {
@@ -139,10 +151,13 @@
   },
   "lastRefreshed": "Dernier rafraichissement : ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU par FFMPEG ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU par FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU ({{detectAvg}}%)",
     "healthy": "Le système est sain",
-    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)"
+    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)",
+    "cameraIsOffline": "{{camera}} est hors ligne",
+    "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Améliorations",
@@ -151,7 +166,14 @@
       "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
       "text_embedding_speed": "Vitesse de capture des données complémentaire de texte",
       "image_embedding_speed": "Vitesse de capture des données complémentaires à l'image",
-      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation"
+      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation",
+      "face_recognition_speed": "Vitesse de reconnaissance faciale",
+      "plate_recognition": "Reconnaissance de plaques d'immatriculation",
+      "image_embedding": "Représentation vectorielle d'image",
+      "yolov9_plate_detection": "Détection de plaques d'immatriculation YOLOv9",
+      "face_recognition": "Reconnaissance faciale",
+      "text_embedding": "Représentation vectorielle de texte",
+      "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9"
     }
   }
 }

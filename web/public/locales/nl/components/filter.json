@@ -32,7 +32,7 @@
     }
   },
   "review": {
-    "showReviewed": "Toon beoordeelden"
+    "showReviewed": "Toon beoordeelde items"
   },
   "motion": {
     "showMotionOnly": "Alleen bewegingen weergeven"
@@ -70,11 +70,11 @@
   },
   "recognizedLicensePlates": {
     "loadFailed": "Het laden van herkende kentekenplaten is mislukt.",
-    "placeholder": "Type om kentekens te zoeken...",
+    "placeholder": "Type om kentekens te zoeken…",
     "title": "Herkende kentekenplaten",
     "noLicensePlatesFound": "Geen kentekenplaten gevonden.",
     "selectPlatesFromList": "Selecteer een of meer kentekens uit de lijst.",
-    "loading": "Herkende kentekenplaten laden..."
+    "loading": "Herkende kentekenplaten laden…"
   },
   "score": "Score",
   "sort": {

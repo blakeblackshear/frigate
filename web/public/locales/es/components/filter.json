@@ -115,8 +115,8 @@
   "recognizedLicensePlates": {
     "title": "Matrículas reconocidas",
     "loadFailed": "No se pudieron cargar las matrículas reconocidas.",
-    "loading": "Cargando matrículas reconocidas...",
-    "placeholder": "Escribe para buscar matrículas...",
+    "loading": "Cargando matrículas reconocidas…",
+    "placeholder": "Escribe para buscar matrículas…",
     "noLicensePlatesFound": "No se encontraron matrículas.",
     "selectPlatesFromList": "Selecciona una o más matrículas de la lista."
   },

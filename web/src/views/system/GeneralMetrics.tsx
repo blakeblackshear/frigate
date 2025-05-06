@@ -240,7 +240,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -316,7 +316,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -350,7 +350,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -386,12 +386,12 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.npu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.npu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
 
-        if (stats.npu) {
+        if (stats?.npu) {
           hasValidNpu = true;
           series[key].data.push({ x: statsIdx + 1, y: stats.npu });
         }
@@ -528,7 +528,9 @@ export default function GeneralMetrics({
             <>
               {detTempSeries && (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5">Detector Temperature</div>
+                  <div className="mb-5">
+                    {t("general.detector.temperature")}
+                  </div>
                   {detTempSeries.map((series) => (
                     <ThresholdBarGraph
                       key={series.name}
@@ -583,8 +585,8 @@ export default function GeneralMetrics({
         </div>
 
         {(statsHistory.length == 0 ||
-          statsHistory[0].gpu_usages ||
-          statsHistory[0].npu_usages) && (
+          gpuSeries.length > 0 ||
+          npuSeries.length > 0) && (
           <>
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm font-medium text-muted-foreground">

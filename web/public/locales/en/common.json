@@ -88,7 +88,7 @@
     "disabled": "Disabled",
     "disable": "Disable",
     "save": "Save",
-    "saving": "Saving...",
+    "saving": "Saving…",
     "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
@@ -153,6 +153,7 @@
       "fi": "Suomi (Finnish)",
       "da": "Dansk (Danish)",
       "sk": "Slovenčina (Slovak)",
+      "yue": "粵語 (Cantonese)",
       "withSystem": {
         "label": "Use the system settings for language"
       }
@@ -173,7 +174,7 @@
       "green": "Green",
       "nord": "Nord",
       "red": "Red",
-      "contrast": "High Contrast",
+      "highcontrast": "High Contrast",
       "default": "Default"
     },
     "help": "Help",

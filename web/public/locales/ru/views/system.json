@@ -18,7 +18,7 @@
     },
     "copy": {
       "label": "Копировать в буфер",
-      "success": "Логи копированы в буфер",
+      "success": "Логи скопированы в буфер",
       "error": "Не удалось скопировать логи в буфер обмена"
     },
     "type": {
@@ -36,12 +36,13 @@
     }
   },
   "general": {
-    "title": "Общее",
+    "title": "Общие",
     "detector": {
       "title": "Детекторы",
       "inferenceSpeed": "Скорость вывода детектора",
       "cpuUsage": "Использование CPU детектором",
-      "memoryUsage": "Использование памяти детектором"
+      "memoryUsage": "Использование памяти детектором",
+      "temperature": "Температура детектора"
     },
     "hardwareInfo": {
       "title": "Информация об оборудовании",
@@ -60,19 +61,21 @@
           "title": "Вывод Nvidia SMI",
           "name": "Название: {{name}}",
           "driver": "Драйвер: {{driver}}",
-          "cudaComputerCapability": "CUDA Compute Capability: {{cuda_compute}}",
+          "cudaComputerCapability": "Вычислительная способность CUDA: {{cuda_compute}}",
           "vbios": "Информация VBios: {{vbios}}"
         },
         "closeInfo": {
           "label": "Закрыть информацию GPU"
         },
         "copyInfo": {
-          "label": "Скопировать информацию GPU"
+          "label": "Скопировать информацию о GPU"
         },
         "toast": {
-          "success": "Информация GPU скопирована в буфер обмена"
+          "success": "Информация о GPU скопирована в буфер обмена"
         }
-      }
+      },
+      "npuMemory": "Память NPU",
+      "npuUsage": "Использование NPU"
     },
     "otherProcesses": {
       "title": "Другие процессы",
@@ -85,15 +88,15 @@
     "overview": "Обзор",
     "recordings": {
       "title": "Записи",
-      "tips": "Это значение показывает общий объём хранилища, занятый записями в базе данных Frigate. Frigate не отслеживает использование хранилища для всех файлов на диске.",
-      "earliestRecording": "Самая ранняя доступная запись:"
+      "tips": "Это значение показывает, сколько места в хранилище занимают записи из базы данных Frigate. Frigate не учитывает другие файлы на диске.",
+      "earliestRecording": "Первая запись:"
     },
     "cameraStorage": {
       "title": "Хранилище камеры",
       "camera": "Камера",
       "unusedStorageInformation": "Информация о неиспользованном хранилище",
       "storageUsed": "Хранилище",
-      "percentageOfTotalUsed": "Процент от общего объёма",
+      "percentageOfTotalUsed": "Доля (%)",
       "bandwidth": "Пропускная способность",
       "unused": {
         "title": "Не используется",
@@ -105,7 +108,7 @@
     "title": "Камеры",
     "overview": "Обзор",
     "info": {
-      "cameraProbeInfo": "Информация о тестировании камеры {{camera}}",
+      "cameraProbeInfo": "Информация о проверке камеры {{camera}}",
       "streamDataFromFFPROBE": "Данные о потоке получены от <code>ffprobe</code>.",
       "fetching": "Получение данных камеры",
       "stream": "Поток {{idx}}",
@@ -122,11 +125,20 @@
     },
     "framesAndDetections": "Кадры/детекции",
     "label": {
-      "ffmpeg": "ffmpeg",
+      "ffmpeg": "FFmpeg",
       "camera": "камера",
       "capture": "захват",
       "skipped": "пропущено",
-      "detect": "детекция"
+      "detect": "детекция",
+      "cameraDetectionsPerSecond": "{{camName}} обнаружений в секунду",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} пропущенных обнаружений в секунду",
+      "cameraFramesPerSecond": "{{camName}} кадров в секунду",
+      "overallFramesPerSecond": "общее количество кадров в секунду",
+      "overallDetectionsPerSecond": "общее количество обнаружений в секунду",
+      "overallSkippedDetectionsPerSecond": "общее количество пропущенных обнаружений в секунду",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} захват",
+      "cameraDetect": "{{camName}} обнаружения"
     },
     "toast": {
       "success": {
@@ -137,21 +149,31 @@
       }
     }
   },
-  "lastRefreshed": "Последнее обновление: ",
+  "lastRefreshed": "Обновлено: ",
   "stats": {
-    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFMPEG ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "Камера {{camera}} использует слишком много ресурсов CPU для детекции ({{detectAvg}}%)",
     "healthy": "Система в порядке",
-    "reindexingEmbeddings": "Переиндексация эмбеддингов ({{processed}}% завершено)"
+    "reindexingEmbeddings": "Переиндексация эмбеддингов (выполнено {{processed}} %)",
+    "cameraIsOffline": "{{camera}} отключена",
+    "detectIsVerySlow": "{{detect}} идёт очень медленно ({{speed}} мс)",
+    "detectIsSlow": "{{detect}} идёт медленно ({{speed}} мс)"
   },
   "enrichments": {
-    "title": "Обогащения данных",
+    "title": "Обогащение данных",
     "infPerSecond": "Выводов в секунду",
     "embeddings": {
-      "image_embedding_speed": "Скорость генерации эмбеддингов изображений",
+      "image_embedding_speed": "Скорость векторизации изображений",
       "plate_recognition_speed": "Скорость распознавания номеров",
-      "text_embedding_speed": "Скорость генерации текстовых эмбеддингов",
-      "face_embedding_speed": "Скорость генерации эмбеддингов лиц"
+      "text_embedding_speed": "Скорость векторизации текста",
+      "face_embedding_speed": "Скорость векторизации лиц",
+      "face_recognition_speed": "Скорость распознавания лиц",
+      "text_embedding": "Векторизация текста",
+      "yolov9_plate_detection_speed": "Скорость обнаружения номеров YOLOv9",
+      "yolov9_plate_detection": "Обнаружение номеров YOLOv9",
+      "face_recognition": "Распознавание лиц",
+      "plate_recognition": "Распознавание номеров",
+      "image_embedding": "Векторизация изображений"
     }
   }
 }

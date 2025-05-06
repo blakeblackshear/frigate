@@ -34,10 +34,12 @@
     "deleteFaceAttempts": "Yüz Denemelerini Sil",
     "addFace": "Yüz Ekle",
     "reprocessFace": "Yüzü Yeniden İşle",
-    "uploadImage": "Resim Yükle"
+    "uploadImage": "Resim Yükle",
+    "renameFace": "Yüzü Yeniden Adlandır",
+    "deleteFace": "Yüzü Sil"
   },
   "imageEntry": {
-    "dropActive": "Resmi buraya bırakın...",
+    "dropActive": "Resmi buraya bırakın…",
     "maxSize": "Maksimum boyut: {{size}} MB",
     "validation": {
       "selectImage": "Lütfen bir resim dosyası seçin."
@@ -54,7 +56,8 @@
       "addFaceLibrary": "{{name}} başarıyla Yüz Kütüphanesi’ne eklendi!",
       "trainedFace": "Yüz başarıyla eğitildi.",
       "uploadedImage": "Resim başarıyla yüklendi.",
-      "updatedFaceScore": "Yüz skoru başarıyla güncellendi."
+      "updatedFaceScore": "Yüz skoru başarıyla güncellendi.",
+      "renamedFace": "Yüz başarıyla {{name}} olarak adlandırıldı"
     },
     "error": {
       "uploadingImageFailed": "Resim yüklenemedi: {{errorMessage}}",
@@ -62,10 +65,20 @@
       "updateFaceScoreFailed": "Yüz skoru güncellenemedi: {{errorMessage}}",
       "trainFailed": "Eğitme işlemi başarısız oldu: {{errorMessage}}",
       "deleteFaceFailed": "Silme işlemi başarısız: {{errorMessage}}",
-      "deleteNameFailed": "İsim silinemedi: {{errorMessage}}"
+      "deleteNameFailed": "İsim silinemedi: {{errorMessage}}",
+      "renameFaceFailed": "Yüz yeniden adlandırılamadı: {{errorMessage}}"
     }
   },
   "readTheDocs": "Dokümantasyonu oku",
   "selectFace": "Yüz Seçin",
-  "trainFace": "Yüzü Eğit"
+  "trainFace": "Yüzü Eğit",
+  "steps": {
+    "faceName": "Yüze İsim Verin",
+    "uploadFace": "Yüz Resmi Yükle",
+    "nextSteps": "Sonraki Adımlar"
+  },
+  "renameFace": {
+    "title": "Yüzü Yeniden Adlandır",
+    "desc": "{{name}} için yeni bir isim girin"
+  }
 }

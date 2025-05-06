@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "Naam",
-      "placeholder": "Voer een naam in...",
+      "placeholder": "Voer een naam in…",
       "errorMessage": {
         "exists": "De cameragroepnaam bestaat al.",
         "invalid": "Ongeldige cameragroepnaam.",
@@ -45,7 +45,7 @@
               "label": "Continue streaming",
               "desc": {
                 "title": "Het camerabeeld is altijd een live stream wanneer het zichtbaar is op het dashboard, zelfs als er geen activiteit wordt gedetecteerd.",
-                "warning": "Continue streaming kan leiden tot hoog bandbreedtegebruik en prestatieproblemen. Gebruik met voorzichtigheid."
+                "warning": "Let op: continu streamen kan leiden tot hoog bandbreedtegebruik en prestatieproblemen."
               }
             },
             "noStreaming": {

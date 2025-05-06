@@ -31,7 +31,7 @@ import {
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchViewProps = {
   search: string;
@@ -608,8 +608,21 @@ export default function SearchView({
                             </TooltipTrigger>
                             <TooltipPortal>
                               <TooltipContent>
-                                Matched {value.search_source} at{" "}
-                                {zScoreToConfidence(value.search_distance)}%
+                                <Trans
+                                  ns="views/explore"
+                                  values={{
+                                    type: t(
+                                      "filter.searchType." +
+                                        value.search_source,
+                                      { ns: "views/search" },
+                                    ),
+                                    confidence: zScoreToConfidence(
+                                      value.search_distance,
+                                    ),
+                                  }}
+                                >
+                                  searchResult.tooltip
+                                </Trans>
                               </TooltipContent>
                             </TooltipPortal>
                           </Tooltip>

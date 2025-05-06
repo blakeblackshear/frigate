@@ -28,9 +28,6 @@ export const getNowYesterdayInLong = (): number => {
  * The `timezone` option allows you to specify a specific timezone for the output, otherwise the user's browser timezone will be used.
  * The `use12hour` option allows you to display time in a 12-hour format if true, and 24-hour format if false.
  * The `dateStyle` and `timeStyle` options allow you to specify pre-defined formats for displaying the date and time.
- * The `strftime_fmt` option allows you to specify a custom format using the strftime syntax.
- *
- * If both `strftime_fmt` and `dateStyle`/`timeStyle` are provided, `strftime_fmt` takes precedence.
  *
  * @param unixTimestamp The Unix timestamp to format
  * @param config An object containing the configuration options for date/time display

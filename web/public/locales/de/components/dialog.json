@@ -23,6 +23,12 @@
           "false_one": "Das ist kein(e) {{label}}",
           "false_other": "Das sind kein(e) {{label}}",
           "label": "Bestätige dieses Label nicht für Frigate Plus"
+        },
+        "question": {
+          "label": "Bestätige diese Beschriftung für Frigate Plus",
+          "ask_a": "Ist dieses Objekt ein <code>{{label}}</code>?",
+          "ask_an": "Ist dieses Objekt ein <code>{{label}}</code>?",
+          "ask_full": "Ist dieses Objekt ein <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       },
       "submitToPlus": {
@@ -72,7 +78,7 @@
     "restreaming": {
       "disabled": "Für diese Kamera ist das Restreaming nicht aktiviert.",
       "desc": {
-        "readTheDocumentation": "Weitere Informationen in der Dokumentation ",
+        "readTheDocumentation": "Weitere Informationen in der Dokumentation",
         "title": "Konfiguriere go2rtc, um erweiterte Live-Ansichtsoptionen und Audio für diese Kamera zu nutzen."
       }
     },

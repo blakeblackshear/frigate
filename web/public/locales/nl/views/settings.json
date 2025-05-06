@@ -6,16 +6,17 @@
     "motionTuner": "Motion Tuner - Frigate",
     "classification": "Classificatie-instellingen - Frigate",
     "masksAndZones": "Masker- en zone-editor - Frigate",
-    "object": "Objectinstellingen - Frigate",
+    "object": "Foutopsporing Frigate",
     "general": "Algemene instellingen - Frigate",
-    "frigatePlus": "Frigate+ Instellingen - Frigate"
+    "frigatePlus": "Frigate+ Instellingen - Frigate",
+    "notifications": "Meldingsinstellingen - Frigate"
   },
   "menu": {
     "ui": "Gebruikersinterface",
     "classification": "Classificatie",
     "masksAndZones": "Maskers / Zones",
-    "motionTuner": "Bewegingsafsteller",
-    "debug": "Debug",
+    "motionTuner": "Bewegingsdetectie-afstellen",
+    "debug": "foutopsporing",
     "users": "Gebruikers",
     "notifications": "Meldingen",
     "cameras": "Camera-instellingen",
@@ -139,7 +140,8 @@
     "birdClassification": {
       "title": "Vogelclassificatie",
       "desc": "Vogelclassificatie herkent bekende vogels met behulp van een gequantiseerd TensorFlow-model. Wanneer een bekende vogel wordt herkend, wordt de algemene naam toegevoegd als sublabel. Deze informatie wordt weergegeven in de interface, is beschikbaar in filters en wordt ook opgenomen in meldingen."
-    }
+    },
+    "restart_required": "Opnieuw opstarten vereist (Classificatie-instellingen gewijzigd)"
   },
   "camera": {
     "review": {
@@ -149,14 +151,14 @@
       "desc": "Schakel waarschuwingen en detecties voor deze camera in of uit. Wanneer deze zijn uitgeschakeld, worden er geen nieuwe beoordelingsitems aangemaakt."
     },
     "reviewClassification": {
-      "objectAlertsTips": "Alle {{alertsLabels}}-objecten op {{cameraName}} worden weergegeven als waarschuwingen.",
-      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-objecten die zijn gedetecteerd in {{zone}} op {{cameraName}} worden weergegeven als waarschuwingen.",
+      "objectAlertsTips": "Alle {{alertsLabels}}-objecten op {{cameraName}} worden weergegeven als meldingen.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-objecten die zijn gedetecteerd in {{zone}} op {{cameraName}} worden weergegeven als meldingen.",
       "zoneObjectDetectionsTips": {
         "text": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties.",
         "notSelectDetections": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} worden gedetecteerd en niet als waarschuwing zijn gecategoriseerd, worden weergegeven als detecties – ongeacht in welke zone ze zich bevinden.",
         "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties – ongeacht in welke zone ze zich bevinden."
       },
-      "selectAlertsZones": "Zones selecteren voor waarschuwingen",
+      "selectAlertsZones": "Zones selecteren voor meldingen",
       "selectDetectionsZones": "Selecteer zones voor detecties",
       "limitDetections": "Beperk detecties tot specifieke zones",
       "toast": {
@@ -241,7 +243,7 @@
       "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
       "name": {
         "title": "Naam",
-        "inputPlaceHolder": "Voer een naam in...",
+        "inputPlaceHolder": "Voer een naam in…",
         "tips": "De naam moet minimaal 2 tekens lang zijn en mag niet gelijk zijn aan de naam van een camera of een andere zone."
       },
       "inertia": {
@@ -331,7 +333,8 @@
       "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
       "context": "Objectfiltermaskers worden gebruikt om valse positieven uit te filteren voor een bepaald objecttype op basis van locatie.",
       "edit": "Objectmasker bewerken"
-    }
+    },
+    "restart_required": "Herstart vereist (maskers/zones gewijzigd)"
   },
   "motionDetectionTuner": {
     "title": "Bewegingsdetectie-afsteller",
@@ -384,12 +387,12 @@
     "motion": {
       "title": "Bewegingskaders",
       "desc": "Toon kaders rondom gebieden waar beweging wordt gedetecteerd",
-      "tips": "<p className=\"mb-2\"><strong>Bewegingskaders</strong></p><br><p>Rode kaders worden over het beeld geplaatst op de plekken waar momenteel beweging wordt gedetecteerd.</p>"
+      "tips": "<p><strong>Bewegingskaders</strong></p><br><p>Rode kaders worden over het beeld geplaatst op de plekken waar momenteel beweging wordt gedetecteerd.</p>"
     },
     "regions": {
       "title": "Regio's",
       "desc": "Toon een kader rond het interessegebied dat naar de objectdetector wordt gestuurd",
-      "tips": "<p className=\"mb-2\"><strong>Interessekaders</strong></p><br><p>Heldergroene kaders worden over het beeld geplaatst op de interessegebieden die naar de objectdetector worden gestuurd.</p>"
+      "tips": "<p><strong>Interessekaders</strong></p><br><p>Heldergroene kaders worden over het beeld geplaatst op de interessegebieden die naar de objectdetector worden gestuurd.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Objectvormfilter tekenen",
@@ -473,13 +476,19 @@
       },
       "deleteUser": {
         "title": "Verwijder gebruiker",
-        "warn": "Weet je zeker dat je <span className=\"font-bold\">{{username}}</span> wilt verwijderen?",
+        "warn": "Weet je zeker dat je <strong>{{username}}</strong> wilt verwijderen?",
         "desc": "Deze actie kan niet ongedaan worden gemaakt. Het gebruikersaccount wordt permanent verwijderd, samen met alle bijbehorende gegevens."
       },
       "changeRole": {
-        "desc": "Machtigingen bijwerken voor <span className=\"font-medium\">{{username}}</span>",
+        "desc": "Machtigingen bijwerken voor <strong>{{username}}</strong>",
         "title": "Gebruikersrol wijzigen",
-        "roleInfo": "<p>Selecteer de juiste rol voor deze gebruiker:</p><ul className=\"mt-2 space-y-1 pl-5\"> <li> • <span className=\"font-medium\">Beheerder:</span> Volledige toegang tot alle functies.</li> <li> • <span className=\"font-medium\">Gebruiker:</span> Beperkt tot Live-dashboards, Beoordelen, Verkennen en Exporteren.</li></ul>"
+        "roleInfo": {
+          "intro": "Selecteer een gepaste rol voor deze gebruiker:",
+          "admin": "Beheerder",
+          "adminDesc": "Volledige toegang tot alle functies.",
+          "viewer": "Gebruiker",
+          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
+        }
       },
       "passwordSetting": {
         "setPassword": "Wachtwoord instellen",
@@ -490,14 +499,14 @@
   },
   "notification": {
     "notificationSettings": {
-      "title": "Notificatie-instellingen",
+      "title": "Meldingen instellen",
       "desc": "Frigate kan rechtstreeks pushmeldingen naar uw apparaat verzenden als het in de browser actief is of als een PWA geïnstalleerd is.",
       "documentation": "Lees de documentatie"
     },
     "notificationUnavailable": {
       "title": "Meldingen niet beschikbaar",
       "documentation": "Lees de documentatie",
-      "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://...</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
+      "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://…</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
     },
     "globalSettings": {
       "title": "Globale instellingen",
@@ -522,7 +531,8 @@
       "12hours": "Onderbreek voor 12 uur",
       "24hours": "Onderbreek voor 24 uur",
       "untilRestart": "Opschorten tot herstart",
-      "10minutes": "Onderbreek voor 10 minuten"
+      "10minutes": "Onderbreek voor 10 minuten",
+      "suspend": "Pauzeren"
     },
     "cancelSuspension": "Onderbreking annuleren",
     "toast": {
@@ -567,16 +577,21 @@
       "baseModel": "Basismodel",
       "cameras": "Camera's",
       "error": "Het laden van modelinformatie is mislukt",
-      "loadingAvailableModels": "Beschikbare modellen laden...",
+      "loadingAvailableModels": "Beschikbare modellen laden…",
       "modelSelect": "Je beschikbare modellen op Frigate+ kunnen hier worden geselecteerd. Houd er rekening mee dat alleen modellen die compatibel zijn met je huidige detectorconfiguratie geselecteerd kunnen worden.",
       "dimensions": "Afmetingen",
       "supportedDetectors": "Ondersteunde detectoren",
       "availableModels": "Beschikbare modellen",
-      "loading": "Modelinformatie laden..."
+      "loading": "Modelinformatie laden…",
+      "plusModelType": {
+        "baseModel": "Basismodel",
+        "userModel": "Verfijnd"
+      }
     },
     "toast": {
       "success": "Frigate+ instellingen zijn opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
       "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
-    }
+    },
+    "restart_required": "Herstart vereist (Frigate+ model gewijzigd)"
   }
 }

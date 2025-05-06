@@ -531,11 +531,9 @@ export default function LiveCameraView({
                   Icon={mic ? FaMicrophone : FaMicrophoneSlash}
                   isActive={mic}
                   title={
-                    (mic
-                      ? t("button.disable", { ns: "common" })
-                      : t("button.enable", { ns: "common" })) +
-                    " " +
-                    t("button.twoWayTalk", { ns: "common" })
+                    mic
+                      ? t("twoWayTalk.disable", { ns: "views/live" })
+                      : t("twoWayTalk.enable", { ns: "views/live" })
                   }
                   onClick={() => {
                     setMic(!mic);
@@ -553,11 +551,9 @@ export default function LiveCameraView({
                   Icon={audio ? GiSpeaker : GiSpeakerOff}
                   isActive={audio ?? false}
                   title={
-                    (audio
-                      ? t("button.disable", { ns: "common" })
-                      : t("button.enable", { ns: "common" })) +
-                    " " +
-                    t("button.cameraAudio", { ns: "common" })
+                    audio
+                      ? t("cameraAudio.disable", { ns: "views/live" })
+                      : t("cameraAudio.enable", { ns: "views/live" })
                   }
                   onClick={() => setAudio(!audio)}
                   disabled={!cameraEnabled}
@@ -898,8 +894,7 @@ function PtzControlPanel({
               <p>
                 {clickOverlay
                   ? t("ptz.move.clickMove.disable")
-                  : t("ptz.move.clickMove.enable")}{" "}
-                click to move
+                  : t("ptz.move.clickMove.enable")}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -1758,7 +1753,7 @@ function FrigateCameraFeatures({
                 isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
               )}
             >
-              {t("manualRecording." + isRecording ? "end" : "start")}
+              {t("manualRecording." + (isRecording ? "end" : "start"))}
             </Button>
             <p className="text-sm text-muted-foreground">
               {t("manualRecording.tips")}

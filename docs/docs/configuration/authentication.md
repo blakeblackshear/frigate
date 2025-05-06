@@ -77,7 +77,7 @@ Changing the secret will invalidate current tokens.
 
 Frigate can be configured to leverage features of common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.
 
-If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
+If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication as there is no correspondence between users in Frigate's database and users authenticated via the proxy. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
 
 Here is an example of how to disable Frigate's authentication and also ensure the requests come only from your known proxy.
 
@@ -108,6 +108,14 @@ proxy:
 ```
 
 Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
+
+A default role can be provided. Any value in the mapped `role` header will override the default.
+
+```yaml
+proxy:
+  ...
+  default_role: viewer
+```
 
 #### Port Considerations
 

@@ -1,11 +1,11 @@
 {
-  "documentTitle": "探索 - Frigate",
+  "documentTitle": "浏览 - Frigate",
   "generativeAI": "生成式 AI",
   "exploreIsUnavailable": {
-    "title": "探索功能不可用",
+    "title": "浏览功能不可用",
     "embeddingsReindexing": {
-      "context": "跟踪对象嵌入重新索引完成后，可以使用探索功能。",
-      "startingUp": "启动中...",
+      "context": "跟踪对象嵌入重新索引完成后，可以使用浏览功能。",
+      "startingUp": "启动中…",
       "estimatedTime": "预计剩余时间：",
       "finishingShortly": "即将完成",
       "step": {
@@ -54,7 +54,12 @@
       },
       "gone": "{{label}} 离开",
       "heard": "听到 {{label}}",
-      "external": "检测到 {{label}}"
+      "external": "检测到 {{label}}",
+      "header": {
+        "ratio": "得分",
+        "zones": "区域",
+        "area": "坐标区域"
+      }
     },
     "annotationSettings": {
       "title": "标注设置",
@@ -78,13 +83,13 @@
   "details": {
     "item": {
       "title": "回放项目详情",
-      "desc": "回放项目详情",
+      "desc": "核查项详情",
       "button": {
-        "share": "分享该回放",
-        "viewInExplore": "在探测中查看"
+        "share": "分享该核查项",
+        "viewInExplore": "在 浏览 中查看"
       },
       "tips": {
-        "mismatch_other": "检测到 {{count}} 个不可用的对象，并已包含在此审核项中。这些对象可能未达到警告或检测标准，或者已被清理/删除。",
+        "mismatch_other": "检测到 {{count}} 个不可用的对象，并已包含在此核查项中。这些对象可能未达到警报或检测标准，或者已被清理/删除。",
         "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪对象，请调整您的配置：<em>{{objects}}</em>"
       },
       "toast": {
@@ -139,7 +144,10 @@
       "descNoLabel": "为探测到的对象输入新的车牌值",
       "title": "编辑车牌"
     },
-    "recognizedLicensePlate": "识别的车牌"
+    "recognizedLicensePlate": "识别的车牌",
+    "snapshotScore": {
+      "label": "快照得分"
+    }
   },
   "itemMenu": {
     "downloadVideo": {

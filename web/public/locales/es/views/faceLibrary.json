@@ -35,13 +35,15 @@
     "deleteFaceAttempts": "Eliminar intentos de rostro",
     "addFace": "Agregar rostro",
     "uploadImage": "Subir imagen",
-    "reprocessFace": "Reprocesar rostro"
+    "reprocessFace": "Reprocesar rostro",
+    "renameFace": "Renombrar Rostro",
+    "deleteFace": "Eliminar Rostro"
   },
   "imageEntry": {
     "validation": {
       "selectImage": "Por favor, selecciona un archivo de imagen."
     },
-    "dropActive": "Suelta la imagen aquí...",
+    "dropActive": "Suelta la imagen aquí…",
     "dropInstructions": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
     "maxSize": "Tamaño máximo: {{size}}MB"
   },
@@ -56,7 +58,8 @@
       "deletedFace_one": "{{count}} rostro eliminado con éxito",
       "deletedFace_many": "{{count}} rostros eliminados con éxito",
       "deletedFace_other": "{{count}} rostros eliminados con éxito",
-      "uploadedImage": "Imagen subida con éxito."
+      "uploadedImage": "Imagen subida con éxito.",
+      "renamedFace": "Rostro renombrado con éxito a {{name}}"
     },
     "error": {
       "uploadingImageFailed": "No se pudo subir la imagen: {{errorMessage}}",
@@ -64,7 +67,8 @@
       "deleteFaceFailed": "No se pudo eliminar: {{errorMessage}}",
       "deleteNameFailed": "No se pudo eliminar el nombre: {{errorMessage}}",
       "trainFailed": "No se pudo entrenar: {{errorMessage}}",
-      "updateFaceScoreFailed": "No se pudo actualizar la puntuación del rostro: {{errorMessage}}"
+      "updateFaceScoreFailed": "No se pudo actualizar la puntuación del rostro: {{errorMessage}}",
+      "renameFaceFailed": "No se pudo renombrar el rostro: {{errorMessage}}"
     }
   },
   "readTheDocs": "Leer la documentación",
@@ -74,5 +78,9 @@
     "faceName": "Introducir Nombre de Rostro",
     "uploadFace": "Subir Imagen de Rostro",
     "nextSteps": "Próximos Pasos"
+  },
+  "renameFace": {
+    "title": "Renombrar Rostro",
+    "desc": "Introduce un nuevo nombre para {{name}}"
   }
 }

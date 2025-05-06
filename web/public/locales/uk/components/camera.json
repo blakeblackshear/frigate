@@ -1,1 +1,13 @@
-{}
+{
+  "group": {
+    "name": {
+      "placeholder": "Введіть назву…"
+    }
+  },
+  "debug": {
+    "zones": "Зони",
+    "mask": "Маска",
+    "motion": "Рух",
+    "regions": "Регiони"
+  }
+}

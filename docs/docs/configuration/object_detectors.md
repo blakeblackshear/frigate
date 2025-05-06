@@ -152,7 +152,7 @@ Use this configuration for YOLO-based models. When no custom model path or URL i
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
@@ -185,7 +185,7 @@ For SSD-based models, provide either a model path or URL to your compiled SSD mo
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
@@ -209,7 +209,7 @@ The Hailo detector supports all YOLO models compiled for Hailo hardware that inc
 
 ```yaml
 detectors:
-  hailo8l:
+  hailo:
     type: hailo8l
     device: PCIe
 
@@ -484,7 +484,7 @@ frigate:
 
 ### Configuration Parameters
 
-The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
+The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration_video.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
 
@@ -610,7 +610,7 @@ If the correct build is used for your GPU then the GPU will be detected and used
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp(4/5)` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
 
 :::
 
@@ -659,7 +659,7 @@ YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) model
 
 :::tip
 
-The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well.  See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well. See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
 
 :::
 
@@ -811,7 +811,23 @@ Hardware accelerated object detection is supported on the following SoCs:
 - RK3576
 - RK3588
 
-This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.3.2.
+
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming NPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  rknn_0:
+    type: rknn
+    num_cores: 0
+  rknn_1:
+    type: rknn
+    num_cores: 0
+```
+
+:::
 
 ### Prerequisites
 
@@ -844,14 +860,14 @@ detectors: # required
 
 The inference time was determined on a rk3588 with 3 NPU cores.
 
-| Model               | Size in mb | Inference time in ms |
-| ------------------- | ---------- | -------------------- |
-| deci-fp16-yolonas_s | 24         | 25                   |
-| deci-fp16-yolonas_m | 62         | 35                   |
-| deci-fp16-yolonas_l | 81         | 45                   |
-| yolov9_tiny         | 8          | 35                   |
-| yolox_nano          | 3          | 16                   |
-| yolox_tiny          | 6          | 20                   |
+| Model                 | Size in mb | Inference time in ms |
+| --------------------- | ---------- | -------------------- |
+| deci-fp16-yolonas_s   | 24         | 25                   |
+| deci-fp16-yolonas_m   | 62         | 35                   |
+| deci-fp16-yolonas_l   | 81         | 45                   |
+| frigate-fp16-yolov9-t | 6          | 35                   |
+| rock-i8-yolox_nano    | 3          | 14                   |
+| rock-i8_yolox_tiny    | 6          | 18                   |
 
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
@@ -887,10 +903,13 @@ The pre-trained YOLO-NAS weights from DeciAI are subject to their license and ca
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
   # possible values are:
-  # - yolov9-t
-  # - yolov9-s
+  # - frigate-fp16-yolov9-t
+  # - frigate-fp16-yolov9-s
+  # - frigate-fp16-yolov9-m
+  # - frigate-fp16-yolov9-c
+  # - frigate-fp16-yolov9-e
   # your yolo_model.rknn
-  path: /config/model_cache/rknn_cache/yolov9-t.rknn
+  path: frigate-fp16-yolov9-t
   model_type: yolo-generic
   width: 320
   height: 320
@@ -905,10 +924,12 @@ model: # required
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
   # possible values are:
-  # - yolox_nano
-  # - yolox_tiny
+  # - rock-i8-yolox_nano
+  # - rock-i8-yolox_tiny
+  # - rock-fp16-yolox_nano
+  # - rock-fp16-yolox_tiny
   # your yolox_model.rknn
-  path: yolox_tiny
+  path: rock-i8-yolox_nano
   model_type: yolox
   width: 416
   height: 416
@@ -948,7 +969,7 @@ Explanation of the paramters:
   - `soc`: the SoC this model was build for (e.g. "rk3588")
   - `tk_version`: Version of `rknn-toolkit2` (e.g. "2.3.0")
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
-- `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.0/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.0_EN.pdf).
+- `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.2_EN.pdf).
 
 # Models
 

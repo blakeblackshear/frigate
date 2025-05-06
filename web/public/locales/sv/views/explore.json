@@ -3,7 +3,7 @@
   "documentTitle": "Utforska - Frigate",
   "exploreIsUnavailable": {
     "embeddingsReindexing": {
-      "startingUp": "Startar upp...",
+      "startingUp": "Startar upp…",
       "estimatedTime": "Beräknad återstående tid:",
       "finishingShortly": "Snart klar"
     },

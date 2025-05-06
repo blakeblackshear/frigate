@@ -2,7 +2,7 @@
   "generativeAI": "IA Generativa",
   "exploreIsUnavailable": {
     "embeddingsReindexing": {
-      "startingUp": "Iniciando...",
+      "startingUp": "Iniciando…",
       "estimatedTime": "Tempo restante estimado:",
       "finishingShortly": "Terminando em breve",
       "step": {

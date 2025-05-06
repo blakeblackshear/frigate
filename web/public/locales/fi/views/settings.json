@@ -2,7 +2,7 @@
   "documentTitle": {
     "camera": "Kamera-asetukset - Frigate",
     "classification": "Klassifiointiasetukset - Frigate",
-    "masksAndZones": "Maski ja aluemuokkain - Frigate",
+    "masksAndZones": "Peite ja vyöhykemuokkain - Frigate",
     "motionTuner": "Liikesäädin - Frigate",
     "default": "Asetukset - Frigate",
     "general": "Yleiset asetukset - Frigate",
@@ -135,6 +135,11 @@
     "toast": {
       "success": "Klassifiointiasetukset on tallennettu. Käynnistä Frigate uudelleen saadaksesi ne käyttöön.",
       "error": "Konfiguraatio muutoksia ei voitu tallentaa: {{errorMessage}}"
+    },
+    "restart_required": "Tarvitaan uudelleenkäynnistys (luokitusasetuksia muutettu)",
+    "birdClassification": {
+      "title": "Lintujen luokittelu",
+      "desc": "Lintujen luokittelu tunnistaa tunnetut linnut kvantisoidun Tensorflow-mallin avulla. Kun tunnettu lintu tunnistetaan, sen yleinen nimi lisätään alitunnisteena. Tämä tieto sisältyy käyttöliittymään, suodattimiin ja ilmoituksiin."
     }
   },
   "camera": {
@@ -152,24 +157,27 @@
     "reviewClassification": {
       "title": "Katseluiden klassifiointi",
       "readTheDocumentation": "Lue dokumentaatio",
-      "noDefinedZones": "Tälle kameralle ei ole määritelty alueita.",
-      "objectAlertsTips": "Kaikki {{alertsLabels}} objektit lähteelle {{cameraName}} näytetään Hälytyksinä.",
+      "noDefinedZones": "Tälle kameralle ei ole määritelty vyöhykkeitä.",
+      "objectAlertsTips": "Kaikki {{alertsLabels}} objektit lähteelle {{cameraName}} näytetään hälytyksinä.",
       "zoneObjectAlertsTips": "Kaikki {{alertsLabels}} objektit jotka tunnistetaan alueella {{zone}} lähteessä {{cameraName}} näytetään Hälytyksinä.",
-      "objectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden alueesta huolimatta.",
+      "objectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden vyöhykkeestä huolimatta.",
       "zoneObjectDetectionsTips": {
-        "text": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu alueella {{zone}} lähteessä {{cameraName}} näytetään Tunnistuksina.",
-        "notSelectDetections": "Kaikki {{detectionsLabels}} objektit jotka tunnistetaan alueella {{zone}} lähteessä {{cameraName}}, joita ei ole kategorisoitu Hälytyksiksi näytetään Tunnistuksina niiden alueesta huolimatta.",
-        "regardlessOfZoneObjectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden alueesta huolimatta."
+        "text": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu vyöhykkeellä {{zone}} lähteessä {{cameraName}} näytetään Tunnistuksina.",
+        "notSelectDetections": "Kaikki {{detectionsLabels}} objektit jotka tunnistetaan vyöhykkeellä {{zone}} lähteessä {{cameraName}}, joita ei ole kategorisoitu Hälytyksiksi näytetään Tunnistuksina niiden vyöhykkeestä huolimatta.",
+        "regardlessOfZoneObjectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden vyöhykkeestä huolimatta."
       },
-      "selectAlertsZones": "Valitse alueet Hälytystä varten",
+      "selectAlertsZones": "Valitse vyöhykkeet Hälytystä varten",
       "desc": "Frigate kategorisoi tahtumia Hälytyksiksi ja Tunnistuksiksi. Vakiona kaikki <em>henkilö</em> sekä <em>ajoneuvo</em> objektit käsitellään Hälytyksinä. Voit kategorisoida uudelleen katseltavat tapahtumat antamalla niille vaaditut alueet.",
-      "limitDetections": "Rajoita tunnistukset tiettyihin alueisiin",
-      "selectDetectionsZones": "Valitse alueet Tunnistusta varten"
+      "limitDetections": "Rajoita tunnistukset tiettyihin vyöhykkeisiin",
+      "selectDetectionsZones": "Valitse vyöhykkeet tunnistusta varten",
+      "toast": {
+        "success": "Luokittelumäärityksen tarkistus on tallennettu. Käynnistä Frigate uudelleen muutosten käyttöönottamiseksi."
+      }
     }
   },
   "masksAndZones": {
     "filter": {
-      "all": "Kaikki maskit ja alueet"
+      "all": "Kaikki peitteet ja vyöhykkeet"
     },
     "form": {
       "polygonDrawing": {
@@ -195,7 +203,7 @@
           "mustBeAtLeastTwoCharacters": "Alueen nimen tulee olla vähintään 2 merkin pituinen.",
           "alreadyExists": "Tämän niminen alue on jo olemassa.",
           "mustNotContainPeriod": "Alueen nimessä ei saa olla pisteitä.",
-          "hasIllegalCharacter": "Alueen nimessä on kiellettyjä merkkejä.",
+          "hasIllegalCharacter": "Vyöhykkeen nimessä on kiellettyjä merkkejä.",
           "mustNotBeSameWithCamera": "Alueen nimi ei saa olla sama kuin kameran nimi."
         }
       },
@@ -217,8 +225,52 @@
       }
     },
     "zones": {
-      "label": "Alueet",
-      "documentTitle": "Muokkaa alueita - Frigate"
+      "label": "Vyöhykkeet",
+      "documentTitle": "Muokkaa vyöhykkeitä - Frigate",
+      "edit": "Myokkaa vyöhykettä",
+      "inertia": {
+        "title": "Inertia",
+        "desc": "Määrittää, kuinka monta kehystä objektin on oltava vyöhykkeellä, ennen kuin se lasketaan vyöhykkeeksi. <em>Oletus: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Oleskeluaika",
+        "desc": "Asettaa vähimmäisajan sekunteina, jonka objektin on oltava vyöhykkeellä, jotta se aktivoituu. <em>Oletus: 0</em>"
+      },
+      "objects": {
+        "title": "Kohteet",
+        "desc": "Luettelo tähän vyöhykkeeseen liittyvistä kohteista."
+      },
+      "desc": {
+        "title": "Vyöhykkeiden avulla voit määrittää tietyn alueen kuvassa, jotta voit selvittää, onko kohde kyseisellä alueella.",
+        "documentation": "Dokumentaatio"
+      },
+      "add": "Lisää vyöhyke",
+      "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan.",
+      "name": {
+        "title": "Nimi",
+        "inputPlaceHolder": "Anna nimi…",
+        "tips": "Nimen on oltava vähintään kaksi merkkiä pitkä, eikä se saa olla kameran tai toisen vyöhykkeen nimi."
+      },
+      "point_one": "{{count}} piste",
+      "point_other": "{{count}} pisteet",
+      "allObjects": "Kaikki kohteet",
+      "speedEstimation": {
+        "title": "Nopeuden arviointi",
+        "desc": "Ota käyttöön nopeuden arviointi tällä vyöhykkeellä oleville kohteille. Sillä on oltava täsmälleen 4 pistettä."
+      },
+      "speedThreshold": {
+        "title": "Nopeuskynnys ({{unit}})",
+        "desc": "Määrittää kohteiden vähimmäisnopeuden, joka otetaan huomioon tässä vyöhykkeessä.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Nopeuden arviointi on poistettu käytöstä tällä vyöhykkeellä. Vyöhykkeillä joilla on nopeuden arviointi, on oltava täsmälleen 4 pistettä.",
+            "loiteringTimeError": "Vyöhykkeitä, joiden oleskeluajat ovat yli 0, ei tule käyttää nopeuden arvioinnissa."
+          }
+        }
+      },
+      "toast": {
+        "success": "Vyöhyke ({{zoneName}}) on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+      }
     },
     "toast": {
       "error": {
@@ -227,6 +279,150 @@
       "success": {
         "copyCoordinates": "{{polyName}} - koordinaatit kopioitu leikepöydälle."
       }
+    },
+    "restart_required": "Uudelleenkäynnistys vaaditaan (peitteitä/vyöhykeitä muutettu)",
+    "motionMasks": {
+      "point_one": "{{count}} piste",
+      "point_other": "{{count}} pisteet",
+      "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan.",
+      "label": "Liikepeitto",
+      "context": {
+        "documentation": "Lue dokumentaatio",
+        "title": "Liikepeittoja käytetään estämään ei-toivottujen liiketyyppien (esimerkiksi puiden oksat, kameroiden aikaleimat) aiheuttamat tunnistukset. Liikepeittoja tulisi käyttää <em>hyvin säästeliäästi</em>, sillä liiallinen maskaus vaikeuttaa kohteiden seurantaa."
+      },
+      "documentTitle": "Muokkaa liikepeittoa - Frigate",
+      "desc": {
+        "title": "Liikepeittoa käytetään estämään ei-toivottujen liiketyyppien aiheuttamat tunnistukset. Liiallinen peittäminen vaikeuttaa kohteiden seurantaa.",
+        "documentation": "Dokumentaatio"
+      },
+      "add": "Uusi liikepeitto",
+      "edit": "Muokkaa liikepeittoa",
+      "polygonAreaTooLarge": {
+        "title": "Liikepeitto peittää {{polygonArea}}% kameran kuvasta. Suuria liikemaskeja ei suositella.",
+        "tips": "Liikepeitto eivät estä kohteiden havaitsemista. Sinun tulisi sen sijaan käyttää vaadittua vyöhykettä.",
+        "documentation": "Lue dokumentaatio"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi.",
+          "noName": "Liikepeitto on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+        }
+      }
+    },
+    "objectMasks": {
+      "point_one": "{{count}} piste",
+      "point_other": "{{count}} pisteet",
+      "label": "Kohdepeitot",
+      "context": "Objektisuodatinpeittoja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
+      "objects": {
+        "title": "Kohteet",
+        "desc": "Kohdetyyppi, jota käytetään tähän kohdepeittoon.",
+        "allObjectTypes": "Kaikki kohdetyypit"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi.",
+          "noName": "Kohdepeitto on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+        }
+      },
+      "documentTitle": "Muokkaa kohdepeittoa - Frigate",
+      "desc": {
+        "title": "Objektisuodatinpeittoja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
+        "documentation": "Dokumentaatio"
+      },
+      "add": "Lisää kohdepeitto",
+      "edit": "Muokkaa kohdepeittoa",
+      "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan."
+    }
+  },
+  "debug": {
+    "regions": {
+      "title": "Alueet",
+      "desc": "Näytä kohdeilmaisimelle lähetetyn kiinnostuksen kohteena olevan alueen laatikko",
+      "tips": "<p><strong>Aluelaatikot</strong></p><br><p>Kirkkaanvihreät laatikot peittävät kuvassa olevat kiinnostavat alueet, jotka lähetetään objektinilmaisimelle.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Objektin muodon suodattimen piirtäminen",
+      "desc": "Piirrä kuvaan suorakulmio nähdäksesi pinta-alan ja kuvasuhteen tiedot",
+      "document": "Lue dokumentaatio ",
+      "score": "Pisteet",
+      "ratio": "Suhde",
+      "area": "Alue",
+      "tips": "Ota tämä asetus käyttöön piirtääksesi kamerakuvaan suorakulmion, joka näyttää sen pinta-alan ja suhteen. Näitä arvoja voidaan sitten käyttää objektin muodon suodatusparametrien asettamiseen asetuksissasi."
+    },
+    "timestamp": {
+      "title": "Aikaleima",
+      "desc": "Lisää aikaleima kuvan päälle"
+    },
+    "noObjects": "Ei kohteita",
+    "zones": {
+      "title": "Vyöhykkeet",
+      "desc": "Näytä määriteltyjen vyöhykkeiden ääriviivat"
+    },
+    "boundingBoxes": {
+      "colors": {
+        "info": "<li>Käynnistettäessä kullekin kohteen merkinnälle määritetään eri värit</li><li>Tummansininen ohut viiva osoittaa, että kohdetta ei ole havaittu tällä hetkellä</li><li>Harmaa ohut viiva osoittaa, että kohde on havaittu paikallaan olevaksi</li><li>Paksu viiva osoittaa, että kohde on automaattisen seurannan kohteena (kun se on käytössä)</li>"
+      }
+    },
+    "mask": {
+      "title": "Liikepeitot",
+      "desc": "Näytä liikepeiton monikulmiot"
+    },
+    "motion": {
+      "title": "Liikelaatikot",
+      "desc": "Näytä laatikot alueiden ympärillä, joilla liikettä havaitaan",
+      "tips": "<p><strong>Liikelaatikot</strong></p><br><p>Punaiset laatikot peittävät ruudun alueet, joilla liikettä havaitaan parhaillaan.</p>"
+    }
+  },
+  "users": {
+    "title": "Käyttäjät",
+    "management": {
+      "title": "Käyttäjien hallinta",
+      "desc": "Hallinnoi tämän Frigate-instanssin käyttäjätilejä."
+    },
+    "addUser": "Lisää käyttäjä",
+    "updatePassword": "Päivitä salasana",
+    "toast": {
+      "success": {
+        "roleUpdated": "Rooli päivitetty käyttäjälle {{user}}",
+        "createUser": "Käyttäjä {{user}} luotu onnistuneesti",
+        "deleteUser": "Käyttäjä {{user}} poistettu onnistuneesti",
+        "updatePassword": "Salasana päivitetty onnistuneesti."
+      },
+      "error": {
+        "setPasswordFailed": "Salasanan tallentaminen epäonnistui: {{errorMessage}}",
+        "createUserFailed": "Käyttäjän luonti epäonnistui: {{errorMessage}}",
+        "roleUpdateFailed": "Roolin päivittäminen epäonnistui: {{errorMessage}}",
+        "deleteUserFailed": "Käyttäjän poisto epäonistui: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Käyttäjänimi",
+      "actions": "Toiminnot",
+      "noUsers": "Käyttäjiä ei löytynyt.",
+      "changeRole": "Vaihda käyttäjäroolia",
+      "password": "Salasana",
+      "deleteUser": "Poista tili",
+      "role": "Rooli"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "desc": "Vain kirjaimet, numerot, pisteet ja alaviivat sallitaan.",
+          "placeholder": "Syötä käyttäjätunnus",
+          "title": "Käyttäjätunnus"
+        }
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Liiketunnistuksen säätäminen",
+    "desc": {
+      "title": "Frigate käyttää liiketunnistusta ensimmäisenä tarkistuksena nähdäkseen, tapahtuuko kuvassa jotain, mikä kannattaisi tarkistaa objektitunnistuksella.",
+      "documentation": "Lue liikkeensäädön opas"
+    },
+    "Threshold": {
+      "title": "Kynnys"
     }
   }
 }

@@ -41,7 +41,7 @@
     "validation": {
       "selectImage": "Selecione um arquivo de imagem."
     },
-    "dropActive": "Solte a imagem aqui...",
+    "dropActive": "Solte a imagem aqui…",
     "maxSize": "Tamanho máximo: {{size}}MB",
     "dropInstructions": "Arraste e solte uma imagem aqui ou clique para selecionar"
   },

@@ -7,7 +7,7 @@
       "estimatedTime": "Temps restant estimé :",
       "finishingShortly": "Termine bientôt",
       "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée.",
-      "startingUp": "Démarrage...",
+      "startingUp": "Démarrage…",
       "step": {
         "thumbnailsEmbedded": "Vignettes intégrées : ",
         "descriptionsEmbedded": "Descriptions intégrées : ",
@@ -124,7 +124,12 @@
       "gone": "{{label}} parti",
       "heard": "{{label}} entendu",
       "external": "{{label}} détecté",
-      "active": "{{label}} est devenu actif"
+      "active": "{{label}} est devenu actif",
+      "header": {
+        "zones": "Zones",
+        "area": "Aire",
+        "ratio": "Ratio"
+      }
     },
     "annotationSettings": {
       "title": "Paramètres d'annotation",

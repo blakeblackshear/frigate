@@ -187,7 +187,11 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay open={isOpen} onOpenChange={handleOpenChange}>
+    <Overlay
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      enableHistoryBack={true}
+    >
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",
@@ -792,7 +796,7 @@ function ObjectDetailsTab({
               {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>
           </div>
-          {snapScore && (
+          {snapScore != undefined && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
                 <div className="flex flex-row items-center gap-1">
@@ -1163,9 +1167,9 @@ export function ObjectSnapshotTab({
                                 ns="components/dialog"
                                 values={{
                                   untranslatedLabel: search?.label,
-                                  translatedLabel: t(
-                                    "filter.label." + search?.label,
-                                  ),
+                                  translatedLabel: t(search?.label, {
+                                    ns: "objects",
+                                  }),
                                 }}
                               >
                                 explore.plus.review.question.ask_full

@@ -94,7 +94,7 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
         default=500, title="Min area of face box to consider running face recognition."
     )
 
-    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
@@ -168,4 +168,4 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         le=10,
     )
 
-    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
