@@ -24,11 +24,9 @@
 - 通过RTSP重新流传输以减少摄像头的连接数
 - 支持WebRTC和MSE，实现低延迟的实时观看
 
-## 文档（英文）
+## 社区中文翻译文档
 
-你可以在这里查看文档 https://docs.frigate.video
-
-文档还暂时没有提供翻译，将会在未来提供。
+你可以在这里查看文档 https://docs.frigate-cn.video
 
 ## 赞助
 
@@ -60,5 +58,7 @@
 ## 翻译
 我们使用 [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) 平台提供翻译支持，欢迎参与进来一起完善。
 
-## 中文讨论社区
-欢迎加入非官方中文讨论QQ群：1043861059
+
+## 非官方中文讨论社区
+欢迎加入中文讨论QQ群：1043861059
+Bilibili：https://space.bilibili.com/3546894915602564

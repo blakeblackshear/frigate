@@ -19,14 +19,11 @@ const config: Config = {
   },
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh'],
+    locales: ['en'],
     localeConfigs: {
       en: {
         label: 'English',
-      },
-      zh: {
-        label: '简体中文',
-      },
+      }
     },
   },
   themeConfig: {
@@ -97,6 +94,12 @@ const config: Config = {
         {
           type: 'localeDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              label: '简体中文',
+              href: 'https://docs.frigate-cn.video',
+            }
+          ]
         },
         {
           href: 'https://github.com/blakeblackshear/frigate',
