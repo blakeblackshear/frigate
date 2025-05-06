@@ -261,14 +261,14 @@ def auth(request: Request):
 
         role_header = proxy_config.header_map.role
         role = (
-            request.headers.get(role_header, default="viewer")
+            request.headers.get(role_header, default=proxy_config.default_role)
             if role_header
-            else "viewer"
+            else proxy_config.default_role
         )
 
-        # if comma-separated with "admin", use "admin", else "viewer"
+        # if comma-separated with "admin", use "admin", else use default role
         success_response.headers["remote-role"] = (
-            "admin" if role and "admin" in role else "viewer"
+            "admin" if role and "admin" in role else proxy_config.default_role
         )
 
         return success_response

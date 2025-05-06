@@ -33,5 +33,6 @@
   },
   "selected_one": "{{count}} selected",
   "selected_other": "{{count}} selected",
-  "camera": "Camera"
+  "camera": "Camera",
+  "detected": "detected"
 }

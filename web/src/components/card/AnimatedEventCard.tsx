@@ -229,7 +229,7 @@ export function AnimatedEventCard({
           .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
           .sort()
           .join(", ")
-          .replaceAll("-verified", "")} detected`}
+          .replaceAll("-verified", "")} ` + t("detected")}
       </TooltipContent>
     </Tooltip>
   );

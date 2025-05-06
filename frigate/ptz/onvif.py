@@ -74,7 +74,7 @@ class OnvifController:
                 "features": [],
                 "presets": {},
             }
-        except ONVIFError as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.error(f"Failed to create ONVIF camera instance for {cam_name}: {e}")
             # track initial failures
             self.failed_cams[cam_name] = {
@@ -100,7 +100,7 @@ class OnvifController:
             # this will fire an exception if camera is not a ptz
             capabilities = onvif.get_definition("ptz")
             logger.debug(f"Onvif capabilities for {camera_name}: {capabilities}")
-        except (ONVIFError, Fault, TransportError) as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.error(
                 f"Unable to get Onvif capabilities for camera: {camera_name}: {e}"
             )
@@ -109,7 +109,7 @@ class OnvifController:
         try:
             profiles = await media.GetProfiles()
             logger.debug(f"Onvif profiles for {camera_name}: {profiles}")
-        except (ONVIFError, Fault, TransportError) as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.error(
                 f"Unable to get Onvif media profiles for camera: {camera_name}: {e}"
             )
@@ -263,7 +263,7 @@ class OnvifController:
         # setup existing presets
         try:
             presets: list[dict] = await ptz.GetPresets({"ProfileToken": profile.token})
-        except ONVIFError as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.warning(f"Unable to get presets from camera: {camera_name}: {e}")
             presets = []
 
@@ -392,7 +392,7 @@ class OnvifController:
 
         try:
             asyncio.run(self.cams[camera_name]["ptz"].ContinuousMove(move_request))
-        except ONVIFError as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.warning(f"Onvif sending move request to {camera_name} failed: {e}")
 
     def _move_relative(self, camera_name: str, pan, tilt, zoom, speed) -> None:
@@ -593,7 +593,7 @@ class OnvifController:
                 self._zoom(camera_name, command)
             else:
                 self._move(camera_name, command)
-        except ONVIFError as e:
+        except (Fault, ONVIFError, TransportError, Exception) as e:
             logger.error(f"Unable to handle onvif command: {e}")
 
     async def get_camera_info(self, camera_name: str) -> dict[str, any]:

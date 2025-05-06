@@ -1167,9 +1167,9 @@ export function ObjectSnapshotTab({
                                 ns="components/dialog"
                                 values={{
                                   untranslatedLabel: search?.label,
-                                  translatedLabel: t(
-                                    "filter.label." + search?.label,
-                                  ),
+                                  translatedLabel: t(search?.label, {
+                                    ns: "objects",
+                                  }),
                                 }}
                               >
                                 explore.plus.review.question.ask_full
