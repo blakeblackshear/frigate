@@ -96,7 +96,7 @@ const config: Config = {
           position: 'right',
           dropdownItemsAfter: [
             {
-              label: '简体中文',
+              label: '简体中文（社区翻译）',
               href: 'https://docs.frigate-cn.video',
             }
           ]
