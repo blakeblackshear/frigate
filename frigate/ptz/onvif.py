@@ -609,21 +609,21 @@ class OnvifController:
             )
             return {}
 
-        if camera_name not in self.cams and (
+        if camera_name not in self.cams.keys() and (
             camera_name not in self.config.cameras
             or not self.config.cameras[camera_name].onvif.host
         ):
             logger.debug(f"ONVIF is not configured for {camera_name}")
             return {}
 
-        if camera_name in self.cams and self.cams[camera_name]["init"]:
+        if camera_name in self.cams.keys() and self.cams[camera_name]["init"]:
             return {
                 "name": camera_name,
                 "features": self.cams[camera_name]["features"],
                 "presets": list(self.cams[camera_name]["presets"].keys()),
             }
 
-        if camera_name not in self.cams and camera_name in self.config.cameras:
+        if camera_name not in self.cams.keys() and camera_name in self.config.cameras:
             cam = self.config.cameras[camera_name]
             result = self._create_onvif_camera(camera_name, cam)
             if result:
