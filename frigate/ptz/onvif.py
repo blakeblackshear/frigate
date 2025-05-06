@@ -48,7 +48,7 @@ class OnvifController:
         self.ptz_metrics = ptz_metrics
 
         # Create a dedicated event loop and run it in a separate thread
-        self.loop = asyncio.new_event_loop()
+        self.loop = asyncio.get_event_loop()
         self.loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
         self.loop_thread.start()
 
@@ -63,7 +63,7 @@ class OnvifController:
 
     def _run_event_loop(self) -> None:
         """Run the event loop in a separate thread."""
-        asyncio.set_event_loop(self.loop)
+        # asyncio.set_event_loop(self.loop)
         try:
             self.loop.run_forever()
         except Exception as e:
