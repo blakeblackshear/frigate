@@ -70,33 +70,49 @@ class OnvifController:
             logger.error(f"Onvif event loop terminated unexpectedly: {e}")
 
     async def _init_cameras(self) -> None:
-        """Create an ONVIF camera instance and handle failures."""
-        for cam_name, cam in self.camera_configs.items():
-            try:
-                self.cams[cam_name] = {
-                    "onvif": ONVIFCamera(
-                        cam.onvif.host,
-                        cam.onvif.port,
-                        cam.onvif.user,
-                        cam.onvif.password,
-                        wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
-                        adjust_time=cam.onvif.ignore_time_mismatch,
-                        encrypt=not cam.onvif.tls_insecure,
-                    ),
-                    "init": False,
-                    "active": False,
-                    "features": [],
-                    "presets": {},
-                }
-            except (Fault, ONVIFError, Exception, TransportError) as e:
-                logger.error(
-                    f"Failed to create ONVIF camera instance for {cam_name}: {e}"
-                )
-                self.failed_cams[cam_name] = {
-                    "retry_attempts": 0,
-                    "last_error": str(e),
-                    "last_attempt": time.time(),
-                }
+        """Initialize all configured cameras."""
+        for cam_name in self.camera_configs:
+            await self._init_single_camera(cam_name)
+
+    async def _init_single_camera(self, cam_name: str) -> bool:
+        """Initialize a single camera by name.
+
+        Args:
+            cam_name: The name of the camera to initialize
+
+        Returns:
+            bool: True if initialization succeeded, False otherwise
+        """
+        if cam_name not in self.camera_configs:
+            logger.error(f"No configuration found for camera {cam_name}")
+            return False
+
+        cam = self.camera_configs[cam_name]
+        try:
+            self.cams[cam_name] = {
+                "onvif": ONVIFCamera(
+                    cam.onvif.host,
+                    cam.onvif.port,
+                    cam.onvif.user,
+                    cam.onvif.password,
+                    wsdl_dir=str(Path(find_spec("onvif").origin).parent / "wsdl"),
+                    adjust_time=cam.onvif.ignore_time_mismatch,
+                    encrypt=not cam.onvif.tls_insecure,
+                ),
+                "init": False,
+                "active": False,
+                "features": [],
+                "presets": {},
+            }
+            return True
+        except (Fault, ONVIFError, TransportError, Exception) as e:
+            logger.error(f"Failed to create ONVIF camera instance for {cam_name}: {e}")
+            self.failed_cams[cam_name] = {
+                "retry_attempts": 0,
+                "last_error": str(e),
+                "last_attempt": time.time(),
+            }
+            return False
 
     async def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
@@ -654,26 +670,23 @@ class OnvifController:
             )
             return {}
 
-        if camera_name not in self.cams and (
+        if camera_name not in self.cams.keys() and (
             camera_name not in self.config.cameras
             or not self.config.cameras[camera_name].onvif.host
         ):
             logger.debug(f"ONVIF is not configured for {camera_name}")
             return {}
 
-        if camera_name in self.cams and self.cams[camera_name]["init"]:
+        if camera_name in self.cams.keys() and self.cams[camera_name]["init"]:
             return {
                 "name": camera_name,
                 "features": self.cams[camera_name]["features"],
                 "presets": list(self.cams[camera_name]["presets"].keys()),
             }
 
-        if camera_name not in self.cams and camera_name in self.config.cameras:
-            cam = self.config.cameras[camera_name]
-            result = self._create_onvif_camera(camera_name, cam)
-            if result:
-                self.cams[camera_name] = result
-            else:
+        if camera_name not in self.cams.keys() and camera_name in self.config.cameras:
+            success = await self._init_single_camera(camera_name)
+            if not success:
                 return {}
 
         # Reset retry count after timeout
