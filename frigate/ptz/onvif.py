@@ -580,6 +580,12 @@ class OnvifController:
     ) -> None:
         """Handle ONVIF commands asynchronously"""
         # logger.debug(f"handling async: {camera_name}, {command}, {param}")
+        current_loop = asyncio.get_running_loop()
+        expected_loop = self.loop
+        if current_loop is not expected_loop:
+            logger.error(
+                f"Wrong event loop in _move! Expected {expected_loop}, got {current_loop}"
+            )
         if camera_name not in self.cams.keys():
             logger.error(f"ONVIF is not configured for {camera_name}")
             return
