@@ -78,16 +78,19 @@ proxy:
   # Optional: Mapping for headers from upstream proxies. Only used if Frigate's auth
   # is disabled.
   # NOTE: Many authentication proxies pass a header downstream with the authenticated
-  #       user name. Not all values are supported. It must be a whitelisted header.
+  #       user name and role. Not all values are supported. It must be a whitelisted header.
   #       See the docs for more info.
   header_map:
     user: x-forwarded-user
+    role: x-forwarded-role
   # Optional: Url for logging out a user. This sets the location of the logout url in
   # the UI.
   logout_url: /api/logout
   # Optional: Auth secret that is checked against the X-Proxy-Secret header sent from
   # the proxy. If not set, all requests are trusted regardless of origin.
   auth_secret: None
+  # Optional: The default role to use for proxy auth. Must be "admin" or "viewer"
+  default_role: viewer
 
 # Optional: Authentication configuration
 auth:

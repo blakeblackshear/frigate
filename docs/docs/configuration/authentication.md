@@ -109,6 +109,14 @@ proxy:
 
 Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
 
+A default role can be provided. Any value in the mapped `role` header will override the default.
+
+```yaml
+proxy:
+  ...
+  default_role: viewer
+```
+
 #### Port Considerations
 
 **Authenticated Port (8971)**
