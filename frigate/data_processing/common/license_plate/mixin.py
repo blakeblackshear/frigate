@@ -1297,6 +1297,10 @@ class LicensePlateProcessingMixin:
                     return
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+
+                # apply motion mask
+                rgb[self.config.cameras[camera].motion.mask == 0] = [0, 0, 0]
+
                 left, top, right, bottom = car_box
                 car = rgb[top:bottom, left:right]
 
