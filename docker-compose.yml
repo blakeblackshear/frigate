@@ -26,16 +26,24 @@ services:
       YOLO_MODELS: ""
     devices:
       - /dev/bus/usb:/dev/bus/usb
-      # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - .:/workspace/frigate:cached
       - ./web/dist:/opt/frigate/web:cached
       - /etc/localtime:/etc/localtime:ro
       - ./config:/config
       - ./debug:/media/frigate
-      - /dev/bus/usb:/dev/bus/usb
+      - ./model:/zoo
+      - ./test_short.mp4:/testing/test_short.mp4
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6
     ports:
       - "1883:1883"
+  degirum_detector:
+    container_name: degirum
+    image: degirum/aiserver:latest
+    privileged: true
+    ports:
+      - "8778:8778"
+
