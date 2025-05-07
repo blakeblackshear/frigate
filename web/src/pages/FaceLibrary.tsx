@@ -244,26 +244,29 @@ export default function FaceLibrary() {
 
   // keyboard
 
-  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  useKeyboardListener(
+    page === "train" ? ["a", "Escape"] : [],
+    (key, modifiers) => {
+      if (modifiers.repeat || !modifiers.down) {
+        return;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          if (selectedFaces.length) {
-            setSelectedFaces([]);
-          } else {
-            setSelectedFaces([...trainImages]);
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl) {
+            if (selectedFaces.length) {
+              setSelectedFaces([]);
+            } else {
+              setSelectedFaces([...trainImages]);
+            }
           }
-        }
-        break;
-      case "Escape":
-        setSelectedFaces([]);
-        break;
-    }
-  });
+          break;
+        case "Escape":
+          setSelectedFaces([]);
+          break;
+      }
+    },
+  );
 
   if (!config) {
     return <ActivityIndicator />;
