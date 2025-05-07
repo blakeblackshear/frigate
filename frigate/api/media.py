@@ -541,7 +541,10 @@ def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
+    description="For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.",
+)
 def recording_clip(
     request: Request,
     camera_name: str,

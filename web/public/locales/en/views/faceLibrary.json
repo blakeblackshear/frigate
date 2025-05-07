@@ -29,7 +29,8 @@
   },
   "train": {
     "title": "Train",
-    "aria": "Select train"
+    "aria": "Select train",
+    "empty": "There are no recent face recognition attempts"
   },
   "selectItem": "Select {{item}}",
   "selectFace": "Select Face",

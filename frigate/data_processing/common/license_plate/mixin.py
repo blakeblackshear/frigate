@@ -79,7 +79,12 @@ class LicensePlateProcessingMixin:
                 resized_image,
             )
 
-        outputs = self.model_runner.detection_model([normalized_image])[0]
+        try:
+            outputs = self.model_runner.detection_model([normalized_image])[0]
+        except Exception as e:
+            logger.warning(f"Error running LPR box detection model: {e}")
+            return []
+
         outputs = outputs[0, :, :]
 
         if False:
@@ -115,7 +120,11 @@ class LicensePlateProcessingMixin:
                 norm_img = norm_img[np.newaxis, :]
                 norm_images.append(norm_img)
 
-        outputs = self.model_runner.classification_model(norm_images)
+        try:
+            outputs = self.model_runner.classification_model(norm_images)
+        except Exception as e:
+            logger.warning(f"Error running LPR classification model: {e}")
+            return
 
         return self._process_classification_output(images, outputs)
 
@@ -152,7 +161,10 @@ class LicensePlateProcessingMixin:
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
 
-        outputs = self.model_runner.recognition_model(norm_images)
+        try:
+            outputs = self.model_runner.recognition_model(norm_images)
+        except Exception as e:
+            logger.warning(f"Error running LPR recognition model: {e}")
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
@@ -968,7 +980,11 @@ class LicensePlateProcessingMixin:
 
         Return the dimensions of the detected plate as [x1, y1, x2, y2].
         """
-        predictions = self.model_runner.yolov9_detection_model(input)
+        try:
+            predictions = self.model_runner.yolov9_detection_model(input)
+        except Exception as e:
+            logger.warning(f"Error running YOLOv9 license plate detection model: {e}")
+            return None
 
         confidence_threshold = self.lpr_config.detection_threshold
 
@@ -1281,6 +1297,10 @@ class LicensePlateProcessingMixin:
                     return
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+
+                # apply motion mask
+                rgb[self.config.cameras[camera].motion.mask == 0] = [0, 0, 0]
+
                 left, top, right, bottom = car_box
                 car = rgb[top:bottom, left:right]
 

@@ -2926,6 +2926,8 @@ paths:
       tags:
         - Media
       summary: Recording Clip
+      description: >-
+        For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.
       operationId: recording_clip__camera_name__start__start_ts__end__end_ts__clip_mp4_get
       parameters:
         - name: camera_name

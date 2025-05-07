@@ -1234,55 +1234,58 @@ export function VideoTab({ search }: VideoTabProps) {
   const source = `${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`;
 
   return (
-    <GenericVideoPlayer source={source}>
-      {reviewItem && (
-        <div
-          className={cn(
-            "absolute top-2 z-10 flex items-center gap-2",
-            isIOS ? "right-8" : "right-2",
-          )}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() => {
-                  if (reviewItem?.id) {
-                    const params = new URLSearchParams({
-                      id: reviewItem.id,
-                    }).toString();
-                    navigate(`/review?${params}`);
-                  }
-                }}
-              >
-                <FaHistory className="size-4 text-white" />
-              </Chip>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("itemMenu.viewInHistory.label")}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                download
-                href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4`}
-              >
-                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                  <FaDownload className="size-4 text-white" />
+    <>
+      <span tabIndex={0} className="sr-only" />
+      <GenericVideoPlayer source={source}>
+        {reviewItem && (
+          <div
+            className={cn(
+              "absolute top-2 z-10 flex items-center gap-2",
+              isIOS ? "right-8" : "right-2",
+            )}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <Chip
+                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  onClick={() => {
+                    if (reviewItem?.id) {
+                      const params = new URLSearchParams({
+                        id: reviewItem.id,
+                      }).toString();
+                      navigate(`/review?${params}`);
+                    }
+                  }}
+                >
+                  <FaHistory className="size-4 text-white" />
                 </Chip>
-              </a>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("button.download", { ns: "common" })}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        </div>
-      )}
-    </GenericVideoPlayer>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>
+                  {t("itemMenu.viewInHistory.label")}
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  download
+                  href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4`}
+                >
+                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                    <FaDownload className="size-4 text-white" />
+                  </Chip>
+                </a>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>
+                  {t("button.download", { ns: "common" })}
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
+          </div>
+        )}
+      </GenericVideoPlayer>
+    </>
   );
 }
