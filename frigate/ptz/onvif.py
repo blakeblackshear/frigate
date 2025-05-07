@@ -271,12 +271,12 @@ class OnvifController:
                     logger.debug(
                         f"{camera_name}: Relative move request after deleting zoom: {move_request}"
                     )
-            except Exception:
+            except Exception as e:
                 self.config.cameras[
                     camera_name
                 ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
                 logger.warning(
-                    f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
+                    f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported. Exception: {e}"
                 )
 
             if move_request.Speed is None:
@@ -326,7 +326,7 @@ class OnvifController:
                     self.cams[camera_name]["relative_zoom_range"] = (
                         ptz_config.Spaces.RelativeZoomTranslationSpace[0]
                     )
-                except Exception:
+                except Exception as e:
                     if (
                         self.config.cameras[camera_name].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
@@ -335,7 +335,7 @@ class OnvifController:
                             camera_name
                         ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
                         logger.warning(
-                            f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
+                            f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported. Exception: {e}"
                         )
 
         if configs.DefaultAbsoluteZoomPositionSpace:
@@ -350,13 +350,13 @@ class OnvifController:
                         ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
                     )
                     self.cams[camera_name]["zoom_limits"] = configs.ZoomLimits
-                except Exception:
+                except Exception as e:
                     if self.config.cameras[camera_name].onvif.autotracking.zooming:
                         self.config.cameras[
                             camera_name
                         ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
                         logger.warning(
-                            f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported"
+                            f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported. Exception: {e}"
                         )
 
         # set relative pan/tilt space for autotracker
@@ -750,9 +750,9 @@ class OnvifController:
 
             # MoveStatus is required for autotracking - should return "true" if supported
             return find_by_key(vars(service_capabilities), "MoveStatus")
-        except Exception:
+        except Exception as e:
             logger.warning(
-                f"Camera {camera_name} does not support the ONVIF GetServiceCapabilities method. Autotracking will not function correctly and must be disabled in your config."
+                f"Camera {camera_name} does not support the ONVIF GetServiceCapabilities method. Autotracking will not function correctly and must be disabled in your config. Exception: {e}"
             )
             return False
 
