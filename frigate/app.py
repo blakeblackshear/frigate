@@ -699,6 +699,10 @@ class FrigateApp:
             self.audio_process.terminate()
             self.audio_process.join()
 
+        # stop the onvif controller
+        if self.onvif_controller:
+            self.onvif_controller.close()
+
         # ensure the capture processes are done
         for camera, metrics in self.camera_metrics.items():
             capture_process = metrics.capture_process
