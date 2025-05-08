@@ -14,7 +14,8 @@ from frigate.config.camera.motion import MotionConfig
 from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.util.image import create_mask
 
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class TestMotionVideo:
@@ -97,10 +98,10 @@ class TestMotion(unittest.TestCase):
             )
             if detectedMotionFrameCount == 0:
                 success = False
-                logging.error(
+                logger.error(
                     f"{test_clip.file_name} No motion detected in range {expected_motion_range[0]}-{expected_motion_range[1]}"
                 )
-        logging.debug(
+        logger.debug(
             f"{detectedMotionFrameCount} out of {expectedMotionFrameCount} motion frames detected ({100 if expectedMotionFrameCount == 0 else round(detectedMotionFrameCount / expectedMotionFrameCount * 100, 2)}%)"
         )
 
@@ -113,7 +114,7 @@ class TestMotion(unittest.TestCase):
                 for x in test_clip.motion_ranges
             ):
                 success = False
-                logging.error(
+                logger.error(
                     f"{test_clip.file_name} Invalid motion detected at frame {motion_frame}"
                 )
             # When calculating accuracy, we take the exact expected motion ranges. For passing the test, we allow for motion to linger a few frames.
@@ -122,7 +123,7 @@ class TestMotion(unittest.TestCase):
                 for x in test_clip.motion_ranges
             ):
                 falsePositiveFrameCount += 1
-        logging.debug(
+        logger.debug(
             f"{falsePositiveFrameCount} invalid motion frames detected ({round((total_frame_count - expectedMotionFrameCount - falsePositiveFrameCount) / (total_frame_count - expectedMotionFrameCount) * 100, 2)}%)"
         )
 
@@ -135,7 +136,7 @@ class TestMotion(unittest.TestCase):
         motion_detector: ImprovedMotionDetector,
         profile: cProfile.Profile,
     ):
-        logging.debug(f"file: {test_clip.file_name}")
+        logger.debug(f"file: {test_clip.file_name}")
         ret, frame = cap.read()
         frame_counter = 1
         motion_frames = []
@@ -167,4 +168,4 @@ class TestMotion(unittest.TestCase):
         pstats.Stats(profile, stream=s).strip_dirs().sort_stats(
             SortKey.CUMULATIVE
         ).print_stats(r"\((?!\_).*\)$", 10)
-        logging.debug(s.getvalue())
+        logger.debug(s.getvalue())

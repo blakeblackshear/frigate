@@ -1,4 +1,4 @@
-"""Peewee migrations -- 029_add_is_calibrating.py.
+"""Peewee migrations -- 031_add_is_calibrating.py.
 
 Some examples (model - class or model name)::
 
