@@ -25,7 +25,7 @@ from frigate.data_processing.common.face.model import (
     FaceRecognizer,
 )
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.builtin import EventsPerSecond
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
 
 from ..types import DataProcessorMetrics
@@ -56,6 +56,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.recognizer: FaceRecognizer | None = None
         self.faces_per_second = EventsPerSecond()
+        self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
 
         download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
         self.model_files = {
@@ -153,9 +154,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def __update_metrics(self, duration: float) -> None:
         self.faces_per_second.update()
-        self.metrics.face_rec_speed.value = (
-            self.metrics.face_rec_speed.value * 9 + duration
-        ) / 10
+        self.inference_speed.update(duration)
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
