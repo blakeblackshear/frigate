@@ -40,12 +40,17 @@
     "title": "Delete Name",
     "desc": "Are you sure you want to delete the collection {{name}}? This will permanently delete all associated faces."
   },
+  "deleteFaceAttempts": {
+    "title": "Delete Faces",
+    "desc_one": "Are you sure you want to delete {{count}} face? This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} faces? This action cannot be undone."
+  },
   "renameFace": {
     "title": "Rename Face",
     "desc": "Enter a new name for {{name}}"
   },
   "button": {
-    "deleteFaceAttempts": "Delete Face Attempts",
+    "deleteFaceAttempts": "Delete Faces",
     "addFace": "Add Face",
     "renameFace": "Rename Face",
     "deleteFace": "Delete Face",
