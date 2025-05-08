@@ -235,7 +235,7 @@ class EmbeddingsContext:
             if os.path.isfile(file_path):
                 os.unlink(file_path)
 
-        if len(os.listdir(folder)) == 0:
+        if face != "train" and len(os.listdir(folder)) == 0:
             os.rmdir(folder)
 
         self.requestor.send_data(
