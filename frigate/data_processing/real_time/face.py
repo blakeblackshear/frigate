@@ -5,9 +5,7 @@ import datetime
 import json
 import logging
 import os
-import random
 import shutil
-import string
 from typing import Optional
 
 import cv2
@@ -343,11 +341,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             return {"success": True, "score": score, "face_name": sub_label}
         elif topic == EmbeddingsRequestEnum.register_face.value:
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
             label = request_data["face_name"]
-            id = f"{label}-{rand_id}"
 
             if request_data.get("cropped"):
                 thumbnail = request_data["image"]
@@ -376,7 +370,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # write face to library
             folder = os.path.join(FACE_DIR, label)
-            file = os.path.join(folder, f"{id}.webp")
+            file = os.path.join(
+                folder, f"{label}_{datetime.datetime.now().timestamp()}.webp"
+            )
             os.makedirs(folder, exist_ok=True)
 
             # save face image
