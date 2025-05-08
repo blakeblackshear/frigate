@@ -324,7 +324,7 @@ export default function MobileReviewSettingsDrawer({
       >
         <DrawerTrigger asChild>
           <Button
-            className="rounded-lg capitalize"
+            className="rounded-lg smart-capitalize"
             aria-label={t("filters")}
             variant={
               filter?.labels || filter?.after || filter?.zones

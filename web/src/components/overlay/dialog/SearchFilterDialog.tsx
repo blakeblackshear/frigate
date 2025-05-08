@@ -462,6 +462,13 @@ export function SubFilterContent({
   setSubLabels,
 }: SubFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
+  const sortedSubLabels = useMemo(
+    () =>
+      [...allSubLabels].sort((a, b) =>
+        a.toLowerCase().localeCompare(b.toLowerCase()),
+      ),
+    [allSubLabels],
+  );
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
@@ -482,7 +489,7 @@ export function SubFilterContent({
         />
       </div>
       <div className="mt-2.5 flex flex-col gap-2.5">
-        {allSubLabels.map((item) => (
+        {sortedSubLabels.map((item) => (
           <FilterSwitch
             key={item}
             label={item.replaceAll("_", " ")}
@@ -919,10 +926,21 @@ export function RecognizedLicensePlatesFilterContent({
     return null;
   }
 
-  const filteredRecognizedLicensePlates =
-    allRecognizedLicensePlates?.filter((id) =>
-      id.toLowerCase().includes(inputValue.toLowerCase()),
-    ) || [];
+  const filterItems = (value: string, search: string) => {
+    if (!search) return 1; // Show all items if no search input
+
+    if (search.includes("*") || search.includes("?")) {
+      const escapedSearch = search
+        .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+        .replace(/\*/g, ".*") // * matches any characters
+        .replace(/\?/g, "."); // ? matches any single character
+      const regex = new RegExp(`^${escapedSearch}$`, "i");
+      return regex.test(value) ? 1 : -1; // 1 for match, -1 for no match
+    }
+
+    // fallback to substring matching if no wildcards
+    return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1;
+  };
 
   return (
     <div className="overflow-x-hidden">
@@ -938,19 +956,22 @@ export function RecognizedLicensePlatesFilterContent({
         </p>
       ) : (
         <>
-          <Command className="border border-input bg-background">
+          <Command
+            className="border border-input bg-background"
+            filter={filterItems}
+          >
             <CommandInput
               placeholder={t("recognizedLicensePlates.placeholder")}
               value={inputValue}
               onValueChange={setInputValue}
             />
             <CommandList className="max-h-[200px] overflow-auto">
-              {filteredRecognizedLicensePlates.length === 0 && inputValue && (
+              {allRecognizedLicensePlates.length > 0 && inputValue && (
                 <CommandEmpty>
                   {t("recognizedLicensePlates.noLicensePlatesFound")}
                 </CommandEmpty>
               )}
-              {filteredRecognizedLicensePlates.map((plate) => (
+              {allRecognizedLicensePlates.map((plate) => (
                 <CommandItem
                   key={plate}
                   value={plate}

@@ -1,0 +1,74 @@
+{
+  "search": "Szukaj",
+  "savedSearches": "Zapisane wyszukiwania",
+  "searchFor": "Szukaj {{inputValue}}",
+  "button": {
+    "clear": "Wyczyść wyszukiwanie",
+    "save": "Zapisz wyszukiwanie",
+    "delete": "Usuń zapisane wyszukiwanie",
+    "filterInformation": "Informacje o filtrze",
+    "filterActive": "Aktywne filtry"
+  },
+  "trackedObjectId": "ID śledzonego obiektu",
+  "filter": {
+    "label": {
+      "cameras": "Kamery",
+      "labels": "Etykiety",
+      "zones": "Strefy",
+      "sub_labels": "Podetykiety",
+      "min_score": "Min. wynik",
+      "max_score": "Maks. wynik",
+      "min_speed": "Min. prędkość",
+      "max_speed": "Maks. prędkość",
+      "recognized_license_plate": "Rozpoznana tablica rejestracyjna",
+      "has_clip": "Posiada klip",
+      "has_snapshot": "Posiada zrzut ekranu",
+      "after": "Po",
+      "search_type": "Typ wyszukiwania",
+      "time_range": "Zakres czasu",
+      "before": "Przed"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Opis"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Data 'przed' musi być późniejsza niż data 'po'.",
+        "afterDatebeEarlierBefore": "Data 'po' musi być wcześniejsza niż data 'przed'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'Min. wynik' musi być mniejszy lub równy 'maks. wynikowi'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'Maks. wynik' musi być większy lub równy 'min. wynikowi'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Min. prędkość' musi być mniejsza lub równa 'maks. prędkości'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'Maks. prędkość' musi być większa lub równa 'min. prędkości'."
+      }
+    },
+    "tips": {
+      "title": "Jak używać filtrów tekstowych",
+      "desc": {
+        "text": "Filtry pomagają zawęzić wyniki wyszukiwania. Oto jak używać ich w polu wejściowym:",
+        "example": "Przykład: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Wpisz nazwę filtra, a następnie dwukropek (np., \"kamery:\").</li><li>Wybierz wartość z sugestii lub wpisz własną.</li><li>Używaj wielu filtrów, dodając je jeden po drugim z odstępem pomiędzy.</li><li>Filtry dat (przed: i po:) używają formatu <em>{{DateFormat}}</em>.</li><li>Filtr zakresu czasu używa formatu <em>{{exampleTime}}</em>.</li><li>Usuwaj filtry klikając 'x' obok nich.</li></ul>",
+        "step2": "Wybierz wartość z sugestii lub wpisz własną.",
+        "step3": "Użyj kilku filtrów dodając jeden po drugim i oddzielając je spacją.",
+        "exampleLabel": "Przykład:",
+        "step1": "Wprowadź nazwę filtra z dwukropkiem (np.: \"cameras:\").",
+        "step4": "Filtry dat (before: i after:) użyj formatu {{DateFormat}}.",
+        "step5": "Filtr zakresu czasu wykorzystuje format {{exampleTime}}.",
+        "step6": "Usuń filtry klikając 'x' obok nich."
+      }
+    },
+    "header": {
+      "currentFilterType": "Wartości filtrów",
+      "noFilters": "Filtry",
+      "activeFilters": "Aktywne filtry"
+    }
+  },
+  "similaritySearch": {
+    "title": "Wyszukiwanie podobieństw",
+    "active": "Wyszukiwanie podobieństw aktywne",
+    "clear": "Wyczyść wyszukiwanie podobieństw"
+  },
+  "placeholder": {
+    "search": "Szukaj…"
+  }
+}

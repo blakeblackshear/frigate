@@ -5,7 +5,7 @@
     "title": "Explore is Unavailable",
     "embeddingsReindexing": {
       "context": "Explore can be used after tracked object embeddings have finished reindexing.",
-      "startingUp": "Starting up...",
+      "startingUp": "Starting up…",
       "estimatedTime": "Estimated time remaining:",
       "finishingShortly": "Finishing shortly",
       "step": {
@@ -54,7 +54,12 @@
       },
       "gone": "{{label}} left",
       "heard": "{{label}} heard",
-      "external": "{{label}} detected"
+      "external": "{{label}} detected",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Ratio",
+        "area": "Area"
+      }
     },
     "annotationSettings": {
       "title": "Annotation Settings",
@@ -91,11 +96,13 @@
       "toast": {
         "success": {
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
-          "updatedSublabel": "Successfully updated sub label."
+          "updatedSublabel": "Successfully updated sub label.",
+          "updatedLPR": "Successfully updated license plate."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
-          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}"
+          "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
+          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}"
         }
       }
     },
@@ -105,10 +112,19 @@
       "desc": "Enter a new sub label for this {{label}}",
       "descNoLabel": "Enter a new sub label for this tracked object"
     },
+    "editLPR": {
+      "title": "Edit license plate",
+      "desc": "Enter a new license plate value for this {{label}}",
+      "descNoLabel": "Enter a new license plate value for this tracked object"
+    },
+    "snapshotScore": {
+      "label": "Snapshot Score"
+    },
     "topScore": {
       "label": "Top Score",
       "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
     },
+    "recognizedLicensePlate": "Recognized License Plate",
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
     "camera": "Camera",
@@ -171,8 +187,10 @@
   },
   "noTrackedObjects": "No Tracked Objects Found",
   "fetchingTrackedObjectsFailed": "Error fetching tracked objects: {{errorMessage}}",
-  "trackedObjectsCount": "{{count}} tracked objects ",
+  "trackedObjectsCount_one": "{{count}} tracked object ",
+  "trackedObjectsCount_other": "{{count}} tracked objects ",
   "searchResult": {
+    "tooltip": "Matched {{type}} at {{confidence}}%",
     "deleteTrackedObject": {
       "toast": {
         "success": "Tracked object deleted successfully.",

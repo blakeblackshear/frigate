@@ -6,7 +6,7 @@ import numpy as np
 
 import frigate.util as util
 from frigate.config import DetectorTypeEnum
-from frigate.object_detection import (
+from frigate.object_detection.base import (
     ObjectDetectProcess,
     RemoteObjectDetector,
     load_labels,

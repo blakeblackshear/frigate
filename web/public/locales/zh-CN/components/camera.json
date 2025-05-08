@@ -12,7 +12,7 @@
     },
     "name": {
       "label": "名称",
-      "placeholder": "请输入名称",
+      "placeholder": "请输入名称…",
       "errorMessage": {
         "mustLeastCharacters": "摄像头组的名称必须至少有 2 个字符。",
         "exists": "摄像头组名称已存在。",

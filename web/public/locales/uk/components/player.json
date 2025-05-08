@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Не знайдено жодного запису",
+  "noPreviewFoundFor": "Попередній перегляд для {{cameraName}} не знайдені",
+  "livePlayerRequiredIOSVersion": "Для цього типу потокового передавання потрібна iOS 17.1 або пізніша версія.",
+  "stats": {
+    "droppedFrames": {
+      "short": {
+        "title": "Пропущене",
+        "value": "{{droppedFrames}} кадрiв"
+      },
+      "title": "Пропущене кадрiв:"
+    },
+    "droppedFrameRate": "Частота пропущенив кадрiв:",
+    "streamType": {
+      "short": "Тип",
+      "title": "Тип потоку:"
+    },
+    "bandwidth": {
+      "title": "Пропускна здатність:",
+      "short": "Пропускна здатність"
+    },
+    "latency": {
+      "title": "Затримка:",
+      "short": {
+        "title": "Затримка",
+        "value": "{{seconds}} сек"
+      },
+      "value": "{{seconds}} секунд"
+    },
+    "totalFrames": "Всього кадрiв:",
+    "decodedFrames": "Декодовані кадри:"
+  },
+  "noPreviewFound": "Попередній перегляд не знайдені",
+  "submitFrigatePlus": {
+    "title": "Відправити це зображення Frigate+?",
+    "submit": "Посилати"
+  },
+  "streamOffline": {
+    "title": "Струм офлайн",
+    "desc": "Потік <code> detect </code > камера {{cameraName}} не отримувала ніяких кадрів, перевіряйте журнали помилок"
+  },
+  "cameraDisabled": "Камера вимкнена",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Зображення успішно завантажено до Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Не вдалося надіслати фрейм Frigate+"
+    }
+  }
+}

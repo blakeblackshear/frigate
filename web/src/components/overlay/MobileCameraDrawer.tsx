@@ -26,7 +26,7 @@ export default function MobileCameraDrawer({
     <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
       <DrawerTrigger asChild>
         <Button
-          className="rounded-lg capitalize"
+          className="rounded-lg smart-capitalize"
           aria-label={t("menu.live.cameras.title")}
           size="sm"
         >
@@ -38,7 +38,7 @@ export default function MobileCameraDrawer({
           {allCameras.map((cam) => (
             <div
               key={cam}
-              className={`mx-4 w-full py-2 text-center capitalize ${cam == selected ? "rounded-lg bg-secondary" : ""}`}
+              className={`mx-4 w-full py-2 text-center smart-capitalize ${cam == selected ? "rounded-lg bg-secondary" : ""}`}
               onClick={() => {
                 onSelectCamera(cam);
                 setCameraDrawer(false);

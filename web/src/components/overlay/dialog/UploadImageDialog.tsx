@@ -35,7 +35,9 @@ export default function UploadImageDialog({
         </DialogHeader>
         <ImageEntry onSave={onSave}>
           <DialogFooter className="pt-4">
-            <Button onClick={() => setOpen(false)}>{t("button.cancel")}</Button>
+            <Button type="button" onClick={() => setOpen(false)}>
+              {t("button.cancel")}
+            </Button>
             <Button variant="select" type="submit">
               {t("button.save")}
             </Button>

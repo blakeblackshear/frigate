@@ -129,6 +129,11 @@ class NorfairTracker(ObjectTracker):
                 "distance_function": frigate_distance,
                 "distance_threshold": 2.5,
             },
+            "license_plate": {
+                "filter_factory": OptimizedKalmanFilterFactory(R=2.5, Q=0.05),
+                "distance_function": frigate_distance,
+                "distance_threshold": 3.75,
+            },
         }
 
         # Define autotracking PTZ-specific configurations
@@ -273,17 +278,24 @@ class NorfairTracker(ObjectTracker):
         )
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
+        if obj_match:
+            boxes = [p.data["box"] for p in obj_match.past_detections]
+        else:
+            boxes = [obj["box"]]
+
+        xmins, ymins, xmaxs, ymaxs = zip(*boxes)
+
         self.positions[id] = {
-            "xmins": [],
-            "ymins": [],
-            "xmaxs": [],
-            "ymaxs": [],
+            "xmins": list(xmins),
+            "ymins": list(ymins),
+            "xmaxs": list(xmaxs),
+            "ymaxs": list(ymaxs),
             "xmin": 0,
             "ymin": 0,
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
-        self.stationary_box_history[id] = []
+        self.stationary_box_history[id] = boxes
 
     def deregister(self, id, track_id):
         obj = self.tracked_objects[id]
@@ -369,9 +381,9 @@ class NorfairTracker(ObjectTracker):
                 }
                 return False
 
-        # if there are less than 10 entries for the position, add the bounding box
+        # if there are more than 5 and less than 10 entries for the position, add the bounding box
         # and recompute the position box
-        if len(position["xmins"]) < 10:
+        if 5 <= len(position["xmins"]) < 10:
             position["xmins"].append(xmin)
             position["ymins"].append(ymin)
             position["xmaxs"].append(xmax)
@@ -599,7 +611,10 @@ class NorfairTracker(ObjectTracker):
 
         # print a table to the console with norfair tracked object info
         if False:
-            self.print_objects_as_table(self.trackers["person"]["ptz"].tracked_objects)
+            if len(self.trackers["license_plate"]["static"].tracked_objects) > 0:
+                self.print_objects_as_table(
+                    self.trackers["license_plate"]["static"].tracked_objects
+                )
 
         # Get tracked objects from type-specific trackers
         for object_trackers in self.trackers.values():
@@ -642,5 +657,22 @@ class NorfairTracker(ObjectTracker):
                 position=text_anchor,
                 size=None,
                 color=(255, 0, 0),
+                thickness=None,
+            )
+
+        if False:
+            # draw the current formatted time on the frame
+            from datetime import datetime
+
+            formatted_time = datetime.fromtimestamp(frame_time).strftime(
+                "%m/%d/%Y %I:%M:%S %p"
+            )
+
+            frame = Drawer.text(
+                frame,
+                formatted_time,
+                position=(10, 50),
+                size=1.5,
+                color=(255, 255, 255),
                 thickness=None,
             )

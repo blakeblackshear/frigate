@@ -34,7 +34,7 @@ import {
   useTheme,
 } from "@/context/theme-provider";
 import { IoColorPalette } from "react-icons/io5";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRestart } from "@/api/ws";
 import {
   Tooltip,
@@ -62,6 +62,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { supportedLanguageKeys } from "@/lib/const";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -72,6 +73,24 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
+
+  // languages
+
+  const languages = useMemo(() => {
+    // Handle language keys that aren't directly used for translation key
+    const specialKeyMap: { [key: string]: string } = {
+      "nb-NO": "nb",
+      "yue-Hant": "yue",
+      "zh-CN": "zhCN",
+    };
+
+    return supportedLanguageKeys.map((key) => {
+      return {
+        code: key,
+        label: t(`menu.language.${specialKeyMap[key] || key}`),
+      };
+    });
+  }, [t]);
 
   // settings
 
@@ -313,44 +332,27 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   }
                 >
                   <span tabIndex={0} className="sr-only" />
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.en")}
-                    onClick={() => setLanguage("en")}
-                  >
-                    {language.trim() === "en" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.en")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">{t("menu.language.en")}</span>
-                    )}
-                  </MenuItem>
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "flex items-center p-2 text-sm"
-                    }
-                    aria-label={t("menu.language.zhCN")}
-                    onClick={() => setLanguage("zh-CN")}
-                  >
-                    {language === "zh-CN" ? (
-                      <>
-                        <LuLanguages className="mr-2 size-4" />
-                        {t("menu.language.zhCN")}
-                      </>
-                    ) : (
-                      <span className="ml-6 mr-2">
-                        {t("menu.language.zhCN")}
-                      </span>
-                    )}
-                  </MenuItem>
+                  {languages.map(({ code, label }) => (
+                    <MenuItem
+                      key={code}
+                      className={
+                        isDesktop
+                          ? "cursor-pointer"
+                          : "flex items-center p-2 text-sm"
+                      }
+                      aria-label={label}
+                      onClick={() => setLanguage(code)}
+                    >
+                      {language.trim() === code ? (
+                        <>
+                          <LuLanguages className="mr-2 size-4" />
+                          {label}
+                        </>
+                      ) : (
+                        <span className="ml-6 mr-2">{label}</span>
+                      )}
+                    </MenuItem>
+                  ))}
                 </SubItemContent>
               </Portal>
             </SubItem>

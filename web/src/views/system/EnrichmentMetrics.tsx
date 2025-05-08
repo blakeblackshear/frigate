@@ -77,7 +77,10 @@ export default function EnrichmentMetrics({
         const key = rawKey.replaceAll("_", " ");
 
         if (!(key in series)) {
-          series[key] = { name: t("features.embeddings." + rawKey), data: [] };
+          series[key] = {
+            name: t("enrichments.embeddings." + rawKey),
+            data: [],
+          };
         }
 
         series[key].data.push({ x: statsIdx + 1, y: stat });
@@ -90,7 +93,7 @@ export default function EnrichmentMetrics({
     <>
       <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
         <div className="text-sm font-medium text-muted-foreground">
-          {t("features.title")}
+          {t("enrichments.title")}
         </div>
         <div
           className={cn(
@@ -102,7 +105,7 @@ export default function EnrichmentMetrics({
             <>
               {embeddingInferenceTimeSeries.map((series) => (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5 capitalize">{series.name}</div>
+                  <div className="mb-5 smart-capitalize">{series.name}</div>
                   {series.name.endsWith("Speed") ? (
                     <ThresholdBarGraph
                       key={series.name}

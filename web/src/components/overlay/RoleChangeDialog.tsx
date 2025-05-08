@@ -46,13 +46,34 @@ export default function RoleChangeDialog({
             {t("users.dialog.changeRole.title")}
           </DialogTitle>
           <DialogDescription>
-            {t("users.dialog.changeRole.desc", { username })}
+            <Trans
+              i18nKey="users.dialog.changeRole.desc"
+              ns="views/settings"
+              values={{ username }}
+              components={{
+                strong: <span className="font-medium" />,
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-6">
+        <div className="py-3">
           <div className="mb-4 text-sm text-muted-foreground">
-            <Trans ns="views/settings">users.dialog.changeRole.roleInfo</Trans>
+            <p>{t("users.dialog.changeRole.roleInfo.intro")}</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>
+                <span className="font-medium">
+                  {t("users.dialog.changeRole.roleInfo.admin")}
+                </span>
+                : {t("users.dialog.changeRole.roleInfo.adminDesc")}
+              </li>
+              <li>
+                <span className="font-medium">
+                  {t("users.dialog.changeRole.roleInfo.viewer")}
+                </span>
+                : {t("users.dialog.changeRole.roleInfo.viewerDesc")}
+              </li>
+            </ul>
           </div>
 
           <Select

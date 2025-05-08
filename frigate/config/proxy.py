@@ -30,3 +30,6 @@ class ProxyConfig(FrigateBaseModel):
         default=None,
         title="Secret value for proxy authentication.",
     )
+    default_role: Optional[str] = Field(
+        default="viewer", title="Default role for proxy users."
+    )

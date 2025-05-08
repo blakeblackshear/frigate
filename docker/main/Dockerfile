@@ -260,7 +260,7 @@ ENTRYPOINT ["/init"]
 CMD []
 
 HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
-    CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
+    CMD test -f /dev/shm/.frigate-is-stopping && exit 0; curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer

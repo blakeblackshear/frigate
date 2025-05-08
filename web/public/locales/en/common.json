@@ -23,34 +23,52 @@
     "pm": "pm",
     "am": "am",
     "yr": "{{time}}yr",
-    "year": "{{time}} years",
+    "year_one": "{{time}} year",
+    "year_other": "{{time}} years",
     "mo": "{{time}}mo",
-    "month": "{{time}} months",
+    "month_one": "{{time}} month",
+    "month_other": "{{time}} months",
     "d": "{{time}}d",
-    "day": "{{time}} days",
+    "day_one": "{{time}} day",
+    "day_other": "{{time}} days",
     "h": "{{time}}h",
-    "hour": "{{time}} hours",
+    "hour_one": "{{time}} hour",
+    "hour_other": "{{time}} hours",
     "m": "{{time}}m",
-    "minute": "{{time}} minutes",
+    "minute_one": "{{time}} minute",
+    "minute_other": "{{time}} minutes",
     "s": "{{time}}s",
-    "second": "{{time}} seconds",
+    "second_one": "{{time}} second",
+    "second_other": "{{time}} seconds",
     "formattedTimestamp": {
-      "12hour": "%b %-d, %I:%M:%S %p",
-      "24hour": "%b %-d, %H:%M:%S"
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "%m/%d %I:%M:%S%P",
-      "24hour": "%d %b %H:%M:%S"
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%b %-d, %I:%M %p",
-      "24hour": "%b %-d, %H:%M"
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
     },
-    "formattedTimestampWithYear": {
-      "12hour": "%b %-d %Y, %I:%M %p",
-      "24hour": "%b %-d %Y, %H:%M"
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
     },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d"
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
   },
   "unit": {
     "speed": {
@@ -70,7 +88,7 @@
     "disabled": "Disabled",
     "disable": "Disable",
     "save": "Save",
-    "saving": "Saving...",
+    "saving": "Saving…",
     "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
@@ -107,8 +125,35 @@
     "configurationEditor": "Configuration Editor",
     "languages": "Languages",
     "language": {
-      "en": "English",
+      "en": "English (English)",
+      "es": "Español (Spanish)",
       "zhCN": "简体中文 (Simplified Chinese)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (French)",
+      "ar": "العربية (Arabic)",
+      "pt": "Português (Portuguese)",
+      "ru": "Русский (Russian)",
+      "de": "Deutsch (German)",
+      "ja": "日本語 (Japanese)",
+      "tr": "Türkçe (Turkish)",
+      "it": "Italiano (Italian)",
+      "nl": "Nederlands (Dutch)",
+      "sv": "Svenska (Swedish)",
+      "cs": "Čeština (Czech)",
+      "nb": "Norsk Bokmål (Norwegian Bokmål)",
+      "ko": "한국어 (Korean)",
+      "vi": "Tiếng Việt (Vietnamese)",
+      "fa": "فارسی (Persian)",
+      "pl": "Polski (Polish)",
+      "uk": "Українська (Ukrainian)",
+      "he": "עברית (Hebrew)",
+      "el": "Ελληνικά (Greek)",
+      "ro": "Română (Romanian)",
+      "hu": "Magyar (Hungarian)",
+      "fi": "Suomi (Finnish)",
+      "da": "Dansk (Danish)",
+      "sk": "Slovenčina (Slovak)",
+      "yue": "粵語 (Cantonese)",
       "withSystem": {
         "label": "Use the system settings for language"
       }
@@ -129,7 +174,7 @@
       "green": "Green",
       "nord": "Nord",
       "red": "Red",
-      "contrast": "High Contrast",
+      "highcontrast": "High Contrast",
       "default": "Default"
     },
     "help": "Help",

@@ -51,7 +51,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -419,7 +419,9 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return t(filterValues as string, { ns: "objects" });
+      return t(filterValues as string, {
+        ns: "objects",
+      });
     } else if (filterType === "search_type") {
       return t("filter.searchType." + (filterValues as string));
     } else {
@@ -729,20 +731,31 @@ export default function InputWithTags({
                   <p className="text-sm text-muted-foreground">
                     {t("filter.tips.desc.text")}
                   </p>
-                  <Trans
-                    ns="views/search"
-                    values={{
-                      DateFormat: getIntlDateFormat(),
-                      exampleTime:
-                        config?.ui.time_format == "24hour"
-                          ? "15:00-16:00"
-                          : "3:00PM-4:00PM",
-                    }}
-                  >
-                    filter.tips.desc.step
-                  </Trans>
+                  <ul className="list-disc pl-5 text-sm text-primary-variant">
+                    <li>{t("filter.tips.desc.step1")}</li>
+                    <li>{t("filter.tips.desc.step2")}</li>
+                    <li>{t("filter.tips.desc.step3")}</li>
+                    <li>
+                      {t("filter.tips.desc.step4", {
+                        DateFormat: getIntlDateFormat(),
+                      })}
+                    </li>
+                    <li>
+                      {t("filter.tips.desc.step5", {
+                        exampleTime:
+                          config?.ui.time_format == "24hour"
+                            ? "15:00-16:00"
+                            : "3:00PM-4:00PM",
+                      })}
+                    </li>
+                    <li>{t("filter.tips.desc.step6")}</li>
+                  </ul>
                   <p className="text-sm text-muted-foreground">
-                    <Trans ns="views/search">filter.tips.desc.example</Trans>
+                    {t("filter.tips.desc.exampleLabel")}{" "}
+                    <code className="text-primary">
+                      cameras:front_door label:person before:01012024
+                      time_range:3:00PM-4:00PM
+                    </code>
                   </p>
                 </div>
               </PopoverContent>
@@ -803,10 +816,14 @@ export default function InputWithTags({
                         .map((value, index) => (
                           <span
                             key={`${filterType}-${index}`}
-                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                           >
                             {t("filter.label." + filterType)}:{" "}
-                            {value.replaceAll("_", " ")}
+                            {filterType === "labels"
+                              ? t(value, {
+                                  ns: "objects",
+                                })
+                              : value.replaceAll("_", " ")}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)
@@ -821,7 +838,7 @@ export default function InputWithTags({
                     : !(filterType == "event_id" && isSimilaritySearch) && (
                         <span
                           key={filterType}
-                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                         >
                           {filterType === "event_id"
                             ? t("trackedObjectId")

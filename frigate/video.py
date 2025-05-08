@@ -7,6 +7,9 @@ import signal
 import subprocess as sp
 import threading
 import time
+from multiprocessing import Queue, Value
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 import cv2
 from setproctitle import setproctitle
@@ -24,7 +27,7 @@ from frigate.const import (
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
-from frigate.object_detection import RemoteObjectDetector
+from frigate.object_detection.base import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
@@ -99,10 +102,10 @@ def capture_frames(
     frame_shape: tuple[int, int],
     frame_manager: FrameManager,
     frame_queue,
-    fps: mp.Value,
-    skipped_fps: mp.Value,
-    current_frame: mp.Value,
-    stop_event: mp.Event,
+    fps: Value,
+    skipped_fps: Value,
+    current_frame: Value,
+    stop_event: MpEvent,
 ):
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
@@ -167,7 +170,7 @@ class CameraWatchdog(threading.Thread):
         camera_name,
         config: CameraConfig,
         shm_frame_count: int,
-        frame_queue: mp.Queue,
+        frame_queue: Queue,
         camera_fps,
         skipped_fps,
         ffmpeg_pid,
@@ -402,10 +405,10 @@ class CameraCapture(threading.Thread):
         frame_index: int,
         ffmpeg_process,
         frame_shape: tuple[int, int],
-        frame_queue: mp.Queue,
-        fps,
-        skipped_fps,
-        stop_event,
+        frame_queue: Queue,
+        fps: Value,
+        skipped_fps: Value,
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{config.name}"
@@ -419,7 +422,7 @@ class CameraCapture(threading.Thread):
         self.skipped_fps = skipped_fps
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
-        self.current_frame = mp.Value("d", 0.0)
+        self.current_frame = Value("d", 0.0)
         self.last_frame = 0
 
     def run(self):
@@ -469,14 +472,14 @@ def capture_camera(
 def track_camera(
     name,
     config: CameraConfig,
-    model_config,
-    labelmap,
-    detection_queue,
-    result_connection,
+    model_config: ModelConfig,
+    labelmap: dict[int, str],
+    detection_queue: Queue,
+    result_connection: MpEvent,
     detected_objects_queue,
     camera_metrics: CameraMetrics,
     ptz_metrics: PTZMetrics,
-    region_grid,
+    region_grid: list[list[dict[str, Any]]],
 ):
     stop_event = mp.Event()
 
@@ -584,8 +587,8 @@ def detect(
 def process_frames(
     camera_name: str,
     requestor: InterProcessRequestor,
-    frame_queue: mp.Queue,
-    frame_shape,
+    frame_queue: Queue,
+    frame_shape: tuple[int, int],
     model_config: ModelConfig,
     camera_config: CameraConfig,
     detect_config: DetectConfig,
@@ -593,13 +596,13 @@ def process_frames(
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
-    detected_objects_queue: mp.Queue,
+    detected_objects_queue: Queue,
     camera_metrics: CameraMetrics,
     objects_to_track: list[str],
     object_filters,
-    stop_event,
+    stop_event: MpEvent,
     ptz_metrics: PTZMetrics,
-    region_grid,
+    region_grid: list[list[dict[str, Any]]],
     exit_on_empty: bool = False,
 ):
     next_region_update = get_tomorrow_at_time(2)

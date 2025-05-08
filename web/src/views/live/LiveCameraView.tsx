@@ -531,11 +531,9 @@ export default function LiveCameraView({
                   Icon={mic ? FaMicrophone : FaMicrophoneSlash}
                   isActive={mic}
                   title={
-                    (mic
-                      ? t("button.disable", { ns: "common" })
-                      : t("button.enable", { ns: "common" })) +
-                    " " +
-                    t("button.twoWayTalk", { ns: "common" })
+                    mic
+                      ? t("twoWayTalk.disable", { ns: "views/live" })
+                      : t("twoWayTalk.enable", { ns: "views/live" })
                   }
                   onClick={() => {
                     setMic(!mic);
@@ -553,11 +551,9 @@ export default function LiveCameraView({
                   Icon={audio ? GiSpeaker : GiSpeakerOff}
                   isActive={audio ?? false}
                   title={
-                    (audio
-                      ? t("button.disable", { ns: "common" })
-                      : t("button.enable", { ns: "common" })) +
-                    " " +
-                    t("button.cameraAudio", { ns: "common" })
+                    audio
+                      ? t("cameraAudio.disable", { ns: "views/live" })
+                      : t("cameraAudio.enable", { ns: "views/live" })
                   }
                   onClick={() => setAudio(!audio)}
                   disabled={!cameraEnabled}
@@ -898,8 +894,7 @@ function PtzControlPanel({
               <p>
                 {clickOverlay
                   ? t("ptz.move.clickMove.disable")
-                  : t("ptz.move.clickMove.enable")}{" "}
-                click to move
+                  : t("ptz.move.clickMove.enable")}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -1376,7 +1371,7 @@ function FrigateCameraFeatures({
                           ) : (
                             <>
                               <LuX className="size-4 text-danger" />
-                              <div>{t("stream.twoWayTalk.available")}</div>
+                              <div>{t("stream.twoWayTalk.unavailable")}</div>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <div className="cursor-pointer p-0">
@@ -1479,17 +1474,17 @@ function FrigateCameraFeatures({
                   })}
                 </p>
               </div>
-              <div className="flex flex-col gap-1">
+              <div
+                className="flex cursor-pointer flex-col gap-1"
+                onClick={() =>
+                  navigate(`/settings?page=debug&camera=${camera.name}`)
+                }
+              >
                 <div className="flex items-center justify-between text-sm font-medium leading-none">
                   {t("streaming.debugView", {
                     ns: "components/dialog",
                   })}
-                  <LuExternalLink
-                    onClick={() =>
-                      navigate(`/settings?page=debug&camera=${camera.name}`)
-                    }
-                    className="ml-2 inline-flex size-5 cursor-pointer"
-                  />
+                  <LuExternalLink className="ml-2 inline-flex size-5" />
                 </div>
               </div>
             </div>
@@ -1758,7 +1753,7 @@ function FrigateCameraFeatures({
                 isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
               )}
             >
-              {t("manualRecording." + isRecording ? "end" : "start")}
+              {t("manualRecording." + (isRecording ? "end" : "start"))}
             </Button>
             <p className="text-sm text-muted-foreground">
               {t("manualRecording.tips")}

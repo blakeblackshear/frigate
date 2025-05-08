@@ -46,8 +46,13 @@
       "title": "How to use text filters",
       "desc": {
         "text": "Filters help you narrow down your search results. Here's how to use them in the input field:",
-        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Type a filter name followed by a colon (e.g., \"cameras:\").</li><li>Select a value from the suggestions or type your own.</li><li>Use multiple filters by adding them one after another with a space in between.</li><li>Date filters (before: and after:) use <em>{{DateFormat}}</em> format.</li><li>Time range filter uses <em>{{exampleTime}}</em> format.</li><li>Remove filters by clicking the 'x' next to them.</li></ul>",
-        "example": "Example: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>"
+        "step1": "Type a filter key name followed by a colon (e.g., \"cameras:\").",
+        "step2": "Select a value from the suggestions or type your own.",
+        "step3": "Use multiple filters by adding them one after another with a space in between.",
+        "step4": "Date filters (before: and after:) use {{DateFormat}} format.",
+        "step5": "Time range filter uses {{exampleTime}} format.",
+        "step6": "Remove filters by clicking the 'x' next to them.",
+        "exampleLabel": "Example:"
       }
     },
     "header": {
@@ -62,6 +67,6 @@
     "clear": "Clear similarity search"
   },
   "placeholder": {
-    "search": "Search..."
+    "search": "Search…"
   }
 }

@@ -126,7 +126,7 @@ export function GeneralFilterContent({
           {["debug", "info", "warning", "error"].map((item) => (
             <div className="flex items-center justify-between" key={item}>
               <Label
-                className="mx-2 w-full cursor-pointer capitalize text-primary"
+                className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}

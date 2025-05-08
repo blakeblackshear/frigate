@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -35,7 +35,14 @@ export default function DeleteUserDialog({
 
         <div className="my-4 rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center text-sm">
           <p className="font-medium text-destructive">
-            {t("users.dialog.deleteUser.warn", { username })}
+            <Trans
+              i18nKey="users.dialog.deleteUser.warn"
+              ns="views/settings"
+              values={{ username }}
+              components={{
+                strong: <span className="font-medium" />,
+              }}
+            />
           </p>
         </div>
 

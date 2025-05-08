@@ -170,8 +170,8 @@ export default function PreviewThumbnailPlayer({
   const formattedDate = useFormattedTimestamp(
     review.start_time,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-      : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
+      ? t("time.formattedTimestampMonthDayHourMinute.24hour", { ns: "common" })
+      : t("time.formattedTimestampMonthDayHourMinute.12hour", { ns: "common" }),
     config?.ui?.timezone,
   );
 
@@ -262,7 +262,7 @@ export default function PreviewThumbnailPlayer({
                 </div>
               </TooltipTrigger>
             </div>
-            <TooltipContent className="capitalize">
+            <TooltipContent className="smart-capitalize">
               {[
                 ...new Set([
                   ...(review.data.objects || []),

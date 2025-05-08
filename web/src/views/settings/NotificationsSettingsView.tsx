@@ -44,6 +44,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -298,6 +299,10 @@ export default function NotificationView({
     saveToConfig(values as NotificationSettingsValueType);
   }
 
+  useEffect(() => {
+    document.title = t("documentTitle.notifications");
+  }, [t]);
+
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
@@ -316,9 +321,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationSettings.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationSettings.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -340,9 +343,7 @@ export default function NotificationView({
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    <p>
-                      {t("notification.notificationUnavailable.documentation")}
-                    </p>{" "}
+                    {t("notification.notificationUnavailable.documentation")}{" "}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>
@@ -645,6 +646,8 @@ export function CameraNotificationSwitch({
     sendNotificationSuspend(0);
   };
 
+  const locale = useDateLocale();
+
   const formatSuspendedUntil = (timestamp: string) => {
     // Some languages require a change in word order
     if (timestamp === "0") return t("time.untilForRestart", { ns: "common" });
@@ -653,10 +656,15 @@ export function CameraNotificationSwitch({
       time_style: "medium",
       date_style: "medium",
       timezone: config?.ui.timezone,
-      strftime_fmt:
+      date_format:
         config?.ui.time_format == "24hour"
-          ? t("time.formattedTimestampExcludeSeconds.24hour", { ns: "common" })
-          : t("time.formattedTimestampExcludeSeconds.12hour", { ns: "common" }),
+          ? t("time.formattedTimestampMonthDayHourMinute.24hour", {
+              ns: "common",
+            })
+          : t("time.formattedTimestampMonthDayHourMinute.12hour", {
+              ns: "common",
+            }),
+      locale: locale,
     });
     return t("time.untilForTime", { ns: "common", time });
   };
@@ -672,7 +680,7 @@ export function CameraNotificationSwitch({
           )}
           <div className="flex flex-col">
             <Label
-              className="text-md cursor-pointer capitalize text-primary"
+              className="text-md cursor-pointer text-primary smart-capitalize"
               htmlFor="camera"
             >
               {camera.replaceAll("_", " ")}
@@ -696,7 +704,7 @@ export function CameraNotificationSwitch({
       {!isSuspended ? (
         <Select onValueChange={handleSuspend}>
           <SelectTrigger className="w-auto">
-            <SelectValue placeholder="Suspend" />
+            <SelectValue placeholder={t("notification.suspendTime.suspend")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="5">

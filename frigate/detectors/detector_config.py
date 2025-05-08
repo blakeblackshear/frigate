@@ -25,10 +25,13 @@ class PixelFormatEnum(str, Enum):
 class InputTensorEnum(str, Enum):
     nchw = "nchw"
     nhwc = "nhwc"
+    hwnc = "hwnc"
+    hwcn = "hwcn"
 
 
 class InputDTypeEnum(str, Enum):
     float = "float"
+    float_denorm = "float_denorm"  # non-normalized float
     int = "int"
 
 
@@ -37,7 +40,6 @@ class ModelTypeEnum(str, Enum):
     rfdetr = "rfdetr"
     ssd = "ssd"
     yolox = "yolox"
-    yolov9 = "yolov9"
     yolonas = "yolonas"
     yologeneric = "yolo-generic"
 

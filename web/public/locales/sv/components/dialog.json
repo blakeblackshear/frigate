@@ -1,0 +1,18 @@
+{
+  "restart": {
+    "button": "Starta om",
+    "restarting": {
+      "title": "Frigate startar om",
+      "content": "Sidan uppdateras om {{countdown}} seconds.",
+      "button": "Tvinga uppdatering nu"
+    },
+    "title": "Är du säker på att du vill starta om Frigate?"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Skicka till Frigate+"
+      }
+    }
+  }
+}

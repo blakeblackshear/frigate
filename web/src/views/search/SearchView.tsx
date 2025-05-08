@@ -31,7 +31,7 @@ import {
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchViewProps = {
   search: string;
@@ -107,7 +107,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
       });
@@ -139,7 +145,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       Object.entries(cameraConfig.zones).map(([name, _]) => {
         zones.add(name);
       });
@@ -585,7 +597,7 @@ export default function SearchView({
                           <Tooltip>
                             <TooltipTrigger>
                               <Chip
-                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
+                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs text-white smart-capitalize`}
                               >
                                 {value.search_source == "thumbnail" ? (
                                   <LuImage className="size-3" />
@@ -596,8 +608,21 @@ export default function SearchView({
                             </TooltipTrigger>
                             <TooltipPortal>
                               <TooltipContent>
-                                Matched {value.search_source} at{" "}
-                                {zScoreToConfidence(value.search_distance)}%
+                                <Trans
+                                  ns="views/explore"
+                                  values={{
+                                    type: t(
+                                      "filter.searchType." +
+                                        value.search_source,
+                                      { ns: "views/search" },
+                                    ),
+                                    confidence: zScoreToConfidence(
+                                      value.search_distance,
+                                    ),
+                                  }}
+                                >
+                                  searchResult.tooltip
+                                </Trans>
                               </TooltipContent>
                             </TooltipPortal>
                           </Tooltip>

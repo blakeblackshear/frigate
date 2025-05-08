@@ -3,33 +3,34 @@ id: license_plate_recognition
 title: License Plate Recognition (LPR)
 ---
 
-Frigate can recognize license plates on vehicles and automatically add the detected characters to the `recognized_license_plate` field or a known name as a `sub_label` to tracked objects of type `car`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
+Frigate can recognize license plates on vehicles and automatically add the detected characters to the `recognized_license_plate` field or a known name as a `sub_label` to tracked objects of type `car` or `motorcycle`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
 
 LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. However, LPR does not run on stationary vehicles.
 
-When a plate is recognized, the recognized name is:
+When a plate is recognized, the details are:
 
 - Added as a `sub_label` (if known) or the `recognized_license_plate` field (if unknown) to a tracked object.
 - Viewable in the Review Item Details pane in Review (sub labels).
 - Viewable in the Tracked Object Details pane in Explore (sub labels and recognized license plates).
 - Filterable through the More Filters menu in Explore.
-- Published via the `frigate/events` MQTT topic as a `sub_label` (known) or `recognized_license_plate` (unknown) for the `car` tracked object.
+- Published via the `frigate/events` MQTT topic as a `sub_label` (known) or `recognized_license_plate` (unknown) for the `car` or `motorcycle` tracked object.
+- Published via the `frigate/tracked_object_update` MQTT topic with `name` (if known) and `plate`.
 
 ## Model Requirements
 
 Users running a Frigate+ model (or any custom model that natively detects license plates) should ensure that `license_plate` is added to the [list of objects to track](https://docs.frigate.video/plus/#available-label-types) either globally or for a specific camera. This will improve the accuracy and performance of the LPR model.
 
-Users without a model that detects license plates can still run LPR. Frigate uses a lightweight YOLOv9 license plate detection model that runs on your CPU. In this case, you should _not_ define `license_plate` in your list of objects to track.
+Users without a model that detects license plates can still run LPR. Frigate uses a lightweight YOLOv9 license plate detection model that can be configured to run on your CPU or GPU. In this case, you should _not_ define `license_plate` in your list of objects to track.
 
 :::note
 
-In the default mode, Frigate's LPR needs to first detect a `car` before it can recognize a license plate. If you're using a dedicated LPR camera and have a zoomed-in view where a `car` will not be detected, you can still run LPR, but the configuration parameters will differ from the default mode. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section below.
+In the default mode, Frigate's LPR needs to first detect a `car` or `motorcycle` before it can recognize a license plate. If you're using a dedicated LPR camera and have a zoomed-in view where a `car` or `motorcycle` will not be detected, you can still run LPR, but the configuration parameters will differ from the default mode. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section below.
 
 :::
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The models are relatively lightweight and run on your CPU. At least 4GB of RAM is required.
+License plate recognition works by running AI models locally on your system. The models are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
 
 ## Configuration
 
@@ -40,23 +41,23 @@ lpr:
   enabled: True
 ```
 
-Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You can disable it for specific cameras at the camera level:
+Like other enrichments in Frigate, LPR **must be enabled globally** to use the feature. You should disable it for specific cameras at the camera level if you don't want to run LPR on cars on those cameras:
 
 ```yaml
 cameras:
-  driveway:
+  garage:
     ...
     lpr:
       enabled: False
 ```
 
-For non-dedicated LPR cameras, ensure that your camera is configured to detect objects of type `car`, and that a car is actually being detected by Frigate. Otherwise, LPR will not run.
+For non-dedicated LPR cameras, ensure that your camera is configured to detect objects of type `car` or `motorcycle`, and that a car or motorcycle is actually being detected by Frigate. Otherwise, LPR will not run.
 
 Like the other real-time processors in Frigate, license plate recognition runs on the camera stream defined by the `detect` role in your config. To ensure optimal performance, select a suitable resolution for this stream in your camera's firmware that fits your specific scene and requirements.
 
 ## Advanced Configuration
 
-Fine-tune the LPR feature using these optional parameters:
+Fine-tune the LPR feature using these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled`, `min_area`, and `enhancement`.
 
 ### Detection
 
@@ -66,6 +67,12 @@ Fine-tune the LPR feature using these optional parameters:
 - **`min_area`**: Defines the minimum area (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels. Note: this is intentionally set very low as it is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
+- **`device`**: Device to use to run license plate recognition models.
+  - Default: `CPU`
+  - This can be `CPU` or `GPU`. For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
+- **`model_size`**: The size of the model used to detect text on plates.
+  - Default: `small`
+  - This can be `small` or `large`. The `large` model uses an enhanced text detector and is more accurate at finding text on plates but slower than the `small` model. For most users, the small model is recommended. For users in countries with multiple lines of text on plates, the large model is recommended. Note that using the large model does not improve _text recognition_, but it may improve _text detection_.
 
 ### Recognition
 
@@ -80,7 +87,7 @@ Fine-tune the LPR feature using these optional parameters:
 
 ### Matching
 
-- **`known_plates`**: List of strings or regular expressions that assign custom a `sub_label` to `car` objects when a recognized plate matches a known value.
+- **`known_plates`**: List of strings or regular expressions that assign custom a `sub_label` to `car` and `motorcycle` objects when a recognized plate matches a known value.
   - These labels appear in the UI, filters, and notifications.
   - Unknown plates are still saved but are added to the `recognized_license_plate` field rather than the `sub_label`.
 - **`match_distance`**: Allows for minor variations (missing/incorrect characters) when matching a detected plate to a known plate.
@@ -89,11 +96,11 @@ Fine-tune the LPR feature using these optional parameters:
 
 ### Image Enhancement
 
-- **`enhancement`**: A value between **0 and 10** that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
-  - **Default:** `0` (no enhancement)
+- **`enhancement`**: A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. This preprocessing step can sometimes improve accuracy but may also have the opposite effect.
+  - Default: `0` (no enhancement)
   - Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters, actually making them much harder for Frigate to recognize.
-  - This setting is best adjusted **at the camera level** if running LPR on multiple cameras.
-  - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at **5** and adjusting as needed. To preview how different enhancement levels affect your plates, use the `debug_save_plates` configuration option (see below).
+  - This setting is best adjusted at the camera level if running LPR on multiple cameras.
+  - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 5 and adjusting as needed. You should see how different enhancement levels affect your plates. Use the `debug_save_plates` configuration option (see below).
 
 ### Debugging
 
@@ -155,26 +162,30 @@ cameras:
 
 Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to capture license plates on distant vehicles, often with fine-tuned settings to capture plates at night.
 
-Users can configure Frigate's LPR in two different ways depending on whether they are using a Frigate+ model:
+To mark a camera as a dedicated LPR camera, add `type: "lpr"` the camera configuration.
 
-### Using a Frigate+ Model
+Users can configure Frigate's dedicated LPR mode in two different ways depending on whether a Frigate+ (or native `license_plate` detecting) model is used:
+
+### Using a Frigate+ (or Native `license_plate` Detecting) Model
 
 Users running a Frigate+ model (or any model that natively detects `license_plate`) can take advantage of `license_plate` detection. This allows license plates to be treated as standard objects in dedicated LPR mode, meaning that alerts, detections, snapshots, zones, and other Frigate features work as usual, and plates are detected efficiently through your configured object detector.
 
-An example configuration for a dedicated LPR camera using a Frigate+ model:
+An example configuration for a dedicated LPR camera using a `license_plate`-detecting model:
 
 ```yaml
 # LPR global configuration
 lpr:
   enabled: True
+  device: CPU # can also be GPU if available
 
 # Dedicated LPR camera configuration
 cameras:
   dedicated_lpr_camera:
     type: "lpr" # required to use dedicated LPR camera mode
+    ffmpeg: ... # add your streams
     detect:
       enabled: True
-      fps: 5 # increase to 10 if vehicles move quickly across your frame
+      fps: 5 # increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.
       min_initialized: 2
       width: 1920
       height: 1080
@@ -206,7 +217,7 @@ With this setup:
 - Snapshots will have license plate bounding boxes on them.
 - The `frigate/events` MQTT topic will publish tracked object updates.
 - Debug view will display `license_plate` bounding boxes.
-- If you are using a Frigate+ model and want to submit images from your dedicated LPR camera for model training and fine-tuning, annotate both the `car` and the `license_plate` in the snapshots on the Frigate+ website, even if the car is barely visible.
+- If you are using a Frigate+ model and want to submit images from your dedicated LPR camera for model training and fine-tuning, annotate both the `car` / `motorcycle` and the `license_plate` in the snapshots on the Frigate+ website, even if the car is barely visible.
 
 ### Using the Secondary LPR Pipeline (Without Frigate+)
 
@@ -218,6 +229,7 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 # LPR global configuration
 lpr:
   enabled: True
+  device: CPU # can also be GPU if available and correct Docker image is used
   detection_threshold: 0.7 # change if necessary
 
 # Dedicated LPR camera configuration
@@ -227,7 +239,7 @@ cameras:
     lpr:
       enabled: True
       enhancement: 3 # optional, enhance the image before trying to recognize characters
-    ffmpeg: ...
+    ffmpeg: ... # add your streams
     detect:
       enabled: False # disable Frigate's standard object detection pipeline
       fps: 5 # increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU
@@ -256,7 +268,7 @@ With this setup:
 - Review items will always be classified as a `detection`.
 - Snapshots will always be saved.
 - Zones and object masks are **not** used.
-- The `frigate/events` MQTT topic will **not** publish tracked object updates, though `frigate/reviews` will if recordings are enabled.
+- The `frigate/events` MQTT topic will **not** publish tracked object updates with the license plate bounding box and score, though `frigate/reviews` will publish if recordings are enabled. If a plate is recognized as a known plate, publishing will occur with an updated `sub_label` field. If characters are recognized, publishing will occur with an updated `recognized_license_plate` field.
 - License plate snapshots are saved at the highest-scoring moment and appear in Explore.
 - Debug view will not show `license_plate` bounding boxes.
 
@@ -269,7 +281,7 @@ With this setup:
 | Object Detection        | Standard Frigate+ detection applies                    | Bypasses standard object detection                              |
 | Zones & Object Masks    | Supported                                              | Not supported                                                   |
 | Debug View              | May show `license_plate` bounding boxes                | May **not** show `license_plate` bounding boxes                 |
-| MQTT `frigate/events`   | Publishes tracked object updates                       | Does **not** publish tracked object updates                     |
+| MQTT `frigate/events`   | Publishes tracked object updates                       | Publishes limited updates                                       |
 | Explore                 | Recognized plates available in More Filters            | Recognized plates available in More Filters                     |
 
 By selecting the appropriate configuration, users can optimize their dedicated LPR cameras based on whether they are using a Frigate+ model or the secondary LPR pipeline.
@@ -280,7 +292,7 @@ By selecting the appropriate configuration, users can optimize their dedicated L
 - Disable the `improve_contrast` motion setting, especially if you are running LPR at night and the frame is mostly dark. This will prevent small pixel changes and smaller areas of motion from triggering license plate detection.
 - Ensure your camera's timestamp is covered with a motion mask so that it's not incorrectly detected as a license plate.
 - For non-Frigate+ users, you may need to change your camera settings for a clearer image or decrease your global `recognition_threshold` config if your plates are not being accurately recognized at night.
-- The secondary pipeline mode runs a local AI model on your CPU to detect plates. Increasing detect `fps` will increase CPU usage proportionally.
+- The secondary pipeline mode runs a local AI model on your CPU or GPU (depending on how `device` is configured) to detect plates. Increasing detect `fps` will increase resource usage proportionally.
 
 ## FAQ
 
@@ -299,9 +311,9 @@ Recognized plates will show as object labels in the debug view and will appear i
 
 If you are still having issues detecting plates, start with a basic configuration and see the debugging tips below.
 
-### Can I run LPR without detecting `car` objects?
+### Can I run LPR without detecting `car` or `motorcycle` objects?
 
-In normal LPR mode, Frigate requires a `car` to be detected first before recognizing a license plate. If you have a dedicated LPR camera, you can change the camera `type` to `"lpr"` to use the Dedicated LPR Camera algorithm. This comes with important caveats, though. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section above.
+In normal LPR mode, Frigate requires a `car` or `motorcycle` to be detected first before recognizing a license plate. If you have a dedicated LPR camera, you can change the camera `type` to `"lpr"` to use the Dedicated LPR Camera algorithm. This comes with important caveats, though. See the [Dedicated LPR Cameras](#dedicated-lpr-cameras) section above.
 
 ### How can I improve detection accuracy?
 
@@ -313,6 +325,10 @@ In normal LPR mode, Frigate requires a `car` to be detected first before recogni
 
 Yes, but performance depends on camera quality, lighting, and infrared capabilities. Make sure your camera can capture clear images of plates at night.
 
+### Can I limit LPR to specific zones?
+
+LPR, like other Frigate enrichments, runs at the camera level rather than the zone level. While you can't restrict LPR to specific zones directly, you can control when recognition runs by setting a `min_area` value to filter out smaller detections.
+
 ### How can I match known plates with minor variations?
 
 Use `match_distance` to allow small character mismatches. Alternatively, define multiple variations in `known_plates`.
@@ -320,10 +336,10 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 ### How do I debug LPR issues?
 
 - View MQTT messages for `frigate/events` to verify detected plates.
-- If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car`.
-- Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` label will change to the recognized plate when LPR is enabled and working.
+- If you are using a Frigate+ model or a model that detects license plates, watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected with a `car` or `motorcycle`.
+- Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` or `motorcycle` label will change to the recognized plate when LPR is enabled and working.
 - Adjust `detection_threshold` and `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
-- Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`).
+- Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`). Ensure these images are readable and the text is clear.
 - Enable debug logs for LPR by adding `frigate.data_processing.common.license_plate: debug` to your `logger` configuration. These logs are _very_ verbose, so only enable this when necessary.
 
   ```yaml
@@ -335,4 +351,22 @@ Use `match_distance` to allow small character mismatches. Alternatively, define 
 
 ### Will LPR slow down my system?
 
-LPR runs on the CPU, so performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
+LPR's performance impact depends on your hardware. Ensure you have at least 4GB RAM and a capable CPU or GPU for optimal results. If you are running the Dedicated LPR Camera mode, resource usage will be higher compared to users who run a model that natively detects license plates. Tune your motion detection settings for your dedicated LPR camera so that the license plate detection model runs only when necessary.
+
+### I am seeing a YOLOv9 plate detection metric in Enrichment Metrics, but I have a Frigate+ or custom model that detects `license_plate`. Why is the YOLOv9 model running?
+
+The YOLOv9 license plate detector model will run (and the metric will appear) if you've enabled LPR but haven't defined `license_plate` as an object to track, either at the global or camera level.
+
+If you are detecting `car` or `motorcycle` on cameras where you don't want to run LPR, make sure you disable LPR it at the camera level. And if you do want to run LPR on those cameras, make sure you define `license_plate` as an object to track.
+
+### It looks like Frigate picked up my camera's timestamp or overlay text as the license plate. How can I prevent this?
+
+This could happen if cars or motorcycles travel close to your camera's timestamp or overlay text. You could either move the text through your camera's firmware, or apply a mask to it in Frigate.
+
+If you are using a model that natively detects `license_plate`, add an _object mask_ of type `license_plate` and a _motion mask_ over your text.
+
+If you are not using a model that natively detects `license_plate` or you are using dedicated LPR camera mode, only a _motion mask_ over your text is required.
+
+### I see "Error running ... model" in my logs. How can I fix this?
+
+This usually happens when your GPU is unable to compile or use one of the LPR models. Set your `device` to `CPU` and try again. GPU acceleration only provides a slight performance increase, and the models are lightweight enough to run without issue on most CPUs.

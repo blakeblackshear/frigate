@@ -63,11 +63,20 @@ export default function SearchFilterGroup({
         return;
       }
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       cameraConfig.objects.track.forEach((label) => {
         if (!config.model.all_attributes.includes(label)) {
           labels.add(label);
         }
       });
+
+      if (cameraConfig.type == "lpr") {
+        labels.add("license_plate");
+      }
 
       if (cameraConfig.audio.enabled_in_config) {
         cameraConfig.audio.listen.forEach((label) => {
@@ -95,7 +104,13 @@ export default function SearchFilterGroup({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       Object.entries(cameraConfig.zones).map(([name, _]) => {
         zones.add(name);
       });
@@ -248,7 +263,9 @@ function GeneralFilterButton({
     }
 
     if (selectedLabels.length == 1) {
-      return t(selectedLabels[0], { ns: "objects" });
+      return t(selectedLabels[0], {
+        ns: "objects",
+      });
     }
 
     return t("labels.count", {
@@ -268,7 +285,7 @@ function GeneralFilterButton({
     <Button
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("labels.label")}
     >
       <MdLabel
@@ -440,7 +457,7 @@ function SortTypeButton({
           ? "select"
           : "default"
       }
-      className="flex items-center gap-2 capitalize"
+      className="flex items-center gap-2 smart-capitalize"
       aria-label={t("labels.label")}
     >
       <MdSort

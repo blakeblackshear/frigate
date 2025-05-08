@@ -219,7 +219,7 @@ export default function Settings() {
                     item: t("menu." + item),
                   })}
                 >
-                  <div className="capitalize">{t("menu." + item)}</div>
+                  <div className="smart-capitalize">{t("menu." + item)}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -336,7 +336,7 @@ function CameraSelectButton({
 
   const trigger = (
     <Button
-      className="flex items-center gap-2 bg-selected capitalize hover:bg-selected"
+      className="flex items-center gap-2 bg-selected smart-capitalize hover:bg-selected"
       aria-label="Select a camera"
       size="sm"
     >

@@ -3,7 +3,7 @@ id: face_recognition
 title: Face Recognition
 ---
 
-Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known person is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
+Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
 ## Model Requirements
 
@@ -12,6 +12,12 @@ Face recognition identifies known individuals by matching detected faces with pr
 When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
 When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
+
+:::note
+
+Frigate needs to first detect a `person` before it can detect and recognize a face.
+
+:::
 
 ### Face Recognition
 
@@ -22,11 +28,13 @@ Frigate has support for two face recognition model types:
 
 In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
 
+All of these features run locally on your system.
+
 ## Minimum System Requirements
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
 
-The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended.
+The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 ## Configuration
 
@@ -39,7 +47,7 @@ face_recognition:
 
 ## Advanced Configuration
 
-Fine-tune face recognition with these optional parameters:
+Fine-tune face recognition with these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled` and `min_area`.
 
 ### Detection
 
@@ -61,6 +69,13 @@ Fine-tune face recognition with these optional parameters:
   - Default: `100`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
+
+## Usage
+
+1. **Enable face recognition** in your configuration file and restart Frigate.
+2. **Upload your face** using the **Add Face** button's wizard in the Face Library section of the Frigate UI.
+3. When Frigate detects and attempts to recognize a face, it will appear in the **Train** tab of the Face Library, along with its associated recognition confidence.
+4. From the **Train** tab, you can **assign the face** to a new or existing person to improve recognition accuracy for the future.
 
 ## Creating a Robust Training Set
 
@@ -125,3 +140,19 @@ This can happen for a few different reasons, but this is usually an indicator th
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+
+### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
+
+No, using another face recognition service will interfere with Frigate's built in face recognition. When using double-take the sub_label feature must be disabled if the built in face recognition is also desired.
+
+### Does face recognition run on the recording stream?
+
+Face recognition does not run on the recording stream, this would be suboptimal for many reasons:
+
+1. The latency of accessing the recordings means the notifications would not include the names of recognized people because recognition would not complete until after.
+2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
+3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
+
+### I get an unknown error when taking a photo directly with my iPhone
+
+By default iOS devices will use HEIC (High Efficiency Image Container) for images, but this format is not supported for uploads. Choosing `large` as the format instead of `original` will use JPG which will work correctly.

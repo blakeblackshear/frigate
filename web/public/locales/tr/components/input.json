@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Videoyu İndir",
+      "toast": {
+        "success": "İncele öğesinin videosu indirilmeye başlandı."
+      }
+    }
+  }
+}

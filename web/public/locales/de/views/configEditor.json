@@ -1,0 +1,15 @@
+{
+  "configEditor": "Konfigurationseditor",
+  "copyConfig": "Konfiguration kopieren",
+  "saveAndRestart": "Sichern und Neustarten",
+  "saveOnly": "Nur Sichern",
+  "toast": {
+    "error": {
+      "savingError": "Fehler beim Speichern der Konfiguration"
+    },
+    "success": {
+      "copyToClipboard": "Konfiguration in Zwischenablage kopiert."
+    }
+  },
+  "documentTitle": "Konfigurationseditor - Frigate"
+}

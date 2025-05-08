@@ -185,7 +185,7 @@ export function CameraStreamingDialog({
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="mb-4">
-        <DialogTitle className="capitalize">
+        <DialogTitle className="smart-capitalize">
           {t("group.camera.setting.title", {
             cameraName: camera.replaceAll("_", " "),
           })}

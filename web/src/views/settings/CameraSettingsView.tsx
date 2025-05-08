@@ -251,8 +251,8 @@ export default function CameraSettingsView({
   }
 
   useEffect(() => {
-    document.title = "Camera Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.camera");
+  }, [t]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
@@ -431,7 +431,7 @@ export default function CameraSettingsView({
                                           }}
                                         />
                                       </FormControl>
-                                      <FormLabel className="font-normal capitalize">
+                                      <FormLabel className="font-normal smart-capitalize">
                                         {zone.name.replaceAll("_", " ")}
                                       </FormLabel>
                                     </FormItem>
@@ -536,7 +536,7 @@ export default function CameraSettingsView({
                                             }}
                                           />
                                         </FormControl>
-                                        <FormLabel className="font-normal capitalize">
+                                        <FormLabel className="font-normal smart-capitalize">
                                           {zone.name.replaceAll("_", " ")}
                                         </FormLabel>
                                       </FormItem>

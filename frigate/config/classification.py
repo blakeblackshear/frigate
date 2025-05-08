@@ -19,6 +19,11 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
+class LPRDeviceEnum(str, Enum):
+    GPU = "GPU"
+    CPU = "CPU"
+
+
 class BirdClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable bird classification.")
     threshold: float = Field(
@@ -89,11 +94,18 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
         default=500, title="Min area of face box to consider running face recognition."
     )
 
-    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
+    device: Optional[LPRDeviceEnum] = Field(
+        default=LPRDeviceEnum.CPU,
+        title="The device used for license plate recognition.",
+    )
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
     detection_threshold: float = Field(
         default=0.7,
         title="License plate object confidence score required to begin running recognition.",
@@ -156,4 +168,4 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         le=10,
     )
 
-    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())

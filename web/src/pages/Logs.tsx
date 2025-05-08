@@ -493,7 +493,7 @@ function Logs() {
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
-                  <div className="capitalize">{item}</div>
+                  <div className="smart-capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -536,7 +536,7 @@ function Logs() {
         <div className="grid grid-cols-5 *:px-0 *:py-3 *:text-sm *:text-primary/40 md:grid-cols-12">
           <div className="col-span-3 lg:col-span-2">
             <div className="flex w-full flex-row items-center">
-              <div className="ml-1 min-w-16 capitalize lg:min-w-20">
+              <div className="ml-1 min-w-16 smart-capitalize lg:min-w-20">
                 {t("logs.type.label")}
               </div>
               <div className="mr-3">{t("logs.type.timestamp")}</div>

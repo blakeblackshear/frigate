@@ -239,11 +239,8 @@ sudo cp docker/main/rootfs/usr/local/nginx/conf/* /usr/local/nginx/conf/ && sudo
 
 ## Contributing translations of the Web UI
 
-If you'd like to contribute translations to Frigate, please follow these steps:
+Frigate uses [Weblate](https://weblate.org) to manage translations of the Web UI. To contribute translation, sign up for an account at Weblate and navigate to the Frigate NVR project:
 
-1. Fork the repository and create a new branch specifically for your translation work
-2. Locate the localization files in the web/public/locales directory
-3. Add or modify the appropriate language JSON files, maintaining the existing key structure while translating only the values
-4. Ensure your translations maintain proper formatting, including any placeholder variables (like `{{example}}`)
-5. Before submitting, thoroughly review the UI
-6. When creating your PR, include a brief description of the languages you've added or updated, and reference any related issues
+https://hosted.weblate.org/projects/frigate-nvr/
+
+When translating, maintain the existing key structure while translating only the values. Ensure your translations maintain proper formatting, including any placeholder variables (like `{{example}}`).

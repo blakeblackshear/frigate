@@ -1,0 +1,17 @@
+{
+  "search": "Arama",
+  "documentTitle": "Dışa Aktar - Frigate",
+  "deleteExport": "Dışa Aktarımı Sil",
+  "deleteExport.desc": "{{exportName}} adlı dışa aktarımı silmek istediğinize emin misiniz?",
+  "editExport": {
+    "saveExport": "Dışa Aktarımı Kaydet",
+    "desc": "Bu dışa aktarım için yeni bir isim girin.",
+    "title": "Dışa Aktarımı Yeniden Adlandır"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Dışa aktarım adlandırılamadı: {{errorMessage}}"
+    }
+  },
+  "noExports": "Dışa aktarım bulunamadı"
+}

@@ -241,6 +241,7 @@ export interface CameraConfig {
     position: string;
     thickness: number;
   };
+  type: string;
   ui: UiConfig;
   webui_url: string | null;
   zones: {
@@ -296,6 +297,13 @@ export interface FrigateConfig {
 
   cameras: {
     [cameraName: string]: CameraConfig;
+  };
+
+  classification: {
+    bird: {
+      enabled: boolean;
+      threshold: number;
+    };
   };
 
   database: {
@@ -400,6 +408,7 @@ export interface FrigateConfig {
       id: string;
       trainDate: string;
       baseModel: string;
+      isBaseModel: boolean;
       supportedDetectors: string[];
       width: number;
       height: number;

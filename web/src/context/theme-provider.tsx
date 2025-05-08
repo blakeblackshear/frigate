@@ -23,7 +23,7 @@ export const colorSchemes: ColorScheme[] = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const friendlyColorSchemeName = (className: string): string => {
   const words = className.split("-").slice(1); // Exclude the first word (e.g., 'theme')
-  return "menu.theme." + words.join(".");
+  return "menu.theme." + words.join("");
 };
 
 type ThemeProviderProps = {

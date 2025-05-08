@@ -10,9 +10,8 @@ import {
 import useSWR from "swr";
 import { CiCircleAlert } from "react-icons/ci";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useTimezone } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useTranslation } from "react-i18next";
 
 type CameraStorage = {
@@ -70,6 +69,19 @@ export default function StorageMetrics({
       : null;
   }, [recordingsSummary]);
 
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    return t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
+      ns: "common",
+    });
+  }, [t, timeFormat]);
+
+  const formattedEarliestDate = useFormattedTimestamp(
+    earliestDate || 0,
+    format,
+    timezone,
+  );
+
   if (!cameraStorage || !stats || !totalStorage || !config) {
     return;
   }
@@ -114,13 +126,7 @@ export default function StorageMetrics({
               <span className="font-medium">
                 {t("storage.recordings.earliestRecording")}
               </span>{" "}
-              {formatUnixTimestampToDateTime(earliestDate, {
-                timezone: timezone,
-                strftime_fmt:
-                  config.ui.time_format === "24hour"
-                    ? "%d %b %Y, %H:%M"
-                    : "%B %d, %Y, %I:%M %p",
-              })}
+              {formattedEarliestDate}
             </div>
           )}
         </div>

@@ -59,10 +59,13 @@ const sidebars: SidebarsConfig = {
         "configuration/objects",
         "configuration/stationary_objects",
       ],
+      "Hardware Acceleration": [
+        "configuration/hardware_acceleration_video",
+        "configuration/hardware_acceleration_enrichments",
+      ],
       "Extra Configuration": [
         "configuration/authentication",
         "configuration/notifications",
-        "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
         "configuration/pwa",
         "configuration/tls",

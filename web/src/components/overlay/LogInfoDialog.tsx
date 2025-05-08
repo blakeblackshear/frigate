@@ -17,6 +17,7 @@ import {
 import { LogChip } from "../indicators/Chip";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type LogInfoDialogProps = {
   logLine?: LogLine;
@@ -26,6 +27,7 @@ export default function LogInfoDialog({
   logLine,
   setLogLine,
 }: LogInfoDialogProps) {
+  const { t } = useTranslation(["views/system"]);
   const Overlay = isDesktop ? Sheet : Drawer;
   const Content = isDesktop ? SheetContent : DrawerContent;
   const Header = isDesktop ? SheetHeader : DrawerHeader;
@@ -53,19 +55,27 @@ export default function LogInfoDialog({
         {logLine && (
           <div className="flex size-full flex-col gap-5">
             <div className="flex w-min flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Type</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.label")}
+              </div>
               <LogChip severity={logLine.severity} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Timestamp</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.timestamp")}
+              </div>
               <div className="text-sm">{logLine.dateStamp}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Tag</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.tag")}
+              </div>
               <div className="text-sm">{logLine.section}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Message</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.message")}
+              </div>
               <div className="text-sm">
                 {logLine.content.split("\n").map((line) => (
                   <>

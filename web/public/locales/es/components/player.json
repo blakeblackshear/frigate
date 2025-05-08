@@ -1,0 +1,51 @@
+{
+  "noPreviewFound": "No se encontró vista previa",
+  "noPreviewFoundFor": "No se encontró vista previa para {{cameraName}}",
+  "submitFrigatePlus": {
+    "submit": "Enviar",
+    "title": "¿Enviar este fotograma a Frigate+?"
+  },
+  "streamOffline": {
+    "desc": "No se han recibido fotogramas en la transmisión <code>detect</code> de {{cameraName}}, revisa los registros de errores",
+    "title": "Transmisión desconectada"
+  },
+  "cameraDisabled": "La cámara está deshabilitada",
+  "stats": {
+    "streamType": {
+      "title": "Tipo de transmisión:",
+      "short": "Tipo"
+    },
+    "bandwidth": {
+      "title": "Ancho de banda:",
+      "short": "Ancho de banda"
+    },
+    "latency": {
+      "title": "Latencia:",
+      "short": {
+        "title": "Latencia",
+        "value": "{{seconds}} seg"
+      },
+      "value": "{{seconds}} segundos"
+    },
+    "totalFrames": "Fotogramas totales:",
+    "droppedFrames": {
+      "title": "Fotogramas perdidos:",
+      "short": {
+        "title": "Perdidos",
+        "value": "{{droppedFrames}} fotogramas"
+      }
+    },
+    "decodedFrames": "Fotogramas decodificados:",
+    "droppedFrameRate": "Tasa de fotogramas perdidos:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Fotograma enviado correctamente a Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Error al enviar el fotograma a Frigate+"
+    }
+  },
+  "livePlayerRequiredIOSVersion": "Se requiere iOS 17.1 o superior para este tipo de transmisión en vivo.",
+  "noRecordingsFoundForThisTime": "No se encontraron grabaciones para este momento"
+}

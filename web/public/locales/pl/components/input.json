@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Pobierz Wideo",
+      "toast": {
+        "success": "Rozpoczęto pobieranie nagrania do przeglądu."
+      }
+    }
+  }
+}

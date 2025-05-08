@@ -100,7 +100,7 @@ export function ObjectPath({
             />
           </TooltipTrigger>
           <TooltipPortal>
-            <TooltipContent side="top" className="capitalize">
+            <TooltipContent side="top" className="smart-capitalize">
               {pos.lifecycle_item
                 ? getLifecycleItemDescription(pos.lifecycle_item)
                 : "Tracked point"}

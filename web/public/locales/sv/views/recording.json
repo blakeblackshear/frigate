@@ -1,0 +1,12 @@
+{
+  "export": "Export",
+  "filter": "Filter",
+  "calendar": "Kalender",
+  "filters": "Filter",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Inget giltigt tidsintervall valt",
+      "endTimeMustAfterStartTime": "Sluttid måste vara efter starttid"
+    }
+  }
+}

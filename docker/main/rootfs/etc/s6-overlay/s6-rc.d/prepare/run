@@ -138,5 +138,9 @@ function migrate_db_from_media_to_config() {
     fi
 }
 
+# remove leftover from last run, not normally needed, but just in case
+# used by the docker healthcheck
+rm -f /dev/shm/.frigate-is-stopping
+
 migrate_addon_config_dir
 migrate_db_from_media_to_config

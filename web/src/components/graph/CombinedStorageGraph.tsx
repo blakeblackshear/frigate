@@ -191,7 +191,7 @@ export function CombinedStorageGraph({
           <TableBody>
             {series.map((item) => (
               <TableRow key={item.name}>
-                <TableCell className="flex flex-row items-center gap-2 font-medium capitalize">
+                <TableCell className="flex flex-row items-center gap-2 font-medium smart-capitalize">
                   {" "}
                   <div
                     className="size-3 rounded-md"

@@ -152,7 +152,7 @@ go2rtc:
     my_camera: rtsp://username:$%40foo%25@192.168.1.100
 ```
 
-See [this comment(https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
+See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
 
 ## Advanced Restream Configurations
 

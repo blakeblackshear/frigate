@@ -196,7 +196,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                   </Button>
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent className="capitalize" side="right">
+                  <TooltipContent className="smart-capitalize" side="right">
                     {name}
                   </TooltipContent>
                 </TooltipPortal>
@@ -657,10 +657,11 @@ export function CameraGroupEdit({
   const formSchema = z.object({
     name: z
       .string()
+      .trim()
       .min(2, {
         message: t("group.name.errorMessage.mustLeastCharacters"),
       })
-      .transform((val: string) => val.trim().replace(/\s+/g, "_"))
+      .transform((val: string) => val.replace(/\s+/g, "_"))
       .refine(
         (value: string) => {
           return (
@@ -846,7 +847,7 @@ export function CameraGroupEdit({
                   <FormControl key={camera}>
                     <div className="flex items-center justify-between gap-1">
                       <Label
-                        className="mx-2 w-full cursor-pointer capitalize text-primary"
+                        className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                         htmlFor={camera.replaceAll("_", " ")}
                       >
                         {camera.replaceAll("_", " ")}

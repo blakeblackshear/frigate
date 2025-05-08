@@ -47,7 +47,14 @@
       "desc": {
         "text": "筛选器可帮助您缩小搜索范围。注意，目前还暂不支持中文搜索。以下是在输入字段中使用筛选器的方法：",
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>输入筛选器名称后跟一个冒号（例如：“cameras:”）。</li><li>从建议中选择一个值或输入您自己的值。</li><li>使用多个筛选器时，可以在它们之间用空格分隔。</li><li>日期筛选器（before: 和 after:）使用 <em>{{DateFormat}}</em> 格式。</li><li>时间范围筛选器使用 <em>{{exampleTime}}</em> 格式。</li><li>点击筛选器旁边的“x”即可移除筛选条件。</li></ul>",
-        "example": "示例：<code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM</code>"
+        "example": "示例：<code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM</code>",
+        "step2": "选择给出的建议值或自行输入；",
+        "step3": "多个过滤器之间用空格分隔；",
+        "step5": "时间范围过滤器使用 {{exampleTime}} 格式；",
+        "step6": "点击过滤器旁的'x'可移除该过滤选项。",
+        "exampleLabel": "范例：",
+        "step1": "输入过滤键名后接冒号（例如 \"cameras:\" ）；",
+        "step4": "日期过滤器（before: 和 after:）使用 {{DateFormat}} 格式；"
       }
     },
     "header": {
@@ -62,6 +69,6 @@
     "clear": "清除相似搜索"
   },
   "placeholder": {
-    "search": "搜索..."
+    "search": "搜索…"
   }
 }

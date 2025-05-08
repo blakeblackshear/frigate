@@ -25,14 +25,18 @@ type ImageEntryProps = {
 export default function ImageEntry({
   onSave,
   children,
-  maxSize = 10 * 1024 * 1024, // 10MB default
+  maxSize = 20 * 1024 * 1024, // 20MB default
   accept = { "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] },
 }: ImageEntryProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
   const [preview, setPreview] = useState<string | null>(null);
 
   const formSchema = z.object({
-    file: z.instanceof(File, { message: "Please select an image file." }),
+    file: z
+      .instanceof(File, { message: t("imageEntry.validation.selectImage") })
+      .refine((file) =>
+        accept["image/*"].includes(`.${file.type.split("/")[1]}`),
+      ),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

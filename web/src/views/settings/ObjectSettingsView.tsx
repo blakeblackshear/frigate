@@ -197,7 +197,7 @@ export default function ObjectSettingsView({
                       <div className="mb-2 flex flex-col">
                         <div className="flex items-center gap-2">
                           <Label
-                            className="mb-0 cursor-pointer capitalize text-primary"
+                            className="mb-0 cursor-pointer text-primary smart-capitalize"
                             htmlFor={param}
                           >
                             {title}
@@ -239,7 +239,7 @@ export default function ObjectSettingsView({
                       <div className="mb-2 flex flex-col">
                         <div className="flex items-center gap-2">
                           <Label
-                            className="mb-0 cursor-pointer capitalize text-primary"
+                            className="mb-0 cursor-pointer text-primary smart-capitalize"
                             htmlFor="debugdraw"
                           >
                             {t("debug.objectShapeFilterDrawing.title")}
@@ -366,7 +366,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                     {getIconForLabel(obj.label, "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
-                    {capitalizeFirstLetter(obj.label.replaceAll("_", " "))}
+                    {t(obj.label, { ns: "objects" })}
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-center justify-end">

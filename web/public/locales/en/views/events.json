@@ -31,5 +31,8 @@
     "label": "View new review items",
     "button": "New Items To Review"
   },
-  "camera": "Camera"
+  "selected_one": "{{count}} selected",
+  "selected_other": "{{count}} selected",
+  "camera": "Camera",
+  "detected": "detected"
 }

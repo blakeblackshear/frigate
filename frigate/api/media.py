@@ -1,5 +1,6 @@
 """Image and video apis."""
 
+import asyncio
 import glob
 import logging
 import math
@@ -110,9 +111,12 @@ def imagestream(
 @router.get("/{camera_name}/ptz/info")
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
-        return JSONResponse(
-            content=await request.app.onvif.get_camera_info(camera_name),
+        # Schedule get_camera_info in the OnvifController's event loop
+        future = asyncio.run_coroutine_threadsafe(
+            request.app.onvif.get_camera_info(camera_name), request.app.onvif.loop
         )
+        result = future.result()
+        return JSONResponse(content=result)
     else:
         return JSONResponse(
             content={"success": False, "message": "Camera not found"},
@@ -537,7 +541,10 @@ def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
+    description="For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.",
+)
 def recording_clip(
     request: Request,
     camera_name: str,

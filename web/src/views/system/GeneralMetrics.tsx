@@ -34,7 +34,7 @@ export default function GeneralMetrics({
   const { data: initialStats } = useSWR<FrigateStats[]>(
     [
       "stats/history",
-      { keys: "cpu_usages,detectors,gpu_usages,processes,service" },
+      { keys: "cpu_usages,detectors,gpu_usages,npu_usages,processes,service" },
     ],
     {
       revalidateOnFocus: false,
@@ -240,7 +240,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -316,7 +316,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -350,7 +350,7 @@ export default function GeneralMetrics({
         return;
       }
 
-      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+      Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -369,7 +369,56 @@ export default function GeneralMetrics({
     return Object.keys(series).length > 0 ? Object.values(series) : undefined;
   }, [statsHistory]);
 
+  // npu stats
+
+  const npuSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: number }[] };
+    } = {};
+    let hasValidNpu = false;
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      Object.entries(stats.npu_usages || {}).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        if (stats?.npu) {
+          hasValidNpu = true;
+          series[key].data.push({ x: statsIdx + 1, y: stats.npu });
+        }
+      });
+    });
+
+    if (!hasValidNpu) {
+      return [];
+    }
+
+    return Object.keys(series).length > 0 ? Object.values(series) : [];
+  }, [statsHistory]);
+
   // other processes stats
+
+  const hardwareType = useMemo(() => {
+    const hasGpu = gpuSeries.length > 0;
+    const hasNpu = npuSeries.length > 0;
+
+    if (hasGpu && !hasNpu) {
+      return "GPUs";
+    } else if (!hasGpu && hasNpu) {
+      return "NPUs";
+    } else {
+      return "GPUs / NPUs";
+    }
+  }, [gpuSeries, npuSeries]);
 
   const otherProcessCpuSeries = useMemo(() => {
     if (!statsHistory) {
@@ -479,7 +528,9 @@ export default function GeneralMetrics({
             <>
               {detTempSeries && (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5">Detector Temperature</div>
+                  <div className="mb-5">
+                    {t("general.detector.temperature")}
+                  </div>
                   {detTempSeries.map((series) => (
                     <ThresholdBarGraph
                       key={series.name}
@@ -533,11 +584,13 @@ export default function GeneralMetrics({
           )}
         </div>
 
-        {(statsHistory.length == 0 || statsHistory[0].gpu_usages) && (
+        {(statsHistory.length == 0 ||
+          gpuSeries.length > 0 ||
+          npuSeries.length > 0) && (
           <>
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm font-medium text-muted-foreground">
-                GPUs
+                {hardwareType}
               </div>
               {canGetGpuInfo && (
                 <Button
@@ -556,97 +609,127 @@ export default function GeneralMetrics({
                 gpuEncSeries?.length && "md:grid-cols-4",
               )}
             >
-              {statsHistory.length != 0 ? (
-                <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                  <div className="mb-5">
-                    {t("general.hardwareInfo.gpuUsage")}
-                  </div>
-                  {gpuSeries.map((series) => (
-                    <ThresholdBarGraph
-                      key={series.name}
-                      graphId={`${series.name}-gpu`}
-                      name={series.name}
-                      unit="%"
-                      threshold={GPUUsageThreshold}
-                      updateTimes={updateTimes}
-                      data={[series]}
-                    />
-                  ))}
+              {statsHistory[0]?.gpu_usages && (
+                <>
+                  {statsHistory.length != 0 ? (
+                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                      <div className="mb-5">
+                        {t("general.hardwareInfo.gpuUsage")}
+                      </div>
+                      {gpuSeries.map((series) => (
+                        <ThresholdBarGraph
+                          key={series.name}
+                          graphId={`${series.name}-gpu`}
+                          name={series.name}
+                          unit="%"
+                          threshold={GPUUsageThreshold}
+                          updateTimes={updateTimes}
+                          data={[series]}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                  {statsHistory.length != 0 ? (
+                    <>
+                      {gpuMemSeries && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.gpuMemory")}
+                          </div>
+                          {gpuMemSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-mem`}
+                              unit="%"
+                              name={series.name}
+                              threshold={GPUMemThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                  {statsHistory.length != 0 ? (
+                    <>
+                      {gpuEncSeries && gpuEncSeries?.length != 0 && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.gpuEncoder")}
+                          </div>
+                          {gpuEncSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-enc`}
+                              unit="%"
+                              name={series.name}
+                              threshold={GPUMemThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                  {statsHistory.length != 0 ? (
+                    <>
+                      {gpuDecSeries && gpuDecSeries?.length != 0 && (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.gpuDecoder")}
+                          </div>
+                          {gpuDecSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-dec`}
+                              unit="%"
+                              name={series.name}
+                              threshold={GPUMemThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
+                </>
+              )}
+              {statsHistory[0]?.npu_usages && (
+                <div
+                  className={cn("mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2")}
+                >
+                  {statsHistory.length != 0 ? (
+                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                      <div className="mb-5">
+                        {t("general.hardwareInfo.npuUsage")}
+                      </div>
+                      {npuSeries.map((series) => (
+                        <ThresholdBarGraph
+                          key={series.name}
+                          graphId={`${series.name}-npu`}
+                          name={series.name}
+                          unit="%"
+                          threshold={GPUUsageThreshold}
+                          updateTimes={updateTimes}
+                          data={[series]}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <Skeleton className="aspect-video w-full" />
+                  )}
                 </div>
-              ) : (
-                <Skeleton className="aspect-video w-full" />
-              )}
-              {statsHistory.length != 0 ? (
-                <>
-                  {gpuMemSeries && (
-                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">
-                        {t("general.hardwareInfo.gpuMemory")}
-                      </div>
-                      {gpuMemSeries.map((series) => (
-                        <ThresholdBarGraph
-                          key={series.name}
-                          graphId={`${series.name}-mem`}
-                          unit="%"
-                          name={series.name}
-                          threshold={GPUMemThreshold}
-                          updateTimes={updateTimes}
-                          data={[series]}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Skeleton className="aspect-video w-full" />
-              )}
-              {statsHistory.length != 0 ? (
-                <>
-                  {gpuEncSeries && gpuEncSeries?.length != 0 && (
-                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">
-                        {t("general.hardwareInfo.gpuEncoder")}
-                      </div>
-                      {gpuEncSeries.map((series) => (
-                        <ThresholdBarGraph
-                          key={series.name}
-                          graphId={`${series.name}-enc`}
-                          unit="%"
-                          name={series.name}
-                          threshold={GPUMemThreshold}
-                          updateTimes={updateTimes}
-                          data={[series]}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Skeleton className="aspect-video w-full" />
-              )}
-              {statsHistory.length != 0 ? (
-                <>
-                  {gpuDecSeries && gpuDecSeries?.length != 0 && (
-                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">
-                        {t("general.hardwareInfo.gpuDecoder")}
-                      </div>
-                      {gpuDecSeries.map((series) => (
-                        <ThresholdBarGraph
-                          key={series.name}
-                          graphId={`${series.name}-dec`}
-                          unit="%"
-                          name={series.name}
-                          threshold={GPUMemThreshold}
-                          updateTimes={updateTimes}
-                          data={[series]}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Skeleton className="aspect-video w-full" />
               )}
             </div>
           </>

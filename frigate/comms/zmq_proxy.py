@@ -6,6 +6,8 @@ from typing import Optional
 
 import zmq
 
+from frigate.const import FAST_QUEUE_TIMEOUT
+
 SOCKET_PUB = "ipc:///tmp/cache/proxy_pub"
 SOCKET_SUB = "ipc:///tmp/cache/proxy_sub"
 
@@ -77,7 +79,9 @@ class Subscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, self.topic)
         self.socket.connect(SOCKET_SUB)
 
-    def check_for_update(self, timeout: float = 1) -> Optional[tuple[str, any]]:
+    def check_for_update(
+        self, timeout: float = FAST_QUEUE_TIMEOUT
+    ) -> Optional[tuple[str, any]]:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)

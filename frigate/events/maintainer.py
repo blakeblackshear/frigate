@@ -75,7 +75,7 @@ class EventProcessor(threading.Thread):
         ).execute()
 
         while not self.stop_event.is_set():
-            update = self.event_receiver.check_for_update()
+            update = self.event_receiver.check_for_update(timeout=1)
 
             if update == None:
                 continue

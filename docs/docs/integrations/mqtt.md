@@ -104,13 +104,42 @@ Message published for each changed tracked object. The first message is publishe
 
 ### `frigate/tracked_object_update`
 
-Message published for updates to tracked object metadata, for example when GenAI runs and returns a tracked object description.
+Message published for updates to tracked object metadata, for example:
+
+#### Generative AI Description Update
 
 ```json
 {
   "type": "description",
   "id": "1607123955.475377-mxklsc",
   "description": "The car is a red sedan moving away from the camera."
+}
+```
+
+#### Face Recognition Update
+
+```json
+{
+  "type": "face",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John",
+  "score": 0.95,
+  "camera": "front_door_cam",
+  "timestamp": 1607123958.748393,
+}
+```
+
+#### License Plate Recognition Update
+
+```json
+{
+  "type": "lpr",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John's Car",
+  "plate": "123ABC",
+  "score": 0.95,
+  "camera": "driveway_cam",
+  "timestamp": 1607123958.748393,
 }
 ```
 

@@ -754,7 +754,6 @@ class Birdseye:
             "birdseye", self.converter, websocket_server, stop_event
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
-        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
         self.birdseye_subscriber = ConfigSubscriber("config/birdseye/")
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
@@ -799,23 +798,12 @@ class Birdseye:
                 updated_birdseye_config,
             ) = self.birdseye_subscriber.check_for_update()
 
-            (
-                updated_enabled_topic,
-                updated_enabled_config,
-            ) = self.config_enabled_subscriber.check_for_update()
-
-            if not updated_birdseye_topic and not updated_enabled_topic:
+            if not updated_birdseye_topic:
                 break
 
             if updated_birdseye_config:
                 camera_name = updated_birdseye_topic.rpartition("/")[-1]
                 self.config.cameras[camera_name].birdseye = updated_birdseye_config
-
-            if updated_enabled_config:
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                self.config.cameras[
-                    camera_name
-                ].enabled = updated_enabled_config.enabled
 
         if self.birdseye_manager.update(
             camera,
@@ -828,6 +816,5 @@ class Birdseye:
 
     def stop(self) -> None:
         self.birdseye_subscriber.stop()
-        self.config_enabled_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

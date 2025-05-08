@@ -108,7 +108,12 @@ export default function SearchActionGroup({
 
       <div className="absolute inset-x-2 inset-y-0 flex items-center justify-between gap-2 bg-background py-2 md:left-auto">
         <div className="mx-1 flex items-center justify-center text-sm text-muted-foreground">
-          <div className="p-1">{`${selectedObjects.length} selected`}</div>
+          <div className="p-1">
+            {t("selected", {
+              ns: "views/events",
+              count: selectedObjects.length,
+            })}
+          </div>
           <div className="p-1">{"|"}</div>
           <div
             className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"

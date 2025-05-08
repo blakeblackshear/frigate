@@ -3,12 +3,12 @@
   "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
   "lowBandwidthMode": "低带宽模式",
   "twoWayTalk": {
-    "enable": "开启双向对话",
-    "disable": "关闭双向对话"
+    "enable": "开启实时对话",
+    "disable": "关闭实时通话"
   },
   "cameraAudio": {
-    "enable": "开启摄像头音频",
-    "disable": "关闭摄像头音频"
+    "enable": "开启音频输出",
+    "disable": "关闭音频输出"
   },
   "ptz": {
     "move": {
@@ -90,12 +90,12 @@
     },
     "debugView": "调试视图",
     "start": "开始手动按需录制",
-    "started": "已启用手动按需录制",
-    "failedToStart": "启动手动录制失败",
+    "started": "已启用手动按需录制。",
+    "failedToStart": "启动手动录制失败。",
     "recordDisabledTips": "由于此摄像头的配置中禁用了录制或对其进行了限制，将只会保存快照。",
     "end": "停止手动按需录制",
-    "ended": "已完成手动按需录制",
-    "failedToEnd": "停止手动录制失败"
+    "ended": "已完成手动按需录制。",
+    "failedToEnd": "停止手动录制失败。"
   },
   "streamingSettings": "视频流设置",
   "notifications": "通知",

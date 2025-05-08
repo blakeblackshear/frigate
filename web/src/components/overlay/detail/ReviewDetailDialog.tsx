@@ -37,7 +37,6 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
-import { useOverlayState } from "@/hooks/use-overlay-state";
 import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
@@ -97,8 +96,12 @@ export default function ReviewDetailDialog({
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
-      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
+      ? t("time.formattedTimestampMonthDayYearHourMinute.24hour", {
+          ns: "common",
+        })
+      : t("time.formattedTimestampMonthDayYearHourMinute.12hour", {
+          ns: "common",
+        }),
     config?.ui.timezone,
   );
 
@@ -109,10 +112,7 @@ export default function ReviewDetailDialog({
 
   // dialog and mobile page
 
-  const [isOpen, setIsOpen] = useOverlayState(
-    "reviewPane",
-    review != undefined,
-  );
+  const [isOpen, setIsOpen] = useState(review != undefined);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -156,7 +156,11 @@ export default function ReviewDetailDialog({
 
   return (
     <>
-      <Overlay open={isOpen ?? false} onOpenChange={handleOpenChange}>
+      <Overlay
+        open={isOpen ?? false}
+        onOpenChange={handleOpenChange}
+        enableHistoryBack={true}
+      >
         <FrigatePlusDialog
           upload={upload}
           onClose={() => setUpload(undefined)}
@@ -233,7 +237,7 @@ export default function ReviewDetailDialog({
                     <div className="text-sm text-primary/40">
                       {t("details.camera")}
                     </div>
-                    <div className="text-sm capitalize">
+                    <div className="text-sm smart-capitalize">
                       {review.camera.replaceAll("_", " ")}
                     </div>
                   </div>
@@ -249,19 +253,20 @@ export default function ReviewDetailDialog({
                     <div className="text-sm text-primary/40">
                       {t("details.objects")}
                     </div>
-                    <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm capitalize">
+                    <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm smart-capitalize">
                       {events?.map((event) => {
                         return (
                           <div
                             key={event.id}
-                            className="flex flex-row items-center gap-2 capitalize"
+                            className="flex flex-row items-center gap-2 smart-capitalize"
                           >
                             {getIconForLabel(
                               event.label,
                               "size-3 text-primary",
                             )}
-                            {event.sub_label ?? event.label} (
-                            {Math.round(event.data.top_score * 100)}%)
+                            {event.sub_label ??
+                              event.label.replaceAll("_", " ")}{" "}
+                            ({Math.round(event.data.top_score * 100)}%)
                             <Tooltip>
                               <TooltipTrigger>
                                 <div
@@ -289,12 +294,12 @@ export default function ReviewDetailDialog({
                       <div className="text-sm text-primary/40">
                         {t("details.zones")}
                       </div>
-                      <div className="flex flex-col items-start gap-2 text-sm capitalize">
+                      <div className="flex flex-col items-start gap-2 text-sm smart-capitalize">
                         {review.data.zones.map((zone) => {
                           return (
                             <div
                               key={zone}
-                              className="flex flex-row items-center gap-2 capitalize"
+                              className="flex flex-row items-center gap-2 smart-capitalize"
                             >
                               {zone.replaceAll("_", " ")}
                             </div>
@@ -323,7 +328,11 @@ export default function ReviewDetailDialog({
                         ns="views/explore"
                         values={{
                           objects: missingObjects
-                            .map((x) => t(x, { ns: "objects" }))
+                            .map((x) =>
+                              t(x, {
+                                ns: "objects",
+                              }),
+                            )
                             .join(", "),
                         }}
                       >

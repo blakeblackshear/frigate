@@ -5,6 +5,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
+import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,10 +18,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -41,8 +46,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import {
+  LuFolderCheck,
   LuImagePlus,
-  LuPlus,
+  LuInfo,
+  LuPencil,
   LuRefreshCw,
   LuScanFace,
   LuSearch,
@@ -63,7 +70,7 @@ export default function FaceLibrary() {
     document.title = t("documentTitle");
   }, [t]);
 
-  const [page, setPage] = useState<string>();
+  const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
   // face data
@@ -85,20 +92,6 @@ export default function FaceLibrary() {
     () => faceData?.["train"] || [],
     [faceData],
   );
-
-  useEffect(() => {
-    if (!pageToggle) {
-      if (trainImages.length > 0) {
-        setPageToggle("train");
-      } else if (faces) {
-        setPageToggle(faces[0]);
-      }
-    } else if (pageToggle == "train" && trainImages.length == 0) {
-      setPageToggle(faces[0]);
-    }
-    // we need to listen on the value of the faces list
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trainImages, faces]);
 
   // upload
 
@@ -223,28 +216,57 @@ export default function FaceLibrary() {
     [faceImages, refreshFaces, setPageToggle, t],
   );
 
+  const onRename = useCallback(
+    (oldName: string, newName: string) => {
+      axios
+        .put(`/faces/${oldName}/rename`, { new_name: newName })
+        .then((resp) => {
+          if (resp.status === 200) {
+            toast.success(t("toast.success.renamedFace", { name: newName }), {
+              position: "top-center",
+            });
+            setPageToggle("train");
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.renameFaceFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [setPageToggle, refreshFaces, t],
+  );
+
   // keyboard
 
-  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  useKeyboardListener(
+    page === "train" ? ["a", "Escape"] : [],
+    (key, modifiers) => {
+      if (modifiers.repeat || !modifiers.down) {
+        return;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          if (selectedFaces.length) {
-            setSelectedFaces([]);
-          } else {
-            setSelectedFaces([...trainImages]);
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl) {
+            if (selectedFaces.length) {
+              setSelectedFaces([]);
+            } else {
+              setSelectedFaces([...trainImages]);
+            }
           }
-        }
-        break;
-      case "Escape":
-        setSelectedFaces([]);
-        break;
-    }
-  });
+          break;
+        case "Escape":
+          setSelectedFaces([]);
+          break;
+      }
+    },
+  );
 
   if (!config) {
     return <ActivityIndicator />;
@@ -276,6 +298,7 @@ export default function FaceLibrary() {
           trainImages={trainImages}
           setPageToggle={setPageToggle}
           onDelete={onDelete}
+          onRename={onRename}
         />
         {selectedFaces?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
@@ -338,8 +361,9 @@ type LibrarySelectorProps = {
   faceData?: FaceLibraryData;
   faces: string[];
   trainImages: string[];
-  setPageToggle: (toggle: string | undefined) => void;
+  setPageToggle: (toggle: string) => void;
   onDelete: (name: string, ids: string[], isName: boolean) => void;
+  onRename: (old_name: string, new_name: string) => void;
 };
 function LibrarySelector({
   pageToggle,
@@ -348,9 +372,11 @@ function LibrarySelector({
   trainImages,
   setPageToggle,
   onDelete,
+  onRename,
 }: LibrarySelectorProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [renameFace, setRenameFace] = useState<string | null>(null);
 
   const handleDeleteFace = useCallback(
     (faceName: string) => {
@@ -361,6 +387,13 @@ function LibrarySelector({
       setPageToggle("train");
     },
     [faceData, onDelete, setPageToggle],
+  );
+
+  const handleSetOpen = useCallback(
+    (open: boolean) => {
+      setRenameFace(open ? renameFace : null);
+    },
+    [renameFace],
   );
 
   return (
@@ -395,9 +428,21 @@ function LibrarySelector({
         </DialogContent>
       </Dialog>
 
+      <TextEntryDialog
+        open={!!renameFace}
+        setOpen={handleSetOpen}
+        title={t("renameFace.title")}
+        description={t("renameFace.desc", { name: renameFace })}
+        onSave={(newName) => {
+          onRename(renameFace!, newName);
+          setRenameFace(null);
+        }}
+        defaultValue={renameFace || ""}
+      />
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="flex justify-between capitalize">
+          <Button className="flex justify-between smart-capitalize">
             {pageToggle || t("selectFace")}
             <span className="ml-2 text-primary-variant">
               ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
@@ -408,18 +453,16 @@ function LibrarySelector({
           className="scrollbar-container max-h-[40dvh] min-w-[220px] overflow-y-auto"
           align="start"
         >
-          {trainImages.length > 0 && (
-            <DropdownMenuItem
-              className="flex cursor-pointer items-center justify-start gap-2"
-              aria-label={t("train.aria")}
-              onClick={() => setPageToggle("train")}
-            >
-              <div>{t("train.title")}</div>
-              <div className="text-secondary-foreground">
-                ({trainImages.length})
-              </div>
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem
+            className="flex cursor-pointer items-center justify-start gap-2"
+            aria-label={t("train.aria")}
+            onClick={() => setPageToggle("train")}
+          >
+            <div>{t("train.title")}</div>
+            <div className="text-secondary-foreground">
+              ({trainImages.length})
+            </div>
+          </DropdownMenuItem>
           {trainImages.length > 0 && faces.length > 0 && (
             <>
               <DropdownMenuSeparator />
@@ -434,7 +477,7 @@ function LibrarySelector({
               className="group flex items-center justify-between"
             >
               <div
-                className="flex-grow cursor-pointer capitalize"
+                className="flex-grow cursor-pointer smart-capitalize"
                 onClick={() => setPageToggle(face)}
               >
                 {face}
@@ -442,17 +485,44 @@ function LibrarySelector({
                   ({faceData?.[face].length})
                 </span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setConfirmDelete(face);
-                }}
-              >
-                <LuTrash2 className="size-4 text-destructive" />
-              </Button>
+              <div className="flex gap-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRenameFace(face);
+                      }}
+                    >
+                      <LuPencil className="size-4 text-primary" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>{t("button.renameFace")}</TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDelete(face);
+                      }}
+                    >
+                      <LuTrash2 className="size-4 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent>{t("button.deleteFace")}</TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              </div>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -533,10 +603,23 @@ function TrainingGrid({
   const formattedDate = useFormattedTimestamp(
     selectedEvent?.start_time ?? 0,
     config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampWithYear.24hour", { ns: "common" })
-      : t("time.formattedTimestampWithYear.12hour", { ns: "common" }),
+      ? t("time.formattedTimestampMonthDayYearHourMinute.24hour", {
+          ns: "common",
+        })
+      : t("time.formattedTimestampMonthDayYearHourMinute.12hour", {
+          ns: "common",
+        }),
     config?.ui.timezone,
   );
+
+  if (attemptImages.length == 0) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuFolderCheck className="size-16" />
+        {t("train.empty")}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -560,17 +643,30 @@ function TrainingGrid({
           </DialogHeader>
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
-            <div className="text-sm capitalize">
+            <div className="text-sm smart-capitalize">
               {selectedEvent?.sub_label ?? "Unknown"}
             </div>
           </div>
           {selectedEvent?.data.sub_label_score && (
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">
-                {t("details.confidence")}
+                <div className="flex flex-row items-center gap-1">
+                  {t("details.subLabelScore")}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="cursor-pointer p-0">
+                        <LuInfo className="size-4" />
+                        <span className="sr-only">Info</span>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      {t("details.scoreInfo")}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-              <div className="text-sm capitalize">
-                {Math.round(selectedEvent?.data?.sub_label_score || 0) * 100}%
+              <div className="text-sm smart-capitalize">
+                {Math.round((selectedEvent?.data?.sub_label_score || 0) * 100)}%
               </div>
             </div>
           )}
@@ -581,7 +677,8 @@ function TrainingGrid({
             <div className="text-sm">{formattedDate}</div>
           </div>
           <img
-            className="w-full"
+            className="mx-auto max-h-[60dvh] object-contain"
+            loading="lazy"
             src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
           />
         </DialogContent>
@@ -692,7 +789,7 @@ function FaceAttemptGroup({
       }}
     >
       <div className="flex flex-row justify-between">
-        <div className="capitalize">
+        <div className="select-none smart-capitalize">
           Person
           {event?.sub_label
             ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
@@ -783,8 +880,6 @@ function FaceAttempt({
 
   // interaction
 
-  const [newFace, setNewFace] = useState(false);
-
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   useContextMenu(imgRef, () => {
@@ -844,15 +939,6 @@ function FaceAttempt({
 
   return (
     <>
-      {newFace && (
-        <TextEntryDialog
-          open={true}
-          setOpen={setNewFace}
-          title={t("createFaceLibrary.new")}
-          onSave={(newName) => onTrainAttempt(newName)}
-        />
-      )}
-
       <div
         className={cn(
           "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
@@ -861,7 +947,7 @@ function FaceAttempt({
             : "outline-transparent duration-500",
         )}
       >
-        <div className="relative w-full overflow-hidden rounded-lg *:text-card-foreground">
+        <div className="relative w-full select-none overflow-hidden rounded-lg *:text-card-foreground">
           <img
             ref={imgRef}
             className={cn("size-44", isMobile && "w-full")}
@@ -879,10 +965,10 @@ function FaceAttempt({
             />
           </div>
         </div>
-        <div className="p-2">
+        <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="capitalize">{data.name}</div>
+              <div className="smart-capitalize">{data.name}</div>
               <div
                 className={cn(
                   "",
@@ -895,36 +981,12 @@ function FaceAttempt({
               </div>
             </div>
             <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              <Tooltip>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <TooltipTrigger>
-                      <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                    </TooltipTrigger>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      className="flex cursor-pointer gap-2 capitalize"
-                      onClick={() => setNewFace(true)}
-                    >
-                      <LuPlus />
-                      {t("createFaceLibrary.new")}
-                    </DropdownMenuItem>
-                    {faceNames.map((faceName) => (
-                      <DropdownMenuItem
-                        key={faceName}
-                        className="flex cursor-pointer gap-2 capitalize"
-                        onClick={() => onTrainAttempt(faceName)}
-                      >
-                        <LuScanFace />
-                        {faceName}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <TooltipContent>{t("trainFace")}</TooltipContent>
-              </Tooltip>
+              <FaceSelectionDialog
+                faceNames={faceNames}
+                onTrainAttempt={onTrainAttempt}
+              >
+                <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+              </FaceSelectionDialog>
               <Tooltip>
                 <TooltipTrigger>
                   <LuRefreshCw
@@ -990,7 +1052,7 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
       <div className="rounded-b-lg bg-card p-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="capitalize">{name}</div>
+            <div className="smart-capitalize">{name}</div>
           </div>
           <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
             <Tooltip>

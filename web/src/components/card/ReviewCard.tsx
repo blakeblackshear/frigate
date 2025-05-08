@@ -52,7 +52,9 @@ export default function ReviewCard({
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
   const formattedDate = useFormattedTimestamp(
     event.start_time,
-    config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+    config?.ui.time_format == "24hour"
+      ? t("time.formattedTimestampHourMinute.24hour", { ns: "common" })
+      : t("time.formattedTimestampHourMinute.12hour", { ns: "common" }),
     config?.ui.timezone,
   );
   const isSelected = useMemo(
@@ -173,7 +175,7 @@ export default function ReviewCard({
               <div className="font-extra-light text-xs">{formattedDate}</div>
             </div>
           </TooltipTrigger>
-          <TooltipContent className="capitalize">
+          <TooltipContent className="smart-capitalize">
             {[
               ...new Set([
                 ...(event.data.objects || []),

@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Ladda ner Video",
+      "toast": {
+        "success": "Din video laddas ner."
+      }
+    }
+  }
+}

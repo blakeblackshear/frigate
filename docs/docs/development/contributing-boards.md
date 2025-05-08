@@ -91,4 +91,4 @@ The `CODEOWNERS` file should be updated to include the `docker/board` along with
 
 # Docs
 
-At a minimum the `installation`, `object_detectors`, `hardware_acceleration`, and `ffmpeg-presets` docs should be updated (if applicable) to reflect the configuration of this community board.
+At a minimum the `installation`, `object_detectors`, `hardware_acceleration_video`, and `ffmpeg-presets` docs should be updated (if applicable) to reflect the configuration of this community board.
