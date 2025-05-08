@@ -167,7 +167,7 @@ export default function MotionTunerView({
     if (changedValue) {
       addMessage(
         "motion_tuner",
-        `Unsaved motion tuner changes (${selectedCamera})`,
+        t("motionDetectionTuner.unsavedChanges", { camera: selectedCamera }),
         undefined,
         `motion_tuner_${selectedCamera}`,
       );

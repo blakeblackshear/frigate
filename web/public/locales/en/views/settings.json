@@ -84,6 +84,7 @@
   },
   "classification": {
     "title": "Classification Settings",
+    "unsavedChanges": "Unsaved Classification settings changes",
     "birdClassification": {
       "title": "Bird Classification",
       "desc": "Bird classification identifies known birds using a quantized Tensorflow model. When a known bird is recognized, its common name will be added as a sub_label. This information is included in the UI, filters, as well as in notifications."
@@ -168,11 +169,12 @@
         "notSelectDetections": "All {{detectionsLabels}} objects detected in {{zone}} on {{cameraName}} not categorized as Alerts will be shown as Detections regardless of which zone they are in.",
         "regardlessOfZoneObjectDetectionsTips": "All {{detectionsLabels}} objects not categorized on {{cameraName}} will be shown as Detections regardless of which zone they are in."
       },
+      "unsavedChanges": "Unsaved Review Classification settings for {{camera}}",
       "selectAlertsZones": "Select zones for Alerts",
       "selectDetectionsZones": "Select zones for Detections",
       "limitDetections": "Limit detections to specific zones",
       "toast": {
-        "success": "Review classification configuration has been saved. Restart Frigate to apply changes."
+        "success": "Review Classification configuration has been saved. Restart Frigate to apply changes."
       }
     }
   },
@@ -338,6 +340,7 @@
   },
   "motionDetectionTuner": {
     "title": "Motion Detection Tuner",
+    "unsavedChanges": "Unsaved Motion Tuner changes ({{camera}})",
     "desc": {
       "title": "Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.",
       "documentation": "Read the Motion Tuning Guide"
@@ -527,6 +530,8 @@
     "registerDevice": "Register This Device",
     "unregisterDevice": "Unregister This Device",
     "sendTestNotification": "Send a test notification",
+    "unsavedRegistrations": "Unsaved Notification registrations",
+    "unsavedChanges": "Unsaved Notification changes",
     "active": "Notifications Active",
     "suspended": "Notifications suspended {{time}}",
     "suspendTime": {
@@ -587,6 +592,7 @@
       "loadingAvailableModels": "Loading available models…",
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
+    "unsavedChanges": "Unsaved Frigate+ settings changes",
     "restart_required": "Restart required (Frigate+ model changed)",
     "toast": {
       "success": "Frigate+ settings have been saved. Restart Frigate to apply changes.",

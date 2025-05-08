@@ -230,7 +230,9 @@ export default function CameraSettingsView({
     if (changedValue) {
       addMessage(
         "camera_settings",
-        `Unsaved review classification settings for ${capitalizeFirstLetter(selectedCamera)}`,
+        t("camera.reviewClassification.unsavedChanges", {
+          camera: selectedCamera,
+        }),
         undefined,
         `review_classification_settings_${selectedCamera}`,
       );

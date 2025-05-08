@@ -220,7 +220,7 @@ export default function ClassificationSettingsView({
     if (changedValue) {
       addMessage(
         "search_settings",
-        `Unsaved Classification settings changes`,
+        t("classification.unsavedChanges"),
         undefined,
         "search_settings",
       );

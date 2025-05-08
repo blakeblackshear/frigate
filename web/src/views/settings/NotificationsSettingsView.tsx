@@ -105,7 +105,7 @@ export default function NotificationView({
     if (changedValue) {
       addMessage(
         "notification_settings",
-        `Unsaved notification settings`,
+        t("notification.unsavedChanges"),
         undefined,
         `notification_settings`,
       );
@@ -128,7 +128,7 @@ export default function NotificationView({
       if (registration) {
         addMessage(
           "notification_settings",
-          "Unsaved Notification Registrations",
+          t("notification.unsavedRegistrations"),
           undefined,
           "registration",
         );
