@@ -385,6 +385,55 @@ export function RecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewRowRef.current?.scrollWidth, previewRowRef.current?.scrollHeight]);
 
+  // visibility listener for lazy loading
+
+  const [visiblePreviews, setVisiblePreviews] = useState<string[]>([]);
+  const visiblePreviewObserver = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    const visibleCameras = new Set<string>();
+    visiblePreviewObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const camera = (entry.target as HTMLElement).dataset.camera;
+
+          if (!camera) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleCameras.add(camera);
+          } else {
+            visibleCameras.delete(camera);
+          }
+
+          setVisiblePreviews([...visibleCameras]);
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    return () => {
+      visiblePreviewObserver.current?.disconnect();
+    };
+  }, []);
+
+  const previewRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!visiblePreviewObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) visiblePreviewObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    // we need to listen on the value of the ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visiblePreviewObserver.current],
+  );
+
   return (
     <div ref={contentRef} className="flex size-full flex-col pt-2">
       <Toaster closeButton={true} />
@@ -631,12 +680,14 @@ export function RecordingView({
                       }}
                     >
                       <PreviewPlayer
+                        previewRef={previewRef}
                         className="size-full"
                         camera={cam}
                         timeRange={currentTimeRange}
                         cameraPreviews={allPreviews ?? []}
                         startTime={startTime}
                         isScrubbing={scrubbing}
+                        isVisible={visiblePreviews.includes(cam)}
                         onControllerReady={(controller) => {
                           previewRefs.current[cam] = controller;
                           controller.scrubToTimestamp(startTime);
