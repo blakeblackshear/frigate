@@ -126,6 +126,10 @@ class ModelConfig(BaseModel):
         if not self.path or not self.path.startswith("plus://"):
             return
 
+        # ensure that model cache dir exists
+        if not os.path.exists(MODEL_CACHE_DIR):
+            os.makedirs(MODEL_CACHE_DIR)
+
         model_id = self.path[7:]
         self.path = os.path.join(MODEL_CACHE_DIR, model_id)
         model_info_path = f"{self.path}.json"
