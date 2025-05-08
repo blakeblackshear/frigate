@@ -8,7 +8,7 @@
     "subLabelScore": "Sub Label Score",
     "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
-    "faceDesc": "Details for the face and associated object",
+    "faceDesc": "Details of the tracked object that generated this face",
     "timestamp": "Timestamp"
   },
   "documentTitle": "Face Library - Frigate",
@@ -16,6 +16,7 @@
     "title": "Upload Face Image",
     "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
   },
+  "collections": "Collections",
   "createFaceLibrary": {
     "title": "Create Collection",
     "desc": "Create a new collection",

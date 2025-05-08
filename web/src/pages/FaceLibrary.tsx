@@ -443,7 +443,7 @@ function LibrarySelector({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
-            {pageToggle || t("selectFace")}
+            {pageToggle == "train" ? t("train.title") : pageToggle}
             <span className="ml-2 text-primary-variant">
               ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
             </span>
@@ -467,7 +467,7 @@ function LibrarySelector({
             <>
               <DropdownMenuSeparator />
               <div className="mb-1 ml-1.5 text-xs text-secondary-foreground">
-                Collections
+                {t("collections")}
               </div>
             </>
           )}
