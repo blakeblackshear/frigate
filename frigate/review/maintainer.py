@@ -1,5 +1,6 @@
 """Maintain review segments in db."""
 
+import copy
 import json
 import logging
 import os
@@ -119,21 +120,23 @@ class PendingReviewSegment:
             )
 
     def get_data(self, ended: bool) -> dict:
-        return {
-            ReviewSegment.id.name: self.id,
-            ReviewSegment.camera.name: self.camera,
-            ReviewSegment.start_time.name: self.start_time,
-            ReviewSegment.end_time.name: self.last_update if ended else None,
-            ReviewSegment.severity.name: self.severity.value,
-            ReviewSegment.thumb_path.name: self.frame_path,
-            ReviewSegment.data.name: {
-                "detections": list(set(self.detections.keys())),
-                "objects": list(set(self.detections.values())),
-                "sub_labels": list(self.sub_labels.values()),
-                "zones": self.zones,
-                "audio": list(self.audio),
-            },
-        }.copy()
+        return copy.deepcopy(
+            {
+                ReviewSegment.id.name: self.id,
+                ReviewSegment.camera.name: self.camera,
+                ReviewSegment.start_time.name: self.start_time,
+                ReviewSegment.end_time.name: self.last_update if ended else None,
+                ReviewSegment.severity.name: self.severity.value,
+                ReviewSegment.thumb_path.name: self.frame_path,
+                ReviewSegment.data.name: {
+                    "detections": list(set(self.detections.keys())),
+                    "objects": list(set(self.detections.values())),
+                    "sub_labels": list(self.sub_labels.values()),
+                    "zones": self.zones,
+                    "audio": list(self.audio),
+                },
+            }
+        )
 
 
 class ReviewSegmentMaintainer(threading.Thread):
