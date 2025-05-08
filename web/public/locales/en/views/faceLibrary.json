@@ -9,7 +9,8 @@
     "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
     "faceDesc": "Details of the tracked object that generated this face",
-    "timestamp": "Timestamp"
+    "timestamp": "Timestamp",
+    "unknown": "Unknown"
   },
   "documentTitle": "Face Library - Frigate",
   "uploadFaceImage": {

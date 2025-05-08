@@ -644,7 +644,7 @@ function TrainingGrid({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
             <div className="text-sm smart-capitalize">
-              {selectedEvent?.sub_label ?? "Unknown"}
+              {selectedEvent?.sub_label ?? t("details.unknown")}
             </div>
           </div>
           {selectedEvent?.data.sub_label_score && (
@@ -793,7 +793,7 @@ function FaceAttemptGroup({
           Person
           {event?.sub_label
             ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-            : ": Unknown"}
+            : ": " + t("details.unknown")}
         </div>
         {event && (
           <Tooltip>
@@ -968,7 +968,9 @@ function FaceAttempt({
         <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="smart-capitalize">{data.name}</div>
+              <div className="smart-capitalize">
+                {data.name == "unknown" ? t("details.unknown") : data.name}
+              </div>
               <div
                 className={cn(
                   "",
