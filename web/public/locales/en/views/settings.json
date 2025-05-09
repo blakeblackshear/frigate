@@ -268,7 +268,8 @@
       "allObjects": "All Objects",
       "speedEstimation": {
         "title": "Speed Estimation",
-        "desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points."
+        "desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points.",
+        "docs": "Read the documentation"
       },
       "speedThreshold": {
         "title": "Speed Threshold ({{unit}})",
