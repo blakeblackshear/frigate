@@ -47,7 +47,7 @@ export default function ReviewActionGroup({
       .post(`reviews/delete`, { ids: selectedReviews })
       .then((resp) => {
         if (resp.status === 200) {
-          toast.success("Reviews deleted successfully", {
+          toast.success(t("recording.confirmDelete.toast.success"), {
             position: "top-center",
           });
           setSelectedReviews([]);
@@ -59,11 +59,16 @@ export default function ReviewActionGroup({
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(`Failed to delete reviews: ${errorMessage}`, {
-          position: "top-center",
-        });
+        toast.error(
+          t("recording.confirmDelete.toast.error", {
+            error: errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
       });
-  }, [selectedReviews, setSelectedReviews, pullLatestData]);
+  }, [selectedReviews, setSelectedReviews, pullLatestData, t]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bypassDialog, setBypassDialog] = useState(false);
