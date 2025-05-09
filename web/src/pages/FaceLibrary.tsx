@@ -6,7 +6,17 @@ import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizard
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -44,7 +54,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
   LuImagePlus,
@@ -165,6 +175,11 @@ export default function FaceLibrary() {
     [selectedFaces, setSelectedFaces],
   );
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<{
+    name: string;
+    ids: string[];
+  } | null>(null);
+
   const onDelete = useCallback(
     (name: string, ids: string[], isName: boolean = false) => {
       axios
@@ -191,7 +206,7 @@ export default function FaceLibrary() {
 
             if (faceImages.length == 1) {
               // face has been deleted
-              setPageToggle("");
+              setPageToggle("train");
             }
 
             refreshFaces();
@@ -244,29 +259,32 @@ export default function FaceLibrary() {
 
   // keyboard
 
-  useKeyboardListener(
-    page === "train" ? ["a", "Escape"] : [],
-    (key, modifiers) => {
-      if (modifiers.repeat || !modifiers.down) {
-        return;
-      }
+  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
 
-      switch (key) {
-        case "a":
-          if (modifiers.ctrl) {
-            if (selectedFaces.length) {
-              setSelectedFaces([]);
-            } else {
-              setSelectedFaces([...trainImages]);
-            }
+    switch (key) {
+      case "a":
+        if (modifiers.ctrl) {
+          if (selectedFaces.length) {
+            setSelectedFaces([]);
+          } else {
+            setSelectedFaces([
+              ...(pageToggle === "train" ? trainImages : faceImages),
+            ]);
           }
-          break;
-        case "Escape":
-          setSelectedFaces([]);
-          break;
-      }
-    },
-  );
+        }
+        break;
+      case "Escape":
+        setSelectedFaces([]);
+        break;
+    }
+  });
+
+  useEffect(() => {
+    setSelectedFaces([]);
+  }, [pageToggle]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -275,6 +293,41 @@ export default function FaceLibrary() {
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster />
+
+      <AlertDialog
+        open={!!deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteFaceAttempts.title")}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            <Trans
+              ns="views/faceLibrary"
+              values={{ count: deleteDialogOpen?.ids.length }}
+            >
+              deleteFaceAttempts.desc
+            </Trans>
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={() => {
+                if (deleteDialogOpen) {
+                  onDelete(deleteDialogOpen.name, deleteDialogOpen.ids);
+                  setDeleteDialogOpen(null);
+                }
+              }}
+            >
+              {t("button.delete", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <UploadImageDialog
         open={upload}
@@ -314,7 +367,9 @@ export default function FaceLibrary() {
             </div>
             <Button
               className="flex gap-2"
-              onClick={() => onDelete("train", selectedFaces)}
+              onClick={() =>
+                setDeleteDialogOpen({ name: pageToggle, ids: selectedFaces })
+              }
             >
               <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
               {isDesktop && t("button.deleteFaceAttempts")}
@@ -335,7 +390,13 @@ export default function FaceLibrary() {
           </div>
         )}
       </div>
-      {pageToggle &&
+      {pageToggle && faceImages.length === 0 && pageToggle !== "train" ? (
+        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+          <LuFolderCheck className="size-16" />
+          No faces available
+        </div>
+      ) : (
+        pageToggle &&
         (pageToggle == "train" ? (
           <TrainingGrid
             config={config}
@@ -349,9 +410,12 @@ export default function FaceLibrary() {
           <FaceGrid
             faceImages={faceImages}
             pageToggle={pageToggle}
+            selectedFaces={selectedFaces}
+            onClickFaces={onClickFaces}
             onDelete={onDelete}
           />
-        ))}
+        ))
+      )}
     </div>
   );
 }
@@ -443,7 +507,7 @@ function LibrarySelector({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
-            {pageToggle || t("selectFace")}
+            {pageToggle == "train" ? t("train.title") : pageToggle}
             <span className="ml-2 text-primary-variant">
               ({(pageToggle && faceData?.[pageToggle]?.length) || 0})
             </span>
@@ -467,7 +531,7 @@ function LibrarySelector({
             <>
               <DropdownMenuSeparator />
               <div className="mb-1 ml-1.5 text-xs text-secondary-foreground">
-                Collections
+                {t("collections")}
               </div>
             </>
           )}
@@ -644,7 +708,7 @@ function TrainingGrid({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.person")}</div>
             <div className="text-sm smart-capitalize">
-              {selectedEvent?.sub_label ?? "Unknown"}
+              {selectedEvent?.sub_label ?? t("details.unknown")}
             </div>
           </div>
           {selectedEvent?.data.sub_label_score && (
@@ -793,7 +857,7 @@ function FaceAttemptGroup({
           Person
           {event?.sub_label
             ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-            : ": Unknown"}
+            : ": " + t("details.unknown")}
         </div>
         {event && (
           <Tooltip>
@@ -968,7 +1032,9 @@ function FaceAttempt({
         <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="smart-capitalize">{data.name}</div>
+              <div className="smart-capitalize">
+                {data.name == "unknown" ? t("details.unknown") : data.name}
+              </div>
               <div
                 className={cn(
                   "",
@@ -1007,16 +1073,36 @@ function FaceAttempt({
 type FaceGridProps = {
   faceImages: string[];
   pageToggle: string;
+  selectedFaces: string[];
+  onClickFaces: (images: string[], ctrl: boolean) => void;
   onDelete: (name: string, ids: string[]) => void;
 };
-function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
-  const sortedFaces = useMemo(() => faceImages.sort().reverse(), [faceImages]);
+function FaceGrid({
+  faceImages,
+  pageToggle,
+  selectedFaces,
+  onClickFaces,
+  onDelete,
+}: FaceGridProps) {
+  const sortedFaces = useMemo(
+    () => (faceImages || []).sort().reverse(),
+    [faceImages],
+  );
+
+  if (sortedFaces.length === 0) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuFolderCheck className="size-16" />
+        No faces available
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        "scrollbar-container gap-2 overflow-y-scroll",
-        isDesktop ? "flex flex-wrap" : "grid grid-cols-2",
+        "scrollbar-container gap-2 overflow-y-scroll p-1",
+        isDesktop ? "flex flex-wrap" : "grid grid-cols-2 md:grid-cols-4",
       )}
     >
       {sortedFaces.map((image: string) => (
@@ -1024,6 +1110,8 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
           key={image}
           name={pageToggle}
           image={image}
+          selected={selectedFaces.includes(image)}
+          onClickFaces={onClickFaces}
           onDelete={onDelete}
         />
       ))}
@@ -1034,22 +1122,44 @@ function FaceGrid({ faceImages, pageToggle, onDelete }: FaceGridProps) {
 type FaceImageProps = {
   name: string;
   image: string;
+  selected: boolean;
+  onClickFaces: (images: string[], ctrl: boolean) => void;
   onDelete: (name: string, ids: string[]) => void;
 };
-function FaceImage({ name, image, onDelete }: FaceImageProps) {
+function FaceImage({
+  name,
+  image,
+  selected,
+  onClickFaces,
+  onDelete,
+}: FaceImageProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
   return (
-    <div className="relative flex flex-col rounded-lg">
+    <div
+      className={cn(
+        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+        selected
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500",
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClickFaces([image], e.ctrlKey || e.metaKey);
+      }}
+    >
       <div
         className={cn(
-          "w-full overflow-hidden rounded-t-lg *:text-card-foreground",
+          "w-full overflow-hidden p-2 *:text-card-foreground",
           isMobile && "flex justify-center",
         )}
       >
-        <img className="h-40" src={`${baseUrl}clips/faces/${name}/${image}`} />
+        <img
+          className="h-40 rounded-lg"
+          src={`${baseUrl}clips/faces/${name}/${image}`}
+        />
       </div>
-      <div className="rounded-b-lg bg-card p-2">
+      <div className="rounded-b-lg bg-card p-3">
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <div className="flex flex-col items-start text-xs text-primary-variant">
             <div className="smart-capitalize">{name}</div>
@@ -1059,7 +1169,10 @@ function FaceImage({ name, image, onDelete }: FaceImageProps) {
               <TooltipTrigger>
                 <LuTrash2
                   className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={() => onDelete(name, [image])}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(name, [image]);
+                  }}
                 />
               </TooltipTrigger>
               <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>

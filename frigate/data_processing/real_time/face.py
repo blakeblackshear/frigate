@@ -5,9 +5,7 @@ import datetime
 import json
 import logging
 import os
-import random
 import shutil
-import string
 from typing import Optional
 
 import cv2
@@ -27,7 +25,7 @@ from frigate.data_processing.common.face.model import (
     FaceRecognizer,
 )
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.builtin import EventsPerSecond
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
 
 from ..types import DataProcessorMetrics
@@ -58,6 +56,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.recognizer: FaceRecognizer | None = None
         self.faces_per_second = EventsPerSecond()
+        self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
 
         download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
         self.model_files = {
@@ -155,9 +154,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
     def __update_metrics(self, duration: float) -> None:
         self.faces_per_second.update()
-        self.metrics.face_rec_speed.value = (
-            self.metrics.face_rec_speed.value * 9 + duration
-        ) / 10
+        self.inference_speed.update(duration)
 
     def process_frame(self, obj_data: dict[str, any], frame: np.ndarray):
         """Look for faces in image."""
@@ -343,11 +340,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             return {"success": True, "score": score, "face_name": sub_label}
         elif topic == EmbeddingsRequestEnum.register_face.value:
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
             label = request_data["face_name"]
-            id = f"{label}-{rand_id}"
 
             if request_data.get("cropped"):
                 thumbnail = request_data["image"]
@@ -376,7 +369,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # write face to library
             folder = os.path.join(FACE_DIR, label)
-            file = os.path.join(folder, f"{id}.webp")
+            file = os.path.join(
+                folder, f"{label}_{datetime.datetime.now().timestamp()}.webp"
+            )
             os.makedirs(folder, exist_ok=True)
 
             # save face image

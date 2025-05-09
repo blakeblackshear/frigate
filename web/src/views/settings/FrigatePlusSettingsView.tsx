@@ -176,7 +176,7 @@ export default function FrigatePlusSettingsView({
     if (changedValue) {
       addMessage(
         "plus_settings",
-        `Unsaved Frigate+ settings changes`,
+        t("frigatePlus.unsavedChanges"),
         undefined,
         "plus_settings",
       );

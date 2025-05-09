@@ -268,7 +268,9 @@ def auth(request: Request):
 
         # if comma-separated with "admin", use "admin", else use default role
         success_response.headers["remote-role"] = (
-            "admin" if role and "admin" in role else proxy_config.default_role
+            "admin"
+            if role and "admin" in [r.strip() for r in role.split(",")]
+            else proxy_config.default_role
         )
 
         return success_response

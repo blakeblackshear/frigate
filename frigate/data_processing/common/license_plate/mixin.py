@@ -25,7 +25,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.builtin import EventsPerSecond
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
@@ -36,8 +36,10 @@ WRITE_DEBUG_IMAGES = False
 class LicensePlateProcessingMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.plate_rec_speed = InferenceSpeed(self.metrics.alpr_speed)
         self.plates_rec_second = EventsPerSecond()
         self.plates_rec_second.start()
+        self.plate_det_speed = InferenceSpeed(self.metrics.yolov9_lpr_speed)
         self.plates_det_second = EventsPerSecond()
         self.plates_det_second.start()
         self.event_metadata_publisher = EventMetadataPublisher()
@@ -1157,22 +1159,6 @@ class LicensePlateProcessingMixin:
         # 5. Return True if previous plate scores higher
         return prev_score > curr_score
 
-    def __update_yolov9_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.yolov9_lpr_speed.value = (
-            self.metrics.yolov9_lpr_speed.value * 9 + duration
-        ) / 10
-
-    def __update_lpr_metrics(self, duration: float) -> None:
-        """
-        Update inference metrics.
-        """
-        self.metrics.alpr_speed.value = (
-            self.metrics.alpr_speed.value * 9 + duration
-        ) / 10
-
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
         now = datetime.datetime.now().timestamp()
@@ -1228,7 +1214,7 @@ class LicensePlateProcessingMixin:
                 f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
             )
             self.plates_det_second.update()
-            self.__update_yolov9_metrics(
+            self.plate_det_speed.update(
                 datetime.datetime.now().timestamp() - yolov9_start
             )
 
@@ -1319,7 +1305,7 @@ class LicensePlateProcessingMixin:
                     f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
                 )
                 self.plates_det_second.update()
-                self.__update_yolov9_metrics(
+                self.plate_det_speed.update(
                     datetime.datetime.now().timestamp() - yolov9_start
                 )
 
@@ -1433,7 +1419,7 @@ class LicensePlateProcessingMixin:
             camera, id, license_plate_frame
         )
         self.plates_rec_second.update()
-        self.__update_lpr_metrics(datetime.datetime.now().timestamp() - start)
+        self.plate_rec_speed.update(datetime.datetime.now().timestamp() - start)
 
         if license_plates:
             for plate, confidence, text_area in zip(license_plates, confidences, areas):

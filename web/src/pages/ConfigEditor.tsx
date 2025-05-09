@@ -143,6 +143,12 @@ function ConfigEditor() {
         scrollBeyondLastLine: false,
         theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
+      editorRef.current?.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+        () => {
+          onHandleSaveConfig("saveonly");
+        },
+      );
     } else if (editorRef.current) {
       editorRef.current.setModel(modelRef.current);
     }
@@ -158,7 +164,7 @@ function ConfigEditor() {
       }
       schemaConfiguredRef.current = false;
     };
-  }, [config, apiHost, systemTheme, theme]);
+  }, [config, apiHost, systemTheme, theme, onHandleSaveConfig]);
 
   // monitoring state
 

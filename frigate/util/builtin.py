@@ -11,6 +11,7 @@ import shlex
 import struct
 import urllib.parse
 from collections.abc import Mapping
+from multiprocessing.sharedctypes import Synchronized
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
 from zoneinfo import ZoneInfoNotFoundError
@@ -26,16 +27,16 @@ logger = logging.getLogger(__name__)
 
 
 class EventsPerSecond:
-    def __init__(self, max_events=1000, last_n_seconds=10):
+    def __init__(self, max_events=1000, last_n_seconds=10) -> None:
         self._start = None
         self._max_events = max_events
         self._last_n_seconds = last_n_seconds
         self._timestamps = []
 
-    def start(self):
+    def start(self) -> None:
         self._start = datetime.datetime.now().timestamp()
 
-    def update(self):
+    def update(self) -> None:
         now = datetime.datetime.now().timestamp()
         if self._start is None:
             self._start = now
@@ -45,7 +46,7 @@ class EventsPerSecond:
             self._timestamps = self._timestamps[(1 - self._max_events) :]
         self.expire_timestamps(now)
 
-    def eps(self):
+    def eps(self) -> float:
         now = datetime.datetime.now().timestamp()
         if self._start is None:
             self._start = now
@@ -58,10 +59,27 @@ class EventsPerSecond:
         return len(self._timestamps) / seconds
 
     # remove aged out timestamps
-    def expire_timestamps(self, now):
+    def expire_timestamps(self, now: float) -> None:
         threshold = now - self._last_n_seconds
         while self._timestamps and self._timestamps[0] < threshold:
             del self._timestamps[0]
+
+
+class InferenceSpeed:
+    def __init__(self, metric: Synchronized) -> None:
+        self.__metric = metric
+        self.__initialized = False
+
+    def update(self, inference_time: float) -> None:
+        if not self.__initialized:
+            self.__metric.value = inference_time
+            self.__initialized = True
+            return
+
+        self.__metric.value = (self.__metric.value * 9 + inference_time) / 10
+
+    def current(self) -> float:
+        return self.__metric.value
 
 
 def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dict:

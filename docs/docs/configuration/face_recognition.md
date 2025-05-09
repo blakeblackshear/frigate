@@ -34,7 +34,7 @@ All of these features run locally on your system.
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
 
-The `large` model is optimized for accuracy, an integrated or discrete GPU is highly recommended. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
+The `large` model is optimized for accuracy, an integrated or discrete GPU is required. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 ## Configuration
 
@@ -107,17 +107,17 @@ When choosing images to include in the face training set it is recommended to al
 
 ### Step 1 - Building a Strong Foundation
 
-When first enabling face recognition it is important to build a foundation of strong images. It is recommended to start by uploading 1-5 "portrait" photos for each person. It is important that the person's face in the photo is straight-on and not turned which will ensure a good starting point.
+When first enabling face recognition it is important to build a foundation of strong images. It is recommended to start by uploading 1-5 photos containing just this person's face. It is important that the person's face in the photo is front-facing and not turned, this will ensure a good starting point.
 
-Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle.
+Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are front-facing. Ignore images from cameras that recognize faces from an angle.
 
 Aim to strike a balance between the quality of images while also having a range of conditions (day / night, different weather conditions, different times of day, etc.) in order to have diversity in the images used for each person and not have over-fitting.
 
-Once a person starts to be consistently recognized correctly on images that are straight-on, it is time to move on to the next step.
+Once a person starts to be consistently recognized correctly on images that are front-facing, it is time to move on to the next step.
 
 ### Step 2 - Expanding The Dataset
 
-Once straight-on images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.
+Once front-facing images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.
 
 ## FAQ
 
@@ -156,3 +156,7 @@ Face recognition does not run on the recording stream, this would be suboptimal 
 ### I get an unknown error when taking a photo directly with my iPhone
 
 By default iOS devices will use HEIC (High Efficiency Image Container) for images, but this format is not supported for uploads. Choosing `large` as the format instead of `original` will use JPG which will work correctly.
+
+## How can I delete the face database and start over?
+
+Frigate does not store anything in its database related to face recognition. You can simply delete all of your faces through the Frigate UI or remove the contents of the `/media/frigate/clips/faces` directory.
