@@ -359,7 +359,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             # expire in realtime processors
             for processor in self.realtime_processors:
-                processor.expire_object(event_id)
+                processor.expire_object(event_id, camera)
 
             if updated_db:
                 try:

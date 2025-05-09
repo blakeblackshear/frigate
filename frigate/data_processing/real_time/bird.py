@@ -152,6 +152,6 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
     def handle_request(self, topic, request_data):
         return None
 
-    def expire_object(self, object_id):
+    def expire_object(self, object_id, camera):
         if object_id in self.detected_birds:
             self.detected_birds.pop(object_id)
