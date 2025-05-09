@@ -128,13 +128,18 @@ export default function CreateFaceWizardDialog({
           </TextEntry>
         )}
         {step == 1 && (
-          <ImageEntry onSave={onUploadImage}>
-            <div className="flex justify-end py-2">
-              <Button variant="select" type="submit">
-                {t("button.next", { ns: "common" })}
-              </Button>
+          <>
+            <div className="px-8 py-2 text-center text-sm text-secondary-foreground">
+              {t("steps.description.uploadFace", { name })}
             </div>
-          </ImageEntry>
+            <ImageEntry onSave={onUploadImage}>
+              <div className="flex justify-end py-2">
+                <Button variant="select" type="submit">
+                  {t("button.next", { ns: "common" })}
+                </Button>
+              </div>
+            </ImageEntry>
+          </>
         )}
         {step == 2 && (
           <div className="mt-2">
