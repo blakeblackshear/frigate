@@ -17,6 +17,7 @@ import {
 } from "../ui/alert-dialog";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 type ReviewActionGroupProps = {
   selectedReviews: string[];
@@ -41,10 +42,27 @@ export default function ReviewActionGroup({
     pullLatestData();
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
 
-  const onDelete = useCallback(async () => {
-    await axios.post(`reviews/delete`, { ids: selectedReviews });
-    setSelectedReviews([]);
-    pullLatestData();
+  const onDelete = useCallback(() => {
+    axios
+      .post(`reviews/delete`, { ids: selectedReviews })
+      .then((resp) => {
+        if (resp.status === 200) {
+          toast.success("Reviews deleted successfully", {
+            position: "top-center",
+          });
+          setSelectedReviews([]);
+          pullLatestData();
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(`Failed to delete reviews: ${errorMessage}`, {
+          position: "top-center",
+        });
+      });
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
