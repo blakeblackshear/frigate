@@ -65,9 +65,9 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
                         "tracked_object_update",
                         json.dumps(
                             {
-                                "type": TrackedObjectUpdateTypesEnum.face,
+                                "type": TrackedObjectUpdateTypesEnum.lpr,
                                 "name": None,
-                                "id": id,
+                                "plate": None,
                                 "camera": camera,
                             }
                         ),

@@ -439,7 +439,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                             {
                                 "type": TrackedObjectUpdateTypesEnum.face,
                                 "name": None,
-                                "id": id,
                                 "camera": camera,
                             }
                         ),
