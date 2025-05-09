@@ -29,7 +29,7 @@
     "uploadFace": "Upload Face Image",
     "nextSteps": "Next Steps",
     "description": {
-      "uploadFace": "Upload an image of {{name}}. This should be an image including their face straight-on. Note that the image does not need to be cropped to just their face.",
+      "uploadFace": "Upload an image of {{name}} that shows their face from a front-facing angle. The image does not need to be cropped to just their face."
     }
   },
   "train": {

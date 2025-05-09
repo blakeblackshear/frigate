@@ -107,17 +107,17 @@ When choosing images to include in the face training set it is recommended to al
 
 ### Step 1 - Building a Strong Foundation
 
-When first enabling face recognition it is important to build a foundation of strong images. It is recommended to start by uploading 1-5 "portrait" photos for each person. It is important that the person's face in the photo is straight-on and not turned which will ensure a good starting point.
+When first enabling face recognition it is important to build a foundation of strong images. It is recommended to start by uploading 1-5 photos containing just this person's face. It is important that the person's face in the photo is front-facing and not turned, this will ensure a good starting point.
 
-Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are straight-on. Ignore images from cameras that recognize faces from an angle.
+Then it is recommended to use the `Face Library` tab in Frigate to select and train images for each person as they are detected. When building a strong foundation it is strongly recommended to only train on images that are front-facing. Ignore images from cameras that recognize faces from an angle.
 
 Aim to strike a balance between the quality of images while also having a range of conditions (day / night, different weather conditions, different times of day, etc.) in order to have diversity in the images used for each person and not have over-fitting.
 
-Once a person starts to be consistently recognized correctly on images that are straight-on, it is time to move on to the next step.
+Once a person starts to be consistently recognized correctly on images that are front-facing, it is time to move on to the next step.
 
 ### Step 2 - Expanding The Dataset
 
-Once straight-on images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.
+Once front-facing images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone.
 
 ## FAQ
 

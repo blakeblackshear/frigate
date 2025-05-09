@@ -127,8 +127,7 @@ class ModelConfig(BaseModel):
             return
 
         # ensure that model cache dir exists
-        if not os.path.exists(MODEL_CACHE_DIR):
-            os.makedirs(MODEL_CACHE_DIR)
+        os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
         model_id = self.path[7:]
         self.path = os.path.join(MODEL_CACHE_DIR, model_id)
