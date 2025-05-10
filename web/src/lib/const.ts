@@ -11,4 +11,5 @@ export const supportedLanguageKeys = [
   "zh-CN",
   "yue-Hant",
   "ru",
+  "uk",
 ];
