@@ -98,6 +98,10 @@
       "title": "Confirm Delete",
       "desc": {
         "selected": "Are you sure you want to delete all recorded video associated with this review item?<br /><br />Hold the <em>Shift</em> key to bypass this dialog in the future."
+      },
+      "toast": {
+        "success": "Video footage associated with the selected review items has been deleted successfully.",
+        "error": "Failed to delete: {{error}}"
       }
     },
     "button": {

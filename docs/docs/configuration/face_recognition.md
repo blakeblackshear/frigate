@@ -137,6 +137,15 @@ This can happen for a few different reasons, but this is usually an indicator th
 - When you provide images with different poses, lighting, and expressions, the algorithm extracts features that are consistent across those variations.
 - By training on a diverse set of images, the algorithm becomes less sensitive to minor variations and noise in the input image.
 
+Review your face collections and remove most of the unclear or low-quality images. Then, use the **Reprocess** button on each face in the **Train** tab to evaluate how the changes affect recognition scores.
+
+Avoid training on images that already score highly, as this can lead to over-fitting. Instead, focus on relatively clear images that score lower - ideally with different lighting, angles, and conditions—to help the model generalize more effectively.
+
+### Frigate misidentified a face. Can I tell it that a face is "not" a specific person?
+
+No, face recognition does not support negative training (i.e., explicitly telling it who someone is _not_). Instead, the best approach is to improve the training data by using a more diverse and representative set of images for each person.
+For more guidance, refer to the section above on improving recognition accuracy.
+
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.

@@ -68,6 +68,7 @@
     "dropInstructions": "Drag and drop an image here, or click to select",
     "maxSize": "Max size: {{size}}MB"
   },
+  "nofaces": "No faces available",
   "readTheDocs": "Read the documentation",
   "trainFaceAs": "Train Face as:",
   "trainFace": "Train Face",

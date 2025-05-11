@@ -1552,6 +1552,12 @@ class LicensePlateProcessingMixin:
                 (base64.b64encode(encoded_img).decode("ASCII"), id, camera),
             )
 
+        if id not in self.detected_license_plates:
+            if camera not in self.camera_current_cars:
+                self.camera_current_cars[camera] = []
+
+            self.camera_current_cars[camera].append(id)
+
         self.detected_license_plates[id] = {
             "plate": top_plate,
             "char_confidences": top_char_confidences,
@@ -1564,7 +1570,7 @@ class LicensePlateProcessingMixin:
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
 
-    def expire_object(self, object_id: str):
+    def expire_object(self, object_id: str, camera: str):
         if object_id in self.detected_license_plates:
             self.detected_license_plates.pop(object_id)
 

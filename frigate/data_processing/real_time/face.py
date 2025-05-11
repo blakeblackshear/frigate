@@ -54,6 +54,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.face_detector: cv2.FaceDetectorYN = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
+        self.camera_current_people: dict[str, list[str]] = {}
         self.recognizer: FaceRecognizer | None = None
         self.faces_per_second = EventsPerSecond()
         self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
@@ -282,9 +283,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if id not in self.person_face_history:
             self.person_face_history[id] = []
 
+            if camera not in self.camera_current_people:
+                self.camera_current_people[camera] = []
+
         self.person_face_history[id].append(
             (sub_label, score, face_frame.shape[0] * face_frame.shape[1])
         )
+        self.camera_current_people[camera].append(id)
         (weighted_sub_label, weighted_score) = self.weighted_average(
             self.person_face_history[id]
         )
@@ -420,9 +425,24 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 )
                 shutil.move(current_file, new_file)
 
-    def expire_object(self, object_id: str):
+    def expire_object(self, object_id: str, camera: str):
         if object_id in self.person_face_history:
             self.person_face_history.pop(object_id)
+
+            if object_id in self.camera_current_people.get(camera, []):
+                self.camera_current_people[camera].remove(object_id)
+
+                if len(self.camera_current_people[camera]) == 0:
+                    self.requestor.send_data(
+                        "tracked_object_update",
+                        json.dumps(
+                            {
+                                "type": TrackedObjectUpdateTypesEnum.face,
+                                "name": None,
+                                "camera": camera,
+                            }
+                        ),
+                    )
 
     def weighted_average(
         self, results_list: list[tuple[str, float, int]], max_weight: int = 4000

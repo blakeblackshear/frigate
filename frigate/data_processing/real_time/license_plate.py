@@ -1,5 +1,6 @@
 """Handle processing images for face detection and recognition."""
 
+import json
 import logging
 
 import numpy as np
@@ -13,6 +14,7 @@ from frigate.data_processing.common.license_plate.mixin import (
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
+from frigate.types import TrackedObjectUpdateTypesEnum
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -36,6 +38,7 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         self.lpr_config = config.lpr
         self.config = config
         self.sub_label_publisher = sub_label_publisher
+        self.camera_current_cars: dict[str, list[str]] = {}
         super().__init__(config, metrics)
 
     def process_frame(
@@ -50,6 +53,22 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
     def handle_request(self, topic, request_data) -> dict[str, any] | None:
         return
 
-    def expire_object(self, object_id: str):
+    def expire_object(self, object_id: str, camera: str):
         if object_id in self.detected_license_plates:
             self.detected_license_plates.pop(object_id)
+
+            if object_id in self.camera_current_cars.get(camera, []):
+                self.camera_current_cars[camera].remove(object_id)
+
+                if len(self.camera_current_cars[camera]) == 0:
+                    self.requestor.send_data(
+                        "tracked_object_update",
+                        json.dumps(
+                            {
+                                "type": TrackedObjectUpdateTypesEnum.lpr,
+                                "name": None,
+                                "plate": None,
+                                "camera": camera,
+                            }
+                        ),
+                    )

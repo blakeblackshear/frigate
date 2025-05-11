@@ -30,6 +30,8 @@ import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { getAttributeLabels } from "@/utils/iconUtil";
 import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -669,6 +671,17 @@ export default function ZoneEditPane({
                 </div>
                 <FormDescription>
                   {t("masksAndZones.zones.speedEstimation.desc")}
+                  <div className="mt-2 flex items-center text-primary">
+                    <Link
+                      to="https://docs.frigate.video/configuration/zones#speed-estimation"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("masksAndZones.zones.speedEstimation.docs")}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -71,7 +71,7 @@ export default function StorageMetrics({
 
   const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
   const format = useMemo(() => {
-    return t(`time.formattedTimestampMonthDayYearHourMinute.${timeFormat}`, {
+    return t(`time.formattedTimestampMonthDayYear.${timeFormat}`, {
       ns: "common",
     });
   }, [t, timeFormat]);
