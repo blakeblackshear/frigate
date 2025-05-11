@@ -819,7 +819,7 @@ function Timeline({
       className={`${
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} no-scrollbar overflow-y-auto`
-          : "overflow-hidden portrait:flex-grow landscape:w-[20%]"
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : "landscape:w-[175px]"} `
       } relative`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
@@ -855,7 +855,7 @@ function Timeline({
           <div
             className={cn(
               "scrollbar-container grid h-auto grid-cols-1 gap-4 overflow-auto p-4",
-              isMobile && "sm:grid-cols-2",
+              isMobile && "sm:portrait:grid-cols-2",
             )}
           >
             {mainCameraReviewItems.length === 0 ? (
