@@ -137,7 +137,9 @@ This can happen for a few different reasons, but this is usually an indicator th
 - When you provide images with different poses, lighting, and expressions, the algorithm extracts features that are consistent across those variations.
 - By training on a diverse set of images, the algorithm becomes less sensitive to minor variations and noise in the input image.
 
-Go back through the face collections and remove most unclear images. Then, reprocess your face attempts with the Reprocess button on each face in the Train tab to see how it affects the score.
+Review your face collections and remove most of the unclear or low-quality images. Then, use the **Reprocess** button on each face in the **Train** tab to evaluate how the changes affect recognition scores.
+
+Avoid training on images that already score highly, as this can lead to over-fitting. Instead, focus on relatively clear images that score lower - ideally with different lighting, angles, and conditions—to help the model generalize more effectively.
 
 ### Frigate misidentified a face. Can I tell it that a face is "not" a specific person?
 
