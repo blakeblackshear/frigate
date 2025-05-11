@@ -139,6 +139,11 @@ This can happen for a few different reasons, but this is usually an indicator th
 
 Go back through the face collections and remove most unclear images. Then, reprocess your face attempts with the Reprocess button on each face in the Train tab to see how it affects the score.
 
+### Frigate misidentified a face. Can I tell it that a face is "not" a specific person?
+
+No, Frigate does not support negative training (i.e., explicitly telling it who someone is _not_). Instead, the best approach is to improve the training data by using a more diverse and representative set of images for each person.
+For more guidance, refer to the section above on improving recognition accuracy.
+
 ### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
