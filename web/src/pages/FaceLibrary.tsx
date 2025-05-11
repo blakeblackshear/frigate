@@ -390,10 +390,10 @@ export default function FaceLibrary() {
           </div>
         )}
       </div>
-      {pageToggle && faceImages.length === 0 && pageToggle !== "train" ? (
+      {pageToggle && faceImages?.length === 0 && pageToggle !== "train" ? (
         <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
           <LuFolderCheck className="size-16" />
-          No faces available
+          {t("nofaces")}
         </div>
       ) : (
         pageToggle &&
