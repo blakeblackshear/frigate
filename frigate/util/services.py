@@ -382,6 +382,50 @@ def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
         return results
 
 
+def get_rockchip_gpu_stats() -> dict[str, str]:
+    """Get GPU stats using rk."""
+    try:
+        with open("/sys/kernel/debug/rkrga/load", "r") as f:
+            content = f.read()
+    except FileNotFoundError:
+        return None
+
+    load_values = []
+    for line in content.splitlines():
+        match = re.search(r"load = (\d+)%", line)
+        if match:
+            load_values.append(int(match.group(1)))
+
+    if not load_values:
+        return None
+
+    average_load = f"{round(sum(load_values) / len(load_values), 2)}%"
+    return {"gpu": average_load, "mem": "-"}
+
+
+def get_rockchip_npu_stats() -> dict[str, str]:
+    """Get NPU stats using rk."""
+    try:
+        with open("/sys/kernel/debug/rknpu/load", "r") as f:
+            npu_output = f.read()
+
+            if "Core0:" in npu_output:
+                # multi core NPU
+                core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+            else:
+                # single core NPU
+                core_loads = re.findall(r"NPU load:\s+(\d+)%", npu_output)
+    except FileNotFoundError:
+        core_loads = None
+
+    if not core_loads:
+        return None
+
+    percentages = [int(load) for load in core_loads]
+    mean = round(sum(percentages) / len(percentages), 2)
+    return {"npu": mean, "mem": "-"}
+
+
 def try_get_info(f, h, default="N/A"):
     try:
         if h:

@@ -5,7 +5,7 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Callable
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -54,7 +54,7 @@ class CameraState:
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
 
-    def get_current_frame(self, draw_options={}):
+    def get_current_frame(self, draw_options: dict[str, Any] = {}):
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
@@ -77,7 +77,9 @@ class CameraState:
                         thickness = 1
                     else:
                         thickness = 2
-                        color = self.config.model.colormap[obj["label"]]
+                        color = self.config.model.colormap.get(
+                            obj["label"], (255, 255, 255)
+                        )
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -99,7 +101,9 @@ class CameraState:
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
-                    color = self.config.model.colormap[obj["label"]]
+                    color = self.config.model.colormap.get(
+                        obj["label"], (255, 255, 255)
+                    )
 
                     # debug autotracking zooming - show the zoom factor box
                     if (
@@ -259,14 +263,37 @@ class CameraState:
                 current_detections[id],
             )
 
+            # add initial frame to frame cache
+            self.frame_cache[frame_time] = np.copy(current_frame)
+
+            # save initial thumbnail data and best object
+            thumbnail_data = {
+                "frame_time": frame_time,
+                "box": new_obj.obj_data["box"],
+                "area": new_obj.obj_data["area"],
+                "region": new_obj.obj_data["region"],
+                "score": new_obj.obj_data["score"],
+                "attributes": new_obj.obj_data["attributes"],
+                "current_estimated_speed": 0,
+                "velocity_angle": 0,
+                "path_data": [],
+                "recognized_license_plate": None,
+                "recognized_license_plate_score": None,
+            }
+            new_obj.thumbnail_data = thumbnail_data
+            tracked_objects[id].thumbnail_data = thumbnail_data
+            self.best_objects[new_obj.obj_data["label"]] = new_obj
+
             # call event handlers
             for c in self.callbacks["start"]:
                 c(self.name, new_obj, frame_name)
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            thumb_update, significant_update, autotracker_update = updated_obj.update(
-                frame_time, current_detections[id], current_frame is not None
+            thumb_update, significant_update, path_update, autotracker_update = (
+                updated_obj.update(
+                    frame_time, current_detections[id], current_frame is not None
+                )
             )
 
             if autotracker_update or significant_update:
@@ -285,11 +312,16 @@ class CameraState:
 
             # if it has been more than 5 seconds since the last thumb update
             # and the last update is greater than the last publish or
-            # the object has changed significantly
+            # the object has changed significantly or
+            # the object moved enough to update the path
             if (
-                frame_time - updated_obj.last_published > 5
-                and updated_obj.last_updated > updated_obj.last_published
-            ) or significant_update:
+                (
+                    frame_time - updated_obj.last_published > 5
+                    and updated_obj.last_updated > updated_obj.last_published
+                )
+                or significant_update
+                or path_update
+            ):
                 # call event handlers
                 for c in self.callbacks["update"]:
                     c(self.name, updated_obj, frame_name)
@@ -306,7 +338,6 @@ class CameraState:
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
         camera_activity: dict[str, list[any]] = {
-            "enabled": True,
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }
@@ -410,9 +441,13 @@ class CameraState:
             self.previous_frame_id = frame_name
 
     def save_manual_event_image(
-        self, event_id: str, label: str, draw: dict[str, list[dict]]
+        self,
+        frame: np.ndarray | None,
+        event_id: str,
+        label: str,
+        draw: dict[str, list[dict]],
     ) -> None:
-        img_frame = self.get_current_frame()
+        img_frame = frame if frame is not None else self.get_current_frame()
 
         # write clean snapshot if enabled
         if self.camera_config.snapshots.clean_copy:
@@ -458,9 +493,9 @@ class CameraState:
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
-        cv2.imwrite(
-            os.path.join(THUMB_DIR, self.camera_config.name, f"{event_id}.webp"), thumb
-        )
+        thumb_path = os.path.join(THUMB_DIR, self.camera_config.name)
+        os.makedirs(thumb_path, exist_ok=True)
+        cv2.imwrite(os.path.join(thumb_path, f"{event_id}.webp"), thumb)
 
     def shutdown(self) -> None:
         for obj in self.tracked_objects.values():

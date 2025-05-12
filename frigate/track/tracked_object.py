@@ -117,6 +117,7 @@ class TrackedObject:
     def update(self, current_frame_time: float, obj_data, has_valid_frame: bool):
         thumb_update = False
         significant_change = False
+        path_update = False
         autotracker_update = False
         # if the object is not in the current frame, add a 0.0 to the score history
         if obj_data["frame_time"] != current_frame_time:
@@ -143,24 +144,29 @@ class TrackedObject:
                 obj_data,
                 self.camera_config.frame_shape,
             ):
-                self.thumbnail_data = {
-                    "frame_time": current_frame_time,
-                    "box": obj_data["box"],
-                    "area": obj_data["area"],
-                    "region": obj_data["region"],
-                    "score": obj_data["score"],
-                    "attributes": obj_data["attributes"],
-                    "current_estimated_speed": self.current_estimated_speed,
-                    "velocity_angle": self.velocity_angle,
-                    "path_data": self.path_data,
-                    "recognized_license_plate": obj_data.get(
-                        "recognized_license_plate"
-                    ),
-                    "recognized_license_plate_score": obj_data.get(
-                        "recognized_license_plate_score"
-                    ),
-                }
-                thumb_update = True
+                if obj_data["frame_time"] == current_frame_time:
+                    self.thumbnail_data = {
+                        "frame_time": obj_data["frame_time"],
+                        "box": obj_data["box"],
+                        "area": obj_data["area"],
+                        "region": obj_data["region"],
+                        "score": obj_data["score"],
+                        "attributes": obj_data["attributes"],
+                        "current_estimated_speed": self.current_estimated_speed,
+                        "velocity_angle": self.velocity_angle,
+                        "path_data": self.path_data.copy(),
+                        "recognized_license_plate": obj_data.get(
+                            "recognized_license_plate"
+                        ),
+                        "recognized_license_plate_score": obj_data.get(
+                            "recognized_license_plate_score"
+                        ),
+                    }
+                    thumb_update = True
+                else:
+                    logger.debug(
+                        f"{self.camera_config.name}: Object frame time {obj_data['frame_time']} is not equal to the current frame time {current_frame_time}, not updating thumbnail"
+                    )
 
         # check zones
         current_zones = []
@@ -272,7 +278,7 @@ class TrackedObject:
                 self.attributes[attr["label"]] = attr["score"]
 
         # populate the sub_label for object with highest scoring logo
-        if self.obj_data["label"] in ["car", "package", "person"]:
+        if self.obj_data["label"] in ["car", "motorcycle", "package", "person"]:
             recognized_logos = {
                 k: self.attributes[k] for k in self.logos if k in self.attributes
             }
@@ -324,19 +330,21 @@ class TrackedObject:
 
             if not self.path_data:
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
             elif (
                 math.dist(self.path_data[-1][0], bottom_center) >= threshold
                 or len(self.path_data) == 1
             ):
                 # check Euclidean distance before appending
                 self.path_data.append((bottom_center, obj_data["frame_time"]))
+                path_update = True
                 logger.debug(
                     f"Point tracking: {obj_data['id']}, {bottom_center}, {obj_data['frame_time']}"
                 )
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
-        return (thumb_update, significant_change, autotracker_update)
+        return (thumb_update, significant_change, path_update, autotracker_update)
 
     def to_dict(self):
         event = {
@@ -370,7 +378,7 @@ class TrackedObject:
             "current_estimated_speed": self.current_estimated_speed,
             "average_estimated_speed": self.average_estimated_speed,
             "velocity_angle": self.velocity_angle,
-            "path_data": self.path_data,
+            "path_data": self.path_data.copy(),
             "recognized_license_plate": self.obj_data.get("recognized_license_plate"),
         }
 
@@ -442,7 +450,7 @@ class TrackedObject:
 
         if bounding_box:
             thickness = 2
-            color = self.colormap[self.obj_data["label"]]
+            color = self.colormap.get(self.obj_data["label"], (255, 255, 255))
 
             # draw the bounding boxes on the frame
             box = self.thumbnail_data["box"]

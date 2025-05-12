@@ -23,6 +23,7 @@ import { FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { useTranslation } from "react-i18next";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -91,6 +92,10 @@ export default function ReviewFilterGroup({
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
       });
+
+      if (cameraConfig.type == "lpr") {
+        labels.add("license_plate");
+      }
 
       if (cameraConfig.audio.enabled_in_config) {
         cameraConfig.audio.listen.forEach((label) => {
@@ -263,6 +268,7 @@ function ShowReviewFilter({
   showReviewed,
   setShowReviewed,
 }: ShowReviewedFilterProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [showReviewedSwitch, setShowReviewedSwitch] = useOptimisticState(
     showReviewed,
     setShowReviewed,
@@ -278,13 +284,13 @@ function ShowReviewFilter({
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          Show Reviewed
+          {t("review.showReviewed")}
         </Label>
       </div>
 
       <Button
         className="block duration-0 md:hidden"
-        aria-label="Show reviewed"
+        aria-label={t("review.showReviewed")}
         variant={showReviewedSwitch ? "select" : "default"}
         size="sm"
         onClick={() =>
@@ -320,6 +326,7 @@ function GeneralFilterButton({
   selectedZones,
   onUpdateFilter,
 }: GeneralFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [open, setOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<GeneralFilter>({
     labels: selectedLabels,
@@ -347,8 +354,8 @@ function GeneralFilterButton({
       variant={
         selectedLabels?.length || selectedZones?.length ? "select" : "default"
       }
-      className="flex items-center gap-2 capitalize"
-      aria-label="Filter"
+      className="flex items-center gap-2 smart-capitalize"
+      aria-label={t("filter")}
     >
       <FaFilter
         className={`${
@@ -364,7 +371,7 @@ function GeneralFilterButton({
             : "text-primary"
         }`}
       >
-        Filter
+        {t("filter")}
       </div>
     </Button>
   );
@@ -439,13 +446,14 @@ export function GeneralFilterContent({
   onReset,
   onClose,
 }: GeneralFilterContentProps) {
+  const { t } = useTranslation(["components/filter", "views/events"]);
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         {currentSeverity && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
-              label="Alerts"
+              label={t("alerts", { ns: "views/events" })}
               disabled={currentSeverity == "alert"}
               isChecked={
                 currentSeverity == "alert" ? true : filter.showAll === true
@@ -455,7 +463,7 @@ export function GeneralFilterContent({
               }
             />
             <FilterSwitch
-              label="Detections"
+              label={t("detections", { ns: "views/events" })}
               disabled={currentSeverity == "detection"}
               isChecked={
                 currentSeverity == "detection" ? true : filter.showAll === true
@@ -472,7 +480,7 @@ export function GeneralFilterContent({
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
-            All Labels
+            {t("labels.all.title")}
           </Label>
           <Switch
             className="ml-1"
@@ -490,7 +498,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={item.replaceAll("_", " ")}
+              label={t(item, { ns: "objects" })}
               isChecked={filter.labels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -519,7 +527,7 @@ export function GeneralFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                {t("zones.all.title")}
               </Label>
               <Switch
                 className="ml-1"
@@ -568,17 +576,20 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           variant="select"
           onClick={() => {
             onApply();
             onClose();
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
-        <Button aria-label="Reset" onClick={onReset}>
-          Reset
+        <Button
+          aria-label={t("button.reset", { ns: "common" })}
+          onClick={onReset}
+        >
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>
@@ -593,6 +604,7 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
+  const { t } = useTranslation(["views/events", "components/filter"]);
   const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
     motionOnly,
     setMotionOnly,
@@ -611,7 +623,7 @@ function ShowMotionOnlyButton({
           className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
-          Motion only
+          {t("motion.only")}
         </Label>
       </div>
 
@@ -619,7 +631,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
-          aria-label="Show Motion Only"
+          aria-label={t("motion.only")}
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >

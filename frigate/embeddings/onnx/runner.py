@@ -65,9 +65,42 @@ class ONNXModelRunner:
         elif self.type == "ort":
             return [input.name for input in self.ort.get_inputs()]
 
+    def get_input_width(self):
+        """Get the input width of the model regardless of backend."""
+        if self.type == "ort":
+            return self.ort.get_inputs()[0].shape[3]
+        elif self.type == "ov":
+            input_info = self.interpreter.inputs
+            first_input = input_info[0]
+
+            try:
+                partial_shape = first_input.get_partial_shape()
+                # width dimension
+                if len(partial_shape) >= 4 and partial_shape[3].is_static:
+                    return partial_shape[3].get_length()
+
+                # If width is dynamic or we can't determine it
+                return -1
+            except Exception:
+                try:
+                    # gemini says some ov versions might still allow this
+                    input_shape = first_input.shape
+                    return input_shape[3] if len(input_shape) >= 4 else -1
+                except Exception:
+                    return -1
+        return -1
+
     def run(self, input: dict[str, Any]) -> Any:
         if self.type == "ov":
             infer_request = self.interpreter.create_infer_request()
+
+            try:
+                # This ensures the model starts with a clean state for each sequence
+                # Important for RNN models like PaddleOCR recognition
+                infer_request.reset_state()
+            except Exception:
+                # this will raise an exception for models with AUTO set as the device
+                pass
 
             outputs = infer_request.infer(input)
 

@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "找不到此次录制",
+  "noPreviewFound": "没有找到预览",
+  "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览",
+  "submitFrigatePlus": {
+    "title": "提交此帧到 Frigate+？",
+    "submit": "提交"
+  },
+  "livePlayerRequiredIOSVersion": "此直播流类型需要 iOS 17.1 或更高版本。",
+  "streamOffline": {
+    "title": "视频流离线",
+    "desc": "未在 {{cameraName}} 的 <code>detect</code> 流上接收到任何帧，请检查错误日志"
+  },
+  "cameraDisabled": "摄像机已禁用",
+  "stats": {
+    "streamType": {
+      "title": "流类型：",
+      "short": "类型"
+    },
+    "bandwidth": {
+      "title": "带宽：",
+      "short": "带宽"
+    },
+    "latency": {
+      "title": "延迟：",
+      "value": "{{seconds}} 秒",
+      "short": {
+        "title": "延迟",
+        "value": "{{seconds}} 秒"
+      }
+    },
+    "totalFrames": "总帧数：",
+    "droppedFrames": {
+      "title": "丢帧数：",
+      "short": {
+        "title": "丢帧",
+        "value": "{{droppedFrames}} 帧"
+      }
+    },
+    "decodedFrames": "解码帧数：",
+    "droppedFrameRate": "丢帧率："
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "已成功提交帧到 Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
+    }
+  }
+}

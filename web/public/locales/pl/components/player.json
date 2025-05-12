@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Nie znaleziono żadnych nagrań w tym czasie",
+  "cameraDisabled": "Kamera jest wyłączona",
+  "stats": {
+    "latency": {
+      "title": "Opóźnienie:",
+      "value": "{{seconds}} sekund",
+      "short": {
+        "title": "Opóźnienie",
+        "value": "{{seconds}} s"
+      }
+    },
+    "totalFrames": "Całkowita liczba klatek:",
+    "streamType": {
+      "title": "Typ transmisji:",
+      "short": "Typ"
+    },
+    "bandwidth": {
+      "title": "Przepustowość:",
+      "short": "Przepustowość"
+    },
+    "droppedFrames": {
+      "title": "Porzucone klatki:",
+      "short": {
+        "title": "Porzucone",
+        "value": "{{droppedFrames}} klatek"
+      }
+    },
+    "decodedFrames": "Zdekodowane klatki:",
+    "droppedFrameRate": "Współczynnik porzuconych klatek:"
+  },
+  "noPreviewFound": "Nie znaleziono podglądu",
+  "noPreviewFoundFor": "Nie znaleziono podglądu dla {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Wyślij tę klatkę do Frigate+?",
+    "submit": "Wyślij"
+  },
+  "livePlayerRequiredIOSVersion": "Wymagana wersja iOS 17.1 lub nowsza dla tego typu transmisji na żywo.",
+  "streamOffline": {
+    "title": "Transmisja offline",
+    "desc": "Nie otrzymano klatek na strumieniu {{cameraName}} <code>detect</code>, sprawdź logi błędów"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Pomyślnie wysłano klatkę do Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Nie udało się wysłać klatki do Frigate+"
+    }
+  }
+}

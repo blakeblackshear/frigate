@@ -1,0 +1,13 @@
+{
+  "group": {
+    "label": "Kameragrupper",
+    "add": "Lägg till Kameragrupp",
+    "edit": "Ändra Kameragrupp",
+    "delete": {
+      "label": "Radera kameragrupp",
+      "confirm": {
+        "title": "Bekräfta borttagning"
+      }
+    }
+  }
+}

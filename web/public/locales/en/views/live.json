@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "lowBandwidthMode": "Low-bandwidth Mode",
+  "twoWayTalk": {
+    "enable": "Enable Two Way Talk",
+    "disable": "Disable Two Way Talk"
+  },
+  "cameraAudio": {
+    "enable": "Enable Camera Audio",
+    "disable": "Disable Camera Audio"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Click in the frame to center the camera",
+        "enable": "Enable click to move",
+        "disable": "Disable click to move"
+      },
+      "left": {
+        "label": "Move PTZ camera to the left"
+      },
+      "up": {
+        "label": "Move PTZ camera up"
+      },
+      "down": {
+        "label": "Move PTZ camera down"
+      },
+      "right": {
+        "label": "Move PTZ camera to the right"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Zoom PTZ camera in"
+      },
+      "out": {
+        "label": "Zoom PTZ camera out"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Click in the frame to center the PTZ camera"
+      }
+    },
+    "presets": "PTZ camera presets"
+  },
+  "camera": {
+    "enable": "Enable Camera",
+    "disable": "Disable Camera"
+  },
+  "muteCameras": {
+    "enable": "Mute All Cameras",
+    "disable": "Unmute All Cameras"
+  },
+  "detect": {
+    "enable": "Enable Detect",
+    "disable": "Disable Detect"
+  },
+  "recording": {
+    "enable": "Enable Recording",
+    "disable": "Disable Recording"
+  },
+  "snapshots": {
+    "enable": "Enable Snapshots",
+    "disable": "Disable Snapshots"
+  },
+  "audioDetect": {
+    "enable": "Enable Audio Detect",
+    "disable": "Disable Audio Detect"
+  },
+  "autotracking": {
+    "enable": "Enable Autotracking",
+    "disable": "Disable Autotracking"
+  },
+  "streamStats": {
+    "enable": "Show Stream Stats",
+    "disable": "Hide Stream Stats"
+  },
+  "manualRecording": {
+    "title": "On-Demand Recording",
+    "tips": "Start a manual event based on this camera's recording retention settings.",
+    "playInBackground": {
+      "label": "Play in background",
+      "desc": "Enable this option to continue streaming when the player is hidden."
+    },
+    "showStats": {
+      "label": "Show Stats",
+      "desc": "Enable this option to show stream statistics as an overlay on the camera feed."
+    },
+    "debugView": "Debug View",
+    "start": "Start on-demand recording",
+    "started": "Started manual on-demand recording.",
+    "failedToStart": "Failed to start manual on-demand recording.",
+    "recordDisabledTips": "Since recording is disabled or restricted in the config for this camera, only a snapshot will be saved.",
+    "end": "End on-demand recording",
+    "ended": "Ended manual on-demand recording.",
+    "failedToEnd": "Failed to end manual on-demand recording."
+  },
+  "streamingSettings": "Streaming Settings",
+  "notifications": "Notifications",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Suspend for: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Audio must be output from your camera and configured in go2rtc for this stream.",
+        "documentation": "Read the documentation "
+      },
+      "available": "Audio is available for this stream",
+      "unavailable": "Audio is not available for this stream"
+    },
+    "twoWayTalk": {
+      "tips": "Your device must support the feature and WebRTC must be configured for two-way talk.",
+      "tips.documentation": "Read the documentation ",
+      "available": "Two-way talk is available for this stream",
+      "unavailable": "Two-way talk is unavailable for this stream"
+    },
+    "lowBandwidth": {
+      "tips": "Live view is in low-bandwidth mode due to buffering or stream errors.",
+      "resetStream": "Reset stream"
+    },
+    "playInBackground": {
+      "label": "Play in background",
+      "tips": "Enable this option to continue streaming when the player is hidden."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Settings",
+    "cameraEnabled": "Camera Enabled",
+    "objectDetection": "Object Detection",
+    "recording": "Recording",
+    "snapshots": "Snapshots",
+    "audioDetection": "Audio Detection",
+    "autotracking": "Autotracking"
+  },
+  "history": {
+    "label": "Show historical footage"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "All",
+      "motion": "Motion",
+      "active_objects": "Active Objects"
+    },
+    "notAllTips": "Your {{source}} recording retention configuration is set to <code>mode: {{effectiveRetainMode}}</code>, so this on-demand recording will only keep segments with {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Edit Layout",
+    "group": {
+      "label": "Edit Camera Group"
+    },
+    "exitEdit": "Exit Editing"
+  }
+}

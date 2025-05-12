@@ -1,10 +1,18 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 const MobilePageContext = createContext<{
   open: boolean;
@@ -23,15 +31,47 @@ export function MobilePage({
   onOpenChange,
 }: MobilePageProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const location = useLocation();
 
   const open = controlledOpen ?? uncontrolledOpen;
-  const setOpen = (value: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(value);
-    } else {
-      setUncontrolledOpen(value);
+  const setOpen = useCallback(
+    (value: boolean) => {
+      if (onOpenChange) {
+        onOpenChange(value);
+      } else {
+        setUncontrolledOpen(value);
+      }
+    },
+    [onOpenChange, setUncontrolledOpen],
+  );
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (open && isActive) {
+      window.history.pushState({ isMobilePage: true }, "", location.pathname);
     }
-  };
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (open && isActive) {
+        event.preventDefault();
+        setOpen(false);
+        // Delay replaceState to ensure state updates are processed
+        setTimeout(() => {
+          if (isActive) {
+            window.history.replaceState(null, "", location.pathname);
+          }
+        }, 0);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      isActive = false;
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [open, setOpen, location.pathname]);
 
   return (
     <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
@@ -138,6 +178,7 @@ export function MobilePageHeader({
   onClose,
   ...props
 }: MobilePageHeaderProps) {
+  const { t } = useTranslation(["common"]);
   const context = useContext(MobilePageContext);
   if (!context)
     throw new Error("MobilePageHeader must be used within MobilePage");
@@ -160,7 +201,7 @@ export function MobilePageHeader({
     >
       <Button
         className="absolute left-0 rounded-lg"
-        aria-label="Go back"
+        aria-label={t("label.back", { ns: "common" })}
         size="sm"
         onClick={handleClose}
       >

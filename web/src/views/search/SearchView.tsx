@@ -22,7 +22,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
 import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
-import SearchSettings from "@/components/settings/SearchSettings";
+import ExploreSettings from "@/components/settings/SearchSettings";
 import {
   Tooltip,
   TooltipContent,
@@ -31,6 +31,7 @@ import {
 import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchViewProps = {
   search: string;
@@ -70,6 +71,7 @@ export default function SearchView({
   setColumns,
   setDefaultView,
 }: SearchViewProps) {
+  const { t } = useTranslation(["views/explore"]);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -105,7 +107,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
       });
@@ -137,7 +145,13 @@ export default function SearchView({
       if (camera == "birdseye") {
         return;
       }
+
       const cameraConfig = config.cameras[camera];
+
+      if (!cameraConfig) {
+        return;
+      }
+
       Object.entries(cameraConfig.zones).map(([name, _]) => {
         zones.add(name);
       });
@@ -495,7 +509,7 @@ export default function SearchView({
                     filter={searchFilter}
                     onUpdateFilter={onUpdateFilter}
                   />
-                  <SearchSettings
+                  <ExploreSettings
                     columns={columns}
                     setColumns={setColumns}
                     defaultView={defaultView}
@@ -531,7 +545,7 @@ export default function SearchView({
         {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
-            No Tracked Objects Found
+            {t("noTrackedObjects")}
           </div>
         )}
 
@@ -583,7 +597,7 @@ export default function SearchView({
                           <Tooltip>
                             <TooltipTrigger>
                               <Chip
-                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
+                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs text-white smart-capitalize`}
                               >
                                 {value.search_source == "thumbnail" ? (
                                   <LuImage className="size-3" />
@@ -594,8 +608,21 @@ export default function SearchView({
                             </TooltipTrigger>
                             <TooltipPortal>
                               <TooltipContent>
-                                Matched {value.search_source} at{" "}
-                                {zScoreToConfidence(value.search_distance)}%
+                                <Trans
+                                  ns="views/explore"
+                                  values={{
+                                    type: t(
+                                      "filter.searchType." +
+                                        value.search_source,
+                                      { ns: "views/search" },
+                                    ),
+                                    confidence: zScoreToConfidence(
+                                      value.search_distance,
+                                    ),
+                                  }}
+                                >
+                                  searchResult.tooltip
+                                </Trans>
                               </TooltipContent>
                             </TooltipPortal>
                           </Tooltip>
@@ -616,7 +643,7 @@ export default function SearchView({
                         }}
                         refreshResults={refresh}
                         showObjectLifecycle={() =>
-                          onSelectSearch(value, false, "object lifecycle")
+                          onSelectSearch(value, false, "object_lifecycle")
                         }
                         showSnapshot={() =>
                           onSelectSearch(value, false, "snapshot")

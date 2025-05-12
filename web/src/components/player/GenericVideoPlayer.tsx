@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useVideoDimensions } from "@/hooks/use-video-dimensions";
 import HlsVideoPlayer from "./HlsVideoPlayer";
 import ActivityIndicator from "../indicators/activity-indicator";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type GenericVideoPlayerProps = {
   source: string;
@@ -35,6 +36,58 @@ export function GenericVideoPlayer({
 
     checkSourceExists(source);
   }, [source]);
+
+  const onSeek = useCallback(
+    (diff: number) => {
+      const currentTime = videoRef.current?.currentTime;
+
+      if (!currentTime) {
+        return;
+      }
+
+      videoRef.current!.currentTime = Math.max(0, currentTime + diff);
+    },
+    [videoRef],
+  );
+
+  useKeyboardListener(
+    ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", " ", "f", "m"],
+    (key, modifiers) => {
+      if (!modifiers.down || modifiers.repeat) {
+        return;
+      }
+
+      switch (key) {
+        case "ArrowDown":
+          onSeek(-1);
+          break;
+        case "ArrowLeft":
+          onSeek(-10);
+          break;
+        case "ArrowRight":
+          onSeek(10);
+          break;
+        case "ArrowUp":
+          onSeek(1);
+          break;
+        case " ":
+          if (videoRef.current?.paused) {
+            videoRef.current?.play();
+          } else {
+            videoRef.current?.pause();
+          }
+          break;
+        case "f":
+          videoRef.current?.requestFullscreen();
+          break;
+        case "m":
+          if (videoRef.current) {
+            videoRef.current.muted = !videoRef.current.muted;
+          }
+          break;
+      }
+    },
+  );
 
   return (
     <div ref={containerRef} className="relative flex h-full w-full flex-col">

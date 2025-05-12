@@ -135,6 +135,7 @@ class Dispatcher:
                         "type": TrackedObjectUpdateTypesEnum.description,
                         "id": event.id,
                         "description": event.data["description"],
+                        "camera": event.camera,
                     }
                 ),
             )
@@ -164,8 +165,12 @@ class Dispatcher:
 
         def handle_on_connect():
             camera_status = self.camera_activity.last_camera_activity.copy()
+            cameras_with_status = camera_status.keys()
 
-            for camera in camera_status.keys():
+            for camera in self.config.cameras.keys():
+                if camera not in cameras_with_status:
+                    camera_status[camera] = {}
+
                 camera_status[camera]["config"] = {
                     "detect": self.config.cameras[camera].detect.enabled,
                     "enabled": self.config.cameras[camera].enabled,

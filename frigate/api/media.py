@@ -1,7 +1,9 @@
 """Image and video apis."""
 
+import asyncio
 import glob
 import logging
+import math
 import os
 import subprocess as sp
 import time
@@ -109,9 +111,12 @@ def imagestream(
 @router.get("/{camera_name}/ptz/info")
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
-        return JSONResponse(
-            content=await request.app.onvif.get_camera_info(camera_name),
+        # Schedule get_camera_info in the OnvifController's event loop
+        future = asyncio.run_coroutine_threadsafe(
+            request.app.onvif.get_camera_info(camera_name), request.app.onvif.loop
         )
+        result = future.result()
+        return JSONResponse(content=result)
     else:
         return JSONResponse(
             content={"success": False, "message": "Camera not found"},
@@ -240,25 +245,50 @@ def get_snapshot_from_recording(
             content={"success": False, "message": "Camera not found"},
             status_code=404,
         )
-
-    recording_query = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-        )
-        .where(
-            (
-                (frame_time >= Recordings.start_time)
-                & (frame_time <= Recordings.end_time)
-            )
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.desc())
-        .limit(1)
-    )
+    recording: Recordings | None = None
 
     try:
-        recording: Recordings = recording_query.get()
+        recording = (
+            Recordings.select(
+                Recordings.path,
+                Recordings.start_time,
+            )
+            .where(
+                (
+                    (frame_time >= Recordings.start_time)
+                    & (frame_time <= Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .order_by(Recordings.start_time.desc())
+            .limit(1)
+            .get()
+        )
+    except DoesNotExist:
+        # try again with a rounded frame time as it may be between
+        # the rounded segment start time
+        frame_time = math.ceil(frame_time)
+        try:
+            recording = (
+                Recordings.select(
+                    Recordings.path,
+                    Recordings.start_time,
+                )
+                .where(
+                    (
+                        (frame_time >= Recordings.start_time)
+                        & (frame_time <= Recordings.end_time)
+                    )
+                )
+                .where(Recordings.camera == camera_name)
+                .order_by(Recordings.start_time.desc())
+                .limit(1)
+                .get()
+            )
+        except DoesNotExist:
+            pass
+
+    if recording is not None:
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
         mime_type = "png" if format == "png" else "jpeg"
@@ -279,7 +309,7 @@ def get_snapshot_from_recording(
                 status_code=404,
             )
         return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
-    except DoesNotExist:
+    else:
         return JSONResponse(
             content={
                 "success": False,
@@ -511,7 +541,10 @@ def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
+    description="For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.",
+)
 def recording_clip(
     request: Request,
     camera_name: str,
@@ -876,7 +909,7 @@ def event_thumbnail(
         elif extension == "webp":
             quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{img}", thumbnail, quality_params)
+        _, img = cv2.imencode(f".{extension}", thumbnail, quality_params)
         thumbnail_bytes = img.tobytes()
 
     return Response(

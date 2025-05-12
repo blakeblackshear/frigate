@@ -303,6 +303,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             and len(payload["before"]["data"]["zones"])
             == len(payload["after"]["data"]["zones"])
         ):
+            logger.debug(
+                f"Skipping notification for {camera} - message is an update and important fields don't have an update"
+            )
             return
 
         self.last_camera_notification_time[camera] = current_time
@@ -324,6 +327,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
         ttl = 3600 if state == "end" else 0
+
+        logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
         for user in self.web_pushers:
             self.send_push_notification(

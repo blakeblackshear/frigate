@@ -20,6 +20,14 @@ export interface BirdseyeConfig {
   width: number;
 }
 
+export interface FaceRecognitionConfig {
+  enabled: boolean;
+  model_size: SearchModelSize;
+  unknown_score: number;
+  detection_threshold: number;
+  recognition_threshold: number;
+}
+
 export type SearchModel = "jinav1" | "jinav2";
 export type SearchModelSize = "small" | "large";
 
@@ -233,6 +241,7 @@ export interface CameraConfig {
     position: string;
     thickness: number;
   };
+  type: string;
   ui: UiConfig;
   webui_url: string | null;
   zones: {
@@ -290,6 +299,13 @@ export interface FrigateConfig {
     [cameraName: string]: CameraConfig;
   };
 
+  classification: {
+    bird: {
+      enabled: boolean;
+      threshold: number;
+    };
+  };
+
   database: {
     path: string;
   };
@@ -331,11 +347,7 @@ export interface FrigateConfig {
 
   environment_vars: Record<string, unknown>;
 
-  face_recognition: {
-    enabled: boolean;
-    detection_threshold: number;
-    recognition_threshold: number;
-  };
+  face_recognition: FaceRecognitionConfig;
 
   ffmpeg: {
     global_args: string[];
@@ -391,6 +403,16 @@ export interface FrigateConfig {
     colormap: { [key: string]: [number, number, number] };
     attributes_map: { [key: string]: [string] };
     all_attributes: [string];
+    plus?: {
+      name: string;
+      id: string;
+      trainDate: string;
+      baseModel: string;
+      isBaseModel: boolean;
+      supportedDetectors: string[];
+      width: number;
+      height: number;
+    };
   };
 
   motion: Record<string, unknown> | null;

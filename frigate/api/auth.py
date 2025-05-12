@@ -109,11 +109,11 @@ def get_jwt_secret() -> str:
         jwt_secret = (
             Path(os.path.join("/run/secrets", JWT_SECRET_ENV_VAR)).read_text().strip()
         )
-    # check for the addon options file
+    # check for the add-on options file
     elif os.path.isfile("/data/options.json"):
         with open("/data/options.json") as f:
             raw_options = f.read()
-        logger.debug("Using jwt secret from Home Assistant addon options file.")
+        logger.debug("Using jwt secret from Home Assistant Add-on options file.")
         options = json.loads(raw_options)
         jwt_secret = options.get("jwt_secret")
 
@@ -253,22 +253,24 @@ def auth(request: Request):
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
         user_header = proxy_config.header_map.user
-        role_header = proxy_config.header_map.role
         success_response.headers["remote-user"] = (
             request.headers.get(user_header, default="anonymous")
             if user_header
             else "anonymous"
         )
+
         role_header = proxy_config.header_map.role
         role = (
-            request.headers.get(role_header, default="viewer")
+            request.headers.get(role_header, default=proxy_config.default_role)
             if role_header
-            else "viewer"
+            else proxy_config.default_role
         )
 
-        # if comma-separated with "admin", use "admin", else "viewer"
+        # if comma-separated with "admin", use "admin", else use default role
         success_response.headers["remote-role"] = (
-            "admin" if role and "admin" in role else "viewer"
+            "admin"
+            if role and "admin" in [r.strip() for r in role.split(",")]
+            else proxy_config.default_role
         )
 
         return success_response

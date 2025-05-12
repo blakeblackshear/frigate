@@ -1,0 +1,78 @@
+{
+  "description": {
+    "placeholder": "Digite um nome para esta coleção",
+    "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos."
+  },
+  "details": {
+    "person": "Pessoa",
+    "face": "Detalhes do rosto",
+    "faceDesc": "Detalhes do rosto e objeto associado",
+    "timestamp": "Carimbo de hora",
+    "confidence": "Confiança"
+  },
+  "documentTitle": "Biblioteca de rostos - Frigate",
+  "uploadFaceImage": {
+    "title": "Carregar imagem do rosto",
+    "desc": "Carregue uma imagem para escanear rostos e incluir em {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Criar coleção",
+    "desc": "Criar uma nova coleção",
+    "new": "Criar novo rosto",
+    "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treinamento que capturem rostos em ângulo.</li></ul>"
+  },
+  "train": {
+    "aria": "Selecionar treino",
+    "title": "Treinar"
+  },
+  "selectItem": "Selecionar {{item}}",
+  "selectFace": "Selecionar rosto",
+  "deleteFaceLibrary": {
+    "title": "Excluir nome",
+    "desc": "Tem certeza de que deseja excluir a coleção {{name}}? Isso excluirá permanentemente todos os rostos associados."
+  },
+  "button": {
+    "addFace": "Adicionar rosto",
+    "uploadImage": "Carregar imagem",
+    "deleteFaceAttempts": "Apagar tentativas de detecção facial",
+    "reprocessFace": "Reprocessar Rosto"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Selecione um arquivo de imagem."
+    },
+    "dropActive": "Solte a imagem aqui…",
+    "maxSize": "Tamanho máximo: {{size}}MB",
+    "dropInstructions": "Arraste e solte uma imagem aqui ou clique para selecionar"
+  },
+  "trainFace": "Treinar rosto",
+  "toast": {
+    "success": {
+      "updatedFaceScore": "Pontuação facial atualizada com sucesso.",
+      "trainedFace": "Rosto treinado com sucesso.",
+      "deletedFace_one": "{{count}} rosto excluído com sucesso.",
+      "deletedFace_many": "{{count}} rostos excluídos com sucesso.",
+      "deletedFace_other": "{{count}} rostos excluídos com sucesso.",
+      "deletedName_one": "{{count}} rosto foi excluído com sucesso.",
+      "deletedName_many": "{{count}} rostos foram excluídos com sucesso.",
+      "deletedName_other": "{{count}} rostos foram excluídos com sucesso.",
+      "uploadedImage": "Imagem carregada com sucesso.",
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à biblioteca de rostos!"
+    },
+    "error": {
+      "uploadingImageFailed": "Falha ao carregar a imagem: {{errorMessage}}",
+      "deleteFaceFailed": "Falha ao excluir: {{errorMessage}}",
+      "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}",
+      "addFaceLibraryFailed": "Falhou ao definir nome do rosto: {{errorMessage}}",
+      "trainFailed": "Falhou ao treinar: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falhou ao atualizar pontuação da face: {{errorMessage}}"
+    }
+  },
+  "readTheDocs": "Leia a documentação",
+  "trainFaceAs": "Treinar rosto como:",
+  "steps": {
+    "faceName": "Digite o Nome do Rosto",
+    "uploadFace": "Carregar imagem do rosto",
+    "nextSteps": "Próximos passos"
+  }
+}

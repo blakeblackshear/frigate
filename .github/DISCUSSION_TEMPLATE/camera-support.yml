@@ -73,7 +73,7 @@ body:
     attributes:
       label: Operating system
       options:
-        - HassOS
+        - Home Assistant OS
         - Debian
         - Other Linux
         - Proxmox
@@ -87,7 +87,7 @@ body:
     attributes:
       label: Install method
       options:
-        - HassOS Addon
+        - Home Assistant Add-on
         - Docker Compose
         - Docker CLI
         - Proxmox via Docker

@@ -1,10 +1,12 @@
 import { useTheme } from "@/context/theme-provider";
+import { useDateLocale } from "@/hooks/use-date-locale";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 
 type ThresholdBarGraphProps = {
@@ -45,6 +47,16 @@ export function ThresholdBarGraph({
 
   const { theme, systemTheme } = useTheme();
 
+  const locale = useDateLocale();
+  const { t } = useTranslation(["common"]);
+
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    return t(`time.formattedTimestampHourMinute.${timeFormat}`, {
+      ns: "common",
+    });
+  }, [t, timeFormat]);
+
   const formatTime = useCallback(
     (val: unknown) => {
       const dateIndex = Math.round(val as number);
@@ -53,17 +65,16 @@ export function ThresholdBarGraph({
       if (dateIndex < 0) {
         timeOffset = 5 * Math.abs(dateIndex);
       }
-
       return formatUnixTimestampToDateTime(
         updateTimes[Math.max(1, dateIndex) - 1] - timeOffset,
         {
           timezone: config?.ui.timezone,
-          strftime_fmt:
-            config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+          date_format: format,
+          locale,
         },
       );
     },
-    [config, updateTimes],
+    [config?.ui.timezone, format, locale, updateTimes],
   );
 
   const options = useMemo(() => {

@@ -144,13 +144,14 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             return
 
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label, (id, self.labelmap[best_id], score)
+            EventMetadataTypeEnum.sub_label,
+            (obj_data["id"], self.labelmap[best_id], score),
         )
         self.detected_birds[obj_data["id"]] = score
 
     def handle_request(self, topic, request_data):
         return None
 
-    def expire_object(self, object_id):
+    def expire_object(self, object_id, camera):
         if object_id in self.detected_birds:
             self.detected_birds.pop(object_id)

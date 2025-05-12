@@ -19,7 +19,6 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     EXPORT_DIR,
-    FFMPEG_HVC1_ARGS,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
 )
@@ -232,9 +231,6 @@ class RecordingExporter(threading.Thread):
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
-
-        if self.config.ffmpeg.apple_compatibility:
-            ffmpeg_cmd += FFMPEG_HVC1_ARGS
 
         # add metadata
         title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"

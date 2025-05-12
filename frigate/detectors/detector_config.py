@@ -25,19 +25,22 @@ class PixelFormatEnum(str, Enum):
 class InputTensorEnum(str, Enum):
     nchw = "nchw"
     nhwc = "nhwc"
+    hwnc = "hwnc"
+    hwcn = "hwcn"
 
 
 class InputDTypeEnum(str, Enum):
     float = "float"
+    float_denorm = "float_denorm"  # non-normalized float
     int = "int"
 
 
 class ModelTypeEnum(str, Enum):
+    dfine = "dfine"
+    rfdetr = "rfdetr"
     ssd = "ssd"
     yolox = "yolox"
-    yolov9 = "yolov9"
     yolonas = "yolonas"
-    dfine = "dfine"
     yologeneric = "yolo-generic"
 
 
@@ -122,6 +125,9 @@ class ModelConfig(BaseModel):
     ) -> None:
         if not self.path or not self.path.startswith("plus://"):
             return
+
+        # ensure that model cache dir exists
+        os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
         model_id = self.path[7:]
         self.path = os.path.join(MODEL_CACHE_DIR, model_id)

@@ -54,7 +54,9 @@ import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
+
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTranslation } from "react-i18next";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -94,6 +96,7 @@ export default function EventView({
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
+  const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -198,8 +201,10 @@ export default function EventView({
         .then((response) => {
           if (response.status == 200) {
             toast.success(
-              "Successfully started export. View the file in the /exports folder.",
-              { position: "top-center" },
+              t("export.toast.success", { ns: "components/dialog" }),
+              {
+                position: "top-center",
+              },
             );
           }
         })
@@ -208,12 +213,18 @@ export default function EventView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(`Failed to start export: ${errorMessage}`, {
-            position: "top-center",
-          });
+          toast.error(
+            t("export.toast.error.failed", {
+              ns: "components/dialog",
+              message: errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         });
     },
-    [reviewItems],
+    [reviewItems, t],
   );
 
   const [motionOnly, setMotionOnly] = useState(false);
@@ -266,70 +277,62 @@ export default function EventView({
           <ToggleGroupItem
             className={cn(severityToggle != "alert" && "text-muted-foreground")}
             value="alert"
-            aria-label="Select alerts"
+            aria-label={t("alerts")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_alert",
-                  severityToggle == "alert" ? "font-semibold" : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_alert sm:hidden",
+                severityToggle == "alert" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.alert > -1 ? (
+                reviewCounts.alert
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("alerts")}
                 {reviewCounts.alert > -1 ? (
-                  reviewCounts.alert
+                  ` ∙ ${reviewCounts.alert}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Alerts
-                  {reviewCounts.alert > -1 ? (
-                    ` ∙ ${reviewCounts.alert}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
               severityToggle != "detection" && "text-muted-foreground",
             )}
             value="detection"
-            aria-label="Select detections"
+            aria-label={t("detections")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_detection",
-                  severityToggle == "detection"
-                    ? "font-semibold"
-                    : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_detection sm:hidden",
+                severityToggle == "detection" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.detection > -1 ? (
+                reviewCounts.detection
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("detections")}
                 {reviewCounts.detection > -1 ? (
-                  reviewCounts.detection
+                  ` ∙ ${reviewCounts.detection}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Detections
-                  {reviewCounts.detection > -1 ? (
-                    ` ∙ ${reviewCounts.detection}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
@@ -337,16 +340,13 @@ export default function EventView({
               severityToggle != "significant_motion" && "text-muted-foreground",
             )}
             value="significant_motion"
-            aria-label="Select motion"
+            aria-label={t("motion.label")}
           >
-            {isMobileOnly ? (
-              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">Motion</div>
-              </>
-            )}
+            <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion sm:hidden" />
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
+              <div className="hidden md:block">{t("motion.label")}</div>
+            </div>
           </ToggleGroupItem>
         </ToggleGroup>
 
@@ -461,6 +461,8 @@ function DetectionReview({
   setSelectedReviews,
   pullLatestData,
 }: DetectionReviewProps) {
+  const { t } = useTranslation(["views/events"]);
+
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
   // detail
@@ -712,7 +714,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            There are no {severity.replace(/_/g, " ")}s to review
+            {t("empty." + severity.replace(/_/g, " "))}
           </div>
         )}
 
@@ -779,14 +781,14 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
-                  aria-label="Mark these items as reviewed"
+                  aria-label={t("markTheseItemsAsReviewed")}
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
                     markAllItemsAsReviewed(currentItems ?? []);
                   }}
                 >
-                  Mark these items as reviewed
+                  {t("markTheseItemsAsReviewed")}
                 </Button>
               </div>
             )}
@@ -862,6 +864,7 @@ function MotionReview({
   motionOnly = false,
   onOpenRecording,
 }: MotionReviewProps) {
+  const { t } = useTranslation(["views/events"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -1051,7 +1054,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        No motion data found
+        {t("empty.motion")}
       </div>
     );
   }

@@ -50,10 +50,11 @@ class RealTimeProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def expire_object(self, object_id: str) -> None:
+    def expire_object(self, object_id: str, camera: str) -> None:
         """Handle objects that are no longer detected.
         Args:
             object_id (str): id of object that is no longer detected.
+            camera (str): name of camera that object was detected on.
 
         Returns:
             None.

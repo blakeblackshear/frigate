@@ -55,7 +55,7 @@ from frigate.models import (
     Timeline,
     User,
 )
-from frigate.object_detection import ObjectDetectProcess
+from frigate.object_detection.base import ObjectDetectProcess
 from frigate.output.output import output_frames
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
@@ -698,6 +698,10 @@ class FrigateApp:
         if self.audio_process:
             self.audio_process.terminate()
             self.audio_process.join()
+
+        # stop the onvif controller
+        if self.onvif_controller:
+            self.onvif_controller.close()
 
         # ensure the capture processes are done
         for camera, metrics in self.camera_metrics.items():

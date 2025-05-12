@@ -17,6 +17,15 @@ const config: Config = {
   markdown: {
     mermaid: true,
   },
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+      }
+    },
+  },
   themeConfig: {
     algolia: {
       appId: 'WIURGBNBPY',
@@ -81,6 +90,16 @@ const config: Config = {
           href: 'http://demo.frigate.video',
           label: 'Demo',
           position: 'right',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
+          dropdownItemsAfter: [
+            {
+              label: '简体中文（社区翻译）',
+              href: 'https://docs.frigate-cn.video',
+            }
+          ]
         },
         {
           href: 'https://github.com/blakeblackshear/frigate',

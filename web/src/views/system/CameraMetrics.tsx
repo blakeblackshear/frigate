@@ -1,5 +1,5 @@
 import { useFrigateStats } from "@/api/ws";
-import { CameraLineGraph } from "@/components/graph/CameraGraph";
+import { CameraLineGraph } from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
+import { useTranslation } from "react-i18next";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -22,7 +23,7 @@ export default function CameraMetrics({
   setLastUpdated,
 }: CameraMetricsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-
+  const { t } = useTranslation(["views/system"]);
   // camera info dialog
 
   const [showCameraInfoDialog, setShowCameraInfoDialog] = useState(false);
@@ -78,10 +79,16 @@ export default function CameraMetrics({
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
 
-    series["overall_fps"] = { name: "overall frames per second", data: [] };
-    series["overall_dps"] = { name: "overall detections per second", data: [] };
+    series["overall_fps"] = {
+      name: t("cameras.label.overallFramesPerSecond"),
+      data: [],
+    };
+    series["overall_dps"] = {
+      name: t("cameras.label.overallDetectionsPerSecond"),
+      data: [],
+    };
     series["overall_skipped_dps"] = {
-      name: "overall skipped detections per second",
+      name: t("cameras.label.overallSkippedDetectionsPerSecond"),
       data: [],
     };
 
@@ -116,7 +123,7 @@ export default function CameraMetrics({
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   const cameraCpuSeries = useMemo(() => {
     if (!statsHistory || statsHistory.length == 0) {
@@ -142,9 +149,18 @@ export default function CameraMetrics({
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
-          series[key]["ffmpeg"] = { name: `${camName} ffmpeg`, data: [] };
-          series[key]["capture"] = { name: `${camName} capture`, data: [] };
-          series[key]["detect"] = { name: `${camName} detect`, data: [] };
+          series[key]["ffmpeg"] = {
+            name: t("cameras.label.cameraFfmpeg", { camName: camName }),
+            data: [],
+          };
+          series[key]["capture"] = {
+            name: t("cameras.label.cameraCapture", { camName: camName }),
+            data: [],
+          };
+          series[key]["detect"] = {
+            name: t("cameras.label.cameraDetect", { camName: camName }),
+            data: [],
+          };
         }
 
         series[key]["ffmpeg"].data.push({
@@ -162,7 +178,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [config, statsHistory]);
+  }, [config, statsHistory, t]);
 
   const cameraFpsSeries = useMemo(() => {
     if (!statsHistory) {
@@ -185,15 +201,21 @@ export default function CameraMetrics({
           const camName = key.replaceAll("_", " ");
           series[key] = {};
           series[key]["fps"] = {
-            name: `${camName} frames per second`,
+            name: t("cameras.label.cameraFramesPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
           series[key]["det"] = {
-            name: `${camName} detections per second`,
+            name: t("cameras.label.cameraDetectionsPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
           series[key]["skip"] = {
-            name: `${camName} skipped detections per second`,
+            name: t("cameras.label.cameraSkippedDetectionsPerSecond", {
+              camName: camName,
+            }),
             data: [],
           };
         }
@@ -213,7 +235,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [statsHistory]);
+  }, [statsHistory, t]);
 
   useEffect(() => {
     if (!showCameraInfoDialog) {
@@ -223,11 +245,13 @@ export default function CameraMetrics({
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
-      <div className="text-sm font-medium text-muted-foreground">Overview</div>
+      <div className="text-sm font-medium text-muted-foreground">
+        {t("cameras.overview")}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
           <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-            <div className="mb-5">Frames / Detections</div>
+            <div className="mb-5">{t("cameras.framesAndDetections")}</div>
             <CameraLineGraph
               graphId="overall-stats"
               unit=""
@@ -256,7 +280,7 @@ export default function CameraMetrics({
                   )}
                   <div className="flex w-full flex-col gap-3">
                     <div className="flex flex-row items-center justify-between">
-                      <div className="text-sm font-medium capitalize text-muted-foreground">
+                      <div className="text-sm font-medium text-muted-foreground smart-capitalize">
                         {camera.name.replaceAll("_", " ")}
                       </div>
                       <Tooltip>
@@ -269,7 +293,9 @@ export default function CameraMetrics({
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>Camera Probe Info</TooltipContent>
+                        <TooltipContent>
+                          {t("cameras.info.tips.title")}
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                     <div
@@ -294,7 +320,9 @@ export default function CameraMetrics({
                       )}
                       {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                         <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                          <div className="mb-5">Frames / Detections</div>
+                          <div className="mb-5">
+                            {t("cameras.framesAndDetections")}
+                          </div>
                           <CameraLineGraph
                             graphId={`${camera.name}-dps`}
                             unit=""

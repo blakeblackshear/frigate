@@ -8,11 +8,11 @@ import Chip from "@/components/indicators/Chip";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
+import { useTranslation } from "react-i18next";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -23,6 +23,7 @@ export default function SearchThumbnail({
   searchResult,
   onClick,
 }: SearchThumbnailProps) {
+  const { t } = useTranslation(["views/search"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -43,17 +44,54 @@ export default function SearchThumbnail({
     [searchResult, onClick],
   );
 
+  const hasRecognizedPlate = useMemo(
+    () => (searchResult.data.recognized_license_plate?.length || 0) > 0,
+    [searchResult],
+  );
+
   const objectLabel = useMemo(() => {
-    if (
-      !config ||
-      !searchResult.sub_label ||
-      !config.model.attributes_map[searchResult.label]
-    ) {
+    if (!config) {
       return searchResult.label;
     }
 
+    if (!searchResult.sub_label) {
+      return `${searchResult.label}${hasRecognizedPlate ? "-plate" : ""}`;
+    }
+
+    if (
+      config.model.attributes_map[searchResult.label]?.includes(
+        searchResult.sub_label,
+      )
+    ) {
+      return searchResult.sub_label;
+    }
+
     return `${searchResult.label}-verified`;
-  }, [config, searchResult]);
+  }, [config, hasRecognizedPlate, searchResult]);
+
+  const objectDetail = useMemo(() => {
+    if (!config) {
+      return undefined;
+    }
+
+    if (!searchResult.sub_label) {
+      if (hasRecognizedPlate) {
+        return `(${searchResult.data.recognized_license_plate})`;
+      }
+
+      return undefined;
+    }
+
+    if (
+      config.model.attributes_map[searchResult.label]?.includes(
+        searchResult.sub_label,
+      )
+    ) {
+      return "";
+    }
+
+    return `(${searchResult.sub_label})`;
+  }, [config, hasRecognizedPlate, searchResult]);
 
   return (
     <div
@@ -93,27 +131,27 @@ export default function SearchThumbnail({
               <TooltipTrigger asChild>
                 <div className="mx-3 pb-1 text-sm text-white">
                   <Chip
-                    className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs`}
+                    className={`z-0 flex items-center justify-between gap-1 space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
                     onClick={() => onClick(searchResult, false, true)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
-                    {Math.round(
+                    {Math.floor(
                       (searchResult.data.score ??
                         searchResult.data.top_score ??
                         searchResult.top_score) * 100,
                     )}
-                    %
+                    % {objectDetail}
                   </Chip>
                 </div>
               </TooltipTrigger>
             </div>
             <TooltipPortal>
-              <TooltipContent className="capitalize">
+              <TooltipContent className="smart-capitalize">
                 {[searchResult.sub_label ?? objectLabel]
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => capitalizeFirstLetter(text))
+                  .map((text) => t(text, { ns: "objects" }))
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}

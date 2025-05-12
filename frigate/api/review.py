@@ -58,13 +58,9 @@ async def review(
     )
 
     clauses = [
-        (
-            (ReviewSegment.start_time > after)
-            & (
-                (ReviewSegment.end_time.is_null(True))
-                | (ReviewSegment.end_time < before)
-            )
-        )
+        (ReviewSegment.start_time > after)
+        & (ReviewSegment.start_time < before)
+        & ((ReviewSegment.end_time.is_null(True)) | (ReviewSegment.end_time < before))
     ]
 
     if cameras != "all":
@@ -176,7 +172,6 @@ async def review_summary(
 
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
-    month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).timestamp()
 
     cameras = params.cameras
     labels = params.labels
@@ -277,7 +272,7 @@ async def review_summary(
         .get()
     )
 
-    clauses = [(ReviewSegment.start_time > month_ago)]
+    clauses = []
 
     if cameras != "all":
         camera_list = cameras.split(",")
@@ -365,7 +360,7 @@ async def review_summary(
                 & (UserReviewStatus.user_id == user_id)
             ),
         )
-        .where(reduce(operator.and_, clauses))
+        .where(reduce(operator.and_, clauses) if clauses else True)
         .group_by(
             (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds
         )

@@ -15,6 +15,7 @@ from frigate.const import (
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.util.config import find_config_file
 
 sys.path.remove("/opt/frigate")
 
@@ -29,12 +30,7 @@ if os.path.isdir("/run/secrets"):
                 Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
             )
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-# Check if we can use .yaml instead of .yml
-config_file_yaml = config_file.replace(".yml", ".yaml")
-if os.path.isfile(config_file_yaml):
-    config_file = config_file_yaml
+config_file = find_config_file()
 
 try:
     with open(config_file) as f:
@@ -57,7 +53,7 @@ elif go2rtc_config["api"].get("origin") is None:
 
 # Need to set default location for HA config
 if go2rtc_config.get("hass") is None:
-    go2rtc_config["hass"] = {"config": "/config"}
+    go2rtc_config["hass"] = {"config": "/homeassistant"}
 
 # we want to ensure that logs are easy to read
 if go2rtc_config.get("log") is None:
@@ -106,7 +102,7 @@ elif go2rtc_config["ffmpeg"].get("bin") is None:
 
 # need to replace ffmpeg command when using ffmpeg4
 if LIBAVFORMAT_VERSION_MAJOR < 59:
-    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 10000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
     if go2rtc_config.get("ffmpeg") is None:
         go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:

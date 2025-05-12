@@ -38,6 +38,7 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
         "ups",
         "usps",
     ],
+    "motorcycle": ["license_plate"],
 }
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
@@ -128,3 +129,7 @@ AUTOTRACKING_ZOOM_EDGE_THRESHOLD = 0.05
 
 JWT_SECRET_ENV_VAR = "FRIGATE_JWT_SECRET"
 PASSWORD_HASH_ALGORITHM = "pbkdf2_sha256"
+
+# Queues
+
+FAST_QUEUE_TIMEOUT = 0.00001  # seconds

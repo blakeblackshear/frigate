@@ -1,0 +1,12 @@
+{
+  "calendar": "Kalenteri",
+  "filter": "Suodatin",
+  "filters": "Suodattimet",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Sopimaton aikaväli valittu",
+      "endTimeMustAfterStartTime": "Loppuaika täytyy olla aloituksen jälkeen"
+    }
+  },
+  "export": "Vie"
+}

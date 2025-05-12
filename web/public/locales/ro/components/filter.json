@@ -1,0 +1,10 @@
+{
+  "filter": "Filtru",
+  "labels": {
+    "label": "Etichete",
+    "all": {
+      "title": "Toate etichetele",
+      "short": "Etichete"
+    }
+  }
+}

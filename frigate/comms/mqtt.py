@@ -213,6 +213,8 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "motion_contour_area",
             "birdseye",
             "birdseye_mode",
+            "review_alerts",
+            "review_detections",
         ]
 
         for name in self.config.cameras.keys():

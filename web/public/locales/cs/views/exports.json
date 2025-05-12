@@ -1,0 +1,17 @@
+{
+  "search": "Hledat",
+  "documentTitle": "Exportovat - Frigate",
+  "noExports": "Žádné exporty nenalezeny",
+  "deleteExport": "Smazat export",
+  "deleteExport.desc": "Opravdu chcete smazat {{exportName}}?",
+  "editExport": {
+    "title": "Přejmenovat export",
+    "desc": "Zadejte nové jméno pro tento export.",
+    "saveExport": "Uložit export"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Nepodařilo se přejmenovat export: {{errorMessage}}"
+    }
+  }
+}

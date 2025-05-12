@@ -12,7 +12,9 @@ from frigate.detectors.detector_config import (
 from frigate.util.model import (
     get_ort_providers,
     post_process_dfine,
-    post_process_yolov9,
+    post_process_rfdetr,
+    post_process_yolo,
+    post_process_yolox,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +31,8 @@ class ONNXDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: ONNXDetectorConfig):
+        super().__init__(detector_config)
+
         try:
             import onnxruntime as ort
 
@@ -50,12 +54,13 @@ class ONNXDetector(DetectionApi):
             path, providers=providers, provider_options=options
         )
 
-        self.h = detector_config.model.height
-        self.w = detector_config.model.width
         self.onnx_model_type = detector_config.model.model_type
         self.onnx_model_px = detector_config.model.input_pixel_format
         self.onnx_model_shape = detector_config.model.input_tensor
         path = detector_config.model.path
+
+        if self.onnx_model_type == ModelTypeEnum.yolox:
+            self.calculate_grids_strides()
 
         logger.info(f"ONNX: {path} loaded")
 
@@ -65,15 +70,19 @@ class ONNXDetector(DetectionApi):
                 None,
                 {
                     "images": tensor_input,
-                    "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64),
+                    "orig_target_sizes": np.array(
+                        [[self.height, self.width]], dtype=np.int64
+                    ),
                 },
             )
-            return post_process_dfine(tensor_output, self.w, self.h)
+            return post_process_dfine(tensor_output, self.width, self.height)
 
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
 
-        if self.onnx_model_type == ModelTypeEnum.yolonas:
+        if self.onnx_model_type == ModelTypeEnum.rfdetr:
+            return post_process_rfdetr(tensor_output)
+        elif self.onnx_model_type == ModelTypeEnum.yolonas:
             predictions = tensor_output[0]
 
             detections = np.zeros((20, 6), np.float32)
@@ -88,15 +97,22 @@ class ONNXDetector(DetectionApi):
                 detections[i] = [
                     class_id,
                     confidence,
-                    y_min / self.h,
-                    x_min / self.w,
-                    y_max / self.h,
-                    x_max / self.w,
+                    y_min / self.height,
+                    x_min / self.width,
+                    y_max / self.height,
+                    x_max / self.width,
                 ]
             return detections
-        elif self.onnx_model_type == ModelTypeEnum.yolov9:
-            predictions: np.ndarray = tensor_output[0]
-            return post_process_yolov9(predictions, self.w, self.h)
+        elif self.onnx_model_type == ModelTypeEnum.yologeneric:
+            return post_process_yolo(tensor_output, self.width, self.height)
+        elif self.onnx_model_type == ModelTypeEnum.yolox:
+            return post_process_yolox(
+                tensor_output[0],
+                self.width,
+                self.height,
+                self.grids,
+                self.expanded_strides,
+            )
         else:
             raise Exception(
                 f"{self.onnx_model_type} is currently not supported for onnx. See the docs for more info on supported models."

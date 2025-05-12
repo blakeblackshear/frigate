@@ -461,6 +461,7 @@ function MSEPlayer({
         setBufferTimeout(undefined);
       }
 
+      const timeoutDuration = bufferTime == 0 ? 5000 : 3000;
       setBufferTimeout(
         setTimeout(() => {
           if (
@@ -471,7 +472,7 @@ function MSEPlayer({
             onDisconnect();
             onError("stalled");
           }
-        }, 3000),
+        }, timeoutDuration),
       );
     }
   }, [
