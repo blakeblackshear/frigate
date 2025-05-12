@@ -704,7 +704,7 @@ export function RecordingView({
                         </div>
                       </TooltipTrigger>
                       <TooltipContent className="smart-capitalize">
-                        {cam}
+                        {cam.replaceAll("_", " ")}
                       </TooltipContent>
                     </Tooltip>
                   );
