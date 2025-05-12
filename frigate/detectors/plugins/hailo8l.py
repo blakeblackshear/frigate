@@ -91,6 +91,8 @@ class HailoAsyncInference:
         output_type: Optional[Dict[str, str]] = None,
         send_original_frame: bool = False,
     ) -> None:
+        # when importing hailo it activates the driver
+        # which leaves processes running even though it may not be used.
         try:
             from hailo_platform import (
                 HEF,
