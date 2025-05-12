@@ -81,4 +81,3 @@ librosa==0.11.*
 soundfile==0.13.*
 # DeGirum detector
 degirum == 0.16.*
-# degirum_headless == 0.15.*
