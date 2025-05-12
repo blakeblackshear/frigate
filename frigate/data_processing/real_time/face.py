@@ -221,6 +221,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
 
+            # check that face is correct size
+            if area(face_box) < self.config.cameras[camera].face_recognition.min_area:
+                logger.debug(
+                    f"Detected face that is smaller than the min_area {face} < {self.config.cameras[camera].face_recognition.min_area}"
+                )
+                return
+
             try:
                 face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
             except Exception:
