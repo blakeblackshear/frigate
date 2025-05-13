@@ -74,6 +74,10 @@
     "formattedTimestamp2": {
       "12hour": "MM/dd h:mm:ssa",
       "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "24hour": "МММ д, рррр",
+      "12hour": "МММ д, рррр"
     }
   },
   "button": {
@@ -175,7 +179,10 @@
       "title": "Живи",
       "allCameras": "Всi камери",
       "cameras": {
-        "title": "Камери"
+        "title": "Камери",
+        "count_one": "{{count}} Камера",
+        "count_few": "{{count}} Камери",
+        "count_many": "{{count}} Камер"
       }
     },
     "review": "Перегляд",
