@@ -1,1 +1,12 @@
-{}
+{
+  "description": {
+    "addFace": "Tambah ke koleksi Pustaka Wajah.",
+    "placeholder": "Masukkan Nama untuk koleksi ini"
+  },
+  "details": {
+    "person": "Orang",
+    "subLabelScore": "Skor Sub Label",
+    "face": "Detail Wajah",
+    "scoreInfo": "Skor sub label adalah nilai gabungan dari tingkat keyakinan sistem dalam mengenali wajah. Nilai ini bisa berbeda dengan skor yang terlihat pada gambar cuplikan."
+  }
+}

@@ -21,5 +21,10 @@
   "singing": "Nyanyian",
   "mantra": "Mantra",
   "synthetic_singing": "Nyanyian sintesis",
-  "whistling": "Siulan"
+  "whistling": "Siulan",
+  "car": "Mobil",
+  "motorcycle": "Motor",
+  "bicycle": "Sepeda",
+  "bus": "Bis",
+  "train": "Kereta"
 }
