@@ -53,7 +53,7 @@
     "cameraGroupStreaming": {
       "title": "Paramètres de diffusion du groupe de caméras",
       "desc": "Les paramètres de diffusion en continu pour chaque groupe de caméras sont stockés dans le stockage local de votre navigateur.",
-      "clearAll": "Effacer tous les paramètres de streaming"
+      "clearAll": "Effacer tous les paramètres de diffusion"
     },
     "recordingsViewer": {
       "title": "Visionneuse d'enregistrements",
@@ -73,7 +73,7 @@
     },
     "toast": {
       "error": {
-        "clearStoredLayoutFailed": "Échec à l'effacement de la mise en page enregistrée : {{errorMessage}}",
+        "clearStoredLayoutFailed": "Échec de l'effacement de la mise en page enregistrée : {{errorMessage}}",
         "clearStreamingSettingsFailed": "Échec de l'effacement des paramètres de diffusion : {{errorMessage}}"
       },
       "success": {
@@ -105,12 +105,12 @@
     "cancelSuspension": "Annuler la suspension",
     "notificationSettings": {
       "title": "Paramètres de notification",
-      "documentation": "Lire la Documentation",
+      "documentation": "Lire la documentation",
       "desc": "Frigate peut envoyer nativement des notifications push à votre appareil lorsqu'il est exécuté dans le navigateur ou installé en tant que PWA."
     },
     "notificationUnavailable": {
       "title": "Notifications indisponibles",
-      "documentation": "Lire la Documentation",
+      "documentation": "Lire la documentation",
       "desc": "Les notifications push Web nécessitent un contexte sécurisé (<code>https://…</code>). Il s'agit d'une limitation du navigateur. Accédez à Frigate en toute sécurité pour utiliser les notifications."
     },
     "globalSettings": {
@@ -120,7 +120,7 @@
     "email": {
       "title": "Email",
       "desc": "Une adresse e-mail valide est requise et sera utilisée pour vous avertir en cas de problème avec le service push.",
-      "placeholder": "e.g. example@email.com"
+      "placeholder": "par ex. exemple@email.com"
     },
     "cameras": {
       "title": "Caméras",
@@ -133,7 +133,9 @@
     "active": "Notifications actives",
     "registerDevice": "Enregistrer cet appareil",
     "unregisterDevice": "Désenregistrer cet appareil",
-    "sendTestNotification": "Envoyer une notification de test"
+    "sendTestNotification": "Envoyer une notification de test",
+    "unsavedChanges": "Modifications des notifications non enregistrés",
+    "unsavedRegistrations": "Enregistrements des notifications non enregistrés"
   },
   "frigatePlus": {
     "apiKey": {
@@ -143,7 +145,7 @@
       "desc": "La clé API Frigate+ permet l'intégration avec le service Frigate+.",
       "plusLink": "En savoir plus sur Frigate+"
     },
-    "title": "Paramètres Frégate+",
+    "title": "Paramètres Frigate+",
     "snapshotConfig": {
       "documentation": "Lire la documentation",
       "desc": "La soumission à Frigate+ nécessite que les instantanés et les instantanés <code>clean_copy</code> soient activés dans votre configuration.",
@@ -157,17 +159,17 @@
     },
     "modelInfo": {
       "baseModel": "Modèle de base",
-      "modelType": "Type de Modèle",
+      "modelType": "Type de modèle",
       "cameras": "Caméras",
       "supportedDetectors": "Détecteurs pris en charge",
-      "loading": "Chargement des informations sur le modèle…",
+      "loading": "Chargement des informations du modèle…",
       "title": "Informations sur le modèle",
       "trainDate": "Date d'entrainement",
-      "error": "Échec au chargement des informations du modèle",
+      "error": "Échec du chargement des informations du modèle",
       "availableModels": "Modèles disponibles",
       "dimensions": "Dimensions",
       "loadingAvailableModels": "Chargement des modèles disponibles…",
-      "modelSelect": "Vous pouvez sélectionner ici vos modèles disponibles sur Frigate+. Notez que seuls les modèles compatibles avec votre configuration de détecteur actuelle peuvent être sélectionnés.",
+      "modelSelect": "Vous pouvez sélectionner ici vos modèles disponibles dans Frigate+. Notez que seuls les modèles compatibles avec votre configuration de détecteur actuelle peuvent être sélectionnés.",
       "plusModelType": {
         "baseModel": "Modèle de base",
         "userModel": "Optimisé"
@@ -177,17 +179,18 @@
       "success": "Les paramètres de Frigate+ ont été enregistrés. Redémarrez Frigate pour appliquer les modifications.",
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}"
     },
-    "restart_required": "Redémarrage requis (modèle Frigate+ changé)"
+    "restart_required": "Redémarrage requis (modèle Frigate+ changé)",
+    "unsavedChanges": "Modifications de paramètres de Frigate+ non enregistrés"
   },
   "classification": {
     "title": "Paramètres de classification",
     "semanticSearch": {
       "title": "Recherche sémantique",
       "reindexNow": {
-        "label": "Réindexé maintenant",
+        "label": "Réindexer maintenant",
         "confirmTitle": "Confirmer la réindexation",
         "error": "Échec du démarrage de la réindexation : {{errorMessage}}",
-        "desc": "La réindexation régénère les intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
+        "desc": "La réindexation génère à nouveau les intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
         "confirmDesc": "Êtes-vous sûr de vouloir réindexer toutes les incorporations d'objets suivis ? Ce processus s'exécutera en arrière-plan, mais il risque de saturer votre processeur et de prendre un certain temps. Vous pouvez suivre la progression sur la page Explorateur.",
         "success": "La réindexation a démarré avec succès.",
         "alreadyInProgress": "La réindexation est déjà en cours.",
@@ -196,14 +199,14 @@
       "desc": "La recherche sémantique dans Frigate vous permet de trouver des objets suivis dans vos éléments d'évaluation en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement.",
       "modelSize": {
         "small": {
-          "desc": "L'utilisation de <em>petit</em> utilise une version quantifiée du modèle qui utilise moins de RAM et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité d'intégration.",
+          "desc": "L'utilisation de <em>petit</em> utilise une version quantifiée du modèle qui utilise moins de mémoire et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité d'intégration.",
           "title": "petit"
         },
         "large": {
-          "desc": "L'utilisation de <em>grand</em> utilise le modèle Jina complet et s'exécutera automatiquement sur le GPU si applicable.",
+          "desc": "L'utilisation de <em>grand</em> utilise le modèle Jina complet et s'exécutera automatiquement sur la carte graphique si applicable.",
           "title": "grand"
         },
-        "desc": "La taille du modèle utilisé pour les intégrations de recherche sémantique.",
+        "desc": "Taille du modèle utilisé pour les intégrations de recherche sémantique.",
         "label": "Taille du modèle"
       },
       "readTheDocumentation": "Lire la documentation"
@@ -213,7 +216,7 @@
       "modelSize": {
         "large": {
           "title": "grand",
-          "desc": "L'utilisation de <em>grand</em> utilise un modèle d'intégration de visage ArcFace et s'exécutera automatiquement sur le GPU si applicable."
+          "desc": "L'utilisation de <em>grand</em> utilise un modèle d'intégration de visage ArcFace et s'exécutera automatiquement sur la carte graphique le cas échéant."
         },
         "small": {
           "desc": "L'utilisation de <em>petit</em> utilise un modèle d'intégration de visage FaceNet qui fonctionne efficacement sur la plupart des processeurs.",
@@ -238,7 +241,8 @@
       "title": "Classification des oiseaux",
       "desc": "La classification des oiseaux identifie les oiseaux connus à l'aide d'un modèle Tensorflow quantifié. Lorsqu'un oiseau connu est reconnu, son nom commun sera ajouté en tant que sous-étiquette. Cette information est incluse dans l'interface utilisateur, les filtres, ainsi que dans les notifications."
     },
-    "restart_required": "Redémarrage requis (paramètres de classification changés)"
+    "restart_required": "Redémarrage requis (paramètres de classification changés)",
+    "unsavedChanges": "Modifications des paramètres de classification non enregistrées"
   },
   "camera": {
     "title": "Paramètres de la caméra",
@@ -249,24 +253,25 @@
       "desc": "Activer/désactiver les alertes et les détections pour cette caméra. Si cette option est désactivée, aucun nouvel élément d'évaluation ne sera généré."
     },
     "reviewClassification": {
-      "title": "Evaluer la Classification",
-      "objectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme des Détections, quelle que soit la zone dans laquelle ils se trouvent.",
+      "title": "Evaluer la classification",
+      "objectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme des détections, quelle que soit la zone dans laquelle ils se trouvent.",
       "zoneObjectDetectionsTips": {
-        "text": "Tous les objets {{detectionsLabels}} non classés dans {{zone}} sur {{cameraName}} seront affichés comme Détections.",
-        "regardlessOfZoneObjectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme des Détections, quelle que soit la zone dans laquelle ils se trouvent.",
-        "notSelectDetections": "Tous les objets {{detectionsLabels}} détectés dans {{zone}} sur {{cameraName}} non classés comme Alertes seront affichés comme Détections, quelle que soit la zone dans laquelle ils se trouvent."
+        "text": "Tous les objets {{detectionsLabels}} non classés dans {{zone}} sur {{cameraName}} seront affichés comme des détections.",
+        "regardlessOfZoneObjectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme des détections, quelle que soit la zone dans laquelle ils se trouvent.",
+        "notSelectDetections": "Tous les objets {{detectionsLabels}} détectés dans {{zone}} sur {{cameraName}} non classés comme des alertes seront affichés comme des détections, quelle que soit la zone dans laquelle ils se trouvent."
       },
-      "selectDetectionsZones": "Sélectionner les zones pour les Détections",
+      "selectDetectionsZones": "Sélectionner les zones pour les détections",
       "toast": {
         "success": "La configuration de la classification des évaluations a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       },
-      "readTheDocumentation": "Lire la Documentation",
-      "objectAlertsTips": "Tous les objets {{alertsLabels}} sur {{cameraName}} seront affichés sous forme d'Alertes.",
+      "readTheDocumentation": "Lire la documentation",
+      "objectAlertsTips": "Tous les objets {{alertsLabels}} sur {{cameraName}} seront affichés sous forme d'alertes.",
       "limitDetections": "Limiter les détections à des zones spécifiques",
-      "zoneObjectAlertsTips": "Tous les objets {{alertsLabels}} détectés dans {{zone}} sur {{cameraName}} seront affichés sous forme d'Alertes.",
+      "zoneObjectAlertsTips": "Tous les objets {{alertsLabels}} détectés dans {{zone}} sur {{cameraName}} seront affichés sous forme d'alertes.",
       "noDefinedZones": "Aucune zone n'est définie pour cette caméra.",
-      "selectAlertsZones": "Sélectionner les zones pour les Alertes",
-      "desc": "Frigate catégorise les éléments d'évaluation en Alertes et Détections. Par défaut, tous les objets <em>personne</em> et <em>voiture</em> sont considérés comme des Alertes. Vous pouvez affiner la catégorisation de vos éléments d'évaluation en configurant les zones requises pour ces éléments."
+      "selectAlertsZones": "Sélectionner les zones pour les alertes",
+      "desc": "Frigate catégorise les éléments d'évaluation en alertes et détections. Par défaut, tous les objets <em>personne</em> et <em>voiture</em> sont considérés comme des alertes. Vous pouvez affiner la catégorisation de vos éléments d'évaluation en configurant les zones requises pour ces éléments.",
+      "unsavedChanges": "Paramètres de classification de la révision pour {{camera}} non enregistrés"
     },
     "streams": {
       "title": "Flux",
@@ -280,7 +285,7 @@
           "mustBeAtLeastTwoCharacters": "Le nom de la zone doit comporter au moins 2 caractères.",
           "mustNotBeSameWithCamera": "Le nom de la zone ne doit pas être le même que le nom de la caméra.",
           "mustNotContainPeriod": "Le nom de la zone ne doit pas contenir de points.",
-          "hasIllegalCharacter": "Le nom de la zone contient des caractères illégaux.",
+          "hasIllegalCharacter": "Le nom de la zone contient des caractères interdits.",
           "alreadyExists": "Une zone portant ce nom existe déjà pour cette caméra."
         }
       },
@@ -320,13 +325,13 @@
       }
     },
     "zones": {
-      "documentTitle": "Modifier la Zone - Frigate",
+      "documentTitle": "Modifier la zone - Frigate",
       "desc": {
-        "title": "Les zones vous permettent de définir une zone spécifique de l'image afin de déterminer si un objet se trouve ou non dans une zone particulière.",
+        "title": "Les zones vous permettent de définir une zone spécifique de l'image afin de déterminer si un objet s'y trouve.",
         "documentation": "Documentation"
       },
-      "add": "Ajouter une Zone",
-      "edit": "Modifier une Zone",
+      "add": "Ajouter une zone",
+      "edit": "Modifier une zone",
       "name": {
         "title": "Nom",
         "inputPlaceHolder": "Entrer un nom…",
@@ -337,8 +342,9 @@
         "title": "Temps de latence"
       },
       "speedEstimation": {
-        "title": "Estimation de la Vitesse",
-        "desc": "Activer l'estimation de la vitesse des objets dans cette zone. La zone doit comporter exactement 4 points."
+        "title": "Estimation de la vitesse",
+        "desc": "Activer l'estimation de la vitesse des objets dans cette zone. La zone doit comporter exactement 4 points.",
+        "docs": "Lire la documentation"
       },
       "speedThreshold": {
         "title": "Seuil de vitesse ({{unit}})",
@@ -366,13 +372,13 @@
         "desc": "Liste des objets qui s'appliquent à cette zone."
       },
       "clickDrawPolygon": "Cliquer pour dessiner un polygone sur l'image.",
-      "allObjects": "Tous les Objets"
+      "allObjects": "Tous les objets"
     },
     "motionMasks": {
       "label": "Masque de mouvement",
-      "documentTitle": "Modifier Masque de Mouvement - Frigate",
+      "documentTitle": "Modifier masque de mouvement - Frigate",
       "context": {
-        "documentation": "Lire la Documentation",
+        "documentation": "Lire la documentation",
         "title": "Les masques de mouvement servent à empêcher les mouvements indésirables de déclencher la détection (par exemple : branches d'arbres, horodatage des caméras). Ils doivent être utilisés <em>avec parcimonie</em>, car un surmasquage complique le suivi des objets."
       },
       "polygonAreaTooLarge": {
@@ -456,7 +462,8 @@
     },
     "toast": {
       "success": "Les paramètres de mouvement ont été enregistrés."
-    }
+    },
+    "unsavedChanges": "Modifications des réglages de mouvement non enregistrés ({{camera}})"
   },
   "debug": {
     "debugging": "Débogage",
@@ -501,7 +508,7 @@
       "ratio": "Ratio"
     },
     "noObjects": "Aucun objet",
-    "title": "Debug",
+    "title": "Débogage",
     "detectorDesc": "Frigate utilise vos détecteurs ({{detectors}}) pour détecter les objets dans le flux vidéo de votre caméra.",
     "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés."
   },
@@ -521,10 +528,10 @@
         "updatePassword": "Mot de passe mis à jour avec succès."
       },
       "error": {
-        "setPasswordFailed": "Échec à l'enregistrement du mot de passe : {{errorMessage}}",
-        "createUserFailed": "Échec à la création de l'utilisateur : {{errorMessage}}",
-        "deleteUserFailed": "Échec à de la suppression de l'utilisateur : {{errorMessage}}",
-        "roleUpdateFailed": "Échec à la mise à jour du rôle : {{errorMessage}}"
+        "setPasswordFailed": "Échec de l'enregistrement du mot de passe : {{errorMessage}}",
+        "createUserFailed": "Échec de la création de l'utilisateur : {{errorMessage}}",
+        "deleteUserFailed": "Échec de la suppression de l'utilisateur : {{errorMessage}}",
+        "roleUpdateFailed": "Échec de la mise à jour du rôle : {{errorMessage}}"
       }
     },
     "table": {

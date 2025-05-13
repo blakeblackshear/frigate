@@ -7,13 +7,13 @@
     "today": "Aujourd'hui",
     "last7": "7 derniers jours",
     "last14": "14 derniers jours",
-    "ago": "{{timeAgo}} avant",
+    "ago": "Il y a {{timeAgo}}",
     "yesterday": "Hier",
     "last30": "30 derniers jours",
     "thisWeek": "Cette semaine",
-    "lastWeek": "Semaine dernière",
+    "lastWeek": "La semaine dernière",
     "thisMonth": "Ce mois-ci",
-    "lastMonth": "Mois dernier",
+    "lastMonth": "Le mois dernier",
     "10minutes": "10 minutes",
     "5minutes": "5 minutes",
     "30minutes": "30 minutes",
@@ -83,6 +83,10 @@
     "formattedTimestampMonthDayYearHourMinute": {
       "12hour": "d MMM yyyy, HH:mm",
       "24hour": "d MMM yyyy HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM,yyuy"
     }
   },
   "button": {

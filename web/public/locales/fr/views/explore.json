@@ -197,6 +197,7 @@
         "success": "L'objet suivi a été supprimé avec succès.",
         "error": "Échec de la suppression de l'objet suivi : {{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "Identifié comme {{type}} à {{confidence}}%"
   }
 }

@@ -111,7 +111,11 @@
       "desc": {
         "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet élément Review ? <br /><br />Pressez la touche <em>Maj</em> pour éviter cette boîte de dialogue dans le futur."
       },
-      "title": "Confirmer la suppression"
+      "title": "Confirmer la suppression",
+      "toast": {
+        "success": "Les séquences vidéo associées aux éléments de revue sélectionnés ont été supprimées avec succès.",
+        "error": "Échec de la suppression : {{error}}"
+      }
     },
     "button": {
       "export": "Exporter",

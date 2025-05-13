@@ -55,9 +55,9 @@
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Saisissez un nom de filtre suivi de deux points (par exemple, «cameras:»).</li><li>Sélectionnez une valeur parmi les suggestions ou saisissez la vôtre.</li><li>Utilisez plusieurs filtres en les ajoutant les uns après les autres, en laissant un espace entre eux.</li><li>Les filtres de date (avant: et après:) utilisent le format <em>{{DateFormat}}</em>.</li><li>Le filtre de plage horaire utilise le format <em>{{exampleTime}}</em>.</li><li>Supprimez les filtres en cliquant sur le «x» à côté d'eux.</li></ul>",
         "step1": "Saisissez un nom de clé de filtre suivi de deux points (par exemple, \"cameras:\").",
         "step2": "Sélectionnez une valeur pour la suggestion ou saisissez la vôtre.",
-        "step3": "Utilisez plusieurs filtres en les ajoutant les uns après les autres avec un espace entre.",
-        "step5": "Le filtre de plage de temps utilise le format {{exampleTime}}.",
-        "step6": "Supprimer les filtres en cliquant sur le 'x' à côté d'eux.",
+        "step3": "Utilisez plusieurs filtres en les ajoutant les uns après les autres avec un espace entre eux.",
+        "step5": "Le filtre de plage horaire utilise le format {{exampleTime}}.",
+        "step6": "Supprimez les filtres en cliquant sur le ' x' à côté d'eux.",
         "step4": "Filtres de dates (avant : et après :) utilisez le format {{DateFormat}}.",
         "exampleLabel": "Exemple :"
       }
