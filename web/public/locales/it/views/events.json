@@ -34,5 +34,6 @@
   "camera": "Telecamera",
   "selected": "{{count}} selezionati",
   "selected_one": "{{count}} selezionati",
-  "selected_other": "{{count}} selezionati"
+  "selected_other": "{{count}} selezionati",
+  "detected": "rilevato"
 }

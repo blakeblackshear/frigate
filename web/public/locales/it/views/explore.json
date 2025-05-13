@@ -192,7 +192,8 @@
         "error": "Impossibile eliminare l'oggetto tracciato: {{errorMessage}}",
         "success": "Oggetto tracciato eliminato correttamente."
       }
-    }
+    },
+    "tooltip": "Corrispondenza {{type}} al {{confidence}}%"
   },
   "trackedObjectsCount_one": "{{count}} oggetto tracciato ",
   "trackedObjectsCount_many": "{{count}} oggetti tracciati ",
