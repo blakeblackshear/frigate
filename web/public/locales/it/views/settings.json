@@ -52,7 +52,8 @@
       "success": "Le impostazioni di Frigate+ sono state salvate. Riavvia Frigate per applicare le modifiche."
     },
     "title": "Impostazioni Frigate+",
-    "restart_required": "Riavvio richiesto (modello Frigate+ modificato)"
+    "restart_required": "Riavvio richiesto (modello Frigate+ modificato)",
+    "unsavedChanges": "Modifiche alle impostazioni di Frigate+ non salvate"
   },
   "debug": {
     "timestamp": {
@@ -287,7 +288,8 @@
       "noDefinedZones": "Per questa telecamera non sono definite zone.",
       "zoneObjectAlertsTips": "Tutti gli oggetti {{alertsLabels}} rilevati in {{zone}} su {{cameraName}} verranno visualizzati come Avvisi.",
       "selectAlertsZones": "Seleziona le zone per gli Avvisi",
-      "selectDetectionsZones": "Seleziona le zone per i Rilevamenti"
+      "selectDetectionsZones": "Seleziona le zone per i Rilevamenti",
+      "unsavedChanges": "Impostazioni di classificazione delle revisioni non salvate per {{camera}}"
     },
     "streams": {
       "desc": "La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
@@ -513,7 +515,8 @@
       "desc": "La classificazione degli uccelli identifica gli uccelli noti utilizzando un modello Tensorflow quantizzato. Quando un uccello noto viene riconosciuto, il suo nome comune viene aggiunto come sub_label. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
       "title": "Classificazione degli uccelli"
     },
-    "restart_required": "Riavvio richiesto (impostazioni di classificazione modificate)"
+    "restart_required": "Riavvio richiesto (impostazioni di classificazione modificate)",
+    "unsavedChanges": "Modifiche alle impostazioni di classificazione non salvate"
   },
   "dialog": {
     "unsavedChanges": {
@@ -541,7 +544,8 @@
     },
     "toast": {
       "success": "Le impostazioni di movimento sono state salvate."
-    }
+    },
+    "unsavedChanges": "Modifiche non salvate del regolatore di movimento ({{camera}})"
   },
   "notification": {
     "email": {
@@ -594,6 +598,8 @@
       "desc": "Frigate può inviare notifiche push in modo nativo al tuo dispositivo quando è in esecuzione nel browser o installato come PWA.",
       "documentation": "Leggi la documentazione"
     },
-    "cancelSuspension": "Annulla sospensione"
+    "cancelSuspension": "Annulla sospensione",
+    "unsavedRegistrations": "Registrazioni di notifiche non salvate",
+    "unsavedChanges": "Modifiche alle notifiche non salvate"
   }
 }

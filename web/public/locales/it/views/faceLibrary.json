@@ -8,16 +8,20 @@
     "confidence": "Fiducia",
     "person": "Persona",
     "face": "Dettagli del volto",
-    "faceDesc": "Dettagli del volto e dell'oggetto associato",
-    "timestamp": "Orario"
+    "faceDesc": "Dettagli dell'oggetto tracciato che ha generato questo volto",
+    "timestamp": "Orario",
+    "subLabelScore": "Punteggio dell'etichetta secondaria",
+    "scoreInfo": "Il punteggio dell'etichetta secondaria è il punteggio ponderato per tutte le confidenze dei volti riconosciuti, quindi potrebbe differire dal punteggio mostrato nell'istantanea.",
+    "unknown": "Sconosciuto"
   },
   "train": {
     "title": "Addestra",
-    "aria": "Seleziona addestramento"
+    "aria": "Seleziona addestramento",
+    "empty": "Non ci sono recenti tentativi di riconoscimento facciale"
   },
   "button": {
     "addFace": "Aggiungi volto",
-    "deleteFaceAttempts": "Elimina tentativi di riconoscimento facciale",
+    "deleteFaceAttempts": "Elimina volti",
     "uploadImage": "Carica immagine",
     "reprocessFace": "Rielabora il volto",
     "deleteFace": "Elimina volto",
@@ -77,10 +81,20 @@
   "steps": {
     "faceName": "Inserisci il nome del volto",
     "nextSteps": "Prossimi passi",
-    "uploadFace": "Carica l'immagine del volto"
+    "uploadFace": "Carica l'immagine del volto",
+    "description": {
+      "uploadFace": "Carica un'immagine di {{name}} che mostri il suo viso da un'angolazione frontale. Non è necessario ritagliare l'immagine in modo da mostrare solo il viso."
+    }
   },
   "renameFace": {
     "title": "Rinomina volto",
     "desc": "Inserisci un nuovo nome per {{name}}"
+  },
+  "collections": "Collezioni",
+  "deleteFaceAttempts": {
+    "title": "Elimina volti",
+    "desc_one": "Vuoi davvero eliminare {{count}} volto? Questa azione non può essere annullata.",
+    "desc_many": "Vuoi davvero eliminare {{count}} volti? Questa azione non può essere annullata.",
+    "desc_other": "Vuoi davvero eliminare {{count}} volti? Questa azione non può essere annullata."
   }
 }
