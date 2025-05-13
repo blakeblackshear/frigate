@@ -40,21 +40,21 @@
     "detector": {
       "title": "Détecteurs",
       "inferenceSpeed": "Vitesse d'inférence du détecteur",
-      "cpuUsage": "Utilisation CPU Détecteur",
-      "memoryUsage": "Utilisation Mémoire Détecteur",
+      "cpuUsage": "Utilisation processeur du détecteur",
+      "memoryUsage": "Utilisation mémoire du détecteur",
       "temperature": "Température du détecteur"
     },
     "hardwareInfo": {
-      "title": "Info Matériel",
-      "gpuUsage": "Utilisation GPU",
-      "gpuMemory": "Mémoire GPU",
-      "gpuEncoder": "Encodeur GPU",
-      "gpuDecoder": "Décodeur GPU",
+      "title": "Info matériel",
+      "gpuUsage": "Utilisation carte graphique",
+      "gpuMemory": "Mémoire carte graphique",
+      "gpuEncoder": "Encodeur carte graphique",
+      "gpuDecoder": "Décodeur carte graphique",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Sortie Vainfo",
           "returnCode": "Code de retour : {{code}}",
-          "processOutput": "Tâche de Sortie :",
+          "processOutput": "Tâche de sortie :",
           "processError": "Erreur de tâche :"
         },
         "nvidiaSMIOutput": {
@@ -79,7 +79,7 @@
     },
     "otherProcesses": {
       "title": "Autres tâches",
-      "processCpuUsage": "Utilisation CPU des tâches",
+      "processCpuUsage": "Utilisation processeur des tâches",
       "processMemoryUsage": "Utilisation mémoire des tâches"
     }
   },
@@ -88,7 +88,7 @@
     "recordings": {
       "title": "Enregistrements",
       "earliestRecording": "Enregistrement le plus ancien :",
-      "tips": "Cette valeur corresponds au total du stockage utilisé par les enregistrements dans la base de données Frigate. Frigate ne suit pas l'utilisation du stockage pour tous les fichiers sur votre disque."
+      "tips": "Cette valeur correspond au stockage total utilisé par les enregistrements dans la base de données Frigate. Frigate ne suit pas l'utilisation du stockage pour tous les fichiers sur votre disque."
     },
     "cameraStorage": {
       "title": "Stockage de la caméra",
@@ -97,24 +97,24 @@
         "title": "Inutilisé",
         "tips": "Cette valeur ne représente peut-être pas précisément l'espace libre et utilisable par Frigate si vous avez d'autres fichiers stockés sur ce disque en plus des enregistrements Frigate. Frigate ne suit pas l'utilisation du stockage en dehors de ses propres enregistrements."
       },
-      "percentageOfTotalUsed": "Pourcentage du Total",
+      "percentageOfTotalUsed": "Pourcentage du total",
       "storageUsed": "Stockage",
       "camera": "Caméra",
       "unusedStorageInformation": "Information sur le stockage non utilisé"
     },
-    "overview": "Prévisualisation"
+    "overview": "Vue d'ensemble"
   },
   "cameras": {
     "title": "Caméras",
     "info": {
-      "cameraProbeInfo": "{{camera}} Information récupérée depuis la Caméra",
-      "fetching": "En cours de récupération des données de la Caméra",
+      "cameraProbeInfo": "{{camera}} Information récupérée depuis la caméra",
+      "fetching": "En cours de récupération des données de la caméra",
       "stream": "Flux {{idx}}",
       "fps": "Images par seconde :",
       "unknown": "Inconnu",
       "audio": "Audio :",
       "tips": {
-        "title": "Information récupérée depuis la Caméra"
+        "title": "Information récupérée depuis la caméra"
       },
       "streamDataFromFFPROBE": "Le flux de données est obtenu par <code>ffprobe</code>.",
       "resolution": "Résolution :",
@@ -139,7 +139,7 @@
       "cameraFramesPerSecond": "{{camName}} images par seconde",
       "cameraDetectionsPerSecond": "{{camName}} détections par seconde"
     },
-    "overview": "Prévisualisation",
+    "overview": "Vue d'ensemble",
     "toast": {
       "success": {
         "copyToClipboard": "Données récupérées copiées dans le presse-papier."
@@ -151,8 +151,8 @@
   },
   "lastRefreshed": "Dernier rafraichissement : ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU par FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation CPU ({{detectAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur par FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur ({{detectAvg}}%)",
     "healthy": "Le système est sain",
     "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)",
     "cameraIsOffline": "{{camera}} est hors ligne",

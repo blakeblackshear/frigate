@@ -34,5 +34,6 @@
   "markTheseItemsAsReviewed": "Marquer ces éléments comme évalués",
   "selected": "{{count}} sélectionné(s)",
   "selected_other": "{{count}} sélectionné(s)",
-  "selected_one": "{{count}} sélectionné(s)"
+  "selected_one": "{{count}} sélectionné(s)",
+  "detected": "détecté"
 }

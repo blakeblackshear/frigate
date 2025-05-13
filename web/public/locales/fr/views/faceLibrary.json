@@ -8,7 +8,10 @@
     "confidence": "Confiance",
     "face": "Détails du visage",
     "timestamp": "Horodatage",
-    "faceDesc": "Détails du visage et de l'objet associé"
+    "faceDesc": "Détails de l'objet suivi qui a généré ce visage",
+    "subLabelScore": "Score de sous-étiquettes",
+    "scoreInfo": "Le score de sous-étiquette est le score pondéré de toutes les scores de confiances de visages reconnus, il peut donc différer du score affiché sur l'instantané.",
+    "unknown": "Inconnu"
   },
   "documentTitle": "Bibliothèque de visages - Frigate",
   "uploadFaceImage": {
@@ -23,13 +26,14 @@
   },
   "train": {
     "title": "Entraîner",
-    "aria": "Sélectionner entraîner"
+    "aria": "Sélectionner entraîner",
+    "empty": "Il n'y a pas de tentatives récentes de reconnaissance faciale"
   },
   "selectFace": "Sélectionner un visage",
   "button": {
     "addFace": "Ajouter un visage",
     "uploadImage": "Téléverser une image",
-    "deleteFaceAttempts": "Supprimer les tentatives de reconnaissance faciale",
+    "deleteFaceAttempts": "Supprimer les visages",
     "reprocessFace": "Réanalyser le visage",
     "renameFace": "Renommer le visage",
     "deleteFace": "Supprimer le visage"
@@ -77,10 +81,21 @@
   "steps": {
     "uploadFace": "Téléverser l'image de visage",
     "faceName": "Entrer un nom pour le visage",
-    "nextSteps": "Prochaines étapes"
+    "nextSteps": "Prochaines étapes",
+    "description": {
+      "uploadFace": "Téléversez une image de {{name}} qui montre son visage de face. L'image n'a pas besoin d'être recadrée pour ne montrer que son visage."
+    }
   },
   "renameFace": {
     "title": "Renommer le visage",
     "desc": "Saisissez un nouveau nom pour {{name}}"
-  }
+  },
+  "collections": "Collections",
+  "deleteFaceAttempts": {
+    "title": "Supprimer les visages",
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} visage ? Cette action est irréversible.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
+  },
+  "nofaces": "Pas de visages disponibles"
 }
