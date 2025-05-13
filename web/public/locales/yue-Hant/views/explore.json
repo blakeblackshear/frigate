@@ -192,7 +192,8 @@
         "success": "追蹤物件已成功刪除。",
         "error": "刪除追蹤物件失敗：{{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "已配對{{type}}（{{confidence}}% 信心"
   },
   "trackedObjectsCount_other": "{{count}} 個追蹤物件 "
 }

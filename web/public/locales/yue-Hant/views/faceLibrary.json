@@ -5,7 +5,10 @@
     "person": "人",
     "confidence": "信心指數",
     "face": "人臉詳細資料",
-    "faceDesc": "人臉及相關物件的詳細資料"
+    "faceDesc": "產生這個人臉的追蹤物件的詳細資料",
+    "scoreInfo": "子標籤分數是所有已識別人臉的信心值加權分數，因此可能與快照上顯示的分數不同。",
+    "subLabelScore": "子標籤分數",
+    "unknown": "未知"
   },
   "description": {
     "addFace": "逐步了解如何新增一個人臉庫的集合。",
@@ -25,11 +28,15 @@
   "steps": {
     "faceName": "請輸入人臉名稱",
     "uploadFace": "上傳人臉圖片",
-    "nextSteps": "下一步"
+    "nextSteps": "下一步",
+    "description": {
+      "uploadFace": "請上載一張{{name}}面向鏡頭的相片。相片不需要裁剪至只顯示人臉。"
+    }
   },
   "train": {
     "title": "訓練",
-    "aria": "選擇訓練"
+    "aria": "選擇訓練",
+    "empty": "最近沒有人臉識別嘗試"
   },
   "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
@@ -45,7 +52,7 @@
     "reprocessFace": "重新處理人臉",
     "deleteFace": "刪除人臉",
     "addFace": "新增人臉",
-    "deleteFaceAttempts": "刪除人臉嘗試記錄",
+    "deleteFaceAttempts": "刪除人臉",
     "renameFace": "重新命名人臉"
   },
   "imageEntry": {
@@ -78,5 +85,11 @@
       "trainFailed": "訓練失敗：{{errorMessage}}",
       "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}"
     }
-  }
+  },
+  "collections": "集合",
+  "deleteFaceAttempts": {
+    "desc_other": "你確定要刪除{{count}}個人臉嗎？這個動作無法還原。",
+    "title": "刪除人臉"
+  },
+  "nofaces": "沒有可用人臉"
 }

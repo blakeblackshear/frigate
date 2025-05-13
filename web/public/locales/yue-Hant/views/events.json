@@ -33,5 +33,6 @@
     "label": "移動"
   },
   "detections": "偵測",
-  "timeline.aria": "選擇時間線"
+  "timeline.aria": "選擇時間線",
+  "detected": "已偵測"
 }
