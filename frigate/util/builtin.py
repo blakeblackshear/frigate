@@ -156,7 +156,7 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         return labels
 
 
-def get_tz_modifiers(tz_name: str) -> Tuple[str, str, int]:
+def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
     seconds_offset = (
         datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
     )
@@ -169,7 +169,7 @@ def get_tz_modifiers(tz_name: str) -> Tuple[str, str, int]:
 
 def to_relative_box(
     width: int, height: int, box: Tuple[int, int, int, int]
-) -> Tuple[int, int, int, int]:
+) -> Tuple[int | float, int | float, int | float, int | float]:
     return (
         box[0] / width,  # x
         box[1] / height,  # y

@@ -184,7 +184,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
-        self.ffmpeg_other_processes: list[dict[str, any]] = []
+        self.ffmpeg_other_processes: list[dict[str, Any]] = []
         self.camera_fps = camera_fps
         self.skipped_fps = skipped_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -371,7 +371,9 @@ class CameraWatchdog(threading.Thread):
             p["logpipe"].close()
         self.ffmpeg_other_processes.clear()
 
-    def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
+    def get_latest_segment_datetime(
+        self, latest_segment: datetime.datetime
+    ) -> datetime.datetime:
         """Checks if ffmpeg is still writing recording segments to cache."""
         cache_files = sorted(
             [
@@ -859,7 +861,7 @@ def process_frames(
             detections[obj["id"]] = {**obj, "attributes": []}
 
         # find the best object for each attribute to be assigned to
-        all_objects: list[dict[str, any]] = object_tracker.tracked_objects.values()
+        all_objects: list[dict[str, Any]] = object_tracker.tracked_objects.values()
         for attributes in attribute_detections.values():
             for attribute in attributes:
                 filtered_objects = filter(

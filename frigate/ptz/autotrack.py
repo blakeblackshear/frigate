@@ -7,6 +7,7 @@ import threading
 import time
 from collections import deque
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 import cv2
 import numpy as np
@@ -59,7 +60,7 @@ class PtzMotionEstimator:
 
     def motion_estimator(
         self,
-        detections: list[dict[str, any]],
+        detections: list[dict[str, Any]],
         frame_name: str,
         frame_time: float,
         camera: str,

@@ -5,7 +5,7 @@ import math
 import os
 from collections import defaultdict
 from statistics import median
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import numpy as np
@@ -38,7 +38,7 @@ class TrackedObject:
         camera_config: CameraConfig,
         ui_config: UIConfig,
         frame_cache,
-        obj_data: dict[str, any],
+        obj_data: dict[str, Any],
     ):
         # set the score history then remove as it is not part of object state
         self.score_history = obj_data["score_history"]
@@ -621,7 +621,7 @@ class TrackedObjectAttribute:
         self.ratio = raw_data[4]
         self.region = raw_data[5]
 
-    def get_tracking_data(self) -> dict[str, any]:
+    def get_tracking_data(self) -> dict[str, Any]:
         """Return data saved to the object."""
         return {
             "label": self.label,
@@ -629,7 +629,7 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, any]]) -> Optional[str]:
+    def find_best_object(self, objects: list[dict[str, Any]]) -> Optional[str]:
         """Find the best attribute for each object and return its ID."""
         best_object_area = None
         best_object_id = None

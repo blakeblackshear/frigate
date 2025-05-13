@@ -2,7 +2,7 @@
 
 import multiprocessing as mp
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Optional
+from typing import Any, Optional
 
 import zmq
 
@@ -18,7 +18,7 @@ class ConfigPublisher:
         self.socket.bind(SOCKET_PUB_SUB)
         self.stop_event: MpEvent = mp.Event()
 
-    def publish(self, topic: str, payload: any) -> None:
+    def publish(self, topic: str, payload: Any) -> None:
         """There is no communication back to the processes."""
         self.socket.send_string(topic, flags=zmq.SNDMORE)
         self.socket.send_pyobj(payload)
@@ -40,7 +40,7 @@ class ConfigSubscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
         self.socket.connect(SOCKET_PUB_SUB)
 
-    def check_for_update(self) -> Optional[tuple[str, any]]:
+    def check_for_update(self) -> Optional[tuple[str, Any]]:
         """Returns updated config or None if no update."""
         try:
             topic = self.socket.recv_string(flags=zmq.NOBLOCK)

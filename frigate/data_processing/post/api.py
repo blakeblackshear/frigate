@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 from frigate.config import FrigateConfig
 
@@ -25,7 +26,7 @@ class PostProcessorApi(ABC):
 
     @abstractmethod
     def process_data(
-        self, data: dict[str, any], data_type: PostProcessDataEnum
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
         """Processes the data of data type.
         Args:
@@ -38,7 +39,7 @@ class PostProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def handle_request(self, request_data: dict[str, any]) -> dict[str, any] | None:
+    def handle_request(self, request_data: dict[str, Any]) -> dict[str, Any] | None:
         """Handle metadata requests.
         Args:
             request_data (dict): containing data about requested change to process.

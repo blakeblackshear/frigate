@@ -10,7 +10,7 @@ import queue
 import subprocess as sp
 import threading
 import traceback
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import numpy as np
@@ -542,10 +542,10 @@ class BirdsEyeFrameManager:
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> tuple[any]:
+    ) -> tuple[Any]:
         """Calculate the optimal layout for 2+ cameras."""
 
-        def map_layout(camera_layout: list[list[any]], row_height: int):
+        def map_layout(camera_layout: list[list[Any]], row_height: int):
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -588,7 +588,7 @@ class BirdsEyeFrameManager:
             return max_width, y, candidate_layout
 
         canvas_aspect_x, canvas_aspect_y = self.canvas.get_aspect(coefficient)
-        camera_layout: list[list[any]] = []
+        camera_layout: list[list[Any]] = []
         camera_layout.append([])
         starting_x = 0
         x = starting_x
@@ -786,7 +786,7 @@ class Birdseye:
     def write_data(
         self,
         camera: str,
-        current_tracked_objects: list[dict[str, any]],
+        current_tracked_objects: list[dict[str, Any]],
         motion_boxes: list[list[int]],
         frame_time: float,
         frame: np.ndarray,

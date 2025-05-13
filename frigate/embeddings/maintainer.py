@@ -7,7 +7,7 @@ import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import numpy as np
@@ -104,7 +104,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
-        self.detected_license_plates: dict[str, dict[str, any]] = {}
+        self.detected_license_plates: dict[str, dict[str, Any]] = {}
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
@@ -159,7 +159,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
 
         self.stop_event = stop_event
-        self.tracked_events: dict[str, list[any]] = {}
+        self.tracked_events: dict[str, list[Any]] = {}
         self.early_request_sent: dict[str, bool] = {}
         self.genai_client = get_genai_client(config)
 
@@ -190,7 +190,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def _handle_request(topic: str, data: dict[str, any]) -> str:
+        def _handle_request(topic: str, data: dict[str, Any]) -> str:
             try:
                 # First handle the embedding-specific topics when semantic search is enabled
                 if self.config.semantic_search.enabled:

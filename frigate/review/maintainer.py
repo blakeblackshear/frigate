@@ -10,7 +10,7 @@ import sys
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import cv2
 import numpy as np
@@ -156,7 +156,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
 
         # manual events
-        self.indefinite_events: dict[str, dict[str, any]] = {}
+        self.indefinite_events: dict[str, dict[str, Any]] = {}
 
         # ensure dirs
         Path(os.path.join(CLIPS_DIR, "review")).mkdir(exist_ok=True)
@@ -194,7 +194,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         camera_config: CameraConfig,
         frame,
         objects: list[TrackedObject],
-        prev_data: dict[str, any],
+        prev_data: dict[str, Any],
     ) -> None:
         """Update segment."""
         if frame is not None:
@@ -219,7 +219,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def _publish_segment_end(
         self,
         segment: PendingReviewSegment,
-        prev_data: dict[str, any],
+        prev_data: dict[str, Any],
     ) -> None:
         """End segment."""
         final_data = segment.get_data(ended=True)

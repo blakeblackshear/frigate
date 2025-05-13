@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import AnyStr, Optional
+from typing import Any, AnyStr, Optional
 
 import cv2
 import numpy as np
@@ -766,7 +766,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         pass
 
     @abstractmethod
@@ -847,7 +847,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -944,7 +944,7 @@ def get_image_from_recording(
     relative_frame_time: float,
     codec: str,
     height: Optional[int] = None,
-) -> Optional[any]:
+) -> Optional[Any]:
     """retrieve a frame from given time in recording file."""
 
     ffmpeg_cmd = [

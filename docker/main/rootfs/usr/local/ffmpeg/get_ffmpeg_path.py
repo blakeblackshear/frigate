@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -21,11 +22,11 @@ try:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.load(raw_config)
+        config: dict[str, Any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
-        config: dict[str, any] = json.loads(raw_config)
+        config: dict[str, Any] = json.loads(raw_config)
 except FileNotFoundError:
-    config: dict[str, any] = {}
+    config: dict[str, Any] = {}
 
 path = config.get("ffmpeg", {}).get("path", "default")
 if path == "default":

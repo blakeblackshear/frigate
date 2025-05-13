@@ -7,6 +7,7 @@ import time
 from enum import Enum
 from importlib.util import find_spec
 from pathlib import Path
+from typing import Any
 
 import numpy
 from onvif import ONVIFCamera, ONVIFError, ONVIFService
@@ -646,7 +647,7 @@ class OnvifController:
                 f"Error executing command {command} for camera {camera_name}: {e}"
             )
 
-    async def get_camera_info(self, camera_name: str) -> dict[str, any]:
+    async def get_camera_info(self, camera_name: str) -> dict[str, Any]:
         """
         Get ptz capabilities and presets, attempting to reconnect if ONVIF is configured
         but not initialized.

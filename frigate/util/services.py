@@ -9,7 +9,7 @@ import signal
 import subprocess as sp
 import traceback
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import cv2
 import psutil
@@ -230,7 +230,7 @@ def is_vaapi_amd_driver() -> bool:
         return any("AMD Radeon Graphics" in line for line in output)
 
 
-def get_amd_gpu_stats() -> dict[str, str]:
+def get_amd_gpu_stats() -> Optional[dict[str, str]]:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
 
@@ -256,7 +256,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
         return results
 
 
-def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
+def get_intel_gpu_stats(sriov: bool) -> Optional[dict[str, str]]:
     """Get stats using intel_gpu_top."""
 
     def get_stats_manually(output: str) -> dict[str, str]:
@@ -382,7 +382,7 @@ def get_intel_gpu_stats(sriov: bool) -> dict[str, str]:
         return results
 
 
-def get_rockchip_gpu_stats() -> dict[str, str]:
+def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
     """Get GPU stats using rk."""
     try:
         with open("/sys/kernel/debug/rkrga/load", "r") as f:
@@ -403,7 +403,7 @@ def get_rockchip_gpu_stats() -> dict[str, str]:
     return {"gpu": average_load, "mem": "-"}
 
 
-def get_rockchip_npu_stats() -> dict[str, str]:
+def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     """Get NPU stats using rk."""
     try:
         with open("/sys/kernel/debug/rknpu/load", "r") as f:
@@ -494,7 +494,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> dict[int, dict]:
+def get_jetson_stats() -> Optional[dict[int, dict]]:
     results = {}
 
     try:
@@ -537,7 +537,7 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def get_nvidia_driver_info() -> dict[str, any]:
+def get_nvidia_driver_info() -> dict[str, Any]:
     """Get general hardware info for nvidia GPU."""
     results = {}
     try:
@@ -596,8 +596,8 @@ def auto_detect_hwaccel() -> str:
 
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
-) -> dict[str, any]:
-    async def calculate_duration(video: Optional[any]) -> float:
+) -> dict[str, Any]:
+    async def calculate_duration(video: Optional[Any]) -> float:
         duration = None
 
         if video is not None:

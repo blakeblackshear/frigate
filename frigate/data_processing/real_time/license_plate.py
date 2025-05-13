@@ -2,6 +2,7 @@
 
 import json
 import logging
+from typing import Any
 
 import numpy as np
 
@@ -30,7 +31,7 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
-        detected_license_plates: dict[str, dict[str, any]],
+        detected_license_plates: dict[str, dict[str, Any]],
     ):
         self.requestor = requestor
         self.detected_license_plates = detected_license_plates
@@ -43,14 +44,14 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
 
     def process_frame(
         self,
-        obj_data: dict[str, any],
+        obj_data: dict[str, Any],
         frame: np.ndarray,
         dedicated_lpr: bool | None = False,
     ):
         """Look for license plates in image."""
         self.lpr_process(obj_data, frame, dedicated_lpr)
 
-    def handle_request(self, topic, request_data) -> dict[str, any] | None:
+    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         return
 
     def expire_object(self, object_id: str, camera: str):

@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 import numpy as np
 
@@ -24,7 +25,7 @@ class RealTimeProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def process_frame(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
+    def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
         """Processes the frame with object data.
         Args:
             obj_data (dict): containing data about focused object in frame.
@@ -37,8 +38,8 @@ class RealTimeProcessorApi(ABC):
 
     @abstractmethod
     def handle_request(
-        self, topic: str, request_data: dict[str, any]
-    ) -> dict[str, any] | None:
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """Handle metadata requests.
         Args:
             topic (str): topic that dictates what work is requested.

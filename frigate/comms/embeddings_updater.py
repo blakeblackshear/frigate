@@ -1,7 +1,7 @@
 """Facilitates communication between processes."""
 
 from enum import Enum
-from typing import Callable
+from typing import Any, Callable
 
 import zmq
 
@@ -58,7 +58,7 @@ class EmbeddingsRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: any) -> str:
+    def send_data(self, topic: str, data: Any) -> str:
         """Sends data and then waits for reply."""
         try:
             self.socket.send_json((topic, data))

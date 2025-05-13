@@ -6,6 +6,7 @@ import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Any
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
@@ -29,7 +30,7 @@ class EventCleanup(threading.Thread):
         self.db = db
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
-        self.camera_labels: dict[str, dict[str, any]] = {}
+        self.camera_labels: dict[str, dict[str, Any]] = {}
 
     def get_removed_camera_labels(self) -> list[Event]:
         """Get a list of distinct labels for removed cameras."""

@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 import shutil
+from typing import Any
 
 import cv2
 from fastapi import APIRouter, Depends, Request, UploadFile
@@ -58,7 +59,7 @@ def reclassify_face(request: Request, body: dict = None):
             content={"message": "Face recognition is not enabled.", "success": False},
         )
 
-    json: dict[str, any] = body or {}
+    json: dict[str, Any] = body or {}
     training_file = os.path.join(
         FACE_DIR, f"train/{sanitize_filename(json.get('training_file', ''))}"
     )
@@ -91,7 +92,7 @@ def train_face(request: Request, name: str, body: dict = None):
             content={"message": "Face recognition is not enabled.", "success": False},
         )
 
-    json: dict[str, any] = body or {}
+    json: dict[str, Any] = body or {}
     training_file_name = sanitize_filename(json.get("training_file", ""))
     training_file = os.path.join(FACE_DIR, f"train/{training_file_name}")
     event_id = json.get("event_id")
@@ -246,7 +247,7 @@ def deregister_faces(request: Request, name: str, body: dict = None):
             content={"message": "Face recognition is not enabled.", "success": False},
         )
 
-    json: dict[str, any] = body or {}
+    json: dict[str, Any] = body or {}
     list_of_ids = json.get("ids", "")
 
     context: EmbeddingsContext = request.app.embeddings
