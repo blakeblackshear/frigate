@@ -164,7 +164,7 @@ def get_cluster_region_from_grid(frame_shape, min_region, cluster, boxes, region
 
 
 def get_region_from_grid(
-    frame_shape: tuple[int],
+    frame_shape: tuple[int, int],
     cluster: list[int],
     min_region: int,
     region_grid: list[list[dict[str, Any]]],
@@ -447,7 +447,7 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
 
 
 def get_startup_regions(
-    frame_shape: tuple[int],
+    frame_shape: tuple[int, int],
     region_min_size: int,
     region_grid: list[list[dict[str, Any]]],
 ) -> list[list[int]]:
@@ -481,7 +481,7 @@ def get_startup_regions(
 
 
 def reduce_detections(
-    frame_shape: tuple[int],
+    frame_shape: tuple[int, int],
     all_detections: list[tuple[Any]],
 ) -> list[tuple[Any]]:
     """Take a list of detections and reduce overlaps to create a list of confident detections."""
