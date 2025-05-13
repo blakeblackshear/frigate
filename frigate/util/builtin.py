@@ -156,7 +156,7 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         return labels
 
 
-def get_tz_modifiers(tz_name: str) -> Tuple[str, str, int]:
+def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
     seconds_offset = (
         datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
     )
