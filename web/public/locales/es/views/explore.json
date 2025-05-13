@@ -194,7 +194,8 @@
         "success": "Objeto rastreado eliminado con éxito.",
         "error": "No se pudo eliminar el objeto rastreado: {{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "Coincidencia con {{type}} al {{confidence}}%"
   },
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",

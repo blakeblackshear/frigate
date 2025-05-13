@@ -83,6 +83,10 @@
     "formattedTimestampMonthDayYearHourMinute": {
       "12hour": "MMM d yyyy, h:mm aaa",
       "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
     }
   },
   "menu": {

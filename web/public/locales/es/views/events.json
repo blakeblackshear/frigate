@@ -34,5 +34,6 @@
   "markTheseItemsAsReviewed": "Marcar estos elementos como revisados",
   "selected": "{{count}} seleccionados",
   "selected_one": "{{count}} seleccionados",
-  "selected_other": "{{count}} seleccionados"
+  "selected_other": "{{count}} seleccionados",
+  "detected": "detectado"
 }
