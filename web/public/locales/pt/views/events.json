@@ -31,5 +31,8 @@
     "label": "Ver novos itens de revisão",
     "button": "Novos itens para revisar"
   },
-  "camera": "Câmera"
+  "camera": "Câmera",
+  "detected": "detectado",
+  "selected_one": "{{count}} selecionado",
+  "selected_other": "{{count}} selecionados"
 }

@@ -4,11 +4,12 @@
     "classification": "Configurações de classificação - Frigate",
     "masksAndZones": "Editor de máscara e zona - Frigate",
     "motionTuner": "Ajuste de movimento - Frigate",
-    "object": "Configurações do objeto - Frigate",
+    "object": "Depuração - Frigate",
     "authentication": "Configurações de autenticação - Frigate",
     "general": "Configurações gerais - Frigate",
     "frigatePlus": "Configurações do Frigate+ - Frigate",
-    "default": "Configurações - Frigate"
+    "default": "Configurações - Frigate",
+    "notifications": "Configuração de Notificações - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -139,7 +140,8 @@
     "birdClassification": {
       "title": "Classificação de Pássaros",
       "desc": "A classificação de aves/pássaros identifica aves conhecidas usando um modelo Tensorflow quantizado. Quando uma ave/ pássaro conhecida(o) for reconhecida(o), o seu nome comum será adicionado como um sub_rótulo. Estas informações estão incluídas na interface do utilizador, nos filtros e também nas notificações."
-    }
+    },
+    "restart_required": "Reinício necessário (configurações de classificação alteradas)"
   },
   "notification": {
     "globalSettings": {
@@ -188,21 +190,29 @@
       "point_many": "{{count}} pontos",
       "point_other": "{{count}} pontos",
       "context": {
-        "documentation": "Leia a documentação"
+        "documentation": "Leia a documentação",
+        "title": "As máscaras de movimento são usadas para impedir que tipos indesejados de movimento acionem a detecção (exemplo: galhos de árvores, carimbos de data/hora da câmera). As máscaras de movimento devem ser usadas <em>com moderação</em>, o uso excessivo de máscaras dificultará o rastreamento de objetos."
       },
       "polygonAreaTooLarge": {
-        "documentation": "Leia a documentação"
+        "documentation": "Leia a documentação",
+        "tips": "As máscaras de movimento não impedem que objetos sejam detectados. Você deve usar uma zona obrigatória em vez disso.",
+        "title": "A máscara de movimento está cobrindo {{polygonArea}}% da área da câmera. Máscaras de movimento grandes não são recomendadas."
       },
       "label": "Máscara de movimento",
       "desc": {
-        "documentation": "Documentação"
+        "documentation": "Documentação",
+        "title": "As máscaras de movimento são usadas para impedir que tipos indesejados de movimento acionem a detecção. O uso excessivo de máscaras dificultará o rastreamento de objetos."
       },
       "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
       "toast": {
         "success": {
-          "noName": "O filtro de movimento foi guardado. Reinicie o Frigate para aplicar as alterações."
+          "noName": "O filtro de movimento foi guardado. Reinicie o Frigate para aplicar as alterações.",
+          "title": "{{polygonName}} foi salvo. Reinicie o Frigate para aplicar as alterações."
         }
-      }
+      },
+      "edit": "Editar Máscara de Movimento",
+      "documentTitle": "Editar Máscara de Movimento - Frigate",
+      "add": "Nova Máscara de Movimento"
     },
     "zones": {
       "label": "Zonas",
@@ -313,18 +323,27 @@
       "label": "Máscaras de objetos",
       "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
       "desc": {
-        "documentation": "Documentação"
+        "documentation": "Documentação",
+        "title": "As máscaras de filtro de objetos são usadas para filtrar falsos positivos para um determinado tipo de objeto com base na localização."
       },
       "point_one": "{{count}} ponto",
       "point_many": "{{count}} pontos",
       "point_other": "{{count}} pontos",
       "objects": {
         "allObjectTypes": "Todos os tipos de objeto",
-        "title": "Objetos"
+        "title": "Objetos",
+        "desc": "O tipo de objeto ao qual essa máscara de objeto se aplica."
       },
       "add": "Adicionar filtro para objecto",
       "edit": "Editar filtro de objecto",
-      "documentTitle": "Editar filtro de movimento - Frigate"
+      "documentTitle": "Editar filtro de movimento - Frigate",
+      "toast": {
+        "success": {
+          "noName": "A máscara de objeto foi salva. Reinicie o Frigate para aplicar as alterações.",
+          "title": "{{polygonName}} foi salvo. Reinicie o Frigate para aplicar as alterações."
+        }
+      },
+      "context": "As máscaras de filtro de objetos são usadas para filtrar falsos positivos para um determinado tipo de objeto com base na localização."
     },
     "restart_required": "É necessário reiniciar (máscaras/zonas alteradas)"
   },
@@ -371,13 +390,20 @@
   },
   "motionDetectionTuner": {
     "contourArea": {
-      "title": "Área de contorno"
+      "title": "Área de contorno",
+      "desc": "O valor da área de contorno é usado para decidir quais grupos de pixels alterados são qualificados como movimento. <em>Valor padrão: 10</em>"
     },
     "improveContrast": {
       "title": "Melhorar o contraste"
     },
     "Threshold": {
-      "title": "Limite"
-    }
+      "title": "Limite",
+      "desc": "O valor do limiar determina quanto de alteração na luminância de um pixel é necessário para ser considerado movimento. <em>Valor padrão: 30</em>"
+    },
+    "desc": {
+      "title": "O Frigate utiliza a detecção de movimento como uma primeira verificação para ver se há algo acontecendo no quadro que valha a pena ser verificado com a detecção de objetos.",
+      "documentation": "Leia o Guia de Ajuste de Movimento"
+    },
+    "title": "Ajustador de Detecção de Movimento"
   }
 }

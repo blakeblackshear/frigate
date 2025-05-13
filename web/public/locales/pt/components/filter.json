@@ -95,10 +95,32 @@
   "logSettings": {
     "label": "Nível de log do filtro",
     "loading": {
-      "title": "Carregando"
+      "title": "Carregando",
+      "desc": "Quando o painel de logs está rolado até o final, novos logs são transmitidos automaticamente à medida que são adicionados."
     },
-    "filterBySeverity": "Filtrar logs por gravidade"
+    "filterBySeverity": "Filtrar logs por gravidade",
+    "disableLogStreaming": "Desativar transmissão de logs",
+    "allLogs": "Todos os logs"
   },
   "estimatedSpeed": "Velocidade estimada ({{unit}})",
-  "timeRange": "Intervalo de tempo"
+  "timeRange": "Intervalo de tempo",
+  "zoneMask": {
+    "filterBy": "Filtrar por máscara de zona"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar exclusão",
+    "toast": {
+      "success": "Objetos rastreados excluídos com sucesso.",
+      "error": "Falha ao excluir os objetos rastreados: {{errorMessage}}"
+    },
+    "desc": "Excluir estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer embeddings salvos e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar este diálogo no futuro."
+  },
+  "recognizedLicensePlates": {
+    "title": "Placas Reconhecidas",
+    "noLicensePlatesFound": "Nenhuma placa encontrada.",
+    "selectPlatesFromList": "Selecione uma ou mais placas da lista.",
+    "loadFailed": "Falha ao carregar as placas reconhecidas.",
+    "loading": "Carregando placas reconhecidas…",
+    "placeholder": "Digite para buscar placas…"
+  }
 }
