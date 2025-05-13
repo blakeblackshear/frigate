@@ -126,8 +126,17 @@
       "detect": "erkennen",
       "camera": "Kamera",
       "skipped": "übersprungene",
-      "ffmpeg": "ffmpeg",
-      "capture": "aufnehmen"
+      "ffmpeg": "FFmpeg",
+      "capture": "aufnehmen",
+      "overallFramesPerSecond": "Bilder pro Sekunde",
+      "overallDetectionsPerSecond": "Erkennungen pro Sekunde",
+      "overallSkippedDetectionsPerSecond": "übersprungene Erkennungen pro Sekunde",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} Aufnahme",
+      "cameraDetect": "{{camName}} Erkennung",
+      "cameraFramesPerSecond": "{{camName}} Bilder pro Sekunde",
+      "cameraDetectionsPerSecond": "{{camName}} Erkennungen pro Sekunde",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} übersprungene Erkennungen pro Sekunde"
     },
     "title": "Kameras",
     "framesAndDetections": "Bilder / Erkennungen",
@@ -149,14 +158,17 @@
       "plate_recognition": "Kennzeichen Erkennung",
       "face_recognition_speed": "Gesichts Erkennungs Geschwindigkeit",
       "text_embedding": "Einbettung von Bildern",
-      "face_recognition": "Gesichts Erkennung"
+      "face_recognition": "Gesichts Erkennung",
+      "image_embedding": "Bild Embedding",
+      "yolov9_plate_detection_speed": "YOLOv9 Kennzeichenerkennungsgeschwindigkeit",
+      "yolov9_plate_detection": "YOLOv9 Kennzeichenerkennung"
     },
     "title": "Optimierungen",
     "infPerSecond": "Rückschlüsse pro Sekunde"
   },
   "stats": {
     "healthy": "Das System läuft problemlos",
-    "ffmpegHighCpuUsage": "{{camera}} hat eine hohe FFMPEG CPU Auslastung ({{ffmpegAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} hat eine hohe FFmpeg CPU Auslastung ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} hat eine hohe CPU Auslastung bei der Erkennung ({{detectAvg}}%)",
     "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)",
     "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",

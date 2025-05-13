@@ -46,7 +46,14 @@
       "desc": {
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Gib einen Filternamen gefolgt von einem Doppelpunkt ein (z.B. \"Kameras:\").</li><li>Wähle einen Wert aus den Vorschlägen aus oder tippe einen individuellen ein.</li><li> Verwende mehrere Filter, indem Du sie nacheinander mit Leerzeichen getrennt eingibst.</li><li>Datumfilter (Vor: und Nach:) im Format <em>{{DateFormat}}</em>.</li><li>Zeitraumfilter im Format <em>{{exampleTime}}</em>.</li><li>Lösche Filter durch Drücken des \"x\" daneben.</li></ul>",
         "text": "Mit Filtern kannst Du Suchergebnisse eingrenzen. Hier erfährst Du, wie diese im Eingabefeld verwendet werden können:",
-        "example": "Beispiel: <code className=\"text-primary\">Kameras:Tor Label:Person Vor:01012024 Zeitraum:15:00-16:00</code>"
+        "example": "Beispiel: <code className=\"text-primary\">Kameras:Tor Label:Person Vor:01012024 Zeitraum:15:00-16:00</code>",
+        "step3": "Verwende mehrere Filter, indem du sie nacheinander mit einem Leerzeichen dazwischen hinzufügst.",
+        "step2": "Wähle einen Wert aus den Vorschlägen aus oder gib einen eigenen ein.",
+        "step1": "Gib einen Filter-Schlüssel ein, gefolgt von einem Doppelpunkt (z.B. „kameras:“).",
+        "exampleLabel": "Beispiel:",
+        "step6": "Entferne Filter, indem du auf das „x“ daneben klickst.",
+        "step4": "Datumsfilter (bevor: und nach:) verwenden das Format {{DateFormat}}.",
+        "step5": "Der Zeitbereichsfilter verwendet das Format {{exampleTime}}."
       },
       "title": "Wie man Textfilter verwendet"
     },

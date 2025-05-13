@@ -22,8 +22,8 @@
     "second_one": "{{time}} Sekunde",
     "second_other": "{{time}} Sekunden",
     "formattedTimestamp2": {
-      "24hour": "%d %b %H:%M:%S",
-      "12hour": "%d-%m %H:%M:%S"
+      "24hour": "dd. MMM HH:mm:ss",
+      "12hour": "dd.MM hh:mm:ss"
     },
     "last30": "Letzte 30 Tage",
     "10minutes": "10 Minuten",
@@ -40,19 +40,19 @@
     "h": "{{time}} Stunde",
     "ago": "{{timeAgo}} her",
     "untilRestart": "Bis zum Neustart",
-    "justNow": "Aktuell",
-    "pm": "pm",
-    "mo": "{{time}}monat",
+    "justNow": "Gerade",
+    "pm": "nachmittags",
+    "mo": "{{time}}Monat",
     "formattedTimestamp": {
-      "12hour": "%d %b %H:%M:%S",
-      "24hour": "%-d %b, %H:%M:%S"
+      "12hour": "d. MMM, hh:mm:ss aaa",
+      "24hour": "dd. MMM, hh:mm:ss aaa"
     },
     "formattedTimestampWithYear": {
       "24hour": "%-d %b %Y, %H:%M",
       "12hour": "%-d %b %Y, %H:%M"
     },
     "formattedTimestampOnlyMonthAndDay": "%-d %b",
-    "am": "am",
+    "am": "vormittags",
     "formattedTimestampExcludeSeconds": {
       "24hour": "%-d %b, %H:%M",
       "12hour": "%-d %b, %H:%M"
