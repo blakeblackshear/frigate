@@ -33,5 +33,6 @@
     "button": "Nowe elementy do przeglądu"
   },
   "selected_one": "{{count}} wybrane",
-  "selected_other": "{{count}} wybrane"
+  "selected_other": "{{count}} wybrane",
+  "detected": "wykryto"
 }

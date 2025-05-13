@@ -9,7 +9,9 @@
     "confidence": "Pewność",
     "face": "Szczegóły twarzy",
     "faceDesc": "Szczegóły twarzy i powiązanego obiektu",
-    "timestamp": "Znacznik czasu"
+    "timestamp": "Znacznik czasu",
+    "subLabelScore": "Ocena podetykiety",
+    "scoreInfo": "Ocena podetykiety to ważona ocena uwzględniająca wszystkie rozpoznane twarze i ich poziom rozpoznania , dlatego może się różnić od oceny pokazanej na stopklatce."
   },
   "documentTitle": "Biblioteka twarzy - Frigate",
   "uploadFaceImage": {

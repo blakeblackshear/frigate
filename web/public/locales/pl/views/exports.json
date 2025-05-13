@@ -1,6 +1,6 @@
 {
   "search": "Szukaj",
-  "documentTitle": "Eksport - Frigate",
+  "documentTitle": "Eksportuj - Frigate",
   "noExports": "Nie znaleziono eksportów",
   "deleteExport": "Usuń eksport",
   "deleteExport.desc": "Czy na pewno chcesz usunąć {{exportName}}?",

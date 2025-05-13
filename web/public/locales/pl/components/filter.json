@@ -24,11 +24,11 @@
   "estimatedSpeed": "Szacowana Prędkość ({{unit}})",
   "features": {
     "label": "Funkcje",
-    "hasSnapshot": "Posiada zrzut ekranu",
+    "hasSnapshot": "Posiada stop klatkę",
     "hasVideoClip": "Posiada klip wideo",
     "submittedToFrigatePlus": {
       "label": "Przesłano do Frigate+",
-      "tips": "Musisz najpierw filtrować obiekty śledzone, które mają zrzut ekranu.<br /><br />Obiekty śledzone bez zrzutu ekranu nie mogą być przesłane do Frigate+."
+      "tips": "Musisz najpierw filtrować obiekty śledzone, które mają stop klatkę.<br /><br />Obiekty śledzone bez stop klatki nie mogą być przesłane do Frigate+."
     }
   },
   "sort": {
@@ -117,7 +117,7 @@
       "error": "Nie udało się usunąć śledzonych obiektów: {{errorMessage}}"
     },
     "title": "Potwierdź Usunięcie",
-    "desc": "Usunięcie tych {{objectLength}} śledzonych obiektów usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrane materiały tych śledzonych obiektów w widoku Historii <em>NIE</em> zostaną usunięte.<br /><br />Czy na pewno chcesz kontynuować?<br /><br />Przytrzymaj klawisz <em>Shift</em>, aby pominąć to okno dialogowe w przyszłości."
+    "desc": "Usunięcie tych {{objectLength}} śledzonych obiektów usuwa stop klatki, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrane materiały tych śledzonych obiektów w widoku Historii <em>NIE</em> zostaną usunięte.<br /><br />Czy na pewno chcesz kontynuować?<br /><br />Przytrzymaj klawisz <em>Shift</em>, aby pominąć to okno dialogowe w przyszłości."
   },
   "zoneMask": {
     "filterBy": "Filtruj według maski strefy"
