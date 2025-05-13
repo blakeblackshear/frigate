@@ -193,6 +193,7 @@
         "success": "跟踪对象删除成功。",
         "error": "删除跟踪对象失败：{{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
   }
 }

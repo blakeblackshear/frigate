@@ -129,7 +129,16 @@
       "detect": "探测",
       "skipped": "跳过",
       "ffmpeg": "FFmpeg编码器",
-      "capture": "捕获"
+      "capture": "捕获",
+      "overallFramesPerSecond": "每秒总帧数",
+      "overallDetectionsPerSecond": "每秒总检测数",
+      "overallSkippedDetectionsPerSecond": "每秒跳过检测数",
+      "cameraCapture": "{{camName}} 捕获",
+      "cameraDetect": "{{camName}} 检测",
+      "cameraDetectionsPerSecond": "{{camName}} 每秒检测数",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳过检测数",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFramesPerSecond": "{{camName}} 每秒帧数"
     },
     "toast": {
       "success": {
@@ -142,7 +151,7 @@
   },
   "lastRefreshed": "最后刷新时间：",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} 的 FFMPEG CPU 使用率较高（{{ffmpegAvg}}%）",
+    "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率较高（{{ffmpegAvg}}%）",
     "detectHighCpuUsage": "{{camera}} 的 探测 CPU 使用率较高（{{detectAvg}}%）",
     "healthy": "系统运行正常",
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
