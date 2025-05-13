@@ -39,13 +39,13 @@
     "createObjectMask": "Objectmasker maken",
     "lifecycleItemDesc": {
       "visible": "{{label}} Gedetecteerd",
-      "entered_zone": "{{label}} ingevoerd {{zones}}",
+      "entered_zone": "{{label}} in zone {{zones}}",
       "attribute": {
         "other": "{{label}} Herkend als {{attribute}}",
         "faceOrLicense_plate": "{{attribute}} Gedetecteerd voor {{label}}"
       },
       "heard": "{{label}} gehoord",
-      "gone": "{{label}} Links",
+      "gone": "{{label}} is vertrokken",
       "active": "{{label}} Werd actief",
       "stationary": "{{label}} werd stationair",
       "external": "{{label}} gedetecteerd",
@@ -188,7 +188,8 @@
         "success": "Het gevolgde object is succesvol verwijderd.",
         "error": "Verwijderen van gevolgd object mislukt: {{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "{{type}} komt voor {{confidence}}% overeen met de zoekopdracht"
   },
   "dialog": {
     "confirmDelete": {

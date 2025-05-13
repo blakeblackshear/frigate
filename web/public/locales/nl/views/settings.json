@@ -141,7 +141,8 @@
       "title": "Vogelclassificatie",
       "desc": "Vogelclassificatie herkent bekende vogels met behulp van een gequantiseerd TensorFlow-model. Wanneer een bekende vogel wordt herkend, wordt de algemene naam toegevoegd als sublabel. Deze informatie wordt weergegeven in de interface, is beschikbaar in filters en wordt ook opgenomen in meldingen."
     },
-    "restart_required": "Opnieuw opstarten vereist (Classificatie-instellingen gewijzigd)"
+    "restart_required": "Opnieuw opstarten vereist (Classificatie-instellingen gewijzigd)",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in de classificatie-instellingen"
   },
   "camera": {
     "review": {
@@ -168,7 +169,8 @@
       "noDefinedZones": "Voor deze camera zijn nog geen zones ingesteld.",
       "desc": "Frigate categoriseert beoordelingsitems als waarschuwingen en detecties.Standaard worden alle <em>person</em>- en <em>car</em>-objecten als waarschuwingen beschouwd. Je kunt de categorisatie verfijnen door zones te configureren waarin uitsluitend deze objecten gedetecteerd moeten worden.",
       "title": "Beoordelingsclassificatie",
-      "objectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties, ongeacht in welke zone ze zich bevinden."
+      "objectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties, ongeacht in welke zone ze zich bevinden.",
+      "unsavedChanges": "Niet-opgeslagen classificatie-instellingen voor {{camera}}"
     },
     "streams": {
       "desc": "Het uitschakelen van een camera laat Frigate volledig stoppen met het verwerken van de stream van die camera. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /><em>Opmerking: dit schakelt de go2rtc-restreams niet uit.</em>",
@@ -356,7 +358,8 @@
     },
     "toast": {
       "success": "De bewegingsinstellingen zijn opgeslagen."
-    }
+    },
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in Bewegingsdetectie-afsteller ({{camera}})"
   },
   "debug": {
     "title": "Foutopsporing",
@@ -548,7 +551,9 @@
     "sendTestNotification": "Stuur een testmelding",
     "registerDevice": "Registreer dit apparaat",
     "unregisterDevice": "Dit apparaat afmelden",
-    "suspended": "Meldingen onderbroken {{time}}"
+    "suspended": "Meldingen onderbroken {{time}}",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in meldingen",
+    "unsavedRegistrations": "Niet-opgeslagen notificatieregistraties"
   },
   "frigatePlus": {
     "title": "Frigate+ Instellingen",
@@ -592,6 +597,7 @@
       "success": "Frigate+ instellingen zijn opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
       "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
     },
-    "restart_required": "Herstart vereist (Frigate+ model gewijzigd)"
+    "restart_required": "Herstart vereist (Frigate+ model gewijzigd)",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in Frigate+ instellingen"
   }
 }
