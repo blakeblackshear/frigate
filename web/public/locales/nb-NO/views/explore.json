@@ -178,7 +178,8 @@
         "error": "Feil ved sletting av sporet objekt: {{errorMessage}}",
         "success": "Sporet objekt ble slettet med suksess."
       }
-    }
+    },
+    "tooltip": "Samsvarer {{type}} til {{confidence}}%"
   },
   "trackedObjectDetails": "Detaljer om sporet objekt",
   "type": {

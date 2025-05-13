@@ -77,7 +77,11 @@
       "12hour": "d. MMM yyyy, h:mm aaa",
       "24hour": "d. MMM yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "d. MMM"
+    "formattedTimestampMonthDay": "d. MMM",
+    "formattedTimestampMonthDayYear": {
+      "24hour": "d. MMM, yyyy",
+      "12hour": "d. MMM, yyyy"
+    }
   },
   "button": {
     "copy": "Kopier",

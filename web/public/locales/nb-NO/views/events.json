@@ -33,5 +33,6 @@
   "markAsReviewed": "Merk som inspisert",
   "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
   "selected_one": "{{count}} valgt",
-  "selected_other": "{{count}} valgt"
+  "selected_other": "{{count}} valgt",
+  "detected": "detektert"
 }
