@@ -187,6 +187,9 @@ def update_yaml_from_url(file_path, url):
     parsed_url = urllib.parse.urlparse(url)
     query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
 
+    # Filter out empty keys but keep blank values for non-empty keys
+    query_string = {k: v for k, v in query_string.items() if k}
+
     for key_path_str, new_value_list in query_string.items():
         key_path = key_path_str.split(".")
         for i in range(len(key_path)):
