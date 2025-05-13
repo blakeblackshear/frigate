@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+from typing import Any
 
 import cv2
 import numpy as np
@@ -36,7 +37,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
-        detected_license_plates: dict[str, dict[str, any]],
+        detected_license_plates: dict[str, dict[str, Any]],
     ):
         self.requestor = requestor
         self.detected_license_plates = detected_license_plates
@@ -47,7 +48,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         super().__init__(config, metrics, model_runner)
 
     def process_data(
-        self, data: dict[str, any], data_type: PostProcessDataEnum
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
         """Look for license plates in recording stream image
         Args:
@@ -214,7 +215,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         logger.debug(f"Post processing plate: {event_id}, {frame_time}")
         self.lpr_process(keyframe_obj_data, frame)
 
-    def handle_request(self, topic, request_data) -> dict[str, any] | None:
+    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.reprocess_plate.value:
             event = request_data["event"]
 

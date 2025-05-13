@@ -7,6 +7,7 @@ import threading
 from collections import defaultdict
 from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 import cv2
 import numpy as np
@@ -70,7 +71,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_end_subscriber = EventEndSubscriber()
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)
 
-        self.camera_activity: dict[str, dict[str, any]] = {}
+        self.camera_activity: dict[str, dict[str, Any]] = {}
         self.ongoing_manual_events: dict[str, str] = {}
 
         # {
@@ -301,7 +302,7 @@ class TrackedObjectProcessor(threading.Thread):
             return {}
 
     def get_current_frame(
-        self, camera: str, draw_options: dict[str, any] = {}
+        self, camera: str, draw_options: dict[str, Any] = {}
     ) -> np.ndarray | None:
         if camera == "birdseye":
             return self.frame_manager.get(

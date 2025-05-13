@@ -2,7 +2,7 @@
 
 import json
 import threading
-from typing import Optional
+from typing import Any, Optional
 
 import zmq
 
@@ -58,7 +58,7 @@ class Publisher:
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect(SOCKET_PUB)
 
-    def publish(self, payload: any, sub_topic: str = "") -> None:
+    def publish(self, payload: Any, sub_topic: str = "") -> None:
         """Publish message."""
         self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
@@ -81,7 +81,7 @@ class Subscriber:
 
     def check_for_update(
         self, timeout: float = FAST_QUEUE_TIMEOUT
-    ) -> Optional[tuple[str, any]]:
+    ) -> Optional[tuple[str, Any]]:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
@@ -98,5 +98,5 @@ class Subscriber:
         self.socket.close()
         self.context.destroy()
 
-    def _return_object(self, topic: str, payload: any) -> any:
+    def _return_object(self, topic: str, payload: Any) -> Any:
         return payload

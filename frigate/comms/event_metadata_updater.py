@@ -2,6 +2,7 @@
 
 import logging
 from enum import Enum
+from typing import Any
 
 from .zmq_proxy import Publisher, Subscriber
 
@@ -27,7 +28,7 @@ class EventMetadataPublisher(Publisher):
     def __init__(self) -> None:
         super().__init__()
 
-    def publish(self, topic: EventMetadataTypeEnum, payload: any) -> None:
+    def publish(self, topic: EventMetadataTypeEnum, payload: Any) -> None:
         super().publish(payload, topic.value)
 
 

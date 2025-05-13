@@ -10,7 +10,7 @@ import random
 import re
 import string
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -1181,7 +1181,7 @@ class LicensePlateProcessingMixin:
         return event_id
 
     def lpr_process(
-        self, obj_data: dict[str, any], frame: np.ndarray, dedicated_lpr: bool = False
+        self, obj_data: dict[str, Any], frame: np.ndarray, dedicated_lpr: bool = False
     ):
         """Look for license plates in image."""
         self.metrics.alpr_pps.value = self.plates_rec_second.eps()
@@ -1272,7 +1272,7 @@ class LicensePlateProcessingMixin:
                 )
                 return
 
-            license_plate: Optional[dict[str, any]] = None
+            license_plate: Optional[dict[str, Any]] = None
 
             if "license_plate" not in self.config.cameras[camera].objects.track:
                 logger.debug(f"{camera}: Running manual license_plate detection.")
@@ -1341,7 +1341,7 @@ class LicensePlateProcessingMixin:
                     return
 
                 if obj_data.get("label") in ["car", "motorcycle"]:
-                    attributes: list[dict[str, any]] = obj_data.get(
+                    attributes: list[dict[str, Any]] = obj_data.get(
                         "current_attributes", []
                     )
                     for attr in attributes:
@@ -1567,7 +1567,7 @@ class LicensePlateProcessingMixin:
             "last_seen": current_time if dedicated_lpr else None,
         }
 
-    def handle_request(self, topic, request_data) -> dict[str, any] | None:
+    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         return
 
     def expire_object(self, object_id: str, camera: str):

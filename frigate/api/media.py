@@ -9,6 +9,7 @@ import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path as FilePath
+from typing import Any
 from urllib.parse import unquote
 
 import cv2
@@ -89,7 +90,7 @@ def imagestream(
     camera_name: str,
     fps: int,
     height: int,
-    draw_options: dict[str, any],
+    draw_options: dict[str, Any],
 ):
     while True:
         # max out at specified FPS

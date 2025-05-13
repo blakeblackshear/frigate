@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import requests
 from pydantic import BaseModel, ConfigDict, Field
@@ -147,7 +147,7 @@ class ModelConfig(BaseModel):
                 json.dump(model_info, f)
         else:
             with open(model_info_path, "r") as f:
-                model_info: dict[str, any] = json.load(f)
+                model_info: dict[str, Any] = json.load(f)
 
         if detector and detector not in model_info["supportedDetectors"]:
             raise ValueError(f"Model does not support detector type of {detector}")

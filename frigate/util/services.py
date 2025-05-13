@@ -9,7 +9,7 @@ import signal
 import subprocess as sp
 import traceback
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import cv2
 import psutil
@@ -537,7 +537,7 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def get_nvidia_driver_info() -> dict[str, any]:
+def get_nvidia_driver_info() -> dict[str, Any]:
     """Get general hardware info for nvidia GPU."""
     results = {}
     try:
@@ -596,8 +596,8 @@ def auto_detect_hwaccel() -> str:
 
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
-) -> dict[str, any]:
-    async def calculate_duration(video: Optional[any]) -> float:
+) -> dict[str, Any]:
+    async def calculate_duration(video: Optional[Any]) -> float:
         duration = None
 
         if video is not None:

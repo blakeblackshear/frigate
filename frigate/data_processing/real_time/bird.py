@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Any
 
 import cv2
 import numpy as np
@@ -35,8 +36,8 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         super().__init__(config, metrics)
         self.interpreter: Interpreter = None
         self.sub_label_publisher = sub_label_publisher
-        self.tensor_input_details: dict[str, any] = None
-        self.tensor_output_details: dict[str, any] = None
+        self.tensor_input_details: dict[str, Any] = None
+        self.tensor_output_details: dict[str, Any] = None
         self.detected_birds: dict[str, float] = {}
         self.labelmap: dict[int, str] = {}
 

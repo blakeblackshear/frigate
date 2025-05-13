@@ -242,7 +242,7 @@ class RecordingMaintainer(threading.Thread):
         self.end_time_cache.pop(cache_path, None)
 
     async def validate_and_move_segment(
-        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, any]
+        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, Any]
     ) -> None:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]

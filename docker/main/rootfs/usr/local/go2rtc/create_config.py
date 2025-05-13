@@ -4,6 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -37,13 +38,13 @@ try:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.load(raw_config)
+        config: dict[str, Any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
-        config: dict[str, any] = json.loads(raw_config)
+        config: dict[str, Any] = json.loads(raw_config)
 except FileNotFoundError:
-    config: dict[str, any] = {}
+    config: dict[str, Any] = {}
 
-go2rtc_config: dict[str, any] = config.get("go2rtc", {})
+go2rtc_config: dict[str, Any] = config.get("go2rtc", {})
 
 # Need to enable CORS for go2rtc so the frigate integration / card work automatically
 if go2rtc_config.get("api") is None:
@@ -134,7 +135,7 @@ for name in go2rtc_config.get("streams", {}):
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):
-    birdseye: dict[str, any] = config.get("birdseye")
+    birdseye: dict[str, Any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
     ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args', ''), input, '-rtsp_transport tcp -f rtsp {output}')}"

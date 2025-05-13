@@ -239,7 +239,7 @@ class CameraState:
         self,
         frame_name: str,
         frame_time: float,
-        current_detections: dict[str, dict[str, any]],
+        current_detections: dict[str, dict[str, Any]],
         motion_boxes: list[tuple[int, int, int, int]],
         regions: list[tuple[int, int, int, int]],
     ):
@@ -337,7 +337,7 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
-        camera_activity: dict[str, list[any]] = {
+        camera_activity: dict[str, list[Any]] = {
             "motion": len(motion_boxes) > 0,
             "objects": [],
         }

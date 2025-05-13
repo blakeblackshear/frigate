@@ -131,7 +131,7 @@ def metrics(request: Request):
 @router.get("/config")
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
-    config: dict[str, dict[str, any]] = config_obj.model_dump(
+    config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
 
@@ -158,7 +158,7 @@ def config(request: Request):
             camera_dict["zones"][zone_name]["color"] = zone.color
 
     # remove go2rtc stream passwords
-    go2rtc: dict[str, any] = config_obj.go2rtc.model_dump(
+    go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
     for stream_name, stream in go2rtc.get("streams", {}).items():
@@ -648,7 +648,7 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
             status_code=400,
         )
 
-    models: dict[any, any] = request.app.frigate_config.plus_api.get_models()
+    models: dict[Any, Any] = request.app.frigate_config.plus_api.get_models()
 
     if not models["list"]:
         return JSONResponse(
@@ -801,7 +801,7 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     count = 0
     start = 0
     end = 0
-    hours: dict[str, list[dict[str, any]]] = {}
+    hours: dict[str, list[dict[str, Any]]] = {}
 
     for t in timeline:
         if count == 0:

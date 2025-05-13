@@ -2,9 +2,10 @@
 
 import json
 import os
+from typing import Any
 
 base_path = os.environ.get("FRIGATE_BASE_PATH", "")
 
-result: dict[str, any] = {"base_path": base_path}
+result: dict[str, Any] = {"base_path": base_path}
 
 print(json.dumps(result))
