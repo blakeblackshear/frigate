@@ -141,7 +141,8 @@
       "title": "Artsbestemmelse for fugler",
       "desc": "Artsbestemmelse identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en kjent fugl gjenkjennes, legges det vanlige navnet til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, i filtre, samt i meldingsvarsler."
     },
-    "restart_required": "Omstart påkrevd (Klassifiseringsinnstillinger endret)"
+    "restart_required": "Omstart påkrevd (Klassifiseringsinnstillinger endret)",
+    "unsavedChanges": "Ulagrede endringer i klassifiseringsinnstillinger"
   },
   "camera": {
     "streams": {
@@ -165,8 +166,9 @@
       "selectDetectionsZones": "Velg soner for deteksjoner",
       "limitDetections": "Avgrens deteksjoner til bestemte soner",
       "toast": {
-        "success": "Konfigurasjon for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å bruke endringer."
-      }
+        "success": "Konfigurasjonen for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å bruke endringer."
+      },
+      "unsavedChanges": "Ulagrede innstillinger for inspeksjonsklassifisering for {{camera}}"
     },
     "title": "Kamerainnstillinger",
     "review": {
@@ -265,7 +267,8 @@
       "allObjects": "Alle objekter",
       "speedEstimation": {
         "title": "Hastighetsestimering",
-        "desc": "Aktiver hastighetsestimering for objekter i denne sonen. Sonen må ha nøyaktig 4 punkter."
+        "desc": "Aktiver hastighetsestimering for objekter i denne sonen. Sonen må ha nøyaktig 4 punkter.",
+        "docs": "Les dokumentasjonen"
       },
       "speedThreshold": {
         "title": "Hastighetsgrense ({{unit}})",
@@ -356,7 +359,8 @@
     },
     "toast": {
       "success": "Bevegelsesinnstillingene er lagret."
-    }
+    },
+    "unsavedChanges": "Ulagrede endringer i bevegelsesjustering ({{camera}})"
   },
   "debug": {
     "title": "Test og feilsøking",
@@ -548,7 +552,9 @@
     "cancelSuspension": "Avbryt suspensjon",
     "title": "Meldingsvarsler",
     "sendTestNotification": "Send en meldingsvarsel for test",
-    "active": "Meldingsvarsler aktivert"
+    "active": "Meldingsvarsler aktivert",
+    "unsavedChanges": "Ulagrede endringer for meldingsvarsler",
+    "unsavedRegistrations": "Ulagrede registreringer for meldingsvarsler"
   },
   "frigatePlus": {
     "apiKey": {
@@ -592,6 +598,7 @@
       "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å bruke endringene.",
       "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
     },
-    "restart_required": "Omstart påkrevd (Frigate+ modell endret)"
+    "restart_required": "Omstart påkrevd (Frigate+ modell endret)",
+    "unsavedChanges": "Ulagrede endringer for Frigate+ innstillinger"
   }
 }

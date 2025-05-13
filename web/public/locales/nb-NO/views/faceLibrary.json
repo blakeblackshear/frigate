@@ -8,8 +8,11 @@
     "person": "Person",
     "confidence": "Konfidens",
     "face": "Ansiktsdetaljer",
-    "faceDesc": "Detaljer for ansiktet og tilknyttet objekt",
-    "timestamp": "Tidsstempel"
+    "faceDesc": "Detaljer for sporet objekt som genererte dette ansiktet",
+    "timestamp": "Tidsstempel",
+    "scoreInfo": "Under-merkelappens poengsum er basert på en vektet sum ut ifra hvor sikre gjenkjenningene av ansiktene er, så den kan avvike fra poengsummen som vises på øyeblikksbildet.",
+    "subLabelScore": "Under-merkelapp poengsum",
+    "unknown": "Ukjent"
   },
   "documentTitle": "Ansiktsbibliotek – Frigate",
   "createFaceLibrary": {
@@ -20,7 +23,8 @@
   },
   "train": {
     "aria": "Velg tren",
-    "title": "Tren"
+    "title": "Tren",
+    "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning"
   },
   "selectFace": "Velg ansikt",
   "deleteFaceLibrary": {
@@ -62,7 +66,7 @@
   "button": {
     "addFace": "Legg til ansikt",
     "uploadImage": "Last opp bilde",
-    "deleteFaceAttempts": "Slett ansiktsforsøk",
+    "deleteFaceAttempts": "Slett ansikter",
     "reprocessFace": "Prosesser ansiktet på nytt",
     "deleteFace": "Slett ansikt",
     "renameFace": "Gi nytt navn til ansikt"
@@ -75,10 +79,20 @@
   "steps": {
     "faceName": "Skriv inn ansiktsnavn",
     "uploadFace": "Last opp ansiktsbilde",
-    "nextSteps": "Neste trinn"
+    "nextSteps": "Neste trinn",
+    "description": {
+      "uploadFace": "Last opp et bilde av {{name}} som viser ansiktet deres forfra. Bildet trenger ikke å være beskåret til kun ansiktet."
+    }
   },
   "renameFace": {
     "desc": "Skriv inn et nytt navn for {{name}}",
     "title": "Gi nytt navn til ansikt"
-  }
+  },
+  "collections": "Samlinger",
+  "deleteFaceAttempts": {
+    "title": "Slett ansikter",
+    "desc_one": "Er du sikker på at du vil slette {{count}} ansikt? Denne handlingen kan ikke angres.",
+    "desc_other": "Er du sikker på at du vil slette {{count}} ansikter? Denne handlingen kan ikke angres."
+  },
+  "nofaces": "Ingen ansikter tilgjengelig"
 }

@@ -108,6 +108,10 @@
       "title": "Bekreft sletting",
       "desc": {
         "selected": "Er du sikker på at du vil slette alle opptak knyttet til dette inspeksjonselementet?<br /><br />Hold inne <em>Shift</em>-tasten for å hoppe over denne dialogen i fremtiden."
+      },
+      "toast": {
+        "success": "Videomaterialet knyttet til de valgte inspeksjonselementene har blitt slettet.",
+        "error": "Kunne ikke slette: {{error}}"
       }
     },
     "button": {
