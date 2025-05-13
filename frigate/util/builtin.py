@@ -169,7 +169,7 @@ def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
 
 def to_relative_box(
     width: int, height: int, box: Tuple[int, int, int, int]
-) -> Tuple[int, int, int, int]:
+) -> Tuple[int | float, int | float, int | float, int | float]:
     return (
         box[0] / width,  # x
         box[1] / height,  # y
