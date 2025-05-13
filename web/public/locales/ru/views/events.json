@@ -34,5 +34,6 @@
   "markTheseItemsAsReviewed": "Пометить эти элементы как просмотренные",
   "selected": "{{count}} выбрано",
   "selected_one": "{{count}} выбрано",
-  "selected_other": "{{count}} выбрано"
+  "selected_other": "{{count}} выбрано",
+  "detected": "обнаружен"
 }

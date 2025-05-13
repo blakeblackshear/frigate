@@ -14,7 +14,7 @@
     "label": {
       "cameras": "Камеры",
       "zones": "Зоны",
-      "sub_labels": "Вторичные метки",
+      "sub_labels": "Дополнительные метки",
       "search_type": "Тип поиска",
       "time_range": "Временной диапазон",
       "before": "До",
