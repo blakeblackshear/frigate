@@ -5,7 +5,10 @@
     "person": "Persoon",
     "confidence": "Vertrouwen",
     "face": "Gezicht Details",
-    "faceDesc": "Details van het gezicht en het bijbehorende object"
+    "faceDesc": "Details van het gevolgde object dat dit gezicht heeft gegenereerd",
+    "scoreInfo": "De sublabelscore is het gewogen gemiddelde van hoe zeker de gezichtsherkenningen zijn. Deze score kan anders zijn dan die op de snapshot.",
+    "subLabelScore": "Score voor sublabel",
+    "unknown": "Onbekend"
   },
   "documentTitle": "Gezichtsbibliotheek - Frigate",
   "description": {
@@ -14,7 +17,8 @@
   },
   "train": {
     "title": "Train",
-    "aria": "Selecteer trainen"
+    "aria": "Selecteer trainen",
+    "empty": "Er zijn geen recente pogingen tot gezichtsherkenning"
   },
   "selectFace": "Selecteer gezicht",
   "toast": {
@@ -56,7 +60,7 @@
   "button": {
     "addFace": "Gezicht toevoegen",
     "uploadImage": "Afbeelding uploaden",
-    "deleteFaceAttempts": "Pogingen tot gezichtsherkenning verwijderen",
+    "deleteFaceAttempts": "Verwijder gezicht",
     "reprocessFace": "Herverwerk gezicht",
     "renameFace": "Gezicht hernoemen",
     "deleteFace": "Gezicht verwijderen"
@@ -75,10 +79,19 @@
   "steps": {
     "nextSteps": "Volgende stappen",
     "faceName": "Voer een naam in",
-    "uploadFace": "Upload een afbeelding van het gezicht"
+    "uploadFace": "Upload een afbeelding van het gezicht",
+    "description": {
+      "uploadFace": "Upload een afbeelding van {{name}} waarop het gezicht van voren te zien is. De afbeelding hoeft niet bijgesneden te zijn tot alleen het gezicht."
+    }
   },
   "renameFace": {
     "title": "Gezicht hernoemen",
     "desc": "Voer een nieuwe naam in voor {{name}}"
-  }
+  },
+  "deleteFaceAttempts": {
+    "title": "Verwijder gezicht",
+    "desc_one": "Weet je zeker dat je {{count}} gezicht wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "desc_other": "Weet je zeker dat je {{count}} gezichten wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+  },
+  "collections": "Collecties"
 }

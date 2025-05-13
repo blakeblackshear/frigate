@@ -2,7 +2,7 @@
   "button": {
     "delete": "Opgeslagen zoekopdracht verwijderen",
     "save": "Zoekopdracht opslaan",
-    "clear": "Duidelijk zoeken",
+    "clear": "Zoekopdracht wissen",
     "filterInformation": "Filter informatie",
     "filterActive": "Filters actief"
   },
