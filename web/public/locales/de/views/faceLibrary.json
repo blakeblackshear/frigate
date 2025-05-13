@@ -7,8 +7,11 @@
     "person": "Person",
     "confidence": "Vertrauen",
     "timestamp": "Zeitstempel",
-    "faceDesc": "Details für das Gesicht und der zugehörigen Person",
-    "face": "Gesichtsdetails"
+    "faceDesc": "Details des verfolgten Objekts, das dieses Gesicht erzeugt hat",
+    "face": "Gesichtsdetails",
+    "subLabelScore": "Sub Label Score",
+    "scoreInfo": "Der Sub Label Score ist der gewichtete Score für alle erkannten Gesichter und kann daher vom Score abweichen, der auf dem Schnappschuss angezeigt wird.",
+    "unknown": "Unbekannt"
   },
   "uploadFaceImage": {
     "title": "Lade Gesichtsbild hoch",
@@ -34,14 +37,15 @@
   "button": {
     "addFace": "Gesicht hinzufügen",
     "uploadImage": "Bild hochladen",
-    "deleteFaceAttempts": "Lösche Gesichtsversuche",
+    "deleteFaceAttempts": "Lösche Gesichter",
     "reprocessFace": "Gesichter erneut verarbeiten",
     "renameFace": "Gesicht umbenennen",
     "deleteFace": "Lösche Gesicht"
   },
   "train": {
     "title": "Trainiere",
-    "aria": "Wähle Training"
+    "aria": "Wähle Training",
+    "empty": "Es gibt keine aktuellen Versuche zurGesichtserkennung"
   },
   "deleteFaceLibrary": {
     "title": "Lösche Name",
@@ -59,7 +63,8 @@
       "deletedName_other": "{{count}} Gesichter wurden erfolgreich gelöscht.",
       "addFaceLibrary": "{{name}} wurde erfolgreich in die Gesichtsbibliothek aufgenommen!",
       "trainedFace": "Gesicht erfolgreich trainiert.",
-      "updatedFaceScore": "Gesichtsbewertung erfolgreich aktualisiert."
+      "updatedFaceScore": "Gesichtsbewertung erfolgreich aktualisiert.",
+      "renamedFace": "Gesicht erfolgreich in {{name}} umbenannt"
     },
     "error": {
       "deleteFaceFailed": "Das Löschen ist fehlgeschlagen: {{errorMessage}}",
@@ -67,16 +72,27 @@
       "addFaceLibraryFailed": "Der Gesichtsname konnte nicht gesetzt werden: {{errorMessage}}",
       "trainFailed": "Ausbildung fehlgeschlagen: {{errorMessage}}",
       "updateFaceScoreFailed": "Aktualisierung der Gesichtsbewertung fehlgeschlagen: {{errorMessage}}",
-      "deleteNameFailed": "Name kann nicht gelöscht werden: {{errorMessage}}"
+      "deleteNameFailed": "Name kann nicht gelöscht werden: {{errorMessage}}",
+      "renameFaceFailed": "Gesicht konnte nicht umbenannt werden: {{errorMessage}}"
     }
   },
   "steps": {
     "uploadFace": "Lade Bild des Gesichts hoch",
     "nextSteps": "Nächste Schritte",
-    "faceName": "Gib den Namen zum Gesicht ein"
+    "faceName": "Gebe Gesichtsname ein",
+    "description": {
+      "uploadFace": "Lade ein Bild von {{name}} hoch, das ihr/sein Gesicht aus einer frontalen Perspektive zeigt. Das Bild muss nicht auf das Gesicht zugeschnitten sein."
+    }
   },
   "renameFace": {
     "title": "Gesicht umbenennen",
     "desc": "Gib den neuen Namen für das Gesicht von {{name}} ein."
-  }
+  },
+  "collections": "Sammlungen",
+  "deleteFaceAttempts": {
+    "title": "Lösche Gesichter",
+    "desc_one": "Bist du sicher, dass du {{count}} Gesicht löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "desc_other": "Bist du sicher, dass du {{count}} Gesichter löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "nofaces": "Keine Gesichter verfügbar"
 }

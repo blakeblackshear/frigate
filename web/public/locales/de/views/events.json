@@ -6,8 +6,8 @@
     "only": "nur Bewegung"
   },
   "empty": {
-    "alert": "Es gibt keine zu prüfende Alarme",
-    "detection": "Es gibt keine zu prüfende Erkennungen",
+    "alert": "Es gibt keine zu prüfenden Alarme",
+    "detection": "Es gibt keine zu prüfenden Erkennungen",
     "motion": "Keine Bewegungsdaten gefunden"
   },
   "timeline": "Zeitleiste",
@@ -33,5 +33,6 @@
   "allCameras": "Alle Kameras",
   "markAsReviewed": "Als geprüft kennzeichnen",
   "selected_one": "{{count}} ausgewählt",
-  "selected_other": "{{count}} ausgewählt"
+  "selected_other": "{{count}} ausgewählt",
+  "detected": "erkannt"
 }

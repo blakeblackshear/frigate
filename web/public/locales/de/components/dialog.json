@@ -108,6 +108,10 @@
       "title": "Bestätige Löschung",
       "desc": {
         "selected": "Bist du sicher, dass du alle aufgezeichneten Videos, die mit diesem Beitrag verbunden sind, löschen möchtest?<br /><br />Halte <em>Shift</em>-Taste gedrückt, um diesen Dialog in Zukunft zu umgehen."
+      },
+      "toast": {
+        "success": "Das Videomaterial des gewählten Eintrags wurde erfolgreich gelöscht.",
+        "error": "Löschen is fehlgeschlagen: {{error}}"
       }
     },
     "button": {
