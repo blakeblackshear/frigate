@@ -37,7 +37,7 @@
         "hasMissingObjects": "Ajuste sua configuração se você quiser que o Frigate salve os objetos rastreados para os seguintes rótulos: <em>{{objects}}</em>",
         "mismatch_one": "{{count}} objeto indisponível foi detectado e incluído neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
         "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
-        "mismatch_other": ""
+        "mismatch_other": "{{count}} objetos indisponíveis foram detectados e incluídos neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos."
       },
       "toast": {
         "success": {
@@ -120,7 +120,12 @@
       "external": "{{label}} detectado",
       "entered_zone": "{{label}} entrou em {{zones}}",
       "active": "{{label}} se tornou ativo",
-      "stationary": "{{label}} se tornou estacionário"
+      "stationary": "{{label}} se tornou estacionário",
+      "header": {
+        "zones": "Zonas",
+        "ratio": "Proporção",
+        "area": "Área"
+      }
     },
     "annotationSettings": {
       "title": "Configurações de anotação",
@@ -128,7 +133,7 @@
         "documentation": "Leia a documentação ",
         "desc": "Esses dados vêm do feed de detecção da sua câmera, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
         "tips": "DICA: Imagine que há um clipe de evento com uma pessoa andando da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento estiver consistentemente à esquerda da pessoa, o valor deve ser diminuído. Da mesma forma, se uma pessoa estiver andando da esquerda para a direita e a caixa delimitadora estiver consistentemente à frente da pessoa, o valor deve ser aumentado.",
-        "label": "Annotation Offset",
+        "label": "Deslocamento de Anotação",
         "millisecondsToOffset": "Milissegundos para deslocar as anotações de detecção. <em>Padrão: 0</em>"
       },
       "showAllZones": {
@@ -170,6 +175,29 @@
     "submitToPlus": {
       "label": "Enviar para o Frigate+",
       "aria": "Enviar para o Frigate Plus"
+    },
+    "deleteTrackedObject": {
+      "label": "Excluir este objeto rastreado"
     }
-  }
+  },
+  "searchResult": {
+    "tooltip": "Encontrado {{type}} com {{confidence}}% de confiança",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Objeto rastreado excluído com sucesso.",
+        "error": "Falha ao excluir objeto rastreado: {{errorMessage}}"
+      }
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "desc": "Excluir este objeto rastreado remove a captura de imagem, quaisquer incorporações salvas e todas as entradas associadas ao ciclo de vida do objeto. As gravações desse objeto rastreado na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?",
+      "title": "Confirmar exclusão"
+    }
+  },
+  "fetchingTrackedObjectsFailed": "Erro ao buscar objetos rastreados: {{errorMessage}}",
+  "noTrackedObjects": "Nenhum objeto rastreado encontrado",
+  "trackedObjectsCount_one": "{{count}} objeto rastreado ",
+  "trackedObjectsCount_many": "{{count}} objetos rastreados ",
+  "trackedObjectsCount_other": ""
 }

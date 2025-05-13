@@ -29,6 +29,12 @@
           "false_one": "Este não é um {{label}}",
           "false_many": "Estes não são muitos {{label}}",
           "false_other": "Estes não são {{label}}"
+        },
+        "question": {
+          "label": "Confirme este rótulo para Frigate Plus",
+          "ask_a": "Este objeto é um <code>{{label}}</code>?",
+          "ask_an": "Este objeto é um <code>{{label}}</code>?",
+          "ask_full": "Este objeto é um(a) <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },

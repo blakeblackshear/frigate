@@ -8,7 +8,9 @@
     "face": "Detalhes do rosto",
     "faceDesc": "Detalhes do rosto e objeto associado",
     "timestamp": "Carimbo de hora",
-    "confidence": "Confiança"
+    "confidence": "Confiança",
+    "scoreInfo": "A pontuação da subetiqueta é a pontuação ponderada de todas as confianças de rostos reconhecidos, portanto, ela pode ser diferente da pontuação exibida na captura de imagem.",
+    "subLabelScore": "Pontuação da Subetiqueta"
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
@@ -23,7 +25,8 @@
   },
   "train": {
     "aria": "Selecionar treino",
-    "title": "Treinar"
+    "title": "Treinar",
+    "empty": "Não há tentativas recentes de reconhecimento facial"
   },
   "selectItem": "Selecionar {{item}}",
   "selectFace": "Selecionar rosto",
@@ -35,7 +38,9 @@
     "addFace": "Adicionar rosto",
     "uploadImage": "Carregar imagem",
     "deleteFaceAttempts": "Apagar tentativas de detecção facial",
-    "reprocessFace": "Reprocessar Rosto"
+    "reprocessFace": "Reprocessar Rosto",
+    "renameFace": "Renomear rosto",
+    "deleteFace": "Excluir rosto"
   },
   "imageEntry": {
     "validation": {
@@ -57,7 +62,8 @@
       "deletedName_many": "{{count}} rostos foram excluídos com sucesso.",
       "deletedName_other": "{{count}} rostos foram excluídos com sucesso.",
       "uploadedImage": "Imagem carregada com sucesso.",
-      "addFaceLibrary": "{{name}} foi adicionado com sucesso à biblioteca de rostos!"
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à biblioteca de rostos!",
+      "renamedFace": "Rosto renomeado com sucesso para {{name}}"
     },
     "error": {
       "uploadingImageFailed": "Falha ao carregar a imagem: {{errorMessage}}",
@@ -65,7 +71,8 @@
       "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}",
       "addFaceLibraryFailed": "Falhou ao definir nome do rosto: {{errorMessage}}",
       "trainFailed": "Falhou ao treinar: {{errorMessage}}",
-      "updateFaceScoreFailed": "Falhou ao atualizar pontuação da face: {{errorMessage}}"
+      "updateFaceScoreFailed": "Falhou ao atualizar pontuação da face: {{errorMessage}}",
+      "renameFaceFailed": "Falha ao renomear o rosto: {{errorMessage}}"
     }
   },
   "readTheDocs": "Leia a documentação",
@@ -74,5 +81,9 @@
     "faceName": "Digite o Nome do Rosto",
     "uploadFace": "Carregar imagem do rosto",
     "nextSteps": "Próximos passos"
+  },
+  "renameFace": {
+    "desc": "Entre com um novo nome para {{name}}",
+    "title": "Renomear Face"
   }
 }
