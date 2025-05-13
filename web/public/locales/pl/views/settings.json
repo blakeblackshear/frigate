@@ -79,7 +79,8 @@
     "general": "Ustawienia Ogólne - Frigate",
     "authentication": "Ustawienia Uwierzytelniania - Frigate",
     "motionTuner": "Konfigurator Ruchu - Frigate",
-    "object": "Ustawienia Obiektów - Frigate"
+    "object": "Debug - Frigate",
+    "notifications": "Ustawienia powiadomień - Frigate"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
@@ -522,7 +523,8 @@
       "1hour": "Zawieś na 1 godzinę",
       "5minutes": "Zawieś na 5 minut",
       "10minutes": "Zawieś na 10 minut",
-      "30minutes": "Zawieś na 30 minut"
+      "30minutes": "Zawieś na 30 minut",
+      "suspend": "Wstrzymaj"
     },
     "cancelSuspension": "Anuluj zawieszenie",
     "toast": {

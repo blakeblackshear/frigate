@@ -197,6 +197,7 @@
         "success": "Śledzony obiekt usunięty pomyślnie.",
         "error": "Nie udało się usunąć śledzonego obiektu: {{errorMessage}}"
       }
-    }
+    },
+    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
   }
 }

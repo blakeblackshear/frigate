@@ -168,7 +168,8 @@
       "sk": "Slovenčina (Słowacki)",
       "vi": "Tiếng Việt (Wietnamski)",
       "ro": "Română (Rumuński)",
-      "fi": "Suomi (Fiński)"
+      "fi": "Suomi (Fiński)",
+      "yue": "粵語 (Kantoński)"
     },
     "appearance": "Wygląd",
     "darkMode": {
@@ -187,7 +188,8 @@
       "contrast": "Wysoki kontrast",
       "default": "Domyślny",
       "red": "Czerwony",
-      "nord": "Nordycki"
+      "nord": "Nordycki",
+      "highcontrast": "Wysoki kontrast"
     },
     "restart": "Uruchom ponownie Frigate",
     "live": {
