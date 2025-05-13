@@ -7,8 +7,9 @@
     "authentication": "Kimlik Doğrulama Ayarları - Frigate",
     "motionTuner": "Hareket Algılama Ayarları - Frigate",
     "frigatePlus": "Frigate+ Ayarları - Frigate",
-    "object": "Nesne Ayarları - Frigate",
-    "general": "Genel Ayarlar - Frigate"
+    "object": "Hata Ayıklama - Frigate",
+    "general": "Genel Ayarlar - Frigate",
+    "notifications": "Bildirim Ayarları - Frigate"
   },
   "menu": {
     "masksAndZones": "Maskeler / Alanlar",
@@ -531,7 +532,8 @@
       "30minutes": "30 dakika süreyle askıya al",
       "untilRestart": "Yeniden başlatılana kadar askıya al",
       "10minutes": "10 dakika süreyle askıya al",
-      "5minutes": "5 dakika süreyle askıya al"
+      "5minutes": "5 dakika süreyle askıya al",
+      "suspend": "Askıya Al"
     },
     "toast": {
       "success": {

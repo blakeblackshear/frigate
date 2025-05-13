@@ -33,5 +33,6 @@
   "markTheseItemsAsReviewed": "Bunları incelendi olarak işaretle",
   "allCameras": "Tüm Kameralar",
   "selected_one": "{{count}} seçildi",
-  "selected_other": "{{count}} seçildi"
+  "selected_other": "{{count}} seçildi",
+  "detected": "algılandı"
 }

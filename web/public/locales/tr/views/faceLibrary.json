@@ -9,7 +9,9 @@
     "faceDesc": "Yüz ve ilişkili nesneye ait detaylar",
     "confidence": "Kesinlik",
     "timestamp": "Zaman Damgası",
-    "face": "Yüz Detayları"
+    "face": "Yüz Detayları",
+    "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
+    "subLabelScore": "Alt Etiket Puanı"
   },
   "documentTitle": "Yüz Kütüphanesi - Frigate",
   "uploadFaceImage": {
@@ -24,7 +26,8 @@
   },
   "train": {
     "title": "Eğit",
-    "aria": "Eğitimi seç"
+    "aria": "Eğitimi seç",
+    "empty": "Yakın zamanda yüz tanıma konusunda bir girişimde bulunulmadı"
   },
   "deleteFaceLibrary": {
     "title": "İsmi Sil",

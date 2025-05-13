@@ -54,7 +54,8 @@
       "title": "Algılayıcılar",
       "inferenceSpeed": "Algılayıcı Çıkarım Hızı",
       "memoryUsage": "Algılayıcı Bellek Kullanımı",
-      "cpuUsage": "Algılayıcı İşlemci Kullanımı"
+      "cpuUsage": "Algılayıcı İşlemci Kullanımı",
+      "temperature": "Algılayıcı Sıcaklığı"
     },
     "title": "Genel"
   },
@@ -100,9 +101,18 @@
     "label": {
       "camera": "kamera",
       "detect": "tespit",
-      "ffmpeg": "ffmpeg",
+      "ffmpeg": "FFmpeg",
       "capture": "kayıt",
-      "skipped": "atlanan"
+      "skipped": "atlanan",
+      "overallDetectionsPerSecond": "toplam tespit/sn",
+      "overallFramesPerSecond": "toplam kare/sn",
+      "cameraFramesPerSecond": "{{camName}} kare/sn",
+      "overallSkippedDetectionsPerSecond": "toplam atlanan tespit/sn",
+      "cameraCapture": "{{camName}} kayıt",
+      "cameraDetect": "{{camName}} tespit",
+      "cameraDetectionsPerSecond": "{{camName}} tespit/sn",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} atlanan tespit/sn",
+      "cameraFfmpeg": "{{camName}} FFmpeg"
     },
     "toast": {
       "success": {
@@ -117,7 +127,7 @@
   },
   "lastRefreshed": "Son güncelleme: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} FFMPEG'te yüksek miktarda CPU kullanıyor (%{{ffmpegAvg}})",
+    "ffmpegHighCpuUsage": "{{camera}} FFmpeg'te yüksek miktarda CPU kullanıyor (%{{ffmpegAvg}})",
     "reindexingEmbeddings": "Gömüler yeniden dizinleniyor (%{{processed}} tamamlandı)",
     "detectHighCpuUsage": "{{camera}} tespitte yüksek miktarda CPU kullanıyor (%{{detectAvg}})",
     "healthy": "Sistem sağlıklı",

@@ -159,7 +159,8 @@
       "fa": "فارسی (Farsça)",
       "es": "Español (İspanyolca)",
       "ar": "العربية (Arapça)",
-      "ru": "Русский (Rusça)"
+      "ru": "Русский (Rusça)",
+      "yue": "粵語 (Kantonca)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -169,7 +170,8 @@
       "green": "Yeşil",
       "red": "Kırmızı",
       "default": "Varsayılan",
-      "nord": "Kuzey"
+      "nord": "Kuzey",
+      "highcontrast": "Yüksek Karşıtlık"
     },
     "restart": "Frigate'i yeniden başlat",
     "live": {
