@@ -766,7 +766,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         pass
 
     @abstractmethod
@@ -847,7 +847,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
