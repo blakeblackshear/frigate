@@ -34,5 +34,6 @@
   "camera": "摄像头",
   "selected": "已选择 {{count}} 个",
   "selected_one": "已选择 {{count}} 个",
-  "selected_other": "已选择 {{count}} 个"
+  "selected_other": "已选择 {{count}} 个",
+  "detected": "检测"
 }
