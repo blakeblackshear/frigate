@@ -141,7 +141,8 @@
       "title": "Clasificación de Aves",
       "desc": "La clasificación de aves identifica aves conocidas utilizando un modelo de TensorFlow cuantizado. Cuando se reconoce una ave conocida, su nombre común se añadirá como una subetiqueta. Esta información se incluye en la interfaz de usuario, en los filtros y en las notificaciones."
     },
-    "restart_required": "Es necesario reiniciar (se han cambiado las configuraciones de clasificación)"
+    "restart_required": "Es necesario reiniciar (se han cambiado las configuraciones de clasificación)",
+    "unsavedChanges": "Cambios en la configuración de clasificación no guardados"
   },
   "camera": {
     "review": {
@@ -168,7 +169,8 @@
       "limitDetections": "Limitar detecciones a zonas específicas",
       "toast": {
         "success": "La configuración de clasificación de revisión ha sido guardada. Reinicia Frigate para aplicar los cambios."
-      }
+      },
+      "unsavedChanges": "Configuración de clasificación de revisión no guardada para {{camera}}"
     },
     "title": "Ajustes de la cámara",
     "streams": {
@@ -251,7 +253,8 @@
       "clickDrawPolygon": "Haz clic para dibujar un polígono en la imagen.",
       "speedEstimation": {
         "desc": "Habilitar la estimación de velocidad para objetos en esta zona. La zona debe tener exactamente 4 puntos.",
-        "title": "Estimación de velocidad"
+        "title": "Estimación de velocidad",
+        "docs": "Leer la documentación"
       },
       "speedThreshold": {
         "toast": {
@@ -359,7 +362,8 @@
     },
     "toast": {
       "success": "Los ajustes de movimiento han sido guardados."
-    }
+    },
+    "unsavedChanges": "Cambios no guardados en el sintonizador de movimiento ({{camera}})"
   },
   "debug": {
     "title": "Depuración",
@@ -551,7 +555,9 @@
         "registerFailed": "Error al guardar el registro de notificaciones."
       }
     },
-    "unregisterDevice": "Cancelar el registro de este dispositivo"
+    "unregisterDevice": "Cancelar el registro de este dispositivo",
+    "unsavedRegistrations": "Registros de notificaciones no guardados",
+    "unsavedChanges": "Cambios de notificaciones no guardados"
   },
   "frigatePlus": {
     "title": "Configuración de Frigate+",
@@ -595,6 +601,7 @@
       "success": "La configuración de Frigate+ se ha guardado. Reinicia Frigate para aplicar los cambios.",
       "error": "No se pudieron guardar los cambios en la configuración: {{errorMessage}}"
     },
-    "restart_required": "Es necesario reiniciar (se ha cambiado el modelo Frigate+)"
+    "restart_required": "Es necesario reiniciar (se ha cambiado el modelo Frigate+)",
+    "unsavedChanges": "Cambios en la configuración de Frigate+ no guardados"
   }
 }
