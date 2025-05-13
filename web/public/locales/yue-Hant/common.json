@@ -62,7 +62,11 @@
     },
     "1hour": "1 小時",
     "h": "{{time}}小時",
-    "formattedTimestampMonthDay": "M月d日"
+    "formattedTimestampMonthDay": "M月d日",
+    "formattedTimestampMonthDayYear": {
+      "24hour": "yy年MM月dd日",
+      "12hour": "yy年MM月dd日"
+    }
   },
   "unit": {
     "speed": {

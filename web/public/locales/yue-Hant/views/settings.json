@@ -141,7 +141,8 @@
       "error": "儲存設定變更失敗：{{errorMessage}}",
       "success": "分類設定已儲存。請重新啟動 Frigate 以套用你的更改。"
     },
-    "title": "進階功能設定"
+    "title": "進階功能設定",
+    "unsavedChanges": "進階功能設定更改尚未儲存"
   },
   "camera": {
     "title": "鏡頭設定",
@@ -173,7 +174,8 @@
       "selectAlertsZones": "選擇警報的區域",
       "toast": {
         "success": "審查分類設定已儲存。請重新啟動Frigate以套用更改。"
-      }
+      },
+      "unsavedChanges": "{{camera}}的審查分類設定尚未儲存"
     }
   },
   "masksAndZones": {
@@ -256,7 +258,8 @@
       "allObjects": "所有物件",
       "speedEstimation": {
         "title": "速度估算",
-        "desc": "啟用此區域內物件的速度估算。區域必須正好有4個點。"
+        "desc": "啟用此區域內物件的速度估算。區域必須正好有4個點。",
+        "docs": "閱讀文件"
       },
       "speedThreshold": {
         "title": "速度門檻 ({{unit}})",
@@ -353,7 +356,8 @@
     },
     "toast": {
       "success": "移動設定已儲存。"
-    }
+    },
+    "unsavedChanges": "{{camera}}的移動調校設定尚未儲存"
   },
   "debug": {
     "title": "除錯",
@@ -545,7 +549,9 @@
         "settingSaved": "通知設定已儲存。"
       }
     },
-    "cancelSuspension": "取消暫停"
+    "cancelSuspension": "取消暫停",
+    "unsavedRegistrations": "通知註冊尚未儲存",
+    "unsavedChanges": "通知設定更改尚未儲存"
   },
   "frigatePlus": {
     "title": "Frigate+設定",
@@ -588,6 +594,7 @@
       "error": "儲存設定變更失敗：{{errorMessage}}",
       "success": "Frigate+設定已儲存。請重新啟動Frigate以套用更改。"
     },
-    "restart_required": "需要重新啟動（已更改Frigate+模型）"
+    "restart_required": "需要重新啟動（已更改Frigate+模型）",
+    "unsavedChanges": "Frigate+ 設定更改尚未儲存"
   }
 }
