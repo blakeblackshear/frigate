@@ -371,7 +371,9 @@ class CameraWatchdog(threading.Thread):
             p["logpipe"].close()
         self.ffmpeg_other_processes.clear()
 
-    def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
+    def get_latest_segment_datetime(
+        self, latest_segment: datetime.datetime
+    ) -> datetime.datetime:
         """Checks if ffmpeg is still writing recording segments to cache."""
         cache_files = sorted(
             [
