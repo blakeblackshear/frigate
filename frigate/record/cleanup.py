@@ -69,7 +69,7 @@ class RecordingCleanup(threading.Thread):
             now - datetime.timedelta(days=config.record.detections.retain.days)
         ).timestamp()
         expired_reviews: ReviewSegment = (
-            ReviewSegment.select(ReviewSegment.id)
+            ReviewSegment.select(ReviewSegment.id, ReviewSegment.thumb_path)
             .where(ReviewSegment.camera == config.name)
             .where(
                 (
@@ -83,6 +83,10 @@ class RecordingCleanup(threading.Thread):
             )
             .namedtuples()
         )
+
+        thumbs_to_delete = list(map(lambda x: x[1], expired_reviews))
+        for thumb_path in thumbs_to_delete:
+            Path(thumb_path).unlink(missing_ok=True)
 
         max_deletes = 100000
         deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))

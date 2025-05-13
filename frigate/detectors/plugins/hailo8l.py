@@ -8,17 +8,6 @@ from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
-
-try:
-    from hailo_platform import (
-        HEF,
-        FormatType,
-        HailoSchedulingAlgorithm,
-        VDevice,
-    )
-except ModuleNotFoundError:
-    pass
-
 from pydantic import Field
 from typing_extensions import Literal
 
@@ -102,6 +91,18 @@ class HailoAsyncInference:
         output_type: Optional[Dict[str, str]] = None,
         send_original_frame: bool = False,
     ) -> None:
+        # when importing hailo it activates the driver
+        # which leaves processes running even though it may not be used.
+        try:
+            from hailo_platform import (
+                HEF,
+                FormatType,
+                HailoSchedulingAlgorithm,
+                VDevice,
+            )
+        except ModuleNotFoundError:
+            pass
+
         self.input_store = input_store
         self.output_store = output_store
 
@@ -112,23 +113,18 @@ class HailoAsyncInference:
         self.target = VDevice(params)
         self.infer_model = self.target.create_infer_model(hef_path)
         self.infer_model.set_batch_size(batch_size)
+
         if input_type is not None:
-            self._set_input_type(input_type)
+            self.infer_model.input().set_format_type(getattr(FormatType, input_type))
+
         if output_type is not None:
-            self._set_output_type(output_type)
+            for output_name, output_type in output_type.items():
+                self.infer_model.output(output_name).set_format_type(
+                    getattr(FormatType, output_type)
+                )
+
         self.output_type = output_type
         self.send_original_frame = send_original_frame
-
-    def _set_input_type(self, input_type: Optional[str] = None) -> None:
-        self.infer_model.input().set_format_type(getattr(FormatType, input_type))
-
-    def _set_output_type(
-        self, output_type_dict: Optional[Dict[str, str]] = None
-    ) -> None:
-        for output_name, output_type in output_type_dict.items():
-            self.infer_model.output(output_name).set_format_type(
-                getattr(FormatType, output_type)
-            )
 
     def callback(
         self,

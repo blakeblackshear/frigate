@@ -50,6 +50,11 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -670,31 +675,38 @@ export function RecordingView({
                   }
 
                   return (
-                    <div
-                      key={cam}
-                      className={
-                        mainCameraAspect == "tall" ? "w-full" : "h-full"
-                      }
-                      style={{
-                        aspectRatio: getCameraAspect(cam),
-                      }}
-                    >
-                      <PreviewPlayer
-                        previewRef={previewRef}
-                        className="size-full"
-                        camera={cam}
-                        timeRange={currentTimeRange}
-                        cameraPreviews={allPreviews ?? []}
-                        startTime={startTime}
-                        isScrubbing={scrubbing}
-                        isVisible={visiblePreviews.includes(cam)}
-                        onControllerReady={(controller) => {
-                          previewRefs.current[cam] = controller;
-                          controller.scrubToTimestamp(startTime);
-                        }}
-                        onClick={() => onSelectCamera(cam)}
-                      />
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          key={cam}
+                          className={
+                            mainCameraAspect == "tall" ? "w-full" : "h-full"
+                          }
+                          style={{
+                            aspectRatio: getCameraAspect(cam),
+                          }}
+                        >
+                          <PreviewPlayer
+                            previewRef={previewRef}
+                            className="size-full"
+                            camera={cam}
+                            timeRange={currentTimeRange}
+                            cameraPreviews={allPreviews ?? []}
+                            startTime={startTime}
+                            isScrubbing={scrubbing}
+                            isVisible={visiblePreviews.includes(cam)}
+                            onControllerReady={(controller) => {
+                              previewRefs.current[cam] = controller;
+                              controller.scrubToTimestamp(startTime);
+                            }}
+                            onClick={() => onSelectCamera(cam)}
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="smart-capitalize">
+                        {cam.replaceAll("_", " ")}
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
                 <div className="w-2" />
