@@ -165,7 +165,7 @@ These speed values are output as a number in miles per hour (mph) or kilometers 
 
 #### Best practices and caveats
 
-- Speed estimation works best with a straight road or path when your object travels in a straight line across that path. Avoid creating your zone near intersections or anywhere that objects would make a turn. If the bounding box changes shape (either because the object made a turn or became partially obscured, for example), speed estimation will not be accurate.
+- Speed estimation works best with a straight road or path when your object travels in a straight line across that path. Avoid creating your zone near intersections or anywhere that objects would make a turn. A large zone can be used, but it's not required and may even cause issues - if the object's bounding box changes shape (such as when it turns or becomes partially hidden), the speed estimate will be inaccurate. Generally it's best to make your zone large enough to capture a few frames, but small enough so that the bounding box doesn't change size as it travels through the zone.
 - Create a zone where the bottom center of your object's bounding box travels directly through it and does not become obscured at any time. See the photo example above.
 - Depending on the size and location of your zone, you may want to decrease the zone's `inertia` value from the default of 3.
 - The more accurate your real-world dimensions can be measured, the more accurate speed estimation will be. However, due to the way Frigate's tracking algorithm works, you may need to tweak the real-world distance values so that estimated speeds better match real-world speeds.

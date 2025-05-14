@@ -593,10 +593,12 @@ def recording_clip(
         clip: Recordings
         for clip in recordings:
             file.write(f"file '{clip.path}'\n")
+
             # if this is the starting clip, add an inpoint
             if clip.start_time < start_ts:
                 file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
-            # if this is the ending clip, add an outpoint
+
+            # if this is the ending clip and end trim is enabled, add an outpoint
             if clip.end_time > end_ts:
                 file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
 
@@ -641,7 +643,12 @@ def recording_clip(
 @router.get("/vod/{camera_name}/start/{start_ts}/end/{end_ts}")
 def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     recordings = (
-        Recordings.select(Recordings.path, Recordings.duration, Recordings.end_time)
+        Recordings.select(
+            Recordings.path,
+            Recordings.duration,
+            Recordings.end_time,
+            Recordings.start_time,
+        )
         .where(
             Recordings.start_time.between(start_ts, end_ts)
             | Recordings.end_time.between(start_ts, end_ts)
@@ -661,14 +668,19 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
-        # Determine if we need to end the last clip early
+        # adjust start offset if start_ts is after recording.start_time
+        if start_ts > recording.start_time:
+            inpoint = int((start_ts - recording.start_time) * 1000)
+            clip["clipFrom"] = inpoint
+            duration -= inpoint
+
+        # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-            if duration == 0:
-                # this means the segment starts right at the end of the requested time range
-                # and it does not need to be included
-                continue
+        if duration <= 0:
+            # skip if the clip has no valid duration
+            continue
 
         if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]

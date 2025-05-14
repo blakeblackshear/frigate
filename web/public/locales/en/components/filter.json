@@ -17,6 +17,7 @@
     }
   },
   "dates": {
+    "selectPreset": "Select a Preset…",
     "all": {
       "title": "All Dates",
       "short": "Dates"

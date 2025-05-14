@@ -282,9 +282,13 @@ class CameraState:
             }
             new_obj.thumbnail_data = thumbnail_data
             tracked_objects[id].thumbnail_data = thumbnail_data
-            self.best_objects[new_obj.obj_data["label"]] = new_obj
+            object_type = new_obj.obj_data["label"]
+            self.best_objects[object_type] = new_obj
 
             # call event handlers
+            for c in self.callbacks["snapshot"]:
+                c(self.name, self.best_objects[object_type], frame_name)
+
             for c in self.callbacks["start"]:
                 c(self.name, new_obj, frame_name)
 

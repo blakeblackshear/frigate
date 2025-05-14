@@ -631,6 +631,7 @@ export default function LiveCameraView({
         <div className="flex flex-col items-center justify-center">
           <PtzControlPanel
             camera={camera.name}
+            enabled={cameraEnabled}
             clickOverlay={clickOverlay}
             setClickOverlay={setClickOverlay}
           />
@@ -689,15 +690,19 @@ function TooltipButton({
 
 function PtzControlPanel({
   camera,
+  enabled,
   clickOverlay,
   setClickOverlay,
 }: {
   camera: string;
+  enabled: boolean;
   clickOverlay: boolean;
   setClickOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { t } = useTranslation(["views/live"]);
-  const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
+  const { data: ptz } = useSWR<CameraPtzInfo>(
+    enabled ? `${camera}/ptz/info` : null,
+  );
 
   const { send: sendPtz } = usePtzCommand(camera);
 

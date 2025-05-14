@@ -525,7 +525,10 @@ export default function ObjectLifecycle({
           {t("objectLifecycle.scrollViewTips")}
         </div>
         <div className="min-w-20 text-right text-sm text-muted-foreground">
-          {current + 1} of {eventSequence.length}
+          {t("objectLifecycle.count", {
+            first: current + 1,
+            second: eventSequence.length,
+          })}
         </div>
       </div>
       {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (

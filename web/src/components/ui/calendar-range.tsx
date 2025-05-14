@@ -369,7 +369,11 @@ export function DateRangePicker({
                 }}
               >
                 <SelectTrigger className="mx-auto mb-2 w-[180px]">
-                  <SelectValue placeholder="Select..." />
+                  <SelectValue
+                    placeholder={t("dates.selectPreset", {
+                      ns: "components/filter",
+                    })}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {PRESETS.map((preset) => (

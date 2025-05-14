@@ -864,16 +864,14 @@ function ObjectDetailsTab({
             className={cn("flex w-full flex-row gap-2", isMobile && "flex-col")}
           >
             {config?.semantic_search.enabled &&
+              setSimilarity != undefined &&
               search.data.type == "object" && (
                 <Button
                   className="w-full"
                   aria-label={t("itemMenu.findSimilar.aria")}
                   onClick={() => {
                     setSearch(undefined);
-
-                    if (setSimilarity) {
-                      setSimilarity();
-                    }
+                    setSimilarity();
                   }}
                 >
                   <div className="flex gap-1">
@@ -1101,7 +1099,7 @@ export function ObjectSnapshotTab({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <a
-                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg?bbox=1`}
                           download={`${search?.camera}_${search?.label}.jpg`}
                         >
                           <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
@@ -1270,7 +1268,7 @@ export function VideoTab({ search }: VideoTabProps) {
               <TooltipTrigger asChild>
                 <a
                   download
-                  href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4`}
+                  href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4?trim=end`}
                 >
                   <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
                     <FaDownload className="size-4 text-white" />

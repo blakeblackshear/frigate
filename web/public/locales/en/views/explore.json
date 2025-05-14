@@ -43,6 +43,8 @@
     "adjustAnnotationSettings": "Adjust annotation settings",
     "scrollViewTips": "Scroll to view the significant moments of this object's lifecycle.",
     "autoTrackingTips": "Bounding box positions will be inaccurate for autotracking cameras.",
+    "count": "{{first}} of {{second}}",
+    "trackedPoint": "Tracked Point",
     "lifecycleItemDesc": {
       "visible": "{{label}} detected",
       "entered_zone": "{{label}} entered {{zones}}",

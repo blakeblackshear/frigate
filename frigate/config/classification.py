@@ -78,7 +78,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
         le=1.0,
     )
     min_area: int = Field(
-        default=500, title="Min area of face box to consider running face recognition."
+        default=750, title="Min area of face box to consider running face recognition."
     )
     save_attempts: int = Field(
         default=100, ge=0, title="Number of face attempts to save in the train tab."
@@ -91,7 +91,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
 class CameraFaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable face recognition.")
     min_area: int = Field(
-        default=500, title="Min area of face box to consider running face recognition."
+        default=750, title="Min area of face box to consider running face recognition."
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
