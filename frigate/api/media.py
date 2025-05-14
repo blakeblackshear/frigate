@@ -551,6 +551,7 @@ def recording_clip(
     camera_name: str,
     start_ts: float,
     end_ts: float,
+    trim: bool = True,
 ):
     def run_download(ffmpeg_cmd: list[str], file_path: str):
         with sp.Popen(
@@ -593,10 +594,13 @@ def recording_clip(
         clip: Recordings
         for clip in recordings:
             file.write(f"file '{clip.path}'\n")
-            # if this is the starting clip, add an inpoint
-            if clip.start_time < start_ts:
+
+            # if this is the starting clip and trim is enabled, add an inpoint
+            if trim and clip.start_time < start_ts:
                 file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
+
             # if this is the ending clip, add an outpoint
+            # we don't trim the output because the VOD also removes outpoint
             if clip.end_time > end_ts:
                 file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
 
