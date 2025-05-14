@@ -662,7 +662,6 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     clips = []
     durations = []
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
-    clip_from: int = 0
 
     recording: Recordings
     for recording in recordings:
@@ -671,7 +670,7 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
         # adjust start offset if start_ts is after recording.start_time
         if start_ts > recording.start_time:
-            clip_from = int((start_ts - recording.start_time) * 1000)
+            clip["clipFrom"] = int((start_ts - recording.start_time) * 1000)
 
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
@@ -709,7 +708,6 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
             "durations": durations,
             "segment_duration": max(durations),
             "sequences": [{"clips": clips}],
-            "clipFrom": clip_from,
         }
     )
 
