@@ -107,7 +107,11 @@ When choosing images to include in the face training set it is recommended to al
 
 ### Understanding the Train Tab
 
-The Train tab on the face library is used to see recent face recognition attempts. The face images are grouped by the person object that they were detected as being related to. Under each face image there will be a name (or `Unknown`) and the confidence of that recognition. Each image can be used to train as a specific person, but not every image should be trained. See below for guidance on training.
+The Train tab in the face library displays recent face recognition attempts. Detected face images are grouped according to the person they were identified as potentially matching.
+
+Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. While each image can be used to train the system for a specific person, not all images are suitable for training.
+
+Refer to the guidelines below for best practices on selecting images for training.
 
 ### Step 1 - Building a Strong Foundation
 
@@ -119,7 +123,7 @@ You do not want to train images that are 90%+ as these are already being confide
 
 ### Step 2 - Expanding The Dataset
 
-Once front-facing images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone, and you still only want to train on images that score lower. 
+Once front-facing images are performing well, start choosing slightly off-angle images to include for training. It is important to still choose images where enough face detail is visible to recognize someone, and you still only want to train on images that score lower.
 
 ## FAQ
 
