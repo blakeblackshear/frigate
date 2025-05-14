@@ -31,11 +31,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -43,7 +38,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
@@ -58,7 +52,6 @@ import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
   LuImagePlus,
-  LuInfo,
   LuPencil,
   LuRefreshCw,
   LuScanFace,
