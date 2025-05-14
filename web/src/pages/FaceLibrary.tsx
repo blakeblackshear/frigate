@@ -853,11 +853,18 @@ function FaceAttemptGroup({
       }}
     >
       <div className="flex flex-row justify-between">
-        <div className="select-none smart-capitalize">
-          Person
-          {event?.sub_label
-            ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-            : ": " + t("details.unknown")}
+        <div className="flex flex-col gap-1">
+          <div className="select-none smart-capitalize">
+            Person
+            {event?.sub_label
+              ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+              : ": " + t("details.unknown")}
+          </div>
+          <TimeAgo
+            className="text-sm text-secondary-foreground"
+            time={group[0].timestamp * 1000}
+            dense
+          />
         </div>
         {event && (
           <Tooltip>
@@ -950,6 +957,14 @@ function FaceAttempt({
     onClick(data, true);
   });
 
+  const imageArea = useMemo(() => {
+    if (!imgRef.current) {
+      return undefined;
+    }
+
+    return imgRef.current.naturalWidth * imgRef.current.naturalHeight;
+  }, [imgRef]);
+
   // api calls
 
   const onTrainAttempt = useCallback(
@@ -1021,13 +1036,11 @@ function FaceAttempt({
               onClick(data, e.metaKey || e.ctrlKey);
             }}
           />
-          <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-            <TimeAgo
-              className="text-white"
-              time={data.timestamp * 1000}
-              dense
-            />
-          </div>
+          {imageArea != undefined && (
+            <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+              {imageArea}px
+            </div>
+          )}
         </div>
         <div className="select-none p-2">
           <div className="flex w-full flex-row items-center justify-between gap-2">
