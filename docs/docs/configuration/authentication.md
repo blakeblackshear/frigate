@@ -97,7 +97,7 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 ### Header mapping
 
-If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive.
+If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive. Multiple values can be included in the role header, but they must be comma-separated.
 
 ```yaml
 proxy:
