@@ -1171,7 +1171,20 @@ class PtzAutoTracker:
             zoom_predicted_movement_time = 0
 
             if np.any(average_velocity):
-                zoom_predicted_movement_time = abs(zoom) * self.zoom_time[camera]
+                # Calculate the intended change in zoom level
+                zoom_change = (1 - abs(zoom)) * (1 if zoom >= 0 else -1)
+
+                # Calculate new zoom level and clamp to [0, 1]
+                new_zoom = max(
+                    0, min(1, self.ptz_metrics[camera].zoom_level.value + zoom_change)
+                )
+
+                # Calculate the actual zoom distance
+                zoom_distance = abs(
+                    new_zoom - self.ptz_metrics[camera].zoom_level.value
+                )
+
+                zoom_predicted_movement_time = zoom_distance * self.zoom_time[camera]
 
                 zoom_predicted_box = (
                     predicted_box
@@ -1188,7 +1201,7 @@ class PtzAutoTracker:
                 tilt = (0.5 - (centroid_y / camera_height)) * 2
 
             logger.debug(
-                f"{camera}: Zoom amount: {zoom}, zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
+                f"{camera}: Zoom amount: {zoom}, zoom distance: {zoom_distance}, zoom predicted time: {zoom_predicted_movement_time}, zoom predicted box: {tuple(zoom_predicted_box)}"
             )
 
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
