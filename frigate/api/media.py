@@ -670,7 +670,9 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
         # adjust start offset if start_ts is after recording.start_time
         if start_ts > recording.start_time:
-            clip["clipFrom"] = int((start_ts - recording.start_time) * 1000)
+            inpoint = int((start_ts - recording.start_time) * 1000)
+            clip["clipFrom"] = inpoint
+            duration -= inpoint
 
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
