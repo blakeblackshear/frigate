@@ -551,7 +551,6 @@ def recording_clip(
     camera_name: str,
     start_ts: float,
     end_ts: float,
-    trim: str = "start,end",
 ):
     def run_download(ffmpeg_cmd: list[str], file_path: str):
         with sp.Popen(
@@ -595,13 +594,12 @@ def recording_clip(
         for clip in recordings:
             file.write(f"file '{clip.path}'\n")
 
-            # if this is the starting clip and start trim is enabled, add an inpoint
-            if "start" in trim and clip.start_time < start_ts:
+            # if this is the starting clip, add an inpoint
+            if clip.start_time < start_ts:
                 file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
 
             # if this is the ending clip and end trim is enabled, add an outpoint
-            # we don't trim the output because the VOD also removes outpoint
-            if "end" in trim and clip.end_time > end_ts:
+            if clip.end_time > end_ts:
                 file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
 
     if len(file_name) > 1000:
@@ -664,6 +662,7 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     clips = []
     durations = []
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
+    clip_from: int = 0
 
     recording: Recordings
     for recording in recordings:
@@ -671,7 +670,6 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
         duration = int(recording.duration * 1000)
 
         # adjust start offset if start_ts is after recording.start_time
-        clip_from = 0
         if start_ts > recording.start_time:
             clip_from = int((start_ts - recording.start_time) * 1000)
             # adjust duration to account for the trimmed start
@@ -687,8 +685,6 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
         if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
-            if clip_from > 0:
-                clip["clipFrom"] = clip_from
             clips.append(clip)
             durations.append(duration)
         else:
@@ -715,6 +711,7 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
             "durations": durations,
             "segment_duration": max(durations),
             "sequences": [{"clips": clips}],
+            "clipFrom": clip_from,
         }
     )
 
