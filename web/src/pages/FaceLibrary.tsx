@@ -743,7 +743,7 @@ function TrainingGrid({
           <img
             className="mx-auto max-h-[60dvh] object-contain"
             loading="lazy"
-            src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg" : "thumbnail.jpg"}`}
+            src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg?bbox=1" : "thumbnail.jpg"}`}
           />
         </DialogContent>
       </Dialog>
