@@ -68,6 +68,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import SearchDetailDialog, {
+  SearchTab,
+} from "@/components/overlay/detail/SearchDetailDialog";
+import { SearchResult } from "@/types/search";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -663,18 +667,7 @@ function TrainingGrid({
   // selection
 
   const [selectedEvent, setSelectedEvent] = useState<Event>();
-
-  const formattedDate = useFormattedTimestamp(
-    selectedEvent?.start_time ?? 0,
-    config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestampMonthDayYearHourMinute.24hour", {
-          ns: "common",
-        })
-      : t("time.formattedTimestampMonthDayYearHourMinute.12hour", {
-          ns: "common",
-        }),
-    config?.ui.timezone,
-  );
+  const [dialogTab, setDialogTab] = useState<SearchTab>("details");
 
   if (attemptImages.length == 0) {
     return (
@@ -687,66 +680,16 @@ function TrainingGrid({
 
   return (
     <>
-      <Dialog
-        open={selectedEvent != undefined}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedEvent(undefined);
-          }
-        }}
-      >
-        <DialogContent
-          className={cn(
-            "",
-            selectedEvent?.has_snapshot && isDesktop && "max-w-7xl",
-          )}
-        >
-          <DialogHeader>
-            <DialogTitle>{t("details.face")}</DialogTitle>
-            <DialogDescription>{t("details.faceDesc")}</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">{t("details.person")}</div>
-            <div className="text-sm smart-capitalize">
-              {selectedEvent?.sub_label ?? t("details.unknown")}
-            </div>
-          </div>
-          {selectedEvent?.data.sub_label_score && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                <div className="flex flex-row items-center gap-1">
-                  {t("details.subLabelScore")}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div className="cursor-pointer p-0">
-                        <LuInfo className="size-4" />
-                        <span className="sr-only">Info</span>
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      {t("details.scoreInfo")}
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              <div className="text-sm smart-capitalize">
-                {Math.round((selectedEvent?.data?.sub_label_score || 0) * 100)}%
-              </div>
-            </div>
-          )}
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              {t("details.timestamp")}
-            </div>
-            <div className="text-sm">{formattedDate}</div>
-          </div>
-          <img
-            className="mx-auto max-h-[60dvh] object-contain"
-            loading="lazy"
-            src={`${baseUrl}api/events/${selectedEvent?.id}/${selectedEvent?.has_snapshot ? "snapshot.jpg?bbox=1" : "thumbnail.jpg"}`}
-          />
-        </DialogContent>
-      </Dialog>
+      <SearchDetailDialog
+        search={
+          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
+        }
+        page={dialogTab}
+        setSimilarity={undefined}
+        setSearchPage={setDialogTab}
+        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
+        setInputFocused={() => {}}
+      />
 
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
         {Object.entries(faceGroups).map(([key, group]) => {

@@ -864,16 +864,14 @@ function ObjectDetailsTab({
             className={cn("flex w-full flex-row gap-2", isMobile && "flex-col")}
           >
             {config?.semantic_search.enabled &&
+              setSimilarity != undefined &&
               search.data.type == "object" && (
                 <Button
                   className="w-full"
                   aria-label={t("itemMenu.findSimilar.aria")}
                   onClick={() => {
                     setSearch(undefined);
-
-                    if (setSimilarity) {
-                      setSimilarity();
-                    }
+                    setSimilarity();
                   }}
                 >
                   <div className="flex gap-1">
