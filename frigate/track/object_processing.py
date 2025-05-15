@@ -249,7 +249,7 @@ class TrackedObjectProcessor(threading.Thread):
 
     def should_mqtt_snapshot(self, camera, obj: TrackedObject):
         # object never changed position
-        if obj.obj_data["position_changes"] == 0:
+        if obj.is_stationary():
             return False
 
         # if there are required zones and there is no overlap
