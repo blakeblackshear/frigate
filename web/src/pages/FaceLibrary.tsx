@@ -791,7 +791,7 @@ function FaceAttemptGroup({
       <div className="flex flex-row justify-between">
         <div className="flex flex-col gap-1">
           <div className="select-none smart-capitalize">
-            Person
+            {t("details.person")}
             {event?.sub_label
               ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
               : ": " + t("details.unknown")}
@@ -974,7 +974,7 @@ function FaceAttempt({
           />
           {imageArea != undefined && (
             <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-              {imageArea}px
+              {t("pixels", { area: imageArea })}
             </div>
           )}
         </div>
