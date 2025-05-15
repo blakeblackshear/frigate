@@ -3,10 +3,13 @@ import { Calendar } from "../ui/calendar";
 import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
-import { type DayButtonProps } from "react-day-picker";
+import { type DayButtonProps, TZDate } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
 import { usePersistence } from "@/hooks/use-persistence";
 import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+import { useTimezone } from "@/hooks/use-date-utils";
 
 type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -22,6 +25,8 @@ export default function ReviewActivityCalendar({
   selectedDay,
   onSelect,
 }: ReviewActivityCalendarProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
   const [weekStartsOn] = usePersistence("weekStartsOn", 0);
 
   const disabledDates = useMemo(() => {
@@ -45,7 +50,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new Date(date);
+        const cal = new TZDate(date, timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
@@ -65,7 +70,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new Date(date);
+        const cal = new TZDate(date, timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
@@ -82,7 +87,7 @@ export default function ReviewActivityCalendar({
     }
 
     return { alerts, detections, recordings };
-  }, [reviewSummary, recordingsSummary]);
+  }, [reviewSummary, recordingsSummary, timezone]);
 
   return (
     <Calendar
@@ -98,6 +103,7 @@ export default function ReviewActivityCalendar({
       }}
       defaultMonth={selectedDay ?? new Date()}
       weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
+      timeZone={timezone}
     />
   );
 }

@@ -21,22 +21,29 @@ export function useFormattedTimestamp(
   return formattedTimestamp;
 }
 
-export function useFormattedRange(start: number, end: number, format: string) {
+export function useFormattedRange(
+  start: number,
+  end: number,
+  format: string,
+  timezone?: string,
+) {
   const locale = useDateLocale();
 
   const formattedStart = useMemo(() => {
     return formatUnixTimestampToDateTime(start, {
+      timezone,
       date_format: format,
       locale,
     });
-  }, [format, start, locale]);
+  }, [format, start, timezone, locale]);
 
   const formattedEnd = useMemo(() => {
     return formatUnixTimestampToDateTime(end, {
+      timezone,
       date_format: format,
       locale,
     });
-  }, [format, end, locale]);
+  }, [format, end, timezone, locale]);
 
   return `${formattedStart} - ${formattedEnd}`;
 }
