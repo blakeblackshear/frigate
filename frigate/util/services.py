@@ -304,7 +304,7 @@ def get_intel_gpu_stats(sriov: bool) -> Optional[dict[str, str]]:
     ]
 
     if sriov:
-        intel_gpu_top_command += ["-d", "drm:/dev/dri/card0"]
+        intel_gpu_top_command += ["-d", "sriov"]
 
     p = sp.run(
         intel_gpu_top_command,
