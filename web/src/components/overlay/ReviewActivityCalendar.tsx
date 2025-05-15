@@ -126,7 +126,13 @@ function ReviewActivityDay({
   return (
     <button ref={ref} {...buttonProps}>
       <div className={cn("flex flex-col items-center justify-center gap-0.5")}>
-        <span className="text-primary">{day.date.getDate()}</span>
+        <span
+          className={cn(
+            modifiers["recordings"] ? "text-primary" : "text-primary/40",
+          )}
+        >
+          {day.date.getDate()}
+        </span>
         <div
           className={cn(
             "w-4",
