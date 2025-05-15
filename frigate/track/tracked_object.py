@@ -384,16 +384,16 @@ class TrackedObject:
 
         return event
 
-    def is_active(self):
+    def is_active(self) -> bool:
         return not self.is_stationary()
 
-    def is_stationary(self):
+    def is_stationary(self) -> bool:
         return (
             self.obj_data["motionless_count"]
             > self.camera_config.detect.stationary.threshold
         )
 
-    def get_thumbnail(self, ext: str):
+    def get_thumbnail(self, ext: str) -> bytes | None:
         img_bytes = self.get_img_bytes(
             ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
@@ -404,7 +404,7 @@ class TrackedObject:
             _, img = cv2.imencode(f".{ext}", np.zeros((175, 175, 3), np.uint8))
             return img.tobytes()
 
-    def get_clean_png(self):
+    def get_clean_png(self) -> bytes | None:
         if self.thumbnail_data is None:
             return None
 
@@ -433,7 +433,7 @@ class TrackedObject:
         crop=False,
         height: int | None = None,
         quality: int | None = None,
-    ):
+    ) -> bytes | None:
         if self.thumbnail_data is None:
             return None
 

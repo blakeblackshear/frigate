@@ -640,7 +640,10 @@ def recording_clip(
     )
 
 
-@router.get("/vod/{camera_name}/start/{start_ts}/end/{end_ts}")
+@router.get(
+    "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
+    description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     recordings = (
         Recordings.select(
@@ -714,7 +717,10 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     )
 
 
-@router.get("/vod/{year_month}/{day}/{hour}/{camera_name}")
+@router.get(
+    "/vod/{year_month}/{day}/{hour}/{camera_name}",
+    description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
     """VOD for specific hour. Uses the default timezone (UTC)."""
     return vod_hour(
@@ -722,7 +728,10 @@ def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str)
     )
 
 
-@router.get("/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}")
+@router.get(
+    "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
+    description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
     parts = year_month.split("-")
     start_date = (
@@ -736,7 +745,10 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     return vod_ts(camera_name, start_ts, end_ts)
 
 
-@router.get("/vod/event/{event_id}")
+@router.get(
+    "/vod/event/{event_id}",
+    description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_event(event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)

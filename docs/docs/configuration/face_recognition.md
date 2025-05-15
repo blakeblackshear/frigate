@@ -172,6 +172,6 @@ Face recognition does not run on the recording stream, this would be suboptimal 
 
 By default iOS devices will use HEIC (High Efficiency Image Container) for images, but this format is not supported for uploads. Choosing `large` as the format instead of `original` will use JPG which will work correctly.
 
-## How can I delete the face database and start over?
+### How can I delete the face database and start over?
 
 Frigate does not store anything in its database related to face recognition. You can simply delete all of your faces through the Frigate UI or remove the contents of the `/media/frigate/clips/faces` directory.

@@ -1,6 +1,5 @@
 """Handle processing images for face detection and recognition."""
 
-import json
 import logging
 from typing import Any
 
@@ -15,7 +14,6 @@ from frigate.data_processing.common.license_plate.mixin import (
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
-from frigate.types import TrackedObjectUpdateTypesEnum
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -55,21 +53,5 @@ class LicensePlateRealTimeProcessor(LicensePlateProcessingMixin, RealTimeProcess
         return
 
     def expire_object(self, object_id: str, camera: str):
-        if object_id in self.detected_license_plates:
-            self.detected_license_plates.pop(object_id)
-
-            if object_id in self.camera_current_cars.get(camera, []):
-                self.camera_current_cars[camera].remove(object_id)
-
-                if len(self.camera_current_cars[camera]) == 0:
-                    self.requestor.send_data(
-                        "tracked_object_update",
-                        json.dumps(
-                            {
-                                "type": TrackedObjectUpdateTypesEnum.lpr,
-                                "name": None,
-                                "plate": None,
-                                "camera": camera,
-                            }
-                        ),
-                    )
+        """Expire lpr objects."""
+        self.lpr_expire(object_id, camera)

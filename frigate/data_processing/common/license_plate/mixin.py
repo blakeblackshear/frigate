@@ -1570,9 +1570,25 @@ class LicensePlateProcessingMixin:
     def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         return
 
-    def expire_object(self, object_id: str, camera: str):
+    def lpr_expire(self, object_id: str, camera: str):
         if object_id in self.detected_license_plates:
             self.detected_license_plates.pop(object_id)
+
+            if object_id in self.camera_current_cars.get(camera, []):
+                self.camera_current_cars[camera].remove(object_id)
+
+                if len(self.camera_current_cars[camera]) == 0:
+                    self.requestor.send_data(
+                        "tracked_object_update",
+                        json.dumps(
+                            {
+                                "type": TrackedObjectUpdateTypesEnum.lpr,
+                                "name": None,
+                                "plate": None,
+                                "camera": camera,
+                            }
+                        ),
+                    )
 
 
 class CTCDecoder:

@@ -293,10 +293,11 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if camera not in self.camera_current_people:
                 self.camera_current_people[camera] = []
 
+            self.camera_current_people[camera].append(id)
+
         self.person_face_history[id].append(
             (sub_label, score, face_frame.shape[0] * face_frame.shape[1])
         )
-        self.camera_current_people[camera].append(id)
         (weighted_sub_label, weighted_score) = self.weighted_average(
             self.person_face_history[id]
         )
