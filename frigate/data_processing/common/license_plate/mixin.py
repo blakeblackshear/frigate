@@ -1571,9 +1571,6 @@ class LicensePlateProcessingMixin:
         return
 
     def lpr_expire(self, object_id: str, camera: str):
-        print(
-            f"expiring {self.detected_license_plates} and we have cars {self.camera_current_cars}"
-        )
         if object_id in self.detected_license_plates:
             self.detected_license_plates.pop(object_id)
 
