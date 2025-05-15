@@ -12,7 +12,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { isMobile } from "react-device-detect";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DateRangePicker } from "../ui/calendar-range";
-import { DateRange, TZDate } from "react-day-picker";
+import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { useTranslation } from "react-i18next";
@@ -22,7 +22,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
   recordingsSummary?: RecordingsSummary;
-  day?: TZDate;
+  day?: Date;
   updateSelectedDay: (day?: Date) => void;
 };
 export default function CalendarFilterButton({
