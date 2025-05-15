@@ -1,6 +1,7 @@
 import {
   useFormattedRange,
   useFormattedTimestamp,
+  useTimezone,
 } from "@/hooks/use-date-utils";
 import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Button } from "../ui/button";
@@ -11,15 +12,17 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { isMobile } from "react-device-detect";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DateRangePicker } from "../ui/calendar-range";
-import { DateRange } from "react-day-picker";
+import { DateRange, TZDate } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
   recordingsSummary?: RecordingsSummary;
-  day?: Date;
+  day?: TZDate;
   updateSelectedDay: (day?: Date) => void;
 };
 export default function CalendarFilterButton({
@@ -98,6 +101,8 @@ export function CalendarRangeFilterButton({
   updateSelectedRange,
 }: CalendarRangeFilterButtonProps) {
   const { t } = useTranslation(["components/filter"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
   const [open, setOpen] = useState(false);
 
   const selectedDate = useFormattedRange(
@@ -128,6 +133,7 @@ export function CalendarRangeFilterButton({
       <DateRangePicker
         initialDateFrom={range?.from}
         initialDateTo={range?.to}
+        timezone={timezone}
         showCompare={false}
         onUpdate={(range) => {
           updateSelectedRange(range.range);
