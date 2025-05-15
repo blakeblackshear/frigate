@@ -22,7 +22,7 @@ RUN apt update && \
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
-    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
+    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocsolver*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
     mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
     cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
