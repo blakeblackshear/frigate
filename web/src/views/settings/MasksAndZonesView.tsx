@@ -271,7 +271,9 @@ export default function MasksAndZonesView({
         type: "motion_mask" as PolygonType,
         typeIndex: index,
         camera: cameraConfig.name,
-        name: `Motion Mask ${index + 1}`,
+        name: t("masksAndZones.motionMaskLabel", {
+          number: index + 1,
+        }),
         objects: [],
         points: interpolatePoints(
           parseCoordinates(maskData),
@@ -295,7 +297,10 @@ export default function MasksAndZonesView({
         type: "object_mask" as PolygonType,
         typeIndex: index,
         camera: cameraConfig.name,
-        name: `Object Mask ${index + 1} (all objects)`,
+        name: t("masksAndZones.objectMaskLabel", {
+          number: index + 1,
+          label: t("masksAndZones.zones.allObjects"),
+        }),
         objects: [],
         points: interpolatePoints(
           parseCoordinates(maskData),
@@ -322,7 +327,10 @@ export default function MasksAndZonesView({
               type: "object_mask" as PolygonType,
               typeIndex: subIndex,
               camera: cameraConfig.name,
-              name: `Object Mask ${globalObjectMasksCount + index + 1} (${objectName})`,
+              name: t("masksAndZones.objectMaskLabel", {
+                number: globalObjectMasksCount + index + 1,
+                label: t(objectName, { ns: "objects" }),
+              }),
               objects: [objectName],
               points: interpolatePoints(
                 parseCoordinates(maskItem),

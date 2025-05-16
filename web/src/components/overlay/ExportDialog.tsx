@@ -406,14 +406,12 @@ function CustomTimeSelector({
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestamp.24hour", { ns: "common" })
       : t("time.formattedTimestamp.12hour", { ns: "common" }),
-    config?.ui.timezone,
   );
   const formattedEnd = useFormattedTimestamp(
     endTime,
     config?.ui.time_format == "24hour"
       ? t("time.formattedTimestamp.24hour", { ns: "common" })
       : t("time.formattedTimestamp.12hour", { ns: "common" }),
-    config?.ui.timezone,
   );
 
   const startClock = useMemo(() => {

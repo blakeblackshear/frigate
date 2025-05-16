@@ -438,7 +438,7 @@ class FrigateApp:
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
+            if not self.config.cameras[name].enabled_in_config:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
@@ -467,7 +467,7 @@ class FrigateApp:
         shm_frame_count = self.shm_frame_count()
 
         for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
+            if not self.config.cameras[name].enabled_in_config:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
