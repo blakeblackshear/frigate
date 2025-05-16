@@ -165,23 +165,23 @@ export default function NotificationView({
   const [registration, setRegistration] =
     useState<ServiceWorkerRegistration | null>();
 
-  // useEffect(() => {
-  //   if (!("Notification" in window) || !window.isSecureContext) {
-  //     return;
-  //   }
-  //   navigator.serviceWorker
-  //     .getRegistration(NOTIFICATION_SERVICE_WORKER)
-  //     .then((worker) => {
-  //       if (worker) {
-  //         setRegistration(worker);
-  //       } else {
-  //         setRegistration(null);
-  //       }
-  //     })
-  //     .catch(() => {
-  //       setRegistration(null);
-  //     });
-  // }, []);
+  useEffect(() => {
+    if (!("Notification" in window) || !window.isSecureContext) {
+      return;
+    }
+    navigator.serviceWorker
+      .getRegistration(NOTIFICATION_SERVICE_WORKER)
+      .then((worker) => {
+        if (worker) {
+          setRegistration(worker);
+        } else {
+          setRegistration(null);
+        }
+      })
+      .catch(() => {
+        setRegistration(null);
+      });
+  }, []);
 
   // form
 
