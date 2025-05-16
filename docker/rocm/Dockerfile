@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=6.3.3
+ARG ROCM=6.4.0
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -15,7 +15,7 @@ ARG AMDGPU
 
 RUN apt update && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/$ROCM/ubuntu/jammy/amdgpu-install_6.3.60303-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4/ubuntu/jammy/amdgpu-install_6.4.60400-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -y rocm
@@ -62,7 +62,6 @@ COPY --from=rocm /opt/rocm-dist/ /
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
 ENV HSA_ENABLE_SDMA=0
-ENV MIGRAPHX_ENABLE_NHWC=1
 ENV TF_ROCM_USE_IMMEDIATE_MODE=1
 
 COPY --from=rocm-dist / /
