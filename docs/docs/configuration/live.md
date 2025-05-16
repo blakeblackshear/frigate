@@ -197,6 +197,12 @@ The default dashboard ("All Cameras") will always use Smart Streaming and the fi
 
 Cameras can be temporarily disabled through the Frigate UI and through [MQTT](/integrations/mqtt#frigatecamera_nameenabledset) to conserve system resources. When disabled, Frigate's ffmpeg processes are terminated — recording stops, object detection is paused, and the Live dashboard displays a blank image with a disabled message. Review items, tracked objects, and historical footage for disabled cameras can still be accessed via the UI.
 
+:::note
+
+Disabling a camera via the Frigate UI or MQTT is temporary and does not persist through restarts of Frigate.
+
+:::
+
 For restreamed cameras, go2rtc remains active but does not use system resources for decoding or processing unless there are active external consumers (such as the Advanced Camera Card in Home Assistant using a go2rtc source).
 
 Note that disabling a camera through the config file (`enabled: False`) removes all related UI elements, including historical footage access. To retain access while disabling the camera, keep it enabled in the config and use the UI or MQTT to disable it temporarily.
