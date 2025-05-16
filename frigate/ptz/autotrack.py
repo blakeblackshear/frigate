@@ -1109,6 +1109,7 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
         predicted_movement_time = 0
+        zoom_distance = 0
 
         average_velocity = np.zeros((4,))
         predicted_box = obj.obj_data["box"]
