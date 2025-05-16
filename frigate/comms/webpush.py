@@ -173,7 +173,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 return
             self.send_alert(decoded)
         elif topic == "notification_test":
-            if not self.config.notifications.enabled:
+            if not self.config.notifications.enabled and not any(
+                cam.notifications.enabled for cam in self.config.cameras.values()
+            ):
+                logger.debug(
+                    "No cameras have notifications enabled, test notification not sent"
+                )
                 return
             self.send_notification_test()
 
