@@ -191,6 +191,8 @@
         "copyCoordinatesFailed": "Could not copy coordinates to clipboard."
       }
     },
+    "motionMaskLabel": "Motion Mask {{number}}",
+    "objectMaskLabel": "Object Mask {{number}} ({{label}})",
     "form": {
       "zoneName": {
         "error": {
