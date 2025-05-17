@@ -264,6 +264,7 @@ tensorrt
 tflite
 thresholded
 timelapse
+titlecase
 tmpfs
 tobytes
 toggleable
