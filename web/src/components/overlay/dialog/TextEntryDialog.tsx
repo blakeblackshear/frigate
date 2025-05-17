@@ -20,6 +20,8 @@ type TextEntryDialogProps = {
   onSave: (text: string) => void;
   defaultValue?: string;
   allowEmpty?: boolean;
+  regexPattern?: RegExp;
+  regexErrorMessage?: string;
 };
 
 export default function TextEntryDialog({
@@ -30,6 +32,8 @@ export default function TextEntryDialog({
   onSave,
   defaultValue = "",
   allowEmpty = false,
+  regexPattern,
+  regexErrorMessage,
 }: TextEntryDialogProps) {
   const { t } = useTranslation("common");
 
@@ -44,6 +48,8 @@ export default function TextEntryDialog({
           defaultValue={defaultValue}
           allowEmpty={allowEmpty}
           onSave={onSave}
+          regexPattern={regexPattern}
+          regexErrorMessage={regexErrorMessage}
         >
           <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
             <Button type="button" onClick={() => setOpen(false)}>
