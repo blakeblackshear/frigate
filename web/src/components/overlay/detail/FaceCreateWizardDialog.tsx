@@ -119,6 +119,8 @@ export default function CreateFaceWizardDialog({
               setName(name);
               setStep(1);
             }}
+            regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
+            regexErrorMessage={t("description.invalidName")}
           >
             <div className="flex justify-end py-2">
               <Button variant="select" type="submit">
