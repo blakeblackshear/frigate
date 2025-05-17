@@ -499,6 +499,8 @@ function LibrarySelector({
           setRenameFace(null);
         }}
         defaultValue={renameFace || ""}
+        regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
+        regexErrorMessage={t("description.invalidName")}
       />
 
       <DropdownMenu>
