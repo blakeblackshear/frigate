@@ -5,12 +5,12 @@ import json
 import logging
 import multiprocessing as mp
 import os
-import re
 import signal
 import threading
 from types import FrameType
 from typing import Any, Optional, Union
 
+import regex
 from pathvalidate import ValidationError, sanitize_filename
 from setproctitle import setproctitle
 
@@ -251,9 +251,9 @@ class EmbeddingsContext:
         except ValidationError as e:
             raise ValueError(f"Invalid face name: {str(e)}")
 
-        if not re.match(valid_name_pattern, old_name):
+        if not regex.match(valid_name_pattern, old_name):
             raise ValueError(f"Invalid old face name: {old_name}")
-        if not re.match(valid_name_pattern, new_name):
+        if not regex.match(valid_name_pattern, new_name):
             raise ValueError(f"Invalid new face name: {new_name}")
         if sanitized_old_name != old_name:
             raise ValueError(f"Old face name contains invalid characters: {old_name}")
