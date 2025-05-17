@@ -482,7 +482,7 @@ class TrackedObject:
                     box[2],
                     box[3],
                     attribute["label"],
-                    f"{attribute['score']:.0%}{' ' + str(box_area) if attribute['label'] in ['license_plate', 'face'] else ''}",
+                    f"{attribute['score']:.0%} {str(box_area)}",
                     thickness=thickness,
                     color=color,
                 )
