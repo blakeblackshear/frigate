@@ -243,7 +243,7 @@ class EmbeddingsContext:
         )
 
     def rename_face(self, old_name: str, new_name: str) -> None:
-        valid_name_pattern = r"^[a-zA-Z0-9\s'_-]{1,50}$"
+        valid_name_pattern = r"^[\p{L}\p{N}\s'_-]{1,50}$"
 
         try:
             sanitized_old_name = sanitize_filename(old_name, replacement_text="_")
