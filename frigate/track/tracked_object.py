@@ -474,6 +474,7 @@ class TrackedObject:
             # draw any attributes
             for attribute in self.thumbnail_data["attributes"]:
                 box = attribute["box"]
+                box_area = int((box[2] - box[0]) * (box[3] - box[1]))
                 draw_box_with_label(
                     best_frame,
                     box[0],
@@ -481,7 +482,7 @@ class TrackedObject:
                     box[2],
                     box[3],
                     attribute["label"],
-                    f"{attribute['score']:.0%}",
+                    f"{attribute['score']:.0%} {str(box_area)}",
                     thickness=thickness,
                     color=color,
                 )

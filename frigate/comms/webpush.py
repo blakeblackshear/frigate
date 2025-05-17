@@ -12,6 +12,7 @@ from typing import Any, Callable
 
 from py_vapid import Vapid01
 from pywebpush import WebPusher
+from titlecase import titlecase
 
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
@@ -325,8 +326,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
-        message = f"Detected on {camera.replace('_', ' ').title()}"
+        title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
+        message = f"Detected on {titlecase(camera.replace('_', ' '))}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
 
         # if event is ongoing open to live view otherwise open to recordings view

@@ -18,18 +18,33 @@ type TextEntryProps = {
   allowEmpty?: boolean;
   onSave: (text: string) => void;
   children?: React.ReactNode;
+  regexPattern?: RegExp;
+  regexErrorMessage?: string;
 };
+
 export default function TextEntry({
   defaultValue = "",
   placeholder,
   allowEmpty = false,
   onSave,
   children,
+  regexPattern,
+  regexErrorMessage = "Input does not match the required format",
 }: TextEntryProps) {
   const formSchema = z.object({
-    text: allowEmpty
-      ? z.string().optional()
-      : z.string().min(1, "Field is required"),
+    text: z
+      .string()
+      .optional()
+      .refine(
+        (val) => {
+          if (!allowEmpty && !val) return false;
+          if (val && regexPattern) return regexPattern.test(val);
+          return true;
+        },
+        {
+          message: regexPattern ? regexErrorMessage : "Field is required",
+        },
+      ),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

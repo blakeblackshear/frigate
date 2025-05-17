@@ -172,6 +172,7 @@ class CameraState:
                 # draw any attributes
                 for attribute in obj["current_attributes"]:
                     box = attribute["box"]
+                    box_area = int((box[2] - box[0]) * (box[3] - box[1]))
                     draw_box_with_label(
                         frame_copy,
                         box[0],
@@ -179,7 +180,7 @@ class CameraState:
                         box[2],
                         box[3],
                         attribute["label"],
-                        f"{attribute['score']:.0%}",
+                        f"{attribute['score']:.0%} {str(box_area)}",
                         thickness=thickness,
                         color=color,
                     )
