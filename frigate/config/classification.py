@@ -80,6 +80,12 @@ class FaceRecognitionConfig(FrigateBaseModel):
     min_area: int = Field(
         default=750, title="Min area of face box to consider running face recognition."
     )
+    min_faces: int = Field(
+        default=1,
+        gt=0,
+        le=6,
+        title="Min face attempts for the sub label to be applied to the person object.",
+    )
     save_attempts: int = Field(
         default=100, ge=0, title="Number of face attempts to save in the train tab."
     )
