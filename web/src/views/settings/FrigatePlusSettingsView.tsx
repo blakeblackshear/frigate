@@ -451,7 +451,7 @@ export default function FrigatePlusSettingsView({
                   </p>
                   <div className="mt-2 flex items-center text-primary-variant">
                     <Link
-                      to="https://docs.frigate.video/configuration/plus/faq"
+                      to="https://docs.frigate.video/plus/faq"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"
