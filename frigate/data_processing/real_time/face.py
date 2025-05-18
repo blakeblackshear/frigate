@@ -302,6 +302,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.person_face_history[id]
         )
 
+        if len(self.person_face_history[id]) < self.face_config.min_faces:
+            weighted_sub_label = "unknown"
+
         self.requestor.send_data(
             "tracked_object_update",
             json.dumps(
