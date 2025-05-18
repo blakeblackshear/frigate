@@ -675,10 +675,9 @@ export function RecordingView({
                   }
 
                   return (
-                    <Tooltip>
+                    <Tooltip key={cam}>
                       <TooltipTrigger asChild>
                         <div
-                          key={cam}
                           className={
                             mainCameraAspect == "tall" ? "w-full" : "h-full"
                           }
