@@ -197,6 +197,19 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, recordings]);
 
+  /** the HLS endpoint returns the vod segments with the first
+   * segment of the hour trimmed, meaning it will start at
+   * the beginning of the hour, cutting off any difference
+   * that the segment has.
+   */
+  const inpointOffset = useMemo(() => {
+    if (!recordingParams || !recordings) {
+      return 0;
+    }
+
+    return recordingParams.after - recordings[0].start_time;
+  }, [recordingParams, recordings]);
+
   return (
     <>
       <HlsVideoPlayer
@@ -207,6 +220,7 @@ export default function DynamicVideoPlayer({
         hotKeys={hotKeys}
         supportsFullscreen={supportsFullscreen}
         fullscreen={fullscreen}
+        inpointOffset={inpointOffset}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
         onClipEnded={onClipEnded}
