@@ -37,6 +37,7 @@ type HlsVideoPlayerProps = {
   supportsFullscreen: boolean;
   fullscreen: boolean;
   frigateControls?: boolean;
+  inpointOffset?: number;
   onClipEnded?: () => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
@@ -55,6 +56,7 @@ export default function HlsVideoPlayer({
   supportsFullscreen,
   fullscreen,
   frigateControls = true,
+  inpointOffset = 0,
   onClipEnded,
   onPlayerLoaded,
   onTimeUpdate,
@@ -187,6 +189,16 @@ export default function HlsVideoPlayer({
     };
   }, [videoRef, controlsOpen]);
 
+  const getVideoTime = useCallback(() => {
+    const currentTime = videoRef.current?.currentTime;
+
+    if (!currentTime) {
+      return undefined;
+    }
+
+    return currentTime + inpointOffset;
+  }, [videoRef, inpointOffset]);
+
   return (
     <TransformWrapper
       minScale={1.0}
@@ -218,7 +230,7 @@ export default function HlsVideoPlayer({
           hotKeys={hotKeys}
           onPlayPause={onPlayPause}
           onSeek={(diff) => {
-            const currentTime = videoRef.current?.currentTime;
+            const currentTime = getVideoTime();
 
             if (!videoRef.current || !currentTime) {
               return;
@@ -234,8 +246,10 @@ export default function HlsVideoPlayer({
             }
           }}
           onUploadFrame={async () => {
-            if (videoRef.current && onUploadFrame) {
-              const resp = await onUploadFrame(videoRef.current.currentTime);
+            const frameTime = getVideoTime();
+
+            if (frameTime && onUploadFrame) {
+              const resp = await onUploadFrame(frameTime);
 
               if (resp && resp.status == 200) {
                 toast.success(t("toast.success.submittedFrigatePlus"), {
@@ -335,11 +349,17 @@ export default function HlsVideoPlayer({
               }
             }
           }}
-          onTimeUpdate={() =>
-            onTimeUpdate && videoRef.current
-              ? onTimeUpdate(videoRef.current.currentTime)
-              : undefined
-          }
+          onTimeUpdate={() => {
+            if (!onTimeUpdate) {
+              return;
+            }
+
+            const frameTime = getVideoTime();
+
+            if (frameTime) {
+              onTimeUpdate(frameTime);
+            }
+          }}
           onLoadedData={() => {
             onPlayerLoaded?.();
             handleLoadedMetadata();

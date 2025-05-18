@@ -17,6 +17,7 @@ export class DynamicVideoController {
   // playback
   private recordings: Recording[] = [];
   private timeRange: TimeRange = { after: 0, before: 0 };
+  private inpointOffset: number = 0;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -41,6 +42,7 @@ export class DynamicVideoController {
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
     this.timeRange = newPlayback.timeRange;
+    this.inpointOffset = this.timeRange.after - this.recordings[0].start_time;
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
@@ -91,6 +93,9 @@ export class DynamicVideoController {
         segment.end_time - segment.start_time - (segment.end_time - time);
       return true;
     });
+
+    // adjust for HLS inpoint offset
+    seekSeconds -= this.inpointOffset;
 
     if (seekSeconds != 0) {
       this.playerController.currentTime = seekSeconds;
