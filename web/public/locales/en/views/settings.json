@@ -219,6 +219,11 @@
           "mustBeGreaterOrEqualZero": "Loitering time must be greater than or equal to 0."
         }
       },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Speed threshold must greater than or equal to 0.1."
+        }
+      },
       "polygonDrawing": {
         "removeLastPoint": "Remove last point",
         "reset": {
@@ -271,7 +276,11 @@
       "speedEstimation": {
         "title": "Speed Estimation",
         "desc": "Enable speed estimation for objects in this zone. The zone must have exactly 4 points.",
-        "docs": "Read the documentation"
+        "docs": "Read the documentation",
+        "lineADistance": "Line A distance ({{unit}})",
+        "lineBDistance": "Line B distance ({{unit}})",
+        "lineCDistance": "Line C distance ({{unit}})",
+        "lineDDistance": "Line D distance ({{unit}})"
       },
       "speedThreshold": {
         "title": "Speed Threshold ({{unit}})",
@@ -473,12 +482,14 @@
             "placeholder": "Re-enter new password"
           }
         },
-        "usernameIsRequired": "Username is required"
+        "usernameIsRequired": "Username is required",
+        "passwordIsRequired": "Password is required"
       },
       "createUser": {
         "title": "Create New User",
         "desc": "Add a new user account and specify an role for access to areas of the Frigate UI.",
-        "usernameOnlyInclude": "Username may only include letters, numbers, . or _"
+        "usernameOnlyInclude": "Username may only include letters, numbers, . or _",
+        "confirmPassword": "Please confirm your password"
       },
       "deleteUser": {
         "title": "Delete User",
@@ -486,12 +497,15 @@
         "warn": "Are you sure you want to delete <strong>{{username}}</strong>?"
       },
       "passwordSetting": {
+        "cannotBeEmpty": "Password cannot be empty",
+        "doNotMatch": "Passwords do not match",
         "updatePassword": "Update Password for {{username}}",
         "setPassword": "Set Password",
         "desc": "Create a strong password to secure this account."
       },
       "changeRole": {
         "title": "Change User Role",
+        "select": "Select a role",
         "desc": "Update permissions for <strong>{{username}}</strong>",
         "roleInfo": {
           "intro": "Select the appropriate role for this user:",

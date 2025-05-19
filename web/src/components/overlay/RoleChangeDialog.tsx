@@ -83,7 +83,7 @@ export default function RoleChangeDialog({
             }
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a role" />
+              <SelectValue placeholder={t("users.dialog.changeRole.select")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="admin" className="flex items-center gap-2">

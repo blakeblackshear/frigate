@@ -197,7 +197,7 @@ function ConfigEditor() {
       listener = (e) => {
         e.preventDefault();
         e.returnValue = true;
-        return "Exit without saving?";
+        return t("confirm");
       };
       window.addEventListener("beforeunload", listener);
     }
@@ -207,7 +207,7 @@ function ConfigEditor() {
         window.removeEventListener("beforeunload", listener);
       }
     };
-  }, [hasChanges]);
+  }, [hasChanges, t]);
 
   if (!config) {
     return <ActivityIndicator />;

@@ -56,8 +56,10 @@ export default function CreateUserDialog({
         .regex(/^[A-Za-z0-9._]+$/, {
           message: t("users.dialog.createUser.usernameOnlyInclude"),
         }),
-      password: z.string().min(1, "Password is required"),
-      confirmPassword: z.string().min(1, "Please confirm your password"),
+      password: z.string().min(1, t("users.dialog.form.passwordIsRequired")),
+      confirmPassword: z
+        .string()
+        .min(1, t("users.dialog.createUser.confirmPassword")),
       role: z.enum(["admin", "viewer"]),
     })
     .refine((data) => data.password === data.confirmPassword, {

@@ -108,6 +108,7 @@
     "title": "Cameras",
     "overview": "Overview",
     "info": {
+      "aspectRatio": "aspect ratio",
       "cameraProbeInfo": "{{camera}} Camera Probe Info",
       "streamDataFromFFPROBE": "Stream data is obtained with <code>ffprobe</code>.",
       "fetching": "Fetching Camera Data",

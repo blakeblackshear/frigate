@@ -77,7 +77,9 @@ export function AnnotationSettingsPane({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              `Annotation offset for ${event?.camera} has been saved to the config file. Restart Frigate to apply your changes.`,
+              t("objectLifecycle.annotationSettings.offset.toast.success", {
+                camera: event?.camera,
+              }),
               {
                 position: "top-center",
               },

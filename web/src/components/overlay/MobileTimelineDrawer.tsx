@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { FaFlag } from "react-icons/fa";
 import { TimelineType } from "@/types/timeline";
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 
 type MobileTimelineDrawerProps = {
   selected: TimelineType;
@@ -13,6 +14,7 @@ export default function MobileTimelineDrawer({
   selected,
   onSelect,
 }: MobileTimelineDrawerProps) {
+  const { t } = useTranslation(["views/events"]);
   const [drawer, setDrawer] = useState(false);
 
   if (!isMobile) {
@@ -38,7 +40,7 @@ export default function MobileTimelineDrawer({
             setDrawer(false);
           }}
         >
-          Timeline
+          {t("timeline")}
         </div>
         <div
           className={`mx-4 w-full py-2 text-center smart-capitalize ${selected == "events" ? "rounded-lg bg-secondary" : ""}`}
@@ -47,7 +49,7 @@ export default function MobileTimelineDrawer({
             setDrawer(false);
           }}
         >
-          Events
+          {t("events.label")}
         </div>
       </DrawerContent>
     </Drawer>

@@ -39,8 +39,11 @@
             "document": "Read the documentation "
           }
         },
+        "stream": "Stream",
+        "placeholder": "Choose a stream",
         "streamMethod": {
           "label": "Streaming Method",
+          "placeholder": "Choose a streaming method",
           "method": {
             "noStreaming": {
               "label": "No Streaming",

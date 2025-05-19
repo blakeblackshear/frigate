@@ -78,6 +78,10 @@
     "speed": {
       "mph": "mph",
       "kph": "kph"
+    },
+    "length": {
+      "feet": "feet",
+      "meters": "meters"
     }
   },
   "label": {
