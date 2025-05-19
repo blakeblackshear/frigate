@@ -13,6 +13,7 @@ import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { calculateInpointOffset } from "@/utils/videoUtil";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -197,6 +198,7 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, recordings]);
 
+<<<<<<< Updated upstream
   /** the HLS endpoint returns the vod segments with the first
    * segment of the hour trimmed, meaning it will start at
    * the beginning of the hour, cutting off any difference
@@ -209,6 +211,12 @@ export default function DynamicVideoPlayer({
 
     return recordingParams.after - recordings[0].start_time;
   }, [recordingParams, recordings]);
+=======
+  const inpointOffset = useMemo(
+    () => calculateInpointOffset(recordingParams.after, (recordings || [])[0]),
+    [recordingParams, recordings],
+  );
+>>>>>>> Stashed changes
 
   return (
     <>
