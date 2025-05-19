@@ -203,7 +203,7 @@ export default function DynamicVideoPlayer({
    * that the segment has.
    */
   const inpointOffset = useMemo(() => {
-    if (!recordingParams || !recordings) {
+    if (!recordingParams || !recordings || recordings?.length === 0) {
       return 0;
     }
 
