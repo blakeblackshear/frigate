@@ -1,4 +1,15 @@
+import logging
+import os
+
 import numpy as np
+
+try:
+    from tflite_runtime.interpreter import Interpreter, load_delegate
+except ModuleNotFoundError:
+    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+
+
+logger = logging.getLogger(__name__)
 
 
 def tflite_init(self, interpreter):
@@ -34,3 +45,30 @@ def tflite_detect_raw(self, tensor_input):
         ]
 
     return detections
+
+
+def tflite_load_delegate_interpreter(
+    delegate_library: str, detector_config, device_config
+):
+    try:
+        logger.info("Attempting to load NPU")
+        tf_delegate = load_delegate(delegate_library, device_config)
+        logger.info("NPU found")
+        interpreter = Interpreter(
+            model_path=detector_config.model.path,
+            experimental_delegates=[tf_delegate],
+        )
+        return interpreter
+    except ValueError:
+        _, ext = os.path.splitext(detector_config.model.path)
+
+        if ext and ext != ".tflite":
+            logger.error(
+                "Incorrect model used with NPU. Only .tflite models can be used with a TFLite delegate."
+            )
+        else:
+            logger.error(
+                "No NPU was detected. If you do not have a TFLite device yet, you must configure CPU detectors."
+            )
+
+        raise
