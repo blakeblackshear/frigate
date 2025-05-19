@@ -99,8 +99,11 @@ export default function ObjectMaskEditPane({
       objectType = objects;
     }
 
-    return `Object Mask ${count + 1} (${objectType})`;
-  }, [polygons, polygon]);
+    return t("masksAndZones.objectMaskLabel", {
+      number: count + 1,
+      label: t(objectType, { ns: "objects" }),
+    });
+  }, [polygons, polygon, t]);
 
   const formSchema = z
     .object({

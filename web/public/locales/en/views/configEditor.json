@@ -4,6 +4,7 @@
   "copyConfig": "Copy Config",
   "saveAndRestart": "Save & Restart",
   "saveOnly": "Save Only",
+  "confirm": "Exit without saving?",
   "toast": {
     "success": {
       "copyToClipboard": "Config copied to clipboard."

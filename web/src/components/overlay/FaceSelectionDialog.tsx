@@ -79,8 +79,8 @@ export default function FaceSelectionDialog({
           >
             {isMobile && (
               <DrawerHeader className="sr-only">
-                <DrawerTitle>Log Details</DrawerTitle>
-                <DrawerDescription>Log details</DrawerDescription>
+                <DrawerTitle>Details</DrawerTitle>
+                <DrawerDescription>Details</DrawerDescription>
               </DrawerHeader>
             )}
             <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>

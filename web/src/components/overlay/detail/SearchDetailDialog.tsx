@@ -909,7 +909,9 @@ function ObjectDetailsTab({
             search.label,
           )) ? (
           <>
-            <div className="text-sm text-primary/40">Description</div>
+            <div className="text-sm text-primary/40">
+              {t("details.description.label")}
+            </div>
             <div className="flex h-64 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
               <div className="flex">
                 <ActivityIndicator />

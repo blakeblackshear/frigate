@@ -66,12 +66,12 @@ export default function SetPasswordDialog({
 
   const handleSave = () => {
     if (!password) {
-      setError("Password cannot be empty");
+      setError(t("users.dialog.passwordSetting.cannotBeEmpty"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("users.dialog.passwordSetting.doNotMatch"));
       return;
     }
 
