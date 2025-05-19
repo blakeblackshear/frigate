@@ -230,7 +230,7 @@ export default function HlsVideoPlayer({
           hotKeys={hotKeys}
           onPlayPause={onPlayPause}
           onSeek={(diff) => {
-            const currentTime = getVideoTime();
+            const currentTime = videoRef.current?.currentTime;
 
             if (!videoRef.current || !currentTime) {
               return;
