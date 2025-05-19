@@ -2,6 +2,7 @@ import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
 import { TimeRange, ObjectLifecycleSequence } from "@/types/timeline";
+import { calculateInpointOffset } from "@/utils/videoUtil";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -42,7 +43,10 @@ export class DynamicVideoController {
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
     this.timeRange = newPlayback.timeRange;
-    this.inpointOffset = this.timeRange.after - this.recordings[0].start_time;
+    this.inpointOffset = calculateInpointOffset(
+      this.timeRange.after,
+      this.recordings[0],
+    );
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);

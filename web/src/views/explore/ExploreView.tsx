@@ -190,8 +190,8 @@ function ThumbnailRow({
               />
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent className="smart-capitalize">
-                <ExploreMoreLink objectType={objectType} />
+              <TooltipContent>
+                {t("exploreMore", { label: objectType })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -282,13 +282,4 @@ function ExploreThumbnailImage({
       </div>
     </SearchResultActions>
   );
-}
-
-function ExploreMoreLink({ objectType }: { objectType: string }) {
-  const formattedType = objectType.replaceAll("_", " ");
-  const label = formattedType.endsWith("s")
-    ? `${formattedType}es`
-    : `${formattedType}s`;
-
-  return <div>Explore More {label}</div>;
 }

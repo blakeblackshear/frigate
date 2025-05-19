@@ -1,6 +1,7 @@
 {
   "documentTitle": "Explore - Frigate",
   "generativeAI": "Generative AI",
+  "exploreMore": "Explore more {{label}} objects",
   "exploreIsUnavailable": {
     "title": "Explore is Unavailable",
     "embeddingsReindexing": {
