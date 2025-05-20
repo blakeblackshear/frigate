@@ -650,8 +650,9 @@ class TrackedObjectAttribute:
                 best_object_id = obj["id"]
                 best_object_label = obj["label"]
             else:
-                if best_object_label == "car" and obj["label"] == "car":
-                    # if multiple cars are overlapping with the same label then the label will not be assigned
+                if best_object_label == obj["label"]:
+                    # if multiple objects of the same type are overlapping
+                    # then the attribute will not be assigned
                     return None
                 elif object_area < best_object_area:
                     # if a car and person are overlapping then assign the label to the smaller object (which should be the person)
