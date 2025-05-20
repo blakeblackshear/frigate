@@ -901,7 +901,9 @@ function FaceAttempt({
     }
 
     return imgRef.current.naturalWidth * imgRef.current.naturalHeight;
-  }, [imgRef]);
+    // only refresh when severity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imgRef.current]);
 
   // api calls
 
