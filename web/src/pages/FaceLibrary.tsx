@@ -876,6 +876,7 @@ function FaceAttempt({
   onRefresh,
 }: FaceAttemptProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const scoreStatus = useMemo(() => {
     if (data.score >= recognitionConfig.recognition_threshold) {
@@ -896,14 +897,12 @@ function FaceAttempt({
   });
 
   const imageArea = useMemo(() => {
-    if (!imgRef.current) {
+    if (imgRef.current == null || !imageLoaded) {
       return undefined;
     }
 
     return imgRef.current.naturalWidth * imgRef.current.naturalHeight;
-    // only refresh when severity changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imgRef.current]);
+  }, [imageLoaded]);
 
   // api calls
 
@@ -966,9 +965,10 @@ function FaceAttempt({
             : "outline-transparent duration-500",
         )}
       >
-        <div className="relative w-full select-none overflow-hidden rounded-lg *:text-card-foreground">
+        <div className="relative w-full select-none overflow-hidden rounded-lg">
           <img
             ref={imgRef}
+            onLoad={() => setImageLoaded(true)}
             className={cn("size-44", isMobile && "w-full")}
             src={`${baseUrl}clips/faces/train/${data.filename}`}
             onClick={(e) => {
