@@ -53,7 +53,13 @@ export default function FaceSelectionDialog({
   const Selector = isDesktop ? DropdownMenu : Drawer;
   const SelectorTrigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const SelectorContent = isDesktop ? DropdownMenuContent : DrawerContent;
-  const SelectorItem = isDesktop ? DropdownMenuItem : DrawerClose;
+  const SelectorItem = isDesktop
+    ? DropdownMenuItem
+    : (props: React.HTMLAttributes<HTMLDivElement>) => (
+        <DrawerClose asChild>
+          <div {...props} className={cn(props.className, "my-2")} />
+        </DrawerClose>
+      );
 
   return (
     <div className={className ?? ""}>
@@ -100,7 +106,7 @@ export default function FaceSelectionDialog({
               {faceNames.map((faceName) => (
                 <SelectorItem
                   key={faceName}
-                  className="flex cursor-pointer gap-2 smart-capitalize"
+                  className="flex cursor-pointer gap-3 smart-capitalize"
                   onClick={() => onTrainAttempt(faceName)}
                 >
                   <LuScanFace />
