@@ -99,6 +99,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                   <Input
                     className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     autoFocus
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck="false"
                     {...field}
                   />
                 </FormControl>
