@@ -91,6 +91,8 @@ proxy:
   auth_secret: None
   # Optional: The default role to use for proxy auth. Must be "admin" or "viewer"
   default_role: viewer
+  # Optional: The character used to separate multiple values in the proxy headers. (default: shown below)
+  separator: ","
 
 # Optional: Authentication configuration
 auth:
