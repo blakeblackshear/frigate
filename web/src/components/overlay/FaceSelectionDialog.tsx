@@ -106,7 +106,7 @@ export default function FaceSelectionDialog({
               {faceNames.map((faceName) => (
                 <SelectorItem
                   key={faceName}
-                  className="flex cursor-pointer gap-3 smart-capitalize"
+                  className="flex cursor-pointer gap-2 smart-capitalize"
                   onClick={() => onTrainAttempt(faceName)}
                 >
                   <LuScanFace />
