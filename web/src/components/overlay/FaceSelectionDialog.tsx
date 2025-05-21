@@ -103,7 +103,7 @@ export default function FaceSelectionDialog({
                 <LuPlus />
                 {t("createFaceLibrary.new")}
               </SelectorItem>
-              {faceNames.map((faceName) => (
+              {faceNames.sort().map((faceName) => (
                 <SelectorItem
                   key={faceName}
                   className="flex cursor-pointer gap-2 smart-capitalize"
