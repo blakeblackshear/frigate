@@ -78,10 +78,7 @@ export default function FaceSelectionDialog({
             <TooltipTrigger asChild={isChildButton}>{children}</TooltipTrigger>
           </SelectorTrigger>
           <SelectorContent
-            className={cn(
-              "max-h-[75dvh] overflow-hidden",
-              isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
-            )}
+            className={cn("", isMobile && "mx-1 gap-2 rounded-t-2xl px-4")}
           >
             {isMobile && (
               <DrawerHeader className="sr-only">
@@ -92,8 +89,8 @@ export default function FaceSelectionDialog({
             <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
             <div
               className={cn(
-                "flex flex-col",
-                isMobile && "gap-2 overflow-y-auto pb-4",
+                "flex max-h-[40dvh] flex-col overflow-y-auto",
+                isMobile && "gap-2 pb-4",
               )}
             >
               <SelectorItem
