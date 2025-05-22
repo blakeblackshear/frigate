@@ -650,6 +650,9 @@ def process_frames(
             prev_enabled = camera_enabled
             camera_enabled = camera_config.enabled
 
+        if "motion" in updated_configs:
+            motion_detector.update_mask()
+
         if (
             not camera_enabled
             and prev_enabled != camera_enabled
