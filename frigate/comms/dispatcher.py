@@ -417,7 +417,9 @@ class Dispatcher:
         notification_settings = self.config.notifications
         logger.info(f"Setting all notifications: {payload}")
         notification_settings.enabled = payload == "ON"  # type: ignore[union-attr]
-        self.config_updater.publisher.publish("config/notifications", notification_settings)
+        self.config_updater.publisher.publish(
+            "config/notifications", notification_settings
+        )
         self.publish("notifications/state", payload, retain=True)
 
     def _on_audio_command(self, camera_name: str, payload: str) -> None:
@@ -639,7 +641,10 @@ class Dispatcher:
                 logger.info(f"Turning off alerts for {camera_name}")
                 review_settings.alerts.enabled = False
 
-        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review, camera_name),
+            review_settings,
+        )
         self.publish(f"{camera_name}/review_alerts/state", payload, retain=True)
 
     def _on_detections_command(self, camera_name: str, payload: str) -> None:
@@ -661,5 +666,8 @@ class Dispatcher:
                 logger.info(f"Turning off detections for {camera_name}")
                 review_settings.detections.enabled = False
 
-        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review, camera_name),
+            review_settings,
+        )
         self.publish(f"{camera_name}/review_detections/state", payload, retain=True)
