@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 
-type ClassificationSettings = {
+type EnrichmentsSettings = {
   search: {
     enabled?: boolean;
     model_size?: SearchModelSize;
@@ -50,12 +50,12 @@ type ClassificationSettings = {
   };
 };
 
-type ClassificationSettingsViewProps = {
+type EnrichmentsSettingsViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
-export default function ClassificationSettingsView({
+export default function EnrichmentsSettingsView({
   setUnsavedChanges,
-}: ClassificationSettingsViewProps) {
+}: EnrichmentsSettingsViewProps) {
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -65,8 +65,8 @@ export default function ClassificationSettingsView({
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
-  const [classificationSettings, setClassificationSettings] =
-    useState<ClassificationSettings>({
+  const [enrichmentsSettings, setEnrichmentsSettings] =
+    useState<EnrichmentsSettings>({
       search: { enabled: undefined, model_size: undefined },
       face: { enabled: undefined, model_size: undefined },
       lpr: { enabled: undefined },
@@ -74,7 +74,7 @@ export default function ClassificationSettingsView({
     });
 
   const [origSearchSettings, setOrigSearchSettings] =
-    useState<ClassificationSettings>({
+    useState<EnrichmentsSettings>({
       search: { enabled: undefined, model_size: undefined },
       face: { enabled: undefined, model_size: undefined },
       lpr: { enabled: undefined },
@@ -83,8 +83,8 @@ export default function ClassificationSettingsView({
 
   useEffect(() => {
     if (config) {
-      if (classificationSettings?.search.enabled == undefined) {
-        setClassificationSettings({
+      if (enrichmentsSettings?.search.enabled == undefined) {
+        setEnrichmentsSettings({
           search: {
             enabled: config.semantic_search.enabled,
             model_size: config.semantic_search.model_size,
@@ -117,10 +117,10 @@ export default function ClassificationSettingsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
-  const handleClassificationConfigChange = (
-    newConfig: Partial<ClassificationSettings>,
+  const handleEnrichmentsConfigChange = (
+    newConfig: Partial<EnrichmentsSettings>,
   ) => {
-    setClassificationSettings((prevConfig) => ({
+    setEnrichmentsSettings((prevConfig) => ({
       search: { ...prevConfig.search, ...newConfig.search },
       face: { ...prevConfig.face, ...newConfig.face },
       lpr: { ...prevConfig.lpr, ...newConfig.lpr },
@@ -135,19 +135,19 @@ export default function ClassificationSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${classificationSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${classificationSettings.search.model_size}&face_recognition.enabled=${classificationSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${classificationSettings.face.model_size}&lpr.enabled=${classificationSettings.lpr.enabled ? "True" : "False"}&classification.bird.enabled=${classificationSettings.bird.enabled ? "True" : "False"}`,
+        `config/set?semantic_search.enabled=${enrichmentsSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${enrichmentsSettings.search.model_size}&face_recognition.enabled=${enrichmentsSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${enrichmentsSettings.face.model_size}&lpr.enabled=${enrichmentsSettings.lpr.enabled ? "True" : "False"}&classification.bird.enabled=${enrichmentsSettings.bird.enabled ? "True" : "False"}`,
         { requires_restart: 0 },
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success(t("classification.toast.success"), {
+          toast.success(t("enrichments.toast.success"), {
             position: "top-center",
           });
           setChangedValue(false);
           updateConfig();
         } else {
           toast.error(
-            t("classification.toast.error", { errorMessage: res.statusText }),
+            t("enrichments.toast.error", { errorMessage: res.statusText }),
             { position: "top-center" },
           );
         }
@@ -164,19 +164,19 @@ export default function ClassificationSettingsView({
       })
       .finally(() => {
         addMessage(
-          "search_settings_restart",
-          t("classification.restart_required"),
+          "enrichments_settings_restart",
+          t("enrichments.restart_required"),
           undefined,
-          "search_settings",
+          "enrichments_settings",
         );
         setIsLoading(false);
       });
-  }, [classificationSettings, t, addMessage, updateConfig]);
+  }, [enrichmentsSettings, t, addMessage, updateConfig]);
 
   const onCancel = useCallback(() => {
-    setClassificationSettings(origSearchSettings);
+    setEnrichmentsSettings(origSearchSettings);
     setChangedValue(false);
-    removeMessage("search_settings", "search_settings");
+    removeMessage("enrichments_settings", "enrichments_settings");
   }, [origSearchSettings, removeMessage]);
 
   const onReindex = useCallback(() => {
@@ -186,12 +186,12 @@ export default function ClassificationSettingsView({
       .put("/reindex")
       .then((res) => {
         if (res.status === 202) {
-          toast.success(t("classification.semanticSearch.reindexNow.success"), {
+          toast.success(t("enrichments.semanticSearch.reindexNow.success"), {
             position: "top-center",
           });
         } else {
           toast.error(
-            t("classification.semanticSearch.reindexNow.error", {
+            t("enrichments.semanticSearch.reindexNow.error", {
               errorMessage: res.statusText,
             }),
             { position: "top-center" },
@@ -204,7 +204,7 @@ export default function ClassificationSettingsView({
           error.response?.data?.detail ||
           "Unknown error";
         toast.error(
-          t("classification.semanticSearch.reindexNow.error", {
+          t("enrichments.semanticSearch.reindexNow.error", {
             errorMessage,
           }),
           { position: "top-center" },
@@ -219,20 +219,20 @@ export default function ClassificationSettingsView({
   useEffect(() => {
     if (changedValue) {
       addMessage(
-        "search_settings",
-        t("classification.unsavedChanges"),
+        "enrichments_settings",
+        t("enrichments.unsavedChanges"),
         undefined,
-        "search_settings",
+        "enrichments_settings",
       );
     } else {
-      removeMessage("search_settings", "search_settings");
+      removeMessage("enrichments_settings", "enrichments_settings");
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changedValue]);
 
   useEffect(() => {
-    document.title = t("documentTitle.classification");
+    document.title = t("documentTitle.enrichments");
   }, [t]);
 
   if (!config) {
@@ -244,15 +244,15 @@ export default function ClassificationSettingsView({
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <Heading as="h3" className="my-2">
-          {t("classification.title")}
+          {t("enrichments.title")}
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
         <Heading as="h4" className="my-2">
-          {t("classification.semanticSearch.title")}
+          {t("enrichments.semanticSearch.title")}
         </Heading>
         <div className="max-w-6xl">
           <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-            <p>{t("classification.semanticSearch.desc")}</p>
+            <p>{t("enrichments.semanticSearch.desc")}</p>
 
             <div className="flex items-center text-primary">
               <Link
@@ -261,7 +261,7 @@ export default function ClassificationSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                {t("classification.semanticSearch.readTheDocumentation")}
+                {t("enrichments.semanticSearch.readTheDocumentation")}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
@@ -273,10 +273,10 @@ export default function ClassificationSettingsView({
             <Switch
               id="enabled"
               className="mr-3"
-              disabled={classificationSettings.search.enabled === undefined}
-              checked={classificationSettings.search.enabled === true}
+              disabled={enrichmentsSettings.search.enabled === undefined}
+              checked={enrichmentsSettings.search.enabled === true}
               onCheckedChange={(isChecked) => {
-                handleClassificationConfigChange({
+                handleEnrichmentsConfigChange({
                   search: { enabled: isChecked },
                 });
               }}
@@ -290,54 +290,54 @@ export default function ClassificationSettingsView({
           <div className="space-y-3">
             <Button
               variant="default"
-              disabled={isLoading || !classificationSettings.search.enabled}
+              disabled={isLoading || !enrichmentsSettings.search.enabled}
               onClick={() => setIsReindexDialogOpen(true)}
-              aria-label={t("classification.semanticSearch.reindexNow.label")}
+              aria-label={t("enrichments.semanticSearch.reindexNow.label")}
             >
-              {t("classification.semanticSearch.reindexNow.label")}
+              {t("enrichments.semanticSearch.reindexNow.label")}
             </Button>
             <div className="mt-3 text-sm text-muted-foreground">
               <Trans ns="views/settings">
-                classification.semanticSearch.reindexNow.desc
+                enrichments.semanticSearch.reindexNow.desc
               </Trans>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
               <div className="text-md">
-                {t("classification.semanticSearch.modelSize.label")}
+                {t("enrichments.semanticSearch.modelSize.label")}
               </div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   <Trans ns="views/settings">
-                    classification.semanticSearch.modelSize.desc
+                    enrichments.semanticSearch.modelSize.desc
                   </Trans>
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
                     <Trans ns="views/settings">
-                      classification.semanticSearch.modelSize.small.desc
+                      enrichments.semanticSearch.modelSize.small.desc
                     </Trans>
                   </li>
                   <li>
                     <Trans ns="views/settings">
-                      classification.semanticSearch.modelSize.large.desc
+                      enrichments.semanticSearch.modelSize.large.desc
                     </Trans>
                   </li>
                 </ul>
               </div>
             </div>
             <Select
-              value={classificationSettings.search.model_size}
+              value={enrichmentsSettings.search.model_size}
               onValueChange={(value) =>
-                handleClassificationConfigChange({
+                handleEnrichmentsConfigChange({
                   search: { model_size: value as SearchModelSize },
                 })
               }
             >
               <SelectTrigger className="w-20">
                 {t(
-                  `classification.semanticSearch.modelSize.${classificationSettings.search.model_size}.title`,
+                  `enrichments.semanticSearch.modelSize.${enrichmentsSettings.search.model_size}.title`,
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -349,7 +349,7 @@ export default function ClassificationSettingsView({
                       value={size}
                     >
                       {t(
-                        "classification.semanticSearch.modelSize." +
+                        "enrichments.semanticSearch.modelSize." +
                           size +
                           ".title",
                       )}
@@ -368,11 +368,11 @@ export default function ClassificationSettingsView({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {t("classification.semanticSearch.reindexNow.confirmTitle")}
+                {t("enrichments.semanticSearch.reindexNow.confirmTitle")}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 <Trans ns="views/settings">
-                  classification.semanticSearch.reindexNow.confirmDesc
+                  enrichments.semanticSearch.reindexNow.confirmDesc
                 </Trans>
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -384,7 +384,7 @@ export default function ClassificationSettingsView({
                 onClick={onReindex}
                 className={buttonVariants({ variant: "select" })}
               >
-                {t("classification.semanticSearch.reindexNow.confirmButton")}
+                {t("enrichments.semanticSearch.reindexNow.confirmButton")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -394,11 +394,11 @@ export default function ClassificationSettingsView({
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            {t("classification.faceRecognition.title")}
+            {t("enrichments.faceRecognition.title")}
           </Heading>
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-              <p>{t("classification.faceRecognition.desc")}</p>
+              <p>{t("enrichments.faceRecognition.desc")}</p>
 
               <div className="flex items-center text-primary">
                 <Link
@@ -407,7 +407,7 @@ export default function ClassificationSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  {t("classification.faceRecognition.readTheDocumentation")}
+                  {t("enrichments.faceRecognition.readTheDocumentation")}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -419,10 +419,10 @@ export default function ClassificationSettingsView({
               <Switch
                 id="enabled"
                 className="mr-3"
-                disabled={classificationSettings.face.enabled === undefined}
-                checked={classificationSettings.face.enabled === true}
+                disabled={enrichmentsSettings.face.enabled === undefined}
+                checked={enrichmentsSettings.face.enabled === true}
                 onCheckedChange={(isChecked) => {
-                  handleClassificationConfigChange({
+                  handleEnrichmentsConfigChange({
                     face: { enabled: isChecked },
                   });
                 }}
@@ -435,32 +435,32 @@ export default function ClassificationSettingsView({
             </div>
             <div className="space-y-0.5">
               <div className="text-md">
-                {t("classification.faceRecognition.modelSize.label")}
+                {t("enrichments.faceRecognition.modelSize.label")}
               </div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   <Trans ns="views/settings">
-                    classification.faceRecognition.modelSize.desc
+                    enrichments.faceRecognition.modelSize.desc
                   </Trans>
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
                     <Trans ns="views/settings">
-                      classification.faceRecognition.modelSize.small.desc
+                      enrichments.faceRecognition.modelSize.small.desc
                     </Trans>
                   </li>
                   <li>
                     <Trans ns="views/settings">
-                      classification.faceRecognition.modelSize.large.desc
+                      enrichments.faceRecognition.modelSize.large.desc
                     </Trans>
                   </li>
                 </ul>
               </div>
             </div>
             <Select
-              value={classificationSettings.face.model_size}
+              value={enrichmentsSettings.face.model_size}
               onValueChange={(value) =>
-                handleClassificationConfigChange({
+                handleEnrichmentsConfigChange({
                   face: {
                     model_size: value as SearchModelSize,
                   },
@@ -469,7 +469,7 @@ export default function ClassificationSettingsView({
             >
               <SelectTrigger className="w-20">
                 {t(
-                  `classification.faceRecognition.modelSize.${classificationSettings.face.model_size}.title`,
+                  `enrichments.faceRecognition.modelSize.${enrichmentsSettings.face.model_size}.title`,
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -481,7 +481,7 @@ export default function ClassificationSettingsView({
                       value={size}
                     >
                       {t(
-                        "classification.faceRecognition.modelSize." +
+                        "enrichments.faceRecognition.modelSize." +
                           size +
                           ".title",
                       )}
@@ -495,11 +495,11 @@ export default function ClassificationSettingsView({
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            {t("classification.licensePlateRecognition.title")}
+            {t("enrichments.licensePlateRecognition.title")}
           </Heading>
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-              <p>{t("classification.licensePlateRecognition.desc")}</p>
+              <p>{t("enrichments.licensePlateRecognition.desc")}</p>
 
               <div className="flex items-center text-primary">
                 <Link
@@ -509,7 +509,7 @@ export default function ClassificationSettingsView({
                   className="inline"
                 >
                   {t(
-                    "classification.licensePlateRecognition.readTheDocumentation",
+                    "enrichments.licensePlateRecognition.readTheDocumentation",
                   )}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
@@ -522,10 +522,10 @@ export default function ClassificationSettingsView({
               <Switch
                 id="enabled"
                 className="mr-3"
-                disabled={classificationSettings.lpr.enabled === undefined}
-                checked={classificationSettings.lpr.enabled === true}
+                disabled={enrichmentsSettings.lpr.enabled === undefined}
+                checked={enrichmentsSettings.lpr.enabled === true}
                 onCheckedChange={(isChecked) => {
-                  handleClassificationConfigChange({
+                  handleEnrichmentsConfigChange({
                     lpr: { enabled: isChecked },
                   });
                 }}
@@ -541,11 +541,11 @@ export default function ClassificationSettingsView({
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            {t("classification.birdClassification.title")}
+            {t("enrichments.birdClassification.title")}
           </Heading>
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
-              <p>{t("classification.birdClassification.desc")}</p>
+              <p>{t("enrichments.birdClassification.desc")}</p>
 
               <div className="flex items-center text-primary">
                 <Link
@@ -554,7 +554,7 @@ export default function ClassificationSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  {t("classification.semanticSearch.readTheDocumentation")}
+                  {t("enrichments.semanticSearch.readTheDocumentation")}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -566,10 +566,10 @@ export default function ClassificationSettingsView({
               <Switch
                 id="enabled"
                 className="mr-3"
-                disabled={classificationSettings.bird.enabled === undefined}
-                checked={classificationSettings.bird.enabled === true}
+                disabled={enrichmentsSettings.bird.enabled === undefined}
+                checked={enrichmentsSettings.bird.enabled === true}
                 onCheckedChange={(isChecked) => {
-                  handleClassificationConfigChange({
+                  handleEnrichmentsConfigChange({
                     bird: { enabled: isChecked },
                   });
                 }}
