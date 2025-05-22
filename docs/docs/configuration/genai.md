@@ -167,7 +167,7 @@ Analyze the sequence of images containing the {label}. Focus on the likely inten
 
 :::tip
 
-Prompts can use variable replacements like `{label}`, `{sub_label}`, and `{camera}` to substitute information from the tracked object as part of the prompt.
+Prompts can use variable replacements `{label}`, `{sub_label}`, and `{camera}` to substitute information from the tracked object as part of the prompt.
 
 :::
 

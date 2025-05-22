@@ -39,7 +39,7 @@ class TestConfig(unittest.TestCase):
             "description": "Fine tuned model",
             "trainDate": "2023-04-28T23:22:01.262Z",
             "type": "ssd",
-            "supportedDetectors": ["edgetpu"],
+            "supportedDetectors": ["cpu", "edgetpu"],
             "width": 320,
             "height": 320,
             "inputShape": "nhwc",

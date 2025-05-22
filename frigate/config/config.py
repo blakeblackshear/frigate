@@ -299,6 +299,22 @@ def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
         )
 
 
+def verify_objects_track(
+    camera_config: CameraConfig, enabled_objects: list[str]
+) -> None:
+    """Verify that a user has not specified an object to track that is not in the labelmap."""
+    valid_objects = [
+        obj for obj in camera_config.objects.track if obj in enabled_objects
+    ]
+
+    if len(valid_objects) != len(camera_config.objects.track):
+        invalid_objects = set(camera_config.objects.track) - set(valid_objects)
+        logger.warning(
+            f"{camera_config.name} is configured to track {list(invalid_objects)} objects, which are not supported by the current model."
+        )
+        camera_config.objects.track = valid_objects
+
+
 def verify_lpr_and_face(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> ValueError | None:
@@ -470,6 +486,37 @@ class FrigateConfig(FrigateBaseModel):
             },
             exclude_unset=True,
         )
+
+        for key, detector in self.detectors.items():
+            adapter = TypeAdapter(DetectorConfig)
+            model_dict = (
+                detector
+                if isinstance(detector, dict)
+                else detector.model_dump(warnings="none")
+            )
+            detector_config: BaseDetectorConfig = adapter.validate_python(model_dict)
+
+            # users should not set model themselves
+            if detector_config.model:
+                detector_config.model = None
+
+            model_config = self.model.model_dump(exclude_unset=True, warnings="none")
+
+            if detector_config.model_path:
+                model_config["path"] = detector_config.model_path
+
+            if "path" not in model_config:
+                if detector_config.type == "cpu":
+                    model_config["path"] = "/cpu_model.tflite"
+                elif detector_config.type == "edgetpu":
+                    model_config["path"] = "/edgetpu_model.tflite"
+
+            model = ModelConfig.model_validate(model_config)
+            model.check_and_load_plus_model(self.plus_api, detector_config.type)
+            model.compute_model_hash()
+            labelmap_objects = model.merged_labelmap.values()
+            detector_config.model = model
+            self.detectors[key] = detector_config
 
         for name, camera in self.cameras.items():
             modified_global_config = global_config.copy()
@@ -644,6 +691,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_required_zones_exist(camera_config)
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
+            verify_objects_track(camera_config, labelmap_objects)
             verify_lpr_and_face(self, camera_config)
 
         self.objects.parse_all_objects(self.cameras)
@@ -654,36 +702,6 @@ class FrigateConfig(FrigateBaseModel):
             logger.warning(
                 "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
             )
-
-        for key, detector in self.detectors.items():
-            adapter = TypeAdapter(DetectorConfig)
-            model_dict = (
-                detector
-                if isinstance(detector, dict)
-                else detector.model_dump(warnings="none")
-            )
-            detector_config: BaseDetectorConfig = adapter.validate_python(model_dict)
-
-            # users should not set model themselves
-            if detector_config.model:
-                detector_config.model = None
-
-            model_config = self.model.model_dump(exclude_unset=True, warnings="none")
-
-            if detector_config.model_path:
-                model_config["path"] = detector_config.model_path
-
-            if "path" not in model_config:
-                if detector_config.type == "cpu":
-                    model_config["path"] = "/cpu_model.tflite"
-                elif detector_config.type == "edgetpu":
-                    model_config["path"] = "/edgetpu_model.tflite"
-
-            model = ModelConfig.model_validate(model_config)
-            model.check_and_load_plus_model(self.plus_api, detector_config.type)
-            model.compute_model_hash()
-            detector_config.model = model
-            self.detectors[key] = detector_config
 
         return self
 

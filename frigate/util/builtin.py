@@ -4,6 +4,7 @@ import ast
 import copy
 import datetime
 import logging
+import math
 import multiprocessing as mp
 import queue
 import re
@@ -399,3 +400,10 @@ def serialize(
 def deserialize(bytes_data: bytes) -> list[float]:
     """Deserializes a compact "raw bytes" format into a list of floats"""
     return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
+
+
+def sanitize_float(value):
+    """Replace NaN or inf with 0.0."""
+    if isinstance(value, (int, float)) and not math.isfinite(value):
+        return 0.0
+    return value
