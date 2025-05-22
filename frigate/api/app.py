@@ -385,8 +385,14 @@ def config_set(request: Request, body: AppConfigSetBody):
             status_code=500,
         )
 
-    if body.requires_restart == 0:
+    if body.requires_restart == 0 or body.update_topic:
         request.app.frigate_config = config
+
+        if body.update_topic and body.update_topic.startswith("config/cameras/"):
+            _, _, camera, field = body.update_topic.split("/")
+            settings = config.model_dump(mode="json", warnings="none", exclude_none=True)["cameras"][camera][field]
+            
+
     return JSONResponse(
         content=(
             {
