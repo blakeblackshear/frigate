@@ -8,9 +8,13 @@ from typing import Any, Callable, Optional
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import CameraActivityManager
 from frigate.comms.base_communicator import Communicator
-from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.webpush import WebPushClient
 from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdatePublisher,
+    CameraConfigUpdateTopic,
+)
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     INSERT_MANY_RECORDINGS,
@@ -38,7 +42,7 @@ class Dispatcher:
     def __init__(
         self,
         config: FrigateConfig,
-        config_updater: ConfigPublisher,
+        config_updater: CameraConfigUpdatePublisher,
         onvif: OnvifController,
         ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
@@ -303,7 +307,10 @@ class Dispatcher:
                 logger.info(f"Turning off camera {camera_name}")
                 camera_settings.enabled = False
 
-        self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.enabled, camera_name),
+            camera_settings.enabled,
+        )
         self.publish(f"{camera_name}/enabled/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
