@@ -14,7 +14,6 @@ import numpy as np
 from peewee import SQL, DoesNotExist
 
 from frigate.camera.state import CameraState
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -28,6 +27,10 @@ from frigate.config import (
     FrigateConfig,
     RecordConfig,
     SnapshotsConfig,
+)
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
 )
 from frigate.const import (
     FAST_QUEUE_TIMEOUT,
@@ -67,7 +70,9 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config.cameras, [CameraConfigUpdateEnum.enabled]
+        )
 
         self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all)
@@ -638,24 +643,14 @@ class TrackedObjectProcessor(threading.Thread):
     def run(self):
         while not self.stop_event.is_set():
             # check for config updates
-            while True:
-                (
-                    updated_enabled_topic,
-                    updated_enabled_config,
-                ) = self.config_enabled_subscriber.check_for_update()
+            updated_topics = self.config_subscriber.check_for_updates()
 
-                if not updated_enabled_topic:
-                    break
-
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                self.config.cameras[
-                    camera_name
-                ].enabled = updated_enabled_config.enabled
-
-                if self.camera_states[camera_name].prev_enabled is None:
-                    self.camera_states[
-                        camera_name
-                    ].prev_enabled = updated_enabled_config.enabled
+            if "enabled" in updated_topics:
+                for camera in updated_topics["enabled"]:
+                    if self.camera_states[camera].prev_enabled is None:
+                        self.camera_states[camera].prev_enabled = self.config.cameras[
+                            camera
+                        ].enabled
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():
@@ -764,6 +759,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_sender.stop()
         self.event_end_subscriber.stop()
         self.sub_label_subscriber.stop()
-        self.config_enabled_subscriber.stop()
+        self.config_subscriber.stop()
 
         logger.info("Exiting object processor...")

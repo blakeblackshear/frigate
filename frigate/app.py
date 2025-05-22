@@ -19,7 +19,6 @@ from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.base_communicator import Communicator
-from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
@@ -27,6 +26,7 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
@@ -322,7 +322,7 @@ class FrigateApp:
 
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
-        self.inter_config_updater = ConfigPublisher()
+        self.inter_config_updater = CameraConfigUpdatePublisher()
         self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
 
@@ -482,7 +482,7 @@ class FrigateApp:
             capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, shm_frame_count, self.camera_metrics[name]),
+                args=(config, shm_frame_count, self.camera_metrics[name]),
             )
             capture_process.daemon = True
             self.camera_metrics[name].capture_process = capture_process
