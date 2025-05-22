@@ -17,10 +17,13 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import CACHE_DIR, CLIPS_DIR
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
@@ -99,7 +102,14 @@ def output_frames(
     websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
-    config_enabled_subscriber = ConfigSubscriber("config/enabled/")
+    config_subscriber = CameraConfigUpdateSubscriber(
+        config.cameras,
+        [
+            CameraConfigUpdateEnum.birdseye,
+            CameraConfigUpdateEnum.enabled,
+            CameraConfigUpdateEnum.record,
+        ],
+    )
 
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Birdseye | None = None
@@ -125,18 +135,7 @@ def output_frames(
 
     while not stop_event.is_set():
         # check if there is an updated config
-        while True:
-            (
-                updated_enabled_topic,
-                updated_enabled_config,
-            ) = config_enabled_subscriber.check_for_update()
-
-            if not updated_enabled_topic:
-                break
-
-            if updated_enabled_config:
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                config.cameras[camera_name].enabled = updated_enabled_config.enabled
+        config_subscriber.check_for_updates()
 
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
         now = datetime.datetime.now().timestamp()
@@ -240,7 +239,7 @@ def output_frames(
     if birdseye is not None:
         birdseye.stop()
 
-    config_enabled_subscriber.stop()
+    config_subscriber.stop()
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
     websocket_server.manager.join()
