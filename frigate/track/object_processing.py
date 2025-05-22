@@ -697,6 +697,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_sender.stop()
         self.event_end_subscriber.stop()
         self.sub_label_subscriber.stop()
-        self.config_enabled_subscriber.stop()
+        self.config_subscriber.stop()
 
         logger.info("Exiting object processor...")

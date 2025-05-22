@@ -703,8 +703,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             f"Dedicated LPR camera API has been called for {camera}, but detections are disabled. LPR events will not appear as a detection."
                         )
 
-        self.record_config_subscriber.stop()
-        self.review_config_subscriber.stop()
+        self.config_subscriber.stop()
         self.requestor.stop()
         self.detection_subscriber.stop()
         logger.info("Exiting review maintainer...")
