@@ -103,7 +103,12 @@ def output_frames(
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
     config_subscriber = CameraConfigUpdateSubscriber(
-        config.cameras, [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.record]
+        config.cameras,
+        [
+            CameraConfigUpdateEnum.birdseye,
+            CameraConfigUpdateEnum.enabled,
+            CameraConfigUpdateEnum.record,
+        ],
     )
 
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}

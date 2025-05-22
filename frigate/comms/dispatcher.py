@@ -485,6 +485,10 @@ class Dispatcher:
                 logger.info(f"Turning off snapshots for {camera_name}")
                 snapshots_settings.enabled = False
 
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.snapshots, camera_name),
+            snapshots_settings,
+        )
         self.publish(f"{camera_name}/snapshots/state", payload, retain=True)
 
     def _on_ptz_command(self, camera_name: str, payload: str) -> None:
@@ -519,7 +523,10 @@ class Dispatcher:
                 logger.info(f"Turning off birdseye for {camera_name}")
                 birdseye_settings.enabled = False
 
-        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
+            birdseye_settings,
+        )
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
@@ -540,7 +547,10 @@ class Dispatcher:
             f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
         )
 
-        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
+            birdseye_settings,
+        )
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:

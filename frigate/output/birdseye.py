@@ -15,7 +15,6 @@ from typing import Any, Optional
 import cv2
 import numpy as np
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR
 from frigate.util.image import (
@@ -754,7 +753,6 @@ class Birdseye:
             "birdseye", self.converter, websocket_server, stop_event
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
-        self.birdseye_subscriber = ConfigSubscriber("config/birdseye/")
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
 
@@ -791,20 +789,6 @@ class Birdseye:
         frame_time: float,
         frame: np.ndarray,
     ) -> None:
-        # check if there is an updated config
-        while True:
-            (
-                updated_birdseye_topic,
-                updated_birdseye_config,
-            ) = self.birdseye_subscriber.check_for_update()
-
-            if not updated_birdseye_topic:
-                break
-
-            if updated_birdseye_config:
-                camera_name = updated_birdseye_topic.rpartition("/")[-1]
-                self.config.cameras[camera_name].birdseye = updated_birdseye_config
-
         if self.birdseye_manager.update(
             camera,
             len([o for o in current_tracked_objects if not o["stationary"]]),
@@ -815,6 +799,5 @@ class Birdseye:
             self.__send_new_frame()
 
     def stop(self) -> None:
-        self.birdseye_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()
