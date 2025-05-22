@@ -397,7 +397,7 @@ def config_set(request: Request, body: AppConfigSetBody):
             settings = config.model_dump(
                 mode="json", warnings="none", exclude_none=True
             )["cameras"][camera][field]
-            request.config_updater.publish_update(
+            request.app.config_publisher.publish_update(
                 CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
                 settings,
             )
