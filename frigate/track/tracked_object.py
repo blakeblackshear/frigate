@@ -18,6 +18,7 @@ from frigate.config import (
 )
 from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.review.types import SeverityEnum
+from frigate.util.builtin import sanitize_float
 from frigate.util.image import (
     area,
     calculate_region,
@@ -201,6 +202,11 @@ class TrackedObject:
                                 self.camera_config.detect.fps,
                             )
                         )
+
+                        # users can configure speed zones incorrectly, so sanitize speed_magnitude
+                        # and velocity_angle in case the values come back as inf or NaN
+                        speed_magnitude = sanitize_float(speed_magnitude)
+                        self.velocity_angle = sanitize_float(self.velocity_angle)
 
                         if self.ui_config.unit_system == "metric":
                             self.current_estimated_speed = (
