@@ -15,10 +15,13 @@ from typing import Any, Optional
 import cv2
 import numpy as np
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     CLIPS_DIR,
@@ -150,9 +153,14 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         # create communication for review segments
         self.requestor = InterProcessRequestor()
-        self.record_config_subscriber = ConfigSubscriber("config/record/")
-        self.review_config_subscriber = ConfigSubscriber("config/review/")
-        self.enabled_config_subscriber = ConfigSubscriber("config/enabled/")
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            config.cameras,
+            [
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.record,
+                CameraConfigUpdateEnum.review,
+            ],
+        )
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
 
         # manual events
@@ -458,50 +466,15 @@ class ReviewSegmentMaintainer(threading.Thread):
     def run(self) -> None:
         while not self.stop_event.is_set():
             # check if there is an updated config
-            while True:
-                (
-                    updated_record_topic,
-                    updated_record_config,
-                ) = self.record_config_subscriber.check_for_update()
+            updated_topics = self.config_subscriber.check_for_updates()
 
-                (
-                    updated_review_topic,
-                    updated_review_config,
-                ) = self.review_config_subscriber.check_for_update()
+            if "record" in updated_topics:
+                for camera in updated_topics["record"]:
+                    self.end_segment(camera)
 
-                (
-                    updated_enabled_topic,
-                    updated_enabled_config,
-                ) = self.enabled_config_subscriber.check_for_update()
-
-                if (
-                    not updated_record_topic
-                    and not updated_review_topic
-                    and not updated_enabled_topic
-                ):
-                    break
-
-                if updated_record_topic:
-                    camera_name = updated_record_topic.rpartition("/")[-1]
-                    self.config.cameras[camera_name].record = updated_record_config
-
-                    # immediately end segment
-                    if not updated_record_config.enabled:
-                        self.end_segment(camera_name)
-
-                if updated_review_topic:
-                    camera_name = updated_review_topic.rpartition("/")[-1]
-                    self.config.cameras[camera_name].review = updated_review_config
-
-                if updated_enabled_config:
-                    camera_name = updated_enabled_topic.rpartition("/")[-1]
-                    self.config.cameras[
-                        camera_name
-                    ].enabled = updated_enabled_config.enabled
-
-                    # immediately end segment as we may not get another update
-                    if not updated_enabled_config.enabled:
-                        self.end_segment(camera_name)
+            if "enabled" in updated_topics:
+                for camera in updated_topics["enabled"]:
+                    self.end_segment(camera)
 
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
@@ -730,8 +703,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             f"Dedicated LPR camera API has been called for {camera}, but detections are disabled. LPR events will not appear as a detection."
                         )
 
-        self.record_config_subscriber.stop()
-        self.review_config_subscriber.stop()
+        self.config_subscriber.stop()
         self.requestor.stop()
         self.detection_subscriber.stop()
         logger.info("Exiting review maintainer...")
