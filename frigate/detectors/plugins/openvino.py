@@ -3,11 +3,9 @@ import os
 
 import numpy as np
 import openvino as ov
-import openvino.properties as props
 from pydantic import Field
 from typing_extensions import Literal
 
-from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import (
