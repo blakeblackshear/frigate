@@ -5,7 +5,6 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 
 from frigate.camera import PTZMetrics
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
@@ -49,7 +48,6 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
-        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}", True)
         self.ptz_metrics = ptz_metrics
         self.last_stop_time = None
 
@@ -58,12 +56,6 @@ class ImprovedMotionDetector(MotionDetector):
 
     def detect(self, frame):
         motion_boxes = []
-
-        # check for updated motion config
-        _, updated_motion_config = self.config_subscriber.check_for_update()
-
-        if updated_motion_config:
-            self.config = updated_motion_config
 
         if not self.config.enabled:
             return motion_boxes
@@ -246,4 +238,4 @@ class ImprovedMotionDetector(MotionDetector):
 
     def stop(self) -> None:
         """stop the motion detector."""
-        self.config_subscriber.stop()
+        pass

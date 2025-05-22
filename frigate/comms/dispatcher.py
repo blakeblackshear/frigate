@@ -277,8 +277,11 @@ class Dispatcher:
                         f"Turning on motion for {camera_name} due to detection being enabled."
                     )
                     motion_settings.enabled = True
-                    self.config_updater.publish(
-                        f"config/motion/{camera_name}", motion_settings
+                    self.config_updater.publish_update(
+                        CameraConfigUpdateTopic(
+                            CameraConfigUpdateEnum.motion, camera_name
+                        ),
+                        motion_settings,
                     )
                     self.publish(f"{camera_name}/motion/state", payload, retain=True)
         elif payload == "OFF":
@@ -333,7 +336,10 @@ class Dispatcher:
                 logger.info(f"Turning off motion for {camera_name}")
                 motion_settings.enabled = False
 
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion/state", payload, retain=True)
 
     def _on_motion_improve_contrast_command(
@@ -351,7 +357,10 @@ class Dispatcher:
                 logger.info(f"Turning off improve contrast for {camera_name}")
                 motion_settings.improve_contrast = False  # type: ignore[union-attr]
 
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/improve_contrast/state", payload, retain=True)
 
     def _on_ptz_autotracker_command(self, camera_name: str, payload: str) -> None:
@@ -391,7 +400,10 @@ class Dispatcher:
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion contour area for {camera_name}: {payload}")
         motion_settings.contour_area = payload  # type: ignore[union-attr]
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion_contour_area/state", payload, retain=True)
 
     def _on_motion_threshold_command(self, camera_name: str, payload: int) -> None:
@@ -405,7 +417,10 @@ class Dispatcher:
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion threshold for {camera_name}: {payload}")
         motion_settings.threshold = payload  # type: ignore[union-attr]
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
 
     def _on_global_notification_command(self, payload: str) -> None:
