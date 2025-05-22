@@ -417,9 +417,7 @@ class Dispatcher:
         notification_settings = self.config.notifications
         logger.info(f"Setting all notifications: {payload}")
         notification_settings.enabled = payload == "ON"  # type: ignore[union-attr]
-        self.config_updater.publish(
-            "config/notifications", {"_global_notifications": notification_settings}
-        )
+        self.config_updater.publisher.publish("config/notifications", notification_settings)
         self.publish("notifications/state", payload, retain=True)
 
     def _on_audio_command(self, camera_name: str, payload: str) -> None:
@@ -582,8 +580,9 @@ class Dispatcher:
             ):
                 self.web_push_client.suspended_cameras[camera_name] = 0
 
-        self.config_updater.publish(
-            "config/notifications", {camera_name: notification_settings}
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.notifications, camera_name),
+            notification_settings,
         )
         self.publish(f"{camera_name}/notifications/state", payload, retain=True)
         self.publish(f"{camera_name}/notifications/suspended", "0", retain=True)
