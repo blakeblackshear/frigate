@@ -12,7 +12,6 @@ import numpy as np
 
 import frigate.util as util
 from frigate.camera import CameraMetrics
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
@@ -20,6 +19,10 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
@@ -138,9 +141,9 @@ class AudioEventMaintainer(threading.Thread):
 
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
-        self.config_subscriber = ConfigSubscriber(f"config/audio/{camera.name}")
-        self.enabled_subscriber = ConfigSubscriber(
-            f"config/enabled/{camera.name}", True
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            {self.config.name: self.config},
+            [CameraConfigUpdateEnum.audio, CameraConfigUpdateEnum.enabled],
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
         self.event_metadata_publisher = EventMetadataPublisher()
@@ -308,21 +311,12 @@ class AudioEventMaintainer(threading.Thread):
             self.logger.error(f"Error reading audio data from ffmpeg process: {e}")
             log_and_restart()
 
-    def _update_enabled_state(self) -> bool:
-        """Fetch the latest config and update enabled state."""
-        _, config_data = self.enabled_subscriber.check_for_update()
-        if config_data:
-            self.config.enabled = config_data.enabled
-            return config_data.enabled
-
-        return self.config.enabled
-
     def run(self) -> None:
-        if self._update_enabled_state():
+        if self.config.enabled:
             self.start_or_restart_ffmpeg()
 
         while not self.stop_event.is_set():
-            enabled = self._update_enabled_state()
+            enabled = self.config.enabled
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.debug(
@@ -344,13 +338,7 @@ class AudioEventMaintainer(threading.Thread):
                 continue
 
             # check if there is an updated config
-            (
-                updated_topic,
-                updated_audio_config,
-            ) = self.config_subscriber.check_for_update()
-
-            if updated_topic:
-                self.config.audio = updated_audio_config
+            self.config_subscriber.check_for_updates()
 
             self.read_audio()
 
@@ -359,7 +347,6 @@ class AudioEventMaintainer(threading.Thread):
         self.logpipe.close()
         self.requestor.stop()
         self.config_subscriber.stop()
-        self.enabled_subscriber.stop()
         self.detection_publisher.stop()
 
 

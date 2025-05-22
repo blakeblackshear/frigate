@@ -479,7 +479,7 @@ class FrigateApp:
             capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, shm_frame_count, self.camera_metrics[name]),
+                args=(config, shm_frame_count, self.camera_metrics[name]),
             )
             capture_process.daemon = True
             self.camera_metrics[name].capture_process = capture_process

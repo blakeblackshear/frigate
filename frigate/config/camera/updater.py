@@ -92,8 +92,8 @@ class CameraConfigUpdateSubscriber:
         elif update_type == CameraConfigUpdateEnum.zones:
             config.zones = updated_config
 
-    def check_for_update(self) -> list[str]:
-        updated_topics: list[str] = []
+    def check_for_updates(self) -> dict[str, list[str]]:
+        updated_topics: dict[str, list[str]] = {}
 
         # get all updates available
         while True:
@@ -106,7 +106,11 @@ class CameraConfigUpdateSubscriber:
             update_type = CameraConfigUpdateEnum[raw_type]
 
             if update_type in self.topics:
-                updated_topics.append(update_type.name)
+                if update_type.name in updated_topics:
+                    updated_topics[update_type.name].append(camera)
+                else:
+                    updated_topics[update_type.name] = [camera]
+
                 self.__update_config(camera, update_type, update_config)
 
         return updated_topics
