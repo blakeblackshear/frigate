@@ -16,7 +16,6 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import psutil
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.comms.recordings_updater import (
@@ -24,6 +23,10 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.config import FrigateConfig, RetainModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -71,7 +74,9 @@ class RecordingMaintainer(threading.Thread):
 
         # create communication for retained recordings
         self.requestor = InterProcessRequestor()
-        self.config_subscriber = ConfigSubscriber("config/record/")
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config.cameras, [CameraConfigUpdateEnum.record]
+        )
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
         self.recordings_publisher = RecordingsDataPublisher(
             RecordingsDataTypeEnum.recordings_available_through
@@ -518,17 +523,7 @@ class RecordingMaintainer(threading.Thread):
             run_start = datetime.datetime.now().timestamp()
 
             # check if there is an updated config
-            while True:
-                (
-                    updated_topic,
-                    updated_record_config,
-                ) = self.config_subscriber.check_for_update()
-
-                if not updated_topic:
-                    break
-
-                camera_name = updated_topic.rpartition("/")[-1]
-                self.config.cameras[camera_name].record = updated_record_config
+            self.config_subscriber.check_for_updates()
 
             stale_frame_count = 0
             stale_frame_count_threshold = 10
