@@ -441,7 +441,10 @@ class Dispatcher:
                 logger.info(f"Turning off audio detection for {camera_name}")
                 audio_settings.enabled = False
 
-        self.config_updater.publish(f"config/audio/{camera_name}", audio_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.audio, camera_name),
+            audio_settings,
+        )
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
@@ -463,7 +466,10 @@ class Dispatcher:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
 
-        self.config_updater.publish(f"config/record/{camera_name}", record_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.record, camera_name),
+            record_settings,
+        )
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:

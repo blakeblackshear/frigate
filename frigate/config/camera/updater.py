@@ -83,11 +83,11 @@ class CameraConfigUpdateSubscriber:
             config.motion = updated_config
         elif update_type == CameraConfigUpdateEnum.notifications:
             config.notifications = updated_config
-        elif updated_config == CameraConfigUpdateEnum.record:
+        elif update_type == CameraConfigUpdateEnum.record:
             config.record = updated_config
-        elif updated_config == CameraConfigUpdateEnum.review:
+        elif update_type == CameraConfigUpdateEnum.review:
             config.review = updated_config
-        elif updated_config == CameraConfigUpdateEnum.snapshots:
+        elif update_type == CameraConfigUpdateEnum.snapshots:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:
             config.zones = updated_config

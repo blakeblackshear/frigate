@@ -102,8 +102,8 @@ def output_frames(
     websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
-    config_subsriber = CameraConfigUpdateSubscriber(
-        config.cameras, [CameraConfigUpdateEnum.enabled]
+    config_subscriber = CameraConfigUpdateSubscriber(
+        config.cameras, [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.record]
     )
 
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
@@ -116,7 +116,7 @@ def output_frames(
     move_preview_frames("cache")
 
     for camera, cam_config in config.cameras.items():
-        if not cam_config.enabled:
+        if not cam_config.enabled_in_config:
             continue
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
@@ -130,7 +130,7 @@ def output_frames(
 
     while not stop_event.is_set():
         # check if there is an updated config
-        config_subsriber.check_for_updates()
+        config_subscriber.check_for_updates()
 
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
         now = datetime.datetime.now().timestamp()
@@ -234,7 +234,7 @@ def output_frames(
     if birdseye is not None:
         birdseye.stop()
 
-    config_subsriber.stop()
+    config_subscriber.stop()
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
     websocket_server.manager.join()
