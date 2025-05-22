@@ -403,6 +403,7 @@ class PreviewRecorder:
             self.reset_frame_cache(frame_time)
 
     def stop(self) -> None:
+        self.config_subscriber.stop()
         self.requestor.stop()
 
 
