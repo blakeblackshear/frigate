@@ -34,9 +34,18 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
+class TeachableMachineConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable running the model.")
+    model_path: str = Field(title="Path to teachable machine tflite model.")
+    labelmap_path: str = Field(title="Path to teachable machine labelmap.")
+
+
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
+    )
+    teachable_machine: Dict[str, TeachableMachineConfig] = Field(
+        title="Teachable Machine Model Configs."
     )
 
 
