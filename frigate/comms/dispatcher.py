@@ -289,7 +289,10 @@ class Dispatcher:
                 logger.info(f"Turning off detection for {camera_name}")
                 detect_settings.enabled = False
 
-        self.config_updater.publish(f"config/detect/{camera_name}", detect_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.detect, camera_name),
+            detect_settings,
+        )
         self.publish(f"{camera_name}/detect/state", payload, retain=True)
 
     def _on_enabled_command(self, camera_name: str, payload: str) -> None:

@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=6.4.0
+ARG ROCM=1
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -13,12 +13,12 @@ FROM wget AS rocm
 ARG ROCM
 ARG AMDGPU
 
-RUN apt update && \
+RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4/ubuntu/jammy/amdgpu-install_6.4.60400-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4.1/ubuntu/jammy/amdgpu-install_6.4.60401-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
-    apt install -y rocm
+    apt install -qq -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
