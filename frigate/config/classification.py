@@ -34,9 +34,36 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
+class CustomClassificationStateCameraConfig(FrigateBaseModel):
+    crop: list[int, int, int, int] = Field(
+        title="Crop of image frame on this camera to run classification on."
+    )
+
+
+class CustomClassificationStateConfig(FrigateBaseModel):
+    cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
+        title="Cameras to run classification on."
+    )
+
+
+class CustomClassificationObjectConfig(FrigateBaseModel):
+    objects: list[str] = Field(title="Object types to classify.")
+
+
+class CustomClassificationConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable running the model.")
+    model_path: str = Field(title="Path to custom classification tflite model.")
+    labelmap_path: str = Field(title="Path to custom classification model labelmap.")
+    object_config: CustomClassificationObjectConfig | None = Field(default=None)
+    state_config: CustomClassificationStateConfig | None = Field(default=None)
+
+
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
+    )
+    custom: Dict[str, CustomClassificationConfig] = Field(
+        default={}, title="Custom Classification Model Configs."
     )
 
 
