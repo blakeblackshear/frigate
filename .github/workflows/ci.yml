@@ -6,6 +6,7 @@ on:
     branches:
       - dev
       - master
+      - fix-jetson-ort
     paths-ignore:
       - "docs/**"
 
@@ -19,6 +20,7 @@ env:
 
 jobs:
   amd64_build:
+    if: false
     runs-on: ubuntu-22.04
     name: AMD64 Build
     steps:
@@ -42,6 +44,7 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
   arm64_build:
+    if: false
     runs-on: ubuntu-22.04-arm
     name: ARM Build
     steps:
@@ -136,6 +139,7 @@ jobs:
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6,mode=max
   amd64_extra_builds:
+    if: false
     runs-on: ubuntu-22.04
     name: AMD64 Extra Build
     needs:
@@ -178,6 +182,7 @@ jobs:
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
             *.cache-from=type=gha
   arm64_extra_builds:
+    if: false
     runs-on: ubuntu-22.04-arm
     name: ARM Extra Build
     needs:
@@ -205,6 +210,7 @@ jobs:
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
+    if: false
     runs-on: ubuntu-22.04
     name: Assemble and push default build
     needs:
