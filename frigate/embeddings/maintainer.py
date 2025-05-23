@@ -503,9 +503,7 @@ class EmbeddingMaintainer(threading.Thread):
             if isinstance(processor, LicensePlateRealTimeProcessor):
                 processor.process_frame(camera, yuv_frame, True)
 
-            if isinstance(processor, TeachableMachineObjectProcessor) or isinstance(
-                processor, TeachableMachineStateProcessor
-            ):
+            if isinstance(processor, TeachableMachineStateProcessor):
                 processor.process_frame({"camera": camera}, yuv_frame)
 
         self.frame_manager.close(frame_name)

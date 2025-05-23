@@ -127,7 +127,7 @@ class TeachableMachineObjectProcessor(RealTimeProcessorApi):
         self.labelmap = load_labels(self.model_config.labelmap_path, prefill=0)
 
     def process_frame(self, obj_data, frame):
-        if obj_data["label"] != "object":
+        if obj_data["label"] not in self.model_config.object_config.objects:
             return
 
         x, y, x2, y2 = calculate_region(
