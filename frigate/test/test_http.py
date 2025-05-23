@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import unittest
+from typing import Any
 from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
@@ -112,8 +113,8 @@ class TestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def test_get_good_event(self):
-        app = create_fastapi_app(
+    def __init_app(self, updater: Any | None = None) -> Any:
+        return create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -121,8 +122,12 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            updater,
             None,
         )
+
+    def test_get_good_event(self):
+        app = self.__init_app()
         id = "123456.random"
 
         with TestClient(app) as client:
@@ -134,16 +139,7 @@ class TestHttp(unittest.TestCase):
         assert event["id"] == model_to_dict(Event.get(Event.id == id))["id"]
 
     def test_get_bad_event(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
         id = "123456.random"
         bad_id = "654321.other"
 
@@ -154,16 +150,7 @@ class TestHttp(unittest.TestCase):
             assert event_response.json() == "Event not found"
 
     def test_delete_event(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
         id = "123456.random"
 
         with TestClient(app) as client:
@@ -176,16 +163,7 @@ class TestHttp(unittest.TestCase):
             assert event == "Event not found"
 
     def test_event_retention(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
         id = "123456.random"
 
         with TestClient(app) as client:
@@ -202,16 +180,7 @@ class TestHttp(unittest.TestCase):
             assert event["retain_indefinitely"] is False
 
     def test_event_time_filtering(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
         morning_id = "123456.random"
         evening_id = "654321.random"
         morning = 1656590400  # 06/30/2022 6 am (GMT)
@@ -241,16 +210,7 @@ class TestHttp(unittest.TestCase):
 
     def test_set_delete_sub_label(self):
         mock_event_updater = Mock(spec=EventMetadataPublisher)
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            mock_event_updater,
-        )
+        app = app = self.__init_app(updater=mock_event_updater)
         id = "123456.random"
         sub_label = "sub"
 
@@ -286,16 +246,7 @@ class TestHttp(unittest.TestCase):
 
     def test_sub_label_list(self):
         mock_event_updater = Mock(spec=EventMetadataPublisher)
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            mock_event_updater,
-        )
+        app = self.__init_app(updater=mock_event_updater)
         id = "123456.random"
         sub_label = "sub"
 
@@ -318,16 +269,7 @@ class TestHttp(unittest.TestCase):
             assert sub_labels == [sub_label]
 
     def test_config(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
 
         with TestClient(app) as client:
             config = client.get("/config").json()
@@ -335,16 +277,7 @@ class TestHttp(unittest.TestCase):
             assert config["cameras"]["front_door"]
 
     def test_recordings(self):
-        app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config),
-            self.db,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        app = self.__init_app()
         id = "123456.random"
 
         with TestClient(app) as client:

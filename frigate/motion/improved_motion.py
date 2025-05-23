@@ -35,12 +35,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
         self.motion_frame_count = 0
         self.frame_counter = 0
-        resized_mask = cv2.resize(
-            config.mask,
-            dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
-            interpolation=cv2.INTER_AREA,
-        )
-        self.mask = np.where(resized_mask == [0])
+        self.update_mask()
         self.save_images = False
         self.calibrating = True
         self.blur_radius = blur_radius
@@ -235,6 +230,14 @@ class ImprovedMotionDetector(MotionDetector):
             self.motion_frame_count = 0
 
         return motion_boxes
+
+    def update_mask(self) -> None:
+        resized_mask = cv2.resize(
+            self.config.mask,
+            dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
+            interpolation=cv2.INTER_AREA,
+        )
+        self.mask = np.where(resized_mask == [0])
 
     def stop(self) -> None:
         """stop the motion detector."""
