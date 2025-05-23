@@ -111,7 +111,7 @@ def output_frames(
     move_preview_frames("cache")
 
     for camera, cam_config in config.cameras.items():
-        if not cam_config.enabled:
+        if not cam_config.enabled_in_config:
             continue
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)

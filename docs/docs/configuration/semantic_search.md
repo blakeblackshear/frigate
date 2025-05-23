@@ -19,7 +19,7 @@ For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
 ## Configuration
 
-Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Classification Settings page before it can be used. Semantic Search is a global configuration setting.
+Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Enrichments Settings page before it can be used. Semantic Search is a global configuration setting.
 
 ```yaml
 semantic_search:
@@ -29,7 +29,7 @@ semantic_search:
 
 :::tip
 
-The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Classification Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing.
+The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Enrichments Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing.
 
 If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to reindex as described above.
 

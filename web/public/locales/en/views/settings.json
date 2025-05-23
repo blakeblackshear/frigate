@@ -3,7 +3,7 @@
     "default": "Settings - Frigate",
     "authentication": "Authentication Settings - Frigate",
     "camera": "Camera Settings - Frigate",
-    "classification": "Classification Settings - Frigate",
+    "enrichments": "Enrichments Settings - Frigate",
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
@@ -13,7 +13,7 @@
   },
   "menu": {
     "ui": "UI",
-    "classification": "Classification",
+    "enrichments": "Enrichments",
     "cameras": "Camera Settings",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
@@ -82,9 +82,9 @@
       }
     }
   },
-  "classification": {
-    "title": "Classification Settings",
-    "unsavedChanges": "Unsaved Classification settings changes",
+  "enrichments": {
+    "title": "Enrichments Settings",
+    "unsavedChanges": "Unsaved Enrichments settings changes",
     "birdClassification": {
       "title": "Bird Classification",
       "desc": "Bird classification identifies known birds using a quantized Tensorflow model. When a known bird is recognized, its common name will be added as a sub_label. This information is included in the UI, filters, as well as in notifications."
@@ -138,9 +138,9 @@
       "desc": "Frigate can recognize license plates on vehicles and automatically add the detected characters to the recognized_license_plate field or a known name as a sub_label to objects that are of type car. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.",
       "readTheDocumentation": "Read the Documentation"
     },
-    "restart_required": "Restart required (Classification settings changed)",
+    "restart_required": "Restart required (Enrichments settings changed)",
     "toast": {
-      "success": "Classification settings have been saved. Restart Frigate to apply your changes.",
+      "success": "Enrichments settings have been saved. Restart Frigate to apply your changes.",
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },

@@ -35,7 +35,7 @@ import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
-import ClassificationSettingsView from "@/views/settings/ClassificationSettingsView";
+import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
@@ -48,7 +48,7 @@ import { useTranslation } from "react-i18next";
 
 const allSettingsViews = [
   "ui",
-  "classification",
+  "enrichments",
   "cameras",
   "masksAndZones",
   "motionTuner",
@@ -249,8 +249,8 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
         {page == "ui" && <UiSettingsView />}
-        {page == "classification" && (
-          <ClassificationSettingsView setUnsavedChanges={setUnsavedChanges} />
+        {page == "enrichments" && (
+          <EnrichmentsSettingsView setUnsavedChanges={setUnsavedChanges} />
         )}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
