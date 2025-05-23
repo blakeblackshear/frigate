@@ -51,13 +51,18 @@ class TeachableMachineStateProcessor(RealTimeProcessorApi):
         self.tensor_output_details = self.interpreter.get_output_details()
         self.labelmap = load_labels(self.model_config.labelmap_path, prefill=0)
 
-    def process_frame(self, obj_data, frame):
+    def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
+        camera = frame_data.get("camera")
+        if camera not in self.model_config.state_config.cameras:
+            return
+
+        camera_config = self.model_config.state_config.cameras[camera]
         x, y, x2, y2 = calculate_region(
             frame.shape,
-            obj_data["box"][0],
-            obj_data["box"][1],
-            obj_data["box"][2],
-            obj_data["box"][3],
+            camera_config.crop[0],
+            camera_config.crop[1],
+            camera_config.crop[2],
+            camera_config.crop[3],
             224,
             1.0,
         )
@@ -71,17 +76,20 @@ class TeachableMachineStateProcessor(RealTimeProcessorApi):
         if input.shape != (224, 224):
             input = cv2.resize(input, (224, 224))
 
+        cv2.imwrite("/media/frigate/frames/gate.jpg", input)
+
         input = np.expand_dims(input, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
             self.tensor_output_details[0]["index"]
         )[0]
+        print(f"the gate res is {res}")
         probs = res / res.sum(axis=0)
         best_id = np.argmax(probs)
         score = round(probs[best_id], 2)
 
-        print(f"got ID of {best_id} with score {score}")
+        print(f"got {self.labelmap[best_id]} with score {score}")
 
     def handle_request(self, topic, request_data):
         return None

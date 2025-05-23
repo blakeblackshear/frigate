@@ -46,6 +46,10 @@ from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
+from frigate.data_processing.real_time.teachable_machine import (
+    TeachableMachineObjectProcessor,
+    TeachableMachineStateProcessor,
+)
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
@@ -140,6 +144,18 @@ class EmbeddingMaintainer(threading.Thread):
                     metrics,
                     lpr_model_runner,
                     self.detected_license_plates,
+                )
+            )
+
+        for model in self.config.classification.teachable_machine.values():
+            self.realtime_processors.append(
+                TeachableMachineStateProcessor(self.config, model, self.metrics)
+                if model.state_config != None
+                else TeachableMachineObjectProcessor(
+                    self.config,
+                    model,
+                    self.event_metadata_publisher,
+                    self.metrics,
                 )
             )
 
@@ -463,11 +479,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera_config = self.config.cameras[camera]
 
-        custom_classification_enabled = True
         if (
             camera_config.type != CameraTypeEnum.lpr
             or "license_plate" in camera_config.objects.track
-        ) and not custom_classification_enabled:
+        ) and len(self.config.classification.teachable_machine) == 0:
             # no active features that use this data
             return
 
@@ -487,6 +502,11 @@ class EmbeddingMaintainer(threading.Thread):
         for processor in self.realtime_processors:
             if isinstance(processor, LicensePlateRealTimeProcessor):
                 processor.process_frame(camera, yuv_frame, True)
+
+            if isinstance(processor, TeachableMachineObjectProcessor) or isinstance(
+                processor, TeachableMachineStateProcessor
+            ):
+                processor.process_frame({"camera": camera}, yuv_frame)
 
         self.frame_manager.close(frame_name)
 
