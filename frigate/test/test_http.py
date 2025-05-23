@@ -113,7 +113,7 @@ class TestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def __init_app(self, updater: Any | None) -> Any:
+    def __init_app(self, updater: Any | None = None) -> Any:
         return create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
