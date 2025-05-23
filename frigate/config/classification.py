@@ -34,10 +34,16 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
+class TeachableMachineModelType(str, Enum):
+    object = "object"
+    state = "state"
+
+
 class TeachableMachineConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable running the model.")
     model_path: str = Field(title="Path to teachable machine tflite model.")
     labelmap_path: str = Field(title="Path to teachable machine labelmap.")
+    model_type: TeachableMachineModelType = Field(title="Type of model.")
 
 
 class ClassificationConfig(FrigateBaseModel):
