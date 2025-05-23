@@ -195,6 +195,7 @@ export default function ObjectMaskEditPane({
       axios
         .put(`config/set?${queryString}`, {
           requires_restart: 0,
+          update_topic: `config/cameras/${polygon.camera}/objects`,
         })
         .then((res) => {
           if (res.status === 200) {
