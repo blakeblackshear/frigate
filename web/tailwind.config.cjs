@@ -42,6 +42,10 @@ module.exports = {
         wide: "32 / 9",
         tall: "8 / 9",
       },
+      backgroundImage: {
+        slashes:
+          "repeating-linear-gradient(45deg, hsl(var(--primary-variant) / 0.2), hsl(var(--primary-variant) / 0.2) 2px, transparent 2px, transparent 8px)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

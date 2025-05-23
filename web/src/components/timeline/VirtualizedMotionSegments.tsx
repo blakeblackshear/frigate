@@ -24,6 +24,7 @@ type VirtualizedMotionSegmentsProps = {
   dense: boolean;
   motionOnly: boolean;
   getMotionSegmentValue: (timestamp: number) => number;
+  getRecordingAvailability: (timestamp: number) => boolean | undefined;
 };
 
 export interface VirtualizedMotionSegmentsRef {
@@ -55,6 +56,7 @@ export const VirtualizedMotionSegments = forwardRef<
       dense,
       motionOnly,
       getMotionSegmentValue,
+      getRecordingAvailability,
     },
     ref,
   ) => {
@@ -154,6 +156,8 @@ export const VirtualizedMotionSegments = forwardRef<
               (item.end_time ?? segmentTime) >= motionEnd),
         );
 
+        const hasRecording = getRecordingAvailability(segmentTime);
+
         if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
           return null; // Skip rendering this segment in motion only mode
         }
@@ -172,6 +176,7 @@ export const VirtualizedMotionSegments = forwardRef<
               events={events}
               firstHalfMotionValue={firstHalfMotionValue}
               secondHalfMotionValue={secondHalfMotionValue}
+              hasRecording={hasRecording}
               segmentDuration={segmentDuration}
               segmentTime={segmentTime}
               timestampSpread={timestampSpread}
@@ -189,6 +194,7 @@ export const VirtualizedMotionSegments = forwardRef<
       [
         events,
         getMotionSegmentValue,
+        getRecordingAvailability,
         motionOnly,
         segmentDuration,
         showMinimap,
