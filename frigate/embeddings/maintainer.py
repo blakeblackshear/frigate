@@ -172,7 +172,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
-            self._process_dedicated_lpr()
+            self._process_frame_updates()
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
@@ -449,7 +449,7 @@ class EmbeddingMaintainer(threading.Thread):
                 event_id, RegenerateDescriptionEnum(source)
             )
 
-    def _process_dedicated_lpr(self) -> None:
+    def _process_frame_updates(self) -> None:
         """Process event updates"""
         (topic, data) = self.detection_subscriber.check_for_update()
 
@@ -458,16 +458,17 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera, frame_name, _, _, motion_boxes, _ = data
 
-        if not camera or not self.config.lpr.enabled or len(motion_boxes) == 0:
+        if not camera or len(motion_boxes) == 0:
             return
 
         camera_config = self.config.cameras[camera]
 
+        custom_classification_enabled = True
         if (
             camera_config.type != CameraTypeEnum.lpr
             or "license_plate" in camera_config.objects.track
-        ):
-            # we're not a dedicated lpr camera or we are one but we're using frigate+
+        ) and not custom_classification_enabled:
+            # no active features that use this data
             return
 
         try:
