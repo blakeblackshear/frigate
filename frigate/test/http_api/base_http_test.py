@@ -119,6 +119,7 @@ class BaseTestHttp(unittest.TestCase):
             None,
             stats,
             None,
+            None,
         )
 
     def insert_mock_event(

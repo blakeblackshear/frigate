@@ -28,6 +28,10 @@ from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryPa
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
@@ -385,8 +389,18 @@ def config_set(request: Request, body: AppConfigSetBody):
             status_code=500,
         )
 
-    if body.requires_restart == 0:
+    if body.requires_restart == 0 or body.update_topic:
         request.app.frigate_config = config
+
+        if body.update_topic and body.update_topic.startswith("config/cameras/"):
+            _, _, camera, field = body.update_topic.split("/")
+
+            settings = config.get_nested_object(body.update_topic)
+            request.app.config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                settings,
+            )
+
     return JSONResponse(
         content=(
             {

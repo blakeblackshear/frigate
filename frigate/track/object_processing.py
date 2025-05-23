@@ -71,7 +71,8 @@ class TrackedObjectProcessor(threading.Thread):
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            self.config.cameras, [CameraConfigUpdateEnum.enabled]
+            self.config.cameras,
+            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.zones],
         )
 
         self.requestor = InterProcessRequestor()

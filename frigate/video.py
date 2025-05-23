@@ -504,8 +504,6 @@ def track_camera(
     frame_queue = camera_metrics.frame_queue
 
     frame_shape = config.frame_shape
-    objects_to_track = config.objects.track
-    object_filters = config.objects.filters
 
     motion_detector = ImprovedMotionDetector(
         frame_shape,
@@ -538,8 +536,6 @@ def track_camera(
         object_tracker,
         detected_objects_queue,
         camera_metrics,
-        objects_to_track,
-        object_filters,
         stop_event,
         ptz_metrics,
         region_grid,
@@ -604,8 +600,6 @@ def process_frames(
     object_tracker: ObjectTracker,
     detected_objects_queue: Queue,
     camera_metrics: CameraMetrics,
-    objects_to_track: list[str],
-    object_filters,
     stop_event: MpEvent,
     ptz_metrics: PTZMetrics,
     region_grid: list[list[dict[str, Any]]],
@@ -618,6 +612,7 @@ def process_frames(
             CameraConfigUpdateEnum.detect,
             CameraConfigUpdateEnum.enabled,
             CameraConfigUpdateEnum.motion,
+            CameraConfigUpdateEnum.objects,
         ],
     )
 
@@ -659,6 +654,9 @@ def process_frames(
         if "enabled" in updated_configs:
             prev_enabled = camera_enabled
             camera_enabled = camera_config.enabled
+
+        if "motion" in updated_configs:
+            motion_detector.update_mask()
 
         if (
             not camera_enabled
@@ -832,8 +830,8 @@ def process_frames(
                         frame,
                         model_config,
                         region,
-                        objects_to_track,
-                        object_filters,
+                        camera_config.objects.track,
+                        camera_config.objects.filters,
                     )
                 )
 
