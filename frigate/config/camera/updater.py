@@ -17,6 +17,7 @@ class CameraConfigUpdateEnum(str, Enum):
     enabled = "enabled"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
+    objects = "objects"
     record = "record"
     review = "review"
     snapshots = "snapshots"
@@ -83,6 +84,8 @@ class CameraConfigUpdateSubscriber:
             config.motion = updated_config
         elif update_type == CameraConfigUpdateEnum.notifications:
             config.notifications = updated_config
+        elif update_type == CameraConfigUpdateEnum.objects:
+            config.objects = updated_config
         elif update_type == CameraConfigUpdateEnum.record:
             config.record = updated_config
         elif update_type == CameraConfigUpdateEnum.review:
