@@ -34,35 +34,35 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
-class TeachableMachineStateCameraConfig(FrigateBaseModel):
+class CustomClassificationStateCameraConfig(FrigateBaseModel):
     crop: list[int, int, int, int] = Field(
         title="Crop of image frame on this camera to run classification on."
     )
 
 
-class TeachableMachineStateConfig(FrigateBaseModel):
-    cameras: Dict[str, TeachableMachineStateCameraConfig] = Field(
+class CustomClassificationStateConfig(FrigateBaseModel):
+    cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
         title="Cameras to run classification on."
     )
 
 
-class TeachableMachineObjectConfig(FrigateBaseModel):
+class CustomClassificationObjectConfig(FrigateBaseModel):
     objects: list[str] = Field(title="Object types to classify.")
 
 
-class TeachableMachineConfig(FrigateBaseModel):
+class CustomClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable running the model.")
     model_path: str = Field(title="Path to teachable machine tflite model.")
     labelmap_path: str = Field(title="Path to teachable machine labelmap.")
-    object_config: TeachableMachineObjectConfig | None = Field(default=None)
-    state_config: TeachableMachineStateConfig | None = Field(default=None)
+    object_config: CustomClassificationObjectConfig | None = Field(default=None)
+    state_config: CustomClassificationStateConfig | None = Field(default=None)
 
 
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
     )
-    teachable_machine: Dict[str, TeachableMachineConfig] = Field(
+    custom: Dict[str, CustomClassificationConfig] = Field(
         default={}, title="Teachable Machine Model Configs."
     )
 

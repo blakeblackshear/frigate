@@ -11,7 +11,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataTypeEnum,
 )
 from frigate.config import FrigateConfig
-from frigate.config.classification import TeachableMachineConfig
+from frigate.config.classification import CustomClassificationConfig
 from frigate.util.builtin import load_labels
 from frigate.util.object import calculate_region
 
@@ -26,11 +26,11 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-class TeachableMachineStateProcessor(RealTimeProcessorApi):
+class CustomStateClassificationProcessor(RealTimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
-        model_config: TeachableMachineConfig,
+        model_config: CustomClassificationConfig,
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
@@ -96,11 +96,11 @@ class TeachableMachineStateProcessor(RealTimeProcessorApi):
         pass
 
 
-class TeachableMachineObjectProcessor(RealTimeProcessorApi):
+class CustomObjectClassificationProcessor(RealTimeProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
-        model_config: TeachableMachineConfig,
+        model_config: CustomClassificationConfig,
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
     ):

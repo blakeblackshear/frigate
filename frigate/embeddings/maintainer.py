@@ -42,13 +42,13 @@ from frigate.data_processing.post.license_plate import (
 )
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.custom_classification import (
+    CustomObjectClassificationProcessor,
+    CustomStateClassificationProcessor,
+)
 from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
-)
-from frigate.data_processing.real_time.teachable_machine import (
-    TeachableMachineObjectProcessor,
-    TeachableMachineStateProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
@@ -149,9 +149,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         for model in self.config.classification.teachable_machine.values():
             self.realtime_processors.append(
-                TeachableMachineStateProcessor(self.config, model, self.metrics)
+                CustomStateClassificationProcessor(self.config, model, self.metrics)
                 if model.state_config != None
-                else TeachableMachineObjectProcessor(
+                else CustomObjectClassificationProcessor(
                     self.config,
                     model,
                     self.event_metadata_publisher,
@@ -503,7 +503,7 @@ class EmbeddingMaintainer(threading.Thread):
             if isinstance(processor, LicensePlateRealTimeProcessor):
                 processor.process_frame(camera, yuv_frame, True)
 
-            if isinstance(processor, TeachableMachineStateProcessor):
+            if isinstance(processor, CustomStateClassificationProcessor):
                 processor.process_frame({"camera": camera}, yuv_frame)
 
         self.frame_manager.close(frame_name)
