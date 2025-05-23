@@ -76,8 +76,6 @@ class TeachableMachineStateProcessor(RealTimeProcessorApi):
         if input.shape != (224, 224):
             input = cv2.resize(input, (224, 224))
 
-        cv2.imwrite("/media/frigate/frames/gate.jpg", input)
-
         input = np.expand_dims(input, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
