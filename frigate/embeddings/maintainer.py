@@ -42,6 +42,10 @@ from frigate.data_processing.post.license_plate import (
 )
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.custom_classification import (
+    CustomObjectClassificationProcessor,
+    CustomStateClassificationProcessor,
+)
 from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
@@ -143,6 +147,18 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
+        for model in self.config.classification.custom.values():
+            self.realtime_processors.append(
+                CustomStateClassificationProcessor(self.config, model, self.metrics)
+                if model.state_config != None
+                else CustomObjectClassificationProcessor(
+                    self.config,
+                    model,
+                    self.event_metadata_publisher,
+                    self.metrics,
+                )
+            )
+
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
@@ -172,7 +188,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
-            self._process_dedicated_lpr()
+            self._process_frame_updates()
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
@@ -449,7 +465,7 @@ class EmbeddingMaintainer(threading.Thread):
                 event_id, RegenerateDescriptionEnum(source)
             )
 
-    def _process_dedicated_lpr(self) -> None:
+    def _process_frame_updates(self) -> None:
         """Process event updates"""
         (topic, data) = self.detection_subscriber.check_for_update()
 
@@ -458,7 +474,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera, frame_name, _, _, motion_boxes, _ = data
 
-        if not camera or not self.config.lpr.enabled or len(motion_boxes) == 0:
+        if not camera or len(motion_boxes) == 0:
             return
 
         camera_config = self.config.cameras[camera]
@@ -466,8 +482,8 @@ class EmbeddingMaintainer(threading.Thread):
         if (
             camera_config.type != CameraTypeEnum.lpr
             or "license_plate" in camera_config.objects.track
-        ):
-            # we're not a dedicated lpr camera or we are one but we're using frigate+
+        ) and len(self.config.classification.custom) == 0:
+            # no active features that use this data
             return
 
         try:
@@ -486,6 +502,9 @@ class EmbeddingMaintainer(threading.Thread):
         for processor in self.realtime_processors:
             if isinstance(processor, LicensePlateRealTimeProcessor):
                 processor.process_frame(camera, yuv_frame, True)
+
+            if isinstance(processor, CustomStateClassificationProcessor):
+                processor.process_frame({"camera": camera}, yuv_frame)
 
         self.frame_manager.close(frame_name)
 
