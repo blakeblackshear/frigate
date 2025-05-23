@@ -147,7 +147,7 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        for model in self.config.classification.teachable_machine.values():
+        for model in self.config.classification.custom.values():
             self.realtime_processors.append(
                 CustomStateClassificationProcessor(self.config, model, self.metrics)
                 if model.state_config != None
@@ -482,7 +482,7 @@ class EmbeddingMaintainer(threading.Thread):
         if (
             camera_config.type != CameraTypeEnum.lpr
             or "license_plate" in camera_config.objects.track
-        ) and len(self.config.classification.teachable_machine) == 0:
+        ) and len(self.config.classification.custom) == 0:
             # no active features that use this data
             return
 

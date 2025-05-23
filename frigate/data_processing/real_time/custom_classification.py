@@ -1,4 +1,4 @@
-"""Real time processor that works with teachable machine tflite models."""
+"""Real time processor that works with classification tflite models."""
 
 import logging
 from typing import Any

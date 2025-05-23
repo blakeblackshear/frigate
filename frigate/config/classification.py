@@ -52,8 +52,8 @@ class CustomClassificationObjectConfig(FrigateBaseModel):
 
 class CustomClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable running the model.")
-    model_path: str = Field(title="Path to teachable machine tflite model.")
-    labelmap_path: str = Field(title="Path to teachable machine labelmap.")
+    model_path: str = Field(title="Path to custom classification tflite model.")
+    labelmap_path: str = Field(title="Path to custom classification model labelmap.")
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 
@@ -63,7 +63,7 @@ class ClassificationConfig(FrigateBaseModel):
         default_factory=BirdClassificationConfig, title="Bird classification config."
     )
     custom: Dict[str, CustomClassificationConfig] = Field(
-        default={}, title="Teachable Machine Model Configs."
+        default={}, title="Custom Classification Model Configs."
     )
 
 
