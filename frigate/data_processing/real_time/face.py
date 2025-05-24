@@ -471,16 +471,21 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if not results_list:
             return None, 0.0
 
-        weighted_scores = {}
-        total_weights = {}
+        counts: dict[str, int] = {}
+        weighted_scores: dict[str, int] = {}
+        total_weights: dict[str, int] = {}
 
         for name, score, face_area in results_list:
             if name == "unknown":
                 continue
 
             if name not in weighted_scores:
+                counts[name] = 0
                 weighted_scores[name] = 0.0
                 total_weights[name] = 0.0
+
+            # increase count
+            counts[name] += 1
 
             # Capped weight based on face area
             weight = min(face_area, max_weight)
@@ -494,6 +499,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             return None, 0.0
 
         best_name = max(weighted_scores, key=weighted_scores.get)
+
+        # If the best name has the same number of results as another name, we are not confident it is a correct result
+        for name, count in counts.items():
+            if name != best_name and counts[best_name] == count:
+                return None, 0.0
+
         weighted_average = weighted_scores[best_name] / total_weights[best_name]
 
         return best_name, weighted_average
