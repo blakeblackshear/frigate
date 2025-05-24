@@ -147,13 +147,15 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        for model in self.config.classification.custom.values():
+        for name, model_config in self.config.classification.custom.items():
             self.realtime_processors.append(
-                CustomStateClassificationProcessor(self.config, model, self.metrics)
-                if model.state_config != None
+                CustomStateClassificationProcessor(
+                    self.config, model_config, name, self.requestor, self.metrics
+                )
+                if model_config.state_config != None
                 else CustomObjectClassificationProcessor(
                     self.config,
-                    model,
+                    model_config,
                     self.event_metadata_publisher,
                     self.metrics,
                 )
@@ -504,7 +506,9 @@ class EmbeddingMaintainer(threading.Thread):
                 processor.process_frame(camera, yuv_frame, True)
 
             if isinstance(processor, CustomStateClassificationProcessor):
-                processor.process_frame({"camera": camera}, yuv_frame)
+                processor.process_frame(
+                    {"camera": camera, "motion": motion_boxes}, yuv_frame
+                )
 
         self.frame_manager.close(frame_name)
 
