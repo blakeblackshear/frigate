@@ -103,6 +103,12 @@ class ModelConfig(BaseModel):
     def __init__(self, **config):
         super().__init__(**config)
 
+        # Verify that the labelmap path points to an existing file.
+        if not os.path.exists(config.get("labelmap_path", "/labelmap.txt")):
+            raise ValueError(
+                f"Model labelmap_path '{config.get('labelmap_path', '/labelmap.txt')}' does not exist."
+            )
+
         self._merged_labelmap = {
             **load_labels(config.get("labelmap_path", "/labelmap.txt")),
             **config.get("labelmap", {}),

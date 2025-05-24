@@ -511,6 +511,10 @@ class FrigateConfig(FrigateBaseModel):
                 elif detector_config.type == "edgetpu":
                     model_config["path"] = "/edgetpu_model.tflite"
 
+            # Verify that the model path points to an existing file.
+            if not os.path.exists(model_config["path"]):
+                raise ValueError(f"Model path '{model_config['path']}' does not exist.")
+
             model = ModelConfig.model_validate(model_config)
             model.check_and_load_plus_model(self.plus_api, detector_config.type)
             model.compute_model_hash()
