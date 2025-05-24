@@ -108,9 +108,7 @@ class ModelConfig(BaseModel):
         # If using a local file, verify that the labelmap path points to an existing file.
         if not path.startswith("plus://"):
             if not os.path.exists(path):
-                raise ValueError(
-                    f"Model labelmap_path '{path}' does not exist."
-                )
+                raise ValueError(f"Model labelmap_path '{path}' does not exist.")
 
         self._merged_labelmap = {
             **load_labels(path),

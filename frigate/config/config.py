@@ -514,7 +514,9 @@ class FrigateConfig(FrigateBaseModel):
             # If using a local file, verify that the model path points to an existing file.
             if not model_config["path"].startswith("plus://"):
                 if not os.path.exists(model_config["path"]):
-                    raise ValueError(f"Model path '{model_config['path']}' does not exist.")
+                    raise ValueError(
+                        f"Model path '{model_config['path']}' does not exist."
+                    )
 
             model = ModelConfig.model_validate(model_config)
             model.check_and_load_plus_model(self.plus_api, detector_config.type)
