@@ -16,6 +16,7 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -32,7 +33,10 @@ function ConfigEditor() {
     document.title = t("documentTitle");
   }, [t]);
 
-  const { data: config } = useSWR<string>("config/raw");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const { data: rawConfig } = useSWR<string>("config/raw");
 
   const { theme, systemTheme } = useTheme();
   const [error, setError] = useState<string | undefined>();
@@ -102,7 +106,7 @@ function ConfigEditor() {
   }, [onHandleSaveConfig]);
 
   useEffect(() => {
-    if (!config) {
+    if (!rawConfig) {
       return;
     }
 
@@ -129,9 +133,9 @@ function ConfigEditor() {
     }
 
     if (!modelRef.current) {
-      modelRef.current = monaco.editor.createModel(config, "yaml", modelUri);
+      modelRef.current = monaco.editor.createModel(rawConfig, "yaml", modelUri);
     } else {
-      modelRef.current.setValue(config);
+      modelRef.current.setValue(rawConfig);
     }
 
     const container = configRef.current;
@@ -164,32 +168,32 @@ function ConfigEditor() {
       }
       schemaConfiguredRef.current = false;
     };
-  }, [config, apiHost, systemTheme, theme, onHandleSaveConfig]);
+  }, [rawConfig, apiHost, systemTheme, theme, onHandleSaveConfig]);
 
   // monitoring state
 
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (!config || !modelRef.current) {
+    if (!rawConfig || !modelRef.current) {
       return;
     }
 
     modelRef.current.onDidChangeContent(() => {
-      if (modelRef.current?.getValue() != config) {
+      if (modelRef.current?.getValue() != rawConfig) {
         setHasChanges(true);
       } else {
         setHasChanges(false);
       }
     });
-  }, [config]);
+  }, [rawConfig]);
 
   useEffect(() => {
-    if (config && modelRef.current) {
-      modelRef.current.setValue(config);
+    if (rawConfig && modelRef.current) {
+      modelRef.current.setValue(rawConfig);
       setHasChanges(false);
     }
-  }, [config]);
+  }, [rawConfig]);
 
   useEffect(() => {
     let listener: ((e: BeforeUnloadEvent) => void) | undefined;
@@ -209,7 +213,7 @@ function ConfigEditor() {
     };
   }, [hasChanges, t]);
 
-  if (!config) {
+  if (!rawConfig) {
     return <ActivityIndicator />;
   }
 
@@ -217,9 +221,16 @@ function ConfigEditor() {
     <div className="absolute bottom-2 left-0 right-0 top-2 md:left-2">
       <div className="relative h-full overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
-          <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            {t("configEditor")}
-          </Heading>
+          <div>
+            <Heading as="h2" className="mb-0 ml-1 md:ml-0">
+              {t(config?.safe_mode ? "safeConfigEditor" : "configEditor")}
+            </Heading>
+            {config?.safe_mode && (
+              <div className="text-sm text-secondary-foreground">
+                {t("safeModeDescription")}
+              </div>
+            )}
+          </div>
           <div className="flex flex-row gap-1">
             <Button
               size="sm"
