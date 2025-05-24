@@ -15,7 +15,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
 from frigate.util.builtin import load_labels
-from frigate.util.object import calculate_region, box_overlaps
+from frigate.util.object import box_overlaps, calculate_region
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
