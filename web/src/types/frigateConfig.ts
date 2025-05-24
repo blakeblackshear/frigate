@@ -283,6 +283,9 @@ export type AllGroupsStreamingSettings = {
 };
 
 export interface FrigateConfig {
+  version: string;
+  safe_mode: boolean;
+
   audio: {
     enabled: boolean;
     enabled_in_config: boolean | null;

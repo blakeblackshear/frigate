@@ -334,6 +334,9 @@ def verify_lpr_and_face(
 
 class FrigateConfig(FrigateBaseModel):
     version: Optional[str] = Field(default=None, title="Current config version.")
+    safe_mode: bool = Field(
+        default=False, title="If Frigate should be started in safe mode."
+    )
 
     # Fields that install global state should be defined first, so that their validators run first.
     environment_vars: EnvVars = Field(
@@ -716,6 +719,7 @@ class FrigateConfig(FrigateBaseModel):
 
     @classmethod
     def load(cls, **kwargs):
+        """Loads the Frigate config file, runs migrations, and creates the config object."""
         config_path = find_config_file()
 
         # No configuration file found, create one.
@@ -743,7 +747,7 @@ class FrigateConfig(FrigateBaseModel):
             return FrigateConfig.parse(f, **kwargs)
 
     @classmethod
-    def parse(cls, config, *, is_json=None, **context):
+    def parse(cls, config, *, is_json=None, safe_load=False, **context):
         # If config is a file, read its contents.
         if hasattr(config, "read"):
             fname = getattr(config, "name", None)
@@ -766,6 +770,15 @@ class FrigateConfig(FrigateBaseModel):
             config = json.load(config)
         else:
             config = yaml.load(config)
+
+        # load minimal Frigate config after the full config did not validate
+        if safe_load:
+            safe_config = {"safe_mode": True, "cameras": {}, "mqtt": {"enabled": False}}
+
+            # copy over auth and proxy config in case auth needs to be enforced
+            safe_config["auth"] = config.get("auth", {})
+            safe_config["proxy"] = config.get("proxy", {})
+            return cls.parse_object(safe_config, **context)
 
         # Validate and return the config dict.
         return cls.parse_object(config, **context)
