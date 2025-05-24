@@ -38,11 +38,23 @@ class CustomClassificationStateCameraConfig(FrigateBaseModel):
     crop: list[int, int, int, int] = Field(
         title="Crop of image frame on this camera to run classification on."
     )
+    threshold: float = Field(
+        default=0.8, title="Classification score threshold to change the state."
+    )
 
 
 class CustomClassificationStateConfig(FrigateBaseModel):
     cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
         title="Cameras to run classification on."
+    )
+    motion: bool = Field(
+        default=False,
+        title="If classification should be run when motion is detected in the crop.",
+    )
+    interval: int | None = Field(
+        default=None,
+        title="Interval to run classification on in seconds.",
+        gt=0,
     )
 
 
