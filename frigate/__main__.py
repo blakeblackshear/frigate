@@ -93,7 +93,14 @@ def main() -> None:
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
         print("*************************************************************")
-        sys.exit(1)
+
+        # attempt to start Frigate in recovery mode
+        try:
+            config = FrigateConfig.load(install=True, safe_load=True)
+            print("Starting Frigate in safe mode.")
+        except ValidationError:
+            print("Unable to load minimal Frigate config.")
+            sys.exit(1)
     if args.validate_config:
         print("*************************************************************")
         print("*** Your config file is valid.                            ***")
