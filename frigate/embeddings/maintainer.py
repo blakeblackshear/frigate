@@ -480,11 +480,12 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         camera_config = self.config.cameras[camera]
+        dedicated_lpr_enabled = (
+            camera_config.type == CameraTypeEnum.lpr
+            and "license_plate" not in camera_config.objects.track
+        )
 
-        if (
-            camera_config.type != CameraTypeEnum.lpr
-            or "license_plate" in camera_config.objects.track
-        ) and len(self.config.classification.custom) == 0:
+        if not dedicated_lpr_enabled and len(self.config.classification.custom) == 0:
             # no active features that use this data
             return
 
@@ -502,7 +503,9 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         for processor in self.realtime_processors:
-            if isinstance(processor, LicensePlateRealTimeProcessor):
+            if dedicated_lpr_enabled and isinstance(
+                processor, LicensePlateRealTimeProcessor
+            ):
                 processor.process_frame(camera, yuv_frame, True)
 
             if isinstance(processor, CustomStateClassificationProcessor):
