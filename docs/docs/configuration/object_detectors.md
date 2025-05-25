@@ -1053,7 +1053,7 @@ python3 yolo_to_onnx.py -m yolov7-320
 
 #### YOLOv9
 
-YOLOv9 models can be exported using the below code or they [can be downloaded from hugging face](https://huggingface.co/Xenova/yolov9-onnx/tree/main)
+YOLOv9 models can be exported using the below code
 
 ```sh
 git clone https://github.com/WongKinYiu/yolov9
