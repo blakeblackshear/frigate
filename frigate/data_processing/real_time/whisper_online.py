@@ -119,15 +119,6 @@ class FasterWhisperASR(ASRBase):
         from faster_whisper import WhisperModel
 
         logging.getLogger("faster_whisper").setLevel(logging.WARNING)
-        if model_dir is not None:
-            logger.debug(
-                f"Loading whisper model from model_dir {model_dir}. modelsize and cache_dir parameters are not used."
-            )
-            model_size_or_path = model_dir
-        elif modelsize is not None:
-            model_size_or_path = modelsize
-        else:
-            raise ValueError("modelsize or model_dir parameter must be set")
 
         # this worked fast and reliably on NVIDIA L40
         model = WhisperModel(
@@ -514,10 +505,10 @@ class OnlineASRProcessor:
         p = self.commited[:k]
         p = [t for _, _, t in p]
         prompt = []
-        l = 0
-        while p and l < 200:  # 200 characters prompt size
+        y = 0
+        while p and y < 200:  # 200 characters prompt size
             x = p.pop(-1)
-            l += len(x) + 1
+            y += len(x) + 1
             prompt.append(x)
         non_prompt = self.commited[k:]
         return self.asr.sep.join(prompt[::-1]), self.asr.sep.join(
