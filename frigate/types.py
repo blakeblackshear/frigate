@@ -27,3 +27,4 @@ class TrackedObjectUpdateTypesEnum(str, Enum):
     description = "description"
     face = "face"
     lpr = "lpr"
+    transcription = "transcription"
