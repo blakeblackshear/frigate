@@ -69,6 +69,10 @@
     "enable": "Enable Audio Detect",
     "disable": "Disable Audio Detect"
   },
+  "transcription": {
+    "enable": "Enable Live Audio Transcription",
+    "disable": "Disable Live Audio Transcription"
+  },
   "autotracking": {
     "enable": "Enable Autotracking",
     "disable": "Disable Autotracking"
@@ -135,6 +139,7 @@
     "recording": "Recording",
     "snapshots": "Snapshots",
     "audioDetection": "Audio Detection",
+    "transcription": "Audio Transcription",
     "autotracking": "Autotracking"
   },
   "history": {
