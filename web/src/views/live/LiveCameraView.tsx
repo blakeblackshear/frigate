@@ -1,11 +1,13 @@
 import {
   useAudioState,
+  useAudioTranscriptionState,
   useAutotrackingState,
   useDetectState,
   useEnabledState,
   usePtzCommand,
   useRecordingsState,
   useSnapshotsState,
+  useTrackedObjectUpdate,
 } from "@/api/ws";
 import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
 import FilterSwitch from "@/components/filter/FilterSwitch";
@@ -90,6 +92,8 @@ import {
   LuX,
 } from "react-icons/lu";
 import {
+  MdClosedCaption,
+  MdClosedCaptionDisabled,
   MdNoPhotography,
   MdOutlineRestartAlt,
   MdPersonOff,
@@ -195,6 +199,33 @@ export default function LiveCameraView({
   // camera enabled state
   const { payload: enabledState } = useEnabledState(camera.name);
   const cameraEnabled = enabledState === "ON";
+
+  // for audio transcriptions
+
+  const { payload: audioTranscriptionState, send: sendTranscription } =
+    useAudioTranscriptionState(camera.name);
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
+  const transcriptionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (
+      wsUpdate &&
+      wsUpdate.type == "transcription" &&
+      wsUpdate.camera == camera.name
+    ) {
+      if (transcriptionRef.current) {
+        transcriptionRef.current.scrollTop =
+          transcriptionRef.current.scrollHeight;
+      }
+    }
+  }, [wsUpdate, camera.name]);
+
+  useEffect(() => {
+    return () => {
+      // disable transcriptions when unmounting
+      if (audioTranscriptionState == "ON") sendTranscription("OFF");
+    };
+  }, [audioTranscriptionState, sendTranscription]);
 
   // click overlay for ptzs
 
@@ -566,6 +597,9 @@ export default function LiveCameraView({
                 autotrackingEnabled={
                   camera.onvif.autotracking.enabled_in_config
                 }
+                transcriptionEnabled={
+                  camera.audio_transcription.enabled_in_config
+                }
                 fullscreen={fullscreen}
                 streamName={streamName ?? ""}
                 setStreamName={setStreamName}
@@ -625,6 +659,19 @@ export default function LiveCameraView({
               />
             </div>
           </TransformComponent>
+          {camera?.audio?.enabled_in_config &&
+            audioTranscriptionState == "ON" &&
+            wsUpdate &&
+            wsUpdate.type === "transcription" &&
+            wsUpdate.camera === camera.name &&
+            wsUpdate.text !== "" && (
+              <div
+                ref={transcriptionRef}
+                className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
+              >
+                {wsUpdate.text}
+              </div>
+            )}
         </div>
       </div>
       {camera.onvif.host != "" && (
@@ -983,6 +1030,7 @@ type FrigateCameraFeaturesProps = {
   recordingEnabled: boolean;
   audioDetectEnabled: boolean;
   autotrackingEnabled: boolean;
+  transcriptionEnabled: boolean;
   fullscreen: boolean;
   streamName: string;
   setStreamName?: (value: string | undefined) => void;
@@ -1002,6 +1050,7 @@ function FrigateCameraFeatures({
   recordingEnabled,
   audioDetectEnabled,
   autotrackingEnabled,
+  transcriptionEnabled,
   fullscreen,
   streamName,
   setStreamName,
@@ -1033,6 +1082,8 @@ function FrigateCameraFeatures({
   const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
   const { payload: autotrackingState, send: sendAutotracking } =
     useAutotrackingState(camera.name);
+  const { payload: transcriptionState, send: sendTranscription } =
+    useAudioTranscriptionState(camera.name);
 
   // roles
 
@@ -1194,6 +1245,27 @@ function FrigateCameraFeatures({
                 }
                 onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
                 disabled={!cameraEnabled}
+              />
+            )}
+            {audioDetectEnabled && transcriptionEnabled && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={
+                  transcriptionState == "ON"
+                    ? MdClosedCaption
+                    : MdClosedCaptionDisabled
+                }
+                isActive={transcriptionState == "ON"}
+                title={
+                  transcriptionState == "ON"
+                    ? t("transcription.disable")
+                    : t("transcription.enable")
+                }
+                onClick={() =>
+                  sendTranscription(transcriptionState == "ON" ? "OFF" : "ON")
+                }
+                disabled={!cameraEnabled || audioState == "OFF"}
               />
             )}
             {autotrackingEnabled && (
@@ -1555,6 +1627,16 @@ function FrigateCameraFeatures({
                   isChecked={audioState == "ON"}
                   onCheckedChange={() =>
                     sendAudio(audioState == "ON" ? "OFF" : "ON")
+                  }
+                />
+              )}
+              {audioDetectEnabled && transcriptionEnabled && (
+                <FilterSwitch
+                  label={t("cameraSettings.transcription")}
+                  disabled={audioState == "OFF"}
+                  isChecked={transcriptionState == "ON"}
+                  onCheckedChange={() =>
+                    sendTranscription(transcriptionState == "ON" ? "OFF" : "ON")
                   }
                 />
               )}
