@@ -125,7 +125,7 @@ Message published for updates to tracked object metadata, for example:
   "name": "John",
   "score": 0.95,
   "camera": "front_door_cam",
-  "timestamp": 1607123958.748393,
+  "timestamp": 1607123958.748393
 }
 ```
 
@@ -139,7 +139,17 @@ Message published for updates to tracked object metadata, for example:
   "plate": "123ABC",
   "score": 0.95,
   "camera": "driveway_cam",
-  "timestamp": 1607123958.748393,
+  "timestamp": 1607123958.748393
+}
+```
+
+#### Live Audio Transcription Update
+
+```json
+{
+  "type": "transcription",
+  "text": "Hello Johnny, are you home?",
+  "camera": "doorbell"
 }
 ```
 
