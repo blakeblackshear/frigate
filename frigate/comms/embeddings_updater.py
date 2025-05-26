@@ -18,6 +18,7 @@ class EmbeddingsRequestEnum(Enum):
     reprocess_face = "reprocess_face"
     reprocess_plate = "reprocess_plate"
     reindex = "reindex"
+    transcribe_audio = "transcribe_audio"
 
 
 class EmbeddingsResponder:
