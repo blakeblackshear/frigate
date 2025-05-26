@@ -186,9 +186,7 @@ class EmbeddingMaintainer(threading.Thread):
         ]
         if audio_transcription_cameras:
             self.post_processors.append(
-                AudioTranscriptionPostProcessor(
-                    self.config, self.requestor, metrics, self.embeddings
-                )
+                AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
             )
 
         self.stop_event = stop_event

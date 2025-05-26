@@ -9,6 +9,7 @@ from typing import Optional
 from faster_whisper import WhisperModel
 from peewee import DoesNotExist
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -17,7 +18,6 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.embeddings.embeddings import Embeddings
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.audio import get_audio_from_recording
 
@@ -33,12 +33,10 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         config: FrigateConfig,
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        embeddings: Embeddings,
     ):
         super().__init__(config, metrics, None)
         self.config = config
         self.requestor = requestor
-        self.embeddings = embeddings
         self.recognizer = None
         self.transcription_lock = threading.Lock()
         self.transcription_thread = None
@@ -130,8 +128,10 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             )
 
             # Embed the description
-            if self.config.semantic_search.enabled:
-                self.embeddings.embed_description(event_id, transcription)
+            self.requestor.send_data(
+                EmbeddingsRequestEnum.embed_description.value,
+                {"id": event_id, "description": transcription},
+            )
 
         except DoesNotExist:
             logger.debug("No recording found for audio transcription post-processing")
@@ -190,7 +190,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                 self.transcription_running = False
                 self.transcription_thread = None
 
-    def handle_request(self, topic: str, request_data: dict[str, any]) -> bool | None:
+    def handle_request(self, topic: str, request_data: dict[str, any]) -> str | None:
         if topic == "transcribe_audio":
             event = request_data["event"]
 
@@ -199,7 +199,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                     logger.warning(
                         "Audio transcription for a speech event is already running."
                     )
-                    return False
+                    return "in_progress"
 
                 # Mark as running and start the thread
                 self.transcription_running = True
@@ -207,6 +207,6 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                     target=self._transcription_wrapper, args=(event,), daemon=True
                 )
                 self.transcription_thread.start()
-                return True
+                return "started"
 
         return None
