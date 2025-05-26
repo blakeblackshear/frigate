@@ -72,3 +72,70 @@ audio:
     - speech
     - yell
 ```
+
+### Audio Transcription
+
+Frigate supports fully local text transcription using `sherpa-onnx` and OpenAI's fully local, open source Whisper models (using `faster-whisper`). Enable audio transcription features at the global level in your config:
+
+```yaml
+audio_transcription:
+  enabled: True
+```
+
+Audio transcription can also be enabled for select cameras only at the camera level:
+
+```yaml
+cameras:
+  back_yard:
+    ...
+    audio_transcription:
+      enabled: True
+```
+
+:::note
+
+Audio detection must be enabled and configured as described above in order to use audio transcription features.
+
+:::
+
+Optional config parameters that can be set at the global level include:
+
+- **`device`**: Device to use to run transcription and translation models.
+  - Default: `CPU`
+  - This can be `CPU` or `GPU`. The `sherpa-onnx` models are lightweight and run on the CPU only. The `whisper` models can run on GPU but are only supported on CUDA hardware.
+- **`model_size`**: The size of the model used for live transcription.
+  - Default: `small`
+  - This can be `small` or `large`. The `small` setting uses `sherpa-onnx` models that are fast, lightweight, and always run on the CPU but are not as accurate as the `whisper` model.
+  - The
+  - This config option applies to **live transcription only**. Recorded `speech` events will always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
+- **`language`**: Defines the language used by `whisper` to translate `speech` audio events (and live audio only if using the `large` model).
+  - Default: `en`
+  - You must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+  - Transcriptions for `speech` events are translated.
+  - Live audio is translated only if you are using the `large` model. The `small` `sherpa-onnx` model is English-only.
+
+#### Live transcription
+
+The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role.
+
+Results can be error-prone due to a number of factors, including:
+
+- Poor quality camera microphone
+- Distance of the audio source to the camera microphone
+- Low audio bitrate setting in the camera
+- Background noise
+- Using the `small` model - it's fast, but not accurate for poor quality audio
+
+For speech sources close to the camera with minimal background noise, use the `small` model.
+
+If you have CUDA hardware, you can experiment with the `large` `whisper` model on GPU. Performance is not quite as fast as the `sherpa-onnx` `small` model, but live transcription is far more accurate.
+
+#### Transcription and translation of `speech` audio events
+
+Any `speech` events in Explore can be transcribed and/or translated through the Transcribe button in the Tracked Object Details pane.
+
+In order to use transcription and translation for past events, you must enable audio detection and define `speech` as an audio type to listen for in your config. To have `speech` events translated into the language of your choice, set the `language` config parameter with the correct [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+
+The transcribed/translated speech will appear in the description box in the Tracked Object Details pane. If Semantic Search is enabled, embeddings are generated for the transcription text and are fully searchable using the description search type.
+
+Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.
