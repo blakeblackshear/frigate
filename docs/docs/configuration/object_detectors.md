@@ -1060,6 +1060,7 @@ git clone https://github.com/WongKinYiu/yolov9
 cd yolov9
 
 # setup the virtual environment so installation doesn't affect main system
+# NOTE: Virtual environment must be using Python 3.11 or older.
 python3 -m venv ./
 bin/pip install -r requirements.txt
 bin/pip install onnx onnxruntime onnx-simplifier>=0.4.1
