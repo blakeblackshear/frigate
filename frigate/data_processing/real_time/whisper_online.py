@@ -122,9 +122,9 @@ class FasterWhisperASR(ASRBase):
 
         # this worked fast and reliably on NVIDIA L40
         model = WhisperModel(
-            model_size_or_path="tiny",
+            model_size_or_path="small" if device == "cuda" else "tiny",
             device=device,
-            compute_type="int8",
+            compute_type="float16" if device == "cuda" else "int8",
             local_files_only=False,
             download_root=model_dir,
         )
