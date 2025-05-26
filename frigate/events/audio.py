@@ -149,6 +149,7 @@ class AudioEventMaintainer(threading.Thread):
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_config.name}.audio")
         self.audio_listener = None
         self.transcription_processor = None
+        self.transcription_thread = None
 
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
@@ -170,7 +171,15 @@ class AudioEventMaintainer(threading.Thread):
                 camera_config=self.camera_config,
                 requestor=self.requestor,
                 metrics=self.camera_metrics[self.camera_config.name],
+                stop_event=self.stop_event,
             )
+
+            self.transcription_thread = threading.Thread(
+                target=self.transcription_processor.run,
+                name=f"{self.camera_config.name}_transcription_processor",
+                daemon=True,
+            )
+            self.transcription_thread.start()
 
         self.was_enabled = camera.enabled
 
@@ -399,6 +408,12 @@ class AudioEventMaintainer(threading.Thread):
 
         if self.audio_listener:
             stop_ffmpeg(self.audio_listener, self.logger)
+        if self.transcription_thread:
+            self.transcription_thread.join(timeout=2)
+            if self.transcription_thread.is_alive():
+                self.logger.warning(
+                    f"Audio transcription thread {self.transcription_thread.name} is still alive"
+                )
         self.logpipe.close()
         self.requestor.stop()
         self.config_subscriber.stop()

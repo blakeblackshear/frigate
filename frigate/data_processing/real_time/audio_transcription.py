@@ -3,6 +3,8 @@
 import json
 import logging
 import os
+import queue
+import threading
 from typing import Optional
 
 import numpy as np
@@ -28,6 +30,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         camera_config: CameraConfig,
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
+        stop_event: threading.Event,
     ):
         super().__init__(config, metrics)
         self.config = config
@@ -36,6 +39,8 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         self.recognizer = None
         self.stream = None
         self.transcription_segments = []
+        self.audio_queue = queue.Queue()
+        self.stop_event = stop_event
 
         if self.config.audio_transcription.model_size == "large":
             self.asr = FasterWhisperASR(
@@ -46,7 +51,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
                 lan=config.audio_transcription.language,
                 model_dir=os.path.join(MODEL_CACHE_DIR, "whisper"),
             )
-            # self.asr.use_vad()  # Enable Silero VAD for low-RMS audio
+            self.asr.use_vad()  # Enable Silero VAD for low-RMS audio
 
         else:
             # small model as default
@@ -113,7 +118,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
 
     def __process_audio_stream(
         self, audio_data: np.ndarray
-    ) -> Optional[tuple[str, float, bool]]:
+    ) -> Optional[tuple[str, bool]]:
         if (not self.recognizer or not self.stream) and not self.online:
             logger.debug(
                 "Audio transcription (streaming) recognizer or stream not initialized"
@@ -174,31 +179,56 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         pass
 
     def process_audio(self, obj_data: dict[str, any], audio: np.ndarray) -> bool | None:
-        camera = obj_data["camera"]
-
         if audio is None or audio.size == 0:
             logger.debug("No audio data provided for transcription")
-            return
+            return None
 
-        result = self.__process_audio_stream(audio)
+        # enqueue audio data for processing in the thread
+        self.audio_queue.put((obj_data, audio))
+        return None
 
-        if not result:
-            return
-
-        text, is_endpoint = result
-        logger.debug(f"Transcribed audio: '{text}', Endpoint: {is_endpoint}")
-
-        self.requestor.send_data(
-            "tracked_object_update",
-            json.dumps(
-                {
-                    "type": TrackedObjectUpdateTypesEnum.transcription,
-                    "text": text,
-                    "camera": camera,
-                }
-            ),
+    def run(self) -> None:
+        """Run method for the transcription thread to process queued audio data."""
+        logger.debug(
+            f"Starting audio transcription thread for {self.camera_config.name}"
         )
-        return is_endpoint
+        while not self.stop_event.is_set():
+            try:
+                # Get audio data from queue with a timeout to check stop_event
+                obj_data, audio = self.audio_queue.get(timeout=0.1)
+                result = self.__process_audio_stream(audio)
+
+                if not result:
+                    continue
+
+                text, is_endpoint = result
+                logger.debug(f"Transcribed audio: '{text}', Endpoint: {is_endpoint}")
+
+                self.requestor.send_data(
+                    "tracked_object_update",
+                    json.dumps(
+                        {
+                            "type": TrackedObjectUpdateTypesEnum.transcription,
+                            "text": text,
+                            "camera": obj_data["camera"],
+                        }
+                    ),
+                )
+
+                self.audio_queue.task_done()
+
+                if is_endpoint:
+                    self.reset(obj_data["camera"])
+
+            except queue.Empty:
+                continue
+            except Exception as e:
+                logger.error(f"Error processing audio in thread: {e}")
+                self.audio_queue.task_done()
+
+        logger.debug(
+            f"Stopping audio transcription thread for {self.camera_config.name}"
+        )
 
     def reset(self, camera: str) -> None:
         if self.config.audio_transcription.model_size == "large":
@@ -223,7 +253,29 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             # reset sherpa
             self.recognizer.reset(self.stream)
 
+        # Clear the audio queue
+        while not self.audio_queue.empty():
+            try:
+                self.audio_queue.get_nowait()
+                self.audio_queue.task_done()
+            except queue.Empty:
+                break
+
         logger.debug("Stream reset")
+
+    def stop(self) -> None:
+        """Stop the transcription thread and clean up."""
+        self.stop_event.set()
+        # Clear the queue to prevent processing stale data
+        while not self.audio_queue.empty():
+            try:
+                self.audio_queue.get_nowait()
+                self.audio_queue.task_done()
+            except queue.Empty:
+                break
+        logger.debug(
+            f"Transcription thread stop signaled for {self.camera_config.name}"
+        )
 
     def handle_request(
         self, topic: str, request_data: dict[str, any]
