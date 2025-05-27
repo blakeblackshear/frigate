@@ -44,7 +44,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
 
         if self.config.audio_transcription.model_size == "large":
             self.asr = FasterWhisperASR(
-                modelsize="tiny",  # could use 'base' for CPU, switch to 'small' or 'large-v2' for GPU
+                modelsize="tiny",
                 device="cuda"
                 if self.config.audio_transcription.device == "GPU"
                 else "cpu",

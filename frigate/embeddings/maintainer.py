@@ -179,12 +179,10 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        audio_transcription_cameras = [
-            c
+        if any(
+            c.enabled_in_config and c.audio_transcription.enabled
             for c in self.config.cameras.values()
-            if c.enabled_in_config and c.audio_transcription.enabled
-        ]
-        if audio_transcription_cameras:
+        ):
             self.post_processors.append(
                 AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
             )

@@ -226,7 +226,6 @@ class AudioEventMaintainer(threading.Thread):
 
         # run audio transcription
         if self.transcription_processor is not None and (
-            # rms >= self.camera_config.audio.min_volume or self.is_endpoint is False
             self.camera_config.audio_transcription.live_enabled
         ):
             self.transcribing = True
