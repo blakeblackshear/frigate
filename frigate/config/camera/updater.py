@@ -12,6 +12,7 @@ class CameraConfigUpdateEnum(str, Enum):
     """Supported camera config update types."""
 
     audio = "audio"
+    audio_transcription = "audio_transcription"
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
@@ -74,6 +75,8 @@ class CameraConfigUpdateSubscriber:
 
         if update_type == CameraConfigUpdateEnum.audio:
             config.audio = updated_config
+        if update_type == CameraConfigUpdateEnum.audio_transcription:
+            config.audio_transcription = updated_config
         elif update_type == CameraConfigUpdateEnum.birdseye:
             config.birdseye = updated_config
         elif update_type == CameraConfigUpdateEnum.detect:

@@ -58,6 +58,7 @@ class Dispatcher:
 
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
+            "audio_transcription": self._on_audio_transcription_command,
             "detect": self._on_detect_command,
             "enabled": self._on_enabled_command,
             "improve_contrast": self._on_motion_improve_contrast_command,
@@ -181,6 +182,9 @@ class Dispatcher:
                     "snapshots": self.config.cameras[camera].snapshots.enabled,
                     "record": self.config.cameras[camera].record.enabled,
                     "audio": self.config.cameras[camera].audio.enabled,
+                    "audio_transcription": self.config.cameras[
+                        camera
+                    ].audio_transcription.live_enabled,
                     "notifications": self.config.cameras[camera].notifications.enabled,
                     "notifications_suspended": int(
                         self.web_push_client.suspended_cameras.get(camera, 0)
@@ -464,6 +468,37 @@ class Dispatcher:
             audio_settings,
         )
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
+
+    def _on_audio_transcription_command(self, camera_name: str, payload: str) -> None:
+        """Callback for live audio transcription topic."""
+        audio_transcription_settings = self.config.cameras[
+            camera_name
+        ].audio_transcription
+
+        if payload == "ON":
+            if not self.config.cameras[
+                camera_name
+            ].audio_transcription.enabled_in_config:
+                logger.error(
+                    "Audio transcription must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not audio_transcription_settings.live_enabled:
+                logger.info(f"Turning on live audio transcription for {camera_name}")
+                audio_transcription_settings.live_enabled = True
+        elif payload == "OFF":
+            if audio_transcription_settings.live_enabled:
+                logger.info(f"Turning off live audio transcription for {camera_name}")
+                audio_transcription_settings.live_enabled = False
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(
+                CameraConfigUpdateEnum.audio_transcription, camera_name
+            ),
+            audio_transcription_settings,
+        )
+        self.publish(f"{camera_name}/audio_transcription/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
         """Callback for recordings topic."""

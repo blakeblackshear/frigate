@@ -497,7 +497,9 @@ class FrigateApp:
         ]
 
         if audio_cameras:
-            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
+            self.audio_process = AudioProcessor(
+                self.config, audio_cameras, self.camera_metrics
+            )
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
 

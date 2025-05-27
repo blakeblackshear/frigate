@@ -19,6 +19,7 @@ from frigate.util.builtin import (
 
 from ..base import FrigateBaseModel
 from ..classification import (
+    AudioTranscriptionConfig,
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
 )
@@ -55,6 +56,9 @@ class CameraConfig(FrigateBaseModel):
     # Options with global fallback
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
+    )
+    audio_transcription: AudioTranscriptionConfig = Field(
+        default_factory=AudioTranscriptionConfig, title="Audio transcription config."
     )
     birdseye: BirdseyeCameraConfig = Field(
         default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."

@@ -300,3 +300,8 @@ class EmbeddingsContext:
 
     def reindex_embeddings(self) -> dict[str, Any]:
         return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})
+
+    def transcribe_audio(self, event: dict[str, any]) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.transcribe_audio.value, {"event": event}
+        )

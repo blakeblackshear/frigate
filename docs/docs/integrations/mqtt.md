@@ -139,7 +139,7 @@ Message published for updates to tracked object metadata, for example:
   "name": "John",
   "score": 0.95,
   "camera": "front_door_cam",
-  "timestamp": 1607123958.748393,
+  "timestamp": 1607123958.748393
 }
 ```
 
@@ -153,7 +153,7 @@ Message published for updates to tracked object metadata, for example:
   "plate": "123ABC",
   "score": 0.95,
   "camera": "driveway_cam",
-  "timestamp": 1607123958.748393,
+  "timestamp": 1607123958.748393
 }
 ```
 
@@ -268,6 +268,12 @@ Publishes the dBFS value for audio detected on this camera.
 Publishes the rms value for audio detected on this camera.
 
 **NOTE:** Requires audio detection to be enabled
+
+### `frigate/<camera_name>/audio/transcription`
+
+Publishes transcribed text for audio detected on this camera.
+
+**NOTE:** Requires audio detection and transcription to be enabled
 
 ### `frigate/<camera_name>/enabled/set`
 
