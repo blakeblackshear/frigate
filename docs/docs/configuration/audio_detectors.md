@@ -75,7 +75,7 @@ audio:
 
 ### Audio Transcription
 
-Frigate supports fully local text transcription using `sherpa-onnx` and OpenAI's fully local, open source Whisper models (using `faster-whisper`). Audio transcription can be enabled at the global level of your config, but since you likely will not want to use audio transcription for every camera, just set the config for audio transcription features at the global level:
+Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI’s open-source Whisper models via `faster-whisper`. To enable transcription, it is recommended to only configure the features at the global level, and enable it at the individual camera level.
 
 ```yaml
 audio_transcription:
@@ -84,7 +84,7 @@ audio_transcription:
   model_size: ...
 ```
 
-Then enable audio transcription for select cameras only at the camera level:
+Enable audio transcription for select cameras at the camera level:
 
 ```yaml
 cameras:
@@ -100,8 +100,11 @@ Audio detection must be enabled and configured as described above in order to us
 
 :::
 
-Optional config parameters that can be set at the global level include:
+The optional config parameters that can be set at the global level include:
 
+- **`enabled`**: Enable or disable the audio transcription feature.
+  - Default: `False`
+  - It is recommended to only configure the features at the global level, and enable it at the individual camera level.
 - **`device`**: Device to use to run transcription and translation models.
   - Default: `CPU`
   - This can be `CPU` or `GPU`. The `sherpa-onnx` models are lightweight and run on the CPU only. The `whisper` models can run on GPU but are only supported on CUDA hardware.
@@ -115,6 +118,8 @@ Optional config parameters that can be set at the global level include:
   - You must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
   - Transcriptions for `speech` events are translated.
   - Live audio is translated only if you are using the `large` model. The `small` `sherpa-onnx` model is English-only.
+
+The only field that is valid at the camera level is `enabled`.
 
 #### Live transcription
 
