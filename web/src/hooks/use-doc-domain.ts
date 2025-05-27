@@ -16,8 +16,6 @@ export function useDocDomain() {
     // Add other language-specific domains here as needed
   };
 
-  // eslint-disable-next-line no-console
-  console.log(i18n.language);
   // Get the appropriate documentation domain for current language
   const docDomain = DOC_DOMAINS[i18n.language] || "docs.frigate.video";
 
