@@ -350,6 +350,12 @@ class HailoDetector(DetectionApi):
             logger.error(
                 f"Timeout waiting for inference results for request {request_id}"
             )
+
+            if not self.inference_thread.is_alive():
+                raise RuntimeError(
+                    "HailoRT inference thread has stopped, restart required."
+                )
+
             return np.zeros((20, 6), dtype=np.float32)
 
         if isinstance(infer_results, list) and len(infer_results) == 1:
