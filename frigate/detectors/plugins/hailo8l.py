@@ -345,7 +345,7 @@ class HailoDetector(DetectionApi):
         request_id = self.input_store.put(tensor_input)
 
         try:
-            _, infer_results = self.response_store.get(request_id, timeout=10.0)
+            _, infer_results = self.response_store.get(request_id, timeout=1.0)
         except TimeoutError:
             logger.error(
                 f"Timeout waiting for inference results for request {request_id}"
