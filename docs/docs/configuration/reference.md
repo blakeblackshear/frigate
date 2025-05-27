@@ -620,6 +620,19 @@ genai:
   object_prompts:
     person: "My special person prompt."
 
+# Optional: Configuration for audio transcription
+# NOTE: only the enabled option can be overridden at the camera level
+audio_transcription:
+  # Optional: Enable license plate recognition (default: shown below)
+  enabled: False
+  # Optional: The device to run the models on (default: shown below)
+  device: CPU
+  # Optional: Set the model size used for transcription. (default: shown below)
+  model_size: small
+  # Optional: Set the language used for transcription translation. (default: shown below)
+  # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
+  language: en
+
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.9)
 # NOTE: The default go2rtc API port (1984) must be used,

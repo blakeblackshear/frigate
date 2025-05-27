@@ -58,6 +58,7 @@ export interface FrigateCameraState {
     snapshots: boolean;
     record: boolean;
     audio: boolean;
+    audio_transcription: boolean;
     notifications: boolean;
     notifications_suspended: number;
     autotracking: boolean;
@@ -84,3 +85,21 @@ export type EmbeddingsReindexProgressType = {
 };
 
 export type ToggleableSetting = "ON" | "OFF";
+
+export type TrackedObjectUpdateType =
+  | "description"
+  | "lpr"
+  | "transcription"
+  | "face";
+
+export type TrackedObjectUpdateReturnType = {
+  type: TrackedObjectUpdateType;
+  id: string;
+  camera: string;
+  description?: string;
+  name?: string;
+  plate?: string;
+  score?: number;
+  timestamp?: number;
+  text?: string;
+} | null;

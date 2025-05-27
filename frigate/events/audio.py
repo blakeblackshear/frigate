@@ -18,7 +18,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataTypeEnum,
 )
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, CameraInput, FfmpegConfig
+from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -29,6 +29,9 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
+)
+from frigate.data_processing.real_time.audio_transcription import (
+    AudioTranscriptionRealTimeProcessor,
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
@@ -75,6 +78,7 @@ class AudioProcessor(util.Process):
 
     def __init__(
         self,
+        config: FrigateConfig,
         cameras: list[CameraConfig],
         camera_metrics: dict[str, CameraMetrics],
     ):
@@ -82,6 +86,7 @@ class AudioProcessor(util.Process):
 
         self.camera_metrics = camera_metrics
         self.cameras = cameras
+        self.config = config
 
     def run(self) -> None:
         audio_threads: list[AudioEventMaintainer] = []
@@ -94,6 +99,7 @@ class AudioProcessor(util.Process):
         for camera in self.cameras:
             audio_thread = AudioEventMaintainer(
                 camera,
+                self.config,
                 self.camera_metrics,
                 self.stop_event,
             )
@@ -122,46 +128,71 @@ class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
+        config: FrigateConfig,
         camera_metrics: dict[str, CameraMetrics],
         stop_event: threading.Event,
     ) -> None:
         super().__init__(name=f"{camera.name}_audio_event_processor")
 
-        self.config = camera
+        self.config = config
+        self.camera_config = camera
         self.camera_metrics = camera_metrics
         self.detections: dict[dict[str, Any]] = {}
         self.stop_event = stop_event
-        self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
+        self.detector = AudioTfl(stop_event, self.camera_config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
-        self.logger = logging.getLogger(f"audio.{self.config.name}")
-        self.ffmpeg_cmd = get_ffmpeg_command(self.config.ffmpeg)
-        self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
+        self.logger = logging.getLogger(f"audio.{self.camera_config.name}")
+        self.ffmpeg_cmd = get_ffmpeg_command(self.camera_config.ffmpeg)
+        self.logpipe = LogPipe(f"ffmpeg.{self.camera_config.name}.audio")
         self.audio_listener = None
+        self.transcription_processor = None
+        self.transcription_thread = None
 
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            {self.config.name: self.config},
-            [CameraConfigUpdateEnum.audio, CameraConfigUpdateEnum.enabled],
+            {self.camera_config.name: self.camera_config},
+            [
+                CameraConfigUpdateEnum.audio,
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.audio_transcription,
+            ],
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
         self.event_metadata_publisher = EventMetadataPublisher()
 
+        if self.camera_config.audio_transcription.enabled_in_config:
+            # init the transcription processor for this camera
+            self.transcription_processor = AudioTranscriptionRealTimeProcessor(
+                config=self.config,
+                camera_config=self.camera_config,
+                requestor=self.requestor,
+                metrics=self.camera_metrics[self.camera_config.name],
+                stop_event=self.stop_event,
+            )
+
+            self.transcription_thread = threading.Thread(
+                target=self.transcription_processor.run,
+                name=f"{self.camera_config.name}_transcription_processor",
+                daemon=True,
+            )
+            self.transcription_thread.start()
+
         self.was_enabled = camera.enabled
 
     def detect_audio(self, audio) -> None:
-        if not self.config.audio.enabled or self.stop_event.is_set():
+        if not self.camera_config.audio.enabled or self.stop_event.is_set():
             return
 
         audio_as_float = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
-        self.camera_metrics[self.config.name].audio_rms.value = rms
-        self.camera_metrics[self.config.name].audio_dBFS.value = dBFS
+        self.camera_metrics[self.camera_config.name].audio_rms.value = rms
+        self.camera_metrics[self.camera_config.name].audio_dBFS.value = dBFS
 
         # only run audio detection when volume is above min_volume
-        if rms >= self.config.audio.min_volume:
+        if rms >= self.camera_config.audio.min_volume:
             # create waveform relative to max range and look for detections
             waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
             model_detections = self.detector.detect(waveform)
@@ -169,26 +200,40 @@ class AudioEventMaintainer(threading.Thread):
 
             for label, score, _ in model_detections:
                 self.logger.debug(
-                    f"{self.config.name} heard {label} with a score of {score}"
+                    f"{self.camera_config.name} heard {label} with a score of {score}"
                 )
 
-                if label not in self.config.audio.listen:
+                if label not in self.camera_config.audio.listen:
                     continue
 
-                if score > dict((self.config.audio.filters or {}).get(label, {})).get(
-                    "threshold", 0.8
-                ):
+                if score > dict(
+                    (self.camera_config.audio.filters or {}).get(label, {})
+                ).get("threshold", 0.8):
                     self.handle_detection(label, score)
                     audio_detections.append(label)
 
             # send audio detection data
             self.detection_publisher.publish(
                 (
-                    self.config.name,
+                    self.camera_config.name,
                     datetime.datetime.now().timestamp(),
                     dBFS,
                     audio_detections,
                 )
+            )
+
+        # run audio transcription
+        if self.transcription_processor is not None and (
+            self.camera_config.audio_transcription.live_enabled
+        ):
+            self.transcribing = True
+            # process audio until we've reached the endpoint
+            self.transcription_processor.process_audio(
+                {
+                    "id": f"{self.camera_config.name}_audio",
+                    "camera": self.camera_config.name,
+                },
+                audio,
             )
 
         self.expire_detections()
@@ -204,8 +249,8 @@ class AudioEventMaintainer(threading.Thread):
         else:
             dBFS = 0
 
-        self.requestor.send_data(f"{self.config.name}/audio/dBFS", float(dBFS))
-        self.requestor.send_data(f"{self.config.name}/audio/rms", float(rms))
+        self.requestor.send_data(f"{self.camera_config.name}/audio/dBFS", float(dBFS))
+        self.requestor.send_data(f"{self.camera_config.name}/audio/rms", float(rms))
 
         return float(rms), float(dBFS)
 
@@ -220,13 +265,13 @@ class AudioEventMaintainer(threading.Thread):
                 random.choices(string.ascii_lowercase + string.digits, k=6)
             )
             event_id = f"{now}-{rand_id}"
-            self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
+            self.requestor.send_data(f"{self.camera_config.name}/audio/{label}", "ON")
 
             self.event_metadata_publisher.publish(
                 EventMetadataTypeEnum.manual_event_create,
                 (
                     now,
-                    self.config.name,
+                    self.camera_config.name,
                     label,
                     event_id,
                     True,
@@ -252,10 +297,10 @@ class AudioEventMaintainer(threading.Thread):
 
             if (
                 now - detection.get("last_detection", now)
-                > self.config.audio.max_not_heard
+                > self.camera_config.audio.max_not_heard
             ):
                 self.requestor.send_data(
-                    f"{self.config.name}/audio/{detection['label']}", "OFF"
+                    f"{self.camera_config.name}/audio/{detection['label']}", "OFF"
                 )
 
                 self.event_metadata_publisher.publish(
@@ -264,12 +309,21 @@ class AudioEventMaintainer(threading.Thread):
                 )
                 self.detections[detection["label"]] = None
 
+                # clear real-time transcription
+                if self.transcription_processor is not None:
+                    self.transcription_processor.reset(self.camera_config.name)
+                    self.requestor.send_data(
+                        f"{self.camera_config.name}/audio/transcription", ""
+                    )
+
     def expire_all_detections(self) -> None:
         """Immediately end all current detections"""
         now = datetime.datetime.now().timestamp()
         for label, detection in list(self.detections.items()):
             if detection:
-                self.requestor.send_data(f"{self.config.name}/audio/{label}", "OFF")
+                self.requestor.send_data(
+                    f"{self.camera_config.name}/audio/{label}", "OFF"
+                )
                 self.event_metadata_publisher.publish(
                     EventMetadataTypeEnum.manual_event_end,
                     (detection["id"], now),
@@ -290,7 +344,7 @@ class AudioEventMaintainer(threading.Thread):
             if self.stop_event.is_set():
                 return
 
-            time.sleep(self.config.ffmpeg.retry_interval)
+            time.sleep(self.camera_config.ffmpeg.retry_interval)
             self.logpipe.dump()
             self.start_or_restart_ffmpeg()
 
@@ -312,20 +366,20 @@ class AudioEventMaintainer(threading.Thread):
             log_and_restart()
 
     def run(self) -> None:
-        if self.config.enabled:
+        if self.camera_config.enabled:
             self.start_or_restart_ffmpeg()
 
         while not self.stop_event.is_set():
-            enabled = self.config.enabled
+            enabled = self.camera_config.enabled
             if enabled != self.was_enabled:
                 if enabled:
                     self.logger.debug(
-                        f"Enabling audio detections for {self.config.name}"
+                        f"Enabling audio detections for {self.camera_config.name}"
                     )
                     self.start_or_restart_ffmpeg()
                 else:
                     self.logger.debug(
-                        f"Disabling audio detections for {self.config.name}, ending events"
+                        f"Disabling audio detections for {self.camera_config.name}, ending events"
                     )
                     self.expire_all_detections()
                     stop_ffmpeg(self.audio_listener, self.logger)
@@ -344,6 +398,12 @@ class AudioEventMaintainer(threading.Thread):
 
         if self.audio_listener:
             stop_ffmpeg(self.audio_listener, self.logger)
+        if self.transcription_thread:
+            self.transcription_thread.join(timeout=2)
+            if self.transcription_thread.is_alive():
+                self.logger.warning(
+                    f"Audio transcription thread {self.transcription_thread.name} is still alive"
+                )
         self.logpipe.close()
         self.requestor.stop()
         self.config_subscriber.stop()
