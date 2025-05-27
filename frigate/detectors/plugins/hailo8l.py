@@ -345,11 +345,17 @@ class HailoDetector(DetectionApi):
         request_id = self.input_store.put(tensor_input)
 
         try:
-            _, infer_results = self.response_store.get(request_id, timeout=10.0)
+            _, infer_results = self.response_store.get(request_id, timeout=1.0)
         except TimeoutError:
             logger.error(
                 f"Timeout waiting for inference results for request {request_id}"
             )
+
+            if not self.inference_thread.is_alive():
+                raise RuntimeError(
+                    "HailoRT inference thread has stopped, restart required."
+                )
+
             return np.zeros((20, 6), dtype=np.float32)
 
         if isinstance(infer_results, list) and len(infer_results) == 1:

@@ -763,12 +763,18 @@ export default function InputWithTags({
 
             {inputFocused ? (
               <LuChevronUp
-                onClick={() => setInputFocused(false)}
+                onClick={() => {
+                  setInputFocused(false);
+                  inputRef.current?.blur();
+                }}
                 className="size-4 cursor-pointer text-secondary-foreground"
               />
             ) : (
               <LuChevronDown
-                onClick={() => setInputFocused(true)}
+                onClick={() => {
+                  setInputFocused(true);
+                  inputRef.current?.focus();
+                }}
                 className="size-4 cursor-pointer text-secondary-foreground"
               />
             )}
@@ -778,7 +784,9 @@ export default function InputWithTags({
         <CommandList
           className={cn(
             "scrollbar-container border-t duration-200 animate-in fade-in",
-            inputFocused ? "visible" : "hidden",
+            inputFocused && inputRef.current?.matches(":focus")
+              ? "visible"
+              : "hidden",
           )}
         >
           {!currentFilterType && inputValue && (

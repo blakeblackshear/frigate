@@ -74,8 +74,10 @@ Fine-tune face recognition with these optional parameters at the global level of
 
 ## Usage
 
+Follow these steps to begin:
+
 1. **Enable face recognition** in your configuration file and restart Frigate.
-2. **Upload your face** using the **Add Face** button's wizard in the Face Library section of the Frigate UI.
+2. **Upload one face** using the **Add Face** button's wizard in the Face Library section of the Frigate UI. Read below for the best practices on expanding your training set.
 3. When Frigate detects and attempts to recognize a face, it will appear in the **Train** tab of the Face Library, along with its associated recognition confidence.
 4. From the **Train** tab, you can **assign the face** to a new or existing person to improve recognition accuracy for the future.
 
