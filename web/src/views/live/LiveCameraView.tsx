@@ -1,4 +1,5 @@
 import {
+  useAudioLiveTranscription,
   useAudioState,
   useAudioTranscriptionState,
   useAutotrackingState,
@@ -7,7 +8,6 @@ import {
   usePtzCommand,
   useRecordingsState,
   useSnapshotsState,
-  useTrackedObjectUpdate,
 } from "@/api/ws";
 import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
 import FilterSwitch from "@/components/filter/FilterSwitch";
@@ -204,21 +204,17 @@ export default function LiveCameraView({
 
   const { payload: audioTranscriptionState, send: sendTranscription } =
     useAudioTranscriptionState(camera.name);
-  const { payload: wsUpdate } = useTrackedObjectUpdate();
+  const { payload: transcription } = useAudioLiveTranscription(camera.name);
   const transcriptionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (
-      wsUpdate &&
-      wsUpdate.type == "transcription" &&
-      wsUpdate.camera == camera.name
-    ) {
+    if (transcription) {
       if (transcriptionRef.current) {
         transcriptionRef.current.scrollTop =
           transcriptionRef.current.scrollHeight;
       }
     }
-  }, [wsUpdate, camera.name]);
+  }, [transcription]);
 
   useEffect(() => {
     return () => {
@@ -661,15 +657,12 @@ export default function LiveCameraView({
           </TransformComponent>
           {camera?.audio?.enabled_in_config &&
             audioTranscriptionState == "ON" &&
-            wsUpdate &&
-            wsUpdate.type === "transcription" &&
-            wsUpdate.camera === camera.name &&
-            wsUpdate.text !== "" && (
+            transcription != null && (
               <div
                 ref={transcriptionRef}
                 className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
               >
-                {wsUpdate.text}
+                {transcription}
               </div>
             )}
         </div>

@@ -1,6 +1,5 @@
 """Handle processing audio for speech transcription using sherpa-onnx with FFmpeg pipe."""
 
-import json
 import logging
 import os
 import queue
@@ -13,7 +12,6 @@ import sherpa_onnx
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.downloader import ModelDownloader
 
 from ..types import DataProcessorMetrics
@@ -205,14 +203,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
                 logger.debug(f"Transcribed audio: '{text}', Endpoint: {is_endpoint}")
 
                 self.requestor.send_data(
-                    "tracked_object_update",
-                    json.dumps(
-                        {
-                            "type": TrackedObjectUpdateTypesEnum.transcription,
-                            "text": text,
-                            "camera": obj_data["camera"],
-                        }
-                    ),
+                    f"{self.camera_config.name}/audio/transcription", text
                 )
 
                 self.audio_queue.task_done()
@@ -237,14 +228,8 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             self.transcription_segments = []
 
             self.requestor.send_data(
-                "tracked_object_update",
-                json.dumps(
-                    {
-                        "type": TrackedObjectUpdateTypesEnum.transcription,
-                        "text": (output[2].strip()),
-                        "camera": camera,
-                    }
-                ),
+                f"{self.camera_config.name}/audio/transcription",
+                (output[2].strip() + " "),
             )
 
             # reset whisper

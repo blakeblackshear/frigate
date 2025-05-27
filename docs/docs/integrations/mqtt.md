@@ -143,16 +143,6 @@ Message published for updates to tracked object metadata, for example:
 }
 ```
 
-#### Live Audio Transcription Update
-
-```json
-{
-  "type": "transcription",
-  "text": "Hello Johnny, are you home?",
-  "camera": "doorbell"
-}
-```
-
 ### `frigate/reviews`
 
 Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. When additional objects are detected or when a zone change occurs, it will publish a, `update` message with the same id. When the review activity has ended a final `end` message is published.
@@ -264,6 +254,12 @@ Publishes the dBFS value for audio detected on this camera.
 Publishes the rms value for audio detected on this camera.
 
 **NOTE:** Requires audio detection to be enabled
+
+### `frigate/<camera_name>/audio/transcription`
+
+Publishes transcribed text for audio detected on this camera.
+
+**NOTE:** Requires audio detection and transcription to be enabled
 
 ### `frigate/<camera_name>/enabled/set`
 

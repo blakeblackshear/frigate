@@ -1,7 +1,6 @@
 """Handle creating audio events."""
 
 import datetime
-import json
 import logging
 import random
 import string
@@ -37,7 +36,6 @@ from frigate.data_processing.real_time.audio_transcription import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection.base import load_labels
-from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
@@ -315,14 +313,7 @@ class AudioEventMaintainer(threading.Thread):
                 if self.transcription_processor is not None:
                     self.transcription_processor.reset(self.camera_config.name)
                     self.requestor.send_data(
-                        "tracked_object_update",
-                        json.dumps(
-                            {
-                                "type": TrackedObjectUpdateTypesEnum.transcription,
-                                "text": "",
-                                "camera": self.camera_config.name,
-                            }
-                        ),
+                        f"{self.camera_config.name}/audio/transcription", ""
                     )
 
     def expire_all_detections(self) -> None:

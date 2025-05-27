@@ -440,6 +440,15 @@ export function useAudioActivity(camera: string): { payload: number } {
   return { payload: payload as number };
 }
 
+export function useAudioLiveTranscription(camera: string): {
+  payload: string;
+} {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/audio/transcription`, "");
+  return { payload: payload as string };
+}
+
 export function useMotionThreshold(camera: string): {
   payload: string;
   send: (payload: number, retain?: boolean) => void;
