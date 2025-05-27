@@ -710,6 +710,21 @@ class FrigateConfig(FrigateBaseModel):
         self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
 
+        # Check audio transcription and audio detection requirements
+        if self.audio_transcription.enabled:
+            # If audio transcription is enabled globally, at least one camera must have audio detection enabled
+            if not any(camera.audio.enabled for camera in self.cameras.values()):
+                raise ValueError(
+                    "Audio transcription is enabled globally, but no cameras have audio detection enabled. At least one camera must have audio detection enabled."
+                )
+        else:
+            # If audio transcription is disabled globally, check each camera with audio_transcription enabled
+            for camera in self.cameras.values():
+                if camera.audio_transcription.enabled and not camera.audio.enabled:
+                    raise ValueError(
+                        f"Camera {camera.name} has audio transcription enabled, but audio detection is not enabled for this camera. Audio detection must be enabled for cameras with audio transcription when it is disabled globally."
+                    )
+
         if self.plus_api and not self.snapshots.clean_copy:
             logger.warning(
                 "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"

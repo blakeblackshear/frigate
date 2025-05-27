@@ -75,14 +75,16 @@ audio:
 
 ### Audio Transcription
 
-Frigate supports fully local text transcription using `sherpa-onnx` and OpenAI's fully local, open source Whisper models (using `faster-whisper`). Enable audio transcription features at the global level in your config:
+Frigate supports fully local text transcription using `sherpa-onnx` and OpenAI's fully local, open source Whisper models (using `faster-whisper`). Audio transcription can be enabled at the global level of your config, but since you likely will not want to use audio transcription for every camera, just set the config for audio transcription features at the global level:
 
 ```yaml
 audio_transcription:
-  enabled: True
+  enabled: False
+  device: ...
+  model_size: ...
 ```
 
-Audio transcription can also be enabled for select cameras only at the camera level:
+Then enable audio transcription for select cameras only at the camera level:
 
 ```yaml
 cameras:
