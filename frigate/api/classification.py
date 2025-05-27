@@ -14,7 +14,10 @@ from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import require_role
-from frigate.api.defs.request.classification_body import RenameFaceBody
+from frigate.api.defs.request.classification_body import (
+    AudioTranscriptionBody,
+    RenameFaceBody,
+)
 from frigate.api.defs.tags import Tags
 from frigate.config.camera import DetectConfig
 from frigate.const import FACE_DIR
@@ -381,6 +384,61 @@ def reindex_embeddings(request: Request):
             content={
                 "success": False,
                 "message": "Failed to start reindexing.",
+            },
+            status_code=500,
+        )
+
+
+@router.put("/audio/transcribe")
+def transcribe_audio(request: Request, body: AudioTranscriptionBody):
+    event_id = body.event_id
+
+    try:
+        event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        message = f"Event {event_id} not found"
+        logger.error(message)
+        return JSONResponse(
+            content=({"success": False, "message": message}), status_code=404
+        )
+
+    if not request.app.frigate_config.cameras[event.camera].audio_transcription.enabled:
+        message = f"Audio transcription is not enabled for {event.camera}."
+        logger.error(message)
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": message,
+                }
+            ),
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    response = context.transcribe_audio(model_to_dict(event))
+
+    if response == "started":
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": "Audio transcription has started.",
+            },
+            status_code=202,  # 202 Accepted
+        )
+    elif response == "in_progress":
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Audio transcription for a speech event is currently in progress. Try again later.",
+            },
+            status_code=409,  # 409 Conflict
+        )
+    else:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Failed to transcribe audio.",
             },
             status_code=500,
         )

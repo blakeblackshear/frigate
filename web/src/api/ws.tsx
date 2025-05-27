@@ -8,6 +8,7 @@ import {
   FrigateReview,
   ModelState,
   ToggleableSetting,
+  TrackedObjectUpdateReturnType,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
@@ -60,6 +61,7 @@ function useValue(): useValueReturn {
         enabled,
         snapshots,
         audio,
+        audio_transcription,
         notifications,
         notifications_suspended,
         autotracking,
@@ -71,6 +73,9 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/audio_transcription/state`] = audio_transcription
+        ? "ON"
+        : "OFF";
       cameraStates[`${name}/notifications/state`] = notifications
         ? "ON"
         : "OFF";
@@ -217,6 +222,20 @@ export function useAudioState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/audio/state`, `${camera}/audio/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useAudioTranscriptionState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/audio_transcription/state`,
+    `${camera}/audio_transcription/set`,
+  );
   return { payload: payload as ToggleableSetting, send };
 }
 
@@ -421,6 +440,15 @@ export function useAudioActivity(camera: string): { payload: number } {
   return { payload: payload as number };
 }
 
+export function useAudioLiveTranscription(camera: string): {
+  payload: string;
+} {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/audio/transcription`, "");
+  return { payload: payload as string };
+}
+
 export function useMotionThreshold(camera: string): {
   payload: string;
   send: (payload: number, retain?: boolean) => void;
@@ -463,11 +491,16 @@ export function useImproveContrast(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
-export function useTrackedObjectUpdate(): { payload: string } {
+export function useTrackedObjectUpdate(): {
+  payload: TrackedObjectUpdateReturnType;
+} {
   const {
     value: { payload },
   } = useWs("tracked_object_update", "");
-  return useDeepMemo(JSON.parse(payload as string));
+  const parsed = payload
+    ? JSON.parse(payload as string)
+    : { type: "", id: "", camera: "" };
+  return { payload: useDeepMemo(parsed) };
 }
 
 export function useNotifications(camera: string): {

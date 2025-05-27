@@ -54,6 +54,7 @@ from .camera.snapshots import SnapshotsConfig
 from .camera.timestamp import TimestampStyleConfig
 from .camera_group import CameraGroupConfig
 from .classification import (
+    AudioTranscriptionConfig,
     ClassificationConfig,
     FaceRecognitionConfig,
     LicensePlateRecognitionConfig,
@@ -419,6 +420,9 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     # Classification Config
+    audio_transcription: AudioTranscriptionConfig = Field(
+        default_factory=AudioTranscriptionConfig, title="Audio transcription config."
+    )
     classification: ClassificationConfig = Field(
         default_factory=ClassificationConfig, title="Object classification config."
     )
@@ -472,6 +476,7 @@ class FrigateConfig(FrigateBaseModel):
         global_config = self.model_dump(
             include={
                 "audio": ...,
+                "audio_transcription": ...,
                 "birdseye": ...,
                 "face_recognition": ...,
                 "lpr": ...,
@@ -528,6 +533,7 @@ class FrigateConfig(FrigateBaseModel):
             allowed_fields_map = {
                 "face_recognition": ["enabled", "min_area"],
                 "lpr": ["enabled", "expire_time", "min_area", "enhancement"],
+                "audio_transcription": ["enabled", "live_enabled"],
             }
 
             for section in allowed_fields_map:
@@ -609,6 +615,9 @@ class FrigateConfig(FrigateBaseModel):
             # set config pre-value
             camera_config.enabled_in_config = camera_config.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
+            camera_config.audio_transcription.enabled_in_config = (
+                camera_config.audio_transcription.enabled
+            )
             camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.notifications.enabled_in_config = (
                 camera_config.notifications.enabled
@@ -700,6 +709,21 @@ class FrigateConfig(FrigateBaseModel):
         self.objects.parse_all_objects(self.cameras)
         self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
+
+        # Check audio transcription and audio detection requirements
+        if self.audio_transcription.enabled:
+            # If audio transcription is enabled globally, at least one camera must have audio detection enabled
+            if not any(camera.audio.enabled for camera in self.cameras.values()):
+                raise ValueError(
+                    "Audio transcription is enabled globally, but no cameras have audio detection enabled. At least one camera must have audio detection enabled."
+                )
+        else:
+            # If audio transcription is disabled globally, check each camera with audio_transcription enabled
+            for camera in self.cameras.values():
+                if camera.audio_transcription.enabled and not camera.audio.enabled:
+                    raise ValueError(
+                        f"Camera {camera.name} has audio transcription enabled, but audio detection is not enabled for this camera. Audio detection must be enabled for cameras with audio transcription when it is disabled globally."
+                    )
 
         if self.plus_api and not self.snapshots.clean_copy:
             logger.warning(

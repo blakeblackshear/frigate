@@ -41,6 +41,11 @@ export interface CameraConfig {
     min_volume: number;
     num_threads: number;
   };
+  audio_transcription: {
+    enabled: boolean;
+    enabled_in_config: boolean;
+    live_enabled: boolean;
+  };
   best_image_timeout: number;
   birdseye: {
     enabled: boolean;
@@ -294,6 +299,10 @@ export interface FrigateConfig {
     max_not_heard: number;
     min_volume: number;
     num_threads: number;
+  };
+
+  audio_transcription: {
+    enabled: boolean;
   };
 
   birdseye: BirdseyeConfig;
