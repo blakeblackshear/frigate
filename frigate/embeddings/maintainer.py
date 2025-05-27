@@ -37,6 +37,9 @@ from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
 from frigate.data_processing.post.api import PostProcessorApi
+from frigate.data_processing.post.audio_transcription import (
+    AudioTranscriptionPostProcessor,
+)
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,
 )
@@ -174,6 +177,14 @@ class EmbeddingMaintainer(threading.Thread):
                     lpr_model_runner,
                     self.detected_license_plates,
                 )
+            )
+
+        if any(
+            c.enabled_in_config and c.audio_transcription.enabled
+            for c in self.config.cameras.values()
+        ):
+            self.post_processors.append(
+                AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
             )
 
         self.stop_event = stop_event
@@ -372,6 +383,8 @@ class EmbeddingMaintainer(threading.Thread):
                             },
                             PostProcessDataEnum.recording,
                         )
+                elif isinstance(processor, AudioTranscriptionPostProcessor):
+                    continue
                 else:
                     processor.process_data(event_id, PostProcessDataEnum.event_id)
 

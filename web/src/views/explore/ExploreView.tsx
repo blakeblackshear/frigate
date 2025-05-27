@@ -75,13 +75,13 @@ export default function ExploreView({
     }, {});
   }, [events]);
 
-  const trackedObjectUpdate = useTrackedObjectUpdate();
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
 
   useEffect(() => {
-    mutate();
-    // mutate / revalidate when event description updates come in
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackedObjectUpdate]);
+    if (wsUpdate && wsUpdate.type == "description") {
+      mutate();
+    }
+  }, [wsUpdate, mutate]);
 
   // update search detail when results change
 

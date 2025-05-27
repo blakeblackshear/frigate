@@ -78,6 +78,7 @@ import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { CgTranscript } from "react-icons/cg";
 
 const SEARCH_TABS = [
   "details",
@@ -710,6 +711,34 @@ function ObjectDetailsTab({
     [search, t],
   );
 
+  // speech transcription
+
+  const onTranscribe = useCallback(() => {
+    axios
+      .put(`/audio/transcribe`, { event_id: search.id })
+      .then((resp) => {
+        if (resp.status == 202) {
+          toast.success(t("details.item.toast.success.audioTranscription"), {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("details.item.toast.error.audioTranscription", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
+      });
+  }, [search, t]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -893,6 +922,16 @@ function ObjectDetailsTab({
                 </Button>
               </FaceSelectionDialog>
             )}
+            {config?.cameras[search?.camera].audio_transcription.enabled &&
+              search?.label == "speech" &&
+              search?.end_time && (
+                <Button className="w-full" onClick={onTranscribe}>
+                  <div className="flex gap-1">
+                    <CgTranscript />
+                    {t("itemMenu.audioTranscription.label")}
+                  </div>
+                </Button>
+              )}
           </div>
         </div>
       </div>

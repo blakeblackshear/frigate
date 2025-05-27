@@ -19,9 +19,30 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
-class LPRDeviceEnum(str, Enum):
+class EnrichmentsDeviceEnum(str, Enum):
     GPU = "GPU"
     CPU = "CPU"
+
+
+class AudioTranscriptionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio transcription.")
+    language: str = Field(
+        default="en",
+        title="Language abbreviation to use for audio event transcription/translation.",
+    )
+    device: Optional[EnrichmentsDeviceEnum] = Field(
+        default=EnrichmentsDeviceEnum.CPU,
+        title="The device used for license plate recognition.",
+    )
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of camera."
+    )
+    live_enabled: Optional[bool] = Field(
+        default=False, title="Enable live transcriptions."
+    )
 
 
 class BirdClassificationConfig(FrigateBaseModel):
@@ -144,8 +165,8 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.CPU,
+    device: Optional[EnrichmentsDeviceEnum] = Field(
+        default=EnrichmentsDeviceEnum.CPU,
         title="The device used for license plate recognition.",
     )
     model_size: str = Field(
