@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -39,6 +40,7 @@ export default function MotionTunerView({
   setUnsavedChanges,
 }: MotionTunerViewProps) {
   const { t } = useTranslation(["views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -198,7 +200,7 @@ export default function MotionTunerView({
 
           <div className="flex items-center text-primary">
             <Link
-              to="https://docs.frigate.video/configuration/motion_detection"
+              to={getLocaleDocUrl("configuration/motion_detection")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline"

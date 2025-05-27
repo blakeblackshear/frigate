@@ -22,6 +22,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type FrigatePlusModel = {
   id: string;
@@ -49,6 +50,7 @@ export default function FrigatePlusSettingsView({
   setUnsavedChanges,
 }: FrigateSettingsViewProps) {
   const { t } = useTranslation("views/settings");
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -451,7 +453,7 @@ export default function FrigatePlusSettingsView({
                   </p>
                   <div className="mt-2 flex items-center text-primary-variant">
                     <Link
-                      to="https://docs.frigate.video/plus/faq"
+                      to={getLocaleDocUrl("plus/faq")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"

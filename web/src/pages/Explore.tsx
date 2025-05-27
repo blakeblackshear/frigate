@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 const API_LIMIT = 25;
 
@@ -29,6 +30,7 @@ export default function Explore() {
   // search field handler
 
   const { t } = useTranslation(["views/explore"]);
+  const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -468,7 +470,7 @@ export default function Explore() {
                 </div>
                 <div className="flex items-center text-primary-variant">
                   <Link
-                    to="https://docs.frigate.video/configuration/semantic_search"
+                    to={getLocaleDocUrl("configuration/semantic_search")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline"

@@ -41,6 +41,8 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useTranslation } from "react-i18next";
 
+import { useDocDomain } from "@/hooks/use-doc-domain";
+
 type MasksAndZoneViewProps = {
   selectedCamera: string;
   selectedZoneMask?: PolygonType[];
@@ -53,6 +55,7 @@ export default function MasksAndZonesView({
   setUnsavedChanges,
 }: MasksAndZoneViewProps) {
   const { t } = useTranslation(["views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
@@ -513,7 +516,7 @@ export default function MasksAndZonesView({
                               <p>{t("masksAndZones.zones.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
-                                  to="https://docs.frigate.video/configuration/zones"
+                                  to={getLocaleDocUrl("configuration/zones")}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline"
@@ -579,7 +582,9 @@ export default function MasksAndZonesView({
                               <p>{t("masksAndZones.motionMasks.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
-                                  to="https://docs.frigate.video/configuration/masks#motion-masks"
+                                  to={getLocaleDocUrl(
+                                    "configuration/masks#motion-masks",
+                                  )}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline"
@@ -649,7 +654,9 @@ export default function MasksAndZonesView({
                               <p>{t("masksAndZones.objectMasks.desc.title")}</p>
                               <div className="flex items-center text-primary">
                                 <Link
-                                  to="https://docs.frigate.video/configuration/masks#object-filter-masks"
+                                  to={getLocaleDocUrl(
+                                    "configuration/masks#object-filter-masks",
+                                  )}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline"

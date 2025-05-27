@@ -45,6 +45,7 @@ import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -61,6 +62,7 @@ export default function NotificationView({
   setUnsavedChanges,
 }: NotificationsSettingsViewProps) {
   const { t } = useTranslation(["views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
     "config",
@@ -316,7 +318,7 @@ export default function NotificationView({
                 <p>{t("notification.notificationSettings.desc")}</p>
                 <div className="flex items-center text-primary">
                   <Link
-                    to="https://docs.frigate.video/configuration/notifications"
+                    to={getLocaleDocUrl("configuration/notifications")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline"
@@ -338,7 +340,7 @@ export default function NotificationView({
                 </Trans>
                 <div className="mt-3 flex items-center">
                   <Link
-                    to="https://docs.frigate.video/configuration/authentication"
+                    to={getLocaleDocUrl("configuration/authentication")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline"
@@ -371,7 +373,7 @@ export default function NotificationView({
                   <p>{t("notification.notificationSettings.desc")}</p>
                   <div className="flex items-center text-primary">
                     <Link
-                      to="https://docs.frigate.video/configuration/notifications"
+                      to={getLocaleDocUrl("configuration/notifications")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"

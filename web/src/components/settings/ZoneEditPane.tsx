@@ -32,6 +32,7 @@ import { getAttributeLabels } from "@/utils/iconUtil";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -63,6 +64,7 @@ export default function ZoneEditPane({
   setSnapPoints,
 }: ZoneEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -673,7 +675,9 @@ export default function ZoneEditPane({
                   {t("masksAndZones.zones.speedEstimation.desc")}
                   <div className="mt-2 flex items-center text-primary">
                     <Link
-                      to="https://docs.frigate.video/configuration/zones#speed-estimation"
+                      to={getLocaleDocUrl(
+                        "configuration/zones#speed-estimation",
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"
