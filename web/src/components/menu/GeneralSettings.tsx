@@ -64,12 +64,15 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 import { supportedLanguageKeys } from "@/lib/const";
 
+import { useDocDomain } from "@/hooks/use-doc-domain";
+
 type GeneralSettingsProps = {
   className?: string;
 };
 
 export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { t } = useTranslation(["common", "views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
@@ -479,7 +482,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               {t("menu.help")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <a href="https://docs.frigate.video" target="_blank">
+            <a href={getLocaleDocUrl("/")} target="_blank">
               <MenuItem
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
