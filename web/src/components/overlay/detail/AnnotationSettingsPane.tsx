@@ -27,6 +27,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type AnnotationSettingsPaneProps = {
   event: Event;
@@ -43,6 +44,7 @@ export function AnnotationSettingsPane({
   setAnnotationOffset,
 }: AnnotationSettingsPaneProps) {
   const { t } = useTranslation(["views/explore"]);
+  const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -180,7 +182,7 @@ export function AnnotationSettingsPane({
                       </Trans>
                       <div className="mt-2 flex items-center text-primary">
                         <Link
-                          to="https://docs.frigate.video/configuration/reference"
+                          to={getLocaleDocUrl("configuration/reference")}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline"

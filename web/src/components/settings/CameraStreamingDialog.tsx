@@ -32,6 +32,7 @@ import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
 import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -51,6 +52,8 @@ export function CameraStreamingDialog({
   onSave,
 }: CameraStreamingDialogProps) {
   const { t } = useTranslation(["components/camera", "components/dialog"]);
+
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -220,7 +223,7 @@ export function CameraStreamingDialog({
                   })}
                   <div className="mt-2 flex items-center text-primary">
                     <Link
-                      to="https://docs.frigate.video/configuration/live"
+                      to={getLocaleDocUrl("configuration/live")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"
@@ -281,7 +284,7 @@ export function CameraStreamingDialog({
                           {t("group.camera.setting.audio.tips.title")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
-                              to="https://docs.frigate.video/configuration/live"
+                              to={getLocaleDocUrl("configuration/live")}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline"

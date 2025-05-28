@@ -23,6 +23,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -52,6 +53,7 @@ export default function MotionMaskEditPane({
   setSnapPoints,
 }: MotionMaskEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
@@ -249,7 +251,7 @@ export default function MotionMaskEditPane({
 
         <div className="flex items-center text-primary">
           <Link
-            to="https://docs.frigate.video/configuration/masks/"
+            to={getLocaleDocUrl("configuration/masks/")}
             target="_blank"
             rel="noopener noreferrer"
             className="inline"

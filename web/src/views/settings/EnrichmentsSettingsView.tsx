@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type EnrichmentsSettings = {
   search: {
@@ -57,6 +58,7 @@ export default function EnrichmentsSettingsView({
   setUnsavedChanges,
 }: EnrichmentsSettingsViewProps) {
   const { t } = useTranslation("views/settings");
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -256,7 +258,7 @@ export default function EnrichmentsSettingsView({
 
             <div className="flex items-center text-primary">
               <Link
-                to="https://docs.frigate.video/configuration/semantic_search"
+                to={getLocaleDocUrl("configuration/semantic_search")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline"
@@ -402,7 +404,7 @@ export default function EnrichmentsSettingsView({
 
               <div className="flex items-center text-primary">
                 <Link
-                  to="https://docs.frigate.video/configuration/face_recognition"
+                  to={getLocaleDocUrl("configuration/face_recognition")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline"
@@ -503,7 +505,9 @@ export default function EnrichmentsSettingsView({
 
               <div className="flex items-center text-primary">
                 <Link
-                  to="https://docs.frigate.video/configuration/license_plate_recognition"
+                  to={getLocaleDocUrl(
+                    "configuration/license_plate_recognition",
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline"
@@ -549,7 +553,9 @@ export default function EnrichmentsSettingsView({
 
               <div className="flex items-center text-primary">
                 <Link
-                  to="https://docs.frigate.video/configuration/license_plate_recognition"
+                  to={getLocaleDocUrl(
+                    "configuration/license_plate_recognition",
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline"

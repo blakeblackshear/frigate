@@ -28,6 +28,7 @@ import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { Separator } from "@/components/ui/separator";
 import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -41,6 +42,8 @@ export default function ObjectSettingsView({
   selectedCamera,
 }: ObjectSettingsViewProps) {
   const { t } = useTranslation(["views/settings"]);
+
+  const { getLocaleDocUrl } = useDocDomain();
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -258,7 +261,9 @@ export default function ObjectSettingsView({
                               {t("debug.objectShapeFilterDrawing.tips")}
                               <div className="mt-2 flex items-center text-primary">
                                 <Link
-                                  to="https://docs.frigate.video/configuration/object_filters#object-shape"
+                                  to={getLocaleDocUrl(
+                                    "configuration/object_filters#object-shape",
+                                  )}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline"

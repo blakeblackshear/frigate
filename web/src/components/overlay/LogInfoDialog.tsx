@@ -18,6 +18,7 @@ import { LogChip } from "../indicators/Chip";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type LogInfoDialogProps = {
   logLine?: LogLine;
@@ -105,23 +106,25 @@ export default function LogInfoDialog({
 }
 
 function useHelpfulLinks(content: string | undefined) {
+  const { getLocaleDocUrl } = useDocDomain();
   return useMemo(() => {
     if (!content) {
       return [];
     }
 
     const links = [];
-
     if (/Could not clear [\d.]* currently [\d.]*/.exec(content)) {
       links.push({
-        link: "https://docs.frigate.video/configuration/record#will-frigate-delete-old-recordings-if-my-storage-runs-out",
+        link: getLocaleDocUrl(
+          "configuration/record#will-frigate-delete-old-recordings-if-my-storage-runs-out",
+        ),
         text: "Frigate Automatic Storage Cleanup",
       });
     }
 
     if (/Did not detect hwaccel/.exec(content)) {
       links.push({
-        link: "https://docs.frigate.video/configuration/hardware_acceleration",
+        link: getLocaleDocUrl("configuration/hardware_acceleration"),
         text: "Setup Hardware Acceleration",
       });
     }
@@ -139,25 +142,27 @@ function useHelpfulLinks(content: string | undefined) {
       content.includes("No VA display found for device /dev/dri/renderD128")
     ) {
       links.push({
-        link: "https://docs.frigate.video/configuration/hardware_acceleration",
+        link: getLocaleDocUrl("configuration/hardware_acceleration"),
         text: "Verify Hardware Acceleration Setup",
       });
     }
 
     if (content.includes("No EdgeTPU was detected")) {
       links.push({
-        link: "https://docs.frigate.video/troubleshooting/edgetpu",
+        link: getLocaleDocUrl("troubleshooting/edgetpu"),
         text: "Troubleshoot Coral",
       });
     }
 
     if (content.includes("The current SHM size of")) {
       links.push({
-        link: "https://docs.frigate.video/frigate/installation/#calculating-required-shm-size",
+        link: getLocaleDocUrl(
+          "frigate/installation/#calculating-required-shm-size",
+        ),
         text: "Calculate Correct SHM Size",
       });
     }
 
     return links;
-  }, [content]);
+  }, [content, getLocaleDocUrl]);
 }
