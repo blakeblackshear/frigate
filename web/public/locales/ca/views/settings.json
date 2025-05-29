@@ -1,1 +1,44 @@
-{}
+{
+  "documentTitle": {
+    "enrichments": "Parmàmetres complementaris - Frigate",
+    "motionTuner": "Ajust de moviment - Frigate",
+    "object": "Depurar - Frigate",
+    "default": "Paràmetres - Frigate",
+    "authentication": "Configuració d'autenticació - Frigate",
+    "camera": "Paràmetres de càmera - Frigate",
+    "masksAndZones": "Editor de màscares i zones - Frigate",
+    "general": "Paràmetres Generals - Frigate",
+    "frigatePlus": "Paràmetres de Frigate+ - Frigate",
+    "notifications": "Paràmetres de notificació - Frigate"
+  },
+  "menu": {
+    "ui": "Interfície d'usuari",
+    "cameras": "Paràmetres de la càmera",
+    "masksAndZones": "Màscares / Zones",
+    "motionTuner": "Ajust de detecció de moviment",
+    "users": "Usuaris",
+    "notifications": "Notificacions",
+    "debug": "Depuració",
+    "frigateplus": "Frigate+",
+    "enrichments": "Enriquiments"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Hi ha canvis no guardats.",
+      "desc": "Desar els canvis abans de continuar?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Càmera",
+    "noCamera": "Cap càmera"
+  },
+  "general": {
+    "title": "Paràmetres generals",
+    "liveDashboard": {
+      "title": "Panell en directe",
+      "automaticLiveView": {
+        "label": "Vista en directe automàtica"
+      }
+    }
+  }
+}

@@ -1,1 +1,48 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Estadístiques de càmera - Frigate",
+    "storage": "Estadístiques d'emmagatzematge - Frigate",
+    "general": "Estadístiques generals - Frigate",
+    "logs": {
+      "frigate": "Registres de Frigate - Frigate",
+      "go2rtc": "Registres de Go2RTC - Frigate",
+      "nginx": "Registres de Nginix - Frigate"
+    },
+    "enrichments": "Estadístiques complementàries - Frigate"
+  },
+  "title": "Sistema",
+  "metrics": "Mètriques del sistema",
+  "logs": {
+    "download": {
+      "label": "Descarregar registres"
+    },
+    "copy": {
+      "label": "Copiar al porta-retalls",
+      "success": "Registres copiats al porta-retalls",
+      "error": "No s'han pogut copiar els registres al porta-retalls"
+    },
+    "type": {
+      "label": "Tipus",
+      "timestamp": "Marca temporal",
+      "tag": "Etiqueta",
+      "message": "Missatge"
+    },
+    "tips": "Els registres s'estàn transmetent des del servidor",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error al obtenir els registres: {{errorMessage}}",
+        "whileStreamingLogs": "Error en la transmissió dels registres: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "detector": {
+      "memoryUsage": "Ús de memòria del detector",
+      "title": "Detectors",
+      "inferenceSpeed": "Velocitat d'inferència del detector",
+      "cpuUsage": "Ús de CPU del detector",
+      "temperature": "Temperatura del detector"
+    },
+    "title": "General"
+  }
+}

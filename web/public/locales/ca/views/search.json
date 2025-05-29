@@ -1,1 +1,41 @@
-{}
+{
+  "filter": {
+    "label": {
+      "time_range": "Rang de temps",
+      "cameras": "Càmeres",
+      "search_type": "Tipus de cerca",
+      "labels": "Etiquetes",
+      "zones": "Zones",
+      "sub_labels": "Subetiquetes",
+      "before": "Abans",
+      "after": "Després",
+      "min_score": "Puntuació mínima",
+      "max_score": "Puntuació màxima",
+      "min_speed": "Velocitat mínima",
+      "max_speed": "Velocitat màxima",
+      "recognized_license_plate": "Matrícula reconeguda",
+      "has_clip": "Té Clip",
+      "has_snapshot": "Té instantània"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descripció"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "La data 'abans' ha de ser posterior a la data 'després'."
+      }
+    }
+  },
+  "search": "Buscar",
+  "savedSearches": "Cerques desades",
+  "searchFor": "Buscar {{inputValue}}",
+  "button": {
+    "clear": "Netejar cerca",
+    "save": "Desar la cerca",
+    "delete": "Suprimeix la recerca desada",
+    "filterInformation": "Informació de filtre",
+    "filterActive": "Filtres actius"
+  },
+  "trackedObjectId": "ID d'objecte rastrejat"
+}

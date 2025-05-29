@@ -1,1 +1,48 @@
-{}
+{
+  "exploreIsUnavailable": {
+    "downloadingModels": {
+      "tips": {
+        "context": "Potser voldreu reindexar les incrustacions dels objectes seguits un cop s'hagin descarregat els models.",
+        "documentation": "Llegir la documentació"
+      },
+      "context": "Frigate està descarregant els models d'embeddings necessaris per a donar suport a la funció de cerca semàntica. Això pot trigar diversos minuts, depenent de la velocitat de la teva connexió de xarxa.",
+      "setup": {
+        "visionModel": "Model de visió",
+        "visionModelFeatureExtractor": "Extractor de característiques del model de visió",
+        "textModel": "Model de text",
+        "textTokenizer": "Tokenitzador de text"
+      },
+      "error": "S'ha produït un error. Comproveu els registres de Frigate."
+    },
+    "embeddingsReindexing": {
+      "context": "Explorar pot ser utilitzat després d’haver completat la reindexació d’objectes rastrejats.",
+      "startingUp": "Iniciant…",
+      "finishingShortly": "Finalitzant en breus",
+      "step": {
+        "thumbnailsEmbedded": "Miniatures integrades: ",
+        "descriptionsEmbedded": "Descripcions integrades: ",
+        "trackedObjectsProcessed": "Objectes processats: "
+      },
+      "estimatedTime": "Temps restant estimat:"
+    },
+    "title": "Explorar no està disponible"
+  },
+  "documentTitle": "Explora - Frigate",
+  "generativeAI": "IA Generativa",
+  "objectLifecycle": {
+    "createObjectMask": "Crear màscara per a l'objecte",
+    "title": "Cicle de vida de l'objecte",
+    "noImageFound": "No s'ha trobat cap imatge per a aquesta marca temporal."
+  },
+  "exploreMore": "Explora més {{label}} objectes",
+  "trackedObjectDetails": "Detalls de l'objecte rastrejat",
+  "type": {
+    "details": "detalls",
+    "snapshot": "instantània",
+    "video": "vídeo",
+    "object_lifecycle": "cicle de vida de l'objecte"
+  },
+  "details": {
+    "timestamp": "Marca temporal"
+  }
+}
