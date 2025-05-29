@@ -108,13 +108,13 @@
   "amazon": "Amazon",
   "usps": "USPS",
   "ups": "UPS",
-  "fedex": "FedEx",
+  "fedex": "Fed Ex",
   "dhl": "DHL",
   "an_post": "An Post",
-  "purolator": "Purolator",
-  "postnl": "PostNL",
-  "nzpost": "NZPost",
-  "postnord": "PostNord",
+  "purolator": "Purolator'",
+  "postnl": "PostNL'",
+  "nzpost": "NZPost'",
+  "postnord": "PostNord'",
   "gls": "GLS",
   "dpd": "DPD"
 }

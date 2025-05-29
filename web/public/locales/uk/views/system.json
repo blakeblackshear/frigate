@@ -1,10 +1,10 @@
 {
   "cameras": {
     "label": {
-      "ffmpeg": "FFmpeg",
+      "ffmpeg": "FFmpeg'",
       "cameraSkippedDetectionsPerSecond": "{{camName}} пропущених виявлень на секунду",
       "cameraDetect": "{{camName}} виявлення",
-      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFfmpeg": "{{camName}} FFmpeg'",
       "overallDetectionsPerSecond": "загальна кiлькiсть виявлень за секунду",
       "cameraDetectionsPerSecond": "{{camName}} виявлень на секунду",
       "overallFramesPerSecond": "загальна кiлкiсть кадрiв на секунду",
@@ -39,7 +39,8 @@
       "error": "Помилка: {{error}}",
       "tips": {
         "title": "Інформація про зонд камери"
-      }
+      },
+      "aspectRatio": "співвідношення сторін"
     },
     "overview": "Огляд",
     "framesAndDetections": "Кадри / Виявлення"
@@ -58,11 +59,11 @@
       "yolov9_plate_detection_speed": "Швидкість виявлення номерних знаків YOLOv9",
       "yolov9_plate_detection": "Виявлення пластин YOLOv9"
     },
-    "title": "Збагачення",
+    "title": "Збагаченням",
     "infPerSecond": "Висновки за секунду"
   },
   "general": {
-    "title": "Загальний",
+    "title": "Загальна",
     "hardwareInfo": {
       "npuUsage": "Використання нейронного процесора",
       "npuMemory": "Пам'ять NPU",
@@ -144,7 +145,7 @@
     "cameras": "Статистика камер - Фрегат",
     "storage": "Статистика сховища - Фрегат",
     "general": "Загальна статистика - Frigate",
-    "enrichments": "Статистика збагачень - Фрегат",
+    "enrichments": "Статистика збагачені - Фрегат",
     "logs": {
       "frigate": "Фрегатні журнали - Фрегат",
       "go2rtc": "Журнали Go2RTC - Фрегат",
