@@ -84,7 +84,10 @@
         "documentation": "Przeczytaj dokumentację ",
         "label": "Przesunięcie adnotacji",
         "millisecondsToOffset": "Milisekundy do przesunięcia adnotacji detekcji. <em>Domyślnie: 0</em>",
-        "tips": "WSKAZÓWKA: Wyobraź sobie, że istnieje klip zdarzenia z osobą idącą od lewej do prawej. Jeśli na osi czasu zdarzenia ramka ograniczająca jest konsekwentnie na lewo od osoby, wartość powinna być zmniejszona. Podobnie, jeśli osoba idzie od lewej do prawej, a ramka ograniczająca jest konsekwentnie przed osobą, wartość powinna być zwiększona."
+        "tips": "WSKAZÓWKA: Wyobraź sobie, że istnieje klip zdarzenia z osobą idącą od lewej do prawej. Jeśli na osi czasu zdarzenia ramka ograniczająca jest konsekwentnie na lewo od osoby, wartość powinna być zmniejszona. Podobnie, jeśli osoba idzie od lewej do prawej, a ramka ograniczająca jest konsekwentnie przed osobą, wartość powinna być zwiększona.",
+        "toast": {
+          "success": "Przesunięcie adnotacji dla {{camera}} zostało zapisane w pliku konfiguracyjnym. Zrestartuj Frigate, aby zastosować zmiany."
+        }
       }
     },
     "title": "Cykl życia obiektu",
@@ -114,7 +117,9 @@
       "next": "Następny slajd"
     },
     "createObjectMask": "Utwórz maskę obiektu",
-    "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji"
+    "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji",
+    "trackedPoint": "Punkt Śledzenia",
+    "count": "{{first}} z {{second}}"
   },
   "exploreIsUnavailable": {
     "title": "Eksploracja jest niedostępna",
@@ -122,7 +127,7 @@
       "context": "Eksploracja będzie dostępna po zakończeniu ponownego indeksowania osadzenia śledzonych obiektów.",
       "startingUp": "Uruchamianie…",
       "estimatedTime": "Szacowany pozostały czas:",
-      "finishingShortly": "Zakańczanie",
+      "finishingShortly": "Zaraz się zakończy",
       "step": {
         "thumbnailsEmbedded": "Osadzone miniatury: ",
         "descriptionsEmbedded": "Osadzone opisy: ",
@@ -199,5 +204,6 @@
       }
     },
     "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
-  }
+  },
+  "exploreMore": "Odkryj więcej obiektów typu {{label}}"
 }

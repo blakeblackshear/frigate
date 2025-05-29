@@ -91,7 +91,8 @@
     "all": {
       "title": "Wszystkie Daty",
       "short": "Daty"
-    }
+    },
+    "selectPreset": "Wybierz ustawienie…"
   },
   "more": "Więcej Filtrów",
   "reset": {

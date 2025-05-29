@@ -57,12 +57,15 @@
               },
               "label": "Ciągłe Strumieniowanie"
             }
-          }
+          },
+          "placeholder": "Wybierz sposób strumieniowania"
         },
         "compatibilityMode": {
           "label": "Tryb kompatybilności",
           "desc": "Włącz tę opcję tylko jeśli transmisja na żywo z kamery wyświetla artefakty kolorów i ma ukośną linię po prawej stronie obrazu."
-        }
+        },
+        "placeholder": "Wybierz strumień",
+        "stream": "Strumień"
       }
     }
   },

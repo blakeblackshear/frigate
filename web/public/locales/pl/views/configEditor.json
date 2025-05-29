@@ -11,5 +11,6 @@
     }
   },
   "saveOnly": "Tylko zapisz",
-  "saveAndRestart": "Zapisz i uruchom ponownie"
+  "saveAndRestart": "Zapisz i uruchom ponownie",
+  "confirm": "Zamknąć bez zapisu?"
 }
