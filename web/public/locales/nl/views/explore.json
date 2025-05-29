@@ -62,7 +62,10 @@
         "desc": "Deze gegevens zijn afkomstig van de detectiestroom van je camera, maar worden weergegeven op beelden uit de opnamestroom. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Het veld <code>annotation_offset</code> kan echter worden gebruikt om deze annotatie-afwijking te corrigeren.",
         "documentation": "Lees de documentatie ",
         "label": "Annotatie-afwijking",
-        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van het object steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden."
+        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van het object steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden.",
+        "toast": {
+          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand. Herstart Frigate om je wijzigingen toe te passen."
+        }
       },
       "showAllZones": {
         "title": "Toon alle zones",
@@ -77,7 +80,9 @@
     "carousel": {
       "previous": "Vorige dia",
       "next": "Volgende dia"
-    }
+    },
+    "count": "{{first}} van {{second}}",
+    "trackedPoint": "Volgpunt"
   },
   "documentTitle": "Verken - Frigate",
   "details": {
@@ -197,5 +202,6 @@
       "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende levenscyclusgegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
     }
   },
-  "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}"
+  "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}",
+  "exploreMore": "Verken meer {{label}} objecten"
 }

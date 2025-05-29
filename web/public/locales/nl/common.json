@@ -34,7 +34,7 @@
     },
     "s": "{{time}}s",
     "formattedTimestamp": {
-      "12hour": "d MMMM, HH:mm:ss",
+      "12hour": "d MMM, HH:mm:ss",
       "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestampOnlyMonthAndDay": "%-d %b",
@@ -62,8 +62,8 @@
       "12hour": "HH:mm"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "d MMMM yyyy, HH:mm",
-      "24hour": "d MMMM yyyy, HH:mm"
+      "12hour": "d MMM yyyy, HH:mm",
+      "24hour": "d MMM yyyy, HH:mm"
     },
     "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampFilename": {
@@ -75,8 +75,12 @@
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "d MMMM, HH:mm",
-      "24hour": "d MMMM, HH:mm"
+      "12hour": "d MMM, HH:mm",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM yyyy",
+      "24hour": "d MMM yyyy"
     }
   },
   "button": {
@@ -120,6 +124,10 @@
     "speed": {
       "mph": "mph",
       "kph": "km/u"
+    },
+    "length": {
+      "feet": "voet",
+      "meters": "meter"
     }
   },
   "label": {
@@ -165,7 +173,8 @@
       "vi": "Tiếng Việt (Vietnamees)",
       "hi": "हिन्दी (Hindi)",
       "ja": "日本語 (Japans)",
-      "yue": "粵語 (Kantonees)"
+      "yue": "粵語 (Kantonees)",
+      "th": "ไทย (Thais)"
     },
     "darkMode": {
       "label": "Donkere modus",

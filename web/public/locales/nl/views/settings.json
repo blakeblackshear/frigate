@@ -9,7 +9,8 @@
     "object": "Foutopsporing Frigate",
     "general": "Algemene instellingen - Frigate",
     "frigatePlus": "Frigate+ Instellingen - Frigate",
-    "notifications": "Meldingsinstellingen - Frigate"
+    "notifications": "Meldingsinstellingen - Frigate",
+    "enrichments": "Verrijkingsinstellingen - Frigate"
   },
   "menu": {
     "ui": "Gebruikersinterface",
@@ -20,7 +21,8 @@
     "users": "Gebruikers",
     "notifications": "Meldingen",
     "cameras": "Camera-instellingen",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "Verrijkingen"
   },
   "dialog": {
     "unsavedChanges": {
@@ -233,6 +235,11 @@
         "reset": {
           "label": "Alle punten wissen"
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "De snelheidsdrempel moet groter dan of gelijk zijn aan 0,1."
+        }
       }
     },
     "zones": {
@@ -262,7 +269,12 @@
       },
       "speedEstimation": {
         "desc": "Snelheidsschatting inschakelen voor objecten in deze zone. De zone moet precies 4 punten hebben.",
-        "title": "Snelheidsschatting"
+        "title": "Snelheidsschatting",
+        "docs": "Lees de documentatie",
+        "lineADistance": "Afstand van lijn A ({{unit}})",
+        "lineBDistance": "Afstand van lijn B ({{unit}})",
+        "lineCDistance": "Afstand van lijn C ({{unit}})",
+        "lineDDistance": "Afstand van lijn D ({{unit}})"
       },
       "speedThreshold": {
         "desc": "Geeft een minimumsnelheid op voor objecten die in deze zone moeten worden beschouwd.",
@@ -336,7 +348,9 @@
       "context": "Objectfiltermaskers worden gebruikt om valse positieven uit te filteren voor een bepaald objecttype op basis van locatie.",
       "edit": "Objectmasker bewerken"
     },
-    "restart_required": "Herstart vereist (maskers/zones gewijzigd)"
+    "restart_required": "Herstart vereist (maskers/zones gewijzigd)",
+    "motionMaskLabel": "Bewegingsmasker {{number}}",
+    "objectMaskLabel": "Objectmasker {{number}} ({{label}})"
   },
   "motionDetectionTuner": {
     "title": "Bewegingsdetectie-afsteller",
@@ -470,12 +484,14 @@
             "placeholder": "Voer het nieuwe wachtwoord opnieuw in"
           }
         },
-        "usernameIsRequired": "Gebruikersnaam is vereist"
+        "usernameIsRequired": "Gebruikersnaam is vereist",
+        "passwordIsRequired": "Wachtwoord is vereist"
       },
       "createUser": {
         "title": "Nieuwe gebruiker aanmaken",
         "desc": "Voeg een nieuw gebruikersaccount toe en geef een rol op voor toegang tot onderdelen van de Frigate-interface.",
-        "usernameOnlyInclude": "Gebruikersnaam mag alleen letters, cijfers, . of _ bevatten"
+        "usernameOnlyInclude": "Gebruikersnaam mag alleen letters, cijfers, . of _ bevatten",
+        "confirmPassword": "Bevestig uw wachtwoord"
       },
       "deleteUser": {
         "title": "Verwijder gebruiker",
@@ -491,12 +507,15 @@
           "adminDesc": "Volledige toegang tot alle functies.",
           "viewer": "Gebruiker",
           "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
-        }
+        },
+        "select": "Selecteer een rol"
       },
       "passwordSetting": {
         "setPassword": "Wachtwoord instellen",
         "updatePassword": "Wachtwoord bijwerken voor {{username}}",
-        "desc": "Maak een sterk wachtwoord aan om dit account te beveiligen."
+        "desc": "Maak een sterk wachtwoord aan om dit account te beveiligen.",
+        "cannotBeEmpty": "Het wachtwoord kan niet leeg zijn",
+        "doNotMatch": "Wachtwoorden komen niet overeen"
       }
     }
   },
@@ -599,5 +618,67 @@
     },
     "restart_required": "Herstart vereist (Frigate+ model gewijzigd)",
     "unsavedChanges": "Niet-opgeslagen wijzigingen in Frigate+ instellingen"
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Weet u zeker dat u alle gevolgde object-embeddings opnieuw wilt indexeren? Dit proces wordt op de achtergrond uitgevoerd, maar kan uw CPU zwaar belasten en enige tijd in beslag nemen. U kunt de voortgang bekijken op de pagina Verkenner.",
+        "label": "Nu opnieuw indexeren",
+        "desc": "Opnieuw indexeren zal embeddings regenereren voor alle gevolgde objecten. Dit proces wordt op de achtergrond uitgevoerd en kan je CPU zwaar belasten en een behoorlijke hoeveelheid tijd in beslag nemen, afhankelijk van het aantal gevolgde objecten dat je hebt.",
+        "confirmButton": "Opnieuw indexeren",
+        "success": "Het herindexeren is succesvol gestart.",
+        "alreadyInProgress": "Het herindexeren is al bezig.",
+        "error": "Het opnieuw indexeren is mislukt: {{errorMessage}}",
+        "confirmTitle": "Bevestig herindexering"
+      },
+      "modelSize": {
+        "large": {
+          "title": "groot",
+          "desc": "Het gebruik van <em>large</em> maakt gebruik van het volledige Jina-model en wordt automatisch op de GPU uitgevoerd als die beschikbaar is."
+        },
+        "label": "Modelgrootte",
+        "desc": "De grootte van het model dat wordt gebruikt voor semantische zoekopdrachten.",
+        "small": {
+          "title": "klein",
+          "desc": "Het gebruik van <em>small</em> maakt gebruik van een gequantiseerde versie van het model die minder RAM verbruikt en sneller draait op de CPU, met een verwaarloosbaar verschil in embeddingkwaliteit."
+        }
+      },
+      "title": "Semantisch zoeken",
+      "desc": "Semantische zoektocht in Frigate laat je opsporingsberichten vinden binnen je beoordelingsvoorwerpen met het beeld zelf, een gebruiker-definieerde tekstbeschrijving, of een automatisch gegen.",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "desc": "Met <em>small</em> wordt een FaceNet-model voor gezichtsinbedding gebruikt dat efficiënt werkt op de meeste CPU's.",
+          "title": "klein"
+        },
+        "desc": "De grootte van het model dat gebruikt wordt voor gezichtsherkenning.",
+        "label": "Modelgrootte",
+        "large": {
+          "title": "groot",
+          "desc": "Het gebruik van <em>groot</em> maakt gebruik van een ArcFace-gezichtsembeddingmodel en wordt automatisch op de GPU uitgevoerd als die beschikbaar is."
+        }
+      },
+      "desc": "Gezichtsherkenning maakt het mogelijk om namen aan mensen toe te wijzen. Wanneer hun gezicht wordt herkend, wijst Frigate de naam van de persoon toe als sublabel. Deze informatie is opgenomen in de gebruikersinterface, filters en meldingen.",
+      "title": "Gezichtsherkenning",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "licensePlateRecognition": {
+      "desc": "Frigate kan kentekenplaten op voertuigen herkennen en automatisch de gedetecteerde tekens toevoegen aan het veld recognized_license_plate of een bekende naam als sublabel toekennen aan objecten van het type auto. Een veelvoorkomende toepassing is het uitlezen van kentekens van auto's die een oprit oprijden of voorbijrijden op straat.",
+      "title": "Kentekenherkenning",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "birdClassification": {
+      "desc": "Vogelclassificatie herkent bekende vogels met behulp van een gequantiseerd TensorFlow-model. Wanneer een bekende vogel wordt herkend, wordt de algemene naam toegevoegd als sublabel. Deze informatie wordt weergegeven in de interface, is beschikbaar in filters en wordt ook opgenomen in meldingen.",
+      "title": "Vogelclassificatie"
+    },
+    "title": "Verrijkingsinstellingen",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in verrijkingsinstellingen",
+    "restart_required": "Opnieuw opstarten vereist (verrijkingsinstellingen gewijzigd)",
+    "toast": {
+      "success": "Verrijkingsinstellingen zijn opgeslagen. Start Frigate opnieuw op om je wijzigingen toe te passen.",
+      "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    }
   }
 }

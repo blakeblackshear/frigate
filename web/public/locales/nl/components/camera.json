@@ -53,7 +53,8 @@
               "desc": "Camerabeelden worden slechts één keer per minuut bijgewerkt en er vindt geen livestreaming plaats."
             }
           },
-          "label": "Streamingmethode"
+          "label": "Streamingmethode",
+          "placeholder": "Kies een streamingmethode"
         },
         "compatibilityMode": {
           "desc": "Schakel deze optie alleen in als de live stream van je camera kleurvervormingen toont en een diagonale lijn aan de rechterkant van het beeld heeft.",
@@ -61,7 +62,9 @@
         },
         "desc": "Wijzig de live streaming-opties voor het dashboard van deze cameragroep. <em>Deze instellingen zijn specifiek voor het apparaat en de browser.</em>",
         "label": "Camera streaming-instellingen",
-        "title": "{{cameraName}} Streaming-instellingen"
+        "title": "{{cameraName}} Streaming-instellingen",
+        "stream": "Stream",
+        "placeholder": "Kies een stream"
       }
     },
     "icon": "Icon"

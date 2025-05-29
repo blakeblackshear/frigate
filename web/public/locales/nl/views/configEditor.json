@@ -11,5 +11,6 @@
     }
   },
   "configEditor": "Configuratie Bewerken",
-  "saveOnly": "Alleen opslaan"
+  "saveOnly": "Alleen opslaan",
+  "confirm": "Afsluiten zonder op te slaan?"
 }
