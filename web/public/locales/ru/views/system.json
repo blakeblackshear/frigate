@@ -3,7 +3,7 @@
     "cameras": "Статистика камер - Frigate",
     "storage": "Статистика хранилища - Frigate",
     "general": "Общая статистика - Frigate",
-    "enrichments": "Статистика улучшений - Frigate",
+    "enrichments": "Статистика обогащений - Frigate",
     "logs": {
       "frigate": "Логи Frigate - Frigate",
       "go2rtc": "Логи Go2RTC - Frigate",
@@ -121,7 +121,8 @@
       "error": "Ошибка: {{error}}",
       "tips": {
         "title": "Информация о тестировании камеры"
-      }
+      },
+      "aspectRatio": "соотношение сторон"
     },
     "framesAndDetections": "Кадры/детекции",
     "label": {

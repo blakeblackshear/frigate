@@ -21,7 +21,8 @@
     "all": {
       "title": "Все даты",
       "short": "Даты"
-    }
+    },
+    "selectPreset": "Период…"
   },
   "timeRange": "Временной диапазон",
   "subLabels": {
