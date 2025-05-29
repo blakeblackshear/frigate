@@ -20,7 +20,8 @@
     "all": {
       "title": "Alle Zeiträume",
       "short": "Daten"
-    }
+    },
+    "selectPreset": "Wähle eine Voreinstellung aus…"
   },
   "reset": {
     "label": "Filter auf Standardwerte zurücksetzen"

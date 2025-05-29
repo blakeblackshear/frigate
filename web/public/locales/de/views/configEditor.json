@@ -11,5 +11,6 @@
       "copyToClipboard": "Konfiguration in Zwischenablage kopiert."
     }
   },
-  "documentTitle": "Konfigurationseditor – Frigate"
+  "documentTitle": "Konfigurationseditor – Frigate",
+  "confirm": "Verlassen ohne zu Speichern?"
 }
