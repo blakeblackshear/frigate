@@ -8,7 +8,8 @@
   },
   "description": {
     "placeholder": "Ange ett namn för denna samling",
-    "addFace": "Gå genom för att lägga till nya ansikte till biblioteket."
+    "addFace": "Gå genom för att lägga till nya ansikte till biblioteket.",
+    "invalidName": "Felaktigt namn. Namn kan endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
   },
   "documentTitle": "Ansiktsbibliotek - Frigate",
   "steps": {
@@ -28,5 +29,6 @@
   "uploadFaceImage": {
     "title": "Ladda upp ansiktsbild",
     "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
-  }
+  },
+  "selectItem": "Välj {{item}}"
 }

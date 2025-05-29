@@ -5,7 +5,8 @@
       "short": "Etiketter"
     },
     "label": "Etiketter",
-    "count": "{{count}} Etiketter"
+    "count": "{{count}} Etiketter",
+    "count_one": "{{count}} Etikett"
   },
   "filter": "Filter",
   "zones": {

@@ -11,5 +11,6 @@
   },
   "details": {
     "timestamp": "tidsstämpel"
-  }
+  },
+  "exploreMore": "Utforska fler {{label}} objekt"
 }

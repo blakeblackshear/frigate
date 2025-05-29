@@ -31,5 +31,8 @@
   },
   "timeline.aria": "Välj tidslinje",
   "camera": "Kamera",
-  "markTheseItemsAsReviewed": "Markera dessa objekt som granskade"
+  "markTheseItemsAsReviewed": "Markera dessa objekt som granskade",
+  "detected": "upptäckt",
+  "selected_one": "{{count}} valda",
+  "selected_other": "{{count}} valda"
 }
