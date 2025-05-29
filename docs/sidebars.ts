@@ -87,8 +87,8 @@ const sidebars: SidebarsConfig = {
     ],
     'Frigate+': [
       'plus/index',
+      'plus/annotating',
       'plus/first_model',
-      'plus/improving_model',
       'plus/faq',
     ],
     Troubleshooting: [

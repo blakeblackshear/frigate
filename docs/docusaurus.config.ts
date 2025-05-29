@@ -23,10 +23,22 @@ const config: Config = {
     mermaid: true,
   },
   themeConfig: {
-    algolia: {
-      appId: "WIURGBNBPY",
-      apiKey: "d02cc0a6a61178b25da550212925226b",
-      indexName: "frigate",
+    announcementBar: {
+      id: 'frigate_plus',
+      content: `
+        <span style="margin-right: 8px; display: inline-block; animation: pulse 2s infinite;">🚀</span>
+        Get more relevant and accurate detections with Frigate+ models.
+        <a style="margin-left: 12px; padding: 3px 10px; background: #94d2bd; color: #001219; text-decoration: none; border-radius: 4px; font-weight: 500; " target="_blank" rel="noopener noreferrer" href="https://frigate.video/plus/">Learn more</a>
+        <span style="margin-left: 8px; display: inline-block; animation: pulse 2s infinite;">✨</span>
+        <style>
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.1); }
+          }
+        </style>`,
+      backgroundColor: '#005f73',
+      textColor: '#e0fbfc',
+      isCloseable: false,
     },
     docs: {
       sidebar: {
