@@ -31,7 +31,8 @@
               "desc": "Smart strømming oppdaterer kamerabilder én gang i minuttet når ingen aktivitet oppdages, for å spare båndbredde og ressurser. Når aktivitet oppdages, byttes bildet sømløst til direktestrøm."
             }
           },
-          "label": "Strømmemetode"
+          "label": "Strømmemetode",
+          "placeholder": "Velg en strømmemetode"
         },
         "compatibilityMode": {
           "label": "Kompatibilitetsmodus",
@@ -45,9 +46,11 @@
         "audio": {
           "tips": {
             "title": "Lyd må komme fra kameraet ditt og konfigureres i go2rtc for denne strømmen.",
-            "document": "Les dokumentasjonen "
+            "document": "Se dokumentasjonen "
           }
-        }
+        },
+        "stream": "Strøm",
+        "placeholder": "Velg en strøm"
       }
     },
     "add": "Legg til kameragruppe",

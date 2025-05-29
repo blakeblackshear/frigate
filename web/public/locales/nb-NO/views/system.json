@@ -117,21 +117,22 @@
       "unknown": "Ukjent",
       "tips": {
         "title": "Kamerainformasjon"
-      }
+      },
+      "aspectRatio": "bildeforhold"
     },
     "framesAndDetections": "Bilder / Deteksjoner",
     "title": "Kameraer",
     "overview": "Oversikt",
     "label": {
       "camera": "kamera",
-      "detect": "detekter",
+      "detect": "detektering",
       "skipped": "forkastet",
       "ffmpeg": "FFmpeg",
-      "capture": "fangst",
+      "capture": "opptak",
       "cameraDetectionsPerSecond": "{{camName}} deteksjoner per sekund",
       "cameraSkippedDetectionsPerSecond": "{{camName}} forkastede deteksjoner per sekund",
       "cameraFramesPerSecond": "{{camName}} bilder per sekund",
-      "cameraCapture": "{{camName}} fangst",
+      "cameraCapture": "{{camName}} opptak",
       "cameraDetect": "{{camName}} detekt",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "overallDetectionsPerSecond": "totale deteksjoner per sekund",

@@ -2,7 +2,8 @@
   "selectItem": "Velg {{item}}",
   "description": {
     "addFace": "Gå gjennom prosessen med å legge til en ny samling i ansiktsbiblioteket.",
-    "placeholder": "Skriv inn et navn for denne samlingen"
+    "placeholder": "Skriv inn et navn for denne samlingen",
+    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrofer, understreker og bindestreker."
   },
   "details": {
     "person": "Person",
@@ -11,7 +12,7 @@
     "faceDesc": "Detaljer for sporet objekt som genererte dette ansiktet",
     "timestamp": "Tidsstempel",
     "scoreInfo": "Under-merkelappens poengsum er basert på en vektet sum ut ifra hvor sikre gjenkjenningene av ansiktene er, så den kan avvike fra poengsummen som vises på øyeblikksbildet.",
-    "subLabelScore": "Under-merkelapp poengsum",
+    "subLabelScore": "Poengsum for under-merkelapp",
     "unknown": "Ukjent"
   },
   "documentTitle": "Ansiktsbibliotek – Frigate",
@@ -62,7 +63,7 @@
       "selectImage": "Vennligst velg en bildefil."
     }
   },
-  "readTheDocs": "Les dokumentasjonen",
+  "readTheDocs": "Se dokumentasjonen",
   "button": {
     "addFace": "Legg til ansikt",
     "uploadImage": "Last opp bilde",
@@ -94,5 +95,6 @@
     "desc_one": "Er du sikker på at du vil slette {{count}} ansikt? Denne handlingen kan ikke angres.",
     "desc_other": "Er du sikker på at du vil slette {{count}} ansikter? Denne handlingen kan ikke angres."
   },
-  "nofaces": "Ingen ansikter tilgjengelig"
+  "nofaces": "Ingen ansikter tilgjengelig",
+  "pixels": "{{area}}piksler"
 }

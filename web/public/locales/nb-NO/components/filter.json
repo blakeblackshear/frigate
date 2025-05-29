@@ -90,7 +90,8 @@
     "all": {
       "title": "Alle datoer",
       "short": "Datoer"
-    }
+    },
+    "selectPreset": "Velg en forhåndsinnstilling.…"
   },
   "more": "Flere filtre",
   "reset": {

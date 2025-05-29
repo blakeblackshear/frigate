@@ -81,14 +81,14 @@
     "audio": {
       "tips": {
         "title": "Lyd må være aktivert på kameraet ditt og konfigurert i go2rtc for denne strømmen.",
-        "documentation": "Les dokumentasjonen "
+        "documentation": "Se dokumentasjonen "
       },
       "available": "Lyd er tilgjengelig for denne strømmen",
       "unavailable": "Lyd er ikke tilgjengelig for denne strømmen"
     },
     "twoWayTalk": {
       "tips": "Enheten din må støtte funksjonen og WebRTC må være konfigurert for toveis tale.",
-      "tips.documentation": "Les dokumentasjonen ",
+      "tips.documentation": "Se dokumentasjonen ",
       "available": "Toveis tale er tilgjengelig for denne strømmen",
       "unavailable": "Toveis tale er ikke tilgjengelig for denne strømmen"
     },

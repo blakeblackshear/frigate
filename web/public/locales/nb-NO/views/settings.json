@@ -9,7 +9,8 @@
     "general": "Generelle innstillinger - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
     "frigatePlus": "Frigate+ innstillinger - Frigate",
-    "notifications": "Meldingsvarsler Innstillinger - Frigate"
+    "notifications": "Meldingsvarsler Innstillinger - Frigate",
+    "enrichments": "Utvidelser Innstillinger - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -20,7 +21,8 @@
     "users": "Brukere",
     "frigateplus": "Frigate+",
     "ui": "Brukergrensesnitt",
-    "notifications": "Meldingsvarsler"
+    "notifications": "Meldingsvarsler",
+    "enrichments": "Utvidelser"
   },
   "dialog": {
     "unsavedChanges": {
@@ -159,7 +161,7 @@
       },
       "selectAlertsZones": "Velg soner for varsler",
       "desc": "Frigate kategoriserer inspeksjonselementer som Varsler og Deteksjoner. Som standard regnes alle <em>person</em>- og <em>bil</em>-objekter som Varsler. Du kan finjustere klassifiseringen ved å konfigurere nødvendige soner.",
-      "readTheDocumentation": "Les dokumentasjonen",
+      "readTheDocumentation": "Se dokumentasjonen",
       "noDefinedZones": "Ingen soner er definert for dette kameraet.",
       "objectAlertsTips": "Alle {{alertsLabels}}-objekter på {{cameraName}} vises som varsler.",
       "objectDetectionsTips": "Alle {{detectionsLabels}}-objekter som ikke er kategorisert på {{cameraName}}, vises som deteksjoner uavhengig av sone.",
@@ -233,6 +235,11 @@
         "error": {
           "mustBeGreaterOrEqualZero": "Oppholdstid må være større enn eller lik 0."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Terskelverdi for hastighet må være større enn eller lik 0.1."
+        }
       }
     },
     "zones": {
@@ -268,7 +275,11 @@
       "speedEstimation": {
         "title": "Hastighetsestimering",
         "desc": "Aktiver hastighetsestimering for objekter i denne sonen. Sonen må ha nøyaktig 4 punkter.",
-        "docs": "Les dokumentasjonen"
+        "docs": "Se dokumentasjonen",
+        "lineADistance": "Linje A avstand ({{unit}})",
+        "lineBDistance": "Linje B avstand ({{unit}})",
+        "lineCDistance": "Linje C avstand ({{unit}})",
+        "lineDDistance": "Linje D avstand ({{unit}})"
       },
       "speedThreshold": {
         "title": "Hastighetsgrense ({{unit}})",
@@ -294,8 +305,8 @@
       "documentTitle": "Rediger bevegelsesmaske - Frigate",
       "edit": "Rediger bevegelsesmaske",
       "context": {
-        "title": "Bevegelsesmasker brukes til å hindre uønsket type bevegelse fra å utløse deteksjon (eksempel: tregrener, kameratidsstempler). Bevegelsesmasker bør brukes <em>svært sparsomt</em>, for mye maskering vil gjøre det vanskeligere å spore objekter.",
-        "documentation": "Les dokumentasjonen"
+        "title": "Bevegelsesmasker brukes til å hindre uønsket type bevegelse fra å utløse deteksjon (eksempel: tregrener, kameratidsstempler). Bevegelsesmasker bør brukes <em>svært sparsomt</em>. For mye maskering vil gjøre det vanskeligere å spore objekter.",
+        "documentation": "Se dokumentasjonen"
       },
       "point_one": "{{count}} punkt",
       "point_other": "{{count}} punkter",
@@ -303,7 +314,7 @@
       "polygonAreaTooLarge": {
         "title": "Bevegelsesmasken dekker {{polygonArea}}% av kameraets bilde. Store bevegelsesmasker anbefales ikke.",
         "tips": "Bevegelsesmasker hindrer ikke objektene fra å bli detektert. Du bør bruke en påkrevd sone i stedet.",
-        "documentation": "Les dokumentasjonen"
+        "documentation": "Se dokumentasjonen"
       },
       "toast": {
         "success": {
@@ -337,7 +348,9 @@
         }
       }
     },
-    "restart_required": "Omstart påkrevd (masker/soner endret)"
+    "restart_required": "Omstart påkrevd (masker/soner endret)",
+    "motionMaskLabel": "Bevegelsesmaske {{number}}",
+    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
   },
   "motionDetectionTuner": {
     "title": "Finjustering av bevegelsesdeteksjon",
@@ -393,13 +406,13 @@
       "desc": "Vis en boks for interesseområdet sendt til objektdetektoren"
     },
     "objectShapeFilterDrawing": {
-      "document": "Les dokumentasjonen ",
+      "document": "Se dokumentasjonen ",
       "score": "Poengsum",
       "ratio": "Forhold",
-      "area": "Område",
+      "area": "Areal",
       "title": "Tegning av objektformfilter",
       "desc": "Tegn et rektangel på bildet for å vise areal- og størrelsesforhold",
-      "tips": "Aktiver dette alternativet for å tegne et rektangel på kamerabildet for å vise området og forholdet. Disse verdiene kan deretter brukes til å sette filterparametere for objektform i konfigurasjonen."
+      "tips": "Aktiver dette alternativet for å tegne et rektangel på kamerabildet for å vise areal og størrelsesforholdet. Disse verdiene kan deretter brukes til å sette filterparametere for objektform i konfigurasjonen."
     },
     "detectorDesc": "Frigate bruker dine detektorer ({{detectors}}) for å oppdage objekter i kameraets videostrøm.",
     "desc": "Test og feilsøk viser sporede objekter i sanntid og deres statistikk. Objektlisten viser en tidsforsinket oppsummering av detekterte objekter.",
@@ -462,7 +475,8 @@
             "placeholder": "Skriv inn nytt passord igjen"
           }
         },
-        "usernameIsRequired": "Brukernavn er påkrevd"
+        "usernameIsRequired": "Brukernavn er påkrevd",
+        "passwordIsRequired": "Passord er påkrevd"
       },
       "changeRole": {
         "desc": "Oppdater tillatelser for <strong>{{username}}</strong>",
@@ -473,12 +487,14 @@
           "adminDesc": "Full tilgang til alle funksjoner.",
           "viewer": "Visningsbruker",
           "viewerDesc": "Begrenset til kun Direkte-dashbord, Inspiser, Utforsk og Eksporter."
-        }
+        },
+        "select": "Velg en rolle"
       },
       "createUser": {
         "title": "Opprett ny bruker",
         "desc": "Legg til en ny brukerkonto og spesifiser en rolle for tilgang til Frigate-brukergrensesnittet.",
-        "usernameOnlyInclude": "Brukernavn kan bare inneholde bokstaver, tall, punktum eller _"
+        "usernameOnlyInclude": "Brukernavn kan bare inneholde bokstaver, tall, punktum eller _",
+        "confirmPassword": "Vennligst bekreft ditt passord"
       },
       "deleteUser": {
         "title": "Slett bruker",
@@ -488,7 +504,9 @@
       "passwordSetting": {
         "updatePassword": "Oppdater passord for {{username}}",
         "setPassword": "Angi passord",
-        "desc": "Opprett et sterkt passord for å sikre denne kontoen."
+        "desc": "Opprett et sterkt passord for å sikre denne kontoen.",
+        "cannotBeEmpty": "Passordet kan ikke være tomt",
+        "doNotMatch": "Passordene samsvarer ikke"
       }
     },
     "table": {
@@ -504,11 +522,11 @@
   "notification": {
     "notificationSettings": {
       "desc": "Frigate kan sende push-varsler til enheten din når den kjører i nettleseren eller er installert som en progressiv webapplikasjon (PWA).",
-      "documentation": "Les dokumentasjonen",
+      "documentation": "Se dokumentasjonen",
       "title": "Innstillinger for meldingsvarsler"
     },
     "notificationUnavailable": {
-      "documentation": "Les dokumentasjonen",
+      "documentation": "Se dokumentasjonen",
       "title": "Meldingsvarsler utilgjengelig",
       "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://…</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler."
     },
@@ -586,7 +604,7 @@
     "snapshotConfig": {
       "title": "Konfigurasjon av øyeblikksbilde",
       "desc": "Innsending til Frigate+ krever at både øyeblikksbilder og <code>clean_copy</code>-øyeblikksbilder er aktivert i konfigurasjonen din.",
-      "documentation": "Les dokumentasjonen",
+      "documentation": "Se dokumentasjonen",
       "table": {
         "camera": "Kamera",
         "snapshots": "Øyeblikksbilder",
@@ -600,5 +618,67 @@
     },
     "restart_required": "Omstart påkrevd (Frigate+ modell endret)",
     "unsavedChanges": "Ulagrede endringer for Frigate+ innstillinger"
+  },
+  "enrichments": {
+    "title": "Innstillinger for utvidelser",
+    "licensePlateRecognition": {
+      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en under-merkelapp på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
+      "title": "Kjennemerke gjenkjenning",
+      "readTheDocumentation": "Se dokumentasjonen"
+    },
+    "birdClassification": {
+      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "title": "Klassifisering av fugler"
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "desc": "Reindeksering vil regenerere vektorrepresentasjoner for alle sporede objekter. Denne prosessen kjøres i bakgrunnen og kan maksimere CPU-belastningen, samt ta en del tid avhengig av hvor mange sporede objekter du har.",
+        "confirmButton": "Reindekser",
+        "confirmTitle": "Bekreft reindeksering",
+        "confirmDesc": "Er du sikker på at du vil reindeksere alle vektorrepresentasjoner for sporede objekter? Denne prosessen vil kjøre i bakgrunnen, men den kan maksimere CPU-belastningen og ta en del tid. Du kan følge fremdriften på Utforsk-siden.",
+        "label": "Reindekser nå",
+        "success": "Reindeksering ble startet.",
+        "alreadyInProgress": "Reindeksering pågar allerede.",
+        "error": "Kunne ikke starte reindeksering: {{errorMessage}}"
+      },
+      "modelSize": {
+        "small": {
+          "desc": "Ved å bruke <em>liten</em> benyttes en kvantisert versjon av modellen som bruker mindre RAM og kjører raskere på CPU, med en svært ubetydelig forskjell i kvalitet på vektorrepresentasjoner.",
+          "title": "liten"
+        },
+        "label": "Modellstørrelse",
+        "desc": "Størrelsen på modellen brukt til vektorrepresentasjoner for semantisk søk.",
+        "large": {
+          "title": "stor",
+          "desc": "Ved å bruke <em>stor</em> benyttes den fullstendige Jina-modellen, og den vil automatisk kjøres på GPU dersom tilgjengelig."
+        }
+      },
+      "title": "Semantisk søk",
+      "desc": "Semantisk søk i Frigate lar deg finne sporede objekter i inspeksjonsselementene dine ved å bruke enten selve bildet, en brukerdefinert tekstbeskrivelse eller en automatisk generert beskrivelse.",
+      "readTheDocumentation": "Se dokumentasjonen"
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "title": "liten",
+          "desc": "Ved å bruke <em>liten</em> benyttes en FaceNet-modell for vektorrepresentasjoner for ansikt som kjører effektivt på de fleste CPU-er."
+        },
+        "label": "Modellstørrelse",
+        "desc": "Størrelsen på modellen brukt til ansiktsgjenkjenning.",
+        "large": {
+          "title": "stor",
+          "desc": "Ved å bruke <em>stor</em> benyttes en ArcFace-modell for vektorrepresentasjoner for ansikt, og den vil automatisk kjøres på GPU dersom tilgjengelig."
+        }
+      },
+      "title": "Ansiktsgjenkjenning",
+      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "readTheDocumentation": "Se dokumentasjonen"
+    },
+    "unsavedChanges": "Ulagrede endringer i innstillinger for utvidelser",
+    "restart_required": "Omstart påkrevd (Innstillinger for utvidelser er endret)",
+    "toast": {
+      "success": "Innstillinger for utvidelser har blitt lagret. Start Frigate på nytt for å bruke endringene.",
+      "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
+    }
   }
 }
