@@ -706,6 +706,10 @@ class FrigateConfig(FrigateBaseModel):
             verify_objects_track(camera_config, labelmap_objects)
             verify_lpr_and_face(self, camera_config)
 
+        # set names on classification configs
+        for name, config in self.classification.custom.items():
+            config.name = name
+
         self.objects.parse_all_objects(self.cameras)
         self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
