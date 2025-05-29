@@ -6,5 +6,10 @@
     "logs": {
       "frigate": "Frigate loggar - Frigate"
     }
+  },
+  "logs": {
+    "copy": {
+      "label": "Kopiera till urklipp"
+    }
   }
 }

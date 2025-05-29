@@ -142,5 +142,21 @@
   "mandolin": "Mandolin",
   "boat": "Båt",
   "train": "Tåg",
-  "bowed_string_instrument": "stråkinstrument"
+  "bowed_string_instrument": "stråkinstrument",
+  "banjo": "Banjo",
+  "sitar": "Sitar",
+  "clock": "Klocka",
+  "keyboard": "Tangentbord",
+  "vehicle": "Fordon",
+  "skateboard": "Skatebord",
+  "door": "Dörr",
+  "blender": "Mixer",
+  "sink": "Vask",
+  "hair_dryer": "Hårfön",
+  "toothbrush": "Tandborste",
+  "scissors": "Sax",
+  "strum": "Anslag",
+  "zither": "Citer",
+  "ukulele": "Ukulele",
+  "piano": "Piano"
 }
