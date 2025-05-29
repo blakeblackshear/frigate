@@ -113,7 +113,11 @@
       "desc": {
         "selected": "Weet u zeker dat u alle opgenomen videobeelden wilt verwijderen die aan dit beoordelingsitem zijn gekoppeld?<br /><br />Houd de <em>Shift</em>-toets ingedrukt om dit dialoogvenster in de toekomst over te slaan."
       },
-      "title": "Bevestig Verwijderen"
+      "title": "Bevestig Verwijderen",
+      "toast": {
+        "error": "Verwijderen mislukt: {{error}}",
+        "success": "De videobeelden die aan de geselecteerde beoordelingsitems zijn gekoppeld, zijn succesvol verwijderd."
+      }
     }
   }
 }

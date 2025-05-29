@@ -20,7 +20,8 @@
     "all": {
       "title": "Alle datums",
       "short": "Datums"
-    }
+    },
+    "selectPreset": "Selecteer een voorinstelling…"
   },
   "features": {
     "hasVideoClip": "Heeft een videoclip",

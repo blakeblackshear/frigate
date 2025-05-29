@@ -121,7 +121,8 @@
       "codec": "Codec:",
       "video": "Video:",
       "fetching": "Camera Gegevens Opvragen",
-      "audio": "Audio:"
+      "audio": "Audio:",
+      "aspectRatio": "beeldverhouding"
     },
     "framesAndDetections": "Frames / Detecties",
     "label": {

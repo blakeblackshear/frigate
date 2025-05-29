@@ -13,7 +13,8 @@
   "documentTitle": "Gezichtsbibliotheek - Frigate",
   "description": {
     "placeholder": "Voer een naam in voor deze verzameling",
-    "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek."
+    "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek.",
+    "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten."
   },
   "train": {
     "title": "Train",
@@ -73,8 +74,8 @@
     "title": "Verwijder Naam",
     "desc": "Weet je zeker dat je de collectie {{name}} wilt verwijderen? Dit zal permanent alle geassocieerde gezichten verwijderen."
   },
-  "trainFaceAs": "Train Face als:",
-  "trainFace": "Train Face",
+  "trainFaceAs": "Gezicht trainen als:",
+  "trainFace": "Gezicht trainen",
   "readTheDocs": "Lees de documentatie",
   "steps": {
     "nextSteps": "Volgende stappen",
@@ -93,5 +94,7 @@
     "desc_one": "Weet je zeker dat je {{count}} gezicht wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "desc_other": "Weet je zeker dat je {{count}} gezichten wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
   },
-  "collections": "Collecties"
+  "collections": "Collecties",
+  "nofaces": "Geen gezichten beschikbaar",
+  "pixels": "{{area}}px"
 }
