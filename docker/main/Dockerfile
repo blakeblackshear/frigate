@@ -227,6 +227,9 @@ ENV OPENCV_FFMPEG_LOGLEVEL=8
 # Set HailoRT to disable logging
 ENV HAILORT_LOGGER_PATH=NONE
 
+# TensorFlow error only
+ENV TF_CPP_MIN_LOG_LEVEL=3
+
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies

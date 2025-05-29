@@ -85,8 +85,7 @@ class CustomClassificationObjectConfig(FrigateBaseModel):
 
 class CustomClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable running the model.")
-    model_path: str = Field(title="Path to custom classification tflite model.")
-    labelmap_path: str = Field(title="Path to custom classification model labelmap.")
+    name: str | None = Field(default=None, title="Name of classification model.")
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 
