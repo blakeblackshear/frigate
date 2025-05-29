@@ -55,14 +55,17 @@
               }
             }
           },
-          "label": "Método de transmisión"
+          "label": "Método de transmisión",
+          "placeholder": "Elige un método de transmisión"
         },
         "compatibilityMode": {
           "label": "Modo de compatibilidad",
           "desc": "Habilita esta opción solo si la transmisión en vivo de tu cámara muestra artefactos de color y tiene una línea diagonal en el lado derecho de la imagen."
         },
         "label": "Ajustes de transmisión de la cámara",
-        "desc": "Cambia las opciones de transmisión en vivo para el panel de control de este grupo de cámaras. <em>Estos ajustes son específicos del dispositivo/navegador.</em>"
+        "desc": "Cambia las opciones de transmisión en vivo para el panel de control de este grupo de cámaras. <em>Estos ajustes son específicos del dispositivo/navegador.</em>",
+        "placeholder": "Elige una transmisión",
+        "stream": "Transmitir"
       }
     }
   },

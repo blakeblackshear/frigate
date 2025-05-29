@@ -1,7 +1,8 @@
 {
   "description": {
     "addFace": "Guía para agregar una nueva colección a la Biblioteca de Rostros.",
-    "placeholder": "Introduce un nombre para esta colección"
+    "placeholder": "Introduce un nombre para esta colección",
+    "invalidName": "Nombre inválido. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos y guiones."
   },
   "details": {
     "person": "Persona",
@@ -97,5 +98,6 @@
     "desc_other": "¿Estás seguro de que quieres eliminar {{count}} rostros? Esta acción no se puede deshacer."
   },
   "collections": "Colecciones",
-  "nofaces": "No hay rostros disponibles"
+  "nofaces": "No hay rostros disponibles",
+  "pixels": "{{area}}px"
 }

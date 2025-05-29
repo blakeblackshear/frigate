@@ -21,7 +21,8 @@
     "all": {
       "title": "Todas las fechas",
       "short": "Fechas"
-    }
+    },
+    "selectPreset": "Selecciona un Preajuste…"
   },
   "timeRange": "Rango de tiempo",
   "subLabels": {

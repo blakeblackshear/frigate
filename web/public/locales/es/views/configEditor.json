@@ -11,5 +11,6 @@
       "savingError": "Error al guardar la configuración"
     }
   },
-  "documentTitle": "Editor de Configuración - Frigate"
+  "documentTitle": "Editor de Configuración - Frigate",
+  "confirm": "¿Salir sin guardar?"
 }
