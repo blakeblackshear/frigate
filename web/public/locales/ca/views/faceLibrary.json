@@ -1,1 +1,43 @@
-{}
+{
+  "selectItem": "Selecciona {{item}}",
+  "details": {
+    "subLabelScore": "Puntuació de la subetiqueta",
+    "scoreInfo": "La puntuació de la subetiqueta és la puntuació ponderada de totes la confidència dels rostres reconeguts, de manera que pot ser diferent de la puntuació que es mostra a la instantània.",
+    "unknown": "Desconegut",
+    "person": "Persona",
+    "faceDesc": "Detalls de l'objecte que ha generat aquest rostre",
+    "timestamp": "Marca temporal",
+    "face": "Detalls del rostre"
+  },
+  "collections": "Col·leccions",
+  "train": {
+    "empty": "No hi ha intents recents de reconeixement de rostres",
+    "title": "Entrenar",
+    "aria": "Seleccionar entrenament"
+  },
+  "description": {
+    "addFace": "Guia per a agregar una nova colecció a la biblioteca de rostres.",
+    "placeholder": "Introduïu un nom per a aquesta col·lecció",
+    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guionets."
+  },
+  "documentTitle": "Biblioteca de rostres - Frigate",
+  "uploadFaceImage": {
+    "title": "Puja una imatge del rostre",
+    "desc": "Carregar una imatge per escanejar els rostres i incloure per a {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Crear Col·lecció",
+    "desc": "Crear una nova col·lecció",
+    "new": "Crear un nou rostre",
+    "nextSteps": "Per establir una base sòlida:<li>Utilitza la pestanya Entrenament per seleccionar i entrenar imatges de cada persona detectada.</li><li>Centra’t en imatges frontals per obtenir millors resultats; evita imatges d’entrenament amb rostres en angle.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Introduir el nom del rostre",
+    "uploadFace": "Puja una imatge del rostre",
+    "nextSteps": "Següents passos",
+    "description": {
+      "uploadFace": "Puja una imatge de {{name}} que mostri el seu rostre de cares. No cal que la imatge estigui retallada només al rostre."
+    }
+  },
+  "selectFace": "Seleccionar rostre"
+}

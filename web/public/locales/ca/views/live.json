@@ -1,1 +1,67 @@
-{}
+{
+  "ptz": {
+    "zoom": {
+      "in": {
+        "label": "Apropar la càmera PTZ"
+      },
+      "out": {
+        "label": "Allunyar la càmera PTZ"
+      }
+    },
+    "move": {
+      "clickMove": {
+        "label": "Fes clic a la imatge per centrar la càmera",
+        "enable": "Habilita clic per moure",
+        "disable": "Deshabilita clic per moure"
+      },
+      "left": {
+        "label": "Moure la càmera PTZ a l'esquerra"
+      },
+      "up": {
+        "label": "Moure la càmera PTZ cap amunt"
+      },
+      "down": {
+        "label": "Moure la càmera PTZ cap avall"
+      },
+      "right": {
+        "label": "Moure la càmera PTZ a la dreta"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Fer clic a la imatge per centrar la càmera PTZ"
+      }
+    },
+    "presets": "Predefinits de la càmera PTZ"
+  },
+  "documentTitle": "Directe - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
+  "lowBandwidthMode": "Mode de baix ample de banda",
+  "twoWayTalk": {
+    "enable": "Activa la comunicació bidireccional",
+    "disable": "Desactiva la comunicació bidireccional"
+  },
+  "cameraAudio": {
+    "enable": "Habilitar l'àudio de la càmera",
+    "disable": "Deshabilita l'àudio de la càmera"
+  },
+  "camera": {
+    "enable": "Habilitar la càmera",
+    "disable": "Deshabilita la càmera"
+  },
+  "muteCameras": {
+    "enable": "Silencia totes les càmeres",
+    "disable": "Activar el so de totes les càmeres"
+  },
+  "detect": {
+    "enable": "Habilita la detecció",
+    "disable": "Deshabilitar detecció"
+  },
+  "recording": {
+    "enable": "Habilitar gravació",
+    "disable": "Deshabilita l'enregistrament"
+  },
+  "snapshots": {
+    "enable": "Habilita captura d'instantània"
+  }
+}
