@@ -44,6 +44,7 @@ from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
+from frigate.log import _stop_logging
 from frigate.models import (
     Event,
     Export,
@@ -770,5 +771,8 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
+
+        # exit the mp Manager process
+        _stop_logging()
 
         os._exit(os.EX_OK)
