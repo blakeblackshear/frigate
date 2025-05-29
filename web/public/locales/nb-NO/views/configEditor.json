@@ -9,7 +9,8 @@
     }
   },
   "configEditor": "Konfigurasjonsredigering",
-  "copyConfig": "Kopier konfigurasjon",
+  "copyConfig": "Kopier konfigurasjonen",
   "saveAndRestart": "Lagre og omstart",
-  "saveOnly": "Kun lagre"
+  "saveOnly": "Kun lagre",
+  "confirm": "Avslutt uten å lagre?"
 }
