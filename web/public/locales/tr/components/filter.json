@@ -13,7 +13,8 @@
     "all": {
       "title": "Tüm Tarihler",
       "short": "Tarihler"
-    }
+    },
+    "selectPreset": "Ön ayar seçin…"
   },
   "sort": {
     "label": "Sırala",

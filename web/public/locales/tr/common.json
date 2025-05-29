@@ -77,6 +77,10 @@
     "formattedTimestampFilename": {
       "12hour": "dd-MM-yy-h-mm-ss-a",
       "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
     }
   },
   "button": {
@@ -160,7 +164,8 @@
       "es": "Español (İspanyolca)",
       "ar": "العربية (Arapça)",
       "ru": "Русский (Rusça)",
-      "yue": "粵語 (Kantonca)"
+      "yue": "粵語 (Kantonca)",
+      "th": "ไทย (Tayca)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -219,6 +224,10 @@
     "speed": {
       "mph": "mph",
       "kph": "km/s"
+    },
+    "length": {
+      "feet": "feet",
+      "meters": "metre"
     }
   },
   "pagination": {

@@ -9,7 +9,8 @@
     "frigatePlus": "Frigate+ Ayarları - Frigate",
     "object": "Hata Ayıklama - Frigate",
     "general": "Genel Ayarlar - Frigate",
-    "notifications": "Bildirim Ayarları - Frigate"
+    "notifications": "Bildirim Ayarları - Frigate",
+    "enrichments": "Zenginleştirme Ayarları - Frigate"
   },
   "menu": {
     "masksAndZones": "Maskeler / Alanlar",
@@ -20,7 +21,8 @@
     "motionTuner": "Hareket Algılama",
     "classification": "Sınıflandırma",
     "debug": "Hata Ayıklama",
-    "cameras": "Kamera Ayarları"
+    "cameras": "Kamera Ayarları",
+    "enrichments": "Zenginleştirmeler"
   },
   "general": {
     "title": "Genel Ayarlar",
@@ -168,8 +170,9 @@
       "objectAlertsTips": "{{cameraName}} kamerasındaki bütün {{alertsLabels}} nesneleri Alarm olarak sınıflandırılacaktır.",
       "limitDetections": "Algılamaları belirli alanlara sınırla",
       "toast": {
-        "success": "İnceleme sınıflandırma ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın."
-      }
+        "success": "İnceleme Sınıflandırma ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın."
+      },
+      "unsavedChanges": "{{camera}} için Kaydedilmemiş Sınıflandırma Ayarları"
     },
     "streams": {
       "desc": "Bir kameranın devre dışı bırakılması, Frigate'in bu kamerayı işlemesini tamamen durdurur. Algılama, kayıt ve hata ayıklama özellikleri kullanılamaz.<br /> <em>Not: Bu eylem, go2rtc'deki yeniden akışları devre dışı bırakmaz.</em>",
@@ -231,6 +234,11 @@
         "error": {
           "mustBeAboveZero": "Eylemsizlik sıfırın üzerinde olmalıdır."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Hız eşiği 0.1'e eşit veya daha yüksek olmalıdır."
+        }
       }
     },
     "zones": {
@@ -258,7 +266,12 @@
       },
       "speedEstimation": {
         "title": "Hız Tahmini",
-        "desc": "Bu alandaki nesneler için hız tahminini etkinleştirin. Alan tam olarak 4 noktaya belirlenmiş olmalıdır."
+        "desc": "Bu alandaki nesneler için hız tahminini etkinleştirin. Alan tam olarak 4 noktaya belirlenmiş olmalıdır.",
+        "docs": "Dökümantasyonu oku",
+        "lineADistance": "Çizgi A mesafesi ({{unit}})",
+        "lineBDistance": "Çizgi B mesafesi ({{unit}})",
+        "lineCDistance": "Çizgi C mesafesi ({{unit}})",
+        "lineDDistance": "Çizgi D mesafesi ({{unit}})"
       },
       "clickDrawPolygon": "Görüntü üzerinde bir çokgen çizmek için tıklayın.",
       "edit": "Alanı Düzenle",
@@ -334,7 +347,9 @@
       "label": "Nesne Maskeleri",
       "clickDrawPolygon": "Görüntü üzerinde bir çokgen çizmek için tıklayın."
     },
-    "restart_required": "Yeniden Başlatma Gerekli (maskeler/alanlar değiştirildi)"
+    "restart_required": "Yeniden Başlatma Gerekli (maskeler/alanlar değiştirildi)",
+    "motionMaskLabel": "Hareket Maskesi {{number}}",
+    "objectMaskLabel": "Nesne maskesi {{number}} ({{label}})"
   },
   "motionDetectionTuner": {
     "title": "Hareket Algılama Ayarlayıcı",
@@ -356,7 +371,8 @@
     "improveContrast": {
       "desc": "Daha karanlık sahneler için kontrastı iyileştirin. <em>Varsayılan: AÇIK</em>",
       "title": "Kontrastı İyileştir"
-    }
+    },
+    "unsavedChanges": "Kaydedilmemiş Hareket Alıglama ayarları ({{camera}})"
   },
   "debug": {
     "title": "Hata Ayıklama",
@@ -466,12 +482,14 @@
           },
           "title": "Yeni Parola"
         },
-        "usernameIsRequired": "Kullanıcı adı gereklidir"
+        "usernameIsRequired": "Kullanıcı adı gereklidir",
+        "passwordIsRequired": "Parola gereklidir"
       },
       "createUser": {
         "title": "Yeni Kullanıcı Oluştur",
         "desc": "Yeni bir kullanıcı hesabı ekleyin ve Frigate'deki erişim düzeylerini sınırlandırmak için bir rol belirtin.",
-        "usernameOnlyInclude": "Kullanıcı adı yalnızca harfler, sayılar, nokta veya alt çizgi (_) içerebilir"
+        "usernameOnlyInclude": "Kullanıcı adı yalnızca harfler, sayılar, nokta veya alt çizgi (_) içerebilir",
+        "confirmPassword": "Lütfen parolanızı onaylayın"
       },
       "deleteUser": {
         "title": "Kullanıcıyı Sil",
@@ -481,7 +499,9 @@
       "passwordSetting": {
         "updatePassword": "{{username}} için Parola Belirle",
         "setPassword": "Parola Belirle",
-        "desc": "Bu hesabı güvenli hale getirmek güçlü bir parola belirleyin."
+        "desc": "Bu hesabı güvenli hale getirmek güçlü bir parola belirleyin.",
+        "cannotBeEmpty": "Parola boş olamaz",
+        "doNotMatch": "Parolalar eşleşmiyor"
       },
       "changeRole": {
         "title": "Kullanıcı Rolünü Değiştir",
@@ -492,7 +512,8 @@
           "admin": "Yönetici",
           "viewer": "Görüntüleyici",
           "viewerDesc": "Yalnızca Canlı, İncele, Keşfet ve Dışa Aktar'a girebilir."
-        }
+        },
+        "select": "Bir rol seçin"
       }
     },
     "updatePassword": "Parola Belirle"
@@ -548,7 +569,9 @@
     "sendTestNotification": "Bir test bildirimi gönder",
     "cancelSuspension": "Askıya Almayı İptal Et",
     "unregisterDevice": "Bu Cihazın Kaydını Sil",
-    "active": "Bildirimler Aktif"
+    "active": "Bildirimler Aktif",
+    "unsavedChanges": "Kaydedilmemiş bildirim ayar değişiklikleri",
+    "unsavedRegistrations": "Kaydedilmemiş bildirim ayar değişiklikleri"
   },
   "frigatePlus": {
     "title": "Frigate+ Ayarları",
@@ -592,6 +615,69 @@
       "success": "Frigate+ ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
       "error": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
     },
-    "restart_required": "Yeniden Başlatma Gerekli (Frigate+ modeli değiştirildi)"
+    "restart_required": "Yeniden Başlatma Gerekli (Frigate+ modeli değiştirildi)",
+    "unsavedChanges": "Kaydedilmemiş Frigate+ ayar değişiklikleri"
+  },
+  "enrichments": {
+    "birdClassification": {
+      "title": "Kuş Sınıflandırma",
+      "desc": "Kuş sınıflandırma, kuantize edilmiş bir Tensorflow modeli aracılığıyla bilinen kuş türlerini tespit eder. Bilinen bir kuş türü tespit edildiğinde, bu türün bilinen adı bir alt etiket olarak ilgili öğeye iliştirilir. Bu bilgi; arayüzde ve bildirimlerde gösterilir ve filtre olarak kullanılabilir."
+    },
+    "unsavedChanges": "Değişitirilen zenginleştirme ayarları kaydedilmedi",
+    "semanticSearch": {
+      "reindexNow": {
+        "desc": "Yeniden dizinleme işlemi, bütün takip edilen nesneler için gömüleri tekrar üretecektir. Bu işlem arka planda gerçekleşir, fakat nesne sayısına bağlı olarak çok işlemci kullanabilir veya tamamlanması makul bir süre alabilir.",
+        "label": "Şimdi Yeniden Dizinle",
+        "confirmTitle": "Yeniden Dizinlemeyi Onayla",
+        "confirmDesc": "Bütün takip edilen nesnelerin gömülerini yeniden dizinlemek istediğinize emin misiniz? Bu işlem arka planda gerçekleşecektir fakat nesne sayısına bağlı olarak çok işlemci kullanabilir ve biraz süre alabilir. İlerlemesini Keşfet sayfasından görüntüleyebilirsiniz.",
+        "confirmButton": "Yeniden Dizinle",
+        "success": "Yeniden dizinleme başarıyla başlatıldı.",
+        "alreadyInProgress": "Yeniden dizinleme zaten sürüyor.",
+        "error": "Yeniden dizinleme başlatılamadı: {{errorMessage}}"
+      },
+      "title": "Anlamsal Arama",
+      "desc": "Anlamsal arama, takip edilen nesneleri; ya görselin kendisini kullanarak ya da görsel öğelere ait açıklamalar üzerinden (kullanıcı tarafından yazılmış ya da otomatik oluşturulmuş) metinle arama yaparak bulmanıza olanak tanır.",
+      "readTheDocumentation": "Dökümantasyonu Oku",
+      "modelSize": {
+        "label": "Model Boyutu",
+        "desc": "Anlamsal aramadaki gömüler için kullanılan modelin büyüklüğü.",
+        "small": {
+          "title": "küçük",
+          "desc": "Modelin <em>küçük</em> sürümü, gömme kalitesinde fark edilmesi zor bir değişikliğe karşılık daha az RAM kullanan ve CPU’da daha hızlı çalışan kuantize bir model kullanır."
+        },
+        "large": {
+          "title": "büyük",
+          "desc": "Modelin <em>büyük</em> sürümü tam boyutlu Jina modelini kullanır ve uygunsa GPU'da çalışacaktır."
+        }
+      }
+    },
+    "title": "Zenginleştirme Ayarları",
+    "faceRecognition": {
+      "title": "Yüz Tanıma",
+      "desc": "Yüz tanıma, tespit edilen insanların yüzleri tanındığında onlara isim atamanıza olanak sağlar ve bu isim bilgisi alt etiket olarak iliştirilir. Bu bilgi; arayüzde ve bildirimlerde gösterilir ve filtre olarak kullanılabilir.",
+      "readTheDocumentation": "Dökümantasyonu Oku",
+      "modelSize": {
+        "label": "Model Boyutu",
+        "desc": "Yüz tanıma için kullanılan modelin büyüklüğü.",
+        "small": {
+          "title": "küçük",
+          "desc": "Modelin <em>küçük</em> sürümü olarak çoğu işlemcide verimli çalışabilen bir FaceNet yüz gömü modeli kullanılır."
+        },
+        "large": {
+          "title": "büyük",
+          "desc": "Modelin <em>büyük</em> sürümü olarak ArcFace yüz gömü modeli kullanılır ve uygunsa GPU'da çalışır."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Plaka Tanıma",
+      "desc": "Frigate tespit edilen araçların tescil plakalarındaki karakterleri okuyabilir ve ilgili araba türündeki nesnenin recognized_license_plate bölümüne, varsa bilindik bir adını da sub_label bölümüne ekleyebilir. Bu özelliği bir yoldan geçen yahut evin önüne park eden araçların plakalarını okumak için kullanabilirsiniz.",
+      "readTheDocumentation": "Dökümantasyonu Oku"
+    },
+    "restart_required": "Yeniden başlatma gerekli (zenginleştirme ayarları değişti)",
+    "toast": {
+      "success": "Zenginleştirme ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
+      "error": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
+    }
   }
 }

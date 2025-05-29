@@ -42,12 +42,15 @@
               "label": "Akıllı yayın (önerilir)",
               "desc": "Akıllı yayın özelliği, internet ve diğer kaynaklardan tasarruf için aktivite yokken yayının yerine dakikada bir güncellenen sabit resim gösterir. Kamerada aktivite tespit edildiğinde görüntü sabit resimden canlı yayına geçer."
             }
-          }
+          },
+          "placeholder": "Bir yayın metodu seçin"
         },
         "compatibilityMode": {
           "label": "Uyumluluk modu",
           "desc": "Bu özelliği sadece kamera akışında renkli mozaiklenme yahut resmin sağ tarafında çizgi görüyorsanız etkinleştirin."
-        }
+        },
+        "placeholder": "Bir yayın seçin",
+        "stream": "Yayın"
       }
     },
     "icon": "Simge",

@@ -11,5 +11,6 @@
   "copyConfig": "Yapılandırmayı Kopyala",
   "configEditor": "Yapılandırma Düzenleyicisi",
   "documentTitle": "Yapılandırma Düzenleyicisi - Frigate",
-  "saveAndRestart": "Kaydet & Yeniden Başlat"
+  "saveAndRestart": "Kaydet & Yeniden Başlat",
+  "confirm": "Kaydetmeden çıkılsın mı?"
 }
