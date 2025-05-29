@@ -3,7 +3,7 @@
     "cameras": "Statystyki kamer - Frigate",
     "storage": "Statystyki Magazynowania - Frigate",
     "general": "Statystyki Ogólne - Frigate",
-    "enrichments": "Statystyki Wzbogaceń - Frigate",
+    "enrichments": "Statystyki Wzbogacania - Frigate",
     "logs": {
       "frigate": "Logi Frigate - Frigate",
       "go2rtc": "Logi Go2RTC - Frigate",
@@ -73,7 +73,8 @@
       "tips": {
         "title": "Informacje o sondowaniu kamery"
       },
-      "fetching": "Pobieranie danych kamery"
+      "fetching": "Pobieranie danych kamery",
+      "aspectRatio": "proporcje"
     },
     "toast": {
       "success": {

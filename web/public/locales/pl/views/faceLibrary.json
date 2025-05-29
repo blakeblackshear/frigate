@@ -2,16 +2,18 @@
   "selectItem": "Wybierz {{item}}",
   "description": {
     "addFace": "Poznaj proces dodawania nowej kolekcji do biblioteki twarzy.",
-    "placeholder": "Wprowadź nazwę tej kolekcji"
+    "placeholder": "Wprowadź nazwę tej kolekcji",
+    "invalidName": "Nieprawidłowa nazwa. Nazwy mogą zawierać tylko litery, cyfry, spacje, apostrofy, podkreślenia oraz myślniki."
   },
   "details": {
     "person": "Osoba",
     "confidence": "Pewność",
     "face": "Szczegóły twarzy",
-    "faceDesc": "Szczegóły twarzy i powiązanego obiektu",
+    "faceDesc": "Szczegóły śledzonego obiektu, który wygenerował tę twarz",
     "timestamp": "Znacznik czasu",
     "subLabelScore": "Ocena podetykiety",
-    "scoreInfo": "Ocena podetykiety to ważona ocena uwzględniająca wszystkie rozpoznane twarze i ich poziom rozpoznania , dlatego może się różnić od oceny pokazanej na stopklatce."
+    "scoreInfo": "Ocena podetykiety to ważona ocena uwzględniająca wszystkie rozpoznane twarze i ich poziom rozpoznania , dlatego może się różnić od oceny pokazanej na stopklatce.",
+    "unknown": "Nieznany"
   },
   "documentTitle": "Biblioteka twarzy - Frigate",
   "uploadFaceImage": {
@@ -26,7 +28,8 @@
   },
   "train": {
     "aria": "Wybierz trenowanie",
-    "title": "Trenuj"
+    "title": "Trenuj",
+    "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy"
   },
   "selectFace": "Wybierz twarz",
   "deleteFaceLibrary": {
@@ -37,7 +40,7 @@
     "addFace": "Dodaj twarz",
     "uploadImage": "Wgraj obraz",
     "reprocessFace": "Przetwórz twarz ponownie",
-    "deleteFaceAttempts": "Usuń próby rozpoznania twarzy",
+    "deleteFaceAttempts": "Usuń twarze",
     "renameFace": "Zmień nazwę twarzy",
     "deleteFace": "Usuń twarz"
   },
@@ -79,10 +82,22 @@
   "steps": {
     "faceName": "Wprowadź nazwę twarzy",
     "uploadFace": "Prześlij obraz twarzy",
-    "nextSteps": "Kolejne kroki"
+    "nextSteps": "Kolejne kroki",
+    "description": {
+      "uploadFace": "Prześlij zdjęcie {{name}}, na którym twarz jest widoczna z przodu. Obraz nie musi być przycięty wyłącznie do twarzy."
+    }
   },
   "renameFace": {
     "title": "Zmień nazwę twarzy",
     "desc": "Wprowadź nową nazwę dla {{name}}"
-  }
+  },
+  "collections": "Kolekcje",
+  "deleteFaceAttempts": {
+    "title": "Usuń twarze",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} twarz? Tej czynności nie można cofnąć.",
+    "desc_few": "Czy na pewno chcesz usunąć {{count}} twarze? Tej czynności nie można cofnąć.",
+    "desc_many": "Czy na pewno chcesz usunąć {{count}} twarzy? Tej czynności nie można cofnąć."
+  },
+  "nofaces": "Brak dostępnych twarzy",
+  "pixels": "{{area}}px"
 }

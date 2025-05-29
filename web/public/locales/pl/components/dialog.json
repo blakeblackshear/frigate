@@ -87,6 +87,10 @@
       "title": "Potwierdź Usunięcie",
       "desc": {
         "selected": "Czy na pewno chcesz usunąć wszystkie nagrane wideo powiązane z tym elementem recenzji?<br /><br />Przytrzymaj klawisz <em>Shift</em>, aby pominąć to okno dialogowe w przyszłości."
+      },
+      "toast": {
+        "success": "Nagrania wideo powiązane z wybranymi elementami przeglądu zostały pomyślnie usunięte.",
+        "error": "Nie udało się usunąć: {{error}}"
       }
     }
   },
