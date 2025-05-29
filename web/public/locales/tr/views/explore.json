@@ -135,7 +135,10 @@
         "documentation": "Dökümantasyonu oku ",
         "millisecondsToOffset": "Belirteç gecikmesi. <em>Varsayılan: 0</em>",
         "desc": "Tespit belirteç verisi kameranızın tespit yayınından gelir fakat kameranızın kayıt yayını üzerine çizilir. Bu iki yayın zaman zaman senkrondan kayar. Bunun sonucu olarak görüntü ve belirteç karelerinin zaman uyumu kayabilir. Bunu telafi etmek için <code>annotation_offset</code> alanı kullanılarak gecikmeyi ayarlanabilir.",
-        "tips": "İPUCU: Videoda bir kişinin soldan sağa doğru yürüdüğünü hayal edin. Eğer belirteç sürekli olarak kişinin solunda/arkasında ise bu değer daha küçük veya negatif olarak ayarlanmalıdır. Benzer şekilde, eğer kişi sağdan sola doğru yürürken belirteç karesi sürekli olarak kişinin önünde/sağında kalıyorsa bu değer daha büyük veya pozitif olarak ayarlanmalıdır."
+        "tips": "İPUCU: Videoda bir kişinin soldan sağa doğru yürüdüğünü hayal edin. Eğer belirteç sürekli olarak kişinin solunda/arkasında ise bu değer daha küçük veya negatif olarak ayarlanmalıdır. Benzer şekilde, eğer kişi sağdan sola doğru yürürken belirteç karesi sürekli olarak kişinin önünde/sağında kalıyorsa bu değer daha büyük veya pozitif olarak ayarlanmalıdır.",
+        "toast": {
+          "success": "{{camera}} kamerası için belirteç telafi değeri yapılandırma dosyasına kaydedildi. Değişikliklerin uygulamak için Frigate'i yeniden başlatın."
+        }
       },
       "title": "Belirteç Ayarları",
       "showAllZones": {
@@ -148,7 +151,9 @@
       "previous": "Önceki sayfa"
     },
     "scrollViewTips": "Bu nesnenin geçmişindeki önemli noktaları görmek için kaydırın.",
-    "autoTrackingTips": "Otomatik takip yapılan kameralarda gösterilen çerçeveler hatalı olacaktır."
+    "autoTrackingTips": "Otomatik takip yapılan kameralarda gösterilen çerçeveler hatalı olacaktır.",
+    "count": "Toplam {{second}} kerede {{first}} kez",
+    "trackedPoint": "Takip Edilen Nokta"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -187,7 +192,8 @@
         "error": "Takip edilen nesne silinemedi: {{errorMessage}}",
         "success": "Takip edilen nesne başarıyla silindi."
       }
-    }
+    },
+    "tooltip": "Eşleşme: {{type}} (%{{confidence}})"
   },
   "dialog": {
     "confirmDelete": {
@@ -196,5 +202,6 @@
     }
   },
   "trackedObjectsCount_one": "{{count}} adet takip edilen nesne ",
-  "trackedObjectsCount_other": "{{count}} adet takip edilen nesne "
+  "trackedObjectsCount_other": "{{count}} adet takip edilen nesne ",
+  "exploreMore": "Daha fazla {{label}} nesnesini keşfet"
 }

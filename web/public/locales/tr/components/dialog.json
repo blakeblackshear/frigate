@@ -25,10 +25,10 @@
           "false_other": "Bu bir {{label}} değil"
         },
         "question": {
-          "ask_an": "Bu nesne bir <code>{{label}}</code> mi?",
-          "label": "Bu etikeri Frigate+ için onaylayın",
+          "ask_an": "Bu nesne bir <code>{{label}}</code> nesnesi mi?",
+          "label": "Bu etiketi Frigate+ için onaylayın",
           "ask_a": "Bu nesne bir <code>{{label}}</code> mi?",
-          "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) mi?"
+          "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) nesnesi mi?"
         }
       },
       "submitToPlus": {
@@ -108,6 +108,10 @@
       "title": "Silmeyi Onayla",
       "desc": {
         "selected": "Bu inceleme öğesiyle ilişkili tüm kaydedilmiş videoları silmek istediğinizden emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
+      },
+      "toast": {
+        "success": "Seçili incele öğelerinin ilişkili olduğu video kayıtları başarıyla silinmiştir.",
+        "error": "Siliemedi: {{error}}"
       }
     },
     "button": {

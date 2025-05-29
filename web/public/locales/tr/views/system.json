@@ -95,7 +95,8 @@
       "fetching": "Kamera Bilgileri Alınıyor",
       "cameraProbeInfo": "{{camera}} Kamera Detayları",
       "error": "Hata: {{error}}",
-      "audio": "Ses:"
+      "audio": "Ses:",
+      "aspectRatio": "en boy oranı"
     },
     "framesAndDetections": "Kare / Tespit",
     "label": {

@@ -2,7 +2,8 @@
   "selectItem": "{{item}} seçin",
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
-    "addFace": "Yüz Kütüphanesi’ne yeni bir koleksiyon ekleme adımlarını takip edin."
+    "addFace": "Yüz Kütüphanesi’ne yeni bir koleksiyon ekleme adımlarını takip edin.",
+    "invalidName": "Geçersiz isim. İsimlerde yalnızca harf, sayı, boşluk, kesme işareti, tire veya alt çizgi kullanılabilir."
   },
   "details": {
     "person": "İnsan",
@@ -11,7 +12,8 @@
     "timestamp": "Zaman Damgası",
     "face": "Yüz Detayları",
     "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
-    "subLabelScore": "Alt Etiket Puanı"
+    "subLabelScore": "Alt Etiket Puanı",
+    "unknown": "Bilinmeyen"
   },
   "documentTitle": "Yüz Kütüphanesi - Frigate",
   "uploadFaceImage": {
@@ -34,7 +36,7 @@
     "desc": "{{name}} koleksiyonunu silmek istediğinizden emin misiniz? Bu işlem, ilişkili tüm yüzleri kalıcı olarak silecektir."
   },
   "button": {
-    "deleteFaceAttempts": "Yüz Denemelerini Sil",
+    "deleteFaceAttempts": "Yüzleri Sil",
     "addFace": "Yüz Ekle",
     "reprocessFace": "Yüzü Yeniden İşle",
     "uploadImage": "Resim Yükle",
@@ -78,10 +80,21 @@
   "steps": {
     "faceName": "Yüze İsim Verin",
     "uploadFace": "Yüz Resmi Yükle",
-    "nextSteps": "Sonraki Adımlar"
+    "nextSteps": "Sonraki Adımlar",
+    "description": {
+      "uploadFace": "{{name}}'ın yüzünü direkt karşıdan, ön açıdan gösteren bir fotoğraf yükleyin. Fotoğrafı yalnızca yüzü kalacak şekilde kırpmanıza gerek YOKTUR."
+    }
   },
   "renameFace": {
     "title": "Yüzü Yeniden Adlandır",
     "desc": "{{name}} için yeni bir isim girin"
-  }
+  },
+  "collections": "Koleksiyonlar",
+  "deleteFaceAttempts": {
+    "title": "Yüzleri Sil",
+    "desc_one": "Bu {{count}} yüzü silmek istediğine emin misin? Bu işlem geri alınamaz.",
+    "desc_other": "Bu {{count}} yüzü silmek istediğine emin misin? Bu işlem geri alınamaz."
+  },
+  "nofaces": "Yüz bulunamadı",
+  "pixels": "{{area}}px"
 }
