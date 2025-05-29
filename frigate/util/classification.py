@@ -87,7 +87,7 @@ def train_classification_model(model_dir: str) -> bool:
             f.write(f"{class_name}\n")
 
     # train the model
-    model.fit(train_gen, epochs=EPOCHS)
+    model.fit(train_gen, epochs=EPOCHS, verbose=0)
 
     # convert model to tflite
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
