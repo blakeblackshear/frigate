@@ -97,6 +97,9 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
                 line = f.readline()
 
     def process_frame(self, obj_data, frame):
+        if not self.interpreter:
+            return
+
         if obj_data["label"] != "bird":
             return
 
