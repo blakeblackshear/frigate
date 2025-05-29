@@ -129,7 +129,11 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         score = round(probs[best_id], 2)
 
         write_classification_attempt(
-            self.train_dir, frame, now, self.labelmap[best_id], score
+            self.train_dir,
+            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+            now,
+            self.labelmap[best_id],
+            score,
         )
 
         if score >= camera_config.threshold:
@@ -214,7 +218,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         previous_score = self.detected_objects.get(obj_data["id"], 0.0)
 
         write_classification_attempt(
-            self.train_dir, frame, now, self.labelmap[best_id], score
+            self.train_dir,
+            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+            now,
+            self.labelmap[best_id],
+            score,
         )
 
         if score <= previous_score:

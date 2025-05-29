@@ -150,10 +150,10 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        for name, model_config in self.config.classification.custom.items():
+        for model_config in self.config.classification.custom.values():
             self.realtime_processors.append(
                 CustomStateClassificationProcessor(
-                    self.config, model_config, name, self.requestor, self.metrics
+                    self.config, model_config, self.requestor, self.metrics
                 )
                 if model_config.state_config != None
                 else CustomObjectClassificationProcessor(
