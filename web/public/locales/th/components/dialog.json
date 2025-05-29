@@ -1,0 +1,19 @@
+{
+  "search": {
+    "saveSearch": {
+      "label": "บันทึกค้นหา",
+      "success": "ค้นหา {{searchName}} ถูกบันทึกเรียบร้อยแล้ว",
+      "desc": "ระบุชื่อสำหรับการค้นหาบันทึกนี้",
+      "button": {
+        "save": {
+          "label": "บันทึกการค้นหานี้"
+        }
+      }
+    }
+  },
+  "export": {
+    "fromTimeline": {
+      "saveExport": "บันทึกส่งออก"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "details": {
+    "person": "คน",
+    "subLabelScore": "คะแนน Sub Label",
+    "unknown": "ไม่รู้"
+  },
+  "steps": {
+    "faceName": "ใส่ชื่อหน้า",
+    "uploadFace": "ใส่รูปหน้า",
+    "nextSteps": "ต่อไป"
+  },
+  "selectFace": "เลือกหน้า",
+  "deleteFaceLibrary": {
+    "title": "ลบชื่อ"
+  },
+  "deleteFaceAttempts": {
+    "title": "ลบหน้า"
+  },
+  "renameFace": {
+    "title": "เปลี่ยนชื่อหน้า",
+    "desc": "ใส่ชื่อใหม่สำหรับ {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "ลบหน้า",
+    "addFace": "เพิ่มหน้า",
+    "renameFace": "แก้ชื่อหน้า",
+    "deleteFace": "ลบหน้า",
+    "uploadImage": "อัปโหลดรูป",
+    "reprocessFace": "คำนวนหน้าใหม่"
+  },
+  "imageEntry": {
+    "dropActive": "ลากรูปลงที่นี้"
+  },
+  "selectItem": "เลือก {{item}}",
+  "createFaceLibrary": {
+    "new": "สร้างหน้าใหม่"
+  }
+}
