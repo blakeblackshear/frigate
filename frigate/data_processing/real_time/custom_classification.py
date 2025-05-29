@@ -15,7 +15,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
-from frigate.const import MODEL_CACHE_DIR
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.util.builtin import load_labels
 from frigate.util.object import box_overlaps, calculate_region
 
@@ -42,7 +42,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.model_config = model_config
         self.requestor = requestor
         self.model_dir = os.path.join(MODEL_CACHE_DIR, self.model_config.name)
-        self.train_dir = os.path.join(self.model_dir, "train")
+        self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name)
         self.interpreter: Interpreter = None
         self.tensor_input_details: dict[str, Any] = None
         self.tensor_output_details: dict[str, Any] = None
