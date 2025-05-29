@@ -1,1 +1,16 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Statistika kamer - Frigate",
+    "storage": "Statistika prostora - Frigate",
+    "general": "Statistika - Frigate"
+  },
+  "logs": {
+    "download": {
+      "label": "Prenesi dnevnike"
+    },
+    "copy": {
+      "label": "Kopiraj v odložišče",
+      "success": "Dnevniki kopirani v odložišče"
+    }
+  }
+}

@@ -1,1 +1,19 @@
-{}
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Oznake",
+    "all": {
+      "title": "Vse oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} oznak"
+  },
+  "dates": {
+    "selectPreset": "Izberite nastavitev …",
+    "all": {
+      "title": "Vsi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Več filtrov"
+}

@@ -1,1 +1,32 @@
-{}
+{
+  "documentTitle": {
+    "default": "Nastavitve - Frigate",
+    "authentication": "Nastavitve preverjanja pristnosti - Frigate",
+    "camera": "Nastavitve kamere - Frigate",
+    "notifications": "Nastavitve obvestil - Frigate"
+  },
+  "menu": {
+    "ui": "Uporabniški vmesnik",
+    "enrichments": "Obogatitve"
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    }
+  }
+}
