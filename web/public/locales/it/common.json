@@ -83,6 +83,10 @@
     "formattedTimestampFilename": {
       "24hour": "MM-dd-yy-HH-mm-ss",
       "12hour": "MM-dd-yy-h-mm-ss-a"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
     }
   },
   "button": {
@@ -126,6 +130,10 @@
     "speed": {
       "kph": "km/h",
       "mph": "miglia/h"
+    },
+    "length": {
+      "feet": "piedi",
+      "meters": "metri"
     }
   },
   "label": {
@@ -171,7 +179,8 @@
       "de": "Deutsch (Tedesco)",
       "he": "עברית (Ebraico)",
       "it": "Italiano (Italiano)",
-      "yue": "粵語 (Cantonese)"
+      "yue": "粵語 (Cantonese)",
+      "th": "ไทย (Tailandese)"
     },
     "darkMode": {
       "label": "Modalità scura",

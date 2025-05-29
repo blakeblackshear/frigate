@@ -107,7 +107,10 @@
         "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. Tuttavia, è possibile utilizzare il campo <code>annotation_offset</code> per correggere questo problema.",
         "label": "Compensazione di annotazione",
         "documentation": "Leggi la documentazione ",
-        "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>"
+        "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
+        "toast": {
+          "success": "La compensazione di annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
+        }
       },
       "showAllZones": {
         "title": "Mostra tutte le zone",
@@ -142,7 +145,9 @@
     "carousel": {
       "previous": "Diapositiva precedente",
       "next": "Diapositiva successiva"
-    }
+    },
+    "count": "{{first}} di {{second}}",
+    "trackedPoint": "Punto tracciato"
   },
   "type": {
     "snapshot": "istantanea",
@@ -199,5 +204,6 @@
   "trackedObjectsCount_many": "{{count}} oggetti tracciati ",
   "trackedObjectsCount_other": "{{count}} oggetti tracciati ",
   "fetchingTrackedObjectsFailed": "Errore durante il recupero degli oggetti tracciati: {{errorMessage}}",
-  "noTrackedObjects": "Nessun oggetto tracciato trovato"
+  "noTrackedObjects": "Nessun oggetto tracciato trovato",
+  "exploreMore": "Esplora altri oggetti {{label}}"
 }

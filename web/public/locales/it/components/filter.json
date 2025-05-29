@@ -21,7 +21,8 @@
     "all": {
       "title": "Tutte le date",
       "short": "Date"
-    }
+    },
+    "selectPreset": "Seleziona una preimpostazione…"
   },
   "reset": {
     "label": "Ripristina i filtri ai valori predefiniti"

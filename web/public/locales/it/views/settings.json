@@ -9,7 +9,8 @@
     "object": "Correzioni - Frigate",
     "general": "Impostazioni generali - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
-    "notifications": "Impostazioni di notifiche - Frigate"
+    "notifications": "Impostazioni di notifiche - Frigate",
+    "enrichments": "Impostazioni di miglioramento - Frigate"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -175,6 +176,11 @@
         "error": {
           "mustBeGreaterOrEqualZero": "Il tempo di permanenza deve essere maggiore o uguale a 0."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "La soglia di velocità deve essere maggiore o uguale a 0,1."
+        }
       }
     },
     "filter": {
@@ -191,7 +197,12 @@
     "zones": {
       "speedEstimation": {
         "desc": "Abilita la stima della velocità per gli oggetti in questa zona. La zona deve avere esattamente 4 punti.",
-        "title": "Stima della velocità"
+        "title": "Stima della velocità",
+        "docs": "Leggi la documentazione",
+        "lineCDistance": "Distanza della linea C ({{unit}})",
+        "lineDDistance": "Distanza della linea D ({{unit}})",
+        "lineADistance": "Distanza della linea A ({{unit}})",
+        "lineBDistance": "Distanza della linea B ({{unit}})"
       },
       "add": "Aggiungi zona",
       "speedThreshold": {
@@ -263,7 +274,9 @@
       "label": "Maschere di oggetti",
       "documentTitle": "Modifica maschera oggetti - Frigate"
     },
-    "restart_required": "Riavvio richiesto (maschere/zone modificate)"
+    "restart_required": "Riavvio richiesto (maschere/zone modificate)",
+    "motionMaskLabel": "Maschera di movimento {{number}}",
+    "objectMaskLabel": "Maschera di oggetto {{number}} ({{label}})"
   },
   "cameraSetting": {
     "camera": "Telecamera",
@@ -312,7 +325,8 @@
     "masksAndZones": "Maschere / Zone",
     "debug": "Correzioni",
     "users": "Utenti",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "Miglioramenti"
   },
   "users": {
     "dialog": {
@@ -325,7 +339,8 @@
           "viewer": "Spettatore"
         },
         "title": "Cambia ruolo utente",
-        "desc": "Aggiorna i permessi per <strong>{{username}}</strong>"
+        "desc": "Aggiorna i permessi per <strong>{{username}}</strong>",
+        "select": "Seleziona un ruolo"
       },
       "deleteUser": {
         "warn": "Sei sicuro di voler eliminare <strong>{{username}}</strong>?",
@@ -362,17 +377,21 @@
             "placeholder": "Reinserisci la nuova password"
           }
         },
-        "usernameIsRequired": "Il nome utente è obbligatorio"
+        "usernameIsRequired": "Il nome utente è obbligatorio",
+        "passwordIsRequired": "La password è obbligatoria"
       },
       "createUser": {
         "desc": "Aggiungi un nuovo account utente e specifica un ruolo per l'accesso alle aree dell'interfaccia utente di Frigate.",
         "title": "Crea nuovo utente",
-        "usernameOnlyInclude": "Il nome utente può contenere solo lettere, numeri, . o _"
+        "usernameOnlyInclude": "Il nome utente può contenere solo lettere, numeri, . o _",
+        "confirmPassword": "Conferma la password"
       },
       "passwordSetting": {
         "updatePassword": "Aggiorna la password per {{username}}",
         "setPassword": "Imposta password",
-        "desc": "Crea una password complessa per proteggere questo account."
+        "desc": "Crea una password complessa per proteggere questo account.",
+        "cannotBeEmpty": "La password non può essere vuota",
+        "doNotMatch": "Le password non corrispondono"
       }
     },
     "table": {
@@ -601,5 +620,67 @@
     "cancelSuspension": "Annulla sospensione",
     "unsavedRegistrations": "Registrazioni di notifiche non salvate",
     "unsavedChanges": "Modifiche alle notifiche non salvate"
+  },
+  "enrichments": {
+    "toast": {
+      "success": "Le impostazioni di miglioramento sono state salvate. Riavvia Frigate per applicare le modifiche.",
+      "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}"
+    },
+    "title": "Impostazioni di miglioramento",
+    "semanticSearch": {
+      "reindexNow": {
+        "desc": "La reindicizzazione rigenererà gli incorporamenti per tutti gli oggetti tracciati. Questo processo viene eseguito in sottofondo e potrebbe impegnare al massimo la CPU e richiedere un tempo considerevole, a seconda del numero di oggetti tracciati.",
+        "success": "Reindicizzazione avviata con successo.",
+        "label": "Reindicizza ora",
+        "confirmTitle": "Conferma reindicizzazione",
+        "confirmDesc": "Vuoi davvero reindicizzare tutti gli incorporamenti di oggetti tracciati? Questo processo verrà eseguito in sottofondo, ma potrebbe impegnare al massimo la CPU e richiedere molto tempo. Puoi monitorare l'avanzamento nella pagina Esplora.",
+        "confirmButton": "Reindicizza",
+        "alreadyInProgress": "La reindicizzazione è già in corso.",
+        "error": "Impossibile avviare la reindicizzazione: {{errorMessage}}"
+      },
+      "modelSize": {
+        "small": {
+          "desc": "Utilizzando <em>piccolo</em> si utilizza una versione quantizzata del modello che utilizza meno RAM ed è più veloce sulla CPU con una differenza davvero trascurabile nella qualità di incorporamento.",
+          "title": "piccolo"
+        },
+        "label": "Dimensioni del modello",
+        "desc": "Dimensione del modello utilizzato per gli incorporamenti della ricerca semantica.",
+        "large": {
+          "title": "grande",
+          "desc": "L'utilizzo di <em>grande</em> utilizza il modello Jina completo e, se applicabile, verrà eseguito automaticamente sulla GPU."
+        }
+      },
+      "title": "Ricerca semantica",
+      "desc": "La ricerca semantica in Frigate consente di trovare gli oggetti tracciati all'interno degli elementi della recensione utilizzando l'immagine stessa, una descrizione testuale definita dall'utente o una generata automaticamente.",
+      "readTheDocumentation": "Leggi la documentazione"
+    },
+    "faceRecognition": {
+      "desc": "Il riconoscimento facciale consente di assegnare un nome alle persone e, quando il volto viene riconosciuto, Frigate assegnerà il nome della persona come sottoetichetta. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
+      "title": "Riconoscimento facciale",
+      "readTheDocumentation": "Leggi la documentazione",
+      "modelSize": {
+        "label": "Dimensioni del modello",
+        "desc": "Dimensioni del modello utilizzato per il riconoscimento facciale.",
+        "small": {
+          "title": "piccolo",
+          "desc": "L'utilizzo di <em>piccolo</em> sfrutta un modello di incorporamento di volti FaceNet che funziona in modo efficiente sulla maggior parte delle CPU."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "L'utilizzo di <em>grande</em> impiega un modello di incorporamento di volti ArcFace e verrà eseguito automaticamente sulla GPU, se applicabile."
+        }
+      }
+    },
+    "birdClassification": {
+      "desc": "La classificazione degli uccelli identifica gli uccelli noti utilizzando un modello Tensorflow quantizzato. Quando un uccello noto viene riconosciuto, il suo nome comune viene aggiunto come sub_label. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
+      "title": "Classificazione degli uccelli"
+    },
+    "licensePlateRecognition": {
+      "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo \"car\". Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
+      "title": "Riconoscimento della targa",
+      "readTheDocumentation": "Leggi la documentazione"
+    },
+    "unsavedChanges": "Modifiche alle impostazioni di miglioramento non salvate",
+    "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
   }
 }

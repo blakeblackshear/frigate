@@ -116,7 +116,11 @@
       "desc": {
         "selected": "Vuoi davvero eliminare tutti i video registrati associati a questo elemento di visto?<br /><br />Tieni premuto il tasto <em>Maiusc</em> per ignorare questa finestra di dialogo in futuro."
       },
-      "title": "Conferma eliminazione"
+      "title": "Conferma eliminazione",
+      "toast": {
+        "success": "Il filmato associato agli elementi di recensione selezionati è stato eliminato correttamente.",
+        "error": "Impossibile eliminare: {{error}}"
+      }
     }
   }
 }
