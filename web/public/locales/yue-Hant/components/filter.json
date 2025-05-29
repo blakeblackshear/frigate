@@ -118,7 +118,8 @@
     "all": {
       "title": "所有日期",
       "short": "日期"
-    }
+    },
+    "selectPreset": "選擇預設設定…"
   },
   "more": "更多篩選條件",
   "timeRange": "時間範圍"

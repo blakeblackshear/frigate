@@ -26,7 +26,8 @@
               "desc": "鏡頭影像每分鐘只會更新一次，不會進行即時串流。"
             }
           },
-          "label": "串流方式"
+          "label": "串流方式",
+          "placeholder": "選擇串流方式"
         },
         "compatibilityMode": {
           "label": "相容模式",
@@ -36,7 +37,9 @@
         "title": "{{cameraName}} 串流設定",
         "desc": "更改此鏡頭群組控制台的即時串流選項。<em>這些設定是裝置/瀏覽器專屬的。</em>",
         "audioIsAvailable": "此串流有提供音訊",
-        "audioIsUnavailable": "此串流沒有音訊"
+        "audioIsUnavailable": "此串流沒有音訊",
+        "placeholder": "選擇串流來源",
+        "stream": "串流"
       }
     },
     "delete": {

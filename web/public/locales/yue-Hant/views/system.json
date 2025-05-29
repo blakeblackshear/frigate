@@ -119,7 +119,8 @@
       "fps": "每秒影格數 (FPS)：",
       "unknown": "未知",
       "error": "錯誤：{{error}}",
-      "cameraProbeInfo": "{{camera}} 鏡頭詳細資訊"
+      "cameraProbeInfo": "{{camera}} 鏡頭詳細資訊",
+      "aspectRatio": "長寬比"
     },
     "framesAndDetections": "畫面 / 偵測",
     "label": {
