@@ -11,5 +11,6 @@
     "error": {
       "savingError": "Erreur lors de l'enregistrement de la configuration"
     }
-  }
+  },
+  "confirm": "Quitter sans enregistrer ?"
 }

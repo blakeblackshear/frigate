@@ -9,7 +9,8 @@
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
-    "notifications": "Paramètres de notification - Frigate"
+    "notifications": "Paramètres de notification - Frigate",
+    "enrichments": "Paramètres d'enrichissements - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -20,7 +21,8 @@
     "cameras": "Paramètres des caméras",
     "users": "Utilisateurs",
     "notifications": "Notifications",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "Enrichissements"
   },
   "dialog": {
     "unsavedChanges": {
@@ -65,7 +67,7 @@
     "calendar": {
       "firstWeekday": {
         "label": "Premier jour de la semaine",
-        "desc": "Le jour du début de semaine du calendrier de révision.",
+        "desc": "Le jour du début de semaine du calendrier de revue.",
         "sunday": "Dimanche",
         "monday": "Lundi"
       },
@@ -190,13 +192,13 @@
         "label": "Réindexer maintenant",
         "confirmTitle": "Confirmer la réindexation",
         "error": "Échec du démarrage de la réindexation : {{errorMessage}}",
-        "desc": "La réindexation génère à nouveau les intégrations pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
-        "confirmDesc": "Êtes-vous sûr de vouloir réindexer toutes les incorporations d'objets suivis ? Ce processus s'exécutera en arrière-plan, mais il risque de saturer votre processeur et de prendre un certain temps. Vous pouvez suivre la progression sur la page Explorateur.",
+        "desc": "La réindexation génère à nouveau les plongements vectoriels pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un certain temps, selon le nombre d'objets suivis.",
+        "confirmDesc": "Êtes-vous sûr de vouloir réindexer tous les plongements vectoriels d'objets suivis ? Ce processus s'exécutera en arrière-plan, mais il risque de saturer votre processeur et de prendre un certain temps. Vous pouvez suivre la progression sur la page Explorer.",
         "success": "La réindexation a démarré avec succès.",
         "alreadyInProgress": "La réindexation est déjà en cours.",
         "confirmButton": "Réindexer"
       },
-      "desc": "La recherche sémantique dans Frigate vous permet de trouver des objets suivis dans vos éléments d'évaluation en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement.",
+      "desc": "La recherche sémantique dans Frigate vous permet de trouver des objets suivis dans vos éléments de revue en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement.",
       "modelSize": {
         "small": {
           "desc": "L'utilisation de <em>petit</em> utilise une version quantifiée du modèle qui utilise moins de mémoire et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité d'intégration.",
@@ -206,7 +208,7 @@
           "desc": "L'utilisation de <em>grand</em> utilise le modèle Jina complet et s'exécutera automatiquement sur la carte graphique si applicable.",
           "title": "grand"
         },
-        "desc": "Taille du modèle utilisé pour les intégrations de recherche sémantique.",
+        "desc": "Taille du modèle utilisé pour les plongements vectoriels de recherche sémantique.",
         "label": "Taille du modèle"
       },
       "readTheDocumentation": "Lire la documentation"
@@ -247,13 +249,13 @@
   "camera": {
     "title": "Paramètres de la caméra",
     "review": {
-      "title": "Evaluation",
+      "title": "Revue",
       "detections": "Détections ",
       "alerts": "Alertes ",
-      "desc": "Activer/désactiver les alertes et les détections pour cette caméra. Si cette option est désactivée, aucun nouvel élément d'évaluation ne sera généré."
+      "desc": "Activer/désactiver les alertes et les détections pour cette caméra. Si cette option est désactivée, aucun nouvel élément de revue ne sera généré."
     },
     "reviewClassification": {
-      "title": "Evaluer la classification",
+      "title": "Classification de la revue",
       "objectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme des détections, quelle que soit la zone dans laquelle ils se trouvent.",
       "zoneObjectDetectionsTips": {
         "text": "Tous les objets {{detectionsLabels}} non classés dans {{zone}} sur {{cameraName}} seront affichés comme des détections.",
@@ -262,7 +264,7 @@
       },
       "selectDetectionsZones": "Sélectionner les zones pour les détections",
       "toast": {
-        "success": "La configuration de la classification des évaluations a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
+        "success": "La configuration de la classification des revues a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       },
       "readTheDocumentation": "Lire la documentation",
       "objectAlertsTips": "Tous les objets {{alertsLabels}} sur {{cameraName}} seront affichés sous forme d'alertes.",
@@ -270,8 +272,8 @@
       "zoneObjectAlertsTips": "Tous les objets {{alertsLabels}} détectés dans {{zone}} sur {{cameraName}} seront affichés sous forme d'alertes.",
       "noDefinedZones": "Aucune zone n'est définie pour cette caméra.",
       "selectAlertsZones": "Sélectionner les zones pour les alertes",
-      "desc": "Frigate catégorise les éléments d'évaluation en alertes et détections. Par défaut, tous les objets <em>personne</em> et <em>voiture</em> sont considérés comme des alertes. Vous pouvez affiner la catégorisation de vos éléments d'évaluation en configurant les zones requises pour ces éléments.",
-      "unsavedChanges": "Paramètres de classification de la révision pour {{camera}} non enregistrés"
+      "desc": "Frigate catégorise les éléments de revues en alertes et détections. Par défaut, tous les objets <em>personne</em> et <em>voiture</em> sont considérés comme des alertes. Vous pouvez affiner la catégorisation de vos éléments de revues en configurant les zones requises pour ces éléments.",
+      "unsavedChanges": "Paramètres de classification de revue pour {{camera}} non enregistrés"
     },
     "streams": {
       "title": "Flux",
@@ -322,6 +324,11 @@
         "error": {
           "mustBeAboveZero": "L'inertie doit être supérieure à 0."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Le seuil de vitesse soit être égal ou supérieur à 0.1."
+        }
       }
     },
     "zones": {
@@ -344,7 +351,11 @@
       "speedEstimation": {
         "title": "Estimation de la vitesse",
         "desc": "Activer l'estimation de la vitesse des objets dans cette zone. La zone doit comporter exactement 4 points.",
-        "docs": "Lire la documentation"
+        "docs": "Lire la documentation",
+        "lineBDistance": "Distance ligne B ({{unit}})",
+        "lineCDistance": "Distance ligne C ({{unit}})",
+        "lineADistance": "Distance ligne A ({{unit}})",
+        "lineDDistance": "Distance ligne D ({{unit}})"
       },
       "speedThreshold": {
         "title": "Seuil de vitesse ({{unit}})",
@@ -440,7 +451,9 @@
         "copyCoordinatesFailed": "Impossible de copier les coordonnées dans le presse-papiers."
       }
     },
-    "restart_required": "Redémarrage requis (masques/zones changés)"
+    "restart_required": "Redémarrage requis (masques/zones changés)",
+    "objectMaskLabel": "Masque d'objet {{number}} ({{label}})",
+    "motionMaskLabel": "Masque de mouvement {{number}}"
   },
   "motionDetectionTuner": {
     "title": "Réglage de la détection de mouvement",
@@ -472,7 +485,7 @@
       "title": "Cadres de délimitation",
       "colors": {
         "label": "Couleurs du cadre de délimitation d'un objet",
-        "info": "<li>Au démarrage, différentes couleurs seront attribuées à chaque étiquette d'objet</li><li>Une fine ligne bleu foncé indique que l'objet n'est pas détecté à ce moment précis</li><li>Une fine ligne grise indique que l'objet est détecté comme étant stationnaire</li><li>Une ligne épaisse indique que l'objet fait l'objet d'un suivi automatique (lorsqu'il est activé)</li>"
+        "info": "<li>Au démarrage, différentes couleurs seront attribuées à chaque libellé d'objet</li><li>Une fine ligne bleu foncé indique que l'objet n'est pas détecté à ce moment précis</li><li>Une fine ligne grise indique que l'objet est détecté comme étant stationnaire</li><li>Une ligne épaisse indique que l'objet fait l'objet d'un suivi automatique (lorsqu'il est activé)</li>"
       },
       "desc": "Afficher les cadres de délimitation autour des objets suivis"
     },
@@ -574,7 +587,8 @@
             "placeholder": "Ré-entrez le nouveau mot de passe"
           }
         },
-        "usernameIsRequired": "Le nom d'utilisateur est requis"
+        "usernameIsRequired": "Le nom d'utilisateur est requis",
+        "passwordIsRequired": "Mot de passe requis"
       },
       "deleteUser": {
         "title": "Supprimer un utilisateur",
@@ -584,7 +598,9 @@
       "passwordSetting": {
         "updatePassword": "Mettre à jour le mot de passe pour {{username}}",
         "setPassword": "Définir le mot de passe",
-        "desc": "Créez un mot de passe fort pour sécuriser ce compte."
+        "desc": "Créez un mot de passe fort pour sécuriser ce compte.",
+        "doNotMatch": "Les mots de passe ne correspondent pas",
+        "cannotBeEmpty": "Le mot de passe ne peut être vide"
       },
       "changeRole": {
         "title": "Changer le rôle de l'utilisateur",
@@ -594,14 +610,78 @@
           "admin": "Administrateur",
           "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
           "viewer": "Observateur",
-          "viewerDesc": "Limité aux tableaux de bord Direct, Examiner, Explorer et Exports."
-        }
+          "viewerDesc": "Limité aux tableaux de bord Direct, Revue, Explorer et Exports."
+        },
+        "select": "Sélectionnez un rôle"
       },
       "createUser": {
         "title": "Créer un nouvel utilisateur",
         "desc": "Ajoutez un nouveau compte utilisateur et spécifiez un rôle pour accéder aux zones de l'interface utilisateur Frigate.",
-        "usernameOnlyInclude": "Le nom d'utilisateur ne peut inclure que des lettres, des chiffres, . ou _"
+        "usernameOnlyInclude": "Le nom d'utilisateur ne peut inclure que des lettres, des chiffres, . ou _",
+        "confirmPassword": "Veuillez confirmer votre mot de passe"
       }
     }
+  },
+  "enrichments": {
+    "title": "Paramètres d'enrichissements",
+    "birdClassification": {
+      "title": "Classification des oiseaux",
+      "desc": "La classification des oiseaux identifie les espèces connues à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau connu est reconnu, son nom commun est ajouté comme sous-libellé. Ces informations sont incluses dans l'interface utilisateur, les filtres ainsi que les notifications."
+    },
+    "semanticSearch": {
+      "title": "Recherche sémantique",
+      "readTheDocumentation": "Lire la documentation",
+      "reindexNow": {
+        "label": "Réindexer maintenant",
+        "desc": "La réindexation va régénérer les plongements pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un temps considérable, en fonction du nombre d'objets suivis.",
+        "confirmTitle": "Confirmez la réindexation",
+        "confirmButton": "Réindexer",
+        "success": "La réindexation a démarré avec succès.",
+        "alreadyInProgress": "La réindexation est déjà en cours.",
+        "error": "Échec du démarrage de la réindexation : {{errorMessage}}",
+        "confirmDesc": "Êtes-vous sûr de vouloir réindexer tous les plongements des objets suivis ? Ce processus s'exécutera en arrière-plan, mais il pourrait saturer votre processeur et prendre un temps considérable. Vous pouvez suivre la progression sur la page Explorer."
+      },
+      "modelSize": {
+        "desc": "La taille du modèle utilisé pour les plongements de recherche sémantique.",
+        "small": {
+          "title": "petit",
+          "desc": "Utiliser <em>petit</em> emploie une version quantifiée du modèle qui utilise moins de mémoire et s'exécute plus rapidement sur le processeur avec une différence très négligeable dans la qualité des plongements."
+        },
+        "large": {
+          "title": "grand",
+          "desc": "Utiliser <em>grand</em> emploie le modèle Jina complet et s'exécutera automatiquement sur le GPU si disponible."
+        },
+        "label": "Taille du modèle"
+      },
+      "desc": "La recherche sémantique dans Frigate vous permet de retrouver les objets suivis dans vos éléments de recue en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
+    },
+    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
+    "faceRecognition": {
+      "title": "Reconnaissance faciale",
+      "readTheDocumentation": "Lire la documentation",
+      "modelSize": {
+        "label": "Taille du modèle",
+        "desc": "La taille du modèle utilisé pour la reconnaissance faciale.",
+        "small": {
+          "title": "petit",
+          "desc": "Utiliser <em>petit</em> emploie un modèle de plongements faciaux FaceNet qui s'exécute efficacement sur la plupart des processeurs."
+        },
+        "large": {
+          "title": "grand",
+          "desc": "Utiliser <em>grand</em> emploie un modèle de plongements faciaux ArcFace et s'exécutera automatiquement sur le GPU si disponible."
+        }
+      },
+      "desc": "La reconnaissance faciale permet d'attribuer des noms aux personnes et, lorsque leur visage est reconnu, Frigate assignera le nom de la personne comme un sous-libellé. Ces informations sont incluses dans l'interface utilisateur, les filtres, ainsi que dans les notifications."
+    },
+    "licensePlateRecognition": {
+      "title": "Reconnaissance des plaques d'immatriculation",
+      "readTheDocumentation": "Lire la documentation",
+      "desc": "Frigate est capable de reconnaître les plaques d'immatriculation sur les véhicules. Il peut alors ajouter automatiquement les caractères détectés au champ recognized_license_plate, ou attribuer un nom connu comme sous-libellé aux objets de type \"voiture\". Un exemple d'utilisation fréquent serait de lire les plaques des voitures qui accèdent à une allée ou qui circulent dans une rue."
+    },
+    "toast": {
+      "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
+      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+    },
+    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissements modifiés)"
   }
 }

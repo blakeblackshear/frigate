@@ -57,12 +57,15 @@
                 "warning": "Le streaming continu peut engendrer une bande-passante élevée et des problèmes de performance. A utiliser avec précaution."
               }
             }
-          }
+          },
+          "placeholder": "Choisissez une méthode de diffusion"
         },
         "compatibilityMode": {
           "label": "Mode de compatibilité",
           "desc": "Activer cette option uniquement si votre flux temps réel affiche des erreurs chromatiques et a une ligne diagonale sur le côté droit de l'image."
-        }
+        },
+        "stream": "Flux",
+        "placeholder": "Choisissez un flux"
       }
     }
   },

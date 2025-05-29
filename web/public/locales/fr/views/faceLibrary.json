@@ -1,7 +1,8 @@
 {
   "description": {
     "addFace": "Parcourez la procédure d’ajout d’une nouvelle collection à la bibliothèque de visages.",
-    "placeholder": "Saisissez un nom pour cette collection"
+    "placeholder": "Saisissez un nom pour cette collection",
+    "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets."
   },
   "details": {
     "person": "Personne",
@@ -9,8 +10,8 @@
     "face": "Détails du visage",
     "timestamp": "Horodatage",
     "faceDesc": "Détails de l'objet suivi qui a généré ce visage",
-    "subLabelScore": "Score de sous-étiquettes",
-    "scoreInfo": "Le score de sous-étiquette est le score pondéré de toutes les scores de confiances de visages reconnus, il peut donc différer du score affiché sur l'instantané.",
+    "subLabelScore": "Score de sous-libellé",
+    "scoreInfo": "Le score de sous-libellé est le score pondéré de tous les scores de confiances des visages reconnus. Il peut donc différer du score affiché sur l'instantané.",
     "unknown": "Inconnu"
   },
   "documentTitle": "Bibliothèque de visages - Frigate",
@@ -97,5 +98,6 @@
     "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible.",
     "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
   },
-  "nofaces": "Pas de visages disponibles"
+  "nofaces": "Pas de visages disponibles",
+  "pixels": "{{area}} pixels"
 }

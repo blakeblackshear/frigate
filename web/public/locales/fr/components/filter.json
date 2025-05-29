@@ -1,13 +1,13 @@
 {
   "labels": {
-    "label": "Étiquettes",
+    "label": "Libellés",
     "all": {
-      "title": "Toutes les étiquettes",
-      "short": "Étiquettes"
+      "title": "Tous les libellés",
+      "short": "Libellés"
     },
     "count": "{{count}} Étiquettes",
-    "count_one": "{{count}} Étiquette",
-    "count_other": "{{count}} Étiquettes"
+    "count_one": "{{count}} libellé",
+    "count_other": "{{count}} libellés"
   },
   "filter": "Filtre",
   "zones": {
@@ -21,7 +21,8 @@
     "all": {
       "title": "Toutes les dates",
       "short": "Dates"
-    }
+    },
+    "selectPreset": "Sélectionnez un préréglage…"
   },
   "more": "Plus de filtres",
   "reset": {
@@ -29,8 +30,8 @@
   },
   "timeRange": "Plage de temps",
   "subLabels": {
-    "label": "Sous-étiquettes",
-    "all": "Toutes les sous-étiquettes"
+    "label": "Sous-libellés",
+    "all": "Tous les sous-libellés"
   },
   "score": "Score",
   "estimatedSpeed": "Vitesse estimée ({{unit}})",
@@ -60,7 +61,7 @@
         "title": "Vue par défaut",
         "summary": "Résumé",
         "unfilteredGrid": "Grille non filtrée",
-        "desc": "Lorsqu'aucun filtre n'est sélectionné, affiche un résumé des objets suivis les plus récents par étiquette, ou affiche une grille non filtrée."
+        "desc": "Lorsqu'aucun filtre n'est sélectionné, affiche un résumé des objets suivis les plus récents par libellé, ou affiche une grille non filtrée."
       },
       "gridColumns": {
         "desc": "Sélectionner le nombre de colonnes dans la vue grille.",
@@ -82,7 +83,7 @@
     }
   },
   "review": {
-    "showReviewed": "Montrer les éléments évalués"
+    "showReviewed": "Montrer les éléments passés en revue"
   },
   "cameras": {
     "label": "Filtre des caméras",
@@ -118,7 +119,7 @@
       "success": "Les objets suivis ont été supprimés avec succès.",
       "error": "Échec de la suppression des objets suivis : {{errorMessage}}"
     },
-    "desc": "La suppression de ces objets suivis {{objectLength}} supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
+    "desc": "La suppression de ces objets suivis {{objectLength}} supprime l'instantané, les plongements vectoriels enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
   },
   "zoneMask": {
     "filterBy": "Filtrer par masque de zone"
