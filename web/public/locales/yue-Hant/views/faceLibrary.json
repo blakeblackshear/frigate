@@ -12,7 +12,8 @@
   },
   "description": {
     "addFace": "逐步了解如何新增一個人臉庫的集合。",
-    "placeholder": "請輸入此集合的名稱"
+    "placeholder": "請輸入此集合的名稱",
+    "invalidName": "名稱無效。名稱只可以包含英文字母、數字、空格、撇號（'）、底線（_）同連字號（-）。"
   },
   "documentTitle": "人臉庫 - Frigate",
   "uploadFaceImage": {
@@ -91,5 +92,6 @@
     "desc_other": "你確定要刪除{{count}}個人臉嗎？這個動作無法還原。",
     "title": "刪除人臉"
   },
-  "nofaces": "沒有可用人臉"
+  "nofaces": "沒有可用人臉",
+  "pixels": "{{area}} 像素"
 }

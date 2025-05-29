@@ -9,7 +9,8 @@
     "object": "除錯 - Frigate",
     "general": "一般設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
-    "notifications": "通知設定 - Frigate"
+    "notifications": "通知設定 - Frigate",
+    "enrichments": "進階功能設定 - Frigate"
   },
   "menu": {
     "ui": "介面",
@@ -20,7 +21,8 @@
     "debug": "除錯",
     "users": "用戶",
     "notifications": "通知",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "進階功能"
   },
   "dialog": {
     "unsavedChanges": {
@@ -230,6 +232,11 @@
         "reset": {
           "label": "清除所有點"
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "速度閾值必須大於或等於 0.1。"
+        }
       }
     },
     "zones": {
@@ -259,7 +266,11 @@
       "speedEstimation": {
         "title": "速度估算",
         "desc": "啟用此區域內物件的速度估算。區域必須正好有4個點。",
-        "docs": "閱讀文件"
+        "docs": "閱讀文件",
+        "lineCDistance": "C 線距離 ({{unit}})",
+        "lineBDistance": "B 線距離 ({{unit}})",
+        "lineADistance": "A 線距離 ({{unit}})",
+        "lineDDistance": "D 線距離 ({{unit}})"
       },
       "speedThreshold": {
         "title": "速度門檻 ({{unit}})",
@@ -334,7 +345,9 @@
     "filter": {
       "all": "所有遮罩與區域"
     },
-    "restart_required": "需要重新啟動（遮罩／區域已變更）"
+    "restart_required": "需要重新啟動（遮罩／區域已變更）",
+    "motionMaskLabel": "移動遮罩 {{number}}",
+    "objectMaskLabel": "物件遮罩 {{number}}（{{label}}"
   },
   "motionDetectionTuner": {
     "title": "移動偵測調校器",
@@ -467,12 +480,14 @@
           "title": "新密碼",
           "placeholder": "輸入新密碼"
         },
-        "usernameIsRequired": "必須輸入用戶名稱"
+        "usernameIsRequired": "必須輸入用戶名稱",
+        "passwordIsRequired": "必須填寫密碼"
       },
       "createUser": {
         "title": "建立新用戶",
         "desc": "新增用戶帳戶，並指定可存取Frigate介面各區域的角色。",
-        "usernameOnlyInclude": "用戶名稱只可包含字母、數字、句號或底線"
+        "usernameOnlyInclude": "用戶名稱只可包含字母、數字、句號或底線",
+        "confirmPassword": "請確認你的密碼"
       },
       "deleteUser": {
         "title": "刪除用戶",
@@ -488,12 +503,15 @@
           "viewer": "觀看者",
           "viewerDesc": "只限使用即時儀表板、審查、瀏覽及匯出功能。",
           "admin": "管理員"
-        }
+        },
+        "select": "選擇角色"
       },
       "passwordSetting": {
         "setPassword": "設定密碼",
         "updatePassword": "更新{{username}}的密碼",
-        "desc": "建立強密碼以保障此帳戶安全。"
+        "desc": "建立強密碼以保障此帳戶安全。",
+        "cannotBeEmpty": "密碼不能留空",
+        "doNotMatch": "密碼不相符"
       }
     },
     "title": "用戶"
@@ -596,5 +614,67 @@
     },
     "restart_required": "需要重新啟動（已更改Frigate+模型）",
     "unsavedChanges": "Frigate+ 設定更改尚未儲存"
+  },
+  "enrichments": {
+    "faceRecognition": {
+      "modelSize": {
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上運行。"
+        },
+        "desc": "用於人臉識別的模型大小。",
+        "label": "模型大小",
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用 FaceNet 臉部嵌入模型，在大多數 CPU 上能有效運行。"
+        }
+      },
+      "desc": "人臉識別功能允許為人物分配名字，當辨識到他們的臉孔時，Frigate 會將名字加到子標籤上。此資訊會顯示於介面、篩選器及通知中。",
+      "title": "人臉識別",
+      "readTheDocumentation": "閱讀文件"
+    },
+    "birdClassification": {
+      "title": "鳥類分類",
+      "desc": "鳥類分類會使用量化 Tensorflow 模型識別已知鳥類。當辨識到已知鳥類時，牠的常見名稱會加到子標籤上。此資訊會顯示在介面、篩選器及通知中。"
+    },
+    "semanticSearch": {
+      "desc": "Frigate 的語意搜尋功能讓你可以利用影像本身、自訂文字描述，或自動產生的描述，在審查項目中尋找已追蹤的物件。",
+      "reindexNow": {
+        "confirmDesc": "你確定要重建索引所有已追蹤物件的嵌入向量嗎？這個過程會在背景運行，但可能會用盡你的 CPU，而且需要一定時間。你可以在「瀏覽」頁面查看進度。",
+        "label": "立即重建索引",
+        "desc": "重建索引會為所有已追蹤物件重新生成嵌入向量。這個過程會在背景運行，可能會用盡你的 CPU，所需時間取決於已追蹤物件的數量。",
+        "confirmTitle": "確認重建索引",
+        "confirmButton": "重建索引",
+        "success": "重建索引已成功開始。",
+        "alreadyInProgress": "重建索引已在進行中。",
+        "error": "啟動重建索引失敗：{{errorMessage}}"
+      },
+      "title": "語意搜尋",
+      "readTheDocumentation": "閱讀文件",
+      "modelSize": {
+        "label": "模型大小",
+        "desc": "用於語意搜尋的模型大小。",
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用量化版本，較少佔用 RAM，在 CPU 上運行更快，而嵌入品質的差異非常細微。"
+        },
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用完整的 Jina 模型，並在適用情況下自動於 GPU 上運行。"
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "車牌識別",
+      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。",
+      "readTheDocumentation": "閱讀文件"
+    },
+    "title": "進階功能設定",
+    "unsavedChanges": "未儲存進階功能設定變更",
+    "restart_required": "需要重新啟動（進階功能設定已變更）",
+    "toast": {
+      "success": "進階功能設定已儲存。請重新啟動 Frigate 以套用你的更改。",
+      "error": "儲存設定變更失敗：{{errorMessage}}"
+    }
   }
 }

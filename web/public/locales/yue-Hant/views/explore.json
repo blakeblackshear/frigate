@@ -69,7 +69,10 @@
         "desc": "此資料來自鏡頭的偵測串流，但覆蓋在錄影串流的畫面上。兩個串流通常無法完全同步。因此邊界框和影片可能無法完全對齊。不過可以使用 <code>annotation_offset</code> 欄位來調整。",
         "label": "註解偏移量",
         "documentation": "閱讀文件 ",
-        "millisecondsToOffset": "偵測註解的偏移毫秒數。<em>預設：0</em>"
+        "millisecondsToOffset": "偵測註解的偏移毫秒數。<em>預設：0</em>",
+        "toast": {
+          "success": "{{camera}} 的註解偏移量已儲存到設定檔。請重新啟動 Frigate 以套用更改。"
+        }
       }
     },
     "carousel": {
@@ -78,7 +81,9 @@
     },
     "adjustAnnotationSettings": "調整註解設定",
     "scrollViewTips": "滾動以查看此物件生命周期中的重要時刻。",
-    "autoTrackingTips": "自動追蹤鏡頭的邊界框位置可能不準確。"
+    "autoTrackingTips": "自動追蹤鏡頭的邊界框位置可能不準確。",
+    "count": "第 {{first}} 個，共 {{second}} 個",
+    "trackedPoint": "追蹤點"
   },
   "details": {
     "item": {
@@ -195,5 +200,6 @@
     },
     "tooltip": "已配對{{type}}（{{confidence}}% 信心"
   },
-  "trackedObjectsCount_other": "{{count}} 個追蹤物件 "
+  "trackedObjectsCount_other": "{{count}} 個追蹤物件 ",
+  "exploreMore": "瀏覽更多{{label}}物件"
 }
