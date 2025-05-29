@@ -1,0 +1,62 @@
+{
+  "search": "ค้นหา",
+  "button": {
+    "save": "บันทึกค้นหา",
+    "delete": "ลบการบันทึกค้นหา",
+    "clear": "ล้างการค้นหา",
+    "filterInformation": "ข้อมูลตัวกรอง",
+    "filterActive": "ตัวกรองที่ใช้งาน"
+  },
+  "savedSearches": "บันทึกการค้นหา",
+  "searchFor": "ค้นหา {{inputValue}}",
+  "trackedObjectId": "ติดตามรหัส",
+  "filter": {
+    "label": {
+      "cameras": "กล้อง",
+      "labels": "หมวดหมู่",
+      "zones": "โซน",
+      "sub_labels": "หมวดหมู่ย่อย",
+      "search_type": "ค้นหาประเภท",
+      "time_range": "ช่วงเวลา",
+      "after": "หลัง",
+      "min_score": "คะแนนต่ำ",
+      "max_speed": "ความเร็วสูงสุด",
+      "has_clip": "มีคลิป",
+      "has_snapshot": "มีภาพ",
+      "before": "ก่อน",
+      "max_score": "คะแนนสูงสุด",
+      "min_speed": "ความเร็วต่ำ"
+    },
+    "searchType": {
+      "description": "ลักษณะ"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "วันที่ของก่อนต้องอยู่หลังจากวันที่ของหลัง.",
+        "afterDatebeEarlierBefore": "วันที่ 'หลัง' จะต้องมาก่อนวันที่ 'ก่อน'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'คะแนนต่ำ' ต้องน้อยกว่าหรือเท่ากับ 'คะแนนสูง'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'ความเร็วต่ำ' จะต้องน้อยกว่าหรือเท่ากับ 'ความเร็วสูงสุด'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'ความเร็วสูงสุด' จะต้องมากกว่าหรือเท่ากับ 'ความเร็วต่ำ'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'คะแนนสูง' ต้องมากกว่าหรือเท่ากับ 'คะแนนต่ำ'."
+      }
+    },
+    "tips": {
+      "desc": {
+        "step1": "ประเภทตัวกรองต้องตามด้วยอัญประกาศ (เช่น \"cameras:\").",
+        "exampleLabel": "ตัวอย่าง:",
+        "step4": "วันที่กรอง (before: และ after:)ใช้รูปแบบ {{DateFormat}}.",
+        "step2": "เลือกค่าจากคําแนะนําหรือพิมพ์ด้วยคุณเอง."
+      },
+      "title": "วิธีการใช้ตัวกรองข้อความ"
+    },
+    "header": {
+      "activeFilters": "ตัวกรองที่ใช้งาน"
+    }
+  },
+  "placeholder": {
+    "search": "ค้นหา…"
+  },
+  "similaritySearch": {
+    "title": "ค้นหาที่คล้ายกัน"
+  }
+}

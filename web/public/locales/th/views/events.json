@@ -1,0 +1,38 @@
+{
+  "motion": {
+    "label": "เคลื่อนไหว",
+    "only": "เคลื่อนไหวเท่านั้น"
+  },
+  "allCameras": "กล้องทั้งหมด",
+  "empty": {
+    "detection": "ไม่มีการเคลื่อนไหวให้รีวิว",
+    "motion": "ไม่เจอข้อมูลการเคลื่อนไหว",
+    "alert": "ไม่มีการแจ้งเตือนให้รีวิว"
+  },
+  "events": {
+    "label": "กิจกรรม",
+    "aria": "เลือกกิจกรรม",
+    "noFoundForTimePeriod": "ไม่เจอกิจกรรมในช่วงเวลานี้"
+  },
+  "recordings": {
+    "documentTitle": "การบันทึก - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "24 ชั่วโมงล่าสุด"
+  },
+  "markAsReviewed": "ทำเครื่องหมายว่ารีวิวแล้ว",
+  "newReviewItems": {
+    "button": "รายการใหม่ที่จะรีวิว",
+    "label": "ดูรายการรีวิวใหม่"
+  },
+  "selected_other": "เลือก {{count}} แล้ว",
+  "camera": "กล้อง",
+  "detected": "ตรวจพบ",
+  "timeline": "ไทม์ไลน์",
+  "markTheseItemsAsReviewed": "ทำเครื่องหมายรายการเหล่านี้ว่าได้รับการรีวิวแล้ว",
+  "alerts": "การแจ้งเตือน",
+  "detections": "การตรวจจับ",
+  "selected_one": "เลือก {{count}} แล้ว",
+  "timeline.aria": "เลือกไทม์ไลน์",
+  "documentTitle": "รีวิว - Frigate"
+}

@@ -1,0 +1,31 @@
+{
+  "general": {
+    "title": "ทั่วไป",
+    "hardwareInfo": {
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "driver": "ไดรเวอร์: {{driver}}",
+          "name": "ชื่อ: {{name}}"
+        }
+      }
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "face_recognition_speed": "ความเร็วในการจดจำใบหน้า",
+      "plate_recognition_speed": "ความเร็วในการจดจำป้าย",
+      "yolov9_plate_detection_speed": "ความเร็วในการตรวจจับป้าย ของ YOLOv9",
+      "face_recognition": "การจดจำใบหน้า",
+      "text_embedding_speed": "ความเร็วในการอ่านข้อความ",
+      "yolov9_plate_detection": "การตรวจจับป้าย ของ YOLOv9"
+    }
+  },
+  "title": "ระบบ",
+  "storage": {
+    "cameraStorage": {
+      "unused": {
+        "title": "ไม่ได้ใช้"
+      }
+    }
+  }
+}

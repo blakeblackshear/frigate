@@ -1,0 +1,17 @@
+{
+  "documentTitle": "ส่งออก - Frigate",
+  "search": "ค้นหา",
+  "noExports": "ไม่เจอการส่งออก",
+  "deleteExport": "ลบส่งออก",
+  "deleteExport.desc": "คุณแน่ใจหรอที่จะลบ {{exportName}}?",
+  "editExport": {
+    "title": "แก้ชื่อส่งออก",
+    "desc": "ใส่ชื่อใหม่สำหรับการส่งออกนี้",
+    "saveExport": "บันทึกการส่งออก"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "ผิดพลาดในการแก้ไขชื่อการส่งออก: {{errorMessage}}"
+    }
+  }
+}
