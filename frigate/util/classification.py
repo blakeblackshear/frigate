@@ -71,7 +71,7 @@ def train_classification_model(model_dir: str) -> bool:
     # create training set
     datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
     train_gen = datagen.flow_from_directory(
-        "train",
+        dataset_dir,
         target_size=(224, 224),
         batch_size=BATCH_SIZE,
         class_mode="categorical",
