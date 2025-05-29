@@ -89,9 +89,9 @@
   "notifications": "Benachrichtigungen",
   "stream": {
     "audio": {
-      "available": "Für diesen Stream ist Audio verfügbar",
+      "available": "Audio ist für diesen Stream verfügbar",
       "tips": {
-        "title": "Der Ton muss von Ihrer Kamera ausgegeben und für diesen Stream in go2rtc konfiguriert werden.",
+        "title": "Audio muss von deiner Kamera ausgegeben und für diesen Stream in go2rtc konfiguriert werden.",
         "documentation": "Dokumentation lesen "
       },
       "unavailable": "Für diesen Stream ist kein Audio verfügbar"
@@ -106,7 +106,7 @@
       "tips": "Die Live-Ansicht befindet sich aufgrund von Puffer- oder Stream-Fehlern im Modus mit geringer Bandbreite.",
       "resetStream": "Stream zurücksetzen"
     },
-    "title": "Strom",
+    "title": "Stream",
     "playInBackground": {
       "tips": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
       "label": "Im Hintergrund abspielen"

@@ -9,7 +9,8 @@
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungstuner – Frigate",
-    "notifications": "Benachrichtigungs-Einstellungen"
+    "notifications": "Benachrichtigungs-Einstellungen",
+    "enrichments": "Erweiterte Statistiken - Frigate"
   },
   "menu": {
     "ui": "Benutzeroberfläche",
@@ -20,7 +21,8 @@
     "debug": "Debug",
     "frigateplus": "Frigate+",
     "users": "Benutzer",
-    "notifications": "Benachrichtigungen"
+    "notifications": "Benachrichtigungen",
+    "enrichments": "Verbesserungen"
   },
   "dialog": {
     "unsavedChanges": {
@@ -222,6 +224,11 @@
         "error": {
           "mustBeFinished": "Polygonzeichnung muss vor dem Speichern abgeschlossen sein."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Der Geschwindigkeitsschwellwert muss größer oder gleich 0,1 sein."
+        }
       }
     },
     "toast": {
@@ -248,7 +255,11 @@
       "speedEstimation": {
         "title": "Geschwindigkeitsschätzung",
         "desc": "Aktiviere die Geschwindigkeitsabschätzung für Objekte in diesem Bereich. Der Bereich muss genau 4 Punkte haben.",
-        "docs": "Bitte lies die Dokumentation"
+        "docs": "Bitte lies die Dokumentation",
+        "lineADistance": "Spur A Distanz ({{unit}})",
+        "lineDDistance": "Spur D Distanz ({{unit}})",
+        "lineBDistance": "Spur B Distanz ({{unit}})",
+        "lineCDistance": "Spur C Distanz ({{unit}})"
       },
       "label": "Zonen",
       "documentTitle": "Zone bearbeiten - Frigate",
@@ -337,7 +348,9 @@
         "desc": "Der Objekttyp, für den diese Objektmaske gilt.",
         "allObjectTypes": "Alle Objekttypen"
       }
-    }
+    },
+    "motionMaskLabel": "Bewegungsmaske {{number}}",
+    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
   },
   "debug": {
     "objectShapeFilterDrawing": {
@@ -471,7 +484,8 @@
             "placeholder": "Neues Passwort erneut eingeben"
           }
         },
-        "usernameIsRequired": "Benutzername ist erforderlich"
+        "usernameIsRequired": "Benutzername ist erforderlich",
+        "passwordIsRequired": "Passwort benötigt"
       },
       "changeRole": {
         "desc": "Berechtigungen für <strong>{{username}}</strong> aktualisieren",
@@ -482,7 +496,8 @@
           "viewer": "Betrachter",
           "viewerDesc": "Nur auf Live-Dashboards, Überprüfung, Erkundung und Exporte beschränkt."
         },
-        "title": "Benutzerrolle ändern"
+        "title": "Benutzerrolle ändern",
+        "select": "Wähle eine Rolle"
       },
       "deleteUser": {
         "desc": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Benutzerkonto dauerhaft gelöscht und alle zugehörigen Daten werden entfernt.",
@@ -492,12 +507,15 @@
       "createUser": {
         "title": "Neuen Benutzer anlegen",
         "desc": "Füge ein neues Benutzerkonto hinzu und lege eine Rolle für den Zugriff auf Bereiche der Frigate-Benutzeroberfläche fest.",
-        "usernameOnlyInclude": "Der Benutzername darf nur Buchstaben, Zahlen, . oder _ enthalten"
+        "usernameOnlyInclude": "Der Benutzername darf nur Buchstaben, Zahlen, . oder _ enthalten",
+        "confirmPassword": "Bitte bestätige dein Passwort"
       },
       "passwordSetting": {
         "updatePassword": "Passwort für {{username}} aktualisieren",
         "setPassword": "Passwort festlegen",
-        "desc": "Erstelle ein sicheres Passwort, um dieses Konto zu schützen."
+        "desc": "Erstelle ein sicheres Passwort, um dieses Konto zu schützen.",
+        "cannotBeEmpty": "Das Passwort darf nicht leer sein",
+        "doNotMatch": "Die Passwörter sind nicht identisch"
       }
     }
   },
@@ -599,5 +617,67 @@
     },
     "restart_required": "Neustart erforderlich (Frigate+ Model geändert)",
     "unsavedChanges": "Nicht gespeicherte Änderungen an den Frigate+-Einstellungen"
+  },
+  "enrichments": {
+    "birdClassification": {
+      "title": "Vogel Klassifizierung",
+      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
+    },
+    "title": "Verbesserugsseinstellungen",
+    "unsavedChanges": "Ungesicherte geänderte Verbesserungseinstellungen",
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Sind Sie sicher, dass Sie alle verfolgten Objekteinbettungen neu indizieren wollen? Dieser Prozess läuft im Hintergrund, kann aber Ihre CPU auslasten und eine gewisse Zeit in Anspruch nehmen. Sie können den Fortschritt auf der Seite Explore verfolgen.",
+        "label": "Jetzt neu indizien",
+        "desc": "Bei der Neuindizierung werden die Einbettungen für alle verfolgten Objekte neu generiert. Dieser Prozess läuft im Hintergrund und kann je nach Anzahl der verfolgten Objekte Ihre CPU auslasten und eine gewisse Zeit in Anspruch nehmen.",
+        "confirmTitle": "Neuinszenierung bestätigen",
+        "confirmButton": "Neuindizierung",
+        "success": "Die Neuindizierung wurde erfolgreich gestartet.",
+        "alreadyInProgress": "Die Neuindizierung ist bereits im Gange.",
+        "error": "Neuindizierung konnte nicht gestartet werden: {{errorMessage}}"
+      },
+      "modelSize": {
+        "small": {
+          "desc": "Bei der Verwendung von <em>klein</em> wird eine quantisierte Version des Modells verwendet, die weniger Arbeitsspeicher verbraucht und schneller auf der CPU läuft, wobei der Unterschied in der Einbettungsqualität sehr gering ist.",
+          "title": "klein"
+        },
+        "label": "Modell Größe",
+        "desc": "Die Größe des für die Einbettung der semantischen Suche verwendeten Modells.",
+        "large": {
+          "title": "groß",
+          "desc": "Bei der Verwendung von <em>groß</em> wird das gesamte Jina-Modell verwendet und automatisch auf der GPU ausgeführt, falls zutreffend."
+        }
+      },
+      "title": "Semantische Suche",
+      "desc": "Die semantische Suche in Frigate ermöglicht es Ihnen, verfolgte Objekte innerhalb Ihrer Überprüfungselemente zu finden, indem Sie entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwenden.",
+      "readTheDocumentation": "Lies die Dokumentation"
+    },
+    "faceRecognition": {
+      "title": "Gesichtserkennung",
+      "desc": "Die Gesichtserkennung ermöglicht es, Personen Namen zuzuweisen, und wenn ihr Gesicht erkannt wird, ordnet Frigate den Namen der Person als Untertitel zu. Diese Informationen sind in der Benutzeroberfläche, den Filtern und in den Benachrichtigungen enthalten.",
+      "readTheDocumentation": "Lies die Dokumentation",
+      "modelSize": {
+        "label": "Modell Größe",
+        "desc": "Die Größe des für die Gesichtserkennung verwendeten Modells.",
+        "small": {
+          "title": "klein",
+          "desc": "Mit <em>klein</em> wird ein FaceNet-Gesichtseinbettungsmodell verwendet, das auf den meisten CPUs effizient läuft."
+        },
+        "large": {
+          "title": "groß",
+          "desc": "Die Verwendung von <em>groß</em> verwendet ein ArcFace-Gesichtseinbettungsmodell und läuft automatisch auf der GPU, falls zutreffend."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Kennzeichenerkennung",
+      "desc": "Frigate kann Kennzeichen an Fahrzeugen erkennen und die erkannten Zeichen automatisch in das Feld recognized_license_plate oder einen bekannten Namen als sub_label zu Objekten vom Typ car hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Kennzeichen von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren.",
+      "readTheDocumentation": "Lies die Dokumentation"
+    },
+    "restart_required": "Neustart erforderlich (Verbesserungseinstellungen geändert)",
+    "toast": {
+      "success": "Die Einstellungen für die Verbesserungen wurden gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen.",
+      "error": "Konfigurationsänderungen konnten nicht gespeichert werden: {{errorMessage}}"
+    }
   }
 }

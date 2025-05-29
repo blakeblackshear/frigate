@@ -127,7 +127,10 @@
         "label": "Anmerkungen Versatz",
         "desc": "Diese Daten stammen aus dem Erkennungs-Feed der Kamera, werden aber mit Bildern aus dem Aufnahme-Feed überlagert. Es ist unwahrscheinlich, dass die beiden Streams perfekt synchronisiert sind. Daher stimmen die Bounding Box und das Filmmaterial nicht perfekt überein. Das Feld <code>annotation_offset</code> kann jedoch verwendet werden, um dies anzupassen.",
         "millisecondsToOffset": "Millisekunden, um die Erkennungen verschoben werden soll. <em>Standard: 0</em>",
-        "tips": "TIPP: Stelle dir einen Ereignisclip vor, in dem eine Person von links nach rechts läuft. Wenn die Bounding Box der Ereigniszeitleiste durchgehend links von der Person liegt, sollte der Wert verringert werden. Ähnlich verhält es sich, wenn eine Person von links nach rechts geht und die Bounding Box durchgängig vor der Person liegt, dann sollte der Wert erhöht werden."
+        "tips": "TIPP: Stelle dir einen Ereignisclip vor, in dem eine Person von links nach rechts läuft. Wenn die Bounding Box der Ereigniszeitleiste durchgehend links von der Person liegt, sollte der Wert verringert werden. Ähnlich verhält es sich, wenn eine Person von links nach rechts geht und die Bounding Box durchgängig vor der Person liegt, dann sollte der Wert erhöht werden.",
+        "toast": {
+          "success": "Versatz für {{camera}} wurde in der Konfigurationsdatei gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen."
+        }
       },
       "showAllZones": {
         "title": "Zeige alle Zonen",
@@ -142,7 +145,9 @@
       "previous": "Vorherige Anzeige"
     },
     "scrollViewTips": "Scrolle um die wichtigsten Momente dieses Objekts anzuzeigen.",
-    "autoTrackingTips": "Die Positionen der Bounding Box sind bei Kameras mit automatischer Verfolgung ungenau."
+    "autoTrackingTips": "Die Positionen der Bounding Box sind bei Kameras mit automatischer Verfolgung ungenau.",
+    "count": "{{first}} von {{second}}",
+    "trackedPoint": "Verfolgter Punkt"
   },
   "type": {
     "details": "Details",
@@ -197,5 +202,6 @@
   "noTrackedObjects": "Keine verfolgten Objekte gefunden",
   "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} verfolgtes Objekt ",
-  "trackedObjectsCount_other": "{{count}} verfolgte Objekte "
+  "trackedObjectsCount_other": "{{count}} verfolgte Objekte ",
+  "exploreMore": "Erkunde mehr {{label}} Objekte"
 }

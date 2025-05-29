@@ -41,7 +41,8 @@
                 "warning": "Kontinuierliches Streaming kann zu hoher Bandbreitenausnutzung und zu Performanceproblemen führen. Bitte behutsam nutzen."
               }
             }
-          }
+          },
+          "placeholder": "Wähle eine streaming Methode"
         },
         "title": "{{cameraName}} Streaming Einstellungen",
         "compatibilityMode": {
@@ -54,7 +55,9 @@
             "document": "Lies die Dokumentation. "
           }
         },
-        "desc": "Ändere die Live Stream Optionen für das Dashboard dieser Kameragruppe. <em>Diese Einstellungen sind geräte-/browserspezifisch.</em>"
+        "desc": "Ändere die Live Stream Optionen für das Dashboard dieser Kameragruppe. <em>Diese Einstellungen sind geräte-/browserspezifisch.</em>",
+        "stream": "Stream",
+        "placeholder": "Wähle einen Stream"
       }
     },
     "add": "Kameragruppe hinzufügen",

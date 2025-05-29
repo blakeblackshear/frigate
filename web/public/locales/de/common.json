@@ -77,6 +77,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d. MMM yyyy",
+      "24hour": "d. MMM yyyy"
     }
   },
   "button": {
@@ -154,7 +158,8 @@
       "uk": "Ukrainisch",
       "he": "Hebräisch",
       "sk": "Slowakisch",
-      "yue": "粵語 (Kantonesisch)"
+      "yue": "粵語 (Kantonesisch)",
+      "th": "ไทย (Thailändisch)"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -214,6 +219,10 @@
     "speed": {
       "mph": "mph",
       "kph": "km/h"
+    },
+    "length": {
+      "feet": "Fuß",
+      "meters": "Meter"
     }
   },
   "toast": {

@@ -1,7 +1,8 @@
 {
   "description": {
     "placeholder": "Gib einen Name für diese Kollektion ein",
-    "addFace": "Anleitung für das Hinzufügen einer neuen Kollektion zur Gesichtsbibliothek."
+    "addFace": "Anleitung für das Hinzufügen einer neuen Kollektion zur Gesichtsbibliothek.",
+    "invalidName": "Ungültiger Name. Namen dürfen nur Buchstaben, Zahlen, Leerzeichen, Apostrophe, Unterstriche und Bindestriche enthalten."
   },
   "details": {
     "person": "Person",
@@ -86,7 +87,7 @@
   },
   "renameFace": {
     "title": "Gesicht umbenennen",
-    "desc": "Gib den neuen Namen für das Gesicht von {{name}} ein."
+    "desc": "Gib den neuen Namen für {{name}} ein"
   },
   "collections": "Sammlungen",
   "deleteFaceAttempts": {
@@ -94,5 +95,6 @@
     "desc_one": "Bist du sicher, dass du {{count}} Gesicht löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
     "desc_other": "Bist du sicher, dass du {{count}} Gesichter löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
   },
-  "nofaces": "Keine Gesichter verfügbar"
+  "nofaces": "Keine Gesichter verfügbar",
+  "pixels": "{{area}}px"
 }

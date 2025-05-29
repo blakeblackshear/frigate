@@ -119,7 +119,8 @@
       "streamDataFromFFPROBE": "Stream-Daten werden mit <code>ffprobe</code> erhalten.",
       "tips": {
         "title": "Kamera-Untersuchsungsinfo"
-      }
+      },
+      "aspectRatio": "Seitenverhältnis"
     },
     "overview": "Übersicht",
     "label": {
