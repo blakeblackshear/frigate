@@ -111,6 +111,10 @@
       "title": "Confirmar exclusão",
       "desc": {
         "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de revisão?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
+      },
+      "toast": {
+        "success": "As imagens de vídeo associadas aos itens de revisão selecionados foram excluídas com êxito.",
+        "error": "Falhou a apagar: {{error}}"
       }
     },
     "button": {

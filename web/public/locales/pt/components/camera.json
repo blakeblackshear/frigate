@@ -54,7 +54,8 @@
               "label": "Sem transmissão",
               "desc": "As imagens da câmera serão atualizadas apenas uma vez por minuto e não haverá transmissão ao vivo."
             }
-          }
+          },
+          "placeholder": "Escolha um método de transmissão"
         },
         "compatibilityMode": {
           "label": "Modo de compatibilidade",
@@ -62,7 +63,9 @@
         },
         "label": "Configurações de transmissão da câmera",
         "desc": "Altere as opções de transmissão ao vivo para o painel deste grupo de câmeras. <em>Essas configurações são específicas do dispositivo/navegador.</em>",
-        "title": "{{cameraName}} configurações de transmissão"
+        "title": "{{cameraName}} configurações de transmissão",
+        "placeholder": "Escolha uma transmissão",
+        "stream": "Transmissão"
       }
     }
   },

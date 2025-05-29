@@ -1,16 +1,18 @@
 {
   "description": {
     "placeholder": "Digite um nome para esta coleção",
-    "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos."
+    "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos.",
+    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens."
   },
   "details": {
     "person": "Pessoa",
     "face": "Detalhes do rosto",
-    "faceDesc": "Detalhes do rosto e objeto associado",
+    "faceDesc": "Detalhes do objeto encontrado que gerou esta cara",
     "timestamp": "Carimbo de hora",
     "confidence": "Confiança",
     "scoreInfo": "A pontuação da subetiqueta é a pontuação ponderada de todas as confianças de rostos reconhecidos, portanto, ela pode ser diferente da pontuação exibida na captura de imagem.",
-    "subLabelScore": "Pontuação da Subetiqueta"
+    "subLabelScore": "Pontuação da Subetiqueta",
+    "unknown": "Desconhecido"
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
@@ -37,7 +39,7 @@
   "button": {
     "addFace": "Adicionar rosto",
     "uploadImage": "Carregar imagem",
-    "deleteFaceAttempts": "Apagar tentativas de detecção facial",
+    "deleteFaceAttempts": "Excluir rostos",
     "reprocessFace": "Reprocessar Rosto",
     "renameFace": "Renomear rosto",
     "deleteFace": "Excluir rosto"
@@ -71,7 +73,7 @@
       "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}",
       "addFaceLibraryFailed": "Falhou ao definir nome do rosto: {{errorMessage}}",
       "trainFailed": "Falhou ao treinar: {{errorMessage}}",
-      "updateFaceScoreFailed": "Falhou ao atualizar pontuação da face: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falhou ao atualizar pontuação do rosto: {{errorMessage}}",
       "renameFaceFailed": "Falha ao renomear o rosto: {{errorMessage}}"
     }
   },
@@ -80,10 +82,22 @@
   "steps": {
     "faceName": "Digite o Nome do Rosto",
     "uploadFace": "Carregar imagem do rosto",
-    "nextSteps": "Próximos passos"
+    "nextSteps": "Próximos passos",
+    "description": {
+      "uploadFace": "Carregue uma imagem de {{name}} que mostre a cara de frente. A imagem não precisa de ser cortada para mostrar apenas a cara."
+    }
   },
   "renameFace": {
     "desc": "Entre com um novo nome para {{name}}",
-    "title": "Renomear Face"
-  }
+    "title": "Renomear rosto"
+  },
+  "collections": "Coleções",
+  "deleteFaceAttempts": {
+    "title": "Excluir rostos",
+    "desc_one": "Tem a certeza que pretende apagar {{count}} cara? Esta ação não pode ser revertida.",
+    "desc_many": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida.",
+    "desc_other": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida."
+  },
+  "nofaces": "Não tem caras disponíveis",
+  "pixels": "{{area}}px"
 }
