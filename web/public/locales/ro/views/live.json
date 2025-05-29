@@ -1,5 +1,9 @@
 {
   "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
-  "lowBandwidthMode": "Mod Latime de Banda Limitata"
+  "lowBandwidthMode": "Mod Latime de Banda Limitata",
+  "twoWayTalk": {
+    "enable": "Activare dialog",
+    "disable": "Dezactivați conversația bidirecțională"
+  }
 }

@@ -2,6 +2,8 @@
   "documentTitle": {
     "authentication": "Setari de Autentificcare - Frigate",
     "camera": "Setari Camera - Frigate",
-    "default": "Setari - Frigate"
+    "default": "Setari - Frigate",
+    "classification": "Setări de clasificare - Frigate",
+    "masksAndZones": "Editor Zonă si Mască - Frigate"
   }
 }
