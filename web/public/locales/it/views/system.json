@@ -1,7 +1,7 @@
 {
   "documentTitle": {
     "cameras": "Statistiche telecamere - Frigate",
-    "enrichments": "Statistiche arricchimento - Frigate",
+    "enrichments": "Statistiche miglioramento - Frigate",
     "storage": "Statistiche archiviazione - Frigate",
     "general": "Statistiche generali - Frigate",
     "logs": {
@@ -95,7 +95,7 @@
       "image_embedding": "Incorporamento di immagini",
       "text_embedding": "Incorporamento di testo"
     },
-    "title": "Arricchimenti",
+    "title": "Miglioramenti",
     "infPerSecond": "Inferenze al secondo"
   },
   "cameras": {
@@ -113,7 +113,8 @@
       "error": "Errore: {{error}}",
       "tips": {
         "title": "Informazioni analisi telecamera"
-      }
+      },
+      "aspectRatio": "rapporto d'aspetto"
     },
     "title": "Telecamere",
     "overview": "Sommario",

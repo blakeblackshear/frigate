@@ -2,7 +2,8 @@
   "selectItem": "Seleziona {{item}}",
   "description": {
     "addFace": "Procedura per aggiungere una nuova raccolta alla Libreria dei Volti.",
-    "placeholder": "Inserisci un nome per questa raccolta"
+    "placeholder": "Inserisci un nome per questa raccolta",
+    "invalidName": "Nome non valido. I nomi possono contenere solo lettere, numeri, spazi, apostrofi, caratteri di sottolineatura e trattini."
   },
   "details": {
     "confidence": "Fiducia",
@@ -96,5 +97,7 @@
     "desc_one": "Vuoi davvero eliminare {{count}} volto? Questa azione non può essere annullata.",
     "desc_many": "Vuoi davvero eliminare {{count}} volti? Questa azione non può essere annullata.",
     "desc_other": "Vuoi davvero eliminare {{count}} volti? Questa azione non può essere annullata."
-  }
+  },
+  "nofaces": "Nessun volto disponibile",
+  "pixels": "{{area}}px"
 }

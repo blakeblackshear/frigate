@@ -11,5 +11,6 @@
     "error": {
       "savingError": "Errore durante il salvataggio della configurazione"
     }
-  }
+  },
+  "confirm": "Vuoi uscire senza salvare?"
 }
