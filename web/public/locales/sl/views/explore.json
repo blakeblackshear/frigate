@@ -1,1 +1,20 @@
-{}
+{
+  "exploreIsUnavailable": {
+    "title": "Funkcija razišči ni na voljo",
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "Model vida"
+      },
+      "context": "Frigate prenaša potrebne modele vdelave za podporo funkcije semantičnega iskanja. To lahko traja nekaj minut, odvisno od hitrosti vaše omrežne povezave."
+    },
+    "embeddingsReindexing": {
+      "step": {
+        "descriptionsEmbedded": "Vdelani opisi: ",
+        "trackedObjectsProcessed": "Obdelani sledeni predmeti: "
+      }
+    }
+  },
+  "documentTitle": "Razišči - Frigate",
+  "generativeAI": "Generativna UI",
+  "exploreMore": "Razišči več {{label}} objektov"
+}

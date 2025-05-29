@@ -1,1 +1,46 @@
-{}
+{
+  "time": {
+    "untilForTime": "Do {{time}}",
+    "untilRestart": "Do ponovnega zagona",
+    "ago": "{{timeAgo}} nazaj",
+    "justNow": "Zdaj",
+    "untilForRestart": "Dokler se Frigate ne zažene ponovno.",
+    "thisWeek": "Ta teden",
+    "lastWeek": "Prejšnji teden",
+    "thisMonth": "Ta mesec",
+    "year_one": "{{time}} leto",
+    "year_two": "{{time}} leti",
+    "year_few": "{{time}} leta",
+    "year_other": "{{time}} let",
+    "second_one": "{{time}} sekunda",
+    "second_two": "{{time}} sekundi",
+    "second_few": "{{time}} sekunde",
+    "second_other": "{{time}} sekund",
+    "month_one": "{{time}} mesec",
+    "month_two": "{{time}} meseca",
+    "month_few": "{{time}} meseci",
+    "month_other": "{{time}} mesecev",
+    "day_one": "{{time}} dan",
+    "day_two": "{{time}} dneva",
+    "day_few": "{{time}} dnevi",
+    "day_other": "{{time}} dni",
+    "hour_one": "{{time}} ura",
+    "hour_two": "{{time}} uri",
+    "hour_few": "{{time}} ure",
+    "hour_other": "{{time}} ur",
+    "minute_one": "{{time}} minuta",
+    "minute_two": "{{time}} minuti",
+    "minute_few": "{{time}} minute",
+    "minute_other": "{{time}} minut"
+  },
+  "menu": {
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} kamera",
+        "count_two": "{{count}} kameri",
+        "count_few": "{{count}} kamere",
+        "count_other": "{{count}} kamer"
+      }
+    }
+  }
+}
