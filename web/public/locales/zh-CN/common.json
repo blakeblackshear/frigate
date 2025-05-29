@@ -71,12 +71,20 @@
     "formattedTimestampFilename": {
       "12hour": "yy年MM月dd日 ah时mm分ss秒",
       "24hour": "yy年MM月dd日 HH时mm分ss秒"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "yy年MM月dd日",
+      "24hour": "yy年MM月dd日"
     }
   },
   "unit": {
     "speed": {
       "mph": "英里/小时",
       "kph": "公里/小时"
+    },
+    "length": {
+      "feet": "英尺",
+      "meters": "米"
     }
   },
   "label": {
@@ -171,7 +179,8 @@
       "sk": "斯拉夫语 (Slovenčina)",
       "ru": "俄语 (Русский)",
       "cs": "捷克语 (Čeština)",
-      "yue": "粤语 (粵語)"
+      "yue": "粤语 (粵語)",
+      "th": "泰语（ไทย）"
     },
     "appearance": "外观",
     "darkMode": {

@@ -121,7 +121,8 @@
       "error": "错误：{{error}}",
       "tips": {
         "title": "摄像头信息"
-      }
+      },
+      "aspectRatio": "宽高比"
     },
     "framesAndDetections": "帧数/检测次数",
     "label": {
