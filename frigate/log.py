@@ -7,7 +7,6 @@ import sys
 import threading
 from collections import deque
 from logging.handlers import QueueHandler, QueueListener
-from multiprocessing import Manager
 from typing import Deque, Optional
 
 from frigate.util.builtin import clean_camera_user_pass
@@ -40,7 +39,7 @@ manager = None
 
 def setup_logging() -> None:
     global log_listener, log_queue, manager
-    manager = Manager()
+    manager = mp.Manager()
     log_queue = manager.Queue()
     log_listener = QueueListener(log_queue, LOG_HANDLER, respect_handler_level=True)
 
