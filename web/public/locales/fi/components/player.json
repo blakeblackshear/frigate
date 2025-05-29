@@ -1,4 +1,5 @@
 {
   "noPreviewFound": "Esikatselua ei löytynyt",
-  "noPreviewFoundFor": "Ei esikatselua {{cameraName}}lle"
+  "noPreviewFoundFor": "Ei esikatselua {{cameraName}}lle",
+  "noRecordingsFoundForThisTime": "Ei tallenteita valitulta ajalta"
 }

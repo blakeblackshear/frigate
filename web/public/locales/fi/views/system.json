@@ -5,5 +5,8 @@
       "tag": "Tagi",
       "message": "Viesti"
     }
+  },
+  "documentTitle": {
+    "cameras": "Kameroiden tilastot - Frigate"
   }
 }
