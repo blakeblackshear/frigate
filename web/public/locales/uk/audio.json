@@ -342,12 +342,12 @@
   "radio": "Радіо",
   "field_recording": "Польова запись",
   "scream": "Крик",
-  "laughter": "сміх",
+  "laughter": "Сміх",
   "bellow": "Рев",
-  "singing": "спів",
+  "singing": "Спів",
   "whoop": "Вигук",
   "snicker": "хіхікання",
-  "crying": "плач",
+  "crying": "Плач",
   "sigh": "Зітхання",
   "yodeling": "Співати йодлем",
   "chant": "Скандування",
@@ -422,8 +422,8 @@
   "new-age_music": "Музика нью-ейдж",
   "music_of_bollywood": "Музика Боллівуду",
   "groan": "стогнати",
-  "whistling": "свист",
-  "snoring": "хропіння",
-  "pant": "задихатися",
-  "sneeze": "чхати"
+  "whistling": "Свист",
+  "snoring": "Хропіння",
+  "pant": "Задихатися",
+  "sneeze": "Чхати"
 }
