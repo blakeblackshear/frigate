@@ -7,12 +7,13 @@
     "camera": "Configuración de cámara - Frigate",
     "motionTuner": "Ajuste de movimiento - Frigate",
     "classification": "Configuración de clasificación - Frigate",
-    "general": "Configuración general - Frigate",
+    "general": "Configuración General - Frigate",
     "frigatePlus": "Configuración de Frigate+ - Frigate",
-    "notifications": "Configuración de Notificaciones - Frigate"
+    "notifications": "Configuración de Notificaciones - Frigate",
+    "enrichments": "Configuración de Análisis Avanzado - Frigate"
   },
   "menu": {
-    "cameras": "Configuración de cámara",
+    "cameras": "Configuración de Cámara",
     "debug": "Depuración",
     "ui": "Interfaz de usuario",
     "classification": "Clasificación",
@@ -20,7 +21,8 @@
     "masksAndZones": "Máscaras / Zonas",
     "frigateplus": "Frigate+",
     "users": "Usuarios",
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "enrichments": "Análisis avanzado"
   },
   "dialog": {
     "unsavedChanges": {
@@ -222,6 +224,11 @@
           "label": "Borrar todos los puntos"
         },
         "removeLastPoint": "Eliminar el último punto"
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "El umbral de velocidad debe ser mayor o igual a 0,1."
+        }
       }
     },
     "zones": {
@@ -254,7 +261,11 @@
       "speedEstimation": {
         "desc": "Habilitar la estimación de velocidad para objetos en esta zona. La zona debe tener exactamente 4 puntos.",
         "title": "Estimación de velocidad",
-        "docs": "Leer la documentación"
+        "docs": "Leer la documentación",
+        "lineBDistance": "Distancia de la línea B ({{unit}})",
+        "lineCDistance": "Distancia de la línea C ({{unit}})",
+        "lineDDistance": "Distancia de la línea D ({{unit}})",
+        "lineADistance": "Distancia de la línea A ({{unit}})"
       },
       "speedThreshold": {
         "toast": {
@@ -340,7 +351,9 @@
       "point_other": "{{count}} puntos",
       "clickDrawPolygon": "Haz clic para dibujar un polígono en la imagen."
     },
-    "restart_required": "Es necesario reiniciar (se han cambiado las máscaras/zonas)"
+    "restart_required": "Es necesario reiniciar (se han cambiado las máscaras/zonas)",
+    "motionMaskLabel": "Máscara de movimiento {{number}}",
+    "objectMaskLabel": "Máscara de objeto {{number}} ({{label}})"
   },
   "motionDetectionTuner": {
     "title": "Sintonizador de Detección de Movimiento",
@@ -473,17 +486,21 @@
             "placeholder": "Vuelve a introducir la nueva contraseña"
           }
         },
-        "usernameIsRequired": "Se requiere el nombre de usuario"
+        "usernameIsRequired": "Se requiere el nombre de usuario",
+        "passwordIsRequired": "Se requiere contraseña"
       },
       "passwordSetting": {
         "updatePassword": "Actualizar contraseña para {{username}}",
         "setPassword": "Establecer contraseña",
-        "desc": "Crear una contraseña fuerte para asegurar esta cuenta."
+        "desc": "Crear una contraseña fuerte para asegurar esta cuenta.",
+        "cannotBeEmpty": "La contraseña no puede estar vacía",
+        "doNotMatch": "Las contraseñas no coinciden"
       },
       "createUser": {
         "desc": "Añadir una nueva cuenta de usuario y especificar un rol para el acceso a áreas de la interfaz de usuario de Frigate.",
         "title": "Crear nuevo usuario",
-        "usernameOnlyInclude": "El nombre de usuario solo puede incluir letras, números, . o _"
+        "usernameOnlyInclude": "El nombre de usuario solo puede incluir letras, números, . o _",
+        "confirmPassword": "Por favor, confirma tu contraseña"
       },
       "changeRole": {
         "title": "Cambiar rol de usuario",
@@ -494,7 +511,8 @@
           "viewerDesc": "Limitado a paneles en vivo, revisión, exploración y exportaciones únicamente.",
           "viewer": "Espectador",
           "admin": "Administrador"
-        }
+        },
+        "select": "Selecciona un rol"
       },
       "deleteUser": {
         "warn": "¿Estás seguro de que quieres eliminar <strong>{{username}}</strong>?",
@@ -603,5 +621,67 @@
     },
     "restart_required": "Es necesario reiniciar (se ha cambiado el modelo Frigate+)",
     "unsavedChanges": "Cambios en la configuración de Frigate+ no guardados"
+  },
+  "enrichments": {
+    "title": "Configuración de Análisis Avanzado",
+    "unsavedChanges": "Cambios sin guardar en la configuración de Análisis Avanzado",
+    "birdClassification": {
+      "title": "Clasificación de Aves",
+      "desc": "La clasificación de aves identifica especies conocidas utilizando un modelo cuantizado de TensorFlow. Cuando se reconoce un ave conocida, su nombre se añade como una subetiqueta (sub_label). Esta información se incluye en la interfaz de usuario, los filtros y las notificaciones."
+    },
+    "semanticSearch": {
+      "title": "Búsqueda Semántica",
+      "desc": "La búsqueda semántica en Frigate te permite encontrar objetos rastreados dentro de tus elementos de revisión utilizando ya sea la imagen en sí, una descripción de texto definida por el usuario o una generada automáticamente.",
+      "readTheDocumentation": "Leer la Documentación",
+      "reindexNow": {
+        "confirmTitle": "Confirmar Re-Indexado",
+        "confirmDesc": "¿Estás seguro de que quieres re-indexar todas las representaciones (embeddings) de objetos rastreados? Este proceso se ejecutará en segundo plano, pero puede usar al máximo tu CPU y tardar una cantidad considerable de tiempo, dependiendo de la cantidad de objetos registrados. Puedes seguir el progreso en la página Explorar (Explore).",
+        "confirmButton": "Re-Indexar",
+        "success": "El proceso de re-indexado ha comenzado.",
+        "alreadyInProgress": "El proceso de re-indexado ya se está ejecutando.",
+        "error": "Ha ocurrido un error al intentar iniciar el proceso de re-indexado: {{errorMessage}}",
+        "label": "Re-indexar Ahora",
+        "desc": "La re-indexación regenerará las embeddings para todos los objetos rastreados. Este proceso se ejecuta en segundo plano y puede utilizar al máximo tu CPU, además de tomar una cantidad considerable de tiempo dependiendo de la cantidad de objetos rastreados que tengas."
+      },
+      "modelSize": {
+        "label": "Tamaño del Modelo",
+        "small": {
+          "title": "pequeño",
+          "desc": "Usar la opción <em>small</em> emplea una versión cuantizada del modelo que consume menos memoria RAM y se ejecuta más rápido en la CPU, con una diferencia muy pequeña o casi imperceptible en la calidad de las representaciones (embeddings)."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usar la opción <em>large</em> emplea el modelo completo de Jina y se ejecutará automáticamente en la GPU, si está disponible."
+        },
+        "desc": "Tamaño del modelo usado para la búsqueda semántica."
+      }
+    },
+    "faceRecognition": {
+      "title": "Reconocimiento Facial",
+      "readTheDocumentation": "Leer la Documentación",
+      "modelSize": {
+        "label": "Tamaño del Modelo",
+        "desc": "Tamaño del modelo a ser utilizado para el reconocimiento facial.",
+        "small": {
+          "title": "pequeño",
+          "desc": "Usar la opción <em>small</em> emplea un modelo de FaceNet para embeddings faciales que se ejecuta de manera eficiente en la mayoría de las CPUs."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usar la opción <em>large</em> emplea un modelo de embeddings faciales ArcFace y se ejecutará automáticamente en la GPU, si está disponible."
+        }
+      },
+      "desc": "El reconocimiento facial permite asignar nombres a las personas y, cuando su rostro es reconocido, Frigate asignará el nombre de la persona como una subetiqueta (sub label). Esta información se incluye en la interfaz de usuario, los filtros y también en las notificaciones."
+    },
+    "licensePlateRecognition": {
+      "title": "Reconocimiento de Matrículas (LPR)",
+      "readTheDocumentation": "Leer la Documentación",
+      "desc": "Frigate puede reconocer matrículas de vehículos y agregar automáticamente los caracteres detectados al campo recognized_license_plate, o bien asignar un nombre conocido como sub-etiqueta (sub_label) a los objetos de tipo coche (car). Un caso de uso común es leer las matrículas de los autos que ingresan a una cochera o que pasan por una calle."
+    },
+    "restart_required": "Es necesario reiniciar Frigate (La configuración de Enrichments han cambiado)",
+    "toast": {
+      "success": "Los ajustes de enriquecimientos se han guardado. Reinicia Frigate para aplicar los cambios.",
+      "error": "No se pudieron guardar los cambios en la configuración: {{errorMessage}}"
+    }
   }
 }

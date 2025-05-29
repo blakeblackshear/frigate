@@ -89,7 +89,7 @@
     "label": "Transmisión",
     "showStats": {
       "label": "Mostrar estadísticas de transmisión",
-      "desc": "Habilita esta opción para mostrar estadísticas de transmisión como una superposición en la alimentación de la cámara."
+      "desc": "Habilita esta opción para mostrar las estadísticas de transmisión como una superposición en la imagen de la cámara."
     }
   },
   "search": {

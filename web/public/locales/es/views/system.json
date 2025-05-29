@@ -121,7 +121,8 @@
       "audio": "Audio:",
       "tips": {
         "title": "Información de Sondeo de la Cámara"
-      }
+      },
+      "aspectRatio": "Relación de aspecto"
     },
     "framesAndDetections": "Fotogramas / Detecciones",
     "label": {

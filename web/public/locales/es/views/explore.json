@@ -137,7 +137,10 @@
         "millisecondsToOffset": "Milisegundos para desplazar las anotaciones de detección. <em>Valor por defecto: 0</em>",
         "desc": "Estos datos provienen de la transmisión de detección de tu cámara, pero se superponen en imágenes de la transmisión de grabación. Es poco probable que ambas transmisiones estén perfectamente sincronizadas. Como resultado, la caja delimitadora y la grabación no estarán perfectamente alineadas. Sin embargo, el campo <code>annotation_offset</code> se puede usar para ajustar esto.",
         "documentation": "Leer la documentación ",
-        "tips": "CONSEJO: Imagina que hay un clip de evento con una persona caminando de izquierda a derecha. Si la caja delimitadora de la línea de tiempo del evento está constantemente a la izquierda de la persona, entonces se debe disminuir el valor. Del mismo modo, si una persona camina de izquierda a derecha y la caja delimitadora está constantemente por delante de la persona, entonces se debe aumentar el valor."
+        "tips": "CONSEJO: Imagina que hay un clip de evento con una persona caminando de izquierda a derecha. Si la caja delimitadora de la línea de tiempo del evento está constantemente a la izquierda de la persona, entonces se debe disminuir el valor. Del mismo modo, si una persona camina de izquierda a derecha y la caja delimitadora está constantemente por delante de la persona, entonces se debe aumentar el valor.",
+        "toast": {
+          "success": "El desplazamiento de anotación para {{camera}} se ha guardado en el archivo de configuración. Reinicia Frigate para aplicar los cambios."
+        }
       },
       "showAllZones": {
         "title": "Mostrar todas las zonas",
@@ -149,7 +152,9 @@
       "previous": "Diapositiva anterior",
       "next": "Siguiente diapositiva"
     },
-    "autoTrackingTips": "Las posiciones de las cajas delimitadoras serán inexactas para cámaras con seguimiento automático."
+    "autoTrackingTips": "Las posiciones de las cajas delimitadoras serán inexactas para cámaras con seguimiento automático.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punto Rastreado"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -199,5 +204,6 @@
   },
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",
-  "trackedObjectsCount_other": "{{count}} objetos rastreados "
+  "trackedObjectsCount_other": "{{count}} objetos rastreados ",
+  "exploreMore": "Explora más objetos {{label}}"
 }
