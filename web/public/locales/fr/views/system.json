@@ -3,7 +3,7 @@
     "storage": "Statistiques de stockage - Frigate",
     "cameras": "Statistiques des caméras - Frigate",
     "general": "Statistiques générales - Frigate",
-    "enrichments": "Statistiques enrichies - Frigate",
+    "enrichments": "Statistiques d'enrichissements - Frigate",
     "logs": {
       "frigate": "Journaux de Frigate - Frigate",
       "nginx": "Journaux Nginx - Frigate",
@@ -120,7 +120,8 @@
       "resolution": "Résolution :",
       "error": "Erreur : {{error}}",
       "codec": "Codec :",
-      "video": "Vidéo :"
+      "video": "Vidéo :",
+      "aspectRatio": "ratio d'aspect"
     },
     "framesAndDetections": "Images / Détections",
     "label": {
@@ -154,13 +155,13 @@
     "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur par FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur ({{detectAvg}}%)",
     "healthy": "Le système est sain",
-    "reindexingEmbeddings": "Réindexation des données complémentaires ({{processed}}% complété)",
+    "reindexingEmbeddings": "Réindexation des plongements vectoriels ({{processed}}% complété)",
     "cameraIsOffline": "{{camera}} est hors ligne",
     "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)"
   },
   "enrichments": {
-    "title": "Améliorations",
+    "title": "Enrichissements",
     "infPerSecond": "Inférences par seconde",
     "embeddings": {
       "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
@@ -169,10 +170,10 @@
       "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation",
       "face_recognition_speed": "Vitesse de reconnaissance faciale",
       "plate_recognition": "Reconnaissance de plaques d'immatriculation",
-      "image_embedding": "Représentation vectorielle d'image",
+      "image_embedding": "Plongements vectoriels d'image",
       "yolov9_plate_detection": "Détection de plaques d'immatriculation YOLOv9",
       "face_recognition": "Reconnaissance faciale",
-      "text_embedding": "Représentation vectorielle de texte",
+      "text_embedding": "Plongement lexical de texte",
       "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9"
     }
   }

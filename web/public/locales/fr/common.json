@@ -160,7 +160,8 @@
       "sk": "Slovenčina (Slovaque)",
       "uk": "Українська (Ukrainien)",
       "vi": "Tiếng Việt (Vietnamien)",
-      "yue": "粵語 (Cantonais)"
+      "yue": "粵語 (Cantonais)",
+      "th": "ไทย (Thai)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -171,7 +172,7 @@
       },
       "label": "Mode sombre"
     },
-    "review": "Visionner",
+    "review": "Passer en revue",
     "explore": "Explorer",
     "export": "Exporter",
     "user": {
@@ -232,7 +233,7 @@
     "title": "Rôle",
     "viewer": "Observateur",
     "admin": "Administrateur",
-    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, au contrôle des évènements, et à l'historique des enregistrements."
+    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, des revues d'éléments, et à l'historique des enregistrements dans l'interface utilisateur."
   },
   "pagination": {
     "next": {
@@ -264,6 +265,10 @@
     "speed": {
       "kph": "km/h",
       "mph": "mph"
+    },
+    "length": {
+      "feet": "pieds",
+      "meters": "mètres"
     }
   }
 }

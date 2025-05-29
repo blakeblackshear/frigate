@@ -6,7 +6,7 @@
     "embeddingsReindexing": {
       "estimatedTime": "Temps restant estimé :",
       "finishingShortly": "Termine bientôt",
-      "context": "L'exploration peut être utilisée une fois la réindexation des objets suivis terminée.",
+      "context": "L'exploration peut être utilisée une fois la réindexation des plongements des objets suivis terminée.",
       "startingUp": "Démarrage…",
       "step": {
         "thumbnailsEmbedded": "Vignettes intégrées : ",
@@ -15,7 +15,7 @@
       }
     },
     "downloadingModels": {
-      "context": "Frigate télécharge les modèles d'incorporation nécessaires pour prendre en charge la fonctionnalité de recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
+      "context": "Frigate télécharge les modèles de plongements vectoriels nécessaires pour prendre en charge la fonctionnalité de recherche sémantique. Cette opération peut prendre plusieurs minutes selon la vitesse de votre connexion réseau.",
       "setup": {
         "visionModelFeatureExtractor": "Extracteur de caractéristiques de modèle de vision",
         "textTokenizer": "Tokeniseur de texte",
@@ -24,7 +24,7 @@
       },
       "tips": {
         "documentation": "Lire la documentation",
-        "context": "Vous souhaiterez peut-être réindexer les incorporations de vos objets suivis une fois les modèles téléchargés."
+        "context": "Vous souhaiterez peut-être réindexer les plongements de vos objets suivis une fois les modèles téléchargés."
       },
       "error": "Une erreur est survenue. Vérifier les journaux Frigate."
     }
@@ -32,36 +32,36 @@
   "details": {
     "timestamp": "Horodatage",
     "item": {
-      "title": "Évaluer les détails de l'élément",
+      "title": "Passer en revue les détails de l'élément",
       "button": {
-        "share": "Partager cet élément d'évaluation",
+        "share": "Partager cet élément de revue",
         "viewInExplore": "Afficher dans Explorer"
       },
       "toast": {
         "success": {
           "regenerate": "Une nouvelle description a été demandée à {{provider}}. Selon la vitesse de votre fournisseur, la régénération de la nouvelle description peut prendre un certain temps.",
-          "updatedSublabel": "Sous-étiquette mise à jour avec succès.",
+          "updatedSublabel": "Sous-libellé mis à jour avec succès.",
           "updatedLPR": "Plaque d'immatriculation mise à jour avec succès."
         },
         "error": {
           "regenerate": "Échec de l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
-          "updatedSublabelFailed": "Échec de la mise à jour de la sous-étiquette : {{errorMessage}}",
+          "updatedSublabelFailed": "Échec de la mise à jour du sous-libellé : {{errorMessage}}",
           "updatedLPRFailed": "Échec à la mise à jour de la plaque d'immatriculation : {{errorMessage}}"
         }
       },
       "tips": {
-        "mismatch_one": "{{count}} objet indisponible a été détecté et inclus dans cet élément d'évaluation. Cet objet n'a pas été considéré comme une alerte ou une détection, ou a déjà été nettoyé/supprimé.",
-        "mismatch_many": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément d'évaluation. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
-        "mismatch_other": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément d'évaluation. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
-        "hasMissingObjects": "Ajustez votre configuration si vous souhaitez que Frigate enregistre les objets suivis pour les étiquettes suivantes : <em>{{objects}}</em>"
+        "mismatch_one": "{{count}} objet indisponible a été détecté et inclus dans cet élément de revue. Cet objet n'a pas été considéré comme une alerte ou une détection, ou a déjà été nettoyé/supprimé.",
+        "mismatch_many": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément de revue. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
+        "mismatch_other": "{{count}} objets indisponibles ont été détectés et inclus dans cet élément de revue. Ces objets n'ont pas été considérés comme une alerte ou une détection, ou ont déjà été nettoyés/supprimés.",
+        "hasMissingObjects": "Ajustez votre configuration si vous souhaitez que Frigate enregistre les objets suivis pour les libellés suivants : <em>{{objects}}</em>"
       },
-      "desc": "Vérifier les détails de l'élément"
+      "desc": "Passer en revue les détails de l'élément"
     },
-    "label": "Étiquette",
+    "label": "Libellé",
     "editSubLabel": {
-      "title": "Modifier la sous-étiquette",
-      "desc": "Saisissez une nouvelle sous-étiquette pour ce {{label}}",
-      "descNoLabel": "Entrer une nouvelle sous-étiquette pour cet objet suivi"
+      "title": "Modifier le sous-libellé",
+      "desc": "Saisissez un nouveau sous-libellé pour ce {{label}}",
+      "descNoLabel": "Entrer un nouveau sous-libellé pour cet objet suivi"
     },
     "topScore": {
       "label": "Meilleur score",
@@ -142,13 +142,18 @@
         "documentation": "Lire la documentation ",
         "desc": "Ces données proviennent du flux de détection de votre caméra, mais sont superposées aux images du flux d'enregistrement. Il est peu probable que les deux flux soient parfaitement synchronisés. Par conséquent, le cadre de délimitation et la séquence ne seront pas parfaitement alignés. Cependant, le champ <code>annotation_offset</code> peut être utilisé pour ajuster ce décalage.",
         "millisecondsToOffset": "Millisecondes pour décaler les annotations détectées. <em>Par défaut : 0</em>",
-        "tips": "ASTUCE : Imaginez un clip d'événement avec une personne marchant de gauche à droite. Si le cadre de la chronologie de l'événement est constamment à gauche de la personne, la valeur doit être diminuée. De même, si une personne marche de gauche à droite et que le cadre de la chronologie est constamment devant elle, la valeur doit être augmentée."
+        "tips": "ASTUCE : Imaginez un clip d'événement avec une personne marchant de gauche à droite. Si le cadre de la chronologie de l'événement est constamment à gauche de la personne, la valeur doit être diminuée. De même, si une personne marche de gauche à droite et que le cadre de la chronologie est constamment devant elle, la valeur doit être augmentée.",
+        "toast": {
+          "success": "Le décalage d'annotation pour {{camera}} a été enregistré dans le fichier de configuration. Redémarrez Frigate pour appliquer vos modifications."
+        }
       }
     },
     "carousel": {
       "next": "Diapositive suivante",
       "previous": "Diapositive précédente"
-    }
+    },
+    "trackedPoint": "Point suivi",
+    "count": "{{first}} de {{second}}"
   },
   "trackedObjectDetails": "Détails de l'objet suivi",
   "itemMenu": {
@@ -183,7 +188,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmer la suppression",
-      "desc": "La suppression de cet objet suivi supprime l'instantané, les incorporations enregistrées et les entrées du cycle de vie de l'objet associé. Les images enregistrées de cet objet suivi dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
+      "desc": "La suppression de cet objet suivi supprime l'instantané, les plongements vectoriels enregistrées et les entrées du cycle de vie de l'objet associé. Les images enregistrées de cet objet suivi dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
     }
   },
   "noTrackedObjects": "Aucun objet suivi trouvé",
@@ -199,5 +204,6 @@
       }
     },
     "tooltip": "Identifié comme {{type}} à {{confidence}}%"
-  }
+  },
+  "exploreMore": "Explorer plus d'objets {{label}}"
 }

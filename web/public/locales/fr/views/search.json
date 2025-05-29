@@ -13,10 +13,10 @@
   "filter": {
     "label": {
       "zones": "Zones",
-      "sub_labels": "Sous-étiquettes",
+      "sub_labels": "Sous-libellés",
       "search_type": "Type de recherche",
       "time_range": "Plage de temps",
-      "labels": "Étiquettes",
+      "labels": "Libellés",
       "cameras": "Caméras",
       "after": "Après",
       "before": "Avant",

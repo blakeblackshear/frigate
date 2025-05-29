@@ -31,9 +31,9 @@
           "submitted": "Soumis"
         },
         "question": {
-          "label": "Confirmez cette étiquette pour Frigate Plus",
+          "label": "Confirmez ce libellé pour Frigate Plus",
           "ask_an": "Est-ce que cet objet est un <code>{{label}}</code> ?",
-          "ask_a": "Est-ce un objet pour un <code>{{label}}</code> ?",
+          "ask_a": "Est-ce que cet objet est un <code>{{label}}</code> ?",
           "ask_full": "Est-ce-que cet objet est un(e) <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) ?"
         }
       }
@@ -109,7 +109,7 @@
   "recording": {
     "confirmDelete": {
       "desc": {
-        "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet élément Review ? <br /><br />Pressez la touche <em>Maj</em> pour éviter cette boîte de dialogue dans le futur."
+        "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet élément de revue ? <br /><br />Pressez la touche <em>Maj</em> pour éviter cette boîte de dialogue dans le futur."
       },
       "title": "Confirmer la suppression",
       "toast": {
@@ -119,7 +119,7 @@
     },
     "button": {
       "export": "Exporter",
-      "markAsReviewed": "Marquer comme vérifié",
+      "markAsReviewed": "Marquer comme passé en revue",
       "deleteNow": "Supprimer maintenant"
     }
   }
