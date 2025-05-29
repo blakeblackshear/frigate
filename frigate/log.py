@@ -7,6 +7,7 @@ import sys
 import threading
 from collections import deque
 from logging.handlers import QueueHandler, QueueListener
+from queue import Queue
 from typing import Deque, Optional
 
 from frigate.util.builtin import clean_camera_user_pass
@@ -33,7 +34,7 @@ LOG_HANDLER.addFilter(
 )
 
 log_listener: Optional[QueueListener] = None
-log_queue: Optional[mp.Queue] = None
+log_queue: Optional[Queue] = None
 manager = None
 
 
