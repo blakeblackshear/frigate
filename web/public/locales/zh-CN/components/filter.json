@@ -21,7 +21,8 @@
     "all": {
       "title": "所有日期",
       "short": "日期"
-    }
+    },
+    "selectPreset": "选择预定时间…"
   },
   "more": "更多筛选项",
   "reset": {

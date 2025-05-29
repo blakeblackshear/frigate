@@ -36,7 +36,7 @@
         "audio": {
           "tips": {
             "title": "音频必须从您的摄像头输出并在 go2rtc 中配置此流。",
-            "document": "阅读文档（英文） "
+            "document": "阅读文档 "
           }
         },
         "streamMethod": {
@@ -57,12 +57,15 @@
                 "warning": "持续视频流可能会导致高带宽使用和性能问题，请谨慎使用。"
               }
             }
-          }
+          },
+          "placeholder": "选择视频流传输方式"
         },
         "compatibilityMode": {
           "label": "兼容模式",
           "desc": "仅在摄像头的实时视频流显示颜色伪影，并且图像右侧有一条对角线时启用此选项。"
-        }
+        },
+        "stream": "视频流",
+        "placeholder": "选择视频流"
       }
     }
   },

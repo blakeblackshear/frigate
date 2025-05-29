@@ -9,7 +9,8 @@
     "object": "调试 - Frigate",
     "general": "常规设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
-    "notifications": "通知设置 - Frigate"
+    "notifications": "通知设置 - Frigate",
+    "enrichments": "增强功能 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -20,7 +21,8 @@
     "debug": "调试",
     "users": "用户",
     "notifications": "通知",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "增强功能"
   },
   "dialog": {
     "unsavedChanges": {
@@ -141,7 +143,8 @@
       "title": "鸟类识别分类",
       "desc": "鸟类识别分类采用量化TensorFlow模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签(sub_label)添加。该信息将显示在用户界面、过滤器及通知中。"
     },
-    "restart_required": "需要重启（分类设置已修改）"
+    "restart_required": "需要重启（分类设置已修改）",
+    "unsavedChanges": "分类设置未保存"
   },
   "camera": {
     "title": "摄像头设置",
@@ -158,7 +161,7 @@
     "reviewClassification": {
       "title": "核查分级",
       "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的 <b>人</b>、<b>汽车</b> 对象都将视为警报。你可以通过修改配置文件配置区域来细分。",
-      "readTheDocumentation": "阅读文档（英文）",
+      "readTheDocumentation": "阅读文档",
       "noDefinedZones": "该摄像头没有设置区域。",
       "objectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下都将显示为警报。",
       "zoneObjectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下的 {{zone}} 区内都将显示为警报。",
@@ -173,7 +176,8 @@
       "limitDetections": "限制仅在特定区域内进行检测",
       "toast": {
         "success": "核查分级配置已保存。请重启 Frigate 以应用更改。"
-      }
+      },
+      "unsavedChanges": "{{camera}} 的核查分类设置未保存"
     }
   },
   "masksAndZones": {
@@ -231,6 +235,11 @@
         "error": {
           "mustBeFinished": "多边形绘制必须完成闭合后才能保存。"
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "速度阈值必须大于或等于0.1。"
+        }
       }
     },
     "zones": {
@@ -238,7 +247,7 @@
       "documentTitle": "编辑区域 - Frigate",
       "desc": {
         "title": "该功能允许你定义特定区域，以便你可以确定特定对象是否在该区域内。",
-        "documentation": "文档（英文）"
+        "documentation": "文档"
       },
       "add": "添加区域",
       "edit": "编辑区域",
@@ -264,7 +273,12 @@
       "allObjects": "所有对象",
       "speedEstimation": {
         "title": "速度估算",
-        "desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。"
+        "desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。",
+        "docs": "阅读文档",
+        "lineBDistance": "B线距离（{{unit}}）",
+        "lineCDistance": "C线距离（{{unit}}）",
+        "lineDDistance": "D线距离（{{unit}}）",
+        "lineADistance": "A线距离（{{unit}}）"
       },
       "speedThreshold": {
         "title": "速度阈值 ({{unit}})",
@@ -285,20 +299,20 @@
       "documentTitle": "编辑运动遮罩 - Frigate",
       "desc": {
         "title": "运动遮罩用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪。",
-        "documentation": "文档（英文）"
+        "documentation": "文档"
       },
       "add": "添加运动遮罩",
       "edit": "编辑运动遮罩",
       "context": {
         "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
-        "documentation": "阅读文档（英文）"
+        "documentation": "阅读文档"
       },
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "polygonAreaTooLarge": {
         "title": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
         "tips": "运动遮罩不会阻止检测到对象，你应该使用区域来限制检测对象。",
-        "documentation": "阅读文档（英文）"
+        "documentation": "阅读文档"
       },
       "toast": {
         "success": {
@@ -312,7 +326,7 @@
       "documentTitle": "编辑对象遮罩 - Frigate",
       "desc": {
         "title": "对象过滤器用于防止特定位置的指定对象被误报。",
-        "documentation": "文档（英文）"
+        "documentation": "文档"
       },
       "add": "添加对象遮罩",
       "edit": "编辑对象遮罩",
@@ -331,13 +345,15 @@
         }
       }
     },
-    "restart_required": "需要重启（遮罩与区域已修改）"
+    "restart_required": "需要重启（遮罩与区域已修改）",
+    "motionMaskLabel": "运动遮罩 {{number}}",
+    "objectMaskLabel": "对象遮罩 {{number}}（{{label}}）"
   },
   "motionDetectionTuner": {
     "title": "运动检测调整器",
     "desc": {
       "title": "Frigate 将使用运动检测作为首个步骤，以确认一帧画面中是否有对象需要使用对象检测。",
-      "documentation": "阅读有关运动检测的文档（英文）"
+      "documentation": "阅读有关运动检测的文档"
     },
     "Threshold": {
       "title": "阈值",
@@ -353,7 +369,8 @@
     },
     "toast": {
       "success": "运动设置已保存。"
-    }
+    },
+    "unsavedChanges": "{{camera}} 的运动调整器设置未保存"
   },
   "debug": {
     "title": "调试",
@@ -396,7 +413,7 @@
       "title": "允许绘制“对象形状过滤器”",
       "desc": "在图像上绘制矩形，以查看区域和比例详细信息",
       "tips": "启用此选项，能够在摄像头图像上绘制矩形，将显示其区域和比例。然后，您可以使用这些值在配置中设置对象形状过滤器参数。",
-      "document": "阅读文档（英文） ",
+      "document": "阅读文档 ",
       "score": "分数",
       "ratio": "比例",
       "area": "区域"
@@ -464,12 +481,14 @@
             "placeholder": "请再次输入新密码"
           }
         },
-        "usernameIsRequired": "用户名为必填项"
+        "usernameIsRequired": "用户名为必填项",
+        "passwordIsRequired": "必须输入密码"
       },
       "createUser": {
         "title": "创建新用户",
         "desc": "创建一个新用户账户，并指定一个角色以控制访问 Frigate UI 的权限。",
-        "usernameOnlyInclude": "用户名只能包含字母、数字和 _"
+        "usernameOnlyInclude": "用户名只能包含字母、数字和 _",
+        "confirmPassword": "请确认你的密码"
       },
       "deleteUser": {
         "title": "删除该用户",
@@ -479,7 +498,9 @@
       "passwordSetting": {
         "updatePassword": "更新 {{username}} 的密码",
         "setPassword": "设置密码",
-        "desc": "创建一个强密码来保护此账户。"
+        "desc": "创建一个强密码来保护此账户。",
+        "doNotMatch": "两次输入密码不匹配",
+        "cannotBeEmpty": "密码不能为空"
       },
       "changeRole": {
         "title": "更改用户权限组",
@@ -490,7 +511,8 @@
           "viewerDesc": "仅能够查看实时监控面板、核查、浏览和导出功能。",
           "adminDesc": "完全功能与访问权限。",
           "intro": "为该用户选择一个合适的权限组："
-        }
+        },
+        "select": "选择权限组"
       }
     }
   },
@@ -499,7 +521,7 @@
     "notificationSettings": {
       "title": "通知设置",
       "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向您的设备发送推送通知。",
-      "documentation": "阅读文档（英文）"
+      "documentation": "阅读文档"
     },
     "globalSettings": {
       "title": "全局设置",
@@ -508,7 +530,7 @@
     "notificationUnavailable": {
       "title": "通知功能不可用",
       "desc": "网页推送通知需要安全连接（<code>https://…</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
-      "documentation": "阅读文档（英文）"
+      "documentation": "阅读文档"
     },
     "email": {
       "title": "电子邮箱",
@@ -545,7 +567,9 @@
       "error": {
         "registerFailed": "通知注册失败。"
       }
-    }
+    },
+    "unsavedRegistrations": "未保存通知注册",
+    "unsavedChanges": "未保存通知设置更改"
   },
   "frigatePlus": {
     "title": "Frigate+ 设置",
@@ -589,6 +613,69 @@
       "success": "Frigate+ 设置已保存。请重启 Frigate 以应用更改。",
       "error": "配置更改保存失败：{{errorMessage}}"
     },
-    "restart_required": "需要重启（Frigate+模型已修改）"
+    "restart_required": "需要重启（Frigate+模型已修改）",
+    "unsavedChanges": "未保存Frigate+变更设置"
+  },
+  "enrichments": {
+    "title": "增强功能设置",
+    "birdClassification": {
+      "desc": "鸟类分类通过量化的TensorFlow模型识别已知鸟类。当识别到已知鸟类时，其通用名称将作为子标签（sub_label）添加。此信息包含在用户界面、筛选器以及通知中。",
+      "title": "鸟类分类"
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "desc": "重建索引将为所有跟踪对象重新生成特征向量。该过程将在后台运行，可能会使CPU满载，所需时间取决于跟踪对象的数量。",
+        "label": "立即重建索引",
+        "confirmTitle": "确认重建索引",
+        "confirmDesc": "确定要为所有跟踪对象重建特征向量索引吗？此过程将在后台运行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
+        "confirmButton": "重建索引",
+        "success": "重建索引已成功启动。",
+        "alreadyInProgress": "重建索引已在执行中。",
+        "error": "启动重建索引失败：{{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "模型大小",
+        "desc": "用于语义搜索的语言模型大小。",
+        "small": {
+          "title": "小",
+          "desc": "使用 <strong>小</strong>模型。该模型将使用较少的内存，在CPU上也能较快的运行。质量较好。"
+        },
+        "large": {
+          "title": "大",
+          "desc": "使用 <strong>大</strong>模型。该模型采用了完整的Jina模型，并在适用的情况下使用GPU。"
+        }
+      },
+      "title": "分类搜索",
+      "desc": "Frigate中的语义搜索功能允许您通过使用图像本身、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找被追踪对象。",
+      "readTheDocumentation": "阅读文档"
+    },
+    "licensePlateRecognition": {
+      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知名称作为子标签添加到汽车类型的对象中。常见的使用场景可能是读取驶入车道的汽车车牌或经过街道的汽车车牌。",
+      "title": "车牌识别",
+      "readTheDocumentation": "阅读文档"
+    },
+    "faceRecognition": {
+      "desc": "人脸识别功能允许为人物分配名称，当识别到他们的面孔时，Frigate 会将人物的名字作为子标签进行分配。这些信息会显示在界面、过滤器以及通知中。",
+      "title": "人脸识别",
+      "readTheDocumentation": "阅读文档",
+      "modelSize": {
+        "label": "模型大小",
+        "desc": "用于人脸识别的模型大小。",
+        "small": {
+          "title": "小",
+          "desc": "使用<strong>小</strong>模型将采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
+        },
+        "large": {
+          "title": "大",
+          "desc": "使用<strong>大</strong>模型将采用ArcFace人脸特征提取模型，若条件允许将自动使用GPU运行。"
+        }
+      }
+    },
+    "toast": {
+      "success": "增强功能设置已保存。请重启 Frigate 以应用更改。",
+      "error": "配置更改保存失败：{{errorMessage}}"
+    },
+    "unsavedChanges": "增强功能设置未保存",
+    "restart_required": "需要重启（增强功能设置已保存）"
   }
 }
