@@ -83,12 +83,20 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
     }
   },
   "unit": {
     "speed": {
       "kph": "kph",
       "mph": "mph"
+    },
+    "length": {
+      "feet": "pé",
+      "meters": "metros"
     }
   },
   "button": {
@@ -191,7 +199,8 @@
       "da": "Dinamarquês (Dansk)",
       "ro": "Romeno (Română)",
       "hu": "Húngaro (Magyar)",
-      "sk": "Eslovaco (Slovenčina)"
+      "sk": "Eslovaco (Slovenčina)",
+      "th": "Tailandês"
     },
     "appearance": "Aparência",
     "darkMode": {

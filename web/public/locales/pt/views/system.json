@@ -72,7 +72,8 @@
       "tips": {
         "title": "Explorar informações da Camera"
       },
-      "streamDataFromFFPROBE": "Os dados de fluxo são obtidos com <code>ffprobe</code>."
+      "streamDataFromFFPROBE": "Os dados de fluxo são obtidos com <code>ffprobe</code>.",
+      "aspectRatio": "relação de aspeto"
     },
     "framesAndDetections": "Quadros / Detecções",
     "label": {
