@@ -1,5 +1,9 @@
 {
   "search": "Cauta",
   "savedSearches": "Cautari Salvate",
-  "searchFor": "Cauta {{inputValue}}"
+  "searchFor": "Cauta {{inputValue}}",
+  "button": {
+    "clear": "Șterge căutarea",
+    "save": "Salvează căutarea"
+  }
 }
