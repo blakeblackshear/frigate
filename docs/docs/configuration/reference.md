@@ -440,18 +440,18 @@ record:
   expire_interval: 60
   # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
   sync_recordings: False
-  # Optional: Retention settings for recording
-  retain:
+  # Optional: Continuous retention settings
+  continuous:
+    # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)
+    # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
+    #       if you only want to retain recordings of alerts and detections.
+    days: 0
+  # Optional: Motion retention settings
+  motion:
     # Optional: Number of days to retain recordings regardless of tracked objects (default: shown below)
     # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
     #       if you only want to retain recordings of alerts and detections.
     days: 0
-    # Optional: Mode for retention. Available options are: all, motion, and active_objects
-    #   all - save all recording segments regardless of activity
-    #   motion - save all recordings segments with any detected motion
-    #   active_objects - save all recording segments with active/moving objects
-    # NOTE: this mode only applies when the days setting above is greater than 0
-    mode: all
   # Optional: Recording Export Settings
   export:
     # Optional: Timelapse Output Args (default: shown below).
