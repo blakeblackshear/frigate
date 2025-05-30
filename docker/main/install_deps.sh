@@ -73,12 +73,18 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-media-va-driver-non-free libmfx1 libmfxgen1 libvpl2
 
+    apt-get -qq install -y ocl-icd-libopencl1
+
     rm -f /usr/share/keyrings/intel-graphics.gpg
     rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
     # install legacy and standard intel icd and level-zero-gpu
-    apt-get install ocl-icd-libopencl1
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
+    # needed core package
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/libigdgmm12_22.5.5_amd64.deb
+    dpkg -i libigdgmm12_22.5.5_amd64.deb
+    rm libigdgmm12_22.5.5_amd64.deb
+
     # legacy packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.22/intel-opencl-icd-legacy1_24.35.30872.22_amd64.deb
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.22/intel-level-zero-gpu-legacy1_1.3.30872.22_amd64.deb
