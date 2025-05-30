@@ -22,27 +22,31 @@ __all__ = [
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 
 
+class RecordRetainConfig(FrigateBaseModel):
+    days: float = Field(default=0, ge=0, title="Default retention period.")
+
+
 class RetainModeEnum(str, Enum):
     all = "all"
     motion = "motion"
     active_objects = "active_objects"
 
 
-class RecordRetainConfig(FrigateBaseModel):
-    days: float = Field(default=0, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
-
-
 class ReviewRetainConfig(FrigateBaseModel):
-    days: float = Field(default=10, title="Default retention period.")
+    days: float = Field(default=10, ge=0, title="Default retention period.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
 
 
 class EventsConfig(FrigateBaseModel):
     pre_capture: int = Field(
-        default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
+        default=5,
+        title="Seconds to retain before event starts.",
+        le=MAX_PRE_CAPTURE,
+        ge=0,
     )
-    post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
+    post_capture: int = Field(
+        default=5, ge=0, title="Seconds to retain after event ends."
+    )
     retain: ReviewRetainConfig = Field(
         default_factory=ReviewRetainConfig, title="Event retention settings."
     )
@@ -77,8 +81,12 @@ class RecordConfig(FrigateBaseModel):
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
-    retain: RecordRetainConfig = Field(
-        default_factory=RecordRetainConfig, title="Record retention settings."
+    continuous: RecordRetainConfig = Field(
+        default_factory=RecordRetainConfig,
+        title="Continuous recording retention settings.",
+    )
+    motion: RecordRetainConfig = Field(
+        default_factory=RecordRetainConfig, title="Motion recording retention settings."
     )
     detections: EventsConfig = Field(
         default_factory=EventsConfig, title="Detection specific retention settings."
