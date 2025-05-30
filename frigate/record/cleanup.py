@@ -206,14 +206,9 @@ class RecordingCleanup(threading.Thread):
                 Previews.path,
             )
             .where(
-                (Recordings.camera == config.name)
-                & (
-                    (
-                        (Recordings.end_time < continuous_expire_date)
-                        & (Recordings.motion == 0)
-                    )
-                    | (Recordings.end_time < motion_expire_date)
-                )
+                (Previews.camera == config.name)
+                & (Previews.end_time < continuous_expire_date)
+                & (Previews.end_time < motion_expire_date)
             )
             .order_by(Previews.start_time)
             .namedtuples()
