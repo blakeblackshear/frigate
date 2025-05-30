@@ -48,7 +48,7 @@ from .camera.genai import GenAIConfig
 from .camera.motion import MotionConfig
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
-from .camera.record import RecordConfig, RetainModeEnum
+from .camera.record import RecordConfig
 from .camera.review import ReviewConfig
 from .camera.snapshots import SnapshotsConfig
 from .camera.timestamp import TimestampStyleConfig
@@ -202,33 +202,6 @@ def verify_valid_live_stream_names(
             return ValueError(
                 f"No restream with name {stream_name} exists for camera {camera_config.name}."
             )
-
-
-def verify_recording_retention(camera_config: CameraConfig) -> None:
-    """Verify that recording retention modes are ranked correctly."""
-    rank_map = {
-        RetainModeEnum.all: 0,
-        RetainModeEnum.motion: 1,
-        RetainModeEnum.active_objects: 2,
-    }
-
-    if (
-        camera_config.record.retain.days != 0
-        and rank_map[camera_config.record.retain.mode]
-        > rank_map[camera_config.record.alerts.retain.mode]
-    ):
-        logger.warning(
-            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and alert retention is configured for {camera_config.record.alerts.retain.mode}. The more restrictive retention policy will be applied."
-        )
-
-    if (
-        camera_config.record.retain.days != 0
-        and rank_map[camera_config.record.retain.mode]
-        > rank_map[camera_config.record.detections.retain.mode]
-    ):
-        logger.warning(
-            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and detection retention is configured for {camera_config.record.detections.retain.mode}. The more restrictive retention policy will be applied."
-        )
 
 
 def verify_recording_segments_setup_with_reasonable_time(
@@ -697,7 +670,6 @@ class FrigateConfig(FrigateBaseModel):
 
             verify_config_roles(camera_config)
             verify_valid_live_stream_names(self, camera_config)
-            verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
             verify_required_zones_exist(camera_config)
