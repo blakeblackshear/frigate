@@ -164,6 +164,12 @@ Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to c
 
 To mark a camera as a dedicated LPR camera, add `type: "lpr"` the camera configuration.
 
+:::note
+
+Frigate's dedicated LPR mode is optimized for cameras with a narrow field of view, specifically positioned and zoomed to capture license plates exclusively. If your camera provides a general overview of a scene rather than a tightly focused view, this mode is not recommended.
+
+:::
+
 Users can configure Frigate's dedicated LPR mode in two different ways depending on whether a Frigate+ (or native `license_plate` detecting) model is used:
 
 ### Using a Frigate+ (or Native `license_plate` Detecting) Model
