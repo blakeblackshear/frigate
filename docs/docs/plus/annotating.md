@@ -3,7 +3,7 @@ id: annotating
 title: Annotating your images
 ---
 
-For the best results, follow these guidelines.
+For the best results, follow these guidelines. You may also want to review the documentation on [improving your model](./index.md#improving-your-model).
 
 **Label every object in the image**: It is important that you label all objects in each image before verifying. If you don't label a car for example, the model will be taught that part of the image is _not_ a car and it will start to get confused. You can exclude labels that you don't want detected on any of your cameras.
 

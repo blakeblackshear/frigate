@@ -43,7 +43,7 @@ Snapshots must be enabled to be able to submit examples to Frigate+
 
 ### Annotate and verify
 
-You can view all of your submitted images at [https://plus.frigate.video](https://plus.frigate.video). Annotations can be added by clicking an image. For more detailed information about labeling, see the documentation on [improving your model](../plus/improving_model.md).
+You can view all of your submitted images at [https://plus.frigate.video](https://plus.frigate.video). Annotations can be added by clicking an image. For more detailed information about labeling, see the documentation on [annotating](../plus/annotating.md).
 
 ![Annotate](/img/annotate.png)
 
