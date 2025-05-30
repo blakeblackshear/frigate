@@ -285,12 +285,16 @@ class RecordingMaintainer(threading.Thread):
                 Path(cache_path).unlink(missing_ok=True)
                 return
 
-        # if cached file's start_time is earlier than the retain days for the camera
-        # meaning continuous recording is not enabled
-        if start_time <= (
-            datetime.datetime.now().astimezone(datetime.timezone.utc)
-            - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
-        ):
+        record_config = self.config.cameras[camera].record
+        highest = None
+
+        if record_config.continuous.days > 0:
+            highest = "continuous"
+        elif record_config.motion.days > 0:
+            highest = "motion"
+
+        # continuous / motion recording is not enabled
+        if highest is None:
             # if the cached segment overlaps with the review items:
             overlaps = False
             for review in reviews:
@@ -344,8 +348,7 @@ class RecordingMaintainer(threading.Thread):
                 ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
                     self.drop_segment(cache_path)
-        # else retain days includes this segment
-        # meaning continuous recording is enabled
+        # continuous / motion is enabled
         else:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
@@ -360,7 +363,11 @@ class RecordingMaintainer(threading.Thread):
                 ).astimezone(datetime.timezone.utc)
                 >= end_time
             ):
-                record_mode = self.config.cameras[camera].record.retain.mode
+                record_mode = (
+                    RetainModeEnum.all
+                    if highest == "continuous"
+                    else RetainModeEnum.motion
+                )
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
                 )
