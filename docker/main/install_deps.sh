@@ -77,6 +77,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
     # install legacy and standard intel icd and level-zero-gpu
+    apt-get install ocl-icd-libopencl1
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
     # legacy packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.22/intel-opencl-icd-legacy1_24.35.30872.22_amd64.deb
