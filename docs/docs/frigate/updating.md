@@ -56,7 +56,7 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
      ```bash
      docker compose up -d
      ```
-   - If using `docker run`, re-run your original command (e.g., from the [Installation](#docker) section) with the updated image tag.
+   - If using `docker run`, re-run your original command (e.g., from the [Installation](./installation.md#docker) section) with the updated image tag.
 
 4. **Verify the Update**:
    - Check the container logs to ensure Frigate starts successfully:
