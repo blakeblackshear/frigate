@@ -374,7 +374,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         camera_config: dict[str, dict[str, Any]] = camera.copy()
         camera_record_retain = camera_config.get("record", {}).get("retain")
 
-        if global_record_retain:
+        if camera_record_retain:
             continuous = {"days": 0}
             motion = {"days": 0}
             days = camera_record_retain.get("days")
