@@ -264,7 +264,9 @@ class RecordingCleanup(threading.Thread):
         logger.debug("Start deleted cameras.")
 
         # Handle deleted cameras
-        expire_days = self.config.record.retain.days
+        expire_days = max(
+            self.config.record.continuous.days, self.config.record.motion.days
+        )
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
