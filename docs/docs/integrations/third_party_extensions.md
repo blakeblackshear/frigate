@@ -26,3 +26,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 ## [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
+
+## [Periscope](https://github.com/maksz42/periscope)
+
+[Periscope](https://github.com/maksz42/periscope) is a lightweight Android app that turns old devices into live viewers for Frigate. It works on Android 2.2 and above, including Android TV. It supports authentication and HTTPS.
