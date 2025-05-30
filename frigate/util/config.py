@@ -368,7 +368,8 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
             new_config["record"]["continuous"] = continuous
             new_config["record"]["motion"] = motion
-            del new_config["record"]["retain"]
+
+        del new_config["record"]["retain"]
 
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, Any]] = camera.copy()
@@ -388,7 +389,8 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
                 camera_config["record"]["continuous"] = continuous
                 camera_config["record"]["motion"] = motion
-                del camera_config["record"]["retain"]
+
+            del camera_config["record"]["retain"]
 
         new_config["cameras"][name] = camera_config
 
