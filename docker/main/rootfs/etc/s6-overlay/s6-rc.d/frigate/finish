@@ -25,7 +25,4 @@ elif [[ "${exit_code_service}" -ne 0 ]]; then
   fi
 fi
 
-# used by the docker healthcheck
-touch /dev/shm/.frigate-is-stopping
-
 exec /run/s6/basedir/bin/halt
