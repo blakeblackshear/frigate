@@ -89,6 +89,8 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-opencl-2_2.5.6+18417_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-core-2_2.5.6+18417_amd64.deb
 
+    dpkg -i *.deb
+    rm *.deb
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
