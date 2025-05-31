@@ -28,6 +28,8 @@ export const useEventSegmentUtils = (
 
   const mapSeverityToNumber = useCallback((severity: string): number => {
     switch (severity) {
+      case "calibration":
+        return -1;
       case "significant_motion":
         return 1;
       case "detection":

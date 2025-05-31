@@ -516,6 +516,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     current_tracked_objects,
                     _,
                     _,
+                    _,
                 ) = data
             elif topic == DetectionTypeEnum.audio:
                 (

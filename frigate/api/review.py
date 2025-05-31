@@ -493,6 +493,7 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
             Recordings.camera,
             Recordings.start_time,
             Recordings.motion,
+            Recordings.is_calibrating,
         )
         .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
@@ -501,7 +502,9 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     )
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "motion", "camera"])
+    df = pd.DataFrame(
+        data, columns=["start_time", "motion", "is_calibrating", "camera"]
+    )
 
     if df.empty:
         logger.warning("No motion data found for the requested time range")
@@ -522,7 +525,12 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
         .to_frame()
     )
     cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
-    df = motion.join(cameras)
+    calibrations = (
+        df["is_calibrating"]
+        .resample(f"{scale}s")
+        .apply(lambda x: (len(x) > 0 and all(x)))
+    )
+    df = motion.join(cameras).join(calibrations)
 
     length = df.shape[0]
     chunk = int(60 * (60 / scale))
