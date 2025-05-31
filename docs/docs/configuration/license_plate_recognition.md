@@ -164,11 +164,17 @@ Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to c
 
 To mark a camera as a dedicated LPR camera, add `type: "lpr"` the camera configuration.
 
+:::note
+
+Frigate's dedicated LPR mode is optimized for cameras with a narrow field of view, specifically positioned and zoomed to capture license plates exclusively. If your camera provides a general overview of a scene rather than a tightly focused view, this mode is not recommended.
+
+:::
+
 Users can configure Frigate's dedicated LPR mode in two different ways depending on whether a Frigate+ (or native `license_plate` detecting) model is used:
 
 ### Using a Frigate+ (or Native `license_plate` Detecting) Model
 
-Users running a Frigate+ model (or any model that natively detects `license_plate`) can take advantage of `license_plate` detection. This allows license plates to be treated as standard objects in dedicated LPR mode, meaning that alerts, detections, snapshots, zones, and other Frigate features work as usual, and plates are detected efficiently through your configured object detector.
+Users running a Frigate+ model (or any model that natively detects `license_plate`) can take advantage of `license_plate` detection. This allows license plates to be treated as standard objects in dedicated LPR mode, meaning that alerts, detections, snapshots, and other Frigate features work as usual, and plates are detected efficiently through your configured object detector.
 
 An example configuration for a dedicated LPR camera using a `license_plate`-detecting model:
 
@@ -213,7 +219,7 @@ cameras:
 With this setup:
 
 - License plates are treated as normal objects in Frigate.
-- Scores, alerts, detections, snapshots, zones, and object masks work as expected.
+- Scores, alerts, detections, and snapshots work as expected.
 - Snapshots will have license plate bounding boxes on them.
 - The `frigate/events` MQTT topic will publish tracked object updates.
 - Debug view will display `license_plate` bounding boxes.
@@ -279,7 +285,6 @@ With this setup:
 | License Plate Detection | Uses `license_plate` as a tracked object               | Runs a dedicated LPR pipeline                                   |
 | FPS Setting             | 5 (increase for fast-moving cars)                      | 5 (increase for fast-moving cars, but it may use much more CPU) |
 | Object Detection        | Standard Frigate+ detection applies                    | Bypasses standard object detection                              |
-| Zones & Object Masks    | Supported                                              | Not supported                                                   |
 | Debug View              | May show `license_plate` bounding boxes                | May **not** show `license_plate` bounding boxes                 |
 | MQTT `frigate/events`   | Publishes tracked object updates                       | Publishes limited updates                                       |
 | Explore                 | Recognized plates available in More Filters            | Recognized plates available in More Filters                     |
