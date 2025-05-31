@@ -708,8 +708,8 @@ export default function ZoneEditPane({
                           {
                             unit:
                               config?.ui.unit_system == "imperial"
-                                ? t("feet", { ns: "common" })
-                                : t("meters", { ns: "common" }),
+                                ? t("unit.length.feet", { ns: "common" })
+                                : t("unit.length.meters", { ns: "common" }),
                           },
                         )}
                       </FormLabel>
@@ -735,8 +735,8 @@ export default function ZoneEditPane({
                           {
                             unit:
                               config?.ui.unit_system == "imperial"
-                                ? t("feet", { ns: "common" })
-                                : t("meters", { ns: "common" }),
+                                ? t("unit.length.feet", { ns: "common" })
+                                : t("unit.length.meters", { ns: "common" }),
                           },
                         )}
                       </FormLabel>
@@ -762,8 +762,8 @@ export default function ZoneEditPane({
                           {
                             unit:
                               config?.ui.unit_system == "imperial"
-                                ? t("feet", { ns: "common" })
-                                : t("meters", { ns: "common" }),
+                                ? t("unit.length.feet", { ns: "common" })
+                                : t("unit.length.meters", { ns: "common" }),
                           },
                         )}
                       </FormLabel>
@@ -789,8 +789,8 @@ export default function ZoneEditPane({
                           {
                             unit:
                               config?.ui.unit_system == "imperial"
-                                ? t("feet", { ns: "common" })
-                                : t("meters", { ns: "common" }),
+                                ? t("unit.length.feet", { ns: "common" })
+                                : t("unit.length.meters", { ns: "common" }),
                           },
                         )}
                       </FormLabel>

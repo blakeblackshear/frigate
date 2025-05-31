@@ -46,6 +46,7 @@ import {
 } from "@/api/ws";
 import { useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -89,6 +90,10 @@ export default function LiveContextMenu({
 }: LiveContextMenuProps) {
   const { t } = useTranslation("views/live");
   const [showSettings, setShowSettings] = useState(false);
+
+  // roles
+
+  const isAdmin = useIsAdmin();
 
   // camera enabled
 
@@ -301,17 +306,21 @@ export default function LiveContextMenu({
             </>
           )}
           <ContextMenuSeparator />
-          <ContextMenuItem>
-            <div
-              className="flex w-full cursor-pointer items-center justify-start gap-2"
-              onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
-            >
-              <div className="text-primary">
-                {isEnabled ? t("camera.disable") : t("camera.enable")}
-              </div>
-            </div>
-          </ContextMenuItem>
-          <ContextMenuSeparator />
+          {isAdmin && (
+            <>
+              <ContextMenuItem>
+                <div
+                  className="flex w-full cursor-pointer items-center justify-start gap-2"
+                  onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
+                >
+                  <div className="text-primary">
+                    {isEnabled ? t("camera.disable") : t("camera.enable")}
+                  </div>
+                </div>
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
           <ContextMenuItem disabled={!isEnabled}>
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
