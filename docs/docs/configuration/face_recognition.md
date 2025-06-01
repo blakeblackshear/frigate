@@ -45,6 +45,8 @@ face_recognition:
   enabled: true
 ```
 
+Like the other real-time processors in Frigate, face recognition runs on the camera stream defined by the `detect` role in your config. To ensure optimal performance, select a suitable resolution for this stream in your camera's firmware that fits your specific scene and requirements.
+
 ## Advanced Configuration
 
 Fine-tune face recognition with these optional parameters at the global level of your config. The only optional parameters that can be set at the camera level are `enabled` and `min_area`.
