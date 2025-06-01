@@ -22,7 +22,7 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
@@ -43,7 +43,11 @@ class LicensePlateProcessingMixin:
         self.plates_det_second = EventsPerSecond()
         self.plates_det_second.start()
         self.event_metadata_publisher = EventMetadataPublisher()
-        self.ctc_decoder = CTCDecoder()
+        self.ctc_decoder = CTCDecoder(
+            character_dict_path=os.path.join(
+                MODEL_CACHE_DIR, "paddleocr-onnx", "ppocr_keys_v1.txt"
+            )
+        )
         self.batch_size = 6
 
         # Detection specific parameters
@@ -1595,113 +1599,121 @@ class CTCDecoder:
     for each decoded character sequence.
     """
 
-    def __init__(self):
+    def __init__(self, character_dict_path=None):
         """
-        Initialize the CTCDecoder with a list of characters and a character map.
+        Initializes the CTCDecoder.
+        :param character_dict_path: Path to the character dictionary file.
+                                    If None, a default (English-focused) list is used.
+                                    For Chinese models, this should point to the correct
+                                    character dictionary file provided with the model.
+        """
+        self.characters = []
+        if character_dict_path and os.path.exists(character_dict_path):
+            with open(character_dict_path, "r", encoding="utf-8") as f:
+                self.characters = ["blank"] + [
+                    line.strip() for line in f if line.strip()
+                ]
+        else:
+            self.characters = [
+                "blank",
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                ":",
+                ";",
+                "<",
+                "=",
+                ">",
+                "?",
+                "@",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+                "[",
+                "\\",
+                "]",
+                "^",
+                "_",
+                "`",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h",
+                "i",
+                "j",
+                "k",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v",
+                "w",
+                "x",
+                "y",
+                "z",
+                "{",
+                "|",
+                "}",
+                "~",
+                "!",
+                '"',
+                "#",
+                "$",
+                "%",
+                "&",
+                "'",
+                "(",
+                ")",
+                "*",
+                "+",
+                ",",
+                "-",
+                ".",
+                "/",
+                " ",
+                " ",
+            ]
 
-        The character set includes digits, letters, special characters, and a "blank" token
-        (used by the CTC model for decoding purposes). A character map is created to map
-        indices to characters.
-        """
-        self.characters = [
-            "blank",
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            ":",
-            ";",
-            "<",
-            "=",
-            ">",
-            "?",
-            "@",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
-            "M",
-            "N",
-            "O",
-            "P",
-            "Q",
-            "R",
-            "S",
-            "T",
-            "U",
-            "V",
-            "W",
-            "X",
-            "Y",
-            "Z",
-            "[",
-            "\\",
-            "]",
-            "^",
-            "_",
-            "`",
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-            "g",
-            "h",
-            "i",
-            "j",
-            "k",
-            "l",
-            "m",
-            "n",
-            "o",
-            "p",
-            "q",
-            "r",
-            "s",
-            "t",
-            "u",
-            "v",
-            "w",
-            "x",
-            "y",
-            "z",
-            "{",
-            "|",
-            "}",
-            "~",
-            "!",
-            '"',
-            "#",
-            "$",
-            "%",
-            "&",
-            "'",
-            "(",
-            ")",
-            "*",
-            "+",
-            ",",
-            "-",
-            ".",
-            "/",
-            " ",
-            " ",
-        ]
         self.char_map = {i: char for i, char in enumerate(self.characters)}
 
     def __call__(
