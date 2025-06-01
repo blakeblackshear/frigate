@@ -189,7 +189,12 @@ Frigate provides a dialog in the Camera Group Edit pane with several options for
 
 :::note
 
-The default dashboard ("All Cameras") will always use Smart Streaming and the first entry set in your `streams` configuration, if defined. Use a camera group if you want to change any of these settings from the defaults.
+The default dashboard ("All Cameras") will always use:
+
+- Smart Streaming, unless you've disabled the global Automatic Live View in Settings.
+- The first entry set in your `streams` configuration, if defined.
+
+Use a camera group if you want to change any of these settings from the defaults.
 
 :::
 

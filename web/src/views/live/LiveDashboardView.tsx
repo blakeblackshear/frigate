@@ -486,9 +486,12 @@ export default function LiveDashboardView({
               const streamName = streamExists
                 ? streamNameFromSettings
                 : firstStreamEntry;
+              const streamType =
+                currentGroupStreamingSettings?.[camera.name]?.streamType;
               const autoLive =
-                currentGroupStreamingSettings?.[camera.name]?.streamType !==
-                "no-streaming";
+                streamType !== undefined
+                  ? streamType !== "no-streaming"
+                  : undefined;
               const showStillWithoutActivity =
                 currentGroupStreamingSettings?.[camera.name]?.streamType !==
                 "continuous";
