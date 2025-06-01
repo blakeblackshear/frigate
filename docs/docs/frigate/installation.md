@@ -145,7 +145,7 @@ $ sudo cat /sys/kernel/debug/rknpu/version
 RKNPU driver: v0.9.2 # or later version
 ```
 
-I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
+I recommend [Armbian](https://www.armbian.com/download/?arch=aarch64), if your board is supported.
 
 #### Setup
 
