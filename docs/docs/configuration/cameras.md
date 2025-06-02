@@ -98,7 +98,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest IP4M-S2112EW-AI      |      ✅      |      ❌      | FOV relative movement not supported.                                                                                                            |
 | Amcrest IP5M-1190EW          |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                            |
 | Ctronics PTZ                 |      ✅      |      ❌      |                                                                                                                                                 |
-| Dahua                        |      ✅      |      ✅      |                                                                                                                                                 |
+| Dahua                        |      ✅      |      ✅      | Some low-end Dahuas (lite series, among others) have been reported to not support autotracking                                                  |
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
 | Foscam R5                    |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
