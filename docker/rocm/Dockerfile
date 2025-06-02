@@ -63,6 +63,7 @@ COPY --from=rocm /opt/rocm-dist/ /
 FROM deps-prelim AS rocm-prelim-hsa-override0
 ENV HSA_ENABLE_SDMA=0
 ENV MIGRAPHX_ENABLE_NHWC=1
+ENV TF_ROCM_USE_IMMEDIATE_MODE=1
 
 COPY --from=rocm-dist / /
 
