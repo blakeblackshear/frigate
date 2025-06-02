@@ -91,7 +91,7 @@ export function RecordingView({
     "recordings/summary",
     {
       timezone: timezone,
-      cameras: allCameras ?? null,
+      cameras: allCameras.join(",") ?? null,
     },
   ]);
 
