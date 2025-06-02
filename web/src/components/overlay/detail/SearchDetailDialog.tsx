@@ -1231,7 +1231,9 @@ export function VideoTab({ search }: VideoTabProps) {
   ]);
   const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
-  const source = `${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`;
+  // subtract 2 seconds from start_time to account for keyframes and any differences in the record/detect streams
+  // to help the start of the event from not being completely cut off
+  const source = `${baseUrl}vod/${search.camera}/start/${search.start_time - 2}/end/${endTime}/index.m3u8`;
 
   return (
     <>
