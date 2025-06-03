@@ -279,6 +279,23 @@ export type CameraStreamingSettings = {
   volume: number;
 };
 
+export type CustomClassificationModelConfig = {
+  enabled: boolean;
+  name: string;
+  object_config: null | {
+    objects: string[];
+  };
+  state_config: null | {
+    cameras: {
+      [cameraName: string]: {
+        crop: [number, number, number, number];
+        threshold: number;
+      };
+    };
+    motion: boolean;
+  };
+};
+
 export type GroupStreamingSettings = {
   [cameraName: string]: CameraStreamingSettings;
 };
@@ -315,6 +332,9 @@ export interface FrigateConfig {
     bird: {
       enabled: boolean;
       threshold: number;
+    };
+    custom: {
+      [modelKey: string]: CustomClassificationModelConfig;
     };
   };
 
