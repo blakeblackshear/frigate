@@ -52,6 +52,21 @@ auth:
     - 172.18.0.0/16 # <---- this is the subnet for the internal Docker Compose network
 ```
 
+## Session Length
+
+The default session length for user authentication in Frigate is 24 hours. This setting determines how long a user's authenticated session remains active before a token refresh is require, otherwise another login will be required.
+
+While the default provides a balance of security and convenience, you can customize this duration to suit your specific security requirements and user experience preferences. The session length is configured in seconds.
+
+The default value of `86400` will expire the authentication session after 24 hours, some other examples:
+- `0`: Setting the session length to 0 will require a user to log in every time they access the application or after a very short, immediate timeout.
+- `604800`: Setting the session length to 604800 will require a user to log in if the token is not refreshed for 7 days.
+
+```yaml
+auth:
+  session_length: 86400
+```
+
 ## JWT Token Secret
 
 The JWT token secret needs to be kept secure. Anyone with this secret can generate valid JWT tokens to authenticate with Frigate. This should be a cryptographically random string of at least 64 characters.
