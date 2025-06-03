@@ -1,3 +1,4 @@
+import { baseUrl } from "@/api/baseUrl";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,10 +21,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import { cn } from "@/lib/utils";
 import { CustomClassificationModelConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import useSWR from "swr";
@@ -47,7 +50,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   }, [model]);
 
   return (
-    <div className="flex size-full flex-col p-2">
+    <div className="flex size-full flex-col gap-2 overflow-hidden p-2">
       <div className="flex flex-row justify-between gap-2 align-middle">
         <LibrarySelector
           pageToggle={pageToggle}
@@ -57,10 +60,19 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           onDelete={() => {}}
           onRename={() => {}}
         />
-        <Button variant="select" onClick={trainModel}>
-          Train Model
-        </Button>
+        <Button onClick={trainModel}>Train Model</Button>
       </div>
+      {pageToggle == "train" ? (
+        <TrainGrid
+          model={model}
+          trainImages={trainImages}
+          selected={false}
+          onClickImages={() => {}}
+          onDelete={() => {}}
+        />
+      ) : (
+        <DatasetGrid />
+      )}
     </div>
   );
 }
@@ -154,7 +166,13 @@ function LibrarySelector({
           <Button className="flex justify-between smart-capitalize">
             {pageToggle == "train" ? t("train.title") : pageToggle}
             <span className="ml-2 text-primary-variant">
-              ({(pageToggle && dataset?.[pageToggle]?.length) || 0})
+              (
+              {(pageToggle &&
+                (pageToggle == "train"
+                  ? trainImages.length
+                  : dataset?.[pageToggle]?.length)) ||
+                0}
+              )
             </span>
           </Button>
         </DropdownMenuTrigger>
@@ -237,5 +255,141 @@ function LibrarySelector({
         </DropdownMenuContent>
       </DropdownMenu>
     </>
+  );
+}
+
+type DatasetGridProps = {
+  name: string;
+  images: string[];
+  onDelete: (name: string, ids: string[]) => void;
+};
+function DatasetGrid({ name, images, onDelete }: DatasetGridProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
+  return (
+    <div
+      className={cn(
+        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+      )}
+    >
+      <div
+        className={cn(
+          "w-full overflow-hidden p-2 *:text-card-foreground",
+          isMobile && "flex justify-center",
+        )}
+      >
+        <img
+          className="h-40 rounded-lg"
+          src={`${baseUrl}clips/faces/${name}/${images}`}
+        />
+      </div>
+      <div className="rounded-b-lg bg-card p-3">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start text-xs text-primary-variant">
+            <div className="smart-capitalize">{name}</div>
+          </div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(name, images);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type TrainGridProps = {
+  model: CustomClassificationModelConfig;
+  trainImages: string[];
+  selected: boolean;
+  onClickImages: (images: string[], ctrl: boolean) => void;
+  onDelete: (name: string, ids: string[]) => void;
+};
+function TrainGrid({
+  model,
+  trainImages,
+  selected,
+  onClickImages,
+  onDelete,
+}: TrainGridProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
+  const trainData = useMemo(
+    () =>
+      trainImages.map((raw) => {
+        const parts = raw.replaceAll(".webp", "").split("-");
+        return {
+          raw,
+          timestamp: parts[0],
+          label: parts[1],
+          score: Number.parseFloat(parts[2]) * 100,
+        };
+      }),
+    [trainImages],
+  );
+
+  return (
+    <div className="grid size-full grid-cols-10 gap-2 overflow-y-auto">
+      {trainData.map((data) => (
+        <div
+          className={cn(
+            "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+            selected
+              ? "shadow-selected outline-selected"
+              : "outline-transparent duration-500",
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClickImages([data.raw], e.ctrlKey || e.metaKey);
+          }}
+        >
+          <div
+            className={cn(
+              "w-full overflow-hidden p-2 *:text-card-foreground",
+              isMobile && "flex justify-center",
+            )}
+          >
+            <img
+              className="h-48 rounded-lg"
+              src={`${baseUrl}clips/${model.name}/${data.raw}`}
+            />
+          </div>
+          <div className="rounded-b-lg bg-card p-3">
+            <div className="flex w-full flex-row items-center justify-between gap-2">
+              <div className="flex flex-col items-start text-xs text-primary-variant">
+                <div className="smart-capitalize">{data.label}</div>
+                <div>{data.score}%</div>
+              </div>
+              <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <LuTrash2
+                      className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete("train", [data.raw]);
+                      }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("button.deleteClassificationAttempts")}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
