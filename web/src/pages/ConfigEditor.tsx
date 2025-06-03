@@ -209,13 +209,24 @@ function ConfigEditor() {
     };
   }, [hasChanges, t]);
 
+  useEffect(() => {
+    if (editorRef.current) {
+      // Small delay to ensure DOM has updated
+      const timeoutId = setTimeout(() => {
+        editorRef.current?.layout();
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [error]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
 
   return (
     <div className="absolute bottom-2 left-0 right-0 top-2 md:left-2">
-      <div className="relative h-full overflow-hidden">
+      <div className="relative flex h-full flex-col overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
             {t("configEditor")}
@@ -254,13 +265,14 @@ function ConfigEditor() {
           </div>
         </div>
 
-        {error && (
-          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
-            {error}
-          </div>
-        )}
-
-        <div ref={configRef} className="mt-2 h-[calc(100%-2.75rem)]" />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {error && (
+            <div className="mt-2 max-h-[30%] min-h-[2.5rem] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
+              {error}
+            </div>
+          )}
+          <div ref={configRef} className="flex-1 overflow-hidden" />
+        </div>
       </div>
       <Toaster closeButton={true} />
       <RestartDialog
