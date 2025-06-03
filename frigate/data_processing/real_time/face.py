@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import shutil
+from pathlib import Path
 from typing import Any, Optional
 
 import cv2
@@ -538,4 +539,4 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # delete oldest face image if maximum is reached
             if len(files) > self.config.face_recognition.save_attempts:
-                os.unlink(os.path.join(folder, files[-1]))
+                Path(os.path.join(folder, files[-1])).unlink(missing_ok=True)
