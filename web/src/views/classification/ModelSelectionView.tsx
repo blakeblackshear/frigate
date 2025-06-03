@@ -35,11 +35,11 @@ export default function ModelSelectionView({
   }
 
   return (
-    <div className="size-full p-2">
+    <div className="flex size-full gap-2 p-2">
       {classificationConfigs.map((config) => (
         <div
           className={cn(
-            "flex w-72 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+            "flex h-52 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
             isMobile && "w-full",
             false
               ? "shadow-selected outline-selected"
