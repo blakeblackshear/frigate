@@ -167,6 +167,8 @@ class LicensePlateProcessingMixin:
             outputs = self.model_runner.recognition_model(norm_images)
         except Exception as e:
             logger.warning(f"Error running LPR recognition model: {e}")
+            return [], []
+
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
