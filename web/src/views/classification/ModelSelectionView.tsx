@@ -1,9 +1,19 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { cn } from "@/lib/utils";
+import {
+  CustomClassificationModelConfig,
+  FrigateConfig,
+} from "@/types/frigateConfig";
 import { useMemo } from "react";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 
-export default function ModelSelectionView() {
+type ModelSelectionViewProps = {
+  onClick: (model: CustomClassificationModelConfig) => void;
+};
+export default function ModelSelectionView({
+  onClick,
+}: ModelSelectionViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -25,9 +35,29 @@ export default function ModelSelectionView() {
   }
 
   return (
-    <div className="size-full">
+    <div className="size-full p-2">
       {classificationConfigs.map((config) => (
-        <div className="size-48">{config.name}</div>
+        <div
+          className={cn(
+            "flex w-72 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+            isMobile && "w-full",
+            false
+              ? "shadow-selected outline-selected"
+              : "outline-transparent duration-500",
+          )}
+          onClick={() => onClick(config)}
+          onContextMenu={() => {
+            // e.stopPropagation();
+            // e.preventDefault();
+            // handleClickEvent(true);
+          }}
+        >
+          <div className="size-48"></div>
+          <div className="smart-capitalize">
+            {config.name} ({config.state_config != null ? "State" : "Object"}{" "}
+            Classification)
+          </div>
+        </div>
       ))}
     </div>
   );

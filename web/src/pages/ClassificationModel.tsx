@@ -1,3 +1,4 @@
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { CustomClassificationModelConfig } from "@/types/frigateConfig";
 import ModelSelectionView from "@/views/classification/ModelSelectionView";
 import ModelTrainingView from "@/views/classification/ModelTrainingView";
@@ -6,11 +7,13 @@ import { useState } from "react";
 export default function ClassificationModelPage() {
   // training
 
-  const [model, setModel] = useState<CustomClassificationModelConfig>();
+  const [model, setModel] = useOverlayState<CustomClassificationModelConfig>(
+    "classificationModel",
+  );
 
   if (model == undefined) {
-    return <ModelSelectionView />;
+    return <ModelSelectionView onClick={setModel} />;
   }
 
-  return <ModelTrainingView />;
+  return <ModelTrainingView model={model} />;
 }
