@@ -21,7 +21,7 @@ from frigate.api.defs.request.classification_body import (
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera import DetectConfig
-from frigate.const import FACE_DIR, MODEL_CACHE_DIR
+from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
 from frigate.util.classification import train_classification_model
@@ -429,6 +429,50 @@ def transcribe_audio(request: Request, body: AudioTranscriptionBody):
 
 
 # custom classification training
+
+
+@router.get("/classification/{name}/dataset")
+def get_classification_dataset(name: str):
+    dataset_dict: dict[str, list[str]] = {}
+
+    dataset_dir = os.path.join(MODEL_CACHE_DIR, f"{sanitize_filename(name)}/dataset")
+
+    if not os.path.exists(dataset_dir):
+        return JSONResponse(status_code=200, content={})
+
+    for name in os.listdir(dataset_dir):
+        category_dir = os.path.join(dataset_dir, name)
+
+        if not os.path.isdir(category_dir):
+            continue
+
+        dataset_dict[name] = []
+
+        for file in filter(
+            lambda f: (f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))),
+            os.listdir(category_dir),
+        ):
+            dataset_dict[name].append(file)
+
+    return JSONResponse(status_code=200, content=dataset_dict)
+
+
+@router.get("/classification/{name}/train")
+def get_classification_images(name: str):
+    train_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+
+    if not os.path.exists(train_dir):
+        return JSONResponse(status_code=200, content=[])
+
+    return JSONResponse(
+        status_code=200,
+        content=list(
+            filter(
+                lambda f: (f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))),
+                os.listdir(train_dir),
+            )
+        ),
+    )
 
 
 @router.post("/classification/{name}/train")
