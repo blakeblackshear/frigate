@@ -30,6 +30,9 @@ from frigate.const import (
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
 )
+from frigate.data_processing.common.audio_transcription.model import (
+    AudioTranscriptionModelRunner,
+)
 from frigate.data_processing.real_time.audio_transcription import (
     AudioTranscriptionRealTimeProcessor,
 )
@@ -87,6 +90,10 @@ class AudioProcessor(util.Process):
         self.camera_metrics = camera_metrics
         self.cameras = cameras
         self.config = config
+        self.transcription_model_runner = AudioTranscriptionModelRunner(
+            self.config.audio_transcription.device,
+            self.config.audio_transcription.model_size,
+        )
 
     def run(self) -> None:
         audio_threads: list[AudioEventMaintainer] = []
@@ -101,6 +108,7 @@ class AudioProcessor(util.Process):
                 camera,
                 self.config,
                 self.camera_metrics,
+                self.transcription_model_runner,
                 self.stop_event,
             )
             audio_threads.append(audio_thread)
@@ -130,6 +138,7 @@ class AudioEventMaintainer(threading.Thread):
         camera: CameraConfig,
         config: FrigateConfig,
         camera_metrics: dict[str, CameraMetrics],
+        audio_transcription_model_runner: AudioTranscriptionModelRunner,
         stop_event: threading.Event,
     ) -> None:
         super().__init__(name=f"{camera.name}_audio_event_processor")
@@ -146,6 +155,7 @@ class AudioEventMaintainer(threading.Thread):
         self.ffmpeg_cmd = get_ffmpeg_command(self.camera_config.ffmpeg)
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_config.name}.audio")
         self.audio_listener = None
+        self.audio_transcription_model_runner = audio_transcription_model_runner
         self.transcription_processor = None
         self.transcription_thread = None
 
@@ -168,6 +178,7 @@ class AudioEventMaintainer(threading.Thread):
                 config=self.config,
                 camera_config=self.camera_config,
                 requestor=self.requestor,
+                model_runner=self.audio_transcription_model_runner,
                 metrics=self.camera_metrics[self.camera_config.name],
                 stop_event=self.stop_event,
             )
@@ -223,18 +234,18 @@ class AudioEventMaintainer(threading.Thread):
             )
 
         # run audio transcription
-        if self.transcription_processor is not None and (
-            self.camera_config.audio_transcription.live_enabled
-        ):
-            self.transcribing = True
-            # process audio until we've reached the endpoint
-            self.transcription_processor.process_audio(
-                {
-                    "id": f"{self.camera_config.name}_audio",
-                    "camera": self.camera_config.name,
-                },
-                audio,
-            )
+        if self.transcription_processor is not None:
+            if self.camera_config.audio_transcription.live_enabled:
+                # process audio until we've reached the endpoint
+                self.transcription_processor.process_audio(
+                    {
+                        "id": f"{self.camera_config.name}_audio",
+                        "camera": self.camera_config.name,
+                    },
+                    audio,
+                )
+            else:
+                self.transcription_processor.check_unload_model()
 
         self.expire_detections()
 
@@ -308,13 +319,6 @@ class AudioEventMaintainer(threading.Thread):
                     (detection["id"], detection["last_detection"]),
                 )
                 self.detections[detection["label"]] = None
-
-                # clear real-time transcription
-                if self.transcription_processor is not None:
-                    self.transcription_processor.reset(self.camera_config.name)
-                    self.requestor.send_data(
-                        f"{self.camera_config.name}/audio/transcription", ""
-                    )
 
     def expire_all_detections(self) -> None:
         """Immediately end all current detections"""

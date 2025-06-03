@@ -4,6 +4,10 @@ import multiprocessing as mp
 from enum import Enum
 from multiprocessing.sharedctypes import Synchronized
 
+import sherpa_onnx
+
+from frigate.data_processing.real_time.whisper_online import FasterWhisperASR
+
 
 class DataProcessorMetrics:
     image_embeddings_speed: Synchronized
@@ -41,3 +45,6 @@ class PostProcessDataEnum(str, Enum):
     recording = "recording"
     review = "review"
     tracked_object = "tracked_object"
+
+
+AudioTranscriptionModel = FasterWhisperASR | sherpa_onnx.OnlineRecognizer | None

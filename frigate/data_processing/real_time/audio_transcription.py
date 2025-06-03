@@ -7,16 +7,20 @@ import threading
 from typing import Optional
 
 import numpy as np
-import sherpa_onnx
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
-from frigate.util.downloader import ModelDownloader
+from frigate.data_processing.common.audio_transcription.model import (
+    AudioTranscriptionModelRunner,
+)
+from frigate.data_processing.real_time.whisper_online import (
+    FasterWhisperASR,
+    OnlineASRProcessor,
+)
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
-from .whisper_online import FasterWhisperASR, OnlineASRProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +31,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         config: FrigateConfig,
         camera_config: CameraConfig,
         requestor: InterProcessRequestor,
+        model_runner: AudioTranscriptionModelRunner,
         metrics: DataProcessorMetrics,
         stop_event: threading.Event,
     ):
@@ -34,94 +39,54 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         self.config = config
         self.camera_config = camera_config
         self.requestor = requestor
-        self.recognizer = None
         self.stream = None
+        self.whisper_model = None
+        self.model_runner = model_runner
         self.transcription_segments = []
         self.audio_queue = queue.Queue()
         self.stop_event = stop_event
 
-        if self.config.audio_transcription.model_size == "large":
-            self.asr = FasterWhisperASR(
-                modelsize="tiny",
-                device="cuda"
-                if self.config.audio_transcription.device == "GPU"
-                else "cpu",
-                lan=config.audio_transcription.language,
-                model_dir=os.path.join(MODEL_CACHE_DIR, "whisper"),
-            )
-            self.asr.use_vad()  # Enable Silero VAD for low-RMS audio
-
-        else:
-            # small model as default
-            download_path = os.path.join(MODEL_CACHE_DIR, "sherpa-onnx")
-            HF_ENDPOINT = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
-            self.model_files = {
-                "encoder.onnx": f"{HF_ENDPOINT}/csukuangfj/sherpa-onnx-streaming-zipformer-en-2023-06-26/resolve/main/encoder-epoch-99-avg-1-chunk-16-left-128.onnx",
-                "decoder.onnx": f"{HF_ENDPOINT}/csukuangfj/sherpa-onnx-streaming-zipformer-en-2023-06-26/resolve/main/decoder-epoch-99-avg-1-chunk-16-left-128.onnx",
-                "joiner.onnx": f"{HF_ENDPOINT}/csukuangfj/sherpa-onnx-streaming-zipformer-en-2023-06-26/resolve/main/joiner-epoch-99-avg-1-chunk-16-left-128.onnx",
-                "tokens.txt": f"{HF_ENDPOINT}/csukuangfj/sherpa-onnx-streaming-zipformer-en-2023-06-26/resolve/main/tokens.txt",
-            }
-
-            if not all(
-                os.path.exists(os.path.join(download_path, n))
-                for n in self.model_files.keys()
-            ):
-                self.downloader = ModelDownloader(
-                    model_name="sherpa-onnx",
-                    download_path=download_path,
-                    file_names=self.model_files.keys(),
-                    download_func=self.__download_models,
-                    complete_func=self.__build_recognizer,
-                )
-                self.downloader.ensure_model_files()
-
-        self.__build_recognizer()
-
-    def __download_models(self, path: str) -> None:
-        try:
-            file_name = os.path.basename(path)
-            ModelDownloader.download_from_url(self.model_files[file_name], path)
-        except Exception as e:
-            logger.error(f"Failed to download {path}: {e}")
-
     def __build_recognizer(self) -> None:
         try:
             if self.config.audio_transcription.model_size == "large":
-                self.online = OnlineASRProcessor(
-                    asr=self.asr,
+                # Whisper models need to be per-process and can only run one stream at a time
+                # TODO: try parallel: https://github.com/SYSTRAN/faster-whisper/issues/100
+                logger.debug(f"Loading Whisper model for {self.camera_config.name}")
+                self.whisper_model = FasterWhisperASR(
+                    modelsize="tiny",
+                    device="cuda"
+                    if self.config.audio_transcription.device == "GPU"
+                    else "cpu",
+                    lan=self.config.audio_transcription.language,
+                    model_dir=os.path.join(MODEL_CACHE_DIR, "whisper"),
+                )
+                self.whisper_model.use_vad()
+                self.stream = OnlineASRProcessor(
+                    asr=self.whisper_model,
                 )
             else:
-                self.recognizer = sherpa_onnx.OnlineRecognizer.from_transducer(
-                    tokens=os.path.join(MODEL_CACHE_DIR, "sherpa-onnx/tokens.txt"),
-                    encoder=os.path.join(MODEL_CACHE_DIR, "sherpa-onnx/encoder.onnx"),
-                    decoder=os.path.join(MODEL_CACHE_DIR, "sherpa-onnx/decoder.onnx"),
-                    joiner=os.path.join(MODEL_CACHE_DIR, "sherpa-onnx/joiner.onnx"),
-                    num_threads=2,
-                    sample_rate=16000,
-                    feature_dim=80,
-                    enable_endpoint_detection=True,
-                    rule1_min_trailing_silence=2.4,
-                    rule2_min_trailing_silence=1.2,
-                    rule3_min_utterance_length=300,
-                    decoding_method="greedy_search",
-                    provider="cpu",
-                )
-                self.stream = self.recognizer.create_stream()
-            logger.debug("Audio transcription (live) initialized")
+                logger.debug(f"Loading sherpa stream for {self.camera_config.name}")
+                self.stream = self.model_runner.model.create_stream()
+            logger.debug(
+                f"Audio transcription (live) initialized for {self.camera_config.name}"
+            )
         except Exception as e:
             logger.error(
                 f"Failed to initialize live streaming audio transcription: {e}"
             )
-            self.recognizer = None
 
     def __process_audio_stream(
         self, audio_data: np.ndarray
     ) -> Optional[tuple[str, bool]]:
-        if (not self.recognizer or not self.stream) and not self.online:
-            logger.debug(
-                "Audio transcription (streaming) recognizer or stream not initialized"
-            )
+        if (
+            self.model_runner.model is None
+            and self.config.audio_transcription.model_size == "small"
+        ):
+            logger.debug("Audio transcription (live) model not initialized")
             return None
+
+        if not self.stream:
+            self.__build_recognizer()
 
         try:
             if audio_data.dtype != np.float32:
@@ -135,10 +100,14 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
 
             if self.config.audio_transcription.model_size == "large":
                 # large model
-                self.online.insert_audio_chunk(audio_data)
-                output = self.online.process_iter()
+                self.stream.insert_audio_chunk(audio_data)
+                output = self.stream.process_iter()
                 text = output[2].strip()
-                is_endpoint = text.endswith((".", "!", "?"))
+                is_endpoint = (
+                    text.endswith((".", "!", "?"))
+                    and sum(len(str(lines)) for lines in self.transcription_segments)
+                    > 300
+                )
 
                 if text:
                     self.transcription_segments.append(text)
@@ -150,11 +119,11 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
                 # small model
                 self.stream.accept_waveform(16000, audio_data)
 
-                while self.recognizer.is_ready(self.stream):
-                    self.recognizer.decode_stream(self.stream)
+                while self.model_runner.model.is_ready(self.stream):
+                    self.model_runner.model.decode_stream(self.stream)
 
-                text = self.recognizer.get_result(self.stream).strip()
-                is_endpoint = self.recognizer.is_endpoint(self.stream)
+                text = self.model_runner.model.get_result(self.stream).strip()
+                is_endpoint = self.model_runner.model.is_endpoint(self.stream)
 
             logger.debug(f"Transcription result: '{text}'")
 
@@ -166,7 +135,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
 
             if is_endpoint and self.config.audio_transcription.model_size == "small":
                 # reset sherpa if we've reached an endpoint
-                self.recognizer.reset(self.stream)
+                self.model_runner.model.reset(self.stream)
 
             return text, is_endpoint
         except Exception as e:
@@ -190,10 +159,17 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         logger.debug(
             f"Starting audio transcription thread for {self.camera_config.name}"
         )
+
+        # start with an empty transcription
+        self.requestor.send_data(
+            f"{self.camera_config.name}/audio/transcription",
+            "",
+        )
+
         while not self.stop_event.is_set():
             try:
                 # Get audio data from queue with a timeout to check stop_event
-                obj_data, audio = self.audio_queue.get(timeout=0.1)
+                _, audio = self.audio_queue.get(timeout=0.1)
                 result = self.__process_audio_stream(audio)
 
                 if not result:
@@ -209,7 +185,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
                 self.audio_queue.task_done()
 
                 if is_endpoint:
-                    self.reset(obj_data["camera"])
+                    self.reset()
 
             except queue.Empty:
                 continue
@@ -221,23 +197,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             f"Stopping audio transcription thread for {self.camera_config.name}"
         )
 
-    def reset(self, camera: str) -> None:
-        if self.config.audio_transcription.model_size == "large":
-            # get final output from whisper
-            output = self.online.finish()
-            self.transcription_segments = []
-
-            self.requestor.send_data(
-                f"{self.camera_config.name}/audio/transcription",
-                (output[2].strip() + " "),
-            )
-
-            # reset whisper
-            self.online.init()
-        else:
-            # reset sherpa
-            self.recognizer.reset(self.stream)
-
+    def clear_audio_queue(self) -> None:
         # Clear the audio queue
         while not self.audio_queue.empty():
             try:
@@ -246,7 +206,53 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             except queue.Empty:
                 break
 
+    def reset(self) -> None:
+        if self.config.audio_transcription.model_size == "large":
+            # get final output from whisper
+            output = self.stream.finish()
+            self.transcription_segments = []
+
+            self.requestor.send_data(
+                f"{self.camera_config.name}/audio/transcription",
+                (output[2].strip() + " "),
+            )
+
+            # reset whisper
+            self.stream.init()
+            self.transcription_segments = []
+        else:
+            # reset sherpa
+            self.model_runner.model.reset(self.stream)
+
         logger.debug("Stream reset")
+
+    def check_unload_model(self) -> None:
+        # regularly called in the loop in audio maintainer
+        if (
+            self.config.audio_transcription.model_size == "large"
+            and self.whisper_model is not None
+        ):
+            logger.debug(f"Unloading Whisper model for {self.camera_config.name}")
+            self.clear_audio_queue()
+            self.transcription_segments = []
+            self.stream = None
+            self.whisper_model = None
+
+            self.requestor.send_data(
+                f"{self.camera_config.name}/audio/transcription",
+                "",
+            )
+        if (
+            self.config.audio_transcription.model_size == "small"
+            and self.stream is not None
+        ):
+            logger.debug(f"Clearing sherpa stream for {self.camera_config.name}")
+            self.stream = None
+
+            self.requestor.send_data(
+                f"{self.camera_config.name}/audio/transcription",
+                "",
+            )
 
     def stop(self) -> None:
         """Stop the transcription thread and clean up."""
@@ -266,7 +272,6 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
         self, topic: str, request_data: dict[str, any]
     ) -> dict[str, any] | None:
         if topic == "clear_audio_recognizer":
-            self.recognizer = None
             self.stream = None
             self.__build_recognizer()
             return {"message": "Audio recognizer cleared and rebuilt", "success": True}

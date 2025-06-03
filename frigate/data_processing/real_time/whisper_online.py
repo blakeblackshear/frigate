@@ -139,8 +139,11 @@ class FasterWhisperASR(ASRBase):
         return model
 
     def transcribe(self, audio, init_prompt=""):
+        from faster_whisper import BatchedInferencePipeline
+
         # tested: beam_size=5 is faster and better than 1 (on one 200 second document from En ESIC, min chunk 0.01)
-        segments, info = self.model.transcribe(
+        batched_model = BatchedInferencePipeline(model=self.model)
+        segments, info = batched_model.transcribe(
             audio,
             language=self.original_language,
             initial_prompt=init_prompt,
