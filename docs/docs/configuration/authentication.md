@@ -58,7 +58,7 @@ The default session length for user authentication in Frigate is 24 hours. This 
 
 While the default provides a balance of security and convenience, you can customize this duration to suit your specific security requirements and user experience preferences. The session length is configured in seconds.
 
-The default value of `86400` will expire the authentication session after 24 hours, some other examples:
+The default value of `86400` will expire the authentication session after 24 hours. Some other examples:
 - `0`: Setting the session length to 0 will require a user to log in every time they access the application or after a very short, immediate timeout.
 - `604800`: Setting the session length to 604800 will require a user to log in if the token is not refreshed for 7 days.
 
