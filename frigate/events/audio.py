@@ -234,18 +234,18 @@ class AudioEventMaintainer(threading.Thread):
             )
 
         # run audio transcription
-        if self.transcription_processor is not None and (
-            self.camera_config.audio_transcription.live_enabled
-        ):
-            self.transcribing = True
-            # process audio until we've reached the endpoint
-            self.transcription_processor.process_audio(
-                {
-                    "id": f"{self.camera_config.name}_audio",
-                    "camera": self.camera_config.name,
-                },
-                audio,
-            )
+        if self.transcription_processor is not None:
+            if self.camera_config.audio_transcription.live_enabled:
+                # process audio until we've reached the endpoint
+                self.transcription_processor.process_audio(
+                    {
+                        "id": f"{self.camera_config.name}_audio",
+                        "camera": self.camera_config.name,
+                    },
+                    audio,
+                )
+            else:
+                self.transcription_processor.check_unload_model()
 
         self.expire_detections()
 
@@ -319,13 +319,6 @@ class AudioEventMaintainer(threading.Thread):
                     (detection["id"], detection["last_detection"]),
                 )
                 self.detections[detection["label"]] = None
-
-                # clear real-time transcription
-                if self.transcription_processor is not None:
-                    self.transcription_processor.reset(self.camera_config.name)
-                    self.requestor.send_data(
-                        f"{self.camera_config.name}/audio/transcription", ""
-                    )
 
     def expire_all_detections(self) -> None:
         """Immediately end all current detections"""
