@@ -54,7 +54,7 @@ auth:
 
 ## Session Length
 
-The default session length for user authentication in Frigate is 24 hours. This setting determines how long a user's authenticated session remains active before a token refresh is require, otherwise another login will be required.
+The default session length for user authentication in Frigate is 24 hours. This setting determines how long a user's authenticated session remains active before a token refresh is required — otherwise, the user will need to log in again.
 
 While the default provides a balance of security and convenience, you can customize this duration to suit your specific security requirements and user experience preferences. The session length is configured in seconds.
 
