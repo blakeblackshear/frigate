@@ -108,21 +108,21 @@ class FaceRecognizer(ABC):
             image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
         )
 
-    def get_blur_factor(self, input: np.ndarray) -> float:
-        """Calculates the factor for the confidence based on the blur of the image."""
+    def get_blur_confidence_reduction(self, input: np.ndarray) -> tuple[float, float]:
+        """Calculates the reduction in confidence based on the blur of the image."""
         if not self.config.face_recognition.blur_confidence_filter:
             return 1.0
 
         variance = cv2.Laplacian(input, cv2.CV_64F).var()
 
-        if variance < 60:  # image is very blurry
-            return 0.96
-        elif variance < 70:  # image moderately blurry
-            return 0.98
-        elif variance < 80:  # image is slightly blurry
-            return 0.99
+        if variance < 80:  # image is very blurry
+            return variance, 0.05
+        elif variance < 100:  # image moderately blurry
+            return variance, 0.03
+        elif variance < 150:  # image is slightly blurry
+            return variance, 0.01
         else:
-            return 1.0
+            return variance, 0.0
 
 
 def similarity_to_confidence(
@@ -234,8 +234,8 @@ class FaceNetRecognizer(FaceRecognizer):
         # face recognition is best run on grayscale images
 
         # get blur factor before aligning face
-        blur_factor = self.get_blur_factor(face_image)
-        logger.debug(f"face detected with blurriness {blur_factor}")
+        variance, blur_reduction = self.get_blur_confidence_reduction(face_image)
+        logger.debug(f"face detected with blurriness {variance}")
 
         # align face and run recognition
         img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
@@ -258,7 +258,7 @@ class FaceNetRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score * blur_factor, 2)
+        return label, round(score - blur_reduction, 2)
 
 
 class ArcFaceRecognizer(FaceRecognizer):
@@ -344,9 +344,9 @@ class ArcFaceRecognizer(FaceRecognizer):
 
         # face recognition is best run on grayscale images
 
-        # get blur factor before aligning face
-        blur_factor = self.get_blur_factor(face_image)
-        logger.debug(f"face detected with blurriness {blur_factor}")
+        # get blur reduction before aligning face
+        variance, blur_reduction = self.get_blur_confidence_reduction(face_image)
+        logger.debug(f"face detected with blurriness {variance}")
 
         # align face and run recognition
         img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
@@ -367,4 +367,4 @@ class ArcFaceRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score * blur_factor, 2)
+        return label, round(score - blur_reduction, 2)

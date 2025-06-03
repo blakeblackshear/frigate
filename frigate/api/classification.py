@@ -154,7 +154,25 @@ def train_face(request: Request, name: str, body: dict = None):
         x2 = x1 + int(face_box[2] * detect_config.width) - 4
         y2 = y1 + int(face_box[3] * detect_config.height) - 4
         face = snapshot[y1:y2, x1:x2]
-        cv2.imwrite(os.path.join(new_file_folder, new_name), face)
+        success = True
+
+        if face.size > 0:
+            try:
+                cv2.imwrite(os.path.join(new_file_folder, new_name), face)
+                success = True
+            except Exception:
+                pass
+
+        if not success:
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Invalid face box or no face exists",
+                    }
+                ),
+                status_code=404,
+            )
 
     context: EmbeddingsContext = request.app.embeddings
     context.clear_face_classifier()
