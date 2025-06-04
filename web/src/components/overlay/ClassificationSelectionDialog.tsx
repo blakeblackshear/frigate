@@ -32,7 +32,7 @@ import { toast } from "sonner";
 
 type ClassificationSelectionDialogProps = {
   className?: string;
-  categories: string[];
+  classes: string[];
   modelName: string;
   image: string;
   onRefresh: () => void;
@@ -40,7 +40,7 @@ type ClassificationSelectionDialogProps = {
 };
 export default function ClassificationSelectionDialog({
   className,
-  categories,
+  classes,
   modelName,
   image,
   onRefresh,
@@ -135,7 +135,7 @@ export default function ClassificationSelectionDialog({
                 <LuPlus />
                 {t("createCategory.new")}
               </SelectorItem>
-              {categories.sort().map((category) => (
+              {classes.sort().map((category) => (
                 <SelectorItem
                   key={category}
                   className="flex cursor-pointer gap-2 smart-capitalize"

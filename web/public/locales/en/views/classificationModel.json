@@ -1,25 +1,25 @@
 {
   "button": {
     "deleteClassificationAttempts": "Delete Classification Images",
-    "renameCategory": "Rename Category",
-    "deleteCategory": "Rename Category",
+    "renameCategory": "Rename Class",
+    "deleteCategory": "Delete Class",
     "deleteImages": "Delete Images"
   },
   "toast": {
     "success": {
-      "deletedCategory": "Deleted Category",
+      "deletedCategory": "Deleted Class",
       "deletedImage": "Deleted Images",
       "categorizedImage": "Successfully Categorized Image"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
-      "deleteCategoryFailed": "Failed to delete category: {{errorMessage}}",
+      "deleteCategoryFailed": "Failed to delete class: {{errorMessage}}",
       "categorizeFailed": "Failed to categorize image: {{errorMessage}}"
     }
   },
   "deleteCategory": {
-    "title": "Delete Category",
-    "desc": "Are you sure you want to delete the category {{name}}? This will permanently delete all associated images and require re-training the model."
+    "title": "Delete Class",
+    "desc": "Are you sure you want to delete the class {{name}}? This will permanently delete all associated images and require re-training the model."
   },
   "deleteDatasetImages": {
     "title": "Delete Dataset Images",
@@ -40,9 +40,9 @@
     "title": "Train",
     "aria": "Select Train"
   },
-  "categories": "Categories",
+  "categories": "Classes",
   "createCategory": {
-    "new": "Create New Category"
+    "new": "Create New Class"
   },
   "categorizeImageAs": "Categorize Image As:",
   "categorizeImage": "Categorize Image"

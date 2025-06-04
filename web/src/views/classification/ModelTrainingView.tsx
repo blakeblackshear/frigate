@@ -280,7 +280,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       {pageToggle == "train" ? (
         <TrainGrid
           model={model}
-          categories={Object.keys(dataset || {})}
+          classes={Object.keys(dataset || {})}
           trainImages={trainImages || []}
           selectedImages={selectedImages}
           onRefresh={refreshTrain}
@@ -561,7 +561,7 @@ function DatasetGrid({
 
 type TrainGridProps = {
   model: CustomClassificationModelConfig;
-  categories: string[];
+  classes: string[];
   trainImages: string[];
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
@@ -570,7 +570,7 @@ type TrainGridProps = {
 };
 function TrainGrid({
   model,
-  categories,
+  classes,
   trainImages,
   selectedImages,
   onClickImages,
@@ -628,7 +628,7 @@ function TrainGrid({
               </div>
               <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
                 <ClassificationSelectionDialog
-                  categories={categories}
+                  classes={classes}
                   modelName={model.name}
                   image={data.raw}
                   onRefresh={onRefresh}
