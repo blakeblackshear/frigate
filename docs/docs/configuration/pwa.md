@@ -20,5 +20,5 @@ In order to install Frigate as a PWA, the following requirements must be met:
 Installation varies slightly based on the device that is being used:
 
 - Desktop: Use the install button typically found in right edge of the address bar
-- Android: Use the `Install as App` button in the more options menu
+- Android: Use the `Install as App` button in the more options menu for Chrome, and the `Add app to Home screen` button for Firefox
 - iOS: Use the `Add to Homescreen` button in the share menu
