@@ -40,8 +40,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
   // dataset
 
-  const { data: trainImages } = useSWR(`classification/${model.name}/train`);
-  const { data: dataset } = useSWR(`classification/${model.name}/dataset`);
+  const { data: trainImages } = useSWR<string[]>(
+    `classification/${model.name}/train`,
+  );
+  const { data: dataset } = useSWR<{ [id: string]: string[] }>(
+    `classification/${model.name}/dataset`,
+  );
 
   // actions
 
@@ -54,8 +58,8 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       <div className="flex flex-row justify-between gap-2 align-middle">
         <LibrarySelector
           pageToggle={pageToggle}
-          dataset={dataset}
-          trainImages={trainImages}
+          dataset={dataset || {}}
+          trainImages={trainImages || []}
           setPageToggle={setPageToggle}
           onDelete={() => {}}
           onRename={() => {}}
@@ -65,13 +69,18 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       {pageToggle == "train" ? (
         <TrainGrid
           model={model}
-          trainImages={trainImages}
+          trainImages={trainImages || []}
           selected={false}
           onClickImages={() => {}}
           onDelete={() => {}}
         />
       ) : (
-        <DatasetGrid />
+        <DatasetGrid
+          modelName={model.name}
+          categoryName={pageToggle}
+          images={dataset?.[pageToggle] || []}
+          onDelete={() => {}}
+        />
       )}
     </div>
   );
@@ -259,51 +268,65 @@ function LibrarySelector({
 }
 
 type DatasetGridProps = {
-  name: string;
+  modelName: string;
+  categoryName: string;
   images: string[];
-  onDelete: (name: string, ids: string[]) => void;
+  onDelete: (modelName: string, categoryName: string, ids: string[]) => void;
 };
-function DatasetGrid({ name, images, onDelete }: DatasetGridProps) {
+function DatasetGrid({
+  modelName,
+  categoryName,
+  images,
+  onDelete,
+}: DatasetGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   return (
-    <div
-      className={cn(
-        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-      )}
-    >
-      <div
-        className={cn(
-          "w-full overflow-hidden p-2 *:text-card-foreground",
-          isMobile && "flex justify-center",
-        )}
-      >
-        <img
-          className="h-40 rounded-lg"
-          src={`${baseUrl}clips/faces/${name}/${images}`}
-        />
-      </div>
-      <div className="rounded-b-lg bg-card p-3">
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="smart-capitalize">{name}</div>
+    <div className="grid grid-cols-10 gap-2 overflow-y-auto">
+      {images.map((image) => (
+        <div
+          className={cn(
+            "flex h-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+            "outline-transparent duration-500",
+          )}
+          onClick={() => {
+            //e.stopPropagation();
+            //onClickImages([data.raw], e.ctrlKey || e.metaKey);
+          }}
+        >
+          <div
+            className={cn(
+              "w-full overflow-hidden p-2 *:text-card-foreground",
+              isMobile && "flex justify-center",
+            )}
+          >
+            <img
+              className="rounded-lg"
+              src={`${baseUrl}clips/${modelName}/dataset/${categoryName}/${image}`}
+            />
           </div>
-          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-            <Tooltip>
-              <TooltipTrigger>
-                <LuTrash2
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(name, images);
-                  }}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
-            </Tooltip>
+          <div className="rounded-b-lg bg-card p-3">
+            <div className="flex w-full flex-row items-center justify-between gap-2">
+              <div className="flex w-full flex-row items-start justify-end gap-5 md:gap-4">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <LuTrash2
+                      className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(modelName, categoryName, [image]);
+                      }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("button.deleteClassificationAttempts")}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -339,9 +362,10 @@ function TrainGrid({
   );
 
   return (
-    <div className="grid size-full grid-cols-10 gap-2 overflow-y-auto">
-      {trainData.map((data) => (
+    <div className="grid grid-cols-10 gap-2 overflow-y-auto">
+      {trainData?.map((data) => (
         <div
+          key={data.timestamp}
           className={cn(
             "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
             selected
@@ -361,7 +385,7 @@ function TrainGrid({
           >
             <img
               className="h-48 rounded-lg"
-              src={`${baseUrl}clips/${model.name}/${data.raw}`}
+              src={`${baseUrl}clips/${model.name}/train/${data.raw}`}
             />
           </div>
           <div className="rounded-b-lg bg-card p-3">

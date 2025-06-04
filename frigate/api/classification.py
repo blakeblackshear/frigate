@@ -435,7 +435,7 @@ def transcribe_audio(request: Request, body: AudioTranscriptionBody):
 def get_classification_dataset(name: str):
     dataset_dict: dict[str, list[str]] = {}
 
-    dataset_dir = os.path.join(MODEL_CACHE_DIR, f"{sanitize_filename(name)}/dataset")
+    dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "dataset")
 
     if not os.path.exists(dataset_dir):
         return JSONResponse(status_code=200, content={})
@@ -459,7 +459,7 @@ def get_classification_dataset(name: str):
 
 @router.get("/classification/{name}/train")
 def get_classification_images(name: str):
-    train_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+    train_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "train")
 
     if not os.path.exists(train_dir):
         return JSONResponse(status_code=200, content=[])
@@ -492,9 +492,7 @@ async def train_configured_model(
             status_code=404,
         )
 
-    background_tasks.add_task(
-        train_classification_model, os.path.join(MODEL_CACHE_DIR, name)
-    )
+    background_tasks.add_task(train_classification_model, name)
     return JSONResponse(
         content={"success": True, "message": "Started classification model training."},
         status_code=200,

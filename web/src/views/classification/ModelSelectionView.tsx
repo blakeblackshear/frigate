@@ -38,12 +38,10 @@ export default function ModelSelectionView({
     <div className="flex size-full gap-2 p-2">
       {classificationConfigs.map((config) => (
         <div
+          key={config.name}
           className={cn(
             "flex h-52 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
             isMobile && "w-full",
-            false
-              ? "shadow-selected outline-selected"
-              : "outline-transparent duration-500",
           )}
           onClick={() => onClick(config)}
           onContextMenu={() => {
