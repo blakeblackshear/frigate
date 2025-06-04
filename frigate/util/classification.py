@@ -1,5 +1,6 @@
 """Util for classification models."""
 
+import logging
 import os
 
 import cv2
@@ -8,6 +9,8 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 
 BATCH_SIZE = 16
 EPOCHS = 50
@@ -35,9 +38,10 @@ def generate_representative_dataset_factory(dataset_dir: str):
 
 
 @staticmethod
-def train_classification_model(model_dir: str) -> bool:
+def train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
-    dataset_dir = os.path.join(model_dir, "dataset")
+    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
+    model_dir = os.path.join(MODEL_CACHE_DIR, model_name)
     num_classes = len(
         [
             d
@@ -45,6 +49,8 @@ def train_classification_model(model_dir: str) -> bool:
             if os.path.isdir(os.path.join(dataset_dir, d))
         ]
     )
+
+    tf.get_logger().setLevel(logging.ERROR)
 
     # Start with imagenet base model with 35% of channels in each layer
     base_model = MobileNetV2(
