@@ -9,7 +9,7 @@
     "success": {
       "deletedCategory": "Deleted Class",
       "deletedImage": "Deleted Images",
-      "categorizedImage": "Successfully Categorized Image"
+      "categorizedImage": "Successfully Classified Image"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
@@ -30,7 +30,7 @@
     "desc": "Are you sure you want to delete {{count}} images? This action cannot be undone."
   },
   "renameCategory": {
-    "title": "Rename Category",
+    "title": "Rename Class",
     "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take affect."
   },
   "description": {
@@ -44,6 +44,6 @@
   "createCategory": {
     "new": "Create New Class"
   },
-  "categorizeImageAs": "Categorize Image As:",
-  "categorizeImage": "Categorize Image"
+  "categorizeImageAs": "Classify Image As:",
+  "categorizeImage": "Classify Image"
 }
