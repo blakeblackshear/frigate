@@ -1,5 +1,33 @@
 {
   "button": {
-    "deleteClassificationAttempts": "Delete Classification Images"
-  }
+    "deleteClassificationAttempts": "Delete Classification Images",
+    "renameCategory": "Rename Category",
+    "deleteCategory": "Rename Category"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Deleted Category",
+      "deletedImage": "Deleted Images"
+    },
+    "error": {
+      "deleteImageFailed": "Failed to delete: {{errorMessage}}",
+      "deleteCategoryFailed": "Failed to delete category: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Delete Category",
+    "desc": "Are you sure you want to delete the category {{name}}? This will permanently delete all associated images and require re-training the model."
+  },
+  "renameCategory": {
+    "title": "Rename Category",
+    "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take affect."
+  },
+  "description": {
+    "invalidName": "    \"invalidName\": \"Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens.\""
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Select Train"
+  },
+  "categories": "Categories"
 }

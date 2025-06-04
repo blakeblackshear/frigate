@@ -497,3 +497,75 @@ async def train_configured_model(
         content={"success": True, "message": "Started classification model training."},
         status_code=200,
     )
+
+
+@router.post(
+    "/classification/{name}/dataset/{category}/delete",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def delete_classification_dataset_images(
+    request: Request, name: str, category: str, body: dict = None
+):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    json: dict[str, Any] = body or {}
+    list_of_ids = json.get("ids", "")
+    folder = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "dataset", sanitize_filename(category)
+    )
+
+    for id in list_of_ids:
+        file_path = os.path.join(folder, id)
+
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+
+    return JSONResponse(
+        content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )
+
+
+@router.post(
+    "/classification/{name}/train/delete",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def delete_classification_train_images(request: Request, name: str, body: dict = None):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    json: dict[str, Any] = body or {}
+    list_of_ids = json.get("ids", "")
+    folder = os.path.join(CLIPS_DIR, sanitize_filename(name), "train")
+
+    for id in list_of_ids:
+        file_path = os.path.join(folder, id)
+
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+
+    return JSONResponse(
+        content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )

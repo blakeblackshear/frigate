@@ -41,6 +41,7 @@ export default function ModelSelectionView({
           key={config.name}
           className={cn(
             "flex h-52 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+            "outline-transparent duration-500",
             isMobile && "w-full",
           )}
           onClick={() => onClick(config)}

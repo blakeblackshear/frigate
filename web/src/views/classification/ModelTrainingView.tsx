@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
   TooltipContent,
@@ -29,23 +30,25 @@ import { useCallback, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
 };
 export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
   const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
   // dataset
 
-  const { data: trainImages } = useSWR<string[]>(
+  const { data: trainImages, mutate: refreshTrain } = useSWR<string[]>(
     `classification/${model.name}/train`,
   );
-  const { data: dataset } = useSWR<{ [id: string]: string[] }>(
-    `classification/${model.name}/dataset`,
-  );
+  const { data: dataset, mutate: refreshDataset } = useSWR<{
+    [id: string]: string[];
+  }>(`classification/${model.name}/dataset`);
 
   // actions
 
@@ -53,15 +56,75 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     axios.post(`classification/${model.name}/train`);
   }, [model]);
 
+  const onDelete = useCallback(
+    (ids: string[], isName: boolean = false) => {
+      const api =
+        pageToggle == "train"
+          ? `/classification/${model.name}/train/delete`
+          : `/classification/${model.name}/dataset/${pageToggle}/delete`;
+
+      axios
+        .post(api, { ids })
+        .then((resp) => {
+          //setSelectedFaces([]);
+
+          if (resp.status == 200) {
+            if (isName) {
+              toast.success(
+                t("toast.success.deletedCategory", { count: ids.length }),
+                {
+                  position: "top-center",
+                },
+              );
+            } else {
+              toast.success(
+                t("toast.success.deletedImage", { count: ids.length }),
+                {
+                  position: "top-center",
+                },
+              );
+            }
+
+            if (pageToggle == "train") {
+              refreshTrain();
+            } else {
+              refreshDataset();
+            }
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          if (isName) {
+            toast.error(
+              t("toast.error.deleteCategoryFailed", { errorMessage }),
+              {
+                position: "top-center",
+              },
+            );
+          } else {
+            toast.error(t("toast.error.deleteImageFailed", { errorMessage }), {
+              position: "top-center",
+            });
+          }
+        });
+    },
+    [pageToggle, model, refreshTrain, refreshDataset, t],
+  );
+
   return (
-    <div className="flex size-full flex-col gap-2 overflow-hidden p-2">
-      <div className="flex flex-row justify-between gap-2 align-middle">
+    <div className="flex size-full flex-col overflow-hidden p-2">
+      <Toaster />
+
+      <div className="mb-2 flex flex-row justify-between gap-2 align-middle">
         <LibrarySelector
           pageToggle={pageToggle}
           dataset={dataset || {}}
           trainImages={trainImages || []}
           setPageToggle={setPageToggle}
-          onDelete={() => {}}
+          onDelete={onDelete}
           onRename={() => {}}
         />
         <Button onClick={trainModel}>Train Model</Button>
@@ -72,14 +135,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           trainImages={trainImages || []}
           selected={false}
           onClickImages={() => {}}
-          onDelete={() => {}}
+          onDelete={onDelete}
         />
       ) : (
         <DatasetGrid
           modelName={model.name}
           categoryName={pageToggle}
           images={dataset?.[pageToggle] || []}
-          onDelete={() => {}}
+          onDelete={onDelete}
         />
       )}
     </div>
@@ -91,7 +154,7 @@ type LibrarySelectorProps = {
   dataset: { [id: string]: string[] };
   trainImages: string[];
   setPageToggle: (toggle: string) => void;
-  onDelete: (name: string, ids: string[], isName: boolean) => void;
+  onDelete: (ids: string[], isName: boolean) => void;
   onRename: (old_name: string, new_name: string) => void;
 };
 function LibrarySelector({
@@ -102,7 +165,7 @@ function LibrarySelector({
   onDelete,
   onRename,
 }: LibrarySelectorProps) {
-  const { t } = useTranslation(["views/faceLibrary"]);
+  const { t } = useTranslation(["views/classificationModel"]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [renameFace, setRenameFace] = useState<string | null>(null);
 
@@ -111,7 +174,7 @@ function LibrarySelector({
       // Get all image IDs for this face
       const imageIds = dataset?.[name] || [];
 
-      onDelete(name, imageIds, true);
+      onDelete(imageIds, true);
       setPageToggle("train");
     },
     [dataset, onDelete, setPageToggle],
@@ -132,9 +195,9 @@ function LibrarySelector({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("deleteFaceLibrary.title")}</DialogTitle>
+            <DialogTitle>{t("deleteCategory.title")}</DialogTitle>
             <DialogDescription>
-              {t("deleteFaceLibrary.desc", { name: confirmDelete })}
+              {t("deleteCategory.desc", { name: confirmDelete })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
@@ -159,8 +222,8 @@ function LibrarySelector({
       <TextEntryDialog
         open={!!renameFace}
         setOpen={handleSetOpen}
-        title={t("renameFace.title")}
-        description={t("renameFace.desc", { name: renameFace })}
+        title={t("renameCategory.title")}
+        description={t("renameCategory.desc", { name: renameFace })}
         onSave={(newName) => {
           onRename(renameFace!, newName);
           setRenameFace(null);
@@ -203,7 +266,7 @@ function LibrarySelector({
             <>
               <DropdownMenuSeparator />
               <div className="mb-1 ml-1.5 text-xs text-secondary-foreground">
-                {t("collections")}
+                {t("categories")}
               </div>
             </>
           )}
@@ -237,7 +300,9 @@ function LibrarySelector({
                     </Button>
                   </TooltipTrigger>
                   <TooltipPortal>
-                    <TooltipContent>{t("button.renameFace")}</TooltipContent>
+                    <TooltipContent>
+                      {t("button.renameCategory")}
+                    </TooltipContent>
                   </TooltipPortal>
                 </Tooltip>
                 <Tooltip>
@@ -255,7 +320,9 @@ function LibrarySelector({
                     </Button>
                   </TooltipTrigger>
                   <TooltipPortal>
-                    <TooltipContent>{t("button.deleteFace")}</TooltipContent>
+                    <TooltipContent>
+                      {t("button.deleteCategory")}
+                    </TooltipContent>
                   </TooltipPortal>
                 </Tooltip>
               </div>
@@ -271,7 +338,7 @@ type DatasetGridProps = {
   modelName: string;
   categoryName: string;
   images: string[];
-  onDelete: (modelName: string, categoryName: string, ids: string[]) => void;
+  onDelete: (ids: string[]) => void;
 };
 function DatasetGrid({
   modelName,
@@ -314,7 +381,7 @@ function DatasetGrid({
                       className="size-5 cursor-pointer text-primary-variant hover:text-primary"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDelete(modelName, categoryName, [image]);
+                        onDelete([image]);
                       }}
                     />
                   </TooltipTrigger>
@@ -336,7 +403,7 @@ type TrainGridProps = {
   trainImages: string[];
   selected: boolean;
   onClickImages: (images: string[], ctrl: boolean) => void;
-  onDelete: (name: string, ids: string[]) => void;
+  onDelete: (ids: string[]) => void;
 };
 function TrainGrid({
   model,
@@ -401,7 +468,7 @@ function TrainGrid({
                       className="size-5 cursor-pointer text-primary-variant hover:text-primary"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDelete("train", [data.raw]);
+                        onDelete([data.raw]);
                       }}
                     />
                   </TooltipTrigger>
