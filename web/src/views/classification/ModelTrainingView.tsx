@@ -505,11 +505,11 @@ function DatasetGrid({
   const { t } = useTranslation(["views/classificationModel"]);
 
   return (
-    <div className="grid grid-cols-10 gap-2 overflow-y-auto p-2">
+    <div className="flex flex-wrap gap-2 overflow-y-auto p-2">
       {images.map((image) => (
         <div
           className={cn(
-            "flex h-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+            "flex w-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
             selectedImages.includes(image)
               ? "shadow-selected outline-selected"
               : "outline-transparent duration-500",
@@ -581,25 +581,27 @@ function TrainGrid({
 
   const trainData = useMemo(
     () =>
-      trainImages.map((raw) => {
-        const parts = raw.replaceAll(".webp", "").split("-");
-        return {
-          raw,
-          timestamp: parts[0],
-          label: parts[1],
-          score: Number.parseFloat(parts[2]) * 100,
-        };
-      }),
+      trainImages
+        .map((raw) => {
+          const parts = raw.replaceAll(".webp", "").split("-");
+          return {
+            raw,
+            timestamp: parts[0],
+            label: parts[1],
+            score: Number.parseFloat(parts[2]) * 100,
+          };
+        })
+        .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
     [trainImages],
   );
 
   return (
-    <div className="grid grid-cols-10 gap-2 overflow-y-auto px-2">
+    <div className="flex flex-wrap gap-2 overflow-y-auto p-2">
       {trainData?.map((data) => (
         <div
           key={data.timestamp}
           className={cn(
-            "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
+            "flex w-56 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
             selectedImages.includes(data.raw)
               ? "shadow-selected outline-selected"
               : "outline-transparent duration-500",
@@ -616,7 +618,7 @@ function TrainGrid({
             )}
           >
             <img
-              className="h-48 rounded-lg"
+              className="w-56 rounded-lg"
               src={`${baseUrl}clips/${model.name}/train/${data.raw}`}
             />
           </div>
