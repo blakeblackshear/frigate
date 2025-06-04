@@ -42,7 +42,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.model_config = model_config
         self.requestor = requestor
         self.model_dir = os.path.join(MODEL_CACHE_DIR, self.model_config.name)
-        self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name)
+        self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name, "train")
         self.interpreter: Interpreter = None
         self.tensor_input_details: dict[str, Any] = None
         self.tensor_output_details: dict[str, Any] = None
