@@ -106,6 +106,9 @@ export function CameraLineGraph({
         labels: {
           rotate: 0,
           formatter: formatTime,
+          style: {
+            colors: "#6B6B6B",
+          },
         },
         axisBorder: {
           show: false,
@@ -118,6 +121,9 @@ export function CameraLineGraph({
         show: true,
         labels: {
           formatter: (val: number) => Math.ceil(val).toString(),
+          style: {
+            colors: "#6B6B6B",
+          },
         },
         min: 0,
       },
@@ -138,7 +144,7 @@ export function CameraLineGraph({
                 className="size-2"
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-secondary-foreground">
                 {t("cameras.label." + label)}
               </div>
               <div className="text-xs text-primary">
@@ -243,6 +249,9 @@ export function EventsPerSecondsLineGraph({
         labels: {
           rotate: 0,
           formatter: formatTime,
+          style: {
+            colors: "#6B6B6B",
+          },
         },
         axisBorder: {
           show: false,
@@ -255,6 +264,9 @@ export function EventsPerSecondsLineGraph({
         show: true,
         labels: {
           formatter: (val: number) => Math.ceil(val).toString(),
+          style: {
+            colors: "#6B6B6B",
+          },
         },
         min: 0,
       },
@@ -268,7 +280,7 @@ export function EventsPerSecondsLineGraph({
   return (
     <div className="flex w-full flex-col">
       <div className="flex items-center gap-1">
-        <div className="text-xs text-muted-foreground">{name}</div>
+        <div className="text-xs text-secondary-foreground">{name}</div>
         <div className="text-xs text-primary">
           {lastValue}
           {unit}
