@@ -21,7 +21,7 @@ from frigate.api.defs.request.classification_body import (
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera import DetectConfig
-from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
+from frigate.const import CLIPS_DIR, FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
 from frigate.util.classification import train_classification_model
@@ -530,6 +530,59 @@ def delete_classification_dataset_images(
 
         if os.path.isfile(file_path):
             os.unlink(file_path)
+
+    return JSONResponse(
+        content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )
+
+
+@router.post(
+    "/classification/{name}/dataset/categorize",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def categorize_classification_image(
+    request: Request, name: str, body: dict = None
+):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    json: dict[str, Any] = body or {}
+    category = sanitize_filename(json.get("category", ""))
+    training_file_name = sanitize_filename(json.get("training_file", ""))
+    training_file = os.path.join(CLIPS_DIR, name, "train", training_file_name)
+
+    if training_file_name and not os.path.isfile(training_file):
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Invalid filename or no file exists: {training_file_name}",
+                }
+            ),
+            status_code=404,
+        )
+
+    new_name = f"{category}-{datetime.datetime.now().timestamp()}.png"
+    new_file_folder = os.path.join(CLIPS_DIR, name, "dataset", category)
+
+    if not os.path.exists(new_file_folder):
+        os.mkdir(new_file_folder)
+
+    # use opencv because webp images can not be used to train
+    img = cv2.imread(training_file)
+    cv2.imwrite(os.path.join(new_file_folder, new_name), img)
+    os.unlink(training_file)
 
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),

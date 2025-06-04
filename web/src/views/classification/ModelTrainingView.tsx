@@ -43,6 +43,8 @@ import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
+import ClassificationSelectionDialog from "@/components/overlay/ClassificationSelectionDialog";
+import { TbCategoryPlus } from "react-icons/tb";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -242,7 +244,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex flex-row justify-between gap-2 px-2 pt-2 align-middle">
+      <div className="flex flex-row justify-between gap-2 p-2 align-middle">
         <LibrarySelector
           pageToggle={pageToggle}
           dataset={dataset || {}}
@@ -278,8 +280,10 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       {pageToggle == "train" ? (
         <TrainGrid
           model={model}
+          categories={Object.keys(dataset || {})}
           trainImages={trainImages || []}
           selectedImages={selectedImages}
+          onRefresh={refreshTrain}
           onClickImages={onClickImages}
           onDelete={onDelete}
         />
@@ -557,16 +561,20 @@ function DatasetGrid({
 
 type TrainGridProps = {
   model: CustomClassificationModelConfig;
+  categories: string[];
   trainImages: string[];
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
+  onRefresh: () => void;
   onDelete: (ids: string[]) => void;
 };
 function TrainGrid({
   model,
+  categories,
   trainImages,
   selectedImages,
   onClickImages,
+  onRefresh,
   onDelete,
 }: TrainGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
@@ -586,7 +594,7 @@ function TrainGrid({
   );
 
   return (
-    <div className="grid grid-cols-10 gap-2 overflow-y-auto p-2">
+    <div className="grid grid-cols-10 gap-2 overflow-y-auto px-2">
       {trainData?.map((data) => (
         <div
           key={data.timestamp}
@@ -619,6 +627,14 @@ function TrainGrid({
                 <div>{data.score}%</div>
               </div>
               <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+                <ClassificationSelectionDialog
+                  categories={categories}
+                  modelName={model.name}
+                  image={data.raw}
+                  onRefresh={onRefresh}
+                >
+                  <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                </ClassificationSelectionDialog>
                 <Tooltip>
                   <TooltipTrigger>
                     <LuTrash2

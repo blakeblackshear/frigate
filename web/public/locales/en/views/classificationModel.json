@@ -8,11 +8,13 @@
   "toast": {
     "success": {
       "deletedCategory": "Deleted Category",
-      "deletedImage": "Deleted Images"
+      "deletedImage": "Deleted Images",
+      "categorizedImage": "Successfully Categorized Image"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
-      "deleteCategoryFailed": "Failed to delete category: {{errorMessage}}"
+      "deleteCategoryFailed": "Failed to delete category: {{errorMessage}}",
+      "categorizeFailed": "Failed to categorize image: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -38,5 +40,10 @@
     "title": "Train",
     "aria": "Select Train"
   },
-  "categories": "Categories"
+  "categories": "Categories",
+  "createCategory": {
+    "new": "Create New Category"
+  },
+  "categorizeImageAs": "Categorize Image As:",
+  "categorizeImage": "Categorize Image"
 }
