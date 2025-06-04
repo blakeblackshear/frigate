@@ -1,5 +1,6 @@
 """Util for classification models."""
 
+import logging
 import os
 
 import cv2
@@ -48,6 +49,8 @@ def train_classification_model(model_name: str) -> bool:
             if os.path.isdir(os.path.join(dataset_dir, d))
         ]
     )
+
+    tf.get_logger().setLevel(logging.ERROR)
 
     # Start with imagenet base model with 35% of channels in each layer
     base_model = MobileNetV2(
