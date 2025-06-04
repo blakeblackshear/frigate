@@ -1,6 +1,16 @@
 import { baseUrl } from "@/api/baseUrl";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -21,14 +31,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { CustomClassificationModelConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
-import { useTranslation } from "react-i18next";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { isDesktop, isMobile } from "react-device-detect";
+import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -50,11 +61,50 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     [id: string]: string[];
   }>(`classification/${model.name}/dataset`);
 
+  // image multiselect
+
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+
+  const onClickImages = useCallback(
+    (images: string[], ctrl: boolean) => {
+      if (selectedImages.length == 0 && !ctrl) {
+        return;
+      }
+
+      let newSelectedImages = [...selectedImages];
+
+      images.forEach((imageId) => {
+        const index = newSelectedImages.indexOf(imageId);
+
+        if (index != -1) {
+          if (selectedImages.length == 1) {
+            newSelectedImages = [];
+          } else {
+            const copy = [
+              ...newSelectedImages.slice(0, index),
+              ...newSelectedImages.slice(index + 1),
+            ];
+            newSelectedImages = copy;
+          }
+        } else {
+          newSelectedImages.push(imageId);
+        }
+      });
+
+      setSelectedImages(newSelectedImages);
+    },
+    [selectedImages, setSelectedImages],
+  );
+
   // actions
 
   const trainModel = useCallback(() => {
     axios.post(`classification/${model.name}/train`);
   }, [model]);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string[] | null>(
+    null,
+  );
 
   const onDelete = useCallback(
     (ids: string[], isName: boolean = false) => {
@@ -66,7 +116,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       axios
         .post(api, { ids })
         .then((resp) => {
-          //setSelectedFaces([]);
+          setSelectedImages([]);
 
           if (resp.status == 200) {
             if (isName) {
@@ -114,11 +164,85 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     [pageToggle, model, refreshTrain, refreshDataset, t],
   );
 
+  // keyboard
+
+  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "a":
+        if (modifiers.ctrl) {
+          if (selectedImages.length) {
+            setSelectedImages([]);
+          } else {
+            setSelectedImages([
+              ...(pageToggle === "train"
+                ? trainImages || []
+                : dataset?.[pageToggle] || []),
+            ]);
+          }
+        }
+        break;
+      case "Escape":
+        setSelectedImages([]);
+        break;
+    }
+  });
+
+  useEffect(() => {
+    setSelectedImages([]);
+  }, [pageToggle]);
+
   return (
-    <div className="flex size-full flex-col overflow-hidden p-2">
+    <div className="flex size-full flex-col overflow-hidden">
       <Toaster />
 
-      <div className="mb-2 flex flex-row justify-between gap-2 align-middle">
+      <AlertDialog
+        open={!!deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t(
+                pageToggle == "train"
+                  ? "deleteTrainImages.title"
+                  : "deleteDatasetImages.title",
+              )}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            <Trans
+              ns="views/classificationModel"
+              values={{ count: deleteDialogOpen?.length, dataset: pageToggle }}
+            >
+              {pageToggle == "train"
+                ? "deleteTrainImages.desc"
+                : "deleteDatasetImages.desc"}
+            </Trans>
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={() => {
+                if (deleteDialogOpen) {
+                  onDelete(deleteDialogOpen);
+                  setDeleteDialogOpen(null);
+                }
+              }}
+            >
+              {t("button.delete", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="flex flex-row justify-between gap-2 px-2 pt-2 align-middle">
         <LibrarySelector
           pageToggle={pageToggle}
           dataset={dataset || {}}
@@ -127,14 +251,36 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           onDelete={onDelete}
           onRename={() => {}}
         />
-        <Button onClick={trainModel}>Train Model</Button>
+        {selectedImages?.length > 0 ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="mx-1 flex w-48 items-center justify-center text-sm text-muted-foreground">
+              <div className="p-1">{`${selectedImages.length} selected`}</div>
+              <div className="p-1">{"|"}</div>
+              <div
+                className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                onClick={() => setSelectedImages([])}
+              >
+                {t("button.unselect", { ns: "common" })}
+              </div>
+            </div>
+            <Button
+              className="flex gap-2"
+              onClick={() => setDeleteDialogOpen(selectedImages)}
+            >
+              <LuTrash2 className="size-7 rounded-md p-1 text-secondary-foreground" />
+              {isDesktop && t("button.deleteImages")}
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={trainModel}>Train Model</Button>
+        )}
       </div>
       {pageToggle == "train" ? (
         <TrainGrid
           model={model}
           trainImages={trainImages || []}
-          selected={false}
-          onClickImages={() => {}}
+          selectedImages={selectedImages}
+          onClickImages={onClickImages}
           onDelete={onDelete}
         />
       ) : (
@@ -142,6 +288,8 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           modelName={model.name}
           categoryName={pageToggle}
           images={dataset?.[pageToggle] || []}
+          selectedImages={selectedImages}
+          onClickImages={onClickImages}
           onDelete={onDelete}
         />
       )}
@@ -338,27 +486,36 @@ type DatasetGridProps = {
   modelName: string;
   categoryName: string;
   images: string[];
+  selectedImages: string[];
+  onClickImages: (images: string[], ctrl: boolean) => void;
   onDelete: (ids: string[]) => void;
 };
 function DatasetGrid({
   modelName,
   categoryName,
   images,
+  selectedImages,
+  onClickImages,
   onDelete,
 }: DatasetGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   return (
-    <div className="grid grid-cols-10 gap-2 overflow-y-auto">
+    <div className="grid grid-cols-10 gap-2 overflow-y-auto p-2">
       {images.map((image) => (
         <div
           className={cn(
             "flex h-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-            "outline-transparent duration-500",
+            selectedImages.includes(image)
+              ? "shadow-selected outline-selected"
+              : "outline-transparent duration-500",
           )}
-          onClick={() => {
-            //e.stopPropagation();
-            //onClickImages([data.raw], e.ctrlKey || e.metaKey);
+          onClick={(e) => {
+            e.stopPropagation();
+
+            if (e.ctrlKey || e.metaKey) {
+              onClickImages([image], true);
+            }
           }}
         >
           <div
@@ -401,14 +558,14 @@ function DatasetGrid({
 type TrainGridProps = {
   model: CustomClassificationModelConfig;
   trainImages: string[];
-  selected: boolean;
+  selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onDelete: (ids: string[]) => void;
 };
 function TrainGrid({
   model,
   trainImages,
-  selected,
+  selectedImages,
   onClickImages,
   onDelete,
 }: TrainGridProps) {
@@ -429,13 +586,13 @@ function TrainGrid({
   );
 
   return (
-    <div className="grid grid-cols-10 gap-2 overflow-y-auto">
+    <div className="grid grid-cols-10 gap-2 overflow-y-auto p-2">
       {trainData?.map((data) => (
         <div
           key={data.timestamp}
           className={cn(
             "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-            selected
+            selectedImages.includes(data.raw)
               ? "shadow-selected outline-selected"
               : "outline-transparent duration-500",
           )}
