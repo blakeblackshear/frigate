@@ -541,9 +541,7 @@ def delete_classification_dataset_images(
     "/classification/{name}/dataset/categorize",
     dependencies=[Depends(require_role(["admin"]))],
 )
-def categorize_classification_image(
-    request: Request, name: str, body: dict = None
-):
+def categorize_classification_image(request: Request, name: str, body: dict = None):
     config: FrigateConfig = request.app.frigate_config
 
     if name not in config.classification.custom:
