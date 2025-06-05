@@ -31,6 +31,7 @@ class LoggerConfig(FrigateBaseModel):
             log_levels = {
                 "absl": LogLevel.error,
                 "httpx": LogLevel.error,
+                "tensorflow": LogLevel.error,
                 "werkzeug": LogLevel.error,
                 "ws4py": LogLevel.error,
                 **self.logs,
