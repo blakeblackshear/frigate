@@ -250,7 +250,9 @@ export default function VideoControls({
         >
           <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent
-            portalProps={{ container: controlsContainerRef.current }}
+            portalProps={{
+              container: containerRef?.current ?? controlsContainerRef.current,
+            }}
           >
             <DropdownMenuRadioGroup
               onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
