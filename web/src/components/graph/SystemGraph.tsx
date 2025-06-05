@@ -90,6 +90,9 @@ export function ThresholdBarGraph({
         zoom: {
           enabled: false,
         },
+        animations: {
+          enabled: false,
+        },
       },
       colors: [
         ({ value }: { value: number }) => {
