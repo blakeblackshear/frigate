@@ -3,11 +3,13 @@
 import datetime
 import logging
 import os
+import threading
 from typing import Any
 
 import cv2
 import numpy as np
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
@@ -15,8 +17,10 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
-from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import load_labels
+from frigate.util.classification import train_classification_model
 from frigate.util.object import box_overlaps, calculate_region
 
 from ..types import DataProcessorMetrics
@@ -61,6 +65,17 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.labelmap = load_labels(
             os.path.join(self.model_dir, "labelmap.txt"),
             prefill=0,
+        )
+
+    def __retrain_model(self) -> None:
+        train_classification_model(self.model_config.name)
+        self.__build_detector()
+        self.requestor.send_data(
+            UPDATE_MODEL_STATE,
+            {
+                "model": self.model_config.name,
+                "state": ModelStatusTypesEnum.training,
+            },
         )
 
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
@@ -143,7 +158,24 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
 
     def handle_request(self, topic, request_data):
-        return None
+        if topic == EmbeddingsRequestEnum.train_classification.value:
+            if request_data.get("model_name") == self.model_config.name:
+                self.requestor.send_data(
+                    UPDATE_MODEL_STATE,
+                    {
+                        "model": self.model_config.name,
+                        "state": ModelStatusTypesEnum.training,
+                    },
+                )
+                threading.Thread(target=self.__retrain_model).start()
+                return {
+                    "success": True,
+                    "message": f"Began training {self.model_config.name} model.",
+                }
+            else:
+                return None
+        else:
+            return None
 
     def expire_object(self, object_id, camera):
         pass
@@ -180,6 +212,17 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.labelmap = load_labels(
             os.path.join(self.model_dir, "labelmap.txt"),
             prefill=0,
+        )
+
+    def __retrain_model(self) -> None:
+        train_classification_model(self.model_config.name)
+        self.__build_detector()
+        self.requestor.send_data(
+            UPDATE_MODEL_STATE,
+            {
+                "model": self.model_config.name,
+                "state": ModelStatusTypesEnum.training,
+            },
         )
 
     def process_frame(self, obj_data, frame):
@@ -236,7 +279,24 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.detected_objects[obj_data["id"]] = score
 
     def handle_request(self, topic, request_data):
-        return None
+        if topic == EmbeddingsRequestEnum.train_classification.value:
+            if request_data.get("model_name") == self.model_config.name:
+                self.requestor.send_data(
+                    UPDATE_MODEL_STATE,
+                    {
+                        "model": self.model_config.name,
+                        "state": ModelStatusTypesEnum.training,
+                    },
+                )
+                threading.Thread(target=self.__retrain_model).start()
+                return {
+                    "success": True,
+                    "message": f"Began training {self.model_config.name} model.",
+                }
+            else:
+                return None
+        else:
+            return None
 
     def expire_object(self, object_id, camera):
         if object_id in self.detected_objects:
