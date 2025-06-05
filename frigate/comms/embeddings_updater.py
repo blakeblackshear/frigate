@@ -9,16 +9,22 @@ SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
 
 
 class EmbeddingsRequestEnum(Enum):
+    # audio
+    transcribe_audio = "transcribe_audio"
+    # custom classification
+    train_classification = "train_classification"
+    # face
     clear_face_classifier = "clear_face_classifier"
-    embed_description = "embed_description"
-    embed_thumbnail = "embed_thumbnail"
-    generate_search = "generate_search"
     recognize_face = "recognize_face"
     register_face = "register_face"
     reprocess_face = "reprocess_face"
-    reprocess_plate = "reprocess_plate"
+    # semantic search
+    embed_description = "embed_description"
+    embed_thumbnail = "embed_thumbnail"
+    generate_search = "generate_search"
     reindex = "reindex"
-    transcribe_audio = "transcribe_audio"
+    # LPR
+    reprocess_plate = "reprocess_plate"
 
 
 class EmbeddingsResponder:
