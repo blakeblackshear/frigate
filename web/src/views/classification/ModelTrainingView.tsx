@@ -45,6 +45,9 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import ClassificationSelectionDialog from "@/components/overlay/ClassificationSelectionDialog";
 import { TbCategoryPlus } from "react-icons/tb";
+import { useModelState } from "@/api/ws";
+import { ModelState } from "@/types/ws";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -53,6 +56,33 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { t } = useTranslation(["views/classificationModel"]);
   const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+
+  // model state
+
+  const [wasTraining, setWasTraining] = useState(false);
+  const { payload: lastModelState } = useModelState(model.name, true);
+  const modelState = useMemo<ModelState>(() => {
+    if (!lastModelState || lastModelState == "downloaded") {
+      return "complete";
+    }
+
+    return lastModelState;
+  }, [lastModelState]);
+
+  useEffect(() => {
+    if (!wasTraining) {
+      return;
+    }
+
+    if (modelState == "complete") {
+      toast.success(t("toast.success.trainedModel"), {
+        position: "top-center",
+      });
+      setWasTraining(false);
+    }
+    // only refresh when modelState changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelState]);
 
   // dataset
 
@@ -101,8 +131,27 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   // actions
 
   const trainModel = useCallback(() => {
-    axios.post(`classification/${model.name}/train`);
-  }, [model]);
+    axios
+      .post(`classification/${model.name}/train`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          setWasTraining(true);
+          toast.success(t("toast.success.trainingModel"), {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+
+        toast.error(t("toast.error.trainingFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      });
+  }, [model, t]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string[] | null>(
     null,
@@ -274,7 +323,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             </Button>
           </div>
         ) : (
-          <Button onClick={trainModel}>Train Model</Button>
+          <Button
+            className="flex justify-center gap-2"
+            onClick={trainModel}
+            disabled={modelState != "complete"}
+          >
+            Train Model
+            {modelState == "training" && <ActivityIndicator size={20} />}
+          </Button>
         )}
       </div>
       {pageToggle == "train" ? (

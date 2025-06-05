@@ -73,7 +73,9 @@ export type ModelState =
   | "not_downloaded"
   | "downloading"
   | "downloaded"
-  | "error";
+  | "error"
+  | "training"
+  | "complete";
 
 export type EmbeddingsReindexProgressType = {
   thumbnails: number;
