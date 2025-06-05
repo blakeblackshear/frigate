@@ -74,9 +74,10 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             UPDATE_MODEL_STATE,
             {
                 "model": self.model_config.name,
-                "state": ModelStatusTypesEnum.training,
+                "state": ModelStatusTypesEnum.complete,
             },
         )
+        logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
         camera = frame_data.get("camera")
@@ -221,9 +222,10 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             UPDATE_MODEL_STATE,
             {
                 "model": self.model_config.name,
-                "state": ModelStatusTypesEnum.training,
+                "state": ModelStatusTypesEnum.complete,
             },
         )
+        logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
     def process_frame(self, obj_data, frame):
         if obj_data["label"] not in self.model_config.object_config.objects:

@@ -29,6 +29,7 @@ class LoggerConfig(FrigateBaseModel):
             logging.getLogger().setLevel(self.default.value.upper())
 
             log_levels = {
+                "absl": LogLevel.error,
                 "httpx": LogLevel.error,
                 "werkzeug": LogLevel.error,
                 "ws4py": LogLevel.error,

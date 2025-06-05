@@ -45,6 +45,9 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import ClassificationSelectionDialog from "@/components/overlay/ClassificationSelectionDialog";
 import { TbCategoryPlus } from "react-icons/tb";
+import { useModelState } from "@/api/ws";
+import { ModelState } from "@/types/ws";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -53,6 +56,17 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { t } = useTranslation(["views/classificationModel"]);
   const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+
+  // model state
+
+  const { payload: lastModelState } = useModelState(model.name, true);
+  const modelState = useMemo<ModelState>(() => {
+    if (!lastModelState || lastModelState == "downloaded") {
+      return "complete";
+    }
+
+    return lastModelState;
+  }, [lastModelState]);
 
   // dataset
 
@@ -274,7 +288,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             </Button>
           </div>
         ) : (
-          <Button onClick={trainModel}>Train Model</Button>
+          <Button
+            className="flex justify-center gap-2"
+            onClick={trainModel}
+            disabled={modelState != "complete"}
+          >
+            Train Model
+            {modelState == "training" && <ActivityIndicator size={20} />}
+          </Button>
         )}
       </div>
       {pageToggle == "train" ? (

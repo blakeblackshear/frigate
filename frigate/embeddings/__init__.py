@@ -294,7 +294,7 @@ class EmbeddingsContext:
 
     def start_classification_training(self, model_name: str) -> dict[str, Any]:
         return self.requestor.send_data(
-            EmbeddingsRequestEnum.train_classification, {"model_name": model_name}
+            EmbeddingsRequestEnum.train_classification.value, {"model_name": model_name}
         )
 
     def transcribe_audio(self, event: dict[str, any]) -> dict[str, any]:
