@@ -59,6 +59,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
   // model state
 
+  const [wasTraining, setWasTraining] = useState(false);
   const { payload: lastModelState } = useModelState(model.name, true);
   const modelState = useMemo<ModelState>(() => {
     if (!lastModelState || lastModelState == "downloaded") {
@@ -67,6 +68,21 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
     return lastModelState;
   }, [lastModelState]);
+
+  useEffect(() => {
+    if (!wasTraining) {
+      return;
+    }
+
+    if (modelState == "complete") {
+      toast.success(t("toast.success.trainedModel"), {
+        position: "top-center",
+      });
+      setWasTraining(false);
+    }
+    // only refresh when modelState changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelState]);
 
   // dataset
 
@@ -115,8 +131,27 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   // actions
 
   const trainModel = useCallback(() => {
-    axios.post(`classification/${model.name}/train`);
-  }, [model]);
+    axios
+      .post(`classification/${model.name}/train`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          setWasTraining(true);
+          toast.success(t("toast.success.trainingModel"), {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+
+        toast.error(t("toast.error.trainingFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      });
+  }, [model, t]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string[] | null>(
     null,

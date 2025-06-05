@@ -9,12 +9,15 @@
     "success": {
       "deletedCategory": "Deleted Class",
       "deletedImage": "Deleted Images",
-      "categorizedImage": "Successfully Classified Image"
+      "categorizedImage": "Successfully Classified Image",
+      "trainedModel": "Successfully trained model.",
+      "trainingModel": "Successfully started model training."
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
       "deleteCategoryFailed": "Failed to delete class: {{errorMessage}}",
-      "categorizeFailed": "Failed to categorize image: {{errorMessage}}"
+      "categorizeFailed": "Failed to categorize image: {{errorMessage}}",
+      "trainingFailed": "Failed to start model training: {{errorMessage}}"
     }
   },
   "deleteCategory": {
