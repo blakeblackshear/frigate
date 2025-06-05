@@ -1,6 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { MotionData } from "@/types/review";
 
+export type MotionSegmentValue = {
+  totalMotion: number;
+  isCalibrating: boolean;
+};
+
 export const useMotionSegmentUtils = (
   segmentDuration: number,
   motion_events: MotionData[],
@@ -39,7 +44,7 @@ export const useMotionSegmentUtils = (
   );
 
   const getMotionSegmentValue = useCallback(
-    (time: number): number => {
+    (time: number): MotionSegmentValue => {
       const segmentStart = getSegmentStart(time);
       const segmentEnd = getSegmentEnd(time);
       const matchingEvents = motion_events.filter((event) => {
@@ -52,8 +57,18 @@ export const useMotionSegmentUtils = (
         (acc, curr) => acc + (curr.motion ?? 0),
         0,
       );
+      // A segment is considered calibration only when there is no "non-calibrating" motion.
+      const isCalibrating =
+        matchingEvents.some((curr) => curr.is_calibrating) &&
+        matchingEvents.every(
+          (curr) =>
+            !curr.motion ||
+            (curr.motion > 0 &&
+              curr.is_calibrating != undefined &&
+              curr.is_calibrating),
+        );
 
-      return totalMotion;
+      return { totalMotion: totalMotion, isCalibrating: isCalibrating };
     },
     [motion_events, getSegmentStart, getSegmentEnd],
   );

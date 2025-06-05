@@ -44,11 +44,13 @@ class SegmentInfo:
     def __init__(
         self,
         motion_count: int,
+        is_calibrating: bool,
         active_object_count: int,
         region_count: int,
         average_dBFS: int,
     ) -> None:
         self.motion_count = motion_count
+        self.is_calibrating = is_calibrating
         self.active_object_count = active_object_count
         self.region_count = region_count
         self.average_dBFS = average_dBFS
@@ -367,6 +369,7 @@ class RecordingMaintainer(threading.Thread):
         active_count = 0
         region_count = 0
         motion_count = 0
+        is_calibrating = False
         for frame in self.object_recordings_info[camera]:
             # frame is after end time of segment
             if frame[0] > end_time.timestamp():
@@ -384,7 +387,14 @@ class RecordingMaintainer(threading.Thread):
                 ]
             )
             motion_count += len(frame[2])
-            region_count += len(frame[3])
+            is_calibrating = is_calibrating or frame[3]
+            region_count += len(frame[4])
+
+        # if there is any motion frame without calibrating, consider the section as non-calibrating.
+        is_calibrating = is_calibrating and not any(
+            len(frame[2]) > 0 and not frame[3]
+            for frame in self.object_recordings_info[camera]
+        )
 
         audio_values = []
         for frame in self.audio_recordings_info[camera]:
@@ -405,7 +415,11 @@ class RecordingMaintainer(threading.Thread):
         average_dBFS = 0 if not audio_values else np.average(audio_values)
 
         return SegmentInfo(
-            motion_count, active_count, region_count, round(average_dBFS)
+            motion_count,
+            is_calibrating,
+            active_count,
+            region_count,
+            round(average_dBFS),
         )
 
     async def move_segment(
@@ -491,6 +505,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.end_time.name: end_time.timestamp(),
                     Recordings.duration.name: duration,
                     Recordings.motion.name: segment_info.motion_count,
+                    Recordings.is_calibrating.name: segment_info.is_calibrating,
                     # TODO: update this to store list of active objects at some point
                     Recordings.objects.name: segment_info.active_object_count,
                     Recordings.regions.name: segment_info.region_count,
@@ -549,6 +564,7 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
+                        is_calibrating,
                     ) = data
 
                     if self.config.cameras[camera].record.enabled:
@@ -557,6 +573,7 @@ class RecordingMaintainer(threading.Thread):
                                 frame_time,
                                 current_tracked_objects,
                                 motion_boxes,
+                                is_calibrating,
                                 regions,
                             )
                         )

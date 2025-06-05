@@ -961,6 +961,7 @@ def process_frames(
                     detections,
                     motion_boxes,
                     regions,
+                    motion_detector.is_calibrating(),
                 )
             )
             camera_metrics.detection_fps.value = object_detector.fps.eps()

@@ -33,7 +33,7 @@ class ImprovedMotionDetector(MotionDetector):
             config.frame_height,
             config.frame_height * frame_shape[1] // frame_shape[0],
         )
-        self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
+        self.avg_frame = None
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
@@ -121,19 +121,22 @@ class ImprovedMotionDetector(MotionDetector):
         if self.save_images:
             contrasted_saved = resized_frame.copy()
 
+        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
+
         # mask frame
-        # this has to come after contrast improvement
+        # this has to come after contrast improvement and masking to avoid the mask bleeding into non-masked area.
         # Setting masked pixels to zero, to match the average frame at startup
         resized_frame[self.mask] = [0]
-
-        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
 
         if self.save_images:
             blurred_saved = resized_frame.copy()
 
-        if self.save_images or self.calibrating:
+        if self.save_images:
             self.frame_counter += 1
         # compare to average
+        if self.avg_frame is None:
+            # initialize the average frame to the first frame read.
+            self.avg_frame = resized_frame.astype(np.float32)
         frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
 
         # compute the threshold image for the current frame
@@ -191,10 +194,11 @@ class ImprovedMotionDetector(MotionDetector):
 
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
         if pct_motion < 0.05 and len(motion_boxes) <= 4:
+            motion_boxes = []  # ignore small movements
             self.calibrating = False
 
-        # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
-        if self.calibrating or pct_motion > self.config.lightning_threshold:
+        # if the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
+        if not self.calibrating and pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
         if self.save_images:
@@ -211,6 +215,7 @@ class ImprovedMotionDetector(MotionDetector):
                 cv2.cvtColor(resized_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(contrasted_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(blurred_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(cv2.convertScaleAbs(self.avg_frame), cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(frameDelta, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR),
                 thresh_dilated,

@@ -648,6 +648,7 @@ class TrackedObjectProcessor(threading.Thread):
                     current_tracked_objects,
                     motion_boxes,
                     regions,
+                    is_calibrating,
                 ) = self.tracked_objects_queue.get(True, 1)
             except queue.Empty:
                 continue
@@ -677,6 +678,7 @@ class TrackedObjectProcessor(threading.Thread):
                     tracked_objects,
                     motion_boxes,
                     regions,
+                    is_calibrating,
                 ),
                 DetectionTypeEnum.video.value,
             )
