@@ -7,7 +7,7 @@ import shutil
 from typing import Any
 
 import cv2
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
@@ -24,7 +24,6 @@ from frigate.config.camera import DetectConfig
 from frigate.const import CLIPS_DIR, FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
-from frigate.util.classification import train_classification_model
 from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
@@ -494,9 +493,7 @@ def get_classification_images(name: str):
 
 
 @router.post("/classification/{name}/train")
-async def train_configured_model(
-    request: Request, name: str, background_tasks: BackgroundTasks
-):
+async def train_configured_model(request: Request, name: str):
     config: FrigateConfig = request.app.frigate_config
 
     if name not in config.classification.custom:
@@ -510,7 +507,8 @@ async def train_configured_model(
             status_code=404,
         )
 
-    background_tasks.add_task(train_classification_model, name)
+    context: EmbeddingsContext = request.app.embeddings
+    context.start_classification_training(name)
     return JSONResponse(
         content={"success": True, "message": "Started classification model training."},
         status_code=200,

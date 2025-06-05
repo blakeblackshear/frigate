@@ -301,6 +301,11 @@ class EmbeddingsContext:
     def reindex_embeddings(self) -> dict[str, Any]:
         return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})
 
+    def start_classification_training(self, model_name: str) -> dict[str, Any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.train_classification.value, {"model_name": model_name}
+        )
+
     def transcribe_audio(self, event: dict[str, any]) -> dict[str, any]:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.transcribe_audio.value, {"event": event}
