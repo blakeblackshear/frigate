@@ -4,7 +4,7 @@ import errno
 import json
 import logging
 import threading
-from typing import Callable
+from typing import Any, Callable
 from wsgiref.simple_server import make_server
 
 from ws4py.server.wsgirefserver import (
@@ -21,8 +21,8 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
-class WebSocket(WebSocket_):
-    def unhandled_error(self, error):
+class WebSocket(WebSocket_):  # type: ignore[misc]
+    def unhandled_error(self, error: Any) -> None:
         """
         Handles the unfriendly socket closures on the server side
         without showing a confusing error message
@@ -33,12 +33,12 @@ class WebSocket(WebSocket_):
             logging.getLogger("ws4py").exception("Failed to receive data")
 
 
-class WebSocketClient(Communicator):  # type: ignore[misc]
+class WebSocketClient(Communicator):
     """Frigate wrapper for ws client."""
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.websocket_server = None
+        self.websocket_server: WSGIServer | None = None
 
     def subscribe(self, receiver: Callable) -> None:
         self._dispatcher = receiver
@@ -47,10 +47,10 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
     def start(self) -> None:
         """Start the websocket client."""
 
-        class _WebSocketHandler(WebSocket):  # type: ignore[misc]
+        class _WebSocketHandler(WebSocket):
             receiver = self._dispatcher
 
-            def received_message(self, message: WebSocket.received_message) -> None:
+            def received_message(self, message: WebSocket.received_message) -> None:  # type: ignore[name-defined]
                 try:
                     json_message = json.loads(message.data.decode("utf-8"))
                     json_message = {
@@ -86,7 +86,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
         )
         self.websocket_thread.start()
 
-    def publish(self, topic: str, payload: str, _: bool) -> None:
+    def publish(self, topic: str, payload: Any, _: bool = False) -> None:
         try:
             ws_message = json.dumps(
                 {
@@ -109,9 +109,11 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
             pass
 
     def stop(self) -> None:
-        self.websocket_server.manager.close_all()
-        self.websocket_server.manager.stop()
-        self.websocket_server.manager.join()
-        self.websocket_server.shutdown()
+        if self.websocket_server is not None:
+            self.websocket_server.manager.close_all()
+            self.websocket_server.manager.stop()
+            self.websocket_server.manager.join()
+            self.websocket_server.shutdown()
+
         self.websocket_thread.join()
         logger.info("Exiting websocket client...")
