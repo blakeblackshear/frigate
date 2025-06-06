@@ -131,7 +131,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.recordings_subscriber = RecordingsDataSubscriber(
             RecordingsDataTypeEnum.recordings_available_through
         )
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
