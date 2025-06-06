@@ -14,7 +14,7 @@ class RecordingsDataTypeEnum(str, Enum):
     recordings_available_through = "recordings_available_through"
 
 
-class RecordingsDataPublisher(Publisher):
+class RecordingsDataPublisher(Publisher[tuple[str, float]]):
     """Publishes latest recording data."""
 
     topic_base = "recordings/"
@@ -22,7 +22,7 @@ class RecordingsDataPublisher(Publisher):
     def __init__(self, topic: RecordingsDataTypeEnum) -> None:
         super().__init__(topic.value)
 
-    def publish(self, payload: Any, sub_topic: str = "") -> None:
+    def publish(self, payload: tuple[str, float], sub_topic: str = "") -> None:
         super().publish(payload, sub_topic)
 
 
