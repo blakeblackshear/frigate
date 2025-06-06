@@ -2,7 +2,7 @@
 
 import json
 import threading
-from typing import Any, Optional
+from typing import Any, Generic, Optional, TypeVar
 
 import zmq
 
@@ -47,7 +47,10 @@ class ZmqProxy:
         self.runner.join()
 
 
-class Publisher:
+T = TypeVar("T")
+
+
+class Publisher(Generic[T]):
     """Publishes messages."""
 
     topic_base: str = ""
@@ -58,7 +61,7 @@ class Publisher:
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect(SOCKET_PUB)
 
-    def publish(self, payload: Any, sub_topic: str = "") -> None:
+    def publish(self, payload: T, sub_topic: str = "") -> None:
         """Publish message."""
         self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
@@ -80,8 +83,8 @@ class Subscriber:
         self.socket.connect(SOCKET_SUB)
 
     def check_for_update(
-        self, timeout: float = FAST_QUEUE_TIMEOUT
-    ) -> Optional[tuple[str, Any]]:
+        self, timeout: float | None = FAST_QUEUE_TIMEOUT
+    ) -> tuple[str, Any] | tuple[None, None] | None:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
@@ -98,5 +101,7 @@ class Subscriber:
         self.socket.close()
         self.context.destroy()
 
-    def _return_object(self, topic: str, payload: Any) -> Any:
+    def _return_object(
+        self, topic: str, payload: Optional[tuple[str, Any]]
+    ) -> tuple[str, Any] | tuple[None, None] | None:
         return payload

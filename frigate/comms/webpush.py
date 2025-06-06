@@ -39,7 +39,7 @@ class PushNotification:
     ttl: int = 0
 
 
-class WebPushClient(Communicator):  # type: ignore[misc]
+class WebPushClient(Communicator):
     """Frigate wrapper for webpush client."""
 
     def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
@@ -50,10 +50,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
         self.suspended_cameras: dict[str, int] = {
-            c.name: 0 for c in self.config.cameras.values()
+            c.name: 0  # type: ignore[misc]
+            for c in self.config.cameras.values()
         }
         self.last_camera_notification_time: dict[str, float] = {
-            c.name: 0 for c in self.config.cameras.values()
+            c.name: 0  # type: ignore[misc]
+            for c in self.config.cameras.values()
         }
         self.last_notification_time: float = 0
         self.notification_queue: queue.Queue[PushNotification] = queue.Queue()

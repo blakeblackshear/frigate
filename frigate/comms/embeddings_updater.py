@@ -1,9 +1,13 @@
 """Facilitates communication between processes."""
 
+import logging
 from enum import Enum
 from typing import Any, Callable
 
 import zmq
+
+logger = logging.getLogger(__name__)
+
 
 SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
 
@@ -41,9 +45,16 @@ class EmbeddingsResponder:
                 break
 
             try:
-                (topic, value) = self.socket.recv_json(flags=zmq.NOBLOCK)
+                raw = self.socket.recv_json(flags=zmq.NOBLOCK)
 
-                response = process(topic, value)
+                if isinstance(raw, list):
+                    (topic, value) = raw
+                    response = process(topic, value)
+                else:
+                    logging.warning(
+                        f"Received unexpected data type in ZMQ recv_json: {type(raw)}"
+                    )
+                    response = None
 
                 if response is not None:
                     self.socket.send_json(response)
@@ -65,7 +76,7 @@ class EmbeddingsRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: Any) -> str:
+    def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
         try:
             self.socket.send_json((topic, data))

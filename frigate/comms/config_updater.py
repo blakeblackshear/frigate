@@ -2,7 +2,7 @@
 
 import multiprocessing as mp
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import zmq
 
@@ -32,7 +32,7 @@ class ConfigPublisher:
 class ConfigSubscriber:
     """Simplifies receiving an updated config."""
 
-    def __init__(self, topic: str, exact=False) -> None:
+    def __init__(self, topic: str, exact: bool = False) -> None:
         self.topic = topic
         self.exact = exact
         self.context = zmq.Context()
@@ -40,7 +40,7 @@ class ConfigSubscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
         self.socket.connect(SOCKET_PUB_SUB)
 
-    def check_for_update(self) -> Optional[tuple[str, Any]]:
+    def check_for_update(self) -> tuple[str, Any] | tuple[None, None]:
         """Returns updated config or None if no update."""
         try:
             topic = self.socket.recv_string(flags=zmq.NOBLOCK)
