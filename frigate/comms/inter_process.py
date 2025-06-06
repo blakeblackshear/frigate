@@ -47,7 +47,7 @@ class InterProcessCommunicator(Communicator):
                         response = self._dispatcher(topic, value)
                     else:
                         logging.warning(
-                            f"Received unexpected data type in ZMQ inter-process: {type(raw)}"
+                            f"Received unexpected data type in ZMQ recv_json: {type(raw)}"
                         )
                         response = None
 
