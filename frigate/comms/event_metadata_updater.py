@@ -28,7 +28,7 @@ class EventMetadataPublisher(Publisher):
     def __init__(self) -> None:
         super().__init__()
 
-    def publish(self, payload: Any, sub_topic: str) -> None:
+    def publish(self, payload: Any, sub_topic: str = "") -> None:
         super().publish(payload, sub_topic)
 
 
@@ -40,7 +40,9 @@ class EventMetadataSubscriber(Subscriber):
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
         super().__init__(topic.value)
 
-    def _return_object(self, topic: str, payload: tuple) -> tuple:
+    def _return_object(
+        self, topic: str, payload: tuple | None
+    ) -> tuple[str, Any] | tuple[None, None]:
         if payload is None:
             return (None, None)
 
