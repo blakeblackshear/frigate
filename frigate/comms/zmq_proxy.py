@@ -83,7 +83,7 @@ class Subscriber:
         self.socket.connect(SOCKET_SUB)
 
     def check_for_update(
-        self, timeout: float = FAST_QUEUE_TIMEOUT
+        self, timeout: float | None = FAST_QUEUE_TIMEOUT
     ) -> tuple[str, Any] | tuple[None, None]:
         """Returns message or None if no update."""
         try:

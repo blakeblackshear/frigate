@@ -146,7 +146,7 @@ class EmbeddingMaintainer(threading.Thread):
             RecordingsDataTypeEnum.recordings_available_through
         )
         self.review_subscriber = ReviewDataSubscriber("")
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 

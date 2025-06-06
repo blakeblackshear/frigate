@@ -169,7 +169,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.review,
             ],
         )
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all.value)
         self.review_publisher = ReviewDataPublisher("")
 
         # manual events
@@ -490,7 +490,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             if not topic:
                 continue
 
-            if topic == DetectionTypeEnum.video:
+            if topic == DetectionTypeEnum.video.value:
                 (
                     camera,
                     frame_name,
@@ -499,14 +499,14 @@ class ReviewSegmentMaintainer(threading.Thread):
                     _,
                     _,
                 ) = data
-            elif topic == DetectionTypeEnum.audio:
+            elif topic == DetectionTypeEnum.audio.value:
                 (
                     camera,
                     frame_time,
                     _,
                     audio_detections,
                 ) = data
-            elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
+            elif topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value:
                 (
                     camera,
                     frame_time,

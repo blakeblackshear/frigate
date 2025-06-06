@@ -183,7 +183,7 @@ class AudioEventMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.audio_transcription,
             ],
         )
-        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
         self.event_metadata_publisher = EventMetadataPublisher()
 
         if self.camera_config.audio_transcription.enabled_in_config:

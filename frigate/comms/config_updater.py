@@ -3,7 +3,7 @@
 import multiprocessing as mp
 from _pickle import UnpicklingError
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import zmq
 
