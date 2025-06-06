@@ -98,5 +98,7 @@ class Subscriber:
         self.socket.close()
         self.context.destroy()
 
-    def _return_object(self, topic: str, payload: Any) -> Any:
+    def _return_object(
+        self, topic: str, payload: Optional[tuple[str, Any]]
+    ) -> Optional[tuple[str, Any]]:
         return payload
