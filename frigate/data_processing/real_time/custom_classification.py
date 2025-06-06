@@ -19,7 +19,7 @@ from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
-from frigate.util.builtin import load_labels
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.classification import train_classification_model
 from frigate.util.object import box_overlaps, calculate_region
 
@@ -51,6 +51,10 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.tensor_input_details: dict[str, Any] = None
         self.tensor_output_details: dict[str, Any] = None
         self.labelmap: dict[int, str] = {}
+        self.classifications_per_second = EventsPerSecond()
+        self.inference_speed = InferenceSpeed(
+            self.metrics.classification_speeds[self.model_config.name]
+        )
         self.last_run = datetime.datetime.now().timestamp()
         self.__build_detector()
 
@@ -66,6 +70,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             os.path.join(self.model_dir, "labelmap.txt"),
             prefill=0,
         )
+        self.classifications_per_second.start()
 
     def __retrain_model(self) -> None:
         train_classification_model(self.model_config.name)
@@ -79,7 +84,14 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         )
         logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
+    def __update_metrics(self, duration: float) -> None:
+        self.classifications_per_second.update()
+        self.inference_speed.update(duration)
+
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
+        self.metrics.classification_cps[
+            self.model_config.name
+        ].value = self.classifications_per_second.eps()
         camera = frame_data.get("camera")
 
         if camera not in self.model_config.state_config.cameras:
@@ -143,6 +155,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         probs = res / res.sum(axis=0)
         best_id = np.argmax(probs)
         score = round(probs[best_id], 2)
+        self.__update_metrics(datetime.datetime.now().timestamp() - now)
 
         write_classification_attempt(
             self.train_dir,
@@ -200,6 +213,10 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.tensor_output_details: dict[str, Any] = None
         self.detected_objects: dict[str, float] = {}
         self.labelmap: dict[int, str] = {}
+        self.classifications_per_second = EventsPerSecond()
+        self.inference_speed = InferenceSpeed(
+            self.metrics.classification_speeds[self.model_config.name]
+        )
         self.__build_detector()
 
     def __build_detector(self) -> None:
@@ -227,7 +244,15 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
         logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
+    def __update_metrics(self, duration: float) -> None:
+        self.classifications_per_second.update()
+        self.inference_speed.update(duration)
+
     def process_frame(self, obj_data, frame):
+        self.metrics.classification_cps[
+            self.model_config.name
+        ].value = self.classifications_per_second.eps()
+
         if obj_data["label"] not in self.model_config.object_config.objects:
             return
 
@@ -261,6 +286,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         best_id = np.argmax(probs)
         score = round(probs[best_id], 2)
         previous_score = self.detected_objects.get(obj_data["id"], 0.0)
+        self.__update_metrics(datetime.datetime.now().timestamp() - now)
 
         write_classification_attempt(
             self.train_dir,
