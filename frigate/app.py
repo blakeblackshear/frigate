@@ -92,11 +92,12 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
         self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics()
+            DataProcessorMetrics(list(config.classification.custom.keys()))
             if (
                 config.semantic_search.enabled
                 or config.lpr.enabled
                 or config.face_recognition.enabled
+                or len(config.classification.custom) > 0
             )
             else None
         )
