@@ -11,7 +11,7 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
-class MqttClient(Communicator):  # type: ignore[misc]
+class MqttClient(Communicator):
     """Frigate wrapper for mqtt client."""
 
     def __init__(self, config: FrigateConfig) -> None:
@@ -150,7 +150,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client: mqtt.Client,
         userdata: Any,
         flags: Any,
-        reason_code: mqtt.ReasonCode,
+        reason_code: mqtt.ReasonCode,  # type: ignore[name-defined]
         properties: Any,
     ) -> None:
         """Mqtt connection callback."""
@@ -182,7 +182,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client: mqtt.Client,
         userdata: Any,
         flags: Any,
-        reason_code: mqtt.ReasonCode,
+        reason_code: mqtt.ReasonCode,  # type: ignore[name-defined]
         properties: Any,
     ) -> None:
         """Mqtt disconnection callback."""
