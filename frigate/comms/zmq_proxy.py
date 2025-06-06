@@ -2,7 +2,7 @@
 
 import json
 import threading
-from typing import Any, Optional
+from typing import Any, Generic, Optional, TypeVar
 
 import zmq
 
@@ -47,7 +47,10 @@ class ZmqProxy:
         self.runner.join()
 
 
-class Publisher:
+T = TypeVar("T")
+
+
+class Publisher(Generic[T]):
     """Publishes messages."""
 
     topic_base: str = ""
@@ -58,7 +61,7 @@ class Publisher:
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect(SOCKET_PUB)
 
-    def publish(self, payload: Any, sub_topic: str = "") -> None:
+    def publish(self, payload: T, sub_topic: str = "") -> None:
         """Publish message."""
         self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
