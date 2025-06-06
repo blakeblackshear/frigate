@@ -80,7 +80,7 @@ class CameraConfig(FrigateBaseModel):
     lpr: CameraLicensePlateRecognitionConfig = Field(
         default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
     )
-    motion: Optional[MotionConfig] = Field(
+    motion: MotionConfig = Field(
         None, title="Motion detection configuration."
     )
     objects: ObjectConfig = Field(
