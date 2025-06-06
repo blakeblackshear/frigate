@@ -31,6 +31,14 @@ unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
+# install mesa-teflon-delegate from bookworm-backports
+# Only available for arm64 at the moment
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backports.list
+    apt-get -qq update
+    apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
+fi
+
 # ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     mkdir -p /usr/lib/ffmpeg/5.0
