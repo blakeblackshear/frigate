@@ -33,7 +33,7 @@ class DetectionSubscriber(Subscriber):
 
     def check_for_update(
         self, timeout: float | None = None
-    ) -> tuple[str, Any] | tuple[None, None]:
+    ) -> tuple[str, Any] | tuple[None, None] | None:
         return super().check_for_update(timeout)
 
     def _return_object(self, topic: str, payload: Any) -> Any:
