@@ -84,7 +84,7 @@ class Subscriber:
 
     def check_for_update(
         self, timeout: float = FAST_QUEUE_TIMEOUT
-    ) -> Optional[tuple[str, Any]]:
+    ) -> tuple[str, Any] | tuple[None, None]:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
@@ -103,5 +103,5 @@ class Subscriber:
 
     def _return_object(
         self, topic: str, payload: Optional[tuple[str, Any]]
-    ) -> Optional[tuple[str, Any]]:
-        return payload
+    ) -> tuple[str, Any] | tuple[None, None]:
+        return payload or (None, None)
