@@ -2,6 +2,7 @@
 
 import logging
 from enum import Enum
+from typing import Any
 
 from .zmq_proxy import Publisher, Subscriber
 
@@ -19,11 +20,10 @@ class RecordingsDataPublisher(Publisher):
     topic_base = "recordings/"
 
     def __init__(self, topic: RecordingsDataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+        super().__init__(topic.value)
 
-    def publish(self, payload: tuple[str, float]) -> None:
-        super().publish(payload)
+    def publish(self, payload: Any, sub_topic: str = "") -> None:
+        super().publish(payload, sub_topic)
 
 
 class RecordingsDataSubscriber(Subscriber):
@@ -32,5 +32,4 @@ class RecordingsDataSubscriber(Subscriber):
     topic_base = "recordings/"
 
     def __init__(self, topic: RecordingsDataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+        super().__init__(topic.value)
