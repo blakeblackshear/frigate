@@ -79,7 +79,7 @@ class RecordingMaintainer(threading.Thread):
             self.config.cameras,
             [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.record],
         )
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all.value)
         self.recordings_publisher = RecordingsDataPublisher(
             RecordingsDataTypeEnum.recordings_available_through
         )
@@ -545,7 +545,7 @@ class RecordingMaintainer(threading.Thread):
                 if not topic:
                     break
 
-                if topic == DetectionTypeEnum.video:
+                if topic == DetectionTypeEnum.video.value:
                     (
                         camera,
                         _,
@@ -564,7 +564,7 @@ class RecordingMaintainer(threading.Thread):
                                 regions,
                             )
                         )
-                elif topic == DetectionTypeEnum.audio:
+                elif topic == DetectionTypeEnum.audio.value:
                     (
                         camera,
                         frame_time,
@@ -580,7 +580,7 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
-                elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
+                elif topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value:
                     continue
 
                 if frame_time < run_start - stale_frame_count_threshold:
