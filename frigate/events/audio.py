@@ -293,7 +293,6 @@ class AudioEventMaintainer(threading.Thread):
             self.requestor.send_data(f"{self.camera_config.name}/audio/{label}", "ON")
 
             self.event_metadata_publisher.publish(
-                EventMetadataTypeEnum.manual_event_create,
                 (
                     now,
                     self.camera_config.name,
@@ -306,6 +305,7 @@ class AudioEventMaintainer(threading.Thread):
                     "audio",
                     {},
                 ),
+                EventMetadataTypeEnum.manual_event_create.value,
             )
             self.detections[label] = {
                 "id": event_id,
@@ -329,8 +329,8 @@ class AudioEventMaintainer(threading.Thread):
                 )
 
                 self.event_metadata_publisher.publish(
-                    EventMetadataTypeEnum.manual_event_end,
                     (detection["id"], detection["last_detection"]),
+                    EventMetadataTypeEnum.manual_event_end.value,
                 )
                 self.detections[detection["label"]] = None
 
@@ -343,8 +343,8 @@ class AudioEventMaintainer(threading.Thread):
                     f"{self.camera_config.name}/audio/{label}", "OFF"
                 )
                 self.event_metadata_publisher.publish(
-                    EventMetadataTypeEnum.manual_event_end,
                     (detection["id"], now),
+                    EventMetadataTypeEnum.manual_event_end.value,
                 )
                 self.detections[label] = None
 

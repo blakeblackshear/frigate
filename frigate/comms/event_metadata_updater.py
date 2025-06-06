@@ -28,8 +28,8 @@ class EventMetadataPublisher(Publisher):
     def __init__(self) -> None:
         super().__init__()
 
-    def publish(self, topic: EventMetadataTypeEnum, payload: Any) -> None:
-        super().publish(payload, topic.value)
+    def publish(self, payload: Any, sub_topic: str) -> None:
+        super().publish(payload, sub_topic)
 
 
 class EventMetadataSubscriber(Subscriber):
