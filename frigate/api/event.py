@@ -1090,7 +1090,7 @@ def set_sub_label(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+        (event_id, new_sub_label, new_score), EventMetadataTypeEnum.sub_label.value
     )
 
     return JSONResponse(
@@ -1144,7 +1144,8 @@ def set_plate(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.recognized_license_plate, (event_id, new_plate, new_score)
+        (event_id, new_plate, new_score),
+        EventMetadataTypeEnum.recognized_license_plate.value,
     )
 
     return JSONResponse(
@@ -1227,8 +1228,8 @@ def regenerate_description(
 
     if camera_config.genai.enabled or params.force:
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.regenerate_description,
             (event.id, params.source, params.force),
+            EventMetadataTypeEnum.regenerate_description.value,
         )
 
         return JSONResponse(
@@ -1353,7 +1354,6 @@ def create_event(
     event_id = f"{now}-{rand_id}"
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.manual_event_create,
         (
             now,
             camera_name,
@@ -1366,6 +1366,7 @@ def create_event(
             body.source_type,
             body.draw,
         ),
+        EventMetadataTypeEnum.manual_event_create.value,
     )
 
     return JSONResponse(
@@ -1389,7 +1390,7 @@ def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.manual_event_end, (event_id, end_time)
+            (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value
         )
     except Exception:
         return JSONResponse(
