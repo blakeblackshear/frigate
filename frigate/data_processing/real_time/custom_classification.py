@@ -294,16 +294,16 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         ):
             if sub_label != "none":
                 self.sub_label_publisher.publish(
-                    EventMetadataTypeEnum.sub_label,
                     (obj_data["id"], sub_label, score),
+                    EventMetadataTypeEnum.sub_label,
                 )
         elif (
             self.model_config.object_config.classification_type
             == ObjectClassificationType.attribute
         ):
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.attribute,
                 (obj_data["id"], self.model_config.name, sub_label, score),
+                EventMetadataTypeEnum.attribute,
             )
 
     def handle_request(self, topic, request_data):
