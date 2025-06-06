@@ -354,6 +354,14 @@ def stats_snapshot(
                     embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
+        for key in embeddings_metrics.classification_speeds.keys():
+            stats["embeddings"][f"{key}_classification_speed"] = round(
+                embeddings_metrics.classification_speeds[key].value * 1000, 2
+            )
+            stats["embeddings"][f"{key}_classification"] = round(
+                embeddings_metrics.classification_cps[key].value, 2
+            )
+
     get_processing_stats(config, stats, hwaccel_errors)
 
     stats["service"] = {
