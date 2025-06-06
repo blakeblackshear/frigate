@@ -487,7 +487,9 @@ class FrigateConfig(FrigateBaseModel):
                 model_config["path"] = detector_config.model_path
 
             if "path" not in model_config:
-                if detector_config.type == "cpu":
+                if detector_config.type == "cpu" or detector_config.type.endswith(
+                    "_tfl"
+                ):
                     model_config["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":
                     model_config["path"] = "/edgetpu_model.tflite"
