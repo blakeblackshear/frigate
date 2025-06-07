@@ -22,7 +22,7 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
     && pip3 install -U /deps/trt-wheels/*.whl
 
 COPY --from=rootfs / /
-COPY docker/tensorrt/detector/rootfs/ /
+COPY docker/tensorrt/detector/rootfs/etc/ld.so.conf.d /
 RUN ldconfig
 
 WORKDIR /opt/frigate/
