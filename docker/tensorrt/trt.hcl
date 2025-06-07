@@ -93,7 +93,7 @@ target "tensorrt" {
   context = "."
   contexts = {
     wget = "target:wget",
-    tensorrt-base = "target:tensorrt-base",
+    wheels = "target:wheels",
     rootfs = "target:rootfs"
   }
   target = "frigate-tensorrt"
