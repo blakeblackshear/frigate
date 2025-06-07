@@ -1,9 +1,26 @@
 {
   "description": {
     "addFace": "Parcurge adaugare unei colectii noi la Libraria de Fete.",
-    "placeholder": "Introduceti un nume pentru aceasta colectie"
+    "placeholder": "Introduceti un nume pentru aceasta colectie",
+    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
   },
   "details": {
-    "person": "Persoana"
-  }
+    "person": "Persoana",
+    "subLabelScore": "Scor subetichetă",
+    "unknown": "Necunoscut",
+    "scoreInfo": "Scorul sub-etichetă este scorul ponderat pentru toate fețele recunoscute, așa că acesta poate diferi de scorul afișat în snapshot.",
+    "face": "Detalii față",
+    "faceDesc": "Detalii despre obiectul urmărit care a generat această față",
+    "timestamp": "Marcaj timp"
+  },
+  "uploadFaceImage": {
+    "desc": "Încarcă o imagine pentru a scana fețele și a include pentru {{pageToggle}}",
+    "title": "Încarcă imaginea feței"
+  },
+  "createFaceLibrary": {
+    "desc": "Creează o colecție nouă",
+    "title": "Creează colecție"
+  },
+  "collections": "Colecții",
+  "documentTitle": "Bibliotecă fețe - Frigate"
 }

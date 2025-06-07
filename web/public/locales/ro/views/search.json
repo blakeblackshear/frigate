@@ -4,6 +4,20 @@
   "searchFor": "Cauta {{inputValue}}",
   "button": {
     "clear": "Șterge căutarea",
-    "save": "Salvează căutarea"
+    "save": "Salvează căutarea",
+    "filterInformation": "Filtrează informațiile",
+    "delete": "Șterge căutarea salvată",
+    "filterActive": "Filtre active"
+  },
+  "trackedObjectId": "ID-ul obiectului urmărit",
+  "filter": {
+    "label": {
+      "cameras": "Camere",
+      "labels": "Etichete",
+      "zones": "Zone",
+      "sub_labels": "Sub-etichete",
+      "search_type": "Tip căutare",
+      "time_range": "Interval de timp"
+    }
   }
 }
