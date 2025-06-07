@@ -9,7 +9,7 @@ Requests for a description are sent off automatically to your AI provider at the
 
 ## Configuration
 
-Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
+Generative AI can be enabled for all cameras or only for specific cameras. If GenAI is disabled for a camera, you can still manually generate descriptions for events using the HTTP API. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
 To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
