@@ -4,6 +4,17 @@
     "untilForRestart": "Pana la repornirea Frigate.",
     "untilRestart": "Pana la repornire",
     "ago": "{{timeAgo}} in urma",
-    "justNow": "Acum"
+    "justNow": "Acum",
+    "today": "Azi",
+    "yesterday": "Ieri",
+    "last7": "Ultimele 7 zile",
+    "last14": "Ultimele 14 zile",
+    "last30": "Ultimele 30 de zile",
+    "thisWeek": "Săptămâna aceasta",
+    "lastWeek": "Săptămâna trecută",
+    "thisMonth": "Luna aceasta",
+    "lastMonth": "Luna trecuta",
+    "5minutes": "5 minute",
+    "10minutes": "10 minute"
   }
 }

@@ -9,6 +9,24 @@
       "startingUp": "เริ่มต้น…",
       "estimatedTime": "ระยะเวลาโดยประมาณ:",
       "finishingShortly": "เสร็จเร็วๆนี้"
+    },
+    "downloadingModels": {
+      "tips": {
+        "documentation": "อ่านเอกสาร"
+      }
     }
-  }
+  },
+  "type": {
+    "details": "รายละเอียด",
+    "video": "วิดีโอ"
+  },
+  "objectLifecycle": {
+    "noImageFound": "ไม่มีภาพสําหรับช่วงเวลานี้.",
+    "annotationSettings": {
+      "offset": {
+        "documentation": "อ่านเอกสาร "
+      }
+    }
+  },
+  "trackedObjectsCount_other": "{{count}} วัตถุที่เจอ "
 }

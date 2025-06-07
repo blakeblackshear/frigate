@@ -1,1 +1,5 @@
-{}
+{
+  "restart": {
+    "title": "Biztosan újra szeretnéd indítani a Frigate-ot?"
+  }
+}

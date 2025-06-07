@@ -143,7 +143,10 @@
         "documentation": "Přečtěte si dokumentaci ",
         "millisecondsToOffset": "Milisekundy pro posun zobrazení popisku detekce. <em>Výchozí: 0</em>",
         "desc": "Tato data pocházejí z detekčního zdroje vaší kamery, ale jsou překryta na snímcích ze záznamu. Je nepravděpodobné, že by tyto dva proudy byly dokonale synchronizované. Výsledkem je, že ohraničující rámeček a stopáž nebudou dokonale zarovnány. K nastavení však lze použít pole <code>annotation_offset</code>.",
-        "tips": "TIP: Představte si, že existuje klip události s osobou, která jde zleva doprava. Pokud je ohraničovací rámeček na časové ose události konzistentně vlevo od osoby, měla by být hodnota snížena. Podobně, pokud osoba chodí zleva doprava a ohraničující rámeček je trvale před osobou, měla by být hodnota zvýšena."
+        "tips": "TIP: Představte si, že existuje klip události s osobou, která jde zleva doprava. Pokud je ohraničovací rámeček na časové ose události konzistentně vlevo od osoby, měla by být hodnota snížena. Podobně, pokud osoba chodí zleva doprava a ohraničující rámeček je trvale před osobou, měla by být hodnota zvýšena.",
+        "toast": {
+          "success": "Posun anotace pro {{camera}} byl uložen do konfiguračního souboru. Restartujte Frigate, aby se změny projevily."
+        }
       },
       "title": "Nastavení popisků"
     },
@@ -201,5 +204,6 @@
     "object_lifecycle": "životní cyklus objektu"
   },
   "noTrackedObjects": "Žádné sledované objekty nebyly nalezeny",
-  "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}"
+  "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}",
+  "exploreMore": "Prozkoumat více {{label}} objektů"
 }

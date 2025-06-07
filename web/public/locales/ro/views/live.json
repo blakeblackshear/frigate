@@ -5,5 +5,38 @@
   "twoWayTalk": {
     "enable": "Activare dialog",
     "disable": "Dezactivați conversația bidirecțională"
+  },
+  "ptz": {
+    "zoom": {
+      "out": {
+        "label": "Îndepărtează camera PTZ"
+      },
+      "in": {
+        "label": "Apropie camera PTZ"
+      }
+    },
+    "move": {
+      "clickMove": {
+        "label": "Apasă în cadrul imaginii pentru a centra camera",
+        "enable": "Activează clic pentru a muta",
+        "disable": "Dezactivează clic pentru a muta"
+      },
+      "left": {
+        "label": "Mișcă camera PTZ spre stânga"
+      },
+      "up": {
+        "label": "Mișcă camera PTZ în sus"
+      },
+      "down": {
+        "label": "Mișcă camera PTZ în jos"
+      },
+      "right": {
+        "label": "Mișcă camera PTZ spre dreapta"
+      }
+    }
+  },
+  "cameraAudio": {
+    "enable": "Activează sunetul camerei",
+    "disable": "Dezactivează sunetul camerei"
   }
 }

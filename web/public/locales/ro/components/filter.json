@@ -5,6 +5,30 @@
     "all": {
       "title": "Toate etichetele",
       "short": "Etichete"
+    },
+    "count_one": "Etichetă {{count}}",
+    "count_other": "{{count}} etichete"
+  },
+  "dates": {
+    "selectPreset": "Selectează o presetare…",
+    "all": {
+      "title": "Toate datele",
+      "short": "Date"
     }
-  }
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Toate zonele",
+      "short": "Zone"
+    }
+  },
+  "reset": {
+    "label": "Resetează filtrele la valorile implicite"
+  },
+  "timeRange": "Interval de timp",
+  "subLabels": {
+    "label": "Sub-etichete"
+  },
+  "more": "Mai multe filtre"
 }
