@@ -14,7 +14,7 @@
     "label": {
       "sub_labels": "Sub etiquetas",
       "zones": "Zonas",
-      "cameras": "Câmeras",
+      "cameras": "Câmaras",
       "labels": "Etiquetas",
       "search_type": "Tipo de pesquisa",
       "time_range": "Intervalo de tempo",
@@ -24,7 +24,7 @@
       "max_score": "Pontuação máxima",
       "min_speed": "Velocidade mínima",
       "max_speed": "Velocidade máxima",
-      "recognized_license_plate": "Placa reconhecida",
+      "recognized_license_plate": "Matrícula reconhecida",
       "has_clip": "Tem Clipe",
       "has_snapshot": "Tem Captura de Imagem"
     },
@@ -42,7 +42,7 @@
         "text": "Os filtros ajudam você a restringir os resultados da sua pesquisa. Veja como usá-los no campo de entrada:",
         "example": "Exemplo: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
         "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"> <li>Digite um nome de filtro seguido de dois pontos (ex: \"cameras:\").</li><li>Selecione um valor entre as sugestões ou digite o seu próprio.</li><li>Use múltiplos filtros adicionando-os um após o outro com um espaço entre eles.</li> <li>Filtros de data (before: e after:) usam o formato <em>{{DateFormat}}</em>.</li><li>O filtro de intervalo de tempo usa o formato <em>{{exampleTime}}</em>.</li><li>Remova filtros clicando no 'x' ao lado deles.</li></ul>",
-        "step1": "Digite um nome para o filtro seguido de dois pontos (exemplo \"cameras:\").",
+        "step1": "Digite um nome para o filtro seguido de dois pontos (exemplo \"camaras:\").",
         "step2": "Selecione um valor entre as sugestões ou digite o seu próprio.",
         "step3": "Use vários filtros adicionando-os um após o outro com um espaço entre eles.",
         "step5": "O filtro de intervalo de tempo usa o formato {{exampleTime}}.",

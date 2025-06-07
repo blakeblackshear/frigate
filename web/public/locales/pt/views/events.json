@@ -4,11 +4,11 @@
     "label": "Movimento",
     "only": "Somente movimento"
   },
-  "allCameras": "Todas as câmeras",
+  "allCameras": "Todas as câmaras",
   "empty": {
     "motion": "Nenhum dado de movimento encontrado",
-    "alert": "Não há alertas para revisar",
-    "detection": "Não há detecções para revisar"
+    "alert": "Não há alertas para análise",
+    "detection": "Não há detecções para análise"
   },
   "timeline": "Linha do tempo",
   "events": {
@@ -25,13 +25,13 @@
   "calendarFilter": {
     "last24Hours": "Últimas 24 horas"
   },
-  "markAsReviewed": "Marcar como revisado",
-  "markTheseItemsAsReviewed": "Marque esses itens como revisados",
+  "markAsReviewed": "Marcar como analisado",
+  "markTheseItemsAsReviewed": "Marque esses itens como analisados",
   "newReviewItems": {
-    "label": "Ver novos itens de revisão",
-    "button": "Novos itens para revisar"
+    "label": "Ver novos itens para analisar",
+    "button": "Novos itens para analisar"
   },
-  "camera": "Câmera",
+  "camera": "Câmara",
   "detected": "detectado",
   "selected_one": "{{count}} selecionado",
   "selected_other": "{{count}} selecionados"
