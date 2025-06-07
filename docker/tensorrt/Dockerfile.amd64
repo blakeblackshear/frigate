@@ -16,9 +16,11 @@ RUN  pip3 wheel --wheel-dir=/trt-wheels -c /requirements-wheels.txt -r /requirem
     && ldconfig
 
 FROM deps AS frigate-tensorrt
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 COPY --from=trt-wheels /trt-wheels /deps/trt-wheels
-RUN pip3 install -U /deps/trt-wheels/*.whl
+RUN pip3 install -U /deps/trt-wheels/*.whl \
+    && pip3 uninstall -y onnxruntime-openvino
 
 COPY --from=rootfs / /
 
