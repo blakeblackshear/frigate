@@ -256,6 +256,7 @@ class CameraState:
         updated_ids = current_ids.intersection(previous_ids)
 
         for id in new_ids:
+            logger.debug(f"{self.name}: New tracked object ID: {id}")
             new_obj = tracked_objects[id] = TrackedObject(
                 self.config.model,
                 self.camera_config,
@@ -265,6 +266,7 @@ class CameraState:
             )
 
             # add initial frame to frame cache
+            logger.debug(f"{self.name}: Adding {frame_time} to frame cache for {id}")
             self.frame_cache[frame_time] = np.copy(current_frame)
 
             # save initial thumbnail data and best object
@@ -429,6 +431,9 @@ class CameraState:
             if t not in current_thumb_frames and t not in current_best_frames
         ]
         for t in thumb_frames_to_delete:
+            logger.debug(
+                f"{self.name}: Deleting {t} from frame cache for {obj.obj_data['id']}"
+            )
             del self.frame_cache[t]
 
         with self.current_frame_lock:
