@@ -473,11 +473,11 @@ class EmbeddingMaintainer(threading.Thread):
         if topic is None:
             return
 
-        event_id, source = payload
+        event_id, source, force = payload
 
         if event_id:
             self.handle_regenerate_description(
-                event_id, RegenerateDescriptionEnum(source)
+                event_id, RegenerateDescriptionEnum(source), force
             )
 
     def _process_frame_updates(self) -> None:
@@ -678,15 +678,21 @@ class EmbeddingMaintainer(threading.Thread):
         except Exception:
             return None
 
-    def handle_regenerate_description(self, event_id: str, source: str) -> None:
+    def handle_regenerate_description(
+        self, event_id: str, source: str, force: bool
+    ) -> None:
         try:
             event: Event = Event.get(Event.id == event_id)
         except DoesNotExist:
             logger.error(f"Event {event_id} not found for description regeneration")
             return
 
+        if self.genai_client is None:
+            logger.error("GenAI not enabled")
+            return
+
         camera_config = self.config.cameras[event.camera]
-        if not camera_config.genai.enabled or self.genai_client is None:
+        if not camera_config.genai.enabled and not force:
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
