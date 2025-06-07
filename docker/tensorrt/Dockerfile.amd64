@@ -6,13 +6,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Globally set pip break-system-packages option to avoid having to specify it every time
 ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
-FROM tensorrt-base AS frigate-tensorrt
+FROM wheels AS trt-wheels
 ARG PIP_BREAK_SYSTEM_PACKAGES
-ENV TRT_VER=8.6.1
 
 # Install TensorRT wheels
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
-RUN pip3 install -U -r /requirements-tensorrt.txt && ldconfig
+RUN pip3 uninstall -y onnxruntime-openvino \
+    && pip3 install -U -r /requirements-tensorrt.txt \
+    && ldconfig
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
@@ -20,10 +21,5 @@ COPY --from=rootfs / /
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
-COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
-COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY --from=trt-deps /usr/local/cuda-12.1 /usr/local/cuda
-COPY docker/tensorrt/detector/rootfs/ /
-COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
