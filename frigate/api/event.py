@@ -1234,9 +1234,10 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if camera_config.genai.enabled:
+    if camera_config.genai.enabled or params.force:
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+            EventMetadataTypeEnum.regenerate_description,
+            (event.id, params.source, params.force),
         )
 
         return JSONResponse(
