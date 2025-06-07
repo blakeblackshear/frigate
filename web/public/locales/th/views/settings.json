@@ -61,10 +61,12 @@
       "username": "ชื่อผู้ใช้",
       "noUsers": "ไม่เจอผู้ใช้",
       "password": "รหัสผ่าน",
-      "deleteUser": "ลบผู้ใช้"
+      "deleteUser": "ลบผู้ใช้",
+      "actions": "การดำเนินการ"
     },
     "management": {
-      "title": "จัดการผู้ใช้"
+      "title": "จัดการผู้ใช้",
+      "desc": "จัดการบัญชีของ Frigate นี้."
     },
     "addUser": "แก้ไขผู้ใช้",
     "title": "ผู้ใช้",
@@ -87,6 +89,12 @@
     },
     "email": {
       "title": "อีเมล"
+    },
+    "notificationSettings": {
+      "documentation": "อ่านเอกสาร"
+    },
+    "notificationUnavailable": {
+      "documentation": "อ่านเอกสาร"
     }
   },
   "documentTitle": {
@@ -177,6 +185,9 @@
       "title": "รีวิว",
       "alerts": "การแจ้งเตือน ",
       "detections": "การเคลื่อนไหว "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "อ่านเอกสาร"
     }
   },
   "masksAndZones": {
@@ -188,10 +199,19 @@
       },
       "add": "เพิ่มโซน",
       "edit": "แก้โซน",
-      "point_other": "{{count}} จุด"
+      "point_other": "{{count}} จุด",
+      "speedEstimation": {
+        "docs": "อ่านเอกสาร"
+      }
     },
     "motionMasks": {
-      "point_other": "{{count}} จุด"
+      "point_other": "{{count}} จุด",
+      "context": {
+        "documentation": "อ่านเอกสาร"
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "อ่านเอกสาร"
+      }
     },
     "objectMasks": {
       "point_other": "{{count}} จุด"
@@ -204,6 +224,25 @@
     },
     "toast": {
       "error": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
+    },
+    "snapshotConfig": {
+      "documentation": "อ่านเอกสาร"
+    }
+  },
+  "debug": {
+    "objectShapeFilterDrawing": {
+      "document": "อ่านเอกสาร "
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    },
+    "faceRecognition": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    },
+    "licensePlateRecognition": {
+      "readTheDocumentation": "อ่านเอกสาร"
     }
   }
 }
