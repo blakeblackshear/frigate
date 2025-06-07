@@ -37,8 +37,427 @@
     "liveDashboard": {
       "title": "Panell en directe",
       "automaticLiveView": {
-        "label": "Vista en directe automàtica"
+        "label": "Vista en directe automàtica",
+        "desc": "Canvia automàticament a la vista en directe d’una càmera quan es detecta activitat. Desactivar aquesta opció fa que les imatges estàtiques de la càmera al panell en directe s’actualitzin només un cop per minut."
+      },
+      "playAlertVideos": {
+        "label": "Reproduir vídeos d’alerta",
+        "desc": "Per defecte, les alertes recents al tauler en directe es reprodueixen com a vídeos petits en bucle. Desactiva aquesta opció per mostrar només una imatge estàtica de les alertes recents en aquest dispositiu/navegador."
+      }
+    },
+    "storedLayouts": {
+      "title": "Disposicions desades",
+      "desc": "La disposició de les càmeres en un grup es pot arrossegar i redimensionar. Les posicions es guarden a l’emmagatzematge local del teu navegador.",
+      "clearAll": "Esborra tots les disposicions"
+    },
+    "cameraGroupStreaming": {
+      "desc": "La configuració de la transmissió per a cada grup de càmeres s'emmagatzema de manera local al vostre navegador.",
+      "title": "Parmàmetres de transmissió del grup de càmeres",
+      "clearAll": "Esborra tots els paràmetres de transmissió"
+    },
+    "recordingsViewer": {
+      "title": "Visor d'enregistraments",
+      "defaultPlaybackRate": {
+        "label": "Velocitat de reproducció predeterminada"
+      }
+    },
+    "calendar": {
+      "firstWeekday": {
+        "monday": "Dilluns",
+        "label": "Primer dia de la setmana",
+        "sunday": "Diumenge"
+      },
+      "title": "Calendari"
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Disposició emmagatzemada esborrada per {{cameraName}}"
       }
     }
+  },
+  "masksAndZones": {
+    "form": {
+      "polygonDrawing": {
+        "snapPoints": {
+          "false": "No ajustar punts",
+          "true": "Punts d'ajust"
+        },
+        "delete": {
+          "success": "{{name}} s'ha suprimit.",
+          "title": "Confirmar la supressió"
+        },
+        "removeLastPoint": "Eliminar l'últim punt",
+        "reset": {
+          "label": "Neteja tots els punts"
+        }
+      },
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "El nom de la zona conté caràcters il·legals."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "L'inèrcia ha de ser superior a 0."
+        }
+      }
+    },
+    "zones": {
+      "objects": {
+        "title": "Objectes"
+      },
+      "speedEstimation": {
+        "lineDDistance": "Distància de la línia D ({{unit}})",
+        "title": "Estimació de velocitat",
+        "docs": "Llegir la documentació",
+        "lineADistance": "Distància de la línia A ({{unit}})",
+        "lineBDistance": "Distància de la línia B ({{unit}})",
+        "lineCDistance": "Distància de la línia C ({{unit}})"
+      },
+      "inertia": {
+        "title": "Inèrcia"
+      },
+      "point_one": "{{count}} punt",
+      "point_many": "{{count}} punts",
+      "point_other": "{{count}} punts",
+      "name": {
+        "inputPlaceHolder": "Introduïu un nom…",
+        "title": "Nom"
+      },
+      "label": "Zones",
+      "desc": {
+        "documentation": "Documentació"
+      },
+      "add": "Afegir Zona",
+      "edit": "Editar zona",
+      "loiteringTime": {
+        "title": "Temps de merodeig"
+      },
+      "allObjects": "Tots els objectes",
+      "documentTitle": "Edita zona - Frigate",
+      "speedThreshold": {
+        "title": "Llindar de velocitat ({{unit}})"
+      }
+    },
+    "filter": {
+      "all": "Totes les màscares i zones"
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Documentació"
+      },
+      "context": {
+        "documentation": "Llegir la documentació"
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "Llegir la documentació"
+      },
+      "point_one": "{{count}} punt",
+      "point_many": "",
+      "point_other": "{{count}} punts",
+      "label": "Màscara de moviment",
+      "add": "Nova màscara de moviment",
+      "edit": "Edita la màscara de moviment",
+      "documentTitle": "Editar la màscara de moviment - Frigate"
+    },
+    "objectMasks": {
+      "documentTitle": "Editar la màscara d'objecte - Frigate",
+      "label": "Màscares d'objecte",
+      "edit": "Editar la màscara d'objecte",
+      "point_one": "{{count}} punt",
+      "point_many": "{{count}} punts",
+      "point_other": "{{count}} punts",
+      "objects": {
+        "allObjectTypes": "Tots els tipus d’objecte",
+        "title": "Objectes"
+      },
+      "add": "Afegir màscara d'objecte",
+      "desc": {
+        "documentation": "Documentació"
+      }
+    },
+    "restart_required": "Reinici necessari (canvi de màscares o zones)",
+    "motionMaskLabel": "Màscara de moviment {{number}}",
+    "objectMaskLabel": "Màscara d'objecte {{number}} ({{label}})"
+  },
+  "notification": {
+    "email": {
+      "title": "Correu electrònic",
+      "placeholder": "p. ex. exemple@email.com"
+    },
+    "notificationSettings": {
+      "documentation": "Llegir la documentació",
+      "title": "Paràmetres de notificació"
+    },
+    "deviceSpecific": "Paràmetres específics del dispositiu",
+    "registerDevice": "Registrar aquest dispositiu",
+    "unregisterDevice": "Desegistrar aquest dispositiu",
+    "cancelSuspension": "Cancel·la la suspensió",
+    "suspendTime": {
+      "untilRestart": "Suspendre fins al reinici",
+      "30minutes": "Suspèn durant 30 minuts",
+      "1hour": "Suspèn durant 1 hora",
+      "12hours": "Suspèn durant 12 hores",
+      "suspend": "Suspendre",
+      "24hours": "Suspèn durant 24 hores",
+      "10minutes": "Suspèn durant 10 minuts",
+      "5minutes": "Suspèn durant 5 minuts"
+    },
+    "toast": {
+      "success": {
+        "settingSaved": "Els paràmetres de notificacions s'han desat."
+      }
+    },
+    "cameras": {
+      "title": "Càmeres",
+      "noCameras": "Sense càmeres disponibles"
+    },
+    "title": "Notificacions",
+    "notificationUnavailable": {
+      "title": "Notificacions no disponibles",
+      "documentation": "Llegir la documentació"
+    },
+    "unsavedChanges": "Canvis de notificació no desats",
+    "globalSettings": {
+      "title": "Paràmetres globals"
+    },
+    "active": "Notificacions actives",
+    "suspended": "Notificacions suspeses {{time}}",
+    "unsavedRegistrations": "Registres de notificació no desats",
+    "sendTestNotification": "Enviar una notificació de prova"
+  },
+  "camera": {
+    "streams": {
+      "title": "Transmissions"
+    },
+    "title": "Paràmetres de la càmera",
+    "reviewClassification": {
+      "title": "Revisar la classificació",
+      "readTheDocumentation": "Llegir la documentació",
+      "selectAlertsZones": "Seleccionar zones per alertes",
+      "limitDetections": "Limitar deteccions a zones específiques",
+      "selectDetectionsZones": "Seleccionar zones per deteccions"
+    },
+    "review": {
+      "alerts": "Alertes ",
+      "detections": "Deteccions ",
+      "title": "Revisar"
+    }
+  },
+  "motionDetectionTuner": {
+    "Threshold": {
+      "title": "Llindar"
+    },
+    "contourArea": {
+      "title": "Àrea de contorn"
+    },
+    "desc": {
+      "documentation": "Llegeix la guia d'ajust de detecció de moviment"
+    },
+    "improveContrast": {
+      "title": "Millorar contrast"
+    },
+    "title": "Afinador de detecció de moviment",
+    "toast": {
+      "success": "Els ajustos de la detecció de moviment s'han desat."
+    }
+  },
+  "debug": {
+    "title": "Depuració",
+    "objectList": "Llista d'objectes",
+    "noObjects": "Cap objecte",
+    "debugging": "Depurant",
+    "mask": {
+      "title": "Màscares de moviment",
+      "desc": "Mostra els polígons de la màscara de moviment"
+    },
+    "regions": {
+      "title": "Regions"
+    },
+    "objectShapeFilterDrawing": {
+      "score": "Puntuació",
+      "document": "Llegir la documentació ",
+      "ratio": "Proporció",
+      "area": "Àrea",
+      "title": "Dibuix del filtre de forma de l'objecte"
+    },
+    "zones": {
+      "title": "Zones"
+    },
+    "timestamp": {
+      "title": "Marca temporal"
+    },
+    "boundingBoxes": {
+      "title": "Caixes delimitadores",
+      "colors": {
+        "label": "Colors de la caixa delimitadora de l'objecte"
+      }
+    },
+    "motion": {
+      "title": "Caixes de moviment"
+    }
+  },
+  "users": {
+    "table": {
+      "username": "Nom d'usuari",
+      "password": "Contrasenya",
+      "deleteUser": "Suprimir usuari",
+      "noUsers": "No s'han trobat usuaris.",
+      "changeRole": "Canviar la funció d’usuari",
+      "actions": "Accions",
+      "role": "Rol"
+    },
+    "toast": {
+      "error": {
+        "deleteUserFailed": "No s'ha pogut eliminar l'usuari: {{errorMessage}}",
+        "roleUpdateFailed": "No s'ha pogut actualitzar la funció: {{errorMessage}}",
+        "setPasswordFailed": "Error en guardar la contrasenya: {{errorMessage}}",
+        "createUserFailed": "No s'ha pogut crear l'usuari: {{errorMessage}}"
+      },
+      "success": {
+        "deleteUser": "L'usuari {{user}} s'ha suprimit amb èxit",
+        "createUser": "L'Usuari {{user}} s'ha creat amb èxit",
+        "updatePassword": "Contrasenya actualitzada amb èxit.",
+        "roleUpdated": "Funció actualitzada per {{user}}"
+      }
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Nom d'usuari",
+          "placeholder": "Introdueix el nom d'usuari"
+        },
+        "password": {
+          "confirm": {
+            "placeholder": "Confirma contrasenya",
+            "title": "Confirma contrasenya"
+          },
+          "strength": {
+            "title": "Seguretat de la contrasenya: ",
+            "weak": "Dèbil",
+            "strong": "Fort",
+            "veryStrong": "Molt forta",
+            "medium": "Mitjana"
+          },
+          "notMatch": "Les contrasenyes no coincideixen",
+          "match": "Les contrasenyes coincideixen",
+          "placeholder": "Introdueix la contrasenya",
+          "title": "Contrasenya"
+        },
+        "newPassword": {
+          "title": "Nova contrasenya",
+          "placeholder": "Introduïu una nova contrasenya",
+          "confirm": {
+            "placeholder": "Re-entrar contrasenya nova"
+          }
+        },
+        "usernameIsRequired": "El nom d'usuari és obligatori",
+        "passwordIsRequired": "La contrasenya és obligatoria"
+      },
+      "passwordSetting": {
+        "updatePassword": "Contrasenya actualitzada per {{username}}",
+        "setPassword": "Estableix Contrasenya",
+        "cannotBeEmpty": "La contrasenya no pot ser buida",
+        "doNotMatch": "Les contrasenyes no coincideixen"
+      },
+      "deleteUser": {
+        "title": "Suprimir usuari"
+      },
+      "changeRole": {
+        "roleInfo": {
+          "viewer": "Visualitzador",
+          "admin": "Administrador",
+          "adminDesc": "Accés complet a totes les funcionalitats."
+        },
+        "title": "Canviar la funció d’usuari",
+        "desc": "Actualitzar permisos per a <strong>{{username}}</strong>",
+        "select": "Seleccioneu un paper"
+      },
+      "createUser": {
+        "title": "Crear un nou usuari",
+        "confirmPassword": "Siusplau, confirma la contrasenya"
+      }
+    },
+    "title": "Usuaris",
+    "addUser": "Afegir usuari",
+    "management": {
+      "title": "Gestió d'usuaris"
+    },
+    "updatePassword": "Actualitzar contrasenya"
+  },
+  "frigatePlus": {
+    "snapshotConfig": {
+      "table": {
+        "camera": "Càmera",
+        "snapshots": "Instantànies",
+        "cleanCopySnapshots": "<code>clean_copy</code> Instantànies"
+      },
+      "title": "Configuració d'instantànies",
+      "documentation": "Llegir la documentació"
+    },
+    "modelInfo": {
+      "baseModel": "Model base",
+      "modelType": "Tipus de model",
+      "trainDate": "Data d'entrenament",
+      "title": "Informació del model",
+      "supportedDetectors": "Detectors compatibles",
+      "availableModels": "Models disponibles",
+      "cameras": "Càmeres",
+      "plusModelType": {
+        "userModel": "Afinat",
+        "baseModel": "Model base"
+      },
+      "loadingAvailableModels": "Carregant models disponibles…",
+      "loading": "Carregant informació del model…"
+    },
+    "apiKey": {
+      "plusLink": "Llegeix més sobre Frigate+",
+      "title": "Clau API de Frigate+"
+    },
+    "unsavedChanges": "Canvis dels paràmetres de Frigate+ sense desar",
+    "title": "Paràmetres de Frigate+"
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "modelSize": {
+        "small": {
+          "title": "petit"
+        },
+        "label": "Mida del model",
+        "large": {
+          "title": "gran"
+        }
+      },
+      "reindexNow": {
+        "confirmButton": "Reindexar",
+        "success": "La reindexació ha començat amb èxit.",
+        "label": "Reindexar ara",
+        "confirmTitle": "Confirmar la reindexació"
+      },
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Cerca semàntica"
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "title": "petit"
+        },
+        "large": {
+          "title": "gran"
+        },
+        "label": "Mida del model"
+      },
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Reconeixement de rostres"
+    },
+    "unsavedChanges": "Canvis dels paràmetres complementaris sense desar",
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Reconeixement de matrícules"
+    },
+    "birdClassification": {
+      "title": "Classificació d'ocells"
+    },
+    "title": "Parmàmetres complementaris"
   }
 }

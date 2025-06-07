@@ -95,7 +95,7 @@
     "title": "Confirmar la supressió",
     "desc": "En suprimir aquests {{objectLength}} objectes de seguiment, s'elimina la instatània, les incrustacions desades, i els registres de temps de vida. Les imatges gravades d'aquests objectes <em>NO</em> es suprimiran de l'historial. <br/><br/>Està segur que vol continuar?<br/><br/>Manteniu la tecla <em>Shift</em> per ometre aquest diàleg en el futur.",
     "toast": {
-      "success": "Els objected amb seguiment s'han suprimit correctament.",
+      "success": "Els objectes amb seguiment s'han suprimit correctament.",
       "error": "No s'han pogut suprimir els objectes de seguiment: {{errorMessage}}"
     }
   },

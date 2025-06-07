@@ -32,7 +32,44 @@
   "objectLifecycle": {
     "createObjectMask": "Crear màscara per a l'objecte",
     "title": "Cicle de vida de l'objecte",
-    "noImageFound": "No s'ha trobat cap imatge per a aquesta marca temporal."
+    "noImageFound": "No s'ha trobat cap imatge per a aquesta marca temporal.",
+    "adjustAnnotationSettings": "Ajustar els paràmetres de les anotacions",
+    "scrollViewTips": "Desplaça't per veure els moments significatius del cicle de vida d'aquest objecte.",
+    "lifecycleItemDesc": {
+      "entered_zone": "{{label}} ha entrat a {{zones}}",
+      "active": "{{label}} s'ha activat",
+      "stationary": "{{label}} ha esdevingut estacionari",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectat per a {{label}}",
+        "other": "{{label}} reconegut com a {{attribute}}"
+      },
+      "header": {
+        "zones": "Zones",
+        "ratio": "Proporció",
+        "area": "Àrea"
+      },
+      "heard": "{{label}} escoltat",
+      "external": "{{label}} detectat",
+      "gone": "{{label}} ha marxat",
+      "visible": "{{label}} detectat"
+    },
+    "annotationSettings": {
+      "offset": {
+        "documentation": "Llegir la documentació ",
+        "label": "Desplaçament de l'anotació"
+      },
+      "title": "Paràmetres de les anotacions",
+      "showAllZones": {
+        "title": "Mostra totes les zones"
+      }
+    },
+    "carousel": {
+      "next": "Diapositiva següent",
+      "previous": "Diapositiva anterior"
+    },
+    "autoTrackingTips": "Les posicions dels recuadres delimitadors seràn inexactes per a càmeres amb seguiment automàtic.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punt seguit"
   },
   "exploreMore": "Explora més {{label}} objectes",
   "trackedObjectDetails": "Detalls de l'objecte rastrejat",
@@ -43,6 +80,99 @@
     "object_lifecycle": "cicle de vida de l'objecte"
   },
   "details": {
-    "timestamp": "Marca temporal"
-  }
+    "timestamp": "Marca temporal",
+    "item": {
+      "button": {
+        "viewInExplore": "Veure a Explorar",
+        "share": "Comparteix aquest element de revisió"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
+          "updatedLPR": "Matrícula actualitzada amb èxit."
+        }
+      },
+      "title": "Revisar detalls de l'element",
+      "desc": "Revisar detalls de l'element"
+    },
+    "label": "Etiqueta",
+    "topScore": {
+      "label": "Puntuació màxima"
+    },
+    "estimatedSpeed": "Velocitat estimada",
+    "button": {
+      "regenerate": {
+        "title": "Regenerar",
+        "label": "Regenerar descripció d'objecte rastrejat"
+      },
+      "findSimilar": "Cercar similars"
+    },
+    "expandRegenerationMenu": "Amplia el menú de regeneració",
+    "regenerateFromSnapshot": "Regenerar desde instantània",
+    "regenerateFromThumbnails": "Regenerar desde miniatures",
+    "tips": {
+      "descriptionSaved": "Descripció desada amb èxit"
+    },
+    "description": {
+      "placeholder": "Descripció de l'objecte rastrejat",
+      "label": "Descripció"
+    },
+    "objects": "Objectes",
+    "camera": "Càmera",
+    "editSubLabel": {
+      "title": "Editar subetiqueta"
+    },
+    "zones": "Zones",
+    "recognizedLicensePlate": "Matrícula reconeguda",
+    "snapshotScore": {
+      "label": "Puntuació d'instantània"
+    },
+    "editLPR": {
+      "title": "Editar matrícula"
+    }
+  },
+  "searchResult": {
+    "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "L'objectes amb seguiment s'ha suprimit correctament."
+      }
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "aria": "Descarregar vídeo",
+      "label": "Descarregar vídeo"
+    },
+    "submitToPlus": {
+      "aria": "Enviar a Frigate Plus",
+      "label": "Enviar a Frigate+"
+    },
+    "downloadSnapshot": {
+      "label": "Descarregar instantània",
+      "aria": "Descarregar instantània"
+    },
+    "findSimilar": {
+      "label": "Cercar similars",
+      "aria": "Trobar objectes de seguiment similars"
+    },
+    "viewObjectLifecycle": {
+      "label": "Veure el cicle de vida de l'objecte",
+      "aria": "Mostrar el cicle de vida de l'objecte"
+    },
+    "viewInHistory": {
+      "label": "Veure a l'historial",
+      "aria": "Veure a l'historial"
+    },
+    "deleteTrackedObject": {
+      "label": "Suprimeix aquest objecte rastrejat"
+    }
+  },
+  "noTrackedObjects": "No s'han trobat objectes rastrejats",
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirmar la supressió"
+    }
+  },
+  "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}"
 }
