@@ -426,6 +426,40 @@ export function useEmbeddingsReindexProgress(
   return { payload: data };
 }
 
+export function useBirdseyeLayout(revalidateOnFocus: boolean = true): {
+  payload: string;
+} {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("birdseye_layout", "birdseyeLayout");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("birdseyeLayout");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("birdseyeLayout");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data };
+}
+
 export function useMotionActivity(camera: string): { payload: string } {
   const {
     value: { payload },
