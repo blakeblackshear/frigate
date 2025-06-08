@@ -63,7 +63,7 @@ def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
         c for c in config.cameras.values() if c.enabled and c.genai.enabled
     ]
 
-    if genai_cameras:
+    if genai_cameras or genai_config.enabled:
         load_providers()
         provider = PROVIDERS.get(genai_config.provider)
         if provider:
