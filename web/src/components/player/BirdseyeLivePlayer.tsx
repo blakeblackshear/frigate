@@ -13,6 +13,7 @@ type LivePlayerProps = {
   liveMode: LivePlayerMode;
   pip?: boolean;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
+  playerRef?: React.MutableRefObject<HTMLDivElement | null>;
   onClick?: () => void;
 };
 
@@ -22,6 +23,7 @@ export default function BirdseyeLivePlayer({
   liveMode,
   pip,
   containerRef,
+  playerRef,
   onClick,
 }: LivePlayerProps) {
   let player;
@@ -76,7 +78,9 @@ export default function BirdseyeLivePlayer({
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
-      <div className="size-full">{player}</div>
+      <div className="size-full" ref={playerRef}>
+        {player}
+      </div>
     </div>
   );
 }

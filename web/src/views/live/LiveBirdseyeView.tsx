@@ -1,11 +1,13 @@
+import { useBirdseyeLayout } from "@/api/ws";
 import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   isDesktop,
   isFirefox,
@@ -122,6 +124,72 @@ export default function LiveBirdseyeView({
     return "mse";
   }, [config]);
 
+  const birdseyeLayout = useBirdseyeLayout();
+
+  // Click overlay handling
+
+  const playerRef = useRef<HTMLDivElement | null>(null);
+  const handleOverlayClick = useCallback(
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
+      let clientX;
+      let clientY;
+      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
+        clientX = e.nativeEvent.touches[0].clientX;
+        clientY = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        clientX = e.nativeEvent.clientX;
+        clientY = e.nativeEvent.clientY;
+      }
+
+      if (
+        playerRef.current &&
+        clientX &&
+        clientY &&
+        config &&
+        birdseyeLayout?.payload
+      ) {
+        const playerRect = playerRef.current.getBoundingClientRect();
+
+        // Calculate coordinates relative to player div, accounting for offset
+        const rawX = clientX - playerRect.left;
+        const rawY = clientY - playerRect.top;
+
+        // Ensure click is within player bounds
+        if (
+          rawX < 0 ||
+          rawX > playerRect.width ||
+          rawY < 0 ||
+          rawY > playerRect.height
+        ) {
+          return;
+        }
+
+        // Scale click coordinates to birdseye canvas resolution
+        const canvasX = rawX * (config.birdseye.width / playerRect.width);
+        const canvasY = rawY * (config.birdseye.height / playerRect.height);
+
+        for (const [cameraName, coords] of Object.entries(
+          birdseyeLayout.payload,
+        )) {
+          const parsedCoords =
+            typeof coords === "string" ? JSON.parse(coords) : coords;
+          if (
+            canvasX >= parsedCoords.x &&
+            canvasX < parsedCoords.x + parsedCoords.width &&
+            canvasY >= parsedCoords.y &&
+            canvasY < parsedCoords.y + parsedCoords.height
+          ) {
+            navigate(`/#${cameraName}`);
+            break;
+          }
+        }
+      }
+    },
+    [playerRef, config, birdseyeLayout, navigate],
+  );
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -215,16 +283,21 @@ export default function LiveBirdseyeView({
             }}
           >
             <div
-              className={growClassName}
+              className={cn(
+                "flex flex-col items-center justify-center",
+                growClassName,
+              )}
               style={{
                 aspectRatio: constrainedAspectRatio,
               }}
+              onClick={handleOverlayClick}
             >
               <BirdseyeLivePlayer
                 className={`${fullscreen ? "*:rounded-none" : ""}`}
                 birdseyeConfig={config.birdseye}
                 liveMode={preferredLiveMode}
                 containerRef={containerRef}
+                playerRef={playerRef}
                 pip={pip}
               />
             </div>
