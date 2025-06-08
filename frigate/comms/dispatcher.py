@@ -21,6 +21,7 @@ from frigate.const import (
     INSERT_PREVIEW,
     NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
+    UPDATE_BIRDSEYE_LAYOUT,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
@@ -55,6 +56,7 @@ class Dispatcher:
         self.camera_activity = CameraActivityManager(config, self.publish)
         self.model_state = {}
         self.embeddings_reindex = {}
+        self.birdseye_layout = {}
 
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
@@ -168,6 +170,14 @@ class Dispatcher:
                 json.dumps(self.embeddings_reindex.copy()),
             )
 
+        def handle_update_birdseye_layout():
+            if payload:
+                self.birdseye_layout = payload
+                self.publish("birdseye_layout", json.dumps(self.birdseye_layout))
+
+        def handle_birdseye_layout():
+            self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
+
         def handle_on_connect():
             camera_status = self.camera_activity.last_camera_activity.copy()
             cameras_with_status = camera_status.keys()
@@ -205,6 +215,7 @@ class Dispatcher:
                 "embeddings_reindex_progress",
                 json.dumps(self.embeddings_reindex.copy()),
             )
+            self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
 
         def handle_notification_test():
             self.publish("notification_test", "Test notification")
@@ -220,10 +231,12 @@ class Dispatcher:
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
+            UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
             NOTIFICATION_TEST: handle_notification_test,
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
+            "birdseyeLayout": handle_birdseye_layout,
             "onConnect": handle_on_connect,
         }
 
