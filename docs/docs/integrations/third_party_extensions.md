@@ -23,6 +23,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
 
+## [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/)
+
+[Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/) is a program that works in tandem with Frigate. It responds to Frigate when a snapshot or a review is made (and more can be added), and uploads them to one or more remote server(s) of your choice.
+
 ## [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
