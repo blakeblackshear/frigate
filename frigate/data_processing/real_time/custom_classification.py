@@ -3,7 +3,6 @@
 import datetime
 import logging
 import os
-import threading
 from typing import Any
 
 import cv2
@@ -17,10 +16,8 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
-from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
-from frigate.types import ModelStatusTypesEnum
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
-from frigate.util.classification import train_classification_model
 from frigate.util.object import box_overlaps, calculate_region
 
 from ..types import DataProcessorMetrics
@@ -71,18 +68,6 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             prefill=0,
         )
         self.classifications_per_second.start()
-
-    def __retrain_model(self) -> None:
-        train_classification_model(self.model_config.name)
-        self.__build_detector()
-        self.requestor.send_data(
-            UPDATE_MODEL_STATE,
-            {
-                "model": self.model_config.name,
-                "state": ModelStatusTypesEnum.complete,
-            },
-        )
-        logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
@@ -172,19 +157,15 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
 
     def handle_request(self, topic, request_data):
-        if topic == EmbeddingsRequestEnum.train_classification.value:
+        if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
-                self.requestor.send_data(
-                    UPDATE_MODEL_STATE,
-                    {
-                        "model": self.model_config.name,
-                        "state": ModelStatusTypesEnum.training,
-                    },
+                self.__build_detector()
+                logger.info(
+                    f"Successfully loaded updated model for {self.model_config.name}"
                 )
-                threading.Thread(target=self.__retrain_model).start()
                 return {
                     "success": True,
-                    "message": f"Began training {self.model_config.name} model.",
+                    "message": f"Loaded {self.model_config.name} model.",
                 }
             else:
                 return None
@@ -231,18 +212,6 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             os.path.join(self.model_dir, "labelmap.txt"),
             prefill=0,
         )
-
-    def __retrain_model(self) -> None:
-        train_classification_model(self.model_config.name)
-        self.__build_detector()
-        self.requestor.send_data(
-            UPDATE_MODEL_STATE,
-            {
-                "model": self.model_config.name,
-                "state": ModelStatusTypesEnum.complete,
-            },
-        )
-        logger.info(f"Successfully loaded updated model for {self.model_config.name}")
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
@@ -307,19 +276,14 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.detected_objects[obj_data["id"]] = score
 
     def handle_request(self, topic, request_data):
-        if topic == EmbeddingsRequestEnum.train_classification.value:
+        if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
-                self.requestor.send_data(
-                    UPDATE_MODEL_STATE,
-                    {
-                        "model": self.model_config.name,
-                        "state": ModelStatusTypesEnum.training,
-                    },
+                logger.info(
+                    f"Successfully loaded updated model for {self.model_config.name}"
                 )
-                threading.Thread(target=self.__retrain_model).start()
                 return {
                     "success": True,
-                    "message": f"Began training {self.model_config.name} model.",
+                    "message": f"Loaded {self.model_config.name} model.",
                 }
             else:
                 return None

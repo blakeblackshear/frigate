@@ -20,8 +20,8 @@ class DataProcessorMetrics:
     alpr_pps: Synchronized
     yolov9_lpr_speed: Synchronized
     yolov9_lpr_pps: Synchronized
-    classification_speeds: dict[str, Synchronized]
-    classification_cps: dict[str, Synchronized]
+    classification_speeds: dict[str, Synchronized] = {}
+    classification_cps: dict[str, Synchronized] = {}
 
     def __init__(self, custom_classification_models: list[str]):
         self.image_embeddings_speed = mp.Value("d", 0.0)
@@ -36,8 +36,6 @@ class DataProcessorMetrics:
         self.yolov9_lpr_pps = mp.Value("d", 0.0)
 
         if custom_classification_models:
-            self.classification_speeds = {}
-            self.classification_cps = {}
             for key in custom_classification_models:
                 self.classification_speeds[key] = mp.Value("d", 0.0)
                 self.classification_cps[key] = mp.Value("d", 0.0)
