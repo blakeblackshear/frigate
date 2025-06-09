@@ -111,7 +111,7 @@ class FaceRecognizer(ABC):
     def get_blur_confidence_reduction(self, input: np.ndarray) -> tuple[float, float]:
         """Calculates the reduction in confidence based on the blur of the image."""
         if not self.config.face_recognition.blur_confidence_filter:
-            return 1.0
+            return 0, 0.0
 
         variance = cv2.Laplacian(input, cv2.CV_64F).var()
 
