@@ -12,7 +12,7 @@ class EmbeddingsRequestEnum(Enum):
     # audio
     transcribe_audio = "transcribe_audio"
     # custom classification
-    train_classification = "train_classification"
+    reload_classification_model = "reload_classification_model"
     # face
     clear_face_classifier = "clear_face_classifier"
     recognize_face = "recognize_face"
