@@ -10,7 +10,11 @@ from tensorflow.keras import layers, models, optimizers
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
+from frigate.comms.inter_process import InterProcessRequestor
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.types import ModelStatusTypesEnum
+from frigate.util import Process
 
 BATCH_SIZE = 16
 EPOCHS = 50
@@ -18,7 +22,7 @@ LEARNING_RATE = 0.001
 
 
 @staticmethod
-def generate_representative_dataset_factory(dataset_dir: str):
+def __generate_representative_dataset_factory(dataset_dir: str):
     def generate_representative_dataset():
         image_paths = []
         for root, dirs, files in os.walk(dataset_dir):
@@ -38,7 +42,7 @@ def generate_representative_dataset_factory(dataset_dir: str):
 
 
 @staticmethod
-def train_classification_model(model_name: str) -> bool:
+def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     model_dir = os.path.join(MODEL_CACHE_DIR, model_name)
@@ -107,7 +111,7 @@ def train_classification_model(model_name: str) -> bool:
     # convert model to tflite
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    converter.representative_dataset = generate_representative_dataset_factory(
+    converter.representative_dataset = __generate_representative_dataset_factory(
         dataset_dir
     )
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
@@ -122,3 +126,42 @@ def train_classification_model(model_name: str) -> bool:
     # restore original stdout / stderr
     sys.stdout = original_stdout
     sys.stderr = original_stderr
+
+
+@staticmethod
+def kickoff_model_training(
+    embeddingRequestor: EmbeddingsRequestor, model_name: str
+) -> None:
+    requestor = InterProcessRequestor()
+    requestor.send_data(
+        UPDATE_MODEL_STATE,
+        {
+            "model": model_name,
+            "state": ModelStatusTypesEnum.training,
+        },
+    )
+
+    # run training in sub process so that
+    # tensorflow will free CPU / GPU memory
+    # upon training completion
+    training_process = Process(
+        target=__train_classification_model,
+        name=f"model_training:{model_name}",
+        args=(model_name,),
+    )
+    training_process.start()
+    training_process.join()
+
+    # reload model and mark training as complete
+    embeddingRequestor.send_data(
+        EmbeddingsRequestEnum.reload_classification_model.value,
+        {"model_name": model_name},
+    )
+    requestor.send_data(
+        UPDATE_MODEL_STATE,
+        {
+            "model": model_name,
+            "state": ModelStatusTypesEnum.complete,
+        },
+    )
+    requestor.stop()

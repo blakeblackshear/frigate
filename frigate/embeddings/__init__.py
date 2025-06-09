@@ -22,6 +22,7 @@ from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Recordings
 from frigate.util.builtin import serialize
+from frigate.util.classification import kickoff_model_training
 from frigate.util.services import listen
 
 from .maintainer import EmbeddingMaintainer
@@ -302,9 +303,12 @@ class EmbeddingsContext:
         return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})
 
     def start_classification_training(self, model_name: str) -> dict[str, Any]:
-        return self.requestor.send_data(
-            EmbeddingsRequestEnum.train_classification.value, {"model_name": model_name}
-        )
+        threading.Thread(
+            target=kickoff_model_training,
+            args=(self.requestor, model_name),
+            daemon=True,
+        ).start()
+        return {"success": True, "message": f"Began training {model_name} model."}
 
     def transcribe_audio(self, event: dict[str, any]) -> dict[str, any]:
         return self.requestor.send_data(
