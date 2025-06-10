@@ -36,7 +36,6 @@ from frigate.const import (
     FACE_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
-    SHM_FRAMES_VAR,
     THUMB_DIR,
 )
 from frigate.data_processing.types import DataProcessorMetrics
@@ -70,8 +69,7 @@ from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
-from frigate.util.object import get_camera_regions_grid
+from frigate.util.image import UntrackedSharedMemory
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
 
@@ -101,8 +99,6 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
-        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.frame_manager = SharedMemoryFrameManager()
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -423,20 +419,6 @@ class FrigateApp:
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
 
-    def init_historical_regions(self) -> None:
-        # delete region grids for removed or renamed cameras
-        cameras = list(self.config.cameras.keys())
-        Regions.delete().where(~(Regions.camera << cameras)).execute()
-
-        # create or update region grids for each camera
-        for camera in self.config.cameras.values():
-            assert camera.name is not None
-            self.region_grids[camera.name] = get_camera_regions_grid(
-                camera.name,
-                camera.detect,
-                max(self.config.model.width, self.config.model.height),
-            )
-
     def start_camera_processor(self) -> None:
         self.camera_maintainer = CameraMaintainer(self.config, self.stop_event)
         self.camera_maintainer.start()
@@ -498,45 +480,6 @@ class FrigateApp:
     def start_watchdog(self) -> None:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
-
-    def shm_frame_count(self) -> int:
-        total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
-
-        # required for log files + nginx cache
-        min_req_shm = 40 + 10
-
-        if self.config.birdseye.restream:
-            min_req_shm += 8
-
-        available_shm = total_shm - min_req_shm
-        cam_total_frame_size = 0.0
-
-        for camera in self.config.cameras.values():
-            if camera.enabled and camera.detect.width and camera.detect.height:
-                cam_total_frame_size += round(
-                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
-                    / 1048576,
-                    1,
-                )
-
-        if cam_total_frame_size == 0.0:
-            return 0
-
-        shm_frame_count = min(
-            int(os.environ.get(SHM_FRAMES_VAR, "50")),
-            int(available_shm / (cam_total_frame_size)),
-        )
-
-        logger.debug(
-            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
-        )
-
-        if shm_frame_count < 20:
-            logger.warning(
-                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size * 20)}MB."
-            )
-
-        return shm_frame_count
 
     def init_auth(self) -> None:
         if self.config.auth.enabled:
@@ -604,10 +547,8 @@ class FrigateApp:
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
-        self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processor()
-        self.start_camera_capture_processes()
         self.start_audio_processor()
         self.start_storage_maintainer()
         self.start_stats_emitter()
@@ -706,7 +647,6 @@ class FrigateApp:
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
 
-        self.frame_manager.cleanup()
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()

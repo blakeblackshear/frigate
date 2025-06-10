@@ -11,6 +11,7 @@ class GlobalConfigUpdateEnum(str, Enum):
     """Supported global config update types."""
 
     add_camera = "add_camera"
+    debug_camera = "debug_camera"
     remove_camera = "remove_camera"
 
 
