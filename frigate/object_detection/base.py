@@ -176,6 +176,7 @@ class ObjectDetectProcess:
         logging.info("Detection process has exited...")
 
     def start_or_restart(self):
+        # TODO have to create a separate ZMQ listener for the MP.Events to be sent here
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()

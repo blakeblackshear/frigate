@@ -124,6 +124,7 @@ class CameraMaintainer(threading.Thread):
             return
 
         if runtime:
+            # TODO we have to send a ZMQ message to the object detector with the same out event
             self.detection_out_events[name] = mp.Event()
             self.camera_metrics[name] = CameraMetrics()
             self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
