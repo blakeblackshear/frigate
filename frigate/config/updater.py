@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any
 
 from frigate.comms.config_updater import ConfigPublisher, ConfigSubscriber
+from frigate.config.camera import CameraConfig
 
 
 class GlobalConfigUpdateEnum(str, Enum):
@@ -46,21 +47,21 @@ class GlobalConfigUpdateSubscriber:
             exact=False,
         )
 
-    def check_for_updates(self) -> list[tuple[GlobalConfigUpdateEnum, Any]]:
-        updated_topics: list[tuple[GlobalConfigUpdateEnum, Any]] = []
+    def check_for_updates(self) -> list[tuple[GlobalConfigUpdateEnum, CameraConfig]]:
+        updated_topics: list[tuple[GlobalConfigUpdateEnum, CameraConfig]] = []
 
         # get all updates available
         while True:
-            update_topic, payload = self.subscriber.check_for_update()
+            update_topic, update_config = self.subscriber.check_for_update()
 
-            if update_topic is None or payload is None:
+            if update_topic is None or update_config is None:
                 break
 
             _, raw_type = update_topic.split("/")
             update_type = GlobalConfigUpdateEnum[raw_type]
 
             if update_type in self.topics:
-                updated_topics.append((update_type, payload))
+                updated_topics.append((update_type, update_config))
 
         return updated_topics
 
