@@ -420,7 +420,15 @@ class FrigateApp:
         logger.info(f"Output process started: {output_processor.pid}")
 
     def start_camera_processor(self) -> None:
-        self.camera_maintainer = CameraMaintainer(self.config, self.stop_event)
+        self.camera_maintainer = CameraMaintainer(
+            self.config,
+            self.detection_queue,
+            self.detection_out_events,
+            self.detected_frames_queue,
+            self.camera_metrics,
+            self.ptz_metrics,
+            self.stop_event,
+        )
         self.camera_maintainer.start()
 
     def start_audio_processor(self) -> None:
@@ -601,7 +609,6 @@ class FrigateApp:
         # stop the onvif controller
         if self.onvif_controller:
             self.onvif_controller.close()
-
 
         # ensure the detectors are done
         for detector in self.detectors.values():
