@@ -153,6 +153,23 @@ class CameraMaintainer(threading.Thread):
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def __stop_camera_capture_process(self, camera: str) -> None:
+        capture_process = self.camera_metrics[camera].capture_process
+        if capture_process is not None:
+            logger.info(f"Waiting for capture process for {camera} to stop")
+            capture_process.terminate()
+            capture_process.join()
+
+    def __stop_camera_process(self, camera: str) -> None:
+        metrics = self.camera_metrics[camera]
+        camera_process = metrics.process
+        if camera_process is not None:
+            logger.info(f"Waiting for process for {camera} to stop")
+            camera_process.terminate()
+            camera_process.join()
+            logger.info(f"Closing frame queue for {camera}")
+            empty_and_close_queue(metrics.frame_queue)
+
     def run(self):
         self.__init_historical_regions()
 
@@ -169,24 +186,18 @@ class CameraMaintainer(threading.Thread):
                 elif update_type == GlobalConfigUpdateEnum.debug_camera:
                     pass
                 elif update_type == GlobalConfigUpdateEnum.remove_camera:
-                    pass
+                    camera = update_payload.get("camera")
+
+                    if camera:
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
 
         # ensure the capture processes are done
-        for camera, metrics in self.camera_metrics.items():
-            capture_process = metrics.capture_process
-            if capture_process is not None:
-                logger.info(f"Waiting for capture process for {camera} to stop")
-                capture_process.terminate()
-                capture_process.join()
+        for camera in self.camera_metrics.keys():
+            self.__stop_camera_capture_process(camera)
 
         # ensure the camera processors are done
-        for camera, metrics in self.camera_metrics.items():
-            camera_process = metrics.process
-            if camera_process is not None:
-                logger.info(f"Waiting for process for {camera} to stop")
-                camera_process.terminate()
-                camera_process.join()
-                logger.info(f"Closing frame queue for {camera}")
-                empty_and_close_queue(metrics.frame_queue)
+        for camera in self.camera_metrics.keys():
+            self.__stop_camera_process(camera)
 
         self.frame_manager.cleanup()
