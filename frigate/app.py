@@ -134,8 +134,13 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
+        # leaving room for 2 extra cameras to be added
         self.detected_frames_queue: Queue = mp.Queue(
-            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
+            maxsize=(
+                sum(camera.enabled_in_config for camera in self.config.cameras.values())
+                + 2
+            )
+            * 2
         )
 
         # Queue for timeline events
