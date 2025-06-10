@@ -1,6 +1,7 @@
 """Create and maintain camera processes / management."""
 
 import logging
+import multiprocessing as mp
 import os
 import shutil
 import threading
@@ -115,11 +116,22 @@ class CameraMaintainer(threading.Thread):
 
         return shm_frame_count
 
-    def __start_camera_processor(self, name: str, config: CameraConfig) -> None:
-        config = self.config.cameras[name]
+    def __start_camera_processor(
+        self, name: str, config: CameraConfig, runtime: bool = False
+    ) -> None:
         if not config.enabled_in_config:
             logger.info(f"Camera processor not started for disabled camera {name}")
             return
+
+        if runtime:
+            self.detection_out_events[name] = mp.Event()
+            self.camera_metrics[name] = CameraMetrics()
+            self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
+            self.region_grids[name] = get_camera_regions_grid(
+                name,
+                config.detect,
+                max(self.config.model.width, self.config.model.height),
+            )
 
         camera_process = FrigateProcess(
             target=track_camera,
@@ -192,7 +204,9 @@ class CameraMaintainer(threading.Thread):
 
             for update_type, update_config in updates:
                 if update_type == GlobalConfigUpdateEnum.add_camera:
-                    self.__start_camera_processor(update_config.name, update_config)
+                    self.__start_camera_processor(
+                        update_config.name, update_config, runtime=True
+                    )
                     self.__start_camera_capture(update_config.name, update_config)
                 elif update_type == GlobalConfigUpdateEnum.debug_camera:
                     pass

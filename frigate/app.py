@@ -277,7 +277,9 @@ class FrigateApp:
                 "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
             },
             timeout=max(
-                60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
+                60,
+                10
+                * len([c for c in self.config.cameras.values() if c.enabled_in_config]),
             ),
             load_vec_extension=self.config.semantic_search.enabled,
         )
@@ -307,7 +309,9 @@ class FrigateApp:
 
     def init_embeddings_client(self) -> None:
         genai_cameras = [
-            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
+            c
+            for c in self.config.cameras.values()
+            if c.enabled_in_config and c.genai.enabled
         ]
 
         if (
