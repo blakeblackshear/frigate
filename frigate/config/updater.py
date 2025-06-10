@@ -45,21 +45,21 @@ class GlobalConfigUpdateSubscriber:
             exact=False,
         )
 
-    def check_for_updates(self) -> dict[str, list[str]]:
-        updated_topics: list[str] = []
+    def check_for_updates(self) -> list[tuple[GlobalConfigUpdateEnum, Any]]:
+        updated_topics: list[tuple[GlobalConfigUpdateEnum, Any]] = []
 
         # get all updates available
         while True:
-            update_topic, update_config = self.subscriber.check_for_update()
+            update_topic, payload = self.subscriber.check_for_update()
 
-            if update_topic is None or update_config is None:
+            if update_topic is None or payload is None:
                 break
 
             _, raw_type = update_topic.split("/")
             update_type = GlobalConfigUpdateEnum[raw_type]
 
             if update_type in self.topics:
-                updated_topics.append(update_type.name)
+                updated_topics.append((update_type, payload))
 
         return updated_topics
 
