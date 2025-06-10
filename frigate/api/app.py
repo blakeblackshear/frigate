@@ -392,14 +392,15 @@ def config_set(request: Request, body: AppConfigSetBody):
     if body.requires_restart == 0 or body.update_topic:
         request.app.frigate_config = config
 
-        if body.update_topic and body.update_topic.startswith("config/cameras/"):
-            _, _, camera, field = body.update_topic.split("/")
+        if body.update_topic:
+            if body.update_topic.startswith("config/cameras/"):
+                _, _, camera, field = body.update_topic.split("/")
 
-            settings = config.get_nested_object(body.update_topic)
-            request.app.config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                settings,
-            )
+                settings = config.get_nested_object(body.update_topic)
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
 
     return JSONResponse(
         content=(
