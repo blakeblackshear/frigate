@@ -93,7 +93,7 @@ class AudioProcessor(util.Process):
 
         if any(
             [
-                conf.audio_transcription.enabled_in_config
+                conf.audio_transcription.enabled_in_config == True
                 for conf in config.cameras.values()
             ]
         ):

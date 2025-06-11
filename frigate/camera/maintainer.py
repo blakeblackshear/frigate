@@ -94,7 +94,7 @@ class CameraMaintainer(threading.Thread):
 
         # leave room for 2 cameras that are added dynamically, if a user wants to add more cameras they may need to increase the SHM size and restart after adding them.
         cam_total_frame_size += 2 * round(
-            (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+            (1280 * 720 * 1.5 + 270480) / 1048576,
             1,
         )
 
