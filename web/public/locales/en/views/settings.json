@@ -148,11 +148,11 @@
     "title": "Camera Settings",
     "streams": {
       "title": "Streams",
-      "desc": "Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
+      "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
     },
     "review": {
       "title": "Review",
-      "desc": "Enable/disable alerts and detections for this camera. When disabled, no new review items will be generated.",
+      "desc": "Temporarily enable/disable alerts and detections for this camera until Frigate restarts. When disabled, no new review items will be generated. ",
       "alerts": "Alerts ",
       "detections": "Detections "
     },

@@ -71,7 +71,8 @@ Or map in all the `/dev/video*` devices.
 
 | CPU Generation | Intel Driver | Recommended Preset  | Notes                                |
 | -------------- | ------------ | ------------------- | ------------------------------------ |
-| gen1 - gen7    | i965         | preset-vaapi        | qsv is not supported                 |
+| gen1 - gen5    | i965         | preset-vaapi        | qsv is not supported                 |
+| gen6 - gen7    | iHD          | preset-vaapi        | qsv is not supported                 |
 | gen8 - gen12   | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used |
 | gen13+         | iHD / Xe     | preset-intel-qsv-\* |                                      |
 | Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-\* |                                      |
