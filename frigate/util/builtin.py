@@ -193,10 +193,11 @@ def update_yaml_from_url(file_path: str, url: str):
 
     for key_path_str, new_value_list in query_string.items():
         key_path = key_path_str.split(".")
-        for i in range(len(key_path)):
+        key_path_copy = key_path.copy()
+        for i in range(len(key_path_copy)):
             try:
-                index = int(key_path[i])
-                key_path[i] = (key_path[i - 1], index)
+                index = int(key_path_copy[i])
+                key_path[i] = (key_path_copy[i - 1], index)
                 key_path.pop(i - 1)
             except ValueError:
                 pass
