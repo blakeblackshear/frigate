@@ -19,7 +19,7 @@ from frigate.const import SHM_FRAMES_VAR
 from frigate.models import Regions
 from frigate.util import Process as FrigateProcess
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
 from frigate.video import capture_camera, track_camera
 
@@ -54,6 +54,7 @@ class CameraMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.remove,
             ],
         )
+        self.detector_camera_publisher = DetectorCameraPublisher()
         self.shm_count = self.__calculate_shm_frame_count()
 
     def __init_historical_regions(self) -> None:
@@ -127,7 +128,6 @@ class CameraMaintainer(threading.Thread):
             return
 
         if runtime:
-            # TODO we have to send a ZMQ message to the object detector with the same out event
             self.detection_out_events[name] = mp.Event()
             self.camera_metrics[name] = CameraMetrics()
             self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
@@ -136,6 +136,11 @@ class CameraMaintainer(threading.Thread):
                 config.detect,
                 max(self.config.model.width, self.config.model.height),
             )
+
+            try:
+                UntrackedSharedMemory(name=f"out-{name}", create=True, size=20 * 6 * 4)
+            except FileExistsError:
+                pass
 
         camera_process = FrigateProcess(
             target=track_camera,
@@ -229,5 +234,6 @@ class CameraMaintainer(threading.Thread):
         for camera in self.camera_metrics.keys():
             self.__stop_camera_process(camera)
 
+        self.detector_camera_publisher.stop()
         self.update_subscriber.stop()
         self.frame_manager.cleanup()
