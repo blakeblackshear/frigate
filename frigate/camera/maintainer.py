@@ -11,7 +11,10 @@ from multiprocessing.synchronize import Event as MpEvent
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.config import FrigateConfig
 from frigate.config.camera import CameraConfig
-from frigate.config.updater import GlobalConfigUpdateEnum, GlobalConfigUpdateSubscriber
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import SHM_FRAMES_VAR
 from frigate.models import Regions
 from frigate.util import Process as FrigateProcess
@@ -44,11 +47,10 @@ class CameraMaintainer(threading.Thread):
         self.ptz_metrics = ptz_metrics
         self.frame_manager = SharedMemoryFrameManager()
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.update_subscriber = GlobalConfigUpdateSubscriber(
+        self.update_subscriber = CameraConfigUpdateSubscriber(
             [
-                GlobalConfigUpdateEnum.add_camera,
-                GlobalConfigUpdateEnum.debug_camera,
-                GlobalConfigUpdateEnum.remove_camera,
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.remove,
             ]
         )
         self.shm_count = self.__calculate_shm_frame_count()
@@ -203,20 +205,20 @@ class CameraMaintainer(threading.Thread):
         while not self.stop_event.wait(1):
             updates = self.update_subscriber.check_for_updates()
 
-            for update_type, update_config in updates:
-                if update_type == GlobalConfigUpdateEnum.add_camera:
-                    self.__start_camera_processor(
-                        update_config.name, update_config, runtime=True
-                    )
-                    self.__start_camera_capture(update_config.name, update_config)
-                elif update_type == GlobalConfigUpdateEnum.debug_camera:
-                    pass
-                elif update_type == GlobalConfigUpdateEnum.remove_camera:
-                    camera = update_config.name
-
-                    if camera:
-                        self.__stop_camera_capture_process(camera)
-                        self.__stop_camera_process(camera)
+            for update_type, updated_cameras in updates:
+                if update_type == CameraConfigUpdateEnum.add.name:
+                    for camera in updated_cameras:
+                        self.__start_camera_processor(
+                            camera,
+                            self.update_subscriber.camera_configs[camera],
+                            runtime=True,
+                        )
+                        self.__start_camera_capture(
+                            camera, self.update_subscriber.camera_configs[camera]
+                        )
+                elif update_type == CameraConfigUpdateEnum.remove.name:
+                    self.__stop_camera_capture_process(camera)
+                    self.__stop_camera_process(camera)
 
         # ensure the capture processes are done
         for camera in self.camera_metrics.keys():

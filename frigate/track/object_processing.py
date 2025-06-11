@@ -32,7 +32,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.config.updater import GlobalConfigUpdateEnum, GlobalConfigUpdateSubscriber
 from frigate.const import FAST_QUEUE_TIMEOUT, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event, Timeline
@@ -67,12 +66,14 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.global_config_subscriber = GlobalConfigUpdateSubscriber(
-            [GlobalConfigUpdateEnum.add_camera, GlobalConfigUpdateEnum.remove_camera]
-        )
         self.camera_config_subscriber = CameraConfigUpdateSubscriber(
             self.config.cameras,
-            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.zones],
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.zones,
+            ],
         )
 
         self.requestor = InterProcessRequestor()
@@ -590,16 +591,6 @@ class TrackedObjectProcessor(threading.Thread):
 
     def run(self):
         while not self.stop_event.is_set():
-            # check for global config updates
-            for topic, payload in self.global_config_subscriber.check_for_updates():
-                if topic == GlobalConfigUpdateEnum.add_camera:
-                    self.create_camera_state(payload["camera"])
-                elif topic == GlobalConfigUpdateEnum.remove_camera:
-                    camera = payload["camera"]
-                    camera_state = self.camera_states[camera]
-                    camera_state.shutdown()
-                    del self.camera_states[camera]
-
             # check for config updates
             updated_topics = self.camera_config_subscriber.check_for_updates()
 
@@ -609,6 +600,17 @@ class TrackedObjectProcessor(threading.Thread):
                         self.camera_states[camera].prev_enabled = self.config.cameras[
                             camera
                         ].enabled
+            elif "add" in updated_topics:
+                for camera in updated_topics["add"]:
+                    self.config.cameras[camera] = (
+                        self.camera_config_subscriber.camera_configs[camera]
+                    )
+                    self.create_camera_state(camera)
+            elif "remove" in updated_topics:
+                for camera in updated_topics["remove"]:
+                    camera_state = self.camera_states[camera]
+                    camera_state.shutdown()
+                    self.camera_states.pop(camera)
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():
