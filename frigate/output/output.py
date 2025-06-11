@@ -103,8 +103,10 @@ def output_frames(
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
     config_subscriber = CameraConfigUpdateSubscriber(
+        config,
         config.cameras,
         [
+            CameraConfigUpdateEnum.add,
             CameraConfigUpdateEnum.birdseye,
             CameraConfigUpdateEnum.enabled,
             CameraConfigUpdateEnum.record,
@@ -135,7 +137,15 @@ def output_frames(
 
     while not stop_event.is_set():
         # check if there is an updated config
-        config_subscriber.check_for_updates()
+        updates = config_subscriber.check_for_updates()
+
+        if "add" in updates:
+            for camera in updates["add"]:
+                jsmpeg_cameras[camera] = JsmpegCamera(
+                    cam_config, stop_event, websocket_server
+                )
+                preview_recorders[camera] = PreviewRecorder(cam_config)
+                preview_write_times[camera] = 0
 
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
         now = datetime.datetime.now().timestamp()

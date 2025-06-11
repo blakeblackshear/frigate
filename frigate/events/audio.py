@@ -90,10 +90,19 @@ class AudioProcessor(util.Process):
         self.camera_metrics = camera_metrics
         self.cameras = cameras
         self.config = config
-        self.transcription_model_runner = AudioTranscriptionModelRunner(
-            self.config.audio_transcription.device,
-            self.config.audio_transcription.model_size,
-        )
+
+        if any(
+            [
+                conf.audio_transcription.enabled_in_config
+                for conf in config.cameras.values()
+            ]
+        ):
+            self.transcription_model_runner = AudioTranscriptionModelRunner(
+                self.config.audio_transcription.device,
+                self.config.audio_transcription.model_size,
+            )
+        else:
+            self.transcription_model_runner = None
 
     def run(self) -> None:
         audio_threads: list[AudioEventMaintainer] = []
@@ -138,7 +147,7 @@ class AudioEventMaintainer(threading.Thread):
         camera: CameraConfig,
         config: FrigateConfig,
         camera_metrics: dict[str, CameraMetrics],
-        audio_transcription_model_runner: AudioTranscriptionModelRunner,
+        audio_transcription_model_runner: AudioTranscriptionModelRunner | None,
         stop_event: threading.Event,
     ) -> None:
         super().__init__(name=f"{camera.name}_audio_event_processor")
@@ -162,6 +171,7 @@ class AudioEventMaintainer(threading.Thread):
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
+            None,
             {self.camera_config.name: self.camera_config},
             [
                 CameraConfigUpdateEnum.audio,
