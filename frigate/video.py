@@ -116,7 +116,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
     config_subscriber = CameraConfigUpdateSubscriber(
-        {config.name: config}, [CameraConfigUpdateEnum.enabled]
+        None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
     )
 
     def get_enabled_state():
@@ -196,7 +196,7 @@ class CameraWatchdog(threading.Thread):
         self.sleeptime = self.config.ffmpeg.retry_interval
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            {config.name: config}, [CameraConfigUpdateEnum.enabled]
+            None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
         )
         self.was_enabled = self.config.enabled
 
@@ -596,6 +596,7 @@ def process_frames(
 ):
     next_region_update = get_tomorrow_at_time(2)
     config_subscriber = CameraConfigUpdateSubscriber(
+        None,
         {camera_name: camera_config},
         [
             CameraConfigUpdateEnum.detect,

@@ -154,10 +154,13 @@ class ReviewSegmentMaintainer(threading.Thread):
         # create communication for review segments
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
+            config,
             config.cameras,
             [
+                CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.record,
+                CameraConfigUpdateEnum.remove,
                 CameraConfigUpdateEnum.review,
             ],
         )

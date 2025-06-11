@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Any
 
 from frigate.comms.config_updater import ConfigPublisher, ConfigSubscriber
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, FrigateConfig
 
 
 class CameraConfigUpdateEnum(str, Enum):
@@ -51,9 +51,11 @@ class CameraConfigUpdatePublisher:
 class CameraConfigUpdateSubscriber:
     def __init__(
         self,
+        config: FrigateConfig | None,
         camera_configs: dict[str, CameraConfig],
         topics: list[CameraConfigUpdateEnum],
     ):
+        self.config = config
         self.camera_configs = camera_configs
         self.topics = topics
 
@@ -71,9 +73,11 @@ class CameraConfigUpdateSubscriber:
         self, camera: str, update_type: CameraConfigUpdateEnum, updated_config: Any
     ) -> None:
         if update_type == CameraConfigUpdateEnum.add:
+            self.config.cameras[camera] = updated_config
             self.camera_configs[camera] = updated_config
             return
         elif update_type == CameraConfigUpdateEnum.remove:
+            self.config.cameras.pop(camera)
             self.camera_configs.pop(camera)
             return
 

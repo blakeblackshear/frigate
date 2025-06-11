@@ -162,6 +162,7 @@ class AudioEventMaintainer(threading.Thread):
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
+            None,
             {self.camera_config.name: self.camera_config},
             [
                 CameraConfigUpdateEnum.audio,

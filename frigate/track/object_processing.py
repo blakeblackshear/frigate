@@ -67,6 +67,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
         self.camera_config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
             self.config.cameras,
             [
                 CameraConfigUpdateEnum.add,

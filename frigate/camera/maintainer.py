@@ -45,6 +45,7 @@ class CameraMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.update_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
             {},
             [
                 CameraConfigUpdateEnum.add,
@@ -170,13 +171,15 @@ class CameraMaintainer(threading.Thread):
         camera_process.start()
         logger.info(f"Camera processor started for {config.name}: {camera_process.pid}")
 
-    def __start_camera_capture(self, name: str, config: CameraConfig) -> None:
-        if not self.config.cameras[name].enabled_in_config:
+    def __start_camera_capture(
+        self, name: str, config: CameraConfig, runtime: bool = False
+    ) -> None:
+        if not config.enabled_in_config:
             logger.info(f"Capture process not started for disabled camera {name}")
             return
 
         # pre-create shms
-        for i in range(self.shm_count):
+        for i in range(10 if runtime else self.shm_count):
             frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
             self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
 
