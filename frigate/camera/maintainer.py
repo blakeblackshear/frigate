@@ -48,10 +48,11 @@ class CameraMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.update_subscriber = CameraConfigUpdateSubscriber(
+            {},
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
-            ]
+            ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
 
@@ -205,7 +206,7 @@ class CameraMaintainer(threading.Thread):
         while not self.stop_event.wait(1):
             updates = self.update_subscriber.check_for_updates()
 
-            for update_type, updated_cameras in updates:
+            for update_type, updated_cameras in updates.items():
                 if update_type == CameraConfigUpdateEnum.add.name:
                     for camera in updated_cameras:
                         self.__start_camera_processor(
@@ -228,4 +229,5 @@ class CameraMaintainer(threading.Thread):
         for camera in self.camera_metrics.keys():
             self.__stop_camera_process(camera)
 
+        self.update_subscriber.stop()
         self.frame_manager.cleanup()

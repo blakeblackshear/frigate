@@ -32,7 +32,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
-from frigate.config.updater import GlobalConfigUpdateEnum, GlobalConfigUpdatePublisher
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
