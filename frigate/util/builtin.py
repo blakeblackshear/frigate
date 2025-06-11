@@ -184,7 +184,7 @@ def create_mask(frame_shape, mask):
     mask_img[:] = 255
 
 
-def update_yaml_from_url(file_path, url):
+def update_yaml_from_url(file_path: str, url: str):
     parsed_url = urllib.parse.urlparse(url)
     query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
 
@@ -213,7 +213,7 @@ def update_yaml_from_url(file_path, url):
             update_yaml_file(file_path, key_path, value)
 
 
-def update_yaml_file(file_path, key_path, new_value):
+def update_yaml_file(file_path: str, key_path: str, new_value: Any):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
 

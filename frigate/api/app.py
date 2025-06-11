@@ -391,7 +391,7 @@ def config_set(request: Request, body: AppConfigSetBody):
         )
 
     if body.requires_restart == 0 or body.update_topic:
-        old_config = request.app.frigate_config
+        old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
 
         if body.update_topic and body.update_topic.startswith("config/cameras/"):
@@ -400,7 +400,7 @@ def config_set(request: Request, body: AppConfigSetBody):
             if field == "add":
                 settings = config.cameras[camera]
             elif field == "remove":
-                
+                settings = old_config.cameras[camera]
             else:
                 settings = config.get_nested_object(body.update_topic)
 
