@@ -116,7 +116,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
     config_subscriber = CameraConfigUpdateSubscriber(
-        {config.name: config}, [CameraConfigUpdateEnum.enabled]
+        None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
     )
 
     def get_enabled_state():
@@ -196,7 +196,7 @@ class CameraWatchdog(threading.Thread):
         self.sleeptime = self.config.ffmpeg.retry_interval
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            {config.name: config}, [CameraConfigUpdateEnum.enabled]
+            None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
         )
         self.was_enabled = self.config.enabled
 
@@ -483,7 +483,6 @@ def track_camera(
     model_config: ModelConfig,
     labelmap: dict[int, str],
     detection_queue: Queue,
-    result_connection: MpEvent,
     detected_objects_queue,
     camera_metrics: CameraMetrics,
     ptz_metrics: PTZMetrics,
@@ -513,7 +512,7 @@ def track_camera(
         ptz_metrics=ptz_metrics,
     )
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config, stop_event
+        name, labelmap, detection_queue, model_config, stop_event
     )
 
     object_tracker = NorfairTracker(config, ptz_metrics)
@@ -607,6 +606,7 @@ def process_frames(
 ):
     next_region_update = get_tomorrow_at_time(2)
     config_subscriber = CameraConfigUpdateSubscriber(
+        None,
         {camera_name: camera_config},
         [
             CameraConfigUpdateEnum.detect,
