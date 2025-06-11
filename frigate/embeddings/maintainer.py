@@ -29,13 +29,13 @@ from frigate.comms.recordings_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.config.camera.camera import CameraTypeEnum
-from frigate.const import (
-    CLIPS_DIR,
-    UPDATE_EVENT_DESCRIPTION,
-)
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
+)
+from frigate.const import (
+    CLIPS_DIR,
+    UPDATE_EVENT_DESCRIPTION,
 )
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
