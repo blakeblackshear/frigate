@@ -23,6 +23,7 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.object_detector_signaler import DetectorProxy
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
@@ -330,6 +331,7 @@ class FrigateApp:
         self.inter_config_updater = CameraConfigUpdatePublisher()
         self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
+        self.detection_proxy = DetectorProxy()
 
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
@@ -661,6 +663,7 @@ class FrigateApp:
         self.inter_config_updater.stop()
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
+        self.detection_proxy.stop()
 
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()

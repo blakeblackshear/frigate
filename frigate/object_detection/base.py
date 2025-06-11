@@ -149,8 +149,7 @@ def run_detector(
             create_output_shm(connection_id)
 
         outputs[connection_id]["np"][:] = detections[:]
-        signal_id = f"{connection_id}/update"
-        detector_publisher.publish(signal_id, signal_id)
+        detector_publisher.publish(connection_id)
         start.value = 0.0
 
         avg_speed.value = (avg_speed.value * 9 + duration) / 10
@@ -231,7 +230,7 @@ class RemoteObjectDetector:
         )
         self.out_shm = UntrackedSharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm = np.ndarray((20, 6), dtype=np.float32, buffer=self.out_shm.buf)
-        self.detector_subscriber = ObjectDetectorSubscriber(f"{name}/update")
+        self.detector_subscriber = ObjectDetectorSubscriber(name)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
