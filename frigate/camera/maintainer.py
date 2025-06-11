@@ -230,7 +230,9 @@ class CameraMaintainer(threading.Thread):
                             runtime=True,
                         )
                         self.__start_camera_capture(
-                            camera, self.update_subscriber.camera_configs[camera]
+                            camera,
+                            self.update_subscriber.camera_configs[camera],
+                            runtime=True,
                         )
                 elif update_type == CameraConfigUpdateEnum.remove.name:
                     self.__stop_camera_capture_process(camera)
