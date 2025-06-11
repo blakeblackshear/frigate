@@ -5,12 +5,13 @@ from enum import Enum
 from typing import Any
 
 from frigate.comms.config_updater import ConfigPublisher, ConfigSubscriber
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, FrigateConfig
 
 
 class CameraConfigUpdateEnum(str, Enum):
     """Supported camera config update types."""
 
+    add = "add"  # for adding a camera
     audio = "audio"
     audio_transcription = "audio_transcription"
     birdseye = "birdseye"
@@ -20,6 +21,7 @@ class CameraConfigUpdateEnum(str, Enum):
     notifications = "notifications"
     objects = "objects"
     record = "record"
+    remove = "remove"  # for removing a camera
     review = "review"
     snapshots = "snapshots"
     zones = "zones"
@@ -49,9 +51,11 @@ class CameraConfigUpdatePublisher:
 class CameraConfigUpdateSubscriber:
     def __init__(
         self,
+        config: FrigateConfig | None,
         camera_configs: dict[str, CameraConfig],
         topics: list[CameraConfigUpdateEnum],
     ):
+        self.config = config
         self.camera_configs = camera_configs
         self.topics = topics
 
@@ -68,14 +72,23 @@ class CameraConfigUpdateSubscriber:
     def __update_config(
         self, camera: str, update_type: CameraConfigUpdateEnum, updated_config: Any
     ) -> None:
-        config = self.camera_configs[camera]
+        if update_type == CameraConfigUpdateEnum.add:
+            self.config.cameras[camera] = updated_config
+            self.camera_configs[camera] = updated_config
+            return
+        elif update_type == CameraConfigUpdateEnum.remove:
+            self.config.cameras.pop(camera)
+            self.camera_configs.pop(camera)
+            return
+
+        config = self.camera_configs.get(camera)
 
         if not config:
             return
 
         if update_type == CameraConfigUpdateEnum.audio:
             config.audio = updated_config
-        if update_type == CameraConfigUpdateEnum.audio_transcription:
+        elif update_type == CameraConfigUpdateEnum.audio_transcription:
             config.audio_transcription = updated_config
         elif update_type == CameraConfigUpdateEnum.birdseye:
             config.birdseye = updated_config
