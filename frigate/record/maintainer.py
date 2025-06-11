@@ -75,7 +75,9 @@ class RecordingMaintainer(threading.Thread):
         # create communication for retained recordings
         self.requestor = InterProcessRequestor()
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            self.config.cameras, [CameraConfigUpdateEnum.record]
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.record],
         )
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
         self.recordings_publisher = RecordingsDataPublisher(

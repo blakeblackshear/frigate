@@ -81,7 +81,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             "config/notifications", exact=True
         )
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            self.config.cameras, [CameraConfigUpdateEnum.notifications]
+            self.config, self.config.cameras, [CameraConfigUpdateEnum.notifications]
         )
 
     def subscribe(self, receiver: Callable) -> None:
@@ -170,7 +170,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         if updated_notification_config:
             self.config.notifications = updated_notification_config
 
-        self.config_subscriber.check_for_updates()
+        updates = self.config_subscriber.check_for_updates()
+
+        if "add" in updates:
+            for camera in updates["add"]:
+                self.suspended_cameras[camera] = 0
+                self.last_camera_notification_time[camera] = 0
 
         if topic == "reviews":
             decoded = json.loads(payload)

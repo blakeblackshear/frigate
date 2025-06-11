@@ -29,6 +29,10 @@ from frigate.comms.recordings_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.config.camera.camera import CameraTypeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
@@ -87,6 +91,11 @@ class EmbeddingMaintainer(threading.Thread):
         self.config = config
         self.metrics = metrics
         self.embeddings = None
+        self.config_updater = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.remove],
+        )
 
         if config.semantic_search.enabled:
             self.embeddings = Embeddings(config, db, metrics)
@@ -198,6 +207,7 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
+            self.config_updater.check_for_updates()
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
@@ -206,6 +216,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_finalized()
             self._process_event_metadata()
 
+        self.config_updater.stop()
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()

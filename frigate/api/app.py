@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import traceback
+import urllib
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
@@ -36,8 +37,10 @@ from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
+    flatten_config_data,
     get_tz_modifiers,
-    update_yaml_from_url,
+    process_config_query_string,
+    update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
 from frigate.util.services import (
@@ -358,14 +361,37 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     with open(config_file, "r") as f:
         old_raw_config = f.read()
-        f.close()
 
     try:
-        update_yaml_from_url(config_file, str(request.url))
+        updates = {}
+
+        # process query string parameters (takes precedence over body.config_data)
+        parsed_url = urllib.parse.urlparse(str(request.url))
+        query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
+
+        # Filter out empty keys but keep blank values for non-empty keys
+        query_string = {k: v for k, v in query_string.items() if k}
+
+        if query_string:
+            updates = process_config_query_string(query_string)
+        elif body.config_data:
+            updates = flatten_config_data(body.config_data)
+
+        if not updates:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No configuration data provided"}
+                ),
+                status_code=400,
+            )
+
+        # apply all updates in a single operation
+        update_yaml_file_bulk(config_file, updates)
+
+        # validate the updated config
         with open(config_file, "r") as f:
             new_raw_config = f.read()
-            f.close()
-        # Validate the config schema
+
         try:
             config = FrigateConfig.parse(new_raw_config)
         except Exception:
@@ -390,12 +416,19 @@ def config_set(request: Request, body: AppConfigSetBody):
         )
 
     if body.requires_restart == 0 or body.update_topic:
+        old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
 
         if body.update_topic and body.update_topic.startswith("config/cameras/"):
             _, _, camera, field = body.update_topic.split("/")
 
-            settings = config.get_nested_object(body.update_topic)
+            if field == "add":
+                settings = config.cameras[camera]
+            elif field == "remove":
+                settings = old_config.cameras[camera]
+            else:
+                settings = config.get_nested_object(body.update_topic)
+
             request.app.config_publisher.publish_update(
                 CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
                 settings,

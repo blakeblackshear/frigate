@@ -14,7 +14,7 @@ import urllib.parse
 from collections.abc import Mapping
 from multiprocessing.sharedctypes import Synchronized
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
@@ -184,25 +184,12 @@ def create_mask(frame_shape, mask):
     mask_img[:] = 255
 
 
-def update_yaml_from_url(file_path, url):
-    parsed_url = urllib.parse.urlparse(url)
-    query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
-
-    # Filter out empty keys but keep blank values for non-empty keys
-    query_string = {k: v for k, v in query_string.items() if k}
-
+def process_config_query_string(query_string: Dict[str, list]) -> Dict[str, Any]:
+    updates = {}
     for key_path_str, new_value_list in query_string.items():
-        key_path = key_path_str.split(".")
-        for i in range(len(key_path)):
-            try:
-                index = int(key_path[i])
-                key_path[i] = (key_path[i - 1], index)
-                key_path.pop(i - 1)
-            except ValueError:
-                pass
-
+        # use the string key as-is for updates dictionary
         if len(new_value_list) > 1:
-            update_yaml_file(file_path, key_path, new_value_list)
+            updates[key_path_str] = new_value_list
         else:
             value = new_value_list[0]
             try:
@@ -210,10 +197,24 @@ def update_yaml_from_url(file_path, url):
                 value = ast.literal_eval(value) if "," not in value else value
             except (ValueError, SyntaxError):
                 pass
-            update_yaml_file(file_path, key_path, value)
+            updates[key_path_str] = value
+    return updates
 
 
-def update_yaml_file(file_path, key_path, new_value):
+def flatten_config_data(
+    config_data: Dict[str, Any], parent_key: str = ""
+) -> Dict[str, Any]:
+    items = []
+    for key, value in config_data.items():
+        new_key = f"{parent_key}.{key}" if parent_key else key
+        if isinstance(value, dict):
+            items.extend(flatten_config_data(value, new_key).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+
+def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
 
@@ -226,7 +227,17 @@ def update_yaml_file(file_path, key_path, new_value):
         )
         return
 
-    data = update_yaml(data, key_path, new_value)
+    # Apply all updates
+    for key_path_str, new_value in updates.items():
+        key_path = key_path_str.split(".")
+        for i in range(len(key_path)):
+            try:
+                index = int(key_path[i])
+                key_path[i] = (key_path[i - 1], index)
+                key_path.pop(i - 1)
+            except ValueError:
+                pass
+        data = update_yaml(data, key_path, new_value)
 
     try:
         with open(file_path, "w") as f:

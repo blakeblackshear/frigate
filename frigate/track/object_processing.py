@@ -66,9 +66,15 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.config_subscriber = CameraConfigUpdateSubscriber(
+        self.camera_config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
             self.config.cameras,
-            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.zones],
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.zones,
+            ],
         )
 
         self.requestor = InterProcessRequestor()
@@ -90,6 +96,12 @@ class TrackedObjectProcessor(threading.Thread):
         # }
         self.zone_data = defaultdict(lambda: defaultdict(dict))
         self.active_zone_data = defaultdict(lambda: defaultdict(dict))
+
+        for camera in self.config.cameras.keys():
+            self.create_camera_state(camera)
+
+    def create_camera_state(self, camera: str) -> None:
+        """Creates a new camera state."""
 
         def start(camera: str, obj: TrackedObject, frame_name: str):
             self.event_sender.publish(
@@ -198,17 +210,16 @@ class TrackedObjectProcessor(threading.Thread):
                 self.camera_activity[camera] = activity
                 self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
 
-        for camera in self.config.cameras.keys():
-            camera_state = CameraState(
-                camera, self.config, self.frame_manager, self.ptz_autotracker_thread
-            )
-            camera_state.on("start", start)
-            camera_state.on("autotrack", autotrack)
-            camera_state.on("update", update)
-            camera_state.on("end", end)
-            camera_state.on("snapshot", snapshot)
-            camera_state.on("camera_activity", camera_activity)
-            self.camera_states[camera] = camera_state
+        camera_state = CameraState(
+            camera, self.config, self.frame_manager, self.ptz_autotracker_thread
+        )
+        camera_state.on("start", start)
+        camera_state.on("autotrack", autotrack)
+        camera_state.on("update", update)
+        camera_state.on("end", end)
+        camera_state.on("snapshot", snapshot)
+        camera_state.on("camera_activity", camera_activity)
+        self.camera_states[camera] = camera_state
 
     def should_save_snapshot(self, camera, obj: TrackedObject):
         if obj.false_positive:
@@ -582,7 +593,7 @@ class TrackedObjectProcessor(threading.Thread):
     def run(self):
         while not self.stop_event.is_set():
             # check for config updates
-            updated_topics = self.config_subscriber.check_for_updates()
+            updated_topics = self.camera_config_subscriber.check_for_updates()
 
             if "enabled" in updated_topics:
                 for camera in updated_topics["enabled"]:
@@ -590,6 +601,17 @@ class TrackedObjectProcessor(threading.Thread):
                         self.camera_states[camera].prev_enabled = self.config.cameras[
                             camera
                         ].enabled
+            elif "add" in updated_topics:
+                for camera in updated_topics["add"]:
+                    self.config.cameras[camera] = (
+                        self.camera_config_subscriber.camera_configs[camera]
+                    )
+                    self.create_camera_state(camera)
+            elif "remove" in updated_topics:
+                for camera in updated_topics["remove"]:
+                    camera_state = self.camera_states[camera]
+                    camera_state.shutdown()
+                    self.camera_states.pop(camera)
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():
@@ -698,6 +720,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_sender.stop()
         self.event_end_subscriber.stop()
         self.sub_label_subscriber.stop()
-        self.config_subscriber.stop()
+        self.camera_config_subscriber.stop()
 
         logger.info("Exiting object processor...")
