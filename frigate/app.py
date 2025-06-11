@@ -137,7 +137,10 @@ class FrigateApp:
         # leaving room for 2 extra cameras to be added
         self.detected_frames_queue: Queue = mp.Queue(
             maxsize=(
-                sum(camera.enabled_in_config for camera in self.config.cameras.values())
+                sum(
+                    camera.enabled_in_config == True
+                    for camera in self.config.cameras.values()
+                )
                 + 2
             )
             * 2
