@@ -473,7 +473,6 @@ def track_camera(
     model_config: ModelConfig,
     labelmap: dict[int, str],
     detection_queue: Queue,
-    result_connection: MpEvent,
     detected_objects_queue,
     camera_metrics: CameraMetrics,
     ptz_metrics: PTZMetrics,
@@ -503,7 +502,7 @@ def track_camera(
         ptz_metrics=ptz_metrics,
     )
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config, stop_event
+        name, labelmap, detection_queue, model_config, stop_event
     )
 
     object_tracker = NorfairTracker(config, ptz_metrics)

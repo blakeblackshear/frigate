@@ -31,7 +31,6 @@ class CameraMaintainer(threading.Thread):
         self,
         config: FrigateConfig,
         detection_queue: Queue,
-        detection_out_events: dict[str, MpEvent],
         detected_frames_queue: Queue,
         camera_metrics: dict[str, CameraMetrics],
         ptz_metrics: dict[str, PTZMetrics],
@@ -40,7 +39,6 @@ class CameraMaintainer(threading.Thread):
         super().__init__(name="camera_processor")
         self.config = config
         self.detection_queue = detection_queue
-        self.detection_out_events = detection_out_events
         self.detected_frames_queue = detected_frames_queue
         self.stop_event = stop_event
         self.camera_metrics = camera_metrics
@@ -54,7 +52,6 @@ class CameraMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.remove,
             ],
         )
-        self.detector_camera_publisher = DetectorCameraPublisher()
         self.shm_count = self.__calculate_shm_frame_count()
 
     def __init_historical_regions(self) -> None:
@@ -151,7 +148,6 @@ class CameraMaintainer(threading.Thread):
                 self.config.model,
                 self.config.model.merged_labelmap,
                 self.detection_queue,
-                self.detection_out_events[name],
                 self.detected_frames_queue,
                 self.camera_metrics[name],
                 self.ptz_metrics[name],
@@ -234,6 +230,5 @@ class CameraMaintainer(threading.Thread):
         for camera in self.camera_metrics.keys():
             self.__stop_camera_process(camera)
 
-        self.detector_camera_publisher.stop()
         self.update_subscriber.stop()
         self.frame_manager.cleanup()

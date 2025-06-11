@@ -82,7 +82,6 @@ class FrigateApp:
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
-        self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
@@ -363,8 +362,6 @@ class FrigateApp:
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
-            self.detection_out_events[name] = mp.Event()
-
             try:
                 largest_frame = max(
                     [
@@ -396,7 +393,7 @@ class FrigateApp:
             self.detectors[name] = ObjectDetectProcess(
                 name,
                 self.detection_queue,
-                self.detection_out_events,
+                list(self.config.cameras.keys()),
                 detector_config,
             )
 
@@ -435,7 +432,6 @@ class FrigateApp:
         self.camera_maintainer = CameraMaintainer(
             self.config,
             self.detection_queue,
-            self.detection_out_events,
             self.detected_frames_queue,
             self.camera_metrics,
             self.ptz_metrics,
