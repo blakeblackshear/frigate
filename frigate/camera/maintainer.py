@@ -179,14 +179,15 @@ class CameraMaintainer(threading.Thread):
             return
 
         # pre-create shms
-        for i in range(10 if runtime else self.shm_count):
+        count = 10 if runtime else self.shm_count
+        for i in range(count):
             frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
             self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
 
         capture_process = FrigateProcess(
             target=capture_camera,
             name=f"camera_capture:{name}",
-            args=(config, self.shm_count, self.camera_metrics[name]),
+            args=(config, count, self.camera_metrics[name]),
         )
         capture_process.daemon = True
         self.camera_metrics[name].capture_process = capture_process
