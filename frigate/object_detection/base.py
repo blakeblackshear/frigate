@@ -112,15 +112,18 @@ def run_detector(
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
+    def create_output_shm(name: str):
+        out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
+        out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
+        outputs[name] = {"shm": out_shm, "np": out_np}
+
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(detector_config=detector_config)
     detector_publisher = ObjectDetectorPublisher()
 
     outputs = {}
     for name in cameras:
-        out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
-        out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
-        outputs[name] = {"shm": out_shm, "np": out_np}
+        create_output_shm(name)
 
     while not stop_event.is_set():
         try:
@@ -141,6 +144,10 @@ def run_detector(
         detections = object_detector.detect_raw(input_frame)
         duration = datetime.datetime.now().timestamp() - start.value
         frame_manager.close(connection_id)
+
+        if connection_id not in outputs:
+            create_output_shm(connection_id)
+
         outputs[connection_id]["np"][:] = detections[:]
         detector_publisher.publish(connection_id, connection_id)
         start.value = 0.0

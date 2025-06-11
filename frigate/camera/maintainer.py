@@ -1,7 +1,6 @@
 """Create and maintain camera processes / management."""
 
 import logging
-import multiprocessing as mp
 import os
 import shutil
 import threading
@@ -125,7 +124,6 @@ class CameraMaintainer(threading.Thread):
             return
 
         if runtime:
-            self.detection_out_events[name] = mp.Event()
             self.camera_metrics[name] = CameraMetrics()
             self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
             self.region_grids[name] = get_camera_regions_grid(
@@ -135,7 +133,20 @@ class CameraMaintainer(threading.Thread):
             )
 
             try:
+                largest_frame = max(
+                    [
+                        det.model.height * det.model.width * 3
+                        if det.model is not None
+                        else 320
+                        for det in self.config.detectors.values()
+                    ]
+                )
                 UntrackedSharedMemory(name=f"out-{name}", create=True, size=20 * 6 * 4)
+                UntrackedSharedMemory(
+                    name=name,
+                    create=True,
+                    size=largest_frame,
+                )
             except FileExistsError:
                 pass
 
