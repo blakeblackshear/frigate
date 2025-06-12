@@ -1,9 +1,7 @@
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import queue
-import signal
 import subprocess as sp
 import threading
 import time
@@ -12,7 +10,6 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 import cv2
-from setproctitle import setproctitle
 
 import frigate.util as util
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -318,7 +315,7 @@ class CameraWatchdog(threading.Thread):
             ffmpeg_cmd, self.logger, self.logpipe, self.frame_size
         )
         self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
-        self.capture_thread = CameraCapture(
+        self.capture_thread = CameraCaptureRunner(
             self.config,
             self.shm_frame_count,
             self.frame_index,
@@ -396,7 +393,7 @@ class CameraWatchdog(threading.Thread):
         return newest_segment_time
 
 
-class CameraCapture(threading.Thread):
+class CameraCaptureRunner(threading.Thread):
     def __init__(
         self,
         config: CameraConfig,
@@ -440,31 +437,28 @@ class CameraCapture(threading.Thread):
         )
 
 
-def capture_camera(
-    config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
-):
-    stop_event = mp.Event()
+class CameraCapture(util.Process):
+    def __init__(
+        self, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
+    ) -> None:
+        super().__init__(name=f"camera_capture:{config.name}", daemon=True)
+        self.config = config
+        self.shm_frame_count = shm_frame_count
+        self.camera_metrics = camera_metrics
 
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    threading.current_thread().name = f"capture:{config.name}"
-    setproctitle(f"frigate.capture:{config.name}")
-
-    camera_watchdog = CameraWatchdog(
-        config,
-        shm_frame_count,
-        camera_metrics.frame_queue,
-        camera_metrics.camera_fps,
-        camera_metrics.skipped_fps,
-        camera_metrics.ffmpeg_pid,
-        stop_event,
-    )
-    camera_watchdog.start()
-    camera_watchdog.join()
+    def run(self) -> None:
+        self.pre_run_setup()
+        camera_watchdog = CameraWatchdog(
+            self.config,
+            self.shm_frame_count,
+            self.camera_metrics.frame_queue,
+            self.camera_metrics.camera_fps,
+            self.camera_metrics.skipped_fps,
+            self.camera_metrics.ffmpeg_pid,
+            self.stop_event,
+        )
+        camera_watchdog.start()
+        camera_watchdog.join()
 
 
 class CameraTracker(util.Process):

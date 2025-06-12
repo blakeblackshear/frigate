@@ -18,11 +18,10 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import SHM_FRAMES_VAR
 from frigate.models import Regions
-from frigate.util import Process as FrigateProcess
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
-from frigate.video import CameraTracker, capture_camera
+from frigate.video import CameraCapture, CameraTracker
 
 logger = logging.getLogger(__name__)
 
@@ -183,11 +182,7 @@ class CameraMaintainer(threading.Thread):
             frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
             self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
 
-        capture_process = FrigateProcess(
-            target=capture_camera,
-            name=f"camera_capture:{name}",
-            args=(config, count, self.camera_metrics[name]),
-        )
+        capture_process = CameraCapture(config, count, self.camera_metrics[name])
         capture_process.daemon = True
         self.capture_processes[name] = capture_process
         capture_process.start()
