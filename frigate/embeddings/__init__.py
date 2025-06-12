@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class EmbeddingProcess(FrigateProcess):
-    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
+    def __init__(self, config: FrigateConfig, metrics: DataProcessorMetrics | None) -> None:
         super().__init__(name="frigate.embeddings_manager", daemon=True)
         self.config = config
         self.metrics = metrics

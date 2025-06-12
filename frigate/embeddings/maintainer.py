@@ -83,7 +83,7 @@ class EmbeddingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics,
+        metrics: DataProcessorMetrics | None,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
