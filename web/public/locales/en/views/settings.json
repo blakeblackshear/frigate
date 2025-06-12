@@ -176,6 +176,35 @@
       "toast": {
         "success": "Review Classification configuration has been saved. Restart Frigate to apply changes."
       }
+    },
+    "addCamera": "Add New Camera",
+    "editCamera": "Edit Camera:",
+    "selectCamera": "Select a Camera",
+    "backToSettings": "Back to Camera Settings",
+    "cameraConfig": {
+      "add": "Add Camera",
+      "edit": "Edit Camera",
+      "description": "Configure camera settings including stream inputs and roles.",
+      "name": "Camera Name",
+      "nameRequired": "Camera name is required",
+      "nameInvalid": "Camera name must contain only letters, numbers, underscores, or hyphens",
+      "namePlaceholder": "e.g., front_door",
+      "enabled": "Enabled",
+      "ffmpeg": {
+        "inputs": "Input Streams",
+        "path": "Stream Path",
+        "pathRequired": "Stream path is required",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "At least one role is required",
+        "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
+        "addInput": "Add Input Stream",
+        "removeInput": "Remove Input Stream",
+        "inputsRequired": "At least one input stream is required"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} saved successfully"
+      }
     }
   },
   "masksAndZones": {
