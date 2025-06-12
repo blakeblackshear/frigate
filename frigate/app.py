@@ -5,6 +5,7 @@ import os
 import secrets
 import shutil
 from multiprocessing import Queue
+from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Optional
@@ -14,7 +15,6 @@ import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 
-import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -24,6 +24,7 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.object_detector_signaler import DetectorProxy
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
@@ -41,7 +42,7 @@ from frigate.const import (
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
@@ -58,13 +59,13 @@ from frigate.models import (
     User,
 )
 from frigate.object_detection.base import ObjectDetectProcess
-from frigate.output.output import output_frames
+from frigate.output.output import OutputProcess
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
-from frigate.record.record import manage_recordings
-from frigate.review.review import manage_review_segments
+from frigate.record.record import RecordProcess
+from frigate.review.review import ReviewProcess
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
@@ -80,16 +81,19 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(self, config: FrigateConfig, manager: SyncManager) -> None:
+        self.metrics_manager = manager
         self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.camera_metrics: DictProxy = self.metrics_manager.dict()
         self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics(list(config.classification.custom.keys()))
+            DataProcessorMetrics(
+                self.metrics_manager, list(config.classification.custom.keys())
+            )
             if (
                 config.semantic_search.enabled
                 or config.lpr.enabled
@@ -127,7 +131,7 @@ class FrigateApp:
     def init_camera_metrics(self) -> None:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            self.camera_metrics[camera_name] = CameraMetrics()
+            self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
             self.ptz_metrics[camera_name] = PTZMetrics(
                 autotracker_enabled=self.config.cameras[
                     camera_name
@@ -221,24 +225,14 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = util.Process(
-            target=manage_recordings,
-            name="recording_manager",
-            args=(self.config,),
-        )
-        recording_process.daemon = True
+        recording_process = RecordProcess(self.config)
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = util.Process(
-            target=manage_review_segments,
-            name="review_segment_manager",
-            args=(self.config,),
-        )
-        review_segment_process.daemon = True
+        review_segment_process = ReviewProcess(self.config)
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
@@ -257,15 +251,10 @@ class FrigateApp:
         ):
             return
 
-        embedding_process = util.Process(
-            target=manage_embeddings,
-            name="embeddings_manager",
-            args=(
-                self.config,
-                self.embeddings_metrics,
-            ),
+        embedding_process = EmbeddingProcess(
+            self.config,
+            self.embeddings_metrics,
         )
-        embedding_process.daemon = True
         self.embedding_process = embedding_process
         embedding_process.start()
         self.processes["embeddings"] = embedding_process.pid or 0
@@ -333,6 +322,7 @@ class FrigateApp:
         self.inter_config_updater = CameraConfigUpdatePublisher()
         self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
+        self.detection_proxy = DetectorProxy()
 
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
@@ -421,12 +411,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = util.Process(
-            target=output_frames,
-            name="output_processor",
-            args=(self.config,),
-        )
-        output_processor.daemon = True
+        output_processor = OutputProcess(self.config)
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
@@ -560,11 +545,11 @@ class FrigateApp:
         self.init_recording_manager()
         self.init_review_segment_manager()
         self.init_go2rtc()
-        self.start_detectors()
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
+        self.start_detectors()
         self.init_dispatcher()
         self.init_embeddings_client()
         self.start_video_output_processor()
@@ -670,13 +655,13 @@ class FrigateApp:
         self.inter_config_updater.stop()
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
+        self.detection_proxy.stop()
 
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
 
-        # exit the mp Manager process
         _stop_logging()
-
+        self.metrics_manager.shutdown()
         os._exit(os.EX_OK)

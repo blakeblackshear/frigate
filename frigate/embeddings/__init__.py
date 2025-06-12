@@ -3,27 +3,23 @@
 import base64
 import json
 import logging
-import multiprocessing as mp
 import os
-import signal
 import threading
 from json.decoder import JSONDecodeError
-from types import FrameType
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import regex
 from pathvalidate import ValidationError, sanitize_filename
-from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR, FACE_DIR
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.models import Event, Recordings
+from frigate.models import Event
+from frigate.util import Process as FrigateProcess
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
-from frigate.util.services import listen
 
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
@@ -31,40 +27,22 @@ from .util import ZScoreNormalization
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
-    stop_event = mp.Event()
+class EmbeddingProcess(FrigateProcess):
+    def __init__(
+        self, config: FrigateConfig, metrics: DataProcessorMetrics | None
+    ) -> None:
+        super().__init__(name="frigate.embeddings_manager", daemon=True)
+        self.config = config
+        self.metrics = metrics
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    threading.current_thread().name = "process:embeddings_manager"
-    setproctitle("frigate.embeddings_manager")
-    listen()
-
-    # Configure Frigate DB
-    db = SqliteVecQueueDatabase(
-        config.database.path,
-        pragmas={
-            "auto_vacuum": "FULL",  # Does not defragment database
-            "cache_size": -512 * 1000,  # 512MB of cache
-            "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
-        },
-        timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
-        load_vec_extension=True,
-    )
-    models = [Event, Recordings]
-    db.bind(models)
-
-    maintainer = EmbeddingMaintainer(
-        db,
-        config,
-        metrics,
-        stop_event,
-    )
-    maintainer.start()
+    def run(self) -> None:
+        self.pre_run_setup()
+        maintainer = EmbeddingMaintainer(
+            self.config,
+            self.metrics,
+            self.stop_event,
+        )
+        maintainer.start()
 
 
 class EmbeddingsContext:
