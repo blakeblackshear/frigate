@@ -343,7 +343,7 @@ def empty_and_close_queue(q: mp.Queue):
         try:
             try:
                 q.get(block=True, timeout=0.5)
-            except queue.Empty:
+            except (queue.Empty, EOFError):
                 q.close()
                 q.join_thread()
                 return
