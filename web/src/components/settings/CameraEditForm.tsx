@@ -73,27 +73,27 @@ export default function CameraEditForm({
             )
             .min(1, {
               message: t("camera.cameraConfig.ffmpeg.inputsRequired"),
-            }),
-          // .refine(
-          //   (inputs) => {
-          //     const roleOccurrences = new Map<Role, number>();
-          //     inputs.forEach((input) => {
-          //       input.roles.forEach((role) => {
-          //         roleOccurrences.set(
-          //           role,
-          //           (roleOccurrences.get(role) || 0) + 1,
-          //         );
-          //       });
-          //     });
-          //     return Array.from(roleOccurrences.values()).every(
-          //       (count) => count <= 1,
-          //     );
-          //   },
-          //   {
-          //     message: t("camera.cameraConfig.ffmpeg.rolesUnique"),
-          //     path: ["inputs"],
-          //   },
-          // ),
+            })
+            .refine(
+              (inputs) => {
+                const roleOccurrences = new Map<Role, number>();
+                inputs.forEach((input) => {
+                  input.roles.forEach((role) => {
+                    roleOccurrences.set(
+                      role,
+                      (roleOccurrences.get(role) || 0) + 1,
+                    );
+                  });
+                });
+                return Array.from(roleOccurrences.values()).every(
+                  (count) => count <= 1,
+                );
+              },
+              {
+                message: t("camera.cameraConfig.ffmpeg.rolesUnique"),
+                path: ["inputs"],
+              },
+            ),
         }),
       }),
     [t],
@@ -149,19 +149,12 @@ export default function CameraEditForm({
     name: "ffmpeg.inputs",
   });
 
-  // Track used roles across all streams in the form
-  // const currentUsedRoles = useMemo(() => {
-  //   const roles = new Set<Role>();
-  //   const values = form.getValues();
-  //   values.ffmpeg.inputs.forEach((input) => {
-  //     input.roles.forEach((role) => roles.add(role));
-  //   });
-  //   return roles;
-  // }, [form]);
+  // Watch ffmpeg.inputs to track used roles
+  const watchedInputs = form.watch("ffmpeg.inputs");
 
   const saveCameraConfig = (values: FormValues) => {
     setIsLoading(true);
-    const configData = {
+    const configData: ConfigSetBody["config_data"] = {
       cameras: {
         [values.cameraName]: {
           enabled: values.enabled,
@@ -220,7 +213,11 @@ export default function CameraEditForm({
       // If camera name changed, delete old camera config
       const deleteRequestBody: ConfigSetBody = {
         requires_restart: 1,
-        config_data: { cameras: { [cameraName]: "" } },
+        config_data: {
+          cameras: {
+            [cameraName]: "",
+          },
+        },
         update_topic: `config/cameras/${cameraName}/remove`,
       };
 
@@ -247,12 +244,21 @@ export default function CameraEditForm({
 
   // Determine available roles for new streams
   const getAvailableRoles = (): Role[] => {
-    const values = form.getValues();
     const used = new Set<Role>();
-    values.ffmpeg.inputs.forEach((input) => {
+    watchedInputs.forEach((input) => {
       input.roles.forEach((role) => used.add(role));
     });
     return used.has("detect") ? [] : ["detect"];
+  };
+
+  const getUsedRolesExcludingIndex = (excludeIndex: number) => {
+    const roles = new Set<Role>();
+    watchedInputs.forEach((input, idx) => {
+      if (idx !== excludeIndex) {
+        input.roles.forEach((role) => roles.add(role));
+      }
+    });
+    return roles;
   };
 
   return (
@@ -358,11 +364,10 @@ export default function CameraEditForm({
                                       : field.value.filter((r) => r !== role);
                                     field.onChange(updatedRoles);
                                   }}
-                                  // disabled={
-                                  //   !field.value.includes(role) &&
-                                  //   currentUsedRoles.has(role) &&
-                                  //   currentUsedRoles.size > 0
-                                  // }
+                                  disabled={
+                                    !field.value.includes(role) &&
+                                    getUsedRolesExcludingIndex(index).has(role)
+                                  }
                                 />
                                 <span>{role}</span>
                               </label>
