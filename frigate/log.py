@@ -1,12 +1,12 @@
 # In log.py
 import atexit
 import logging
-import multiprocessing as mp
 import os
 import sys
 import threading
 from collections import deque
 from logging.handlers import QueueHandler, QueueListener
+from multiprocessing.managers import SyncManager
 from queue import Queue
 from typing import Deque, Optional
 
@@ -35,12 +35,10 @@ LOG_HANDLER.addFilter(
 
 log_listener: Optional[QueueListener] = None
 log_queue: Optional[Queue] = None
-manager = None
 
 
-def setup_logging() -> None:
-    global log_listener, log_queue, manager
-    manager = mp.Manager()
+def setup_logging(manager: SyncManager) -> None:
+    global log_listener, log_queue
     log_queue = manager.Queue()
     log_listener = QueueListener(log_queue, LOG_HANDLER, respect_handler_level=True)
 
@@ -57,13 +55,10 @@ def setup_logging() -> None:
 
 
 def _stop_logging() -> None:
-    global log_listener, manager
+    global log_listener
     if log_listener is not None:
         log_listener.stop()
         log_listener = None
-    if manager is not None:
-        manager.shutdown()
-        manager = None
 
 
 # When a multiprocessing.Process exits, python tries to flush stdout and stderr. However, if the

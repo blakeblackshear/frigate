@@ -1,5 +1,8 @@
+import faulthandler
 import logging
 import multiprocessing as mp
+import signal
+import sys
 import threading
 from logging.handlers import QueueHandler
 from typing import Callable, Optional
@@ -45,7 +48,23 @@ class Process(BaseProcess):
         return self.__dict__["stop_event"]
 
     def before_start(self) -> None:
-        self.__log_queue = frigate.log.log_queue
+        self.__log_queue = frigate.log.log_listener.queue
+
+    def pre_run_setup(self) -> None:
+        faulthandler.enable()
+
+        def receiveSignal(signalNumber, frame):
+            # Get the stop_event through the dict to bypass lazy initialization.
+            stop_event = self.__dict__.get("stop_event")
+            if stop_event is not None:
+                # Someone is monitoring stop_event. We should set it.
+                stop_event.set()
+            else:
+                # Nobody is monitoring stop_event. We should raise SystemExit.
+                sys.exit()
+
+        signal.signal(signal.SIGTERM, receiveSignal)
+        signal.signal(signal.SIGINT, receiveSignal)
         self.logger = logging.getLogger(self.name)
         logging.basicConfig(handlers=[], force=True)
         logging.getLogger().addHandler(QueueHandler(self.__log_queue))

@@ -13,6 +13,7 @@ import numpy as np
 
 import frigate.util as util
 from frigate.camera import CameraMetrics
+from logging.handlers import QueueHandler
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
@@ -84,7 +85,7 @@ class AudioProcessor(util.Process):
         self,
         config: FrigateConfig,
         cameras: list[CameraConfig],
-        camera_metrics: DictProxy[str, CameraMetrics],
+        camera_metrics: DictProxy,
     ):
         super().__init__(name="frigate.audio_manager", daemon=True)
 
@@ -106,6 +107,7 @@ class AudioProcessor(util.Process):
             self.transcription_model_runner = None
 
     def run(self) -> None:
+        self.pre_run_setup()
         audio_threads: list[AudioEventMaintainer] = []
 
         threading.current_thread().name = "process:audio_manager"
@@ -147,7 +149,7 @@ class AudioEventMaintainer(threading.Thread):
         self,
         camera: CameraConfig,
         config: FrigateConfig,
-        camera_metrics: DictProxy[str, CameraMetrics],
+        camera_metrics: DictProxy,
         audio_transcription_model_runner: AudioTranscriptionModelRunner | None,
         stop_event: threading.Event,
     ) -> None:

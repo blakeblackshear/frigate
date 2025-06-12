@@ -33,7 +33,7 @@ class CameraMaintainer(threading.Thread):
         config: FrigateConfig,
         detection_queue: Queue,
         detected_frames_queue: Queue,
-        camera_metrics: DictProxy[str, CameraMetrics],
+        camera_metrics: DictProxy,
         ptz_metrics: dict[str, PTZMetrics],
         stop_event: MpEvent,
     ):

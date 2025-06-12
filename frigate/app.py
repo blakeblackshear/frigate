@@ -5,7 +5,7 @@ import os
 import secrets
 import shutil
 from multiprocessing import Queue
-from multiprocessing.managers import DictProxy
+from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
 
@@ -80,15 +80,15 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(self, config: FrigateConfig, manager: SyncManager) -> None:
+        self.metrics_manager = manager
         self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.metrics_manager = mp.Manager()
-        self.camera_metrics: DictProxy[str, CameraMetrics] = self.metrics_manager.dict()
+        self.camera_metrics: DictProxy = self.metrics_manager.dict()
         self.embeddings_metrics: DataProcessorMetrics | None = (
             DataProcessorMetrics(
                 self.metrics_manager, list(config.classification.custom.keys())
@@ -658,7 +658,6 @@ class FrigateApp:
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
-        self.metrics_manager.shutdown()
 
         # Save embeddings stats to disk
         if self.embeddings:
@@ -676,7 +675,6 @@ class FrigateApp:
             shm.close()
             shm.unlink()
 
-        # exit the mp Manager process
         _stop_logging()
-
+        self.metrics_manager.shutdown()
         os._exit(os.EX_OK)
