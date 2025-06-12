@@ -173,7 +173,7 @@ export default function CameraMetrics({
         });
         series[key]["detect"].data.push({
           x: statsIdx,
-          y: stats.cpu_usages[camStats.pid.toString()].cpu,
+          y: stats.cpu_usages[camStats.pid?.toString()]?.cpu,
         });
       });
     });

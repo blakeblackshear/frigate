@@ -5,13 +5,13 @@ import os
 import shutil
 import time
 from json import JSONDecodeError
+from multiprocessing.managers import DictProxy
 from typing import Any, Optional
 
 import psutil
 import requests
 from requests.exceptions import RequestException
 
-from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
@@ -53,7 +53,7 @@ def get_latest_version(config: FrigateConfig) -> str:
 
 def stats_init(
     config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetrics],
+    camera_metrics: DictProxy,
     embeddings_metrics: DataProcessorMetrics | None,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
@@ -273,10 +273,12 @@ def stats_snapshot(
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats.detection_fps.value
-        pid = camera_stats.process.pid if camera_stats.process else None
+        pid = camera_stats.process_pid.value if camera_stats.process_pid.value else None
         ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
         capture_pid = (
-            camera_stats.capture_process.pid if camera_stats.capture_process else None
+            camera_stats.capture_process_pid.value
+            if camera_stats.capture_process_pid.value
+            else None
         )
         stats["cameras"][name] = {
             "camera_fps": round(camera_stats.camera_fps.value, 2),
