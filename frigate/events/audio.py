@@ -91,12 +91,7 @@ class AudioProcessor(util.Process):
         self.cameras = cameras
         self.config = config
 
-        if any(
-            [
-                conf.audio_transcription.enabled_in_config == True
-                for conf in config.cameras.values()
-            ]
-        ):
+        if self.config.audio_transcription.enabled:
             self.transcription_model_runner = AudioTranscriptionModelRunner(
                 self.config.audio_transcription.device,
                 self.config.audio_transcription.model_size,
