@@ -86,8 +86,11 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.metrics_manager = mp.Manager()
         self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics(list(config.classification.custom.keys()))
+            DataProcessorMetrics(
+                self.metrics_manager, list(config.classification.custom.keys())
+            )
             if (
                 config.semantic_search.enabled
                 or config.lpr.enabled
@@ -653,6 +656,7 @@ class FrigateApp:
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
+        self.metrics_manager.shutdown()
 
         # Save embeddings stats to disk
         if self.embeddings:

@@ -1,5 +1,6 @@
 import argparse
 import faulthandler
+import multiprocessing as mp
 import signal
 import sys
 import threading
@@ -112,4 +113,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    mp.set_start_method("forkserver", force=True)
     main()

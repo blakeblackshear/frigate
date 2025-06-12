@@ -19,7 +19,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR, FACE_DIR
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.models import Event, Recordings
+from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
 from frigate.util.services import listen
@@ -43,22 +43,7 @@ def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> N
     setproctitle("frigate.embeddings_manager")
     listen()
 
-    # Configure Frigate DB
-    db = SqliteVecQueueDatabase(
-        config.database.path,
-        pragmas={
-            "auto_vacuum": "FULL",  # Does not defragment database
-            "cache_size": -512 * 1000,  # 512MB of cache
-            "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
-        },
-        timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
-        load_vec_extension=True,
-    )
-    models = [Event, Recordings]
-    db.bind(models)
-
     maintainer = EmbeddingMaintainer(
-        db,
         config,
         metrics,
         stop_event,

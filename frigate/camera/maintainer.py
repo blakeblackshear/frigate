@@ -1,6 +1,7 @@
 """Create and maintain camera processes / management."""
 
 import logging
+import multiprocessing as mp
 import os
 import shutil
 import threading
@@ -119,7 +120,7 @@ class CameraMaintainer(threading.Thread):
 
     def __start_camera_processor(
         self, name: str, config: CameraConfig, runtime: bool = False
-    ) -> None:
+    ) -> mp.Process:
         if not config.enabled_in_config:
             logger.info(f"Camera processor not started for disabled camera {name}")
             return
@@ -167,13 +168,13 @@ class CameraMaintainer(threading.Thread):
             ),
             daemon=True,
         )
-        self.camera_metrics[config.name].process = camera_process
         camera_process.start()
         logger.info(f"Camera processor started for {config.name}: {camera_process.pid}")
+        return camera_process
 
     def __start_camera_capture(
         self, name: str, config: CameraConfig, runtime: bool = False
-    ) -> None:
+    ) -> mp.Process:
         if not config.enabled_in_config:
             logger.info(f"Capture process not started for disabled camera {name}")
             return
@@ -190,9 +191,9 @@ class CameraMaintainer(threading.Thread):
             args=(config, count, self.camera_metrics[name]),
         )
         capture_process.daemon = True
-        self.camera_metrics[name].capture_process = capture_process
         capture_process.start()
         logger.info(f"Capture process started for {name}: {capture_process.pid}")
+        return capture_process
 
     def __stop_camera_capture_process(self, camera: str) -> None:
         capture_process = self.camera_metrics[camera].capture_process
@@ -225,16 +226,20 @@ class CameraMaintainer(threading.Thread):
             for update_type, updated_cameras in updates.items():
                 if update_type == CameraConfigUpdateEnum.add.name:
                     for camera in updated_cameras:
-                        self.__start_camera_processor(
+                        camera_process = self.__start_camera_processor(
                             camera,
                             self.update_subscriber.camera_configs[camera],
                             runtime=True,
                         )
-                        self.__start_camera_capture(
+                        capture_process = self.__start_camera_capture(
                             camera,
                             self.update_subscriber.camera_configs[camera],
                             runtime=True,
                         )
+                        self.camera_metrics[config.name].process = camera_process
+                        self.camera_metrics[
+                            config.name
+                        ].capture_process = capture_process
                 elif update_type == CameraConfigUpdateEnum.remove.name:
                     self.__stop_camera_capture_process(camera)
                     self.__stop_camera_process(camera)
