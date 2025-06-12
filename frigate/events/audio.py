@@ -12,8 +12,6 @@ from typing import Any, Tuple
 import numpy as np
 
 import frigate.util as util
-from frigate.camera import CameraMetrics
-from logging.handlers import QueueHandler
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,

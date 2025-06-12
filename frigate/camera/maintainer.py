@@ -22,7 +22,7 @@ from frigate.util import Process as FrigateProcess
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
-from frigate.video import capture_camera, track_camera
+from frigate.video import CameraTracker, capture_camera
 
 logger = logging.getLogger(__name__)
 
@@ -155,21 +155,15 @@ class CameraMaintainer(threading.Thread):
             except FileExistsError:
                 pass
 
-        camera_process = FrigateProcess(
-            target=track_camera,
-            name=f"camera_processor:{name}",
-            args=(
-                config.name,
-                config,
-                self.config.model,
-                self.config.model.merged_labelmap,
-                self.detection_queue,
-                self.detected_frames_queue,
-                self.camera_metrics[name],
-                self.ptz_metrics[name],
-                self.region_grids[name],
-            ),
-            daemon=True,
+        camera_process = CameraTracker(
+            config,
+            self.config.model,
+            self.config.model.merged_labelmap,
+            self.detection_queue,
+            self.detected_frames_queue,
+            self.camera_metrics[name],
+            self.ptz_metrics[name],
+            self.region_grids[name],
         )
         self.camera_processes[config.name] = camera_process
         camera_process.start()
