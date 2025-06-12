@@ -12,7 +12,6 @@ from typing import Any, Optional
 import cv2
 import numpy as np
 from peewee import DoesNotExist
-from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
@@ -58,9 +57,10 @@ from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
-from frigate.models import Event
+from frigate.models import Event, Recordings
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import (
@@ -82,9 +82,8 @@ class EmbeddingMaintainer(threading.Thread):
 
     def __init__(
         self,
-        db: SqliteQueueDatabase,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics,
+        metrics: DataProcessorMetrics | None,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
@@ -96,6 +95,22 @@ class EmbeddingMaintainer(threading.Thread):
             self.config.cameras,
             [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.remove],
         )
+
+        # Configure Frigate DB
+        db = SqliteVecQueueDatabase(
+            config.database.path,
+            pragmas={
+                "auto_vacuum": "FULL",  # Does not defragment database
+                "cache_size": -512 * 1000,  # 512MB of cache
+                "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
+            },
+            timeout=max(
+                60, 10 * len([c for c in config.cameras.values() if c.enabled])
+            ),
+            load_vec_extension=True,
+        )
+        models = [Event, Recordings]
+        db.bind(models)
 
         if config.semantic_search.enabled:
             self.embeddings = Embeddings(config, db, metrics)

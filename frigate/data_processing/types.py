@@ -1,7 +1,7 @@
 """Embeddings types."""
 
-import multiprocessing as mp
 from enum import Enum
+from multiprocessing.managers import SyncManager
 from multiprocessing.sharedctypes import Synchronized
 
 import sherpa_onnx
@@ -20,25 +20,27 @@ class DataProcessorMetrics:
     alpr_pps: Synchronized
     yolov9_lpr_speed: Synchronized
     yolov9_lpr_pps: Synchronized
-    classification_speeds: dict[str, Synchronized] = {}
-    classification_cps: dict[str, Synchronized] = {}
+    classification_speeds: dict[str, Synchronized]
+    classification_cps: dict[str, Synchronized]
 
-    def __init__(self, custom_classification_models: list[str]):
-        self.image_embeddings_speed = mp.Value("d", 0.0)
-        self.image_embeddings_eps = mp.Value("d", 0.0)
-        self.text_embeddings_speed = mp.Value("d", 0.0)
-        self.text_embeddings_eps = mp.Value("d", 0.0)
-        self.face_rec_speed = mp.Value("d", 0.0)
-        self.face_rec_fps = mp.Value("d", 0.0)
-        self.alpr_speed = mp.Value("d", 0.0)
-        self.alpr_pps = mp.Value("d", 0.0)
-        self.yolov9_lpr_speed = mp.Value("d", 0.0)
-        self.yolov9_lpr_pps = mp.Value("d", 0.0)
+    def __init__(self, manager: SyncManager, custom_classification_models: list[str]):
+        self.image_embeddings_speed = manager.Value("d", 0.0)
+        self.image_embeddings_eps = manager.Value("d", 0.0)
+        self.text_embeddings_speed = manager.Value("d", 0.0)
+        self.text_embeddings_eps = manager.Value("d", 0.0)
+        self.face_rec_speed = manager.Value("d", 0.0)
+        self.face_rec_fps = manager.Value("d", 0.0)
+        self.alpr_speed = manager.Value("d", 0.0)
+        self.alpr_pps = manager.Value("d", 0.0)
+        self.yolov9_lpr_speed = manager.Value("d", 0.0)
+        self.yolov9_lpr_pps = manager.Value("d", 0.0)
+        self.classification_speeds = manager.dict()
+        self.classification_cps = manager.dict()
 
         if custom_classification_models:
             for key in custom_classification_models:
-                self.classification_speeds[key] = mp.Value("d", 0.0)
-                self.classification_cps[key] = mp.Value("d", 0.0)
+                self.classification_speeds[key] = manager.Value("d", 0.0)
+                self.classification_cps[key] = manager.Value("d", 0.0)
 
 
 class DataProcessorModelRunner:

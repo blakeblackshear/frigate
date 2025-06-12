@@ -341,11 +341,14 @@ def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
 def empty_and_close_queue(q: mp.Queue):
     while True:
         try:
-            q.get(block=True, timeout=0.5)
-        except queue.Empty:
-            q.close()
-            q.join_thread()
-            return
+            try:
+                q.get(block=True, timeout=0.5)
+            except (queue.Empty, EOFError):
+                q.close()
+                q.join_thread()
+                return
+        except AttributeError:
+            pass
 
 
 def generate_color_palette(n):

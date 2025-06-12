@@ -1,9 +1,7 @@
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import queue
-import signal
 import subprocess as sp
 import threading
 import time
@@ -12,8 +10,8 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 import cv2
-from setproctitle import setproctitle
 
+import frigate.util as util
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
@@ -53,7 +51,6 @@ from frigate.util.object import (
     is_object_filtered,
     reduce_detections,
 )
-from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 
@@ -328,7 +325,7 @@ class CameraWatchdog(threading.Thread):
             ffmpeg_cmd, self.logger, self.logpipe, self.frame_size
         )
         self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
-        self.capture_thread = CameraCapture(
+        self.capture_thread = CameraCaptureRunner(
             self.config,
             self.shm_frame_count,
             self.frame_index,
@@ -406,7 +403,7 @@ class CameraWatchdog(threading.Thread):
         return newest_segment_time
 
 
-class CameraCapture(threading.Thread):
+class CameraCaptureRunner(threading.Thread):
     def __init__(
         self,
         config: CameraConfig,
@@ -450,103 +447,103 @@ class CameraCapture(threading.Thread):
         )
 
 
-def capture_camera(
-    config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
-):
-    stop_event = mp.Event()
+class CameraCapture(util.Process):
+    def __init__(
+        self, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
+    ) -> None:
+        super().__init__(name=f"camera_capture:{config.name}", daemon=True)
+        self.config = config
+        self.shm_frame_count = shm_frame_count
+        self.camera_metrics = camera_metrics
 
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    threading.current_thread().name = f"capture:{config.name}"
-    setproctitle(f"frigate.capture:{config.name}")
-
-    camera_watchdog = CameraWatchdog(
-        config,
-        shm_frame_count,
-        camera_metrics.frame_queue,
-        camera_metrics.camera_fps,
-        camera_metrics.skipped_fps,
-        camera_metrics.ffmpeg_pid,
-        stop_event,
-    )
-    camera_watchdog.start()
-    camera_watchdog.join()
+    def run(self) -> None:
+        self.pre_run_setup()
+        camera_watchdog = CameraWatchdog(
+            self.config,
+            self.shm_frame_count,
+            self.camera_metrics.frame_queue,
+            self.camera_metrics.camera_fps,
+            self.camera_metrics.skipped_fps,
+            self.camera_metrics.ffmpeg_pid,
+            self.stop_event,
+        )
+        camera_watchdog.start()
+        camera_watchdog.join()
 
 
-def track_camera(
-    name,
-    config: CameraConfig,
-    model_config: ModelConfig,
-    labelmap: dict[int, str],
-    detection_queue: Queue,
-    detected_objects_queue,
-    camera_metrics: CameraMetrics,
-    ptz_metrics: PTZMetrics,
-    region_grid: list[list[dict[str, Any]]],
-):
-    stop_event = mp.Event()
-
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    threading.current_thread().name = f"process:{name}"
-    setproctitle(f"frigate.process:{name}")
-    listen()
-
-    frame_queue = camera_metrics.frame_queue
-
-    frame_shape = config.frame_shape
-
-    motion_detector = ImprovedMotionDetector(
-        frame_shape,
-        config.motion,
-        config.detect.fps,
-        name=config.name,
-        ptz_metrics=ptz_metrics,
-    )
-    object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, model_config, stop_event
-    )
-
-    object_tracker = NorfairTracker(config, ptz_metrics)
-
-    frame_manager = SharedMemoryFrameManager()
-
-    # create communication for region grid updates
-    requestor = InterProcessRequestor()
-
-    process_frames(
-        name,
-        requestor,
-        frame_queue,
-        frame_shape,
-        model_config,
-        config,
-        frame_manager,
-        motion_detector,
-        object_detector,
-        object_tracker,
+class CameraTracker(util.Process):
+    def __init__(
+        self,
+        config: CameraConfig,
+        model_config: ModelConfig,
+        labelmap: dict[int, str],
+        detection_queue: Queue,
         detected_objects_queue,
-        camera_metrics,
-        stop_event,
-        ptz_metrics,
-        region_grid,
-    )
+        camera_metrics: CameraMetrics,
+        ptz_metrics: PTZMetrics,
+        region_grid: list[list[dict[str, Any]]],
+    ) -> None:
+        super().__init__(name=f"camera_processor:{config.name}", daemon=True)
+        self.config = config
+        self.model_config = model_config
+        self.labelmap = labelmap
+        self.detection_queue = detection_queue
+        self.detected_objects_queue = detected_objects_queue
+        self.camera_metrics = camera_metrics
+        self.ptz_metrics = ptz_metrics
+        self.region_grid = region_grid
 
-    # empty the frame queue
-    logger.info(f"{name}: emptying frame queue")
-    while not frame_queue.empty():
-        (frame_name, _) = frame_queue.get(False)
-        frame_manager.delete(frame_name)
+    def run(self) -> None:
+        self.pre_run_setup()
+        frame_queue = self.camera_metrics.frame_queue
+        frame_shape = self.config.frame_shape
 
-    logger.info(f"{name}: exiting subprocess")
+        motion_detector = ImprovedMotionDetector(
+            frame_shape,
+            self.config.motion,
+            self.config.detect.fps,
+            name=self.config.name,
+            ptz_metrics=self.ptz_metrics,
+        )
+        object_detector = RemoteObjectDetector(
+            self.config.name,
+            self.labelmap,
+            self.detection_queue,
+            self.model_config,
+            self.stop_event,
+        )
+
+        object_tracker = NorfairTracker(self.config, self.ptz_metrics)
+
+        frame_manager = SharedMemoryFrameManager()
+
+        # create communication for region grid updates
+        requestor = InterProcessRequestor()
+
+        process_frames(
+            requestor,
+            frame_queue,
+            frame_shape,
+            self.model_config,
+            self.config,
+            frame_manager,
+            motion_detector,
+            object_detector,
+            object_tracker,
+            self.detected_objects_queue,
+            self.camera_metrics,
+            self.stop_event,
+            self.ptz_metrics,
+            self.region_grid,
+        )
+
+        # empty the frame queue
+        logger.info(f"{self.config.name}: emptying frame queue")
+        while not frame_queue.empty():
+            (frame_name, _) = frame_queue.get(False)
+            frame_manager.delete(frame_name)
+
+        logger.info(f"{self.config.name}: exiting subprocess")
 
 
 def detect(
@@ -587,7 +584,6 @@ def detect(
 
 
 def process_frames(
-    camera_name: str,
     requestor: InterProcessRequestor,
     frame_queue: Queue,
     frame_shape: tuple[int, int],
@@ -607,7 +603,7 @@ def process_frames(
     next_region_update = get_tomorrow_at_time(2)
     config_subscriber = CameraConfigUpdateSubscriber(
         None,
-        {camera_name: camera_config},
+        {camera_config.name: camera_config},
         [
             CameraConfigUpdateEnum.detect,
             CameraConfigUpdateEnum.enabled,
@@ -663,7 +659,9 @@ def process_frames(
             and prev_enabled != camera_enabled
             and camera_metrics.frame_queue.empty()
         ):
-            logger.debug(f"Camera {camera_name} disabled, clearing tracked objects")
+            logger.debug(
+                f"Camera {camera_config.name} disabled, clearing tracked objects"
+            )
             prev_enabled = camera_enabled
 
             # Clear norfair's dictionaries
@@ -688,7 +686,7 @@ def process_frames(
             datetime.datetime.now().astimezone(datetime.timezone.utc)
             > next_region_update
         ):
-            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_name)
+            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
             next_region_update = get_tomorrow_at_time(2)
 
         try:
@@ -708,7 +706,9 @@ def process_frames(
         frame = frame_manager.get(frame_name, (frame_shape[0] * 3 // 2, frame_shape[1]))
 
         if frame is None:
-            logger.debug(f"{camera_name}: frame {frame_time} is not in memory store.")
+            logger.debug(
+                f"{camera_config.name}: frame {frame_time} is not in memory store."
+            )
             continue
 
         # look for motion if enabled
@@ -947,7 +947,7 @@ def process_frames(
                 )
 
             cv2.imwrite(
-                f"debug/frames/{camera_name}-{'{:.6f}'.format(frame_time)}.jpg",
+                f"debug/frames/{camera_config.name}-{'{:.6f}'.format(frame_time)}.jpg",
                 bgr_frame,
             )
         # add to the queue if not full
@@ -959,7 +959,7 @@ def process_frames(
             camera_metrics.process_fps.value = fps_tracker.eps()
             detected_objects_queue.put(
                 (
-                    camera_name,
+                    camera_config.name,
                     frame_name,
                     frame_time,
                     detections,
