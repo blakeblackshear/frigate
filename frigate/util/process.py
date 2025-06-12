@@ -30,32 +30,10 @@ class BaseProcess(mp.Process):
         super().start(*args, **kwargs)
         self.after_start()
 
-    def __getattribute__(self, name: str) -> Any:
-        if name == "run":
-            run = super().__getattribute__("run")
-
-            @wraps(run)
-            def run_wrapper(*args, **kwargs):
-                try:
-                    self.before_run()
-                    return run(*args, **kwargs)
-                finally:
-                    self.after_run()
-
-            return run_wrapper
-
-        return super().__getattribute__(name)
-
     def before_start(self) -> None:
         pass
 
     def after_start(self) -> None:
-        pass
-
-    def before_run(self) -> None:
-        pass
-
-    def after_run(self) -> None:
         pass
 
 
@@ -72,24 +50,6 @@ class Process(BaseProcess):
 
     def before_start(self) -> None:
         self.__log_queue = frigate.log.log_listener.queue
-
-    def before_run(self) -> None:
-        faulthandler.enable()
-
-        def receiveSignal(signalNumber, frame):
-            # Get the stop_event through the dict to bypass lazy initialization.
-            stop_event = self.__dict__.get("stop_event")
-            if stop_event is not None:
-                # Someone is monitoring stop_event. We should set it.
-                stop_event.set()
-            else:
-                # Nobody is monitoring stop_event. We should raise SystemExit.
-                sys.exit()
-
-        signal.signal(signal.SIGTERM, receiveSignal)
-        signal.signal(signal.SIGINT, receiveSignal)
-
         self.logger = logging.getLogger(self.name)
-
         logging.basicConfig(handlers=[], force=True)
         logging.getLogger().addHandler(QueueHandler(self.__log_queue))
