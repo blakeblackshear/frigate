@@ -350,6 +350,9 @@ class TrackedObject:
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
+        logger.debug(
+            f"{self.camera_config.name}: Updating {obj_data['id']}: thumb update? {thumb_update}, significant change? {significant_change}, path update? {path_update}, autotracker update? {autotracker_update} "
+        )
         return (thumb_update, significant_change, path_update, autotracker_update)
 
     def to_dict(self):
