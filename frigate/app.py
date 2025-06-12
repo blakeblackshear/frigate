@@ -5,6 +5,7 @@ import os
 import secrets
 import shutil
 from multiprocessing import Queue
+from multiprocessing.managers import DictProxy
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
 
@@ -86,7 +87,7 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.metrics_manager = mp.Manager()
-        self.camera_metrics: dict[str, CameraMetrics] = self.metrics_manager.dict()
+        self.camera_metrics: DictProxy[str, CameraMetrics] = self.metrics_manager.dict()
         self.embeddings_metrics: DataProcessorMetrics | None = (
             DataProcessorMetrics(
                 self.metrics_manager, list(config.classification.custom.keys())
