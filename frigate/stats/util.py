@@ -271,10 +271,12 @@ def stats_snapshot(
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats.detection_fps.value
-        pid = camera_stats.process.pid if camera_stats.process else None
+        pid = camera_stats.process_pid.value if camera_stats.process_pid.value else None
         ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
         capture_pid = (
-            camera_stats.capture_process.pid if camera_stats.capture_process else None
+            camera_stats.capture_process_pid.value
+            if camera_stats.capture_process_pid.value
+            else None
         )
         stats["cameras"][name] = {
             "camera_fps": round(camera_stats.camera_fps.value, 2),

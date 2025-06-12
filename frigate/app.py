@@ -85,8 +85,8 @@ class FrigateApp:
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetrics] = {}
         self.metrics_manager = mp.Manager()
+        self.camera_metrics: dict[str, CameraMetrics] = self.metrics_manager.dict()
         self.embeddings_metrics: DataProcessorMetrics | None = (
             DataProcessorMetrics(
                 self.metrics_manager, list(config.classification.custom.keys())
@@ -128,7 +128,7 @@ class FrigateApp:
     def init_camera_metrics(self) -> None:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            self.camera_metrics[camera_name] = CameraMetrics()
+            self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
             self.ptz_metrics[camera_name] = PTZMetrics(
                 autotracker_enabled=self.config.cameras[
                     camera_name

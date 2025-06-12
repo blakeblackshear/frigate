@@ -54,6 +54,8 @@ class CameraMaintainer(threading.Thread):
             ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
+        self.camera_processes: dict[str, mp.Process] = {}
+        self.capture_processes: dict[str, mp.Process] = {}
 
     def __init_historical_regions(self) -> None:
         # delete region grids for removed or renamed cameras
@@ -120,7 +122,7 @@ class CameraMaintainer(threading.Thread):
 
     def __start_camera_processor(
         self, name: str, config: CameraConfig, runtime: bool = False
-    ) -> mp.Process:
+    ) -> None:
         if not config.enabled_in_config:
             logger.info(f"Camera processor not started for disabled camera {name}")
             return
@@ -168,13 +170,14 @@ class CameraMaintainer(threading.Thread):
             ),
             daemon=True,
         )
+        self.camera_processes[config.name] = camera_process
         camera_process.start()
+        self.camera_metrics[config.name].process_pid.value = camera_process.pid
         logger.info(f"Camera processor started for {config.name}: {camera_process.pid}")
-        return camera_process
 
     def __start_camera_capture(
         self, name: str, config: CameraConfig, runtime: bool = False
-    ) -> mp.Process:
+    ) -> None:
         if not config.enabled_in_config:
             logger.info(f"Capture process not started for disabled camera {name}")
             return
@@ -191,26 +194,26 @@ class CameraMaintainer(threading.Thread):
             args=(config, count, self.camera_metrics[name]),
         )
         capture_process.daemon = True
+        self.capture_processes[name] = capture_process
         capture_process.start()
+        self.camera_metrics[name].capture_process_pid.value = capture_process.pid
         logger.info(f"Capture process started for {name}: {capture_process.pid}")
-        return capture_process
 
     def __stop_camera_capture_process(self, camera: str) -> None:
-        capture_process = self.camera_metrics[camera].capture_process
+        capture_process = self.capture_processes[camera]
         if capture_process is not None:
             logger.info(f"Waiting for capture process for {camera} to stop")
             capture_process.terminate()
             capture_process.join()
 
     def __stop_camera_process(self, camera: str) -> None:
-        metrics = self.camera_metrics[camera]
-        camera_process = metrics.process
+        camera_process = self.camera_processes[camera]
         if camera_process is not None:
             logger.info(f"Waiting for process for {camera} to stop")
             camera_process.terminate()
             camera_process.join()
             logger.info(f"Closing frame queue for {camera}")
-            empty_and_close_queue(metrics.frame_queue)
+            empty_and_close_queue(self.camera_metrics[camera].frame_queue)
 
     def run(self):
         self.__init_historical_regions()
@@ -226,30 +229,26 @@ class CameraMaintainer(threading.Thread):
             for update_type, updated_cameras in updates.items():
                 if update_type == CameraConfigUpdateEnum.add.name:
                     for camera in updated_cameras:
-                        camera_process = self.__start_camera_processor(
+                        self.__start_camera_processor(
                             camera,
                             self.update_subscriber.camera_configs[camera],
                             runtime=True,
                         )
-                        capture_process = self.__start_camera_capture(
+                        self.__start_camera_capture(
                             camera,
                             self.update_subscriber.camera_configs[camera],
                             runtime=True,
                         )
-                        self.camera_metrics[config.name].process = camera_process
-                        self.camera_metrics[
-                            config.name
-                        ].capture_process = capture_process
                 elif update_type == CameraConfigUpdateEnum.remove.name:
                     self.__stop_camera_capture_process(camera)
                     self.__stop_camera_process(camera)
 
         # ensure the capture processes are done
-        for camera in self.camera_metrics.keys():
+        for camera in self.camera_processes.keys():
             self.__stop_camera_capture_process(camera)
 
         # ensure the camera processors are done
-        for camera in self.camera_metrics.keys():
+        for camera in self.capture_processes.keys():
             self.__stop_camera_process(camera)
 
         self.update_subscriber.stop()
