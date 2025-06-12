@@ -1,16 +1,11 @@
 import datetime
 import logging
-import multiprocessing as mp
-import os
 import queue
-import signal
-import threading
 from abc import ABC, abstractmethod
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 
 import numpy as np
-from setproctitle import setproctitle
 
 import frigate.util as util
 from frigate.comms.object_detector_signaler import (
@@ -25,7 +20,6 @@ from frigate.detectors.detector_config import (
 )
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
-from frigate.util.services import listen
 
 from .util import tensor_transform
 
@@ -90,73 +84,75 @@ class LocalObjectDetector(ObjectDetector):
         return self.detect_api.detect_raw(tensor_input=tensor_input)
 
 
-def run_detector(
-    name: str,
-    detection_queue: Queue,
-    cameras: list[str],
-    avg_speed: Value,
-    start: Value,
-    detector_config: BaseDetectorConfig,
-):
-    threading.current_thread().name = f"detector:{name}"
-    logger = logging.getLogger(f"detector.{name}")
-    logger.info(f"Starting detection process: {os.getpid()}")
-    setproctitle(f"frigate.detector.{name}")
-    listen()
+class DetectorRunner(util.Process):
+    def __init__(
+        self,
+        name,
+        detection_queue: Queue,
+        cameras: list[str],
+        avg_speed: Value,
+        start_time: Value,
+        detector_config: BaseDetectorConfig,
+    ) -> None:
+        super().__init__(name=name, daemon=True)
+        self.detection_queue = detection_queue
+        self.cameras = cameras
+        self.avg_speed = avg_speed
+        self.start_time = start_time
+        self.detector_config = detector_config
+        self.outputs: dict = {}
 
-    stop_event: MpEvent = mp.Event()
-
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    def create_output_shm(name: str):
+    def create_output_shm(self, name: str):
         out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
         out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
-        outputs[name] = {"shm": out_shm, "np": out_np}
+        self.outputs[name] = {"shm": out_shm, "np": out_np}
 
-    frame_manager = SharedMemoryFrameManager()
-    object_detector = LocalObjectDetector(detector_config=detector_config)
-    detector_publisher = ObjectDetectorPublisher()
+    def run(self) -> None:
+        self.pre_run_setup()
 
-    outputs = {}
-    for name in cameras:
-        create_output_shm(name)
+        frame_manager = SharedMemoryFrameManager()
+        object_detector = LocalObjectDetector(detector_config=self.detector_config)
+        detector_publisher = ObjectDetectorPublisher()
 
-    while not stop_event.is_set():
-        try:
-            connection_id = detection_queue.get(timeout=1)
-        except queue.Empty:
-            continue
-        input_frame = frame_manager.get(
-            connection_id,
-            (1, detector_config.model.height, detector_config.model.width, 3),
-        )
+        for name in self.cameras:
+            self.create_output_shm(name)
 
-        if input_frame is None:
-            logger.warning(f"Failed to get frame {connection_id} from SHM")
-            continue
+        while not self.stop_event.is_set():
+            try:
+                connection_id = self.detection_queue.get(timeout=1)
+            except queue.Empty:
+                continue
+            input_frame = frame_manager.get(
+                connection_id,
+                (
+                    1,
+                    self.detector_config.model.height,
+                    self.detector_config.model.width,
+                    3,
+                ),
+            )
 
-        # detect and send the output
-        start.value = datetime.datetime.now().timestamp()
-        detections = object_detector.detect_raw(input_frame)
-        duration = datetime.datetime.now().timestamp() - start.value
-        frame_manager.close(connection_id)
+            if input_frame is None:
+                logger.warning(f"Failed to get frame {connection_id} from SHM")
+                continue
 
-        if connection_id not in outputs:
-            create_output_shm(connection_id)
+            # detect and send the output
+            self.start_time.value = datetime.datetime.now().timestamp()
+            detections = object_detector.detect_raw(input_frame)
+            duration = datetime.datetime.now().timestamp() - self.start_time.value
+            frame_manager.close(connection_id)
 
-        outputs[connection_id]["np"][:] = detections[:]
-        signal_id = f"{connection_id}/update"
-        detector_publisher.publish(signal_id, signal_id)
-        start.value = 0.0
+            if connection_id not in self.outputs:
+                self.create_output_shm(connection_id)
 
-        avg_speed.value = (avg_speed.value * 9 + duration) / 10
+            self.outputs[connection_id]["np"][:] = detections[:]
+            detector_publisher.publish(connection_id)
+            self.start_time.value = 0.0
 
-    detector_publisher.stop()
-    logger.info("Exited detection process...")
+            self.avg_speed.value = (self.avg_speed.value * 9 + duration) / 10
+
+        detector_publisher.stop()
+        logger.info("Exited detection process...")
 
 
 class ObjectDetectProcess:
@@ -193,19 +189,14 @@ class ObjectDetectProcess:
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = util.Process(
-            target=run_detector,
-            name=f"detector:{self.name}",
-            args=(
-                self.name,
-                self.detection_queue,
-                self.cameras,
-                self.avg_inference_speed,
-                self.detection_start,
-                self.detector_config,
-            ),
+        self.detect_process = DetectorRunner(
+            f"detector:{self.name}",
+            self.detection_queue,
+            self.cameras,
+            self.avg_inference_speed,
+            self.detection_start,
+            self.detector_config,
         )
-        self.detect_process.daemon = True
         self.detect_process.start()
 
 
@@ -231,7 +222,7 @@ class RemoteObjectDetector:
         )
         self.out_shm = UntrackedSharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm = np.ndarray((20, 6), dtype=np.float32, buffer=self.out_shm.buf)
-        self.detector_subscriber = ObjectDetectorSubscriber(f"{name}/update")
+        self.detector_subscriber = ObjectDetectorSubscriber(name)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []

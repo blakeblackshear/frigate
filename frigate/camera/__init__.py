@@ -1,7 +1,7 @@
 import multiprocessing as mp
+from multiprocessing.managers import SyncManager
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.synchronize import Event
-from typing import Optional
 
 
 class CameraMetrics:
@@ -16,25 +16,25 @@ class CameraMetrics:
 
     frame_queue: mp.Queue
 
-    process: Optional[mp.Process]
-    capture_process: Optional[mp.Process]
+    process_pid: Synchronized
+    capture_process_pid: Synchronized
     ffmpeg_pid: Synchronized
 
-    def __init__(self):
-        self.camera_fps = mp.Value("d", 0)
-        self.detection_fps = mp.Value("d", 0)
-        self.detection_frame = mp.Value("d", 0)
-        self.process_fps = mp.Value("d", 0)
-        self.skipped_fps = mp.Value("d", 0)
-        self.read_start = mp.Value("d", 0)
-        self.audio_rms = mp.Value("d", 0)
-        self.audio_dBFS = mp.Value("d", 0)
+    def __init__(self, manager: SyncManager):
+        self.camera_fps = manager.Value("d", 0)
+        self.detection_fps = manager.Value("d", 0)
+        self.detection_frame = manager.Value("d", 0)
+        self.process_fps = manager.Value("d", 0)
+        self.skipped_fps = manager.Value("d", 0)
+        self.read_start = manager.Value("d", 0)
+        self.audio_rms = manager.Value("d", 0)
+        self.audio_dBFS = manager.Value("d", 0)
 
-        self.frame_queue = mp.Queue(maxsize=2)
+        self.frame_queue = manager.Queue(maxsize=2)
 
-        self.process = None
-        self.capture_process = None
-        self.ffmpeg_pid = mp.Value("i", 0)
+        self.process_pid = manager.Value("i", 0)
+        self.capture_process_pid = manager.Value("i", 0)
+        self.ffmpeg_pid = manager.Value("i", 0)
 
 
 class PTZMetrics:

@@ -1,5 +1,6 @@
 import argparse
 import faulthandler
+import multiprocessing as mp
 import signal
 import sys
 import threading
@@ -15,10 +16,11 @@ from frigate.util.config import find_config_file
 
 
 def main() -> None:
+    manager = mp.Manager()
     faulthandler.enable()
 
     # Setup the logging thread
-    setup_logging()
+    setup_logging(manager)
 
     threading.current_thread().name = "frigate"
 
@@ -108,8 +110,9 @@ def main() -> None:
         sys.exit(0)
 
     # Run the main application.
-    FrigateApp(config).start()
+    FrigateApp(config, manager).start()
 
 
 if __name__ == "__main__":
+    mp.set_start_method("forkserver", force=True)
     main()

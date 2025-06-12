@@ -4,9 +4,8 @@ import multiprocessing as mp
 import signal
 import sys
 import threading
-from functools import wraps
 from logging.handlers import QueueHandler
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import frigate.log
 
@@ -30,32 +29,10 @@ class BaseProcess(mp.Process):
         super().start(*args, **kwargs)
         self.after_start()
 
-    def __getattribute__(self, name: str) -> Any:
-        if name == "run":
-            run = super().__getattribute__("run")
-
-            @wraps(run)
-            def run_wrapper(*args, **kwargs):
-                try:
-                    self.before_run()
-                    return run(*args, **kwargs)
-                finally:
-                    self.after_run()
-
-            return run_wrapper
-
-        return super().__getattribute__(name)
-
     def before_start(self) -> None:
         pass
 
     def after_start(self) -> None:
-        pass
-
-    def before_run(self) -> None:
-        pass
-
-    def after_run(self) -> None:
         pass
 
 
@@ -73,7 +50,7 @@ class Process(BaseProcess):
     def before_start(self) -> None:
         self.__log_queue = frigate.log.log_listener.queue
 
-    def before_run(self) -> None:
+    def pre_run_setup(self) -> None:
         faulthandler.enable()
 
         def receiveSignal(signalNumber, frame):
@@ -88,8 +65,6 @@ class Process(BaseProcess):
 
         signal.signal(signal.SIGTERM, receiveSignal)
         signal.signal(signal.SIGINT, receiveSignal)
-
         self.logger = logging.getLogger(self.name)
-
         logging.basicConfig(handlers=[], force=True)
         logging.getLogger().addHandler(QueueHandler(self.__log_queue))
