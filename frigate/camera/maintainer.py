@@ -6,6 +6,7 @@ import os
 import shutil
 import threading
 from multiprocessing import Queue
+from multiprocessing.managers import DictProxy
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -32,7 +33,7 @@ class CameraMaintainer(threading.Thread):
         config: FrigateConfig,
         detection_queue: Queue,
         detected_frames_queue: Queue,
-        camera_metrics: dict[str, CameraMetrics],
+        camera_metrics: DictProxy[str, CameraMetrics],
         ptz_metrics: dict[str, PTZMetrics],
         stop_event: MpEvent,
     ):

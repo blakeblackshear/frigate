@@ -5,6 +5,7 @@ import os
 import shutil
 import time
 from json import JSONDecodeError
+from multiprocessing.managers import DictProxy
 from typing import Any, Optional
 
 import psutil
@@ -53,7 +54,7 @@ def get_latest_version(config: FrigateConfig) -> str:
 
 def stats_init(
     config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetrics],
+    camera_metrics: DictProxy[str, CameraMetrics],
     embeddings_metrics: DataProcessorMetrics | None,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],

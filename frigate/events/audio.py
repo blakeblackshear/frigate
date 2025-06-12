@@ -6,6 +6,7 @@ import random
 import string
 import threading
 import time
+from multiprocessing.managers import DictProxy
 from typing import Any, Tuple
 
 import numpy as np
@@ -83,7 +84,7 @@ class AudioProcessor(util.Process):
         self,
         config: FrigateConfig,
         cameras: list[CameraConfig],
-        camera_metrics: dict[str, CameraMetrics],
+        camera_metrics: DictProxy[str, CameraMetrics],
     ):
         super().__init__(name="frigate.audio_manager", daemon=True)
 
@@ -146,7 +147,7 @@ class AudioEventMaintainer(threading.Thread):
         self,
         camera: CameraConfig,
         config: FrigateConfig,
-        camera_metrics: dict[str, CameraMetrics],
+        camera_metrics: DictProxy[str, CameraMetrics],
         audio_transcription_model_runner: AudioTranscriptionModelRunner | None,
         stop_event: threading.Event,
     ) -> None:
