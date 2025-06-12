@@ -1,12 +1,8 @@
-import faulthandler
 import logging
 import multiprocessing as mp
-import signal
-import sys
 import threading
-from functools import wraps
 from logging.handlers import QueueHandler
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import frigate.log
 
