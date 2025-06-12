@@ -14,7 +14,6 @@ import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 
-import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -42,7 +41,7 @@ from frigate.const import (
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
@@ -59,12 +58,12 @@ from frigate.models import (
     User,
 )
 from frigate.object_detection.base import ObjectDetectProcess
-from frigate.output.output import output_frames
+from frigate.output.output import OutputProcess
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
-from frigate.record.record import manage_recordings
+from frigate.record.record import RecordProcess
 from frigate.review.review import ReviewProcess
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
@@ -224,11 +223,7 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = util.Process(
-            target=manage_recordings,
-            name="recording_manager",
-            args=(self.config,),
-        )
+        recording_process = RecordProcess(self.config)
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
@@ -255,13 +250,9 @@ class FrigateApp:
         ):
             return
 
-        embedding_process = util.Process(
-            target=manage_embeddings,
-            name="embeddings_manager",
-            args=(
-                self.config,
-                self.embeddings_metrics,
-            ),
+        embedding_process = EmbeddingProcess(
+            self.config,
+            self.embeddings_metrics,
         )
         embedding_process.daemon = True
         self.embedding_process = embedding_process
@@ -420,12 +411,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = util.Process(
-            target=output_frames,
-            name="output_processor",
-            args=(self.config,),
-        )
-        output_processor.daemon = True
+        output_processor = OutputProcess(self.config)
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
