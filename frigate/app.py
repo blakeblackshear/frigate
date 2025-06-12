@@ -224,7 +224,6 @@ class FrigateApp:
 
     def init_recording_manager(self) -> None:
         recording_process = RecordProcess(self.config)
-        recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
@@ -254,7 +253,6 @@ class FrigateApp:
             self.config,
             self.embeddings_metrics,
         )
-        embedding_process.daemon = True
         self.embedding_process = embedding_process
         embedding_process.start()
         self.processes["embeddings"] = embedding_process.pid or 0
