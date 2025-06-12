@@ -45,7 +45,7 @@ class Process(BaseProcess):
         return self.__dict__["stop_event"]
 
     def before_start(self) -> None:
-        self.__log_queue = frigate.log.log_listener.queue
+        self.__log_queue = frigate.log.log_queue
         self.logger = logging.getLogger(self.name)
         logging.basicConfig(handlers=[], force=True)
         logging.getLogger().addHandler(QueueHandler(self.__log_queue))
