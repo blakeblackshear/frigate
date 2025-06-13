@@ -12,6 +12,7 @@ from frigate.comms.object_detector_signaler import (
     ObjectDetectorPublisher,
     ObjectDetectorSubscriber,
 )
+from frigate.config import FrigateConfig
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
@@ -92,6 +93,7 @@ class DetectorRunner(util.Process):
         cameras: list[str],
         avg_speed: Value,
         start_time: Value,
+        config: FrigateConfig,
         detector_config: BaseDetectorConfig,
     ) -> None:
         super().__init__(name=name, daemon=True)
@@ -99,6 +101,7 @@ class DetectorRunner(util.Process):
         self.cameras = cameras
         self.avg_speed = avg_speed
         self.start_time = start_time
+        self.config = config
         self.detector_config = detector_config
         self.outputs: dict = {}
 
@@ -108,7 +111,7 @@ class DetectorRunner(util.Process):
         self.outputs[name] = {"shm": out_shm, "np": out_np}
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
 
         frame_manager = SharedMemoryFrameManager()
         object_detector = LocalObjectDetector(detector_config=self.detector_config)
@@ -161,6 +164,7 @@ class ObjectDetectProcess:
         name: str,
         detection_queue: Queue,
         cameras: list[str],
+        config: FrigateConfig,
         detector_config: BaseDetectorConfig,
     ):
         self.name = name
@@ -169,6 +173,7 @@ class ObjectDetectProcess:
         self.avg_inference_speed = Value("d", 0.01)
         self.detection_start = Value("d", 0.0)
         self.detect_process: util.Process | None = None
+        self.config = config
         self.detector_config = detector_config
         self.start_or_restart()
 
@@ -195,6 +200,7 @@ class ObjectDetectProcess:
             self.cameras,
             self.avg_inference_speed,
             self.detection_start,
+            self.config,
             self.detector_config,
         )
         self.detect_process.start()

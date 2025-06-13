@@ -386,6 +386,7 @@ class FrigateApp:
                 self.detection_queue,
                 list(self.config.cameras.keys()),
                 detector_config,
+                self.config,
             )
 
     def start_ptz_autotracker(self) -> None:
