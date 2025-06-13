@@ -14,7 +14,6 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-import frigate.util as util
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
@@ -27,6 +26,7 @@ from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
 from frigate.util.image import SharedMemoryFrameManager, get_blank_yuv_frame
+from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def check_disabled_camera_update(
         birdseye.all_cameras_disabled()
 
 
-class OutputProcess(util.Process):
+class OutputProcess(FrigateProcess):
     def __init__(self, config: FrigateConfig) -> None:
         super().__init__(name="frigate.output", daemon=True)
         self.config = config
