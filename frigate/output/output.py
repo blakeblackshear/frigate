@@ -77,7 +77,7 @@ class OutputProcess(util.Process):
         self.config = config
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
 
         frame_manager = SharedMemoryFrameManager()
 

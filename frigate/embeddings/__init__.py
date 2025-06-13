@@ -36,7 +36,7 @@ class EmbeddingProcess(FrigateProcess):
         self.metrics = metrics
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
         maintainer = EmbeddingMaintainer(
             self.config,
             self.metrics,
