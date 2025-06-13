@@ -14,7 +14,7 @@ from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRe
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
-from frigate.util import Process
+from frigate.util.process import FrigateProcess
 
 BATCH_SIZE = 16
 EPOCHS = 50
@@ -144,7 +144,7 @@ def kickoff_model_training(
     # run training in sub process so that
     # tensorflow will free CPU / GPU memory
     # upon training completion
-    training_process = Process(
+    training_process = FrigateProcess(
         target=__train_classification_model,
         name=f"model_training:{model_name}",
         args=(model_name,),

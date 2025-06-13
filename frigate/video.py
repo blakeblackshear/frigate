@@ -11,7 +11,6 @@ from typing import Any
 
 import cv2
 
-import frigate.util as util
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
@@ -51,6 +50,7 @@ from frigate.util.object import (
     is_object_filtered,
     reduce_detections,
 )
+from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
 
@@ -447,7 +447,7 @@ class CameraCaptureRunner(threading.Thread):
         )
 
 
-class CameraCapture(util.Process):
+class CameraCapture(FrigateProcess):
     def __init__(
         self, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
     ) -> None:
@@ -471,7 +471,7 @@ class CameraCapture(util.Process):
         camera_watchdog.join()
 
 
-class CameraTracker(util.Process):
+class CameraTracker(FrigateProcess):
     def __init__(
         self,
         config: CameraConfig,
