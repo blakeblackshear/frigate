@@ -387,6 +387,7 @@ class FrigateApp:
                 name,
                 self.detection_queue,
                 list(self.config.cameras.keys()),
+                self.config,
                 detector_config,
             )
 
