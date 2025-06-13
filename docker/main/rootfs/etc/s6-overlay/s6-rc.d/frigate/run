@@ -6,7 +6,7 @@ set -o errexit -o nounset -o pipefail
 
 # opt out of openvino telemetry
 if [ -e /usr/local/bin/opt_in_out ]; then
-  /usr/local/bin/opt_in_out --opt_out
+  /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
 fi
 
 # Logs should be sent to stdout so that s6 can collect them
