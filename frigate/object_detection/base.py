@@ -195,7 +195,7 @@ class ObjectDetectProcess:
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
         self.detect_process = DetectorRunner(
-            f"detector:{self.name}",
+            f"frigate.detector:{self.name}",
             self.detection_queue,
             self.cameras,
             self.avg_inference_speed,
