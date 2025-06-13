@@ -11,7 +11,6 @@ from typing import Any, Tuple
 
 import numpy as np
 
-import frigate.util as util
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
@@ -40,6 +39,7 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.process import FrigateProcess
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
@@ -76,7 +76,7 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     )
 
 
-class AudioProcessor(util.Process):
+class AudioProcessor(FrigateProcess):
     name = "frigate.audio_manager"
 
     def __init__(
