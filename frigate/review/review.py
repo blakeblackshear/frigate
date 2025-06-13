@@ -15,7 +15,7 @@ class ReviewProcess(util.Process):
         self.config = config
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
         maintainer = ReviewSegmentMaintainer(
             self.config,
             self.stop_event,
