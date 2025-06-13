@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 from collections import deque
+from enum import Enum
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing.managers import SyncManager
 from queue import Queue
@@ -33,6 +34,15 @@ LOG_HANDLER.addFilter(
     not in record.getMessage()
 )
 
+
+class LogLevel(str, Enum):
+    debug = "debug"
+    info = "info"
+    warning = "warning"
+    error = "error"
+    critical = "critical"
+
+
 log_listener: Optional[QueueListener] = None
 log_queue: Optional[Queue] = None
 
@@ -59,6 +69,22 @@ def _stop_logging() -> None:
     if log_listener is not None:
         log_listener.stop()
         log_listener = None
+
+
+def apply_log_levels(default: str, log_levels: dict[str, LogLevel]) -> None:
+    logging.getLogger().setLevel(default)
+
+    log_levels = {
+        "absl": LogLevel.error,
+        "httpx": LogLevel.error,
+        "tensorflow": LogLevel.error,
+        "werkzeug": LogLevel.error,
+        "ws4py": LogLevel.error,
+        **log_levels,
+    }
+
+    for log, level in log_levels.items():
+        logging.getLogger(log).setLevel(level.value.upper())
 
 
 # When a multiprocessing.Process exits, python tries to flush stdout and stderr. However, if the

@@ -100,7 +100,7 @@ class AudioProcessor(util.Process):
             self.transcription_model_runner = None
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
         audio_threads: list[AudioEventMaintainer] = []
 
         threading.current_thread().name = "process:audio_manager"

@@ -18,7 +18,7 @@ class RecordProcess(FrigateProcess):
         self.config = config
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.config.logger)
         db = SqliteQueueDatabase(
             self.config.database.path,
             pragmas={
