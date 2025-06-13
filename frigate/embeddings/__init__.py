@@ -17,9 +17,9 @@ from frigate.const import CONFIG_DIR, FACE_DIR
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
-from frigate.util import Process as FrigateProcess
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
+from frigate.util.process import FrigateProcess
 
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization

@@ -39,7 +39,7 @@ class BaseProcess(mp.Process):
         pass
 
 
-class Process(BaseProcess):
+class FrigateProcess(BaseProcess):
     logger: logging.Logger
 
     @property
