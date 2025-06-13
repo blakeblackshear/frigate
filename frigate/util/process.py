@@ -7,6 +7,8 @@ import threading
 from logging.handlers import QueueHandler
 from typing import Callable, Optional
 
+from setproctitle import setproctitle
+
 import frigate.log
 from frigate.config.logger import LoggerConfig
 
@@ -52,6 +54,8 @@ class Process(BaseProcess):
         self.__log_queue = frigate.log.log_listener.queue
 
     def pre_run_setup(self, logConfig: LoggerConfig | None = None) -> None:
+        setproctitle(self.name)
+        threading.current_thread().name = f"process:{self.name}"
         faulthandler.enable()
 
         def receiveSignal(signalNumber, frame):
