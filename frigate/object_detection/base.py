@@ -7,7 +7,6 @@ from multiprocessing.synchronize import Event as MpEvent
 
 import numpy as np
 
-import frigate.util as util
 from frigate.comms.object_detector_signaler import (
     ObjectDetectorPublisher,
     ObjectDetectorSubscriber,
@@ -21,6 +20,7 @@ from frigate.detectors.detector_config import (
 )
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
+from frigate.util.process import FrigateProcess
 
 from .util import tensor_transform
 
@@ -85,7 +85,7 @@ class LocalObjectDetector(ObjectDetector):
         return self.detect_api.detect_raw(tensor_input=tensor_input)
 
 
-class DetectorRunner(util.Process):
+class DetectorRunner(FrigateProcess):
     def __init__(
         self,
         name,
@@ -172,7 +172,7 @@ class ObjectDetectProcess:
         self.detection_queue = detection_queue
         self.avg_inference_speed = Value("d", 0.01)
         self.detection_start = Value("d", 0.0)
-        self.detect_process: util.Process | None = None
+        self.detect_process: FrigateProcess | None = None
         self.config = config
         self.detector_config = detector_config
         self.start_or_restart()
@@ -195,7 +195,7 @@ class ObjectDetectProcess:
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
         self.detect_process = DetectorRunner(
-            f"detector:{self.name}",
+            f"frigate.detector:{self.name}",
             self.detection_queue,
             self.cameras,
             self.avg_inference_speed,
