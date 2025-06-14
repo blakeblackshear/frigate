@@ -9,7 +9,7 @@
     "title": "Transmissão offline",
     "desc": "Nenhum quadro foi recebido na transmissão de <code>detecção</code> {{cameraName}}, verifique os logs de erro"
   },
-  "cameraDisabled": "A câmera está desativada",
+  "cameraDisabled": "A câmara está desativada",
   "stats": {
     "streamType": {
       "title": "Tipo de transmissão:",

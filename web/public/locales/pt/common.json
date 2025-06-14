@@ -114,8 +114,8 @@
     "close": "Fechar",
     "history": "Histórico",
     "back": "Voltar",
-    "fullscreen": "Tela cheia",
-    "exitFullscreen": "Sair da tela cheia",
+    "fullscreen": "Ecrã Completo",
+    "exitFullscreen": "Sair do Ecrã Completo",
     "twoWayTalk": "Conversa bidirecional",
     "cameraAudio": "Áudio da câmera",
     "edit": "Editar",
@@ -134,7 +134,7 @@
     "export": "Exportar",
     "next": "Próximo",
     "play": "Tocar",
-    "pictureInPicture": "Imagem na Imagem"
+    "pictureInPicture": "Sobrepor Imagem"
   },
   "label": {
     "back": "Voltar"
@@ -143,9 +143,9 @@
     "user": {
       "logout": "Sair",
       "account": "Conta",
-      "current": "Usuário atual: {{user}}",
+      "current": "Utilizador atual: {{user}}",
       "setPassword": "Definir senha",
-      "title": "Usuário",
+      "title": "Utilizador",
       "anonymous": "anônimo"
     },
     "faceLibrary": "Biblioteca de rostos",
@@ -200,7 +200,8 @@
       "ro": "Romeno (Română)",
       "hu": "Húngaro (Magyar)",
       "sk": "Eslovaco (Slovenčina)",
-      "th": "Tailandês"
+      "th": "Tailandês",
+      "ca": "Català (Catalão)"
     },
     "appearance": "Aparência",
     "darkMode": {
@@ -219,9 +220,9 @@
     "restart": "Reiniciar Frigate",
     "live": {
       "title": "Ao vivo",
-      "allCameras": "Todas as câmeras",
+      "allCameras": "Todas as câmaras",
       "cameras": {
-        "title": "Câmeras",
+        "title": "Câmaras",
         "count_one": "{{count}} Câmera",
         "count_many": "{{count}} Câmeras",
         "count_other": "{{count}} Câmeras"
