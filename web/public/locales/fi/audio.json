@@ -13,5 +13,16 @@
   "bus": "Bussi",
   "train": "Juna",
   "bicycle": "Pyörä",
-  "skateboard": "Rullalauta"
+  "skateboard": "Rullalauta",
+  "bellow": "Karjua",
+  "whoop": "Huutaa",
+  "whispering": "Kuiskaus",
+  "laughter": "Nauru",
+  "snicker": "Hihittää",
+  "crying": "Itku",
+  "sigh": "Huokaus",
+  "singing": "Laulu",
+  "choir": "Kuoro",
+  "yodeling": "Jodlata",
+  "camera": "Kamera"
 }
