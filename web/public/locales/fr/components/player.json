@@ -3,14 +3,14 @@
   "noPreviewFoundFor": "Aucun aperçu trouvé pour {{cameraName}}",
   "noPreviewFound": "Aucun aperçu trouvé",
   "submitFrigatePlus": {
-    "title": "Soumettre cette image à Frigate+?",
+    "title": "Soumettre cette image à Frigate+ ?",
     "submit": "Soumettre"
   },
   "streamOffline": {
     "title": "Flux hors ligne",
-    "desc": "Aucune image n'a été reçue sur le flux de <code>détection</code> de la caméra {{cameraName}}, vérifiez le journal d'erreurs"
+    "desc": "Aucune image n'a été reçue sur le flux de <code>détection</code> de la caméra {{cameraName}}. Vérifiez le journal d'erreurs."
   },
-  "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version ultérieure est requis pour ce type de flux en direct.",
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version supérieure est requis pour ce type de flux en direct.",
   "cameraDisabled": "La caméra est désactivée",
   "stats": {
     "streamType": {
@@ -26,7 +26,7 @@
       "value": "{{seconds}} secondes",
       "short": {
         "title": "Latence",
-        "value": "{{seconds}} sec"
+        "value": "{{seconds}} s"
       }
     },
     "droppedFrames": {

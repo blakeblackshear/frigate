@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Parcourez la procédure d’ajout d’une nouvelle collection à la bibliothèque de visages.",
+    "addFace": "Guide pour ajouter une nouvelle collection à la bibliothèque de visages",
     "placeholder": "Saisissez un nom pour cette collection",
     "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets."
   },
@@ -11,7 +11,7 @@
     "timestamp": "Horodatage",
     "faceDesc": "Détails de l'objet suivi qui a généré ce visage",
     "subLabelScore": "Score de sous-libellé",
-    "scoreInfo": "Le score de sous-libellé est le score pondéré de tous les scores de confiances des visages reconnus. Il peut donc différer du score affiché sur l'instantané.",
+    "scoreInfo": "Le score du sous-libellé correspond au score pondéré de tous les scores de confiance des visages reconnus. Il est donc possible qu'il ne corresponde pas au score affiché sur l'instantané.",
     "unknown": "Inconnu"
   },
   "documentTitle": "Bibliothèque de visages - Frigate",
@@ -23,7 +23,7 @@
     "title": "Créer une collection",
     "desc": "Créer une nouvelle collection",
     "new": "Créer un nouveau visage",
-    "nextSteps": "Pour construire une base solide :<li>Utilisez l’onglet Entraîner pour sélectionner et entraîner le modèle sur des images pour chaque personne détectée.</li><li>Concentrez-vous sur des images de face pour de meilleurs résultats ; évitez d’entraîner le modèle des images qui capturent des visages de biais.</li></ul>"
+    "nextSteps": "Pour construire une base solide :<li>Utilisez l'onglet Entraîner pour sélectionner et entraîner des images pour chaque personne détectée.</li><li>Privilégiez les images de face pour de meilleurs résultats ; évitez d'utiliser des images d'entraînement où les visages sont capturés de biais.</li></ul>"
   },
   "train": {
     "title": "Entraîner",
@@ -35,7 +35,7 @@
     "addFace": "Ajouter un visage",
     "uploadImage": "Téléverser une image",
     "deleteFaceAttempts": "Supprimer les visages",
-    "reprocessFace": "Réanalyser le visage",
+    "reprocessFace": "Retraiter le visage",
     "renameFace": "Renommer le visage",
     "deleteFace": "Supprimer le visage"
   },
@@ -77,10 +77,10 @@
       "renameFaceFailed": "Échec du renommage du visage : {{errorMessage}}"
     }
   },
-  "trainFaceAs": "Entraîner un visage comme :",
-  "trainFace": "Entraîner visage",
+  "trainFaceAs": "Entraîner le visage comme :",
+  "trainFace": "Entraîner un visage",
   "steps": {
-    "uploadFace": "Téléverser l'image de visage",
+    "uploadFace": "Téléverser une image de visage",
     "faceName": "Entrer un nom pour le visage",
     "nextSteps": "Prochaines étapes",
     "description": {
@@ -98,6 +98,6 @@
     "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible.",
     "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
   },
-  "nofaces": "Pas de visages disponibles",
+  "nofaces": "Pas de visage disponible",
   "pixels": "{{area}} pixels"
 }
