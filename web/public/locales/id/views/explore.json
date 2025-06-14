@@ -8,5 +8,8 @@
       "startingUp": "Sedang memulai…",
       "estimatedTime": "Perkiraan waktu tersisa:"
     }
+  },
+  "details": {
+    "timestamp": "Stempel waktu"
   }
 }

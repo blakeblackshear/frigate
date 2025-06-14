@@ -4,6 +4,39 @@
     "camera": "Setari Camera - Frigate",
     "default": "Setari - Frigate",
     "classification": "Setări de clasificare - Frigate",
-    "masksAndZones": "Editor Zonă si Mască - Frigate"
+    "masksAndZones": "Editor Zonă si Mască - Frigate",
+    "notifications": "Setări notificări - Frigate",
+    "motionTuner": "Ajustare mișcare - Frigate",
+    "object": "Depanare - Frigate",
+    "general": "Setări generale - Frigate",
+    "frigatePlus": "Setări Frigate+ - Frigate",
+    "enrichments": "Setări de Îmbogățire - Frigate"
+  },
+  "menu": {
+    "ui": "Interfață utilizator",
+    "cameras": "Setări cameră",
+    "masksAndZones": "Măști / Zone",
+    "motionTuner": "Reglaj mișcare",
+    "enrichments": "Îmbogățiri",
+    "debug": "Depanare",
+    "users": "Utilizatori",
+    "notifications": "Notificări",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Ai modificări nesalvate.",
+      "desc": "Vrei să salvezi modificările înainte de a continua?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Cameră",
+    "noCamera": "Nicio cameră"
+  },
+  "general": {
+    "title": "Setări generale",
+    "liveDashboard": {
+      "title": "Tabloul de bord live"
+    }
   }
 }

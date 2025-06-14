@@ -22,7 +22,9 @@
     },
     "detector": {
       "temperature": "Temperatura Detectorului",
-      "title": "Detectori"
+      "title": "Detectori",
+      "cpuUsage": "Utilizarea procesorului detectorului",
+      "inferenceSpeed": "Viteza inferenței detectorului"
     },
     "otherProcesses": {
       "title": "Alte Procese"
@@ -50,6 +52,13 @@
       "timestamp": "Marca temporală",
       "tag": "Etichetă",
       "message": "Mesaj"
+    },
+    "tips": "Jurnalele se transmit de pe server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Eroare la preluarea jurnalelor: {{errorMessage}}",
+        "whileStreamingLogs": "Eroare la transmiterea jurnalelor: {{errorMessage}}"
+      }
     }
   },
   "metrics": "Date Sistem"

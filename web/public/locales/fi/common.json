@@ -40,5 +40,33 @@
     "minute_other": "{{time}}minuuttia",
     "second_one": "{{time}}sekuntti",
     "second_other": "{{time}}sekunttia"
-  }
+  },
+  "pagination": {
+    "next": {
+      "title": "Seuraava",
+      "label": "Mene seuraavalle sivulle"
+    },
+    "more": "Lisää sivuja",
+    "previous": {
+      "title": "Edellinen",
+      "label": "Mene edelliselle sivulle"
+    },
+    "label": "sivutus"
+  },
+  "accessDenied": {
+    "documentTitle": "Pääsy kielletty - Frigate",
+    "title": "Pääsy kielletty",
+    "desc": "Sinulla ei ole oikeuksia tarkastella tätä sivua."
+  },
+  "role": {
+    "admin": "Järjestelmänvalvoja",
+    "viewer": "Katselija",
+    "desc": "Järjestelmänvalvojalla on täysi käyttöoikeus kaikkiin Frigaten käyttöliittymän toimintoihin. Katselijoiden oikeudet on rajoitettu kameroiden katseluun, kohteiden arviointiin ja historian tarkasteluun."
+  },
+  "notFound": {
+    "documentTitle": "Ei löytynyt - Frigate",
+    "title": "404",
+    "desc": "Sivua ei löytynyt"
+  },
+  "selectItem": "Valitse {{item}}"
 }

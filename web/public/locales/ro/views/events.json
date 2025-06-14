@@ -31,5 +31,8 @@
     "button": "Articole Noi de Revizuit"
   },
   "camera": "Camera foto",
-  "detections": "Detectii"
+  "detections": "Detectii",
+  "detected": "detectat",
+  "selected_one": "{{count}} selectate",
+  "selected_other": "{{count}} selectate"
 }

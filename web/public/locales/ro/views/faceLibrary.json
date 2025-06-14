@@ -1,9 +1,41 @@
 {
   "description": {
     "addFace": "Parcurge adaugare unei colectii noi la Libraria de Fete.",
-    "placeholder": "Introduceti un nume pentru aceasta colectie"
+    "placeholder": "Introduceti un nume pentru aceasta colectie",
+    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
   },
   "details": {
-    "person": "Persoana"
+    "person": "Persoana",
+    "subLabelScore": "Scor subetichetă",
+    "unknown": "Necunoscut",
+    "scoreInfo": "Scorul sub-etichetă este scorul ponderat pentru toate fețele recunoscute, așa că acesta poate diferi de scorul afișat în snapshot.",
+    "face": "Detalii față",
+    "faceDesc": "Detalii despre obiectul urmărit care a generat această față",
+    "timestamp": "Marcaj timp"
+  },
+  "uploadFaceImage": {
+    "desc": "Încarcă o imagine pentru a scana fețele și a include pentru {{pageToggle}}",
+    "title": "Încarcă imaginea feței"
+  },
+  "createFaceLibrary": {
+    "desc": "Creează o colecție nouă",
+    "title": "Creează colecție",
+    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „antrenare” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
+    "new": "Crează o față nouă"
+  },
+  "collections": "Colecții",
+  "documentTitle": "Bibliotecă fețe - Frigate",
+  "train": {
+    "empty": "Nu există încercări recente de recunoaștere facială",
+    "title": "Antrenează",
+    "aria": "Selectează antrenarea"
+  },
+  "steps": {
+    "description": {
+      "uploadFace": "Încarcă o imagine cu {{name}} care să arate fața dintr-un unghi frontal. Imaginea nu trebuie să fie decupată doar la nivelul feței."
+    },
+    "faceName": "Introdu numele feței",
+    "uploadFace": "Încarcă imaginea feței",
+    "nextSteps": "Pașii următori"
   }
 }

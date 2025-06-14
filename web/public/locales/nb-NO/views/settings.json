@@ -148,7 +148,7 @@
   },
   "camera": {
     "streams": {
-      "desc": "Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>",
+      "desc": "Midlertidig deaktiver et kamera til Frigate startes på nytt. Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>",
       "title": "Strømmer"
     },
     "reviewClassification": {
@@ -175,7 +175,7 @@
     "title": "Kamerainnstillinger",
     "review": {
       "title": "Inspeksjon",
-      "desc": "Aktiver/deaktiver varsler og deteksjoner for dette kameraet. Når deaktivert, vil det ikke genereres nye inspeksjonselementer.",
+      "desc": "Aktiver/deaktiver varsler og deteksjoner midlertidig for dette kameraet til Frigate startes på nytt. Når deaktivert, vil det ikke genereres nye inspeksjonselementer. ",
       "alerts": "Varsler ",
       "detections": "Deteksjoner "
     }
