@@ -5,10 +5,6 @@ import sys
 
 import cv2
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras import layers, models, optimizers
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.comms.inter_process import InterProcessRequestor
@@ -44,6 +40,13 @@ def __generate_representative_dataset_factory(dataset_dir: str):
 @staticmethod
 def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
+
+    # import in the function so that tensorflow is not initialized multiple times
+    import tensorflow as tf
+    from tensorflow.keras import layers, models, optimizers
+    from tensorflow.keras.applications import MobileNetV2
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     model_dir = os.path.join(MODEL_CACHE_DIR, model_name)
     num_classes = len(
