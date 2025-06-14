@@ -10,7 +10,7 @@
     "general": "常规设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
-    "enrichments": "增强功能 - Frigate"
+    "enrichments": "增强功能设置 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -150,11 +150,11 @@
     "title": "摄像头设置",
     "streams": {
       "title": "视频流",
-      "desc": "禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理。检测、录制和调试功能都将不可用。<br /><em>注意：该选项不会禁用 go2rtc 转播。</em>"
+      "desc": "暂时禁用摄像头，除非重启Frigate否则将保持禁用。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理。检测、录制和调试功能都将不可用。<br /><em>注意：该选项不会禁用 go2rtc 转播。</em>"
     },
     "review": {
       "title": "核查",
-      "desc": "启用/禁用摄像头的警报和检测。禁用后，不会生成新的核查项。",
+      "desc": "启用/禁用摄像头的警报和检测。禁用后，除非重启Frigate，否则不会生成新的核查项。 ",
       "alerts": "警报 ",
       "detections": "检测 "
     },
@@ -374,7 +374,7 @@
   },
   "debug": {
     "title": "调试",
-    "detectorDesc": "Frigate 将使用探测器（{{detectors}}）来检测摄像头视频流中的对象。",
+    "detectorDesc": "Frigate 将使用检测器（{{detectors}}）来检测摄像头视频流中的对象。",
     "desc": "调试界面将实时显示被追踪的对象以及统计信息，对象列表将显示检测到的对象和延迟显示的概览。",
     "debugging": "调试选项",
     "objectList": "对象列表",
@@ -603,7 +603,7 @@
       "error": "加载模型信息失败",
       "availableModels": "可用模型",
       "loadingAvailableModels": "正在加载可用模型…",
-      "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前探测器配置兼容的模型。",
+      "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前检测器配置兼容的模型。",
       "plusModelType": {
         "baseModel": "基础模型",
         "userModel": "定向调优"

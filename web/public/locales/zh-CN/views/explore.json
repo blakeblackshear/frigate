@@ -146,7 +146,7 @@
     },
     "editLPR": {
       "desc": "为 {{label}} 输入新的车牌值",
-      "descNoLabel": "为探测到的对象输入新的车牌值",
+      "descNoLabel": "为检测到的对象输入新的车牌值",
       "title": "编辑车牌"
     },
     "recognizedLicensePlate": "识别的车牌",
