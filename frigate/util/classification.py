@@ -17,7 +17,6 @@ EPOCHS = 50
 LEARNING_RATE = 0.001
 
 
-@staticmethod
 def __generate_representative_dataset_factory(dataset_dir: str):
     def generate_representative_dataset():
         image_paths = []
@@ -37,7 +36,6 @@ def __generate_representative_dataset_factory(dataset_dir: str):
     return generate_representative_dataset
 
 
-@staticmethod
 def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
 
