@@ -38,7 +38,8 @@
       "uk": "Українська (Ucraïnès)",
       "da": "Dansk (Danès)",
       "sk": "Slovenčina (Eslovac)",
-      "ru": "Русский (Rus)"
+      "ru": "Русский (Rus)",
+      "th": "ไทย (Tailandès)"
     },
     "system": "Sistema",
     "systemMetrics": "Mètriques del sistema",
@@ -193,6 +194,10 @@
     "speed": {
       "mph": "mph",
       "kph": "km/h"
+    },
+    "length": {
+      "feet": "peus",
+      "meters": "metres"
     }
   },
   "label": {
