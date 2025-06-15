@@ -1,9 +1,83 @@
 {
-  "documentTitle": "Live - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "documentTitle": "Frigate - Live",
+  "documentTitle.withCamera": "{{camera}} - Frigate - Live",
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
     "enable": "Activare dialog",
     "disable": "Dezactivați conversația bidirecțională"
+  },
+  "ptz": {
+    "zoom": {
+      "out": {
+        "label": "Îndepărtează camera PTZ"
+      },
+      "in": {
+        "label": "Apropie camera PTZ"
+      }
+    },
+    "move": {
+      "clickMove": {
+        "label": "Apasă în cadrul imaginii pentru a centra camera",
+        "enable": "Activează clic pentru a muta",
+        "disable": "Dezactivează clic pentru a muta"
+      },
+      "left": {
+        "label": "Mișcă camera PTZ spre stânga"
+      },
+      "up": {
+        "label": "Mișcă camera PTZ în sus"
+      },
+      "down": {
+        "label": "Mișcă camera PTZ în jos"
+      },
+      "right": {
+        "label": "Mișcă camera PTZ spre dreapta"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Fă clic în cadru pentru a centra camera PTZ"
+      }
+    },
+    "presets": "Presetări cameră PTZ"
+  },
+  "cameraAudio": {
+    "enable": "Activează sunetul camerei",
+    "disable": "Dezactivează sunetul camerei"
+  },
+  "camera": {
+    "enable": "Activează camera",
+    "disable": "Dezactivează camera"
+  },
+  "muteCameras": {
+    "enable": "Dezactivează sunetul pentru toate camerele",
+    "disable": "Activează sunetul pentru toate camerele"
+  },
+  "detect": {
+    "enable": "Activează detectarea",
+    "disable": "Dezactivează detectarea"
+  },
+  "recording": {
+    "enable": "Activează înregistrarea",
+    "disable": "Dezactivează înregistrarea"
+  },
+  "snapshots": {
+    "disable": "Dezactivează snapshoturile",
+    "enable": "Activează snapshoturile"
+  },
+  "audioDetect": {
+    "enable": "Activează detectarea audio",
+    "disable": "Dezactivează detectarea audio"
+  },
+  "autotracking": {
+    "enable": "Activează urmărirea automată",
+    "disable": "Dezactivează urmărirea automată"
+  },
+  "streamStats": {
+    "enable": "Afișează statistici streaming",
+    "disable": "Ascunde statisticile de streaming"
+  },
+  "manualRecording": {
+    "title": "Înregistrare la cerere"
   }
 }

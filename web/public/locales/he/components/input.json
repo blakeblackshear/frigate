@@ -1,7 +1,10 @@
 {
   "button": {
     "downloadVideo": {
-      "label": "הורד וידאו"
+      "label": "הורד וידאו",
+      "toast": {
+        "success": "הורדת סרטון הסקירה שלך החלה."
+      }
     }
   }
 }

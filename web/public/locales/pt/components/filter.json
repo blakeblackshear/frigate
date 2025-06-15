@@ -53,14 +53,14 @@
     "relevance": "Relevância"
   },
   "cameras": {
-    "label": "Filtro de câmeras",
+    "label": "Filtro de câmaras",
     "all": {
-      "short": "Câmeras",
-      "title": "Todas as câmeras"
+      "short": "Câmaras",
+      "title": "Todas as câmaras"
     }
   },
   "review": {
-    "showReviewed": "Mostrar revisado"
+    "showReviewed": "Mostrar analisados"
   },
   "motion": {
     "showMotionOnly": "Mostrar apenas movimento"
@@ -97,7 +97,7 @@
     "label": "Nível de log do filtro",
     "loading": {
       "title": "Carregando",
-      "desc": "Quando o painel de logs está rolado até o final, novos logs são transmitidos automaticamente à medida que são adicionados."
+      "desc": "Ao fazer scroll até ao fundo no painel de logs, novos registos são automaticamente apresentados à medida que são adicionados."
     },
     "filterBySeverity": "Filtrar logs por gravidade",
     "disableLogStreaming": "Desativar transmissão de logs",
@@ -117,11 +117,11 @@
     "desc": "Excluir estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer embeddings salvos e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar este diálogo no futuro."
   },
   "recognizedLicensePlates": {
-    "title": "Placas Reconhecidas",
-    "noLicensePlatesFound": "Nenhuma placa encontrada.",
-    "selectPlatesFromList": "Selecione uma ou mais placas da lista.",
-    "loadFailed": "Falha ao carregar as placas reconhecidas.",
-    "loading": "Carregando placas reconhecidas…",
-    "placeholder": "Digite para buscar placas…"
+    "title": "Matrículas Reconhecidas",
+    "noLicensePlatesFound": "Nenhuma matrícula encontrada.",
+    "selectPlatesFromList": "Selecione uma ou mais matrículas da lista.",
+    "loadFailed": "Falha ao carregar as matrículas reconhecidas.",
+    "loading": "Carregando matrículas reconhecidas…",
+    "placeholder": "Digite para procurar matrículas…"
   }
 }

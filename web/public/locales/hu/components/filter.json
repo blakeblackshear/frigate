@@ -1,1 +1,19 @@
-{}
+{
+  "filter": "Szűrő",
+  "labels": {
+    "label": "Cimkék",
+    "all": {
+      "title": "Minden cimke",
+      "short": "Cimkék"
+    },
+    "count_other": "{{count}} cimke",
+    "count_one": "{{count}} Cimke"
+  },
+  "zones": {
+    "label": "Zónák",
+    "all": {
+      "title": "Minden zóna",
+      "short": "Zónák"
+    }
+  }
+}

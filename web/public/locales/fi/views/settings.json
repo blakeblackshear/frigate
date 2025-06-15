@@ -7,8 +7,10 @@
     "default": "Asetukset - Frigate",
     "general": "Yleiset asetukset - Frigate",
     "frigatePlus": "Frigate+ asetukset - Frigate",
-    "object": "Objektiasetukset - Frigate",
-    "authentication": "Autentikointiuasetukset - Frigate"
+    "object": "Virheenjäljitys - Frigate",
+    "authentication": "Autentikointiuasetukset - Frigate",
+    "notifications": "Ilmoitusasetukset - Frigate",
+    "enrichments": "Laajennusasetukset – Frigate"
   },
   "menu": {
     "ui": "Käyttöliittymä",
@@ -19,7 +21,8 @@
     "masksAndZones": "Maskit / alueet",
     "debug": "Debuggaus",
     "motionTuner": "Liikesäädin",
-    "notifications": "Ilmoitukset"
+    "notifications": "Ilmoitukset",
+    "enrichments": "Rikasteet"
   },
   "dialog": {
     "unsavedChanges": {

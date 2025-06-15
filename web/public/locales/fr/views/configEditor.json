@@ -3,10 +3,10 @@
   "documentTitle": "Éditeur de configuration - Frigate",
   "copyConfig": "Copier la configuration",
   "saveOnly": "Enregistrer seulement",
-  "saveAndRestart": "Enregistrer & redémarrer",
+  "saveAndRestart": "Enregistrer et redémarrer",
   "toast": {
     "success": {
-      "copyToClipboard": "Configuration copiée dans le presse-papiers."
+      "copyToClipboard": "Configuration copiée dans le presse-papiers"
     },
     "error": {
       "savingError": "Erreur lors de l'enregistrement de la configuration"

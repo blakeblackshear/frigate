@@ -2,7 +2,7 @@
   "configEditor": "Editor de configuração",
   "copyConfig": "Copiar configuração",
   "saveAndRestart": "Salvar e reiniciar",
-  "saveOnly": "Somente salvar",
+  "saveOnly": "Salvar Apenas",
   "toast": {
     "success": {
       "copyToClipboard": "Configuração copiada para a área de transferência."
