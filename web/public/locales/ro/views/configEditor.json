@@ -11,5 +11,6 @@
     "error": {
       "savingError": "Eroare la salvarea setarilor"
     }
-  }
+  },
+  "confirm": "Ieși fără să salvezi?"
 }

@@ -5,6 +5,59 @@
     "all": {
       "title": "Toate etichetele",
       "short": "Etichete"
+    },
+    "count_one": "Etichetă {{count}}",
+    "count_other": "{{count}} etichete"
+  },
+  "dates": {
+    "selectPreset": "Selectează o presetare…",
+    "all": {
+      "title": "Toate datele",
+      "short": "Date"
     }
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Toate zonele",
+      "short": "Zone"
+    }
+  },
+  "reset": {
+    "label": "Resetează filtrele la valorile implicite"
+  },
+  "timeRange": "Interval de timp",
+  "subLabels": {
+    "label": "Sub-etichete",
+    "all": "Toate sub-etichetele"
+  },
+  "more": "Mai multe filtre",
+  "score": "Scor",
+  "estimatedSpeed": "Viteza estimată ({{unit}})",
+  "features": {
+    "label": "Caracteristici",
+    "hasSnapshot": "Are snapshot",
+    "hasVideoClip": "Are un videoclip",
+    "submittedToFrigatePlus": {
+      "label": "Trimis către Frigate+",
+      "tips": "Trebuie mai întâi să filtrezi obiectele urmărite care au un snapshot.<br /><br />Obiectele urmărite fără snapshot nu pot fi trimise către Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sortează",
+    "dateAsc": "Dată (crescător)",
+    "dateDesc": "Dată (descrescător)",
+    "scoreAsc": "Scor obiect (crescător)",
+    "scoreDesc": "Scor obiect (descrescător)",
+    "speedAsc": "Viteză estimată (crescător)",
+    "speedDesc": "Viteză estimată (descrescător)",
+    "relevance": "Relevanță"
+  },
+  "cameras": {
+    "all": {
+      "short": "Camere",
+      "title": "Toate camerele"
+    },
+    "label": "Filtru camere"
   }
 }

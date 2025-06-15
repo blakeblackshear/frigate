@@ -4,6 +4,56 @@
     "camera": "Setari Camera - Frigate",
     "default": "Setari - Frigate",
     "classification": "Setări de clasificare - Frigate",
-    "masksAndZones": "Editor Zonă si Mască - Frigate"
+    "masksAndZones": "Editor Zonă si Mască - Frigate",
+    "notifications": "Setări notificări - Frigate",
+    "motionTuner": "Ajustare mișcare - Frigate",
+    "object": "Depanare - Frigate",
+    "general": "Setări generale - Frigate",
+    "frigatePlus": "Setări Frigate+ - Frigate",
+    "enrichments": "Setări de Îmbogățire - Frigate"
+  },
+  "menu": {
+    "ui": "Interfață utilizator",
+    "cameras": "Setări cameră",
+    "masksAndZones": "Măști / Zone",
+    "motionTuner": "Reglaj mișcare",
+    "enrichments": "Îmbogățiri",
+    "debug": "Depanare",
+    "users": "Utilizatori",
+    "notifications": "Notificări",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Ai modificări nesalvate.",
+      "desc": "Vrei să salvezi modificările înainte de a continua?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Cameră",
+    "noCamera": "Nicio cameră"
+  },
+  "general": {
+    "title": "Setări generale",
+    "liveDashboard": {
+      "title": "Tabloul de bord live",
+      "automaticLiveView": {
+        "desc": "Comută automat la vizualizarea live a unei camere când este detectată activitate. Dezactivarea acestei opțiuni face ca imaginile statice ale camerelor din panoul Live să se actualizeze doar o dată pe minut.",
+        "label": "Vizualizare Live Automată"
+      },
+      "playAlertVideos": {
+        "label": "Redă videoclipurile de alertă",
+        "desc": "În mod implicit, alertele recente din panoul Live se redau ca videoclipuri mici, ce ruleaza repetat. Dezactivează această opțiune pentru a afișa doar o imagine statică a alertelor recente pe acest dispozitiv/browser."
+      }
+    },
+    "storedLayouts": {
+      "title": "Layout-uri salvate",
+      "desc": "Aranjamentul camerelor într-un grup de camere poate fi tras și redimensionat. Pozițiile sunt salvate în stocarea locală a browserului tău.",
+      "clearAll": "Șterge toate layout-urile"
+    },
+    "cameraGroupStreaming": {
+      "title": "Setări de streaming pentru grupul de camere",
+      "desc": "Setările de streaming pentru fiecare grup de camere sunt stocate în memoria locală a browserului tău."
+    }
   }
 }
