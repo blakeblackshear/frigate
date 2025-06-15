@@ -17,13 +17,13 @@
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
     "title": "Carregar imagem do rosto",
-    "desc": "Carregue uma imagem para escanear rostos e incluir em {{pageToggle}}"
+    "desc": "Carregue uma imagem para procurar rostos e incluir em {{pageToggle}}"
   },
   "createFaceLibrary": {
     "title": "Criar coleção",
     "desc": "Criar uma nova coleção",
     "new": "Criar novo rosto",
-    "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treinamento que capturem rostos em ângulo.</li></ul>"
+    "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treino que capturem rostos em ângulo.</li></ul>"
   },
   "train": {
     "aria": "Selecionar treino",

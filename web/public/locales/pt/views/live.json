@@ -2,56 +2,56 @@
   "documentTitle": "Ao vivo - Frigate",
   "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
   "twoWayTalk": {
-    "disable": "Desativar conversação bidirecional",
-    "enable": "Habilitar conversação bidirecional"
+    "disable": "Desativar conversa bidirecional",
+    "enable": "Habilitar conversa bidirecional"
   },
   "cameraAudio": {
-    "enable": "Habilitar áudio da câmera",
-    "disable": "Desativar áudio da câmera"
+    "enable": "Habilitar áudio da câmara",
+    "disable": "Desativar áudio da câmara"
   },
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "Clique no quadro para centralizar a câmera",
+        "label": "Clique no quadro para centralizar a câmara",
         "enable": "Habilitar clique para mover",
         "disable": "Desativar clique para mover"
       },
       "down": {
-        "label": "Mover a câmera PTZ para baixo"
+        "label": "Mover a câmara PTZ para baixo"
       },
       "up": {
-        "label": "Mover a câmera PTZ para cima"
+        "label": "Mover a câmara PTZ para cima"
       },
       "left": {
-        "label": "Mover a câmera PTZ para a esquerda"
+        "label": "Mover a câmara PTZ para a esquerda"
       },
       "right": {
-        "label": "Mover a câmera PTZ para a direita"
+        "label": "Mover a câmara PTZ para a direita"
       }
     },
     "zoom": {
       "in": {
-        "label": "Aumentar zoom da câmera PTZ"
+        "label": "Aumentar zoom da câmara PTZ"
       },
       "out": {
-        "label": "Diminuir zoom da câmera PTZ"
+        "label": "Diminuir zoom da câmara PTZ"
       }
     },
-    "presets": "Predefinições de câmera PTZ",
+    "presets": "Predefinições de câmara PTZ",
     "frame": {
       "center": {
-        "label": "Clique no quadro para centralizar a câmera PTZ"
+        "label": "Clique no quadro para centralizar a câmara PTZ"
       }
     }
   },
   "lowBandwidthMode": "Modo de baixa largura de banda",
   "camera": {
-    "enable": "Habilitar câmera",
-    "disable": "Desativar câmera"
+    "enable": "Habilitar câmara",
+    "disable": "Desativar câmara"
   },
   "muteCameras": {
-    "disable": "Ativar áudio de todas as câmeras",
-    "enable": "Silenciar todas as câmeras"
+    "disable": "Ativar áudio de todas as câmaras",
+    "enable": "Silenciar todas as câmaras"
   },
   "detect": {
     "enable": "Habilitar detecção",
@@ -74,23 +74,23 @@
     "disable": "Ocultar estatísticas de transmissão"
   },
   "manualRecording": {
-    "tips": "Inicie um evento manual com base nas configurações de retenção de gravação desta câmera.",
+    "tips": "Inicie um evento manual com base nas configurações de retenção de gravação desta câmara.",
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "desc": "Habilite esta opção para continuar a transmissão quando o player estiver oculto."
     },
     "showStats": {
       "label": "Mostrar estatísticas",
-      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmera."
+      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmara."
     },
-    "start": "Iniciar gravação sob demanda",
-    "recordDisabledTips": "Como a gravação está desabilitada ou restrita na configuração desta câmera, apenas um snapshot será salvo.",
-    "end": "Encerrar gravação sob demanda",
-    "ended": "Fim da gravação manual sob demanda.",
-    "failedToEnd": "Falha ao finalizar a gravação manual sob demanda.",
-    "failedToStart": "Falha ao iniciar a gravação manual sob demanda.",
-    "title": "Gravação sob demanda",
-    "started": "Iniciou a gravação manual sob demanda.",
+    "start": "Iniciar gravação on-demand",
+    "recordDisabledTips": "Como a gravação está desabilitada ou restrita na configuração desta câmara, apenas um snapshot será salvo.",
+    "end": "Encerrar gravação on-demand",
+    "ended": "Fim da gravação manual on-demand.",
+    "failedToEnd": "Falha ao finalizar a gravação manual on-demand.",
+    "failedToStart": "Falha ao iniciar a gravação manual on-demand.",
+    "title": "Gravação on-demand",
+    "started": "Iniciou a gravação manual on-demand.",
     "debugView": "Exibição de depuração"
   },
   "streamingSettings": "Configurações de transmissão",
@@ -102,7 +102,7 @@
     "title": "Transmissão",
     "audio": {
       "tips": {
-        "title": "O áudio deve ser emitido pela sua câmera e configurado no go2rtc para esta transmissão.",
+        "title": "O áudio deve ser emitido pela sua câmara e configurado no go2rtc para esta transmissão.",
         "documentation": "Leia a documentação "
       },
       "available": "O áudio está disponível para esta transmissão",
@@ -110,8 +110,8 @@
     },
     "twoWayTalk": {
       "tips.documentation": "Leia a documentação ",
-      "unavailable": "Conversa bidirecional não está disponível para este fluxo",
-      "tips": "Seu dispositivo deve suportar o recurso e o WebRTC deve ser configurado para conversação bidirecional.",
+      "unavailable": "Conversa bidirecional não está disponível para esta transmissão",
+      "tips": "Seu dispositivo deve suportar o recurso e o WebRTC deve ser configurado para conversa bidirecional.",
       "available": "Conversa bidirecional está disponível para esta transmissão"
     },
     "lowBandwidth": {
@@ -125,7 +125,7 @@
   },
   "cameraSettings": {
     "title": "{{camera}} configurações",
-    "cameraEnabled": "Câmera habilitada",
+    "cameraEnabled": "Câmara habilitada",
     "objectDetection": "Detecção de objeto",
     "recording": "Gravando",
     "audioDetection": "Detecção de áudio",
@@ -138,12 +138,12 @@
       "motion": "Movimento",
       "all": "Todos"
     },
-    "notAllTips": "Sua configuração de retenção de gravação {{source}} está definida como <code>modo: {{effectiveRetainMode}}</code>, portanto, esta gravação sob demanda manterá apenas segmentos com {{effectiveRetainModeName}}."
+    "notAllTips": "Sua configuração de retenção de gravação {{source}} está definida como <code>modo: {{effectiveRetainMode}}</code>, portanto, esta gravação on-demand manterá apenas segmentos com {{effectiveRetainModeName}}."
   },
   "editLayout": {
     "label": "Editar layout",
     "group": {
-      "label": "Editar grupo de câmeras"
+      "label": "Editar grupo de câmaras"
     },
     "exitEdit": "Sair da edição"
   },
