@@ -13,7 +13,28 @@
       "submitToPlus": {
         "label": "Lähetä Frigate+:lle",
         "desc": "Välttämissäsi paikoissa olevat kohteet eivät ole vääriä positiivisia. Niiden lähettäminen väärinä positiivisina sekoittaa mallia."
+      },
+      "review": {
+        "question": {
+          "label": "Vahvista tämä nimike Frigate Plussalle",
+          "ask_a": "Onko kohde <code>{{label}}</code>?",
+          "ask_an": "Onko tämä kohde <code>{{label}}</code>?",
+          "ask_full": "Onko tämä kohde <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Lähetetty"
+        }
       }
+    },
+    "video": {
+      "viewInHistory": "Katso historiaa"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Valitse aikajanalta",
+      "lastHour_one": "Viimeinen tunti",
+      "lastHour_other": "Viimeiset {{count}} tuntia"
     }
   }
 }

@@ -1,5 +1,31 @@
 {
   "description": {
-    "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon."
-  }
+    "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon.",
+    "invalidName": "Virheellinen nimi. Nimi voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
+    "placeholder": "Anna nimi kokoelmalle"
+  },
+  "uploadFaceImage": {
+    "desc": "Lähetä kuva kasvojen tunnistukseen ja lisää se sivulle {{pageToggle}}",
+    "title": "Lähetä kasvokuva"
+  },
+  "details": {
+    "unknown": "Tuntematon",
+    "faceDesc": "Lisätiedot kohteesta, josta tämä kasvokuva tallennettiin",
+    "person": "Henkilö",
+    "timestamp": "Aikaleima",
+    "subLabelScore": "",
+    "face": ""
+  },
+  "documentTitle": "Kasvokirjasto - Frigate",
+  "deleteFaceAttempts": {
+    "desc_one": "Oletko varma, että haluat poistaa {{count}} kasvon? Tätä toimintoa ei voi perua.",
+    "desc_other": "Oletko varma, että haluat poistaa {{count}} kasvoa? Tätä toimintoa ei voi perua."
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "{{count}} kasvo poistettu onnistuneesti.",
+      "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti."
+    }
+  },
+  "selectItem": "Valitse {{item}}"
 }
