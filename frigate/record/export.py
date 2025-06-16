@@ -126,7 +126,7 @@ class RecordingExporter(threading.Thread):
             minutes = int(diff / 60)
             seconds = int(diff % 60)
             ffmpeg_cmd = [
-                self.config.ffmpeg.ffmpeg_path,
+                "7.0",
                 "-hide_banner",
                 "-loglevel",
                 "warning",
