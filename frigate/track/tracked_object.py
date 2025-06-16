@@ -419,7 +419,7 @@ class TrackedObject:
 
         try:
             best_frame = cv2.cvtColor(
-                self.frame_cache[self.thumbnail_data["frame_time"]],
+                self.frame_cache[self.thumbnail_data["frame_time"]]["frame"],
                 cv2.COLOR_YUV2BGR_I420,
             )
         except KeyError:
@@ -448,7 +448,7 @@ class TrackedObject:
 
         try:
             best_frame = cv2.cvtColor(
-                self.frame_cache[self.thumbnail_data["frame_time"]],
+                self.frame_cache[self.thumbnail_data["frame_time"]]["frame"],
                 cv2.COLOR_YUV2BGR_I420,
             )
         except KeyError:
