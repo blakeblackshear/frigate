@@ -50,7 +50,7 @@ class ConfigSubscriber:
                 return (topic, obj)
             else:
                 return (None, None)
-        except zmq.ZMQError:
+        except (zmq.ZMQError, UnicodeDecodeError):
             return (None, None)
 
     def stop(self) -> None:
