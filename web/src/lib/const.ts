@@ -10,6 +10,7 @@ export const supportedLanguageKeys = [
   "nb-NO",
   "zh-CN",
   "yue-Hant",
+  "vi",
   "th",
   "he",
   "ru",

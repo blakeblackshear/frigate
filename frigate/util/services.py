@@ -306,11 +306,14 @@ def get_intel_gpu_stats(sriov: bool) -> Optional[dict[str, str]]:
     if sriov:
         intel_gpu_top_command += ["-d", "sriov"]
 
-    p = sp.run(
-        intel_gpu_top_command,
-        encoding="ascii",
-        capture_output=True,
-    )
+    try:
+        p = sp.run(
+            intel_gpu_top_command,
+            encoding="ascii",
+            capture_output=True,
+        )
+    except UnicodeDecodeError:
+        return None
 
     # timeout has a non-zero returncode when timeout is reached
     if p.returncode != 124:
