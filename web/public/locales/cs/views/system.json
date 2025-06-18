@@ -14,7 +14,8 @@
         "title": "Informace o sondování kamery"
       },
       "streamDataFromFFPROBE": "Data ze streamu jsou získávána pomocí <code>ffprobe</code>.",
-      "cameraProbeInfo": "{{camera}} Informace o sondování kamery"
+      "cameraProbeInfo": "{{camera}} Informace o sondování kamery",
+      "aspectRatio": "zachovat poměr stran"
     },
     "label": {
       "camera": "kamera",

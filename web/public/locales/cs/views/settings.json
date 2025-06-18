@@ -9,7 +9,8 @@
     "motionTuner": "Ladič detekce pohybu - Frigate",
     "object": "Ladění - Frigate",
     "general": "Obecné nastavení - Frigate",
-    "frigatePlus": "Frigate+ nastavení - Frigate"
+    "frigatePlus": "Frigate+ nastavení - Frigate",
+    "enrichments": "Nastavení obohacení - Frigate"
   },
   "frigatePlus": {
     "toast": {
@@ -122,7 +123,11 @@
       "speedEstimation": {
         "docs": "Přečtěte si dokumentaci",
         "title": "Odhad rychlosti",
-        "desc": "Povolit odhad rychlosti pro objekty v této zóně. Zóna musí mít přesně 4 body."
+        "desc": "Povolit odhad rychlosti pro objekty v této zóně. Zóna musí mít přesně 4 body.",
+        "lineADistance": "Vzdálenost linky A ({{unit}})",
+        "lineBDistance": "Vzdálenost linky B ({{unit}})",
+        "lineCDistance": "Vzdálenost linky C ({{unit}})",
+        "lineDDistance": "Vzdálenost linky D ({{unit}})"
       },
       "name": {
         "inputPlaceHolder": "Zadejte jméno…",
@@ -252,6 +257,11 @@
         "error": {
           "mustBeGreaterOrEqualZero": "Doba setrvání musí být větší nebo rovna nule."
         }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Prahová hodnota rychlosti musí být větší nebo rovna 0,1."
+        }
       }
     },
     "objectMasks": {
@@ -279,7 +289,9 @@
       "point_one": "{{count}} bod",
       "point_few": "{{count}} body",
       "point_other": "{{count}} bodů"
-    }
+    },
+    "motionMaskLabel": "Maska Detekce pohybu {{number}}",
+    "objectMaskLabel": "Maska Objektu {{number}} {{label}}"
   },
   "menu": {
     "ui": "Uživatelské rozhraní",
@@ -290,7 +302,8 @@
     "debug": "Ladění",
     "users": "Uživatelé",
     "notifications": "Notifikace",
-    "frigateplus": "Frigate +"
+    "frigateplus": "Frigate +",
+    "enrichments": "Obohacení"
   },
   "dialog": {
     "unsavedChanges": {
@@ -402,10 +415,10 @@
   "camera": {
     "streams": {
       "title": "Streamy",
-      "desc": "Deaktivace kamery zcela zastaví zpracování jejích streamů ve Frigate. Detekce, nahrávání ani ladění nebudou dostupné.<br/><em>Poznámka: Tímto nedojde k deaktivaci restreamů v go2rtc.</em>"
+      "desc": "Dočasně zakáže kameru dokud Frigate nerestartuje. Deaktivace kamery zcela zastaví zpracování jejích streamů ve Frigate. Detekce, nahrávání ani ladění nebudou dostupné.<br/><em>Poznámka: Tímto nedojde k deaktivaci restreamů v go2rtc.</em>"
     },
     "review": {
-      "desc": "Povolte nebo zakažte upozornění a detekce pro tuto kameru. Pokud jsou vypnuté, nebudou se vytvářet žádné nové položky k přezkoumání.",
+      "desc": "Dočasně povolte nebo zakažte upozornění a detekce pro tuto kameru dokud Frigate nerestartuje. Pokud jsou vypnuté, nebudou se vytvářet žádné nové položky k přezkoumání. ",
       "detections": "Detekce ",
       "title": "Revize",
       "alerts": "Výstrahy "
@@ -520,12 +533,14 @@
           "title": "Uživatelské jméno",
           "desc": "Povolena jsou pouze písmena, čísla, tečky a podtržítka.",
           "placeholder": "Vložte uživatelské jméno"
-        }
+        },
+        "passwordIsRequired": "Je vyžadováno heslo"
       },
       "createUser": {
         "title": "Vytvořit nového uživatele",
         "desc": "Přidejte nový uživatelský účet a zadejte roli pro určení přístupu k jednotlivým částem uživatelského rozhraní Frigate.",
-        "usernameOnlyInclude": "Uživatelské jméno smí obsahovat pouze písmena, čísla, . nebo _"
+        "usernameOnlyInclude": "Uživatelské jméno smí obsahovat pouze písmena, čísla, . nebo _",
+        "confirmPassword": "Potvrďte prosím heslo"
       },
       "deleteUser": {
         "title": "Smazat Uživatele",
@@ -541,12 +556,15 @@
           "viewerDesc": "Omezení pouze na Živé dashboardy, Revize, Průzkumníka a Exporty."
         },
         "title": "Změnit Roli Uživatele",
-        "desc": "Aktualizovat oprávnění pro <strong>{{username}}</strong>"
+        "desc": "Aktualizovat oprávnění pro <strong>{{username}}</strong>",
+        "select": "Vyberte roli"
       },
       "passwordSetting": {
         "updatePassword": "Aktualizovat heslo pro uživatele {{username}}",
         "setPassword": "Nastavit Heslo",
-        "desc": "Vytvořte silné heslo pro zabezpečení tohoto účtu."
+        "desc": "Vytvořte silné heslo pro zabezpečení tohoto účtu.",
+        "cannotBeEmpty": "Heslo nemůže být prázdné",
+        "doNotMatch": "Hesla nesouhlasí"
       }
     },
     "table": {
@@ -601,6 +619,68 @@
     "contourArea": {
       "title": "Obrysová Oblast",
       "desc": "Hodnota plochy obrysu se používá k rozhodnutí, které skupiny změněných pixelů se kvalifikují jako pohyb. <em>Výchozí: 10</em>"
+    }
+  },
+  "enrichments": {
+    "title": "Nastavení obohacení",
+    "faceRecognition": {
+      "title": "Rozpoznání Obličeje",
+      "desc": "Rozpoznávání obličeje umožňuje přiřadit lidem jména a po rozpoznání jejich obličeje. Frigate přiřadí jméno osoby jako podštítek. Tyto informace jsou zahrnuty v uživatelském rozhraní, filtrech a také v oznámeních.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci",
+      "modelSize": {
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu použitého pro rozpoznání obličeje.",
+        "small": {
+          "title": "malý",
+          "desc": "Použití metody <em>malý</em> využívá model vkládání obličejů FaceNet, který efektivně běží na většině procesorů."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Použití metody <em>velký</em> využívá model vkládání obličejů ArcFace a v případě potřeby se automaticky spustí na GPU."
+        }
+      }
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Jste si jisti, že chcete znovu indexovat všechny vložené sledované objekty? Tento proces poběží na pozadí, ale může maximálně zatížit váš procesor a trvat poměrně dlouho. Průběh můžete sledovat na stránce Prozkoumat.",
+        "confirmTitle": "Potvrdit Reindexování",
+        "label": "Přeindexovat nyní",
+        "desc": "Reindexování regeneruje vložení pro všechny sledované objekty. Tento proces běží na pozadí a může maximálně zatížit váš procesor a trvat poměrně dlouho v závislosti na počtu sledovaných objektů.",
+        "confirmButton": "Přeindexovat",
+        "success": "Přeindexování úspěšně spuštěno.",
+        "alreadyInProgress": "Přeindexování je již spuštěno.",
+        "error": "Chyba spuštění přeindexování: {{errorMessage}}"
+      },
+      "title": "Sémantické Vyhledávání",
+      "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty v rámci vašich zkontrolovaných položek pomocí samotného obrázku, uživatelem definovaného textového popisu nebo automaticky generovaného popisu.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci",
+      "modelSize": {
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu použitého pro vkládání sémantického vyhledávání.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitím <em>malého</em> modelu se využívá kvantizovaná verze modelu, která spotřebovává méně RAM a běží rychleji na CPU s velmi zanedbatelným rozdílem v kvalitě vkládání."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Použití parametru <em>velký</em> využívá celý model Jina a v případě potřeby se automaticky spustí na GPU."
+        }
+      }
+    },
+    "birdClassification": {
+      "desc": "Klasifikace ptáků identifikuje známé ptáky pomocí kvantovaného modelu Tensorflow. Po rozpoznání známého ptáka se jeho běžný název přidá jako sub_label. Tato informace je zahrnuta v uživatelském rozhraní, filtrech a také v oznámeních.",
+      "title": "Klasifikace Ptáků"
+    },
+    "unsavedChanges": "Neuložené změny nastavení Obohacení",
+    "licensePlateRecognition": {
+      "title": "Rozpoznání SPZ",
+      "desc": "Frigate dokáže rozpoznávat SPZ vozidel a automaticky přidávat detekované znaky do pole recognized_license_plate nebo název známé SPZ jako sub_label k objektům typu auto. Běžným případem použití může být čtení SPZ aut vjíždějících na příjezdovou cestu nebo aut projíždějících po ulici.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci"
+    },
+    "restart_required": "Nutný restart (nastavení Obohacení změněno)",
+    "toast": {
+      "success": "Nastavení Obohacení uloženo. Restartujte Frigate aby se změny aplikovaly.",
+      "error": "Chyba ukládání změn konfigurace: {{errorMessage}}"
     }
   }
 }

@@ -124,6 +124,10 @@
     "speed": {
       "kph": "Km/h",
       "mph": "míle/h"
+    },
+    "length": {
+      "feet": "stopa",
+      "meters": "metry"
     }
   },
   "selectItem": "Vyberte {{item}}",
@@ -179,7 +183,9 @@
       "fa": "فارسی (Perština)",
       "ro": "Română (Rumunština)",
       "hu": "Magyar (Maďarština)",
-      "pl": "Polski (Polština)"
+      "pl": "Polski (Polština)",
+      "th": "ไทย (Thaiština)",
+      "ca": "Català (Katalánština)"
     },
     "theme": {
       "highcontrast": "Vysoký kontrast",

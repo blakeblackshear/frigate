@@ -21,7 +21,8 @@
               }
             }
           },
-          "label": "Metoda streamování"
+          "label": "Metoda streamování",
+          "placeholder": "Vyberte metodu vysílání"
         },
         "label": "Nastavení streamování kamery",
         "audioIsAvailable": "Audio je k dispozici pro tento stream",
@@ -37,7 +38,9 @@
           "desc": "Tuto možnost povolte pouze v případě, že živý přenos vaší kamery zobrazuje barevné artefakty a má na pravé straně obrazu diagonální čáru."
         },
         "title": "Nastavení streamování {{cameraName}}",
-        "desc": "Změní možnosti živého vysílání pro dashboard této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>"
+        "desc": "Změní možnosti živého vysílání pro dashboard této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>",
+        "stream": "Proud",
+        "placeholder": "Vyberte proud"
       }
     },
     "delete": {
