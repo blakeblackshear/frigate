@@ -149,7 +149,7 @@
   "camera": {
     "review": {
       "alerts": "Alertas ",
-      "desc": "Habilitar/deshabilitar alertas y detecciones para esta cámara. Cuando está deshabilitado, no se generarán nuevos elementos de revisión.",
+      "desc": "Activar/desactivar temporalmente las alertas y detecciones para esta cámara hasta que Frigate se reinicie. Cuando está desactivado, no se generarán nuevos elementos de revisión. ",
       "detections": "Detecciones ",
       "title": "Revisar"
     },
@@ -177,7 +177,7 @@
     "title": "Ajustes de la cámara",
     "streams": {
       "title": "Transmisiones",
-      "desc": "Deshabilitar una cámara detiene completamente el procesamiento de las transmisiones de esta cámara por parte de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no deshabilita las retransmisiones de go2rtc.</em>"
+      "desc": "Desactivar temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de esta cámara por parte de Frigate. La detección, grabación y depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
     }
   },
   "masksAndZones": {
