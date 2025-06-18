@@ -1,1 +1,21 @@
-{}
+{
+  "group": {
+    "label": "Kamera Csoport",
+    "delete": {
+      "confirm": {
+        "desc": "Biztosan törölni akarja a következő kamera csoportot <em>{{name}}</em>?",
+        "title": "Törlés megerősítése"
+      },
+      "label": "Kamera csoport törlése"
+    },
+    "add": "Kamera csoport hozzáadása",
+    "edit": "Kamera csoport módosítása",
+    "name": {
+      "label": "Név",
+      "placeholder": "Adjon meg egy nevet…",
+      "errorMessage": {
+        "mustLeastCharacters": "A kamera csoport nevének legalább 2 karakterből kell állnia."
+      }
+    }
+  }
+}
