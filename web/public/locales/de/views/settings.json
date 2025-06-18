@@ -170,13 +170,13 @@
     },
     "streams": {
       "title": "Streams",
-      "desc": "Das Deaktivieren einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr möglich.<br /> <em>Hinweis: Go2RTC-Restreams werden dadurch nicht deaktiviert.</em>"
+      "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Das Deaktivieren einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr möglich.<br /> <em>Hinweis: Go2RTC-Restreams werden dadurch nicht deaktiviert.</em>"
     },
     "review": {
       "title": "Überprüfung",
       "alerts": "Warnungen ",
       "detections": "Erkennungen ",
-      "desc": "Aktivieren/Deaktivieren Sie Warnungen und Erkennungen für diese Kamera. Wenn diese Option deaktiviert ist, werden keine neuen Überprüfungselemente generiert."
+      "desc": "Aktiviere/deaktiviere Benachrichtigungen und Erkennungen für diese Kamera vorübergehend, bis Frigate neu gestartet wird. Wenn deaktiviert, werden keine neuen Überprüfungseinträge erstellt. "
     },
     "title": "Kamera-Einstellungen"
   },
