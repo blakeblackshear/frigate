@@ -1,12 +1,12 @@
 {
   "time": {
-    "untilRestart": "còn lại đến khi khởi động lại",
+    "untilRestart": "Đến khi khởi động lại",
     "untilForTime": "Cho đến khi {{time}}",
     "untilForRestart": "Cho đến khi Frigate khởi động lại.",
     "ago": "{{timeAgo}} trước",
     "formattedTimestamp": {
-      "12hour": "định dạng thời gian 12 giờ",
-      "24hour": "định dạng thời gian 24 giờ"
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
     },
     "year_other": "{{time}} năm",
     "month_other": "{{time}} tháng",
@@ -14,31 +14,31 @@
     "hour_other": "{{time}} giờ",
     "minute_other": "{{time}} phút",
     "second_other": "{{time}} giây",
-    "justNow": "vừa xong",
-    "today": "hôm nay",
-    "yesterday": "hôm qua",
+    "justNow": "Vừa xong",
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
     "last7": "7 ngày qua",
     "last14": "14 ngày qua",
     "last30": "30 ngày qua",
-    "thisWeek": "tuần này",
-    "lastWeek": "tuần trước",
-    "thisMonth": "tháng này",
-    "lastMonth": "tháng trước",
+    "thisWeek": "Tuần này",
+    "lastWeek": "Tuần trước",
+    "thisMonth": "Tháng này",
+    "lastMonth": "Tháng trước",
     "5minutes": "5 phút",
     "10minutes": "10 phút",
     "30minutes": "30 phút",
     "1hour": "1 giờ",
     "12hours": "12 giờ",
     "24hours": "24 giờ",
-    "pm": "chiều",
-    "am": "sáng",
-    "mo": "{{time}}tháng",
-    "d": "{{time}}ngày",
-    "m": "{{time}}phút",
-    "s": "{{time}}giây",
+    "pm": "pm",
+    "am": "am",
+    "mo": "{{time}} tháng",
+    "d": "{{time}} ngày",
+    "m": "{{time}} phút",
+    "s": "{{time}} giây",
     "formattedTimestamp2": {
-      "12hour": "định dạng thời gian 12 giờ (2)",
-      "24hour": "định dạng thời gian 24 giờ (2)"
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampExcludeSeconds": {
       "12hour": "thời gian 12 giờ (không giây)",
@@ -49,18 +49,43 @@
       "24hour": "thời gian 24 giờ kèm năm"
     },
     "formattedTimestampOnlyMonthAndDay": "chỉ tháng và ngày",
-    "yr": "{{time}}năm",
-    "h": "{{time}}giờ"
+    "yr": "{{time}} năm",
+    "h": "{{time}} giờ",
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-s"
+    }
   },
   "menu": {
-    "systemLogs": "nhật ký hệ thống",
+    "systemLogs": "Nhật ký hệ thống",
     "user": {
-      "account": "tài khoản",
-      "anonymous": "ẩn danh",
-      "logout": "đăng xuất",
-      "setPassword": "đặt mật khẩu",
+      "account": "Tài khoản",
+      "anonymous": "Ẩn danh",
+      "logout": "Đăng xuất",
+      "setPassword": "Đặt mật khẩu",
       "current": "Người dùng hiện tại: {{user}}",
-      "title": "người dùng"
+      "title": "Người dùng"
     },
     "language": {
       "en": "Tiếng Anh",
@@ -93,136 +118,144 @@
       "sk": "Tiếng Slovakia",
       "withSystem": {
         "label": "Theo hệ thống"
-      }
+      },
+      "yue": "Tiếng Quảng Đông",
+      "ca": "Tiếng Catalan",
+      "th": "Tiếng Thái Lan"
     },
-    "system": "hệ thống",
-    "systemMetrics": "thông số hệ thống",
-    "configuration": "cấu hình",
-    "settings": "cài đặt",
-    "configurationEditor": "trình chỉnh sửa cấu hình",
-    "languages": "ngôn ngữ",
-    "appearance": "giao diện",
+    "system": "Hệ thống",
+    "systemMetrics": "Thông số hệ thống",
+    "configuration": "Cấu hình",
+    "settings": "Cài đặt",
+    "configurationEditor": "Trình chỉnh sửa cấu hình",
+    "languages": "Ngôn ngữ",
+    "appearance": "Giao diện",
     "darkMode": {
-      "label": "chế độ tối",
-      "light": "sáng",
-      "dark": "tối",
+      "label": "Chế độ tối",
+      "light": "Sáng",
+      "dark": "Tối",
       "withSystem": {
-        "label": "theo hệ thống"
+        "label": "Theo hệ thống"
       }
     },
-    "withSystem": "theo hệ thống",
+    "withSystem": "Hệ thống",
     "theme": {
-      "label": "giao diện",
-      "red": "đỏ",
+      "label": "Giao diện",
+      "red": "Đỏ",
       "contrast": "tương phản",
-      "blue": "xanh dương",
-      "green": "xanh lá",
-      "nord": "nord",
-      "default": "mặc định"
+      "blue": "Xanh dương",
+      "green": "Xanh lá",
+      "nord": "Nord",
+      "default": "Mặc định",
+      "highcontrast": "Độ tương phản cao"
     },
-    "help": "trợ giúp",
+    "help": "Trợ giúp",
     "documentation": {
-      "title": "tài liệu",
-      "label": "hướng dẫn"
+      "title": "Tài liệu",
+      "label": "Hướng dẫn"
     },
-    "restart": "khởi động lại",
+    "restart": "Khởi động lại",
     "live": {
-      "title": "trực tiếp",
-      "allCameras": "tất cả camera",
+      "title": "Trực tiếp",
+      "allCameras": "Tất cả Camera",
       "cameras": {
-        "title": "camera",
+        "title": "Camera",
         "count_other": "{{count}} Camera"
       }
     },
-    "review": "xem lại",
-    "explore": "khám phá",
-    "export": "xuất",
+    "review": "Xem lại",
+    "explore": "Khám phá",
+    "export": "Xuất",
     "uiPlayground": "UI Playground",
-    "faceLibrary": "thư viện khuôn mặt"
+    "faceLibrary": "Thư viện khuôn mặt"
   },
   "unit": {
     "speed": {
       "mph": "mph (dặm/giờ)",
       "kph": "km/h (kilômét/giờ)"
+    },
+    "length": {
+      "meters": "mét (m)",
+      "feet": "feet (ft)"
     }
   },
   "label": {
-    "back": "quay lại"
+    "back": "Quay lại"
   },
   "button": {
-    "apply": "áp dụng",
-    "reset": "đặt lại",
-    "done": "xong",
-    "enabled": "đã bật",
-    "enable": "bật",
-    "disabled": "đã tắt",
-    "disable": "tắt",
+    "apply": "Áp dụng",
+    "reset": "Đặt lại",
+    "done": "Xong",
+    "enabled": "Đã bật",
+    "enable": "Bật",
+    "disabled": "Đã tắt",
+    "disable": "Tắt",
     "save": "Lưu",
-    "cancel": "hủy",
-    "close": "đóng",
-    "copy": "sao chép",
-    "back": "quay lại",
-    "history": "lịch sử",
-    "fullscreen": "toàn màn hình",
-    "on": "bật",
-    "exitFullscreen": "thoát toàn màn hình",
-    "pictureInPicture": "hình trong hình",
-    "twoWayTalk": "đàm thoại hai chiều",
-    "cameraAudio": "âm thanh camera",
-    "off": "tắt",
-    "edit": "chỉnh sửa",
-    "copyCoordinates": "sao chép tọa độ",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "copy": "Sao chép",
+    "back": "Quay lại",
+    "history": "Lịch sử",
+    "fullscreen": "Toàn màn hình",
+    "on": "Bật",
+    "exitFullscreen": "Thoát toàn màn hình",
+    "pictureInPicture": "Hình trong hình",
+    "twoWayTalk": "Đàm thoại hai chiều",
+    "cameraAudio": "Âm thanh Camera",
+    "off": "Tắt",
+    "edit": "Chỉnh sửa",
+    "copyCoordinates": "Sao chép tọa độ",
     "delete": "Xóa",
-    "yes": "có",
-    "no": "không",
-    "download": "tải xuống",
-    "info": "thông tin",
-    "suspended": "tạm dừng",
-    "unsuspended": "khôi phục",
-    "play": "phát",
-    "unselect": "bỏ chọn",
-    "export": "xuất",
-    "deleteNow": "xóa ngay",
-    "next": "tiếp theo",
+    "yes": "Có",
+    "no": "Không",
+    "download": "Tải xuống",
+    "info": "Thông tin",
+    "suspended": "Đã tạm dừng",
+    "unsuspended": "Khôi phục",
+    "play": "Phát",
+    "unselect": "Bỏ chọn",
+    "export": "Xuất",
+    "deleteNow": "Xóa ngay",
+    "next": "Tiếp theo",
     "saving": "Đang lưu…"
   },
   "toast": {
     "copyUrlToClipboard": "Đã sao chép liên kết.",
     "save": {
-      "title": "lưu thành công",
+      "title": "Lưu thành công",
       "error": {
-        "noMessage": "không có thông báo lỗi",
+        "noMessage": "Không thể lưu thay đổi cấu hình",
         "title": "Lỗi khi lưu thay đổi cấu hình: {{errorMessage}}"
       }
     }
   },
   "role": {
-    "title": "vai trò",
-    "admin": "quản trị viên",
-    "viewer": "người xem",
+    "title": "Vai trò",
+    "admin": "Quản trị viên",
+    "viewer": "Người xem",
     "desc": "Quản trị viên có toàn quyền truy cập tất cả các tính năng trong giao diện Frigate. Người xem chỉ được phép xem camera, mục đã ghi lại và các đoạn video lịch sử trong giao diện."
   },
   "pagination": {
-    "label": "trang",
+    "label": "Trang",
     "previous": {
-      "title": "trước đó",
-      "label": "trước"
+      "title": "Trước đó",
+      "label": "Trước"
     },
     "next": {
-      "title": "kế tiếp",
-      "label": "tiếp"
+      "title": "Kế tiếp",
+      "label": "Tiếp"
     },
-    "more": "xem thêm"
+    "more": "Xem thêm"
   },
   "accessDenied": {
-    "documentTitle": "từ chối truy cập",
-    "title": "truy cập bị từ chối",
+    "documentTitle": "Từ chối truy cập",
+    "title": "Truy cập bị từ chối",
     "desc": "Bạn không có quyền truy cập vào trang này."
   },
   "notFound": {
-    "documentTitle": "không tìm thấy",
-    "title": "không tìm thấy",
-    "desc": "trang bạn đang tìm không tồn tại"
+    "documentTitle": "Không tìm thấy",
+    "title": "Không tìm thấy",
+    "desc": "Trang bạn đang tìm không tồn tại"
   },
   "selectItem": "Chọn mục {{item}}"
 }
