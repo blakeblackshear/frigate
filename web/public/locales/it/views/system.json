@@ -1,7 +1,7 @@
 {
   "documentTitle": {
     "cameras": "Statistiche telecamere - Frigate",
-    "enrichments": "Statistiche miglioramento - Frigate",
+    "enrichments": "Statistiche di miglioramento - Frigate",
     "storage": "Statistiche archiviazione - Frigate",
     "general": "Statistiche generali - Frigate",
     "logs": {
