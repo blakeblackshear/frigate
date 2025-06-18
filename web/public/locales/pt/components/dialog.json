@@ -74,20 +74,20 @@
     },
     "select": "Selecione",
     "name": {
-      "placeholder": "Nomeie a exportação"
+      "placeholder": "Nome da exportação"
     }
   },
   "streaming": {
     "showStats": {
       "label": "Mostrar estatísticas de transmissão",
-      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmera."
+      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmara."
     },
     "restreaming": {
       "desc": {
-        "title": "Configure o go2rtc para obter opções adicionais de visualização ao vivo e áudio para esta câmera.",
+        "title": "Configure o go2rtc para obter opções adicionais de visualização ao vivo e áudio para esta câmara.",
         "readTheDocumentation": "Leia a documentação"
       },
-      "disabled": "A retransmissão não está habilitada para esta câmera."
+      "disabled": "A retransmissão não está habilitada para esta câmara."
     },
     "label": "Transmissão",
     "debugView": "Exibição de depuração"
@@ -110,16 +110,16 @@
     "confirmDelete": {
       "title": "Confirmar exclusão",
       "desc": {
-        "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de revisão?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
+        "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de analise?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
       },
       "toast": {
-        "success": "As imagens de vídeo associadas aos itens de revisão selecionados foram excluídas com êxito.",
+        "success": "As imagens de vídeo associadas aos itens de analise selecionados foram excluídas com êxito.",
         "error": "Falhou a apagar: {{error}}"
       }
     },
     "button": {
       "export": "Exportar",
-      "markAsReviewed": "Marcar como revisado",
+      "markAsReviewed": "Marcar como analisado",
       "deleteNow": "Excluir agora"
     }
   }
