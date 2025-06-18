@@ -553,7 +553,7 @@ export default function EnrichmentsSettingsView({
 
               <div className="flex items-center text-primary">
                 <Link
-                  to={getLocaleDocUrl(
+                  to={getLocaleDocUrl("configuration/bird_classification")}
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
