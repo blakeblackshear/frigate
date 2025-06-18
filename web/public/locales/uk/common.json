@@ -47,37 +47,37 @@
     "untilForRestart": "Доки Frigate не перезавантажиться.",
     "untilRestart": "До перезавантаження",
     "formattedTimestamp": {
-      "12hour": "МММ д, г:мм:сс ааа",
-      "24hour": "МММ д, ГГ:мм:сс"
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
     },
     "formattedTimestampHourMinuteSecond": {
-      "12hour": "г:мм:сс ааа",
+      "12hour": "h:mm:ss aaa",
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "МММ д, г:мм ааа",
-      "24hour": "МММ д, ГГ:мм"
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "МММ д рррр, г:мм ааа",
-      "24hour": "МММ д рррр, ГГ:мм"
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "МММ д",
+    "formattedTimestampMonthDay": "MMM d",
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
     },
     "formattedTimestamp2": {
-      "12hour": "ММ/дд г:мм:сс",
-      "24hour": "д МММ ГГ:мм:сс"
+      "12hour": "dd.MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
     },
     "formattedTimestampMonthDayYear": {
-      "24hour": "МММ д, рррр",
-      "12hour": "МММ д, рррр"
+      "24hour": "MMM d, yyyy",
+      "12hour": "MMM d, yyyy"
     }
   },
   "button": {
@@ -106,7 +106,7 @@
     "enable": "Увімкнути",
     "disabled": "Вимкнено",
     "disable": "Вимкнути",
-    "save": "Зберігати",
+    "save": "Зберегти",
     "download": "Завантажити",
     "info": "Інфо",
     "suspended": "Призупинено",
@@ -151,7 +151,8 @@
       },
       "en": "Англійська",
       "yue": "粵語 (Кантонська)",
-      "th": "ไทย (Тайська)"
+      "th": "ไทย (Тайська)",
+      "ca": "Català (Каталанська)"
     },
     "system": "Система",
     "systemMetrics": "Системна метріка",
