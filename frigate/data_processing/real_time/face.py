@@ -444,18 +444,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if object_id in self.camera_current_people.get(camera, []):
                 self.camera_current_people[camera].remove(object_id)
 
-                if len(self.camera_current_people[camera]) == 0:
-                    self.requestor.send_data(
-                        "tracked_object_update",
-                        json.dumps(
-                            {
-                                "type": TrackedObjectUpdateTypesEnum.face,
-                                "name": None,
-                                "camera": camera,
-                            }
-                        ),
-                    )
-
     def weighted_average(
         self, results_list: list[tuple[str, float, int]], max_weight: int = 4000
     ):
