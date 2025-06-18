@@ -18,11 +18,21 @@
       "gpuMemory": "Utilizare Memorie",
       "title": "Informații hardware",
       "gpuEncoder": "Codificator GPU",
-      "gpuDecoder": "Decodificator GPU"
+      "gpuDecoder": "Decodificator GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "returnCode": "Cod de retur: {{code}}",
+          "processOutput": "Rezultatul procesului:",
+          "title": "Rezultat vainfo"
+        }
+      }
     },
     "detector": {
       "temperature": "Temperatura Detectorului",
-      "title": "Detectori"
+      "title": "Detectori",
+      "cpuUsage": "Utilizarea procesorului detectorului",
+      "inferenceSpeed": "Viteza inferenței detectorului",
+      "memoryUsage": "Utilizare memorie detector"
     },
     "otherProcesses": {
       "title": "Alte Procese"
@@ -50,6 +60,13 @@
       "timestamp": "Marca temporală",
       "tag": "Etichetă",
       "message": "Mesaj"
+    },
+    "tips": "Jurnalele se transmit de pe server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Eroare la preluarea jurnalelor: {{errorMessage}}",
+        "whileStreamingLogs": "Eroare la transmiterea jurnalelor: {{errorMessage}}"
+      }
     }
   },
   "metrics": "Date Sistem"

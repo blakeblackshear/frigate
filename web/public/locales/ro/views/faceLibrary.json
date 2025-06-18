@@ -1,9 +1,61 @@
 {
   "description": {
     "addFace": "Parcurge adaugare unei colectii noi la Libraria de Fete.",
-    "placeholder": "Introduceti un nume pentru aceasta colectie"
+    "placeholder": "Introduceti un nume pentru aceasta colectie",
+    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
   },
   "details": {
-    "person": "Persoana"
-  }
+    "person": "Persoana",
+    "subLabelScore": "Scor subetichetă",
+    "unknown": "Necunoscut",
+    "scoreInfo": "Scorul sub-etichetă este scorul ponderat pentru toate fețele recunoscute, așa că acesta poate diferi de scorul afișat în snapshot.",
+    "face": "Detalii față",
+    "faceDesc": "Detalii despre obiectul urmărit care a generat această față",
+    "timestamp": "Marcaj timp"
+  },
+  "uploadFaceImage": {
+    "desc": "Încarcă o imagine pentru a scana fețele și a include pentru {{pageToggle}}",
+    "title": "Încarcă imaginea feței"
+  },
+  "createFaceLibrary": {
+    "desc": "Creează o colecție nouă",
+    "title": "Creează colecție",
+    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „antrenare” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
+    "new": "Crează o față nouă"
+  },
+  "collections": "Colecții",
+  "documentTitle": "Bibliotecă fețe - Frigate",
+  "train": {
+    "empty": "Nu există încercări recente de recunoaștere facială",
+    "title": "Antrenează",
+    "aria": "Selectează antrenarea"
+  },
+  "steps": {
+    "description": {
+      "uploadFace": "Încarcă o imagine cu {{name}} care să arate fața dintr-un unghi frontal. Imaginea nu trebuie să fie decupată doar la nivelul feței."
+    },
+    "faceName": "Introdu numele feței",
+    "uploadFace": "Încarcă imaginea feței",
+    "nextSteps": "Pașii următori"
+  },
+  "selectFace": "Selectează fața",
+  "deleteFaceLibrary": {
+    "title": "Șterge numele",
+    "desc": "Ești sigur că vrei să ștergi colecția {{name}}? Aceasta va șterge definitiv toate fețele asociate."
+  },
+  "renameFace": {
+    "title": "Redenumește fața",
+    "desc": "Introdu un nume nou pentru {{name}}"
+  },
+  "deleteFaceAttempts": {
+    "title": "Șterge fețele",
+    "desc_one": "Ești sigur că vrei să ștergi {{count}} față? Această acțiune nu poate fi anulată.",
+    "desc_few": "Ești sigur că vrei să ștergi {{count}} fețe? Această acțiune nu poate fi anulată.",
+    "desc_other": "Ești sigur că vrei să ștergi {{count}} de fețe? Această acțiune nu poate fi anulată."
+  },
+  "button": {
+    "addFace": "Adaugă față",
+    "deleteFaceAttempts": "Șterge fețele"
+  },
+  "selectItem": "Selectează {{item}}"
 }
