@@ -122,6 +122,8 @@ class FaceRecognizer(ABC):
             return 0.04
         elif variance < 200:  # image is slightly blurry
             return 0.02
+        elif variance < 250:  # image is mostly clear
+            return 0.01
         else:
             return 0.0
 
