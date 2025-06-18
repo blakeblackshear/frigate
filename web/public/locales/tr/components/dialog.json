@@ -107,7 +107,7 @@
     "confirmDelete": {
       "title": "Silmeyi Onayla",
       "desc": {
-        "selected": "Bu inceleme öğesiyle ilişkili tüm kaydedilmiş videoları silmek istediğinizden emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
+        "selected": "Bu inceleme öğesiyle ilişkili tüm kaydedilmiş videoları silmek istediğinizden emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklatın."
       },
       "toast": {
         "success": "Seçili incele öğelerinin ilişkili olduğu video kayıtları başarıyla silinmiştir.",
