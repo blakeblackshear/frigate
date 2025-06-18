@@ -305,13 +305,13 @@
       "unsavedChanges": "Impostazioni di classificazione delle revisioni non salvate per {{camera}}"
     },
     "streams": {
-      "desc": "La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
+      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
       "title": "Flussi"
     },
     "title": "Impostazioni telecamera",
     "review": {
       "title": "Rivedi",
-      "desc": "Abilita/disabilita avvisi e rilevamenti per questa telecamera. Se disabilitati, non verranno generati nuovi elementi di revisione.",
+      "desc": "Abilita/disabilita temporaneamente avvisi e rilevamenti per questa telecamera fino al riavvio di Frigate. Se disabilitati, non verranno generati nuovi elementi di revisione. ",
       "alerts": "Avvisi ",
       "detections": "Rilevamenti "
     }

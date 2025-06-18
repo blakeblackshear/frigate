@@ -17,7 +17,7 @@
     "aria": "Sélectionner les événements",
     "noFoundForTimePeriod": "Aucun événement trouvé pour cette plage de temps."
   },
-  "documentTitle": "Revue - Frigate",
+  "documentTitle": "Revue d'événements -Frigate",
   "recordings": {
     "documentTitle": "Enregistrements - Frigate"
   },
@@ -28,7 +28,7 @@
   "markAsReviewed": "Marqué comme passé en revue",
   "newReviewItems": {
     "button": "Nouveaux éléments à passer en revue",
-    "label": "Afficher les nouveaux éléments à passer en revue"
+    "label": "Afficher les nouveaux éléments de la revue d'événements"
   },
   "camera": "Caméra",
   "markTheseItemsAsReviewed": "Marquer ces éléments comme passés en revue",

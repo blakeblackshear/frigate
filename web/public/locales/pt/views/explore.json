@@ -19,9 +19,9 @@
         "textTokenizer": "Tokenizador de texto",
         "visionModelFeatureExtractor": "Extrator de características de modelo de visão"
       },
-      "context": "O Frigate está baixando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
+      "context": "O Frigate está descarregando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
       "tips": {
-        "context": "Talvez você queira reindexar as incorporações dos seus objetos rastreados depois que os modelos forem baixados.",
+        "context": "Talvez você queira reindexar as incorporações dos seus objetos rastreados depois que os modelos forem descarregados.",
         "documentation": "Leia a documentação"
       },
       "error": "Ocorreu um erro. Verifique os logs do Frigate."
@@ -31,24 +31,24 @@
   "details": {
     "timestamp": "Carimbo de hora",
     "item": {
-      "title": "Revisar detalhes do item",
-      "desc": "Revisar detalhes do item",
+      "title": "Analisar detalhes do item",
+      "desc": "Analisar detalhes do item",
       "tips": {
-        "hasMissingObjects": "Ajuste sua configuração se você quiser que o Frigate salve os objetos rastreados para os seguintes rótulos: <em>{{objects}}</em>",
+        "hasMissingObjects": "Ajuste sua configuração se você quiser que o Frigate guarde os objetos rastreados para os seguintes rótulos: <em>{{objects}}</em>",
         "mismatch_one": "{{count}} objeto indisponível foi detectado e incluído neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
         "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos.",
         "mismatch_other": "{{count}} objetos indisponíveis foram detectados e incluídos neste item de análise. Esses objetos não qualificaram como alerta ou detecção ou já foram limpos/excluídos."
       },
       "toast": {
         "success": {
-          "regenerate": "Uma nova descrição foi solicitada pelo {{provider}}. Dependendo da velocidade do seu provedor, a nova descrição pode levar algum tempo para ser regenerada.",
+          "regenerate": "Uma nova descrição foi solicitada pelo {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para ser regenerada.",
           "updatedSublabel": "Sub-rotulo atualizado com sucesso.",
-          "updatedLPR": "Placa de veículo atualizada com sucesso."
+          "updatedLPR": "Matrícula atualizada com sucesso."
         },
         "error": {
           "regenerate": "Falha ao chamar {{provider}} para uma nova descrição: {{errorMessage}}",
           "updatedSublabelFailed": "Falha ao atualizar o sub-rotulo: {{errorMessage}}",
-          "updatedLPRFailed": "Falha ao atualizar a placa de veículo: {{errorMessage}}"
+          "updatedLPRFailed": "Falha ao atualizar a matrícula: {{errorMessage}}"
         }
       },
       "button": {
@@ -59,7 +59,7 @@
     "zones": "Zonas",
     "description": {
       "label": "Descrição",
-      "aiTips": "O Frigate não solicitará uma descrição do seu provedor de IA Generativa até que o ciclo de vida do objeto rastreado tenha terminado.",
+      "aiTips": "O Frigate não solicitará uma descrição do seu fornecedor de IA Generativa até que o ciclo de vida do objeto rastreado tenha terminado.",
       "placeholder": "Descrição do objeto rastreado"
     },
     "camera": "Câmera",
@@ -84,11 +84,11 @@
       "descNoLabel": "Digite um novo sub-rotulo para este objeto rastreado"
     },
     "editLPR": {
-      "title": "Editar placa de veículo",
-      "desc": "Digite um novo valor de placa de veículo para este {{label}}",
-      "descNoLabel": "Digite um novo valor de placa de veículo para este objeto rastreado"
+      "title": "Editar matrícula",
+      "desc": "Digite um novo valor da matrícula para este {{label}}",
+      "descNoLabel": "Digite um novo valor da matrícula para este objeto rastreado"
     },
-    "recognizedLicensePlate": "Placa de veículo reconhecida",
+    "recognizedLicensePlate": "Matrícula reconhecida",
     "estimatedSpeed": "Velocidade estimada",
     "objects": "Objetos",
     "expandRegenerationMenu": "Expandir menu de regeneração",
@@ -131,8 +131,8 @@
       "title": "Configurações de anotação",
       "offset": {
         "documentation": "Leia a documentação ",
-        "desc": "Esses dados vêm do feed de detecção da sua câmera, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
-        "tips": "DICA: Imagine que há um clipe de evento com uma pessoa andando da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento estiver consistentemente à esquerda da pessoa, o valor deve ser diminuído. Da mesma forma, se uma pessoa estiver andando da esquerda para a direita e a caixa delimitadora estiver consistentemente à frente da pessoa, o valor deve ser aumentado.",
+        "desc": "Esses dados vêm do feed de detecção da sua câmara, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
+        "tips": "DICA: Imagine que há um clipe de evento com uma pessoa a andar da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento estiver consistentemente à esquerda da pessoa, o valor deve ser diminuído. Da mesma forma, se uma pessoa estiver andando da esquerda para a direita e a caixa delimitadora estiver consistentemente à frente da pessoa, o valor deve ser aumentado.",
         "label": "Deslocamento de Anotação",
         "millisecondsToOffset": "Milissegundos para deslocar as anotações de detecção. <em>Padrão: 0</em>",
         "toast": {
@@ -152,14 +152,14 @@
     "createObjectMask": "Criar Máscara de Objeto",
     "adjustAnnotationSettings": "Ajustar configurações de anotação",
     "autoTrackingTips": "As posições da caixa delimitadora serão imprecisas para câmeras com rastreamento automático.",
-    "scrollViewTips": "Role para ver os momentos significativos do ciclo de vida deste objeto.",
+    "scrollViewTips": "Faça scroll para ver os momentos significativos do ciclo de vida deste objeto.",
     "count": "{{first}} de {{second}}",
     "trackedPoint": "Ponto Rastreado"
   },
   "itemMenu": {
     "downloadSnapshot": {
-      "aria": "Baixar captura",
-      "label": "Baixar captura"
+      "aria": "Descarregar captura",
+      "label": "Descarregar captura"
     },
     "viewObjectLifecycle": {
       "label": "Ver ciclo de vida do objeto",
@@ -170,8 +170,8 @@
       "aria": "Ver no Histórico"
     },
     "downloadVideo": {
-      "label": "Baixar vídeo",
-      "aria": "Baixar vídeo"
+      "label": "Descarregar vídeo",
+      "aria": "Descarregar vídeo"
     },
     "findSimilar": {
       "label": "Encontrar similar",

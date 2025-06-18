@@ -3,7 +3,8 @@
   "documentTitle.withCamera": "{{camera}} - v živo - Frigate",
   "lowBandwidthMode": "Nizkopasovni način",
   "twoWayTalk": {
-    "enable": "Omogoči dvosmerni pogovor"
+    "enable": "Omogoči dvosmerni pogovor",
+    "disable": "Onemogoči Obojesmerni Pogovor"
   },
   "ptz": {
     "move": {

@@ -92,8 +92,8 @@
   "collections": "Koleksiyonlar",
   "deleteFaceAttempts": {
     "title": "Yüzleri Sil",
-    "desc_one": "Bu {{count}} yüzü silmek istediğine emin misin? Bu işlem geri alınamaz.",
-    "desc_other": "Bu {{count}} yüzü silmek istediğine emin misin? Bu işlem geri alınamaz."
+    "desc_one": "Bir adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
   },
   "nofaces": "Yüz bulunamadı",
   "pixels": "{{area}}px"

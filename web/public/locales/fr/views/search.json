@@ -1,6 +1,6 @@
 {
   "savedSearches": "Recherches enregistrées",
-  "search": "Chercher",
+  "search": "Rechercher",
   "searchFor": "Chercher {{inputValue}}",
   "button": {
     "clear": "Effacer la recherche",
@@ -29,7 +29,7 @@
       "max_score": "Score maximum"
     },
     "searchType": {
-      "thumbnail": "Vignette",
+      "thumbnail": "Miniature",
       "description": "Description"
     },
     "toast": {

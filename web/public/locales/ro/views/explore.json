@@ -6,15 +6,53 @@
     "embeddingsReindexing": {
       "startingUp": "Porneste…",
       "estimatedTime": "Timp ramas estimat:",
-      "finishingShortly": "Termina curand"
+      "finishingShortly": "Termina curand",
+      "step": {
+        "descriptionsEmbedded": "Descrieri încorporate: ",
+        "trackedObjectsProcessed": "Obiecte urmărite procesate: ",
+        "thumbnailsEmbedded": "Miniaturi încorporate: "
+      },
+      "context": "Funcția de căutare poate fi utilizată după ce reindexarea obiectelor urmărite este finalizată."
+    },
+    "downloadingModels": {
+      "context": "Frigate descarcă modelele de încorporare necesare pentru a susține funcția de Căutare Semantică. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii rețelei dvs.",
+      "setup": {
+        "visionModel": "Model viziune",
+        "visionModelFeatureExtractor": "Extractor de caracteristici pentru modelul de viziune",
+        "textModel": "Model de text",
+        "textTokenizer": "Tokenizer text"
+      },
+      "tips": {
+        "context": "S-ar putea să doriți să reindexați încorporările obiectelor urmărite odată ce modelele sunt descărcate.",
+        "documentation": "Citește documentația"
+      },
+      "error": "A apărut o eroare. Verifică jurnalele Frigate."
     }
   },
   "type": {
-    "details": "detalii"
+    "details": "detalii",
+    "snapshot": "snapshot",
+    "video": "video",
+    "object_lifecycle": "ciclul de viață al obiectului"
   },
   "objectLifecycle": {
     "lifecycleItemDesc": {
-      "visible": "{{label}} detectata"
-    }
-  }
+      "visible": "{{label}} detectata",
+      "active": "{{label}} a devenit activ",
+      "entered_zone": "{{label}} a intrat în {{zones}}"
+    },
+    "title": "Ciclul de viață al obiectului",
+    "count": "{{first}} din {{second}}",
+    "trackedPoint": "Punct urmărit",
+    "noImageFound": "Nicio imagine găsită pentru această marcă temporală.",
+    "createObjectMask": "Creează mască de obiect",
+    "adjustAnnotationSettings": "Ajustează setările de adnotare",
+    "scrollViewTips": "Derulează pentru a vizualiza momentele semnificative din ciclul de viață al acestui obiect.",
+    "autoTrackingTips": "Pozițiile casetelor de delimitare vor fi inexacte pentru camerele cu urmărire automată."
+  },
+  "details": {
+    "timestamp": "Marcaj timp"
+  },
+  "exploreMore": "Explorează mai multe obiecte {{label}}",
+  "trackedObjectDetails": "Detalii despre obiectul urmărit"
 }

@@ -1,1 +1,26 @@
-{}
+{
+  "restart": {
+    "title": "Biztosan újra szeretnéd indítani a Frigate-ot?",
+    "button": "Újraindítás",
+    "restarting": {
+      "title": "A Frigate újraindul",
+      "content": "Az oldal újrtölt {{countdown}} másodperc múlva.",
+      "button": "Erőltetett újraindítás azonnal"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Küldés a Frigate+-nak"
+      },
+      "review": {
+        "state": {
+          "submitted": "Elküldve"
+        },
+        "question": {
+          "ask_a": "Ez a tárgy egy <code>{{label}}</code>?"
+        }
+      }
+    }
+  }
+}

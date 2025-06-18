@@ -151,7 +151,7 @@
       "title": "İncele",
       "alerts": "Alarmlar ",
       "detections": "Tespitler ",
-      "desc": "Bu kamera için uyarıları ve algılamaları etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, yeni inceleme öğeleri oluşturulmaz."
+      "desc": "Bu kamera için uyarıları ve algılamaları geçici olarak etkinleştirin/devre dışı bırakın. Frigate yeniden başlatıldığında yapılandırmanızdaki tercihlere geri dönülür. Devre dışı bırakıldığında, yeni inceleme öğeleri oluşturulamaz. "
     },
     "reviewClassification": {
       "readTheDocumentation": "Dökümantasyonu Oku",
@@ -175,7 +175,7 @@
       "unsavedChanges": "{{camera}} için Kaydedilmemiş Sınıflandırma Ayarları"
     },
     "streams": {
-      "desc": "Bir kameranın devre dışı bırakılması, Frigate'in bu kamerayı işlemesini tamamen durdurur. Algılama, kayıt ve hata ayıklama özellikleri kullanılamaz.<br /> <em>Not: Bu eylem, go2rtc'deki yeniden akışları devre dışı bırakmaz.</em>",
+      "desc": "Frigate yeniden başlataılana kadar bir kamerayı devre dışı bırakın. Bir kameranın devre dışı bırakılması, Frigate'in bu kamerayı işlemesini tamamen durdurur. Algılama, kayıt ve hata ayıklama özellikleri kullanılamaz.<br /> <em>Not: Bu eylem, go2rtc'deki yeniden akışları devre dışı bırakmaz.</em>",
       "title": "Akışlar"
     }
   },

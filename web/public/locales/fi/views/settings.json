@@ -7,8 +7,10 @@
     "default": "Asetukset - Frigate",
     "general": "Yleiset asetukset - Frigate",
     "frigatePlus": "Frigate+ asetukset - Frigate",
-    "object": "Objektiasetukset - Frigate",
-    "authentication": "Autentikointiuasetukset - Frigate"
+    "object": "Virheenjäljitys - Frigate",
+    "authentication": "Autentikointiuasetukset - Frigate",
+    "notifications": "Ilmoitusasetukset - Frigate",
+    "enrichments": "Laajennusasetukset – Frigate"
   },
   "menu": {
     "ui": "Käyttöliittymä",
@@ -19,7 +21,8 @@
     "masksAndZones": "Maskit / alueet",
     "debug": "Debuggaus",
     "motionTuner": "Liikesäädin",
-    "notifications": "Ilmoitukset"
+    "notifications": "Ilmoitukset",
+    "enrichments": "Rikasteet"
   },
   "dialog": {
     "unsavedChanges": {
@@ -146,11 +149,11 @@
     "title": "Kamera-asetukset",
     "streams": {
       "title": "Striimit",
-      "desc": "Kameran poiskytkeminen lopettaa kameran videostriimien käsittelyn. Havainnot, tallennus ja debuggaus ovat pois käytöstä.<br /><em>Huom: tämä ei poista käytöstä go2rtc uusinta striimejä.</em>"
+      "desc": "Poista kamera käytöstä väliaikaisesti, kunnes Frigate uudelleenkäynnistetään. Kameran poiskytkeminen lopettaa kameran videostriimien käsittelyn. Havainnot, tallennus ja debuggaus ovat pois käytöstä.<br /><em>Huom: tämä ei poista käytöstä go2rtc uusinta striimejä.</em>"
     },
     "review": {
       "title": "Katselu",
-      "desc": "Kytke päälle/pois hälytykset ja tunnistus tälle kameralle. Kun ne ovat pois päältä, uusia katseltavia tapahtumia ei luoda.",
+      "desc": "Kytke väliaikaisesti päälle/pois hälytykset ja tunnistus tälle kameralle, kunnes Frigate käynnistetään uudelleen. Kun ne ovat pois päältä, uusia katseltavia tapahtumia ei luoda. ",
       "alerts": "Hälytykset ",
       "detections": "Tunnistukset "
     },

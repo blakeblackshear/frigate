@@ -41,7 +41,7 @@
     "hasVideoClip": "包含视频片段",
     "submittedToFrigatePlus": {
       "label": "提交至 Frigate+",
-      "tips": "你必须要先筛选具有快照的探测对象。<br /><br />没有快照的跟踪对象无法提交至 Frigate+."
+      "tips": "你必须要先筛选具有快照的检测对象。<br /><br />没有快照的跟踪对象无法提交至 Frigate+."
     }
   },
   "sort": {

@@ -26,7 +26,7 @@
     "day_other": "{{time}} วัน",
     "h": "{{time}} ชั่วโมง",
     "hour_other": "{{time}} ชั่วโมง",
-    "m": "{{time}} เดือน",
+    "m": "{{time}} นาที",
     "s": "{{time}} วินาที",
     "mo": "{{time}} เดือน",
     "minute_other": "{{time}} นาที",
@@ -114,7 +114,7 @@
       "logout": "ออกจากระบบ",
       "title": "ผู้ใช้",
       "account": "บัญชี",
-      "current": "จำนวนผู้ใช้: {{user}}",
+      "current": "ผู้ใช้ปัจจุบัน: {{user}}",
       "anonymous": "ไม่ระบุตัวตน",
       "setPassword": "ตั้งรหัสผ่าน"
     },

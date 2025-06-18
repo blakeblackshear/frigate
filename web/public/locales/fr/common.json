@@ -18,22 +18,22 @@
     "5minutes": "5 minutes",
     "30minutes": "30 minutes",
     "12hours": "12 heures",
-    "h": "{{time}}h",
+    "h": "{{time}} h",
     "pm": "PM",
     "am": "AM",
-    "yr": "{{time}}a",
+    "yr": "{{time}} a",
     "year_one": "{{time}} année",
     "year_many": "{{time}} années",
     "year_other": "{{time}} années",
-    "mo": "{{time}}m",
+    "mo": "{{time}} m",
     "month_one": "{{time}} mois",
     "month_many": "{{time}} mois",
     "month_other": "{{time}} mois",
-    "s": "{{time}}s",
+    "s": "{{time}} s",
     "second_one": "{{time}} seconde",
     "second_many": "{{time}} secondes",
     "second_other": "{{time}} secondes",
-    "m": "{{time}}m",
+    "m": "{{time}} mn",
     "hour_one": "{{time}} heure",
     "hour_many": "{{time}} heures",
     "hour_other": "{{time}} heures",
@@ -41,7 +41,7 @@
     "minute_one": "{{time}} minute",
     "minute_many": "{{time}} minutes",
     "minute_other": "{{time}} minutes",
-    "d": "{{time}}j",
+    "d": "{{time}} j",
     "day_one": "{{time}} jour",
     "day_many": "{{time}} jours",
     "day_other": "{{time}} jours",
@@ -65,28 +65,28 @@
     },
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm",
-      "12hour": "HH:mm"
+      "12hour": "HH:mm aaa"
     },
     "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampFilename": {
-      "12hour": "dd-MM-yy-HH-mm-ss",
+      "12hour": "dd-MM-yy-HH-mm-ss-a",
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "d MMM HH:mm",
-      "24hour": "d MMM HH:mm"
+      "12hour": "d MMM, HH:mm aaa",
+      "24hour": "d MMM, HH:mm"
     },
     "formattedTimestampHourMinuteSecond": {
       "24hour": "HH:mm:ss",
-      "12hour": "HH:mm:ss"
+      "12hour": "HH:mm:ss aaa"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "d MMM yyyy, HH:mm",
-      "24hour": "d MMM yyyy HH:mm"
+      "12hour": "d MMM yyyy, HH:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
     },
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
-      "24hour": "d MMM,yyuy"
+      "24hour": "d MMM,yyyy"
     }
   },
   "button": {
@@ -129,7 +129,7 @@
   "menu": {
     "configuration": "Configuration",
     "language": {
-      "en": "Anglais (Anglais)",
+      "en": "English (Anglais)",
       "withSystem": {
         "label": "Utiliser les paramètres système pour la langue"
       },
@@ -161,7 +161,8 @@
       "uk": "Українська (Ukrainien)",
       "vi": "Tiếng Việt (Vietnamien)",
       "yue": "粵語 (Cantonais)",
-      "th": "ไทย (Thai)"
+      "th": "ไทย (Thai)",
+      "ca": "Català (Catalan)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -172,7 +173,7 @@
       },
       "label": "Mode sombre"
     },
-    "review": "Passer en revue",
+    "review": "Revue d'événements",
     "explore": "Explorer",
     "export": "Exporter",
     "user": {
@@ -207,16 +208,16 @@
     "restart": "Redémarrer Frigate",
     "live": {
       "cameras": {
-        "count_one": "{{count}} Caméra",
-        "count_many": "{{count}} Caméras",
-        "count_other": "{{count}} Caméras",
+        "count_one": "{{count}} caméra",
+        "count_many": "{{count}} caméras",
+        "count_other": "{{count}} caméras",
         "title": "Caméras"
       },
       "allCameras": "Toutes les caméras",
       "title": "Direct"
     },
     "uiPlayground": "Gestion de l'interface",
-    "faceLibrary": "Librairie des visages",
+    "faceLibrary": "Bibliothèque de visages",
     "languages": "Langues"
   },
   "toast": {
@@ -233,7 +234,7 @@
     "title": "Rôle",
     "viewer": "Observateur",
     "admin": "Administrateur",
-    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, des revues d'éléments, et à l'historique des enregistrements dans l'interface utilisateur."
+    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, de la revue d'événements, et à l'historique des enregistrements dans l'interface utilisateur."
   },
   "pagination": {
     "next": {

@@ -53,7 +53,8 @@
                 "warning": "La transmissió contínua pot provocar problemes d'ús elevat d'amplada de banda i rendiment. Feu servir amb precaució."
               }
             }
-          }
+          },
+          "placeholder": "Tria un mètode de transmissió"
         },
         "compatibilityMode": {
           "label": "Mode de compatibilitat",

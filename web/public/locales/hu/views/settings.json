@@ -8,7 +8,8 @@
     "object": "Hibakeresés - Frigate",
     "general": "Alapbeállítások - Frigate",
     "frigatePlus": "Frigate+ beállítások - Frigate",
-    "notifications": "Értesítések beállítása - Frigate"
+    "notifications": "Értesítések beállítása - Frigate",
+    "motionTuner": "Mozgás Hangoló - Frigate"
   },
   "menu": {
     "ui": "UI",

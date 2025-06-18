@@ -159,11 +159,12 @@
       "he": "Hebräisch",
       "sk": "Slowakisch",
       "yue": "粵語 (Kantonesisch)",
-      "th": "ไทย (Thailändisch)"
+      "th": "ไทย (Thailändisch)",
+      "ca": "Català (Katalanisch)"
     },
     "appearance": "Erscheinung",
     "theme": {
-      "label": "Thema",
+      "label": "Design-Thema",
       "blue": "Blau",
       "green": "Grün",
       "default": "Standard",

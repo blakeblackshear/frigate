@@ -1,1 +1,5 @@
-{}
+{
+  "noRecordingsFoundForThisTime": "لا يوجد تسجيلات في هذا التوقيت",
+  "noPreviewFound": "لا يوجد معاينة",
+  "noPreviewFoundFor": "لا يوجد معاينة لـ{{cameraName}}"
+}

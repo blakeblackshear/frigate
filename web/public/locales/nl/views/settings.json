@@ -151,7 +151,7 @@
       "title": "Beoordeel",
       "alerts": "Meldingen ",
       "detections": "Detecties ",
-      "desc": "Schakel waarschuwingen en detecties voor deze camera in of uit. Wanneer deze zijn uitgeschakeld, worden er geen nieuwe beoordelingsitems aangemaakt."
+      "desc": "Schakel waarschuwingen en detecties voor deze camera tijdelijk in of uit totdat Frigate opnieuw wordt gestart. Wanneer uitgeschakeld, worden er geen nieuwe beoordelingsitems gegenereerd. "
     },
     "reviewClassification": {
       "objectAlertsTips": "Alle {{alertsLabels}}-objecten op {{cameraName}} worden weergegeven als meldingen.",
@@ -175,7 +175,7 @@
       "unsavedChanges": "Niet-opgeslagen classificatie-instellingen voor {{camera}}"
     },
     "streams": {
-      "desc": "Het uitschakelen van een camera laat Frigate volledig stoppen met het verwerken van de stream van die camera. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /><em>Opmerking: dit schakelt de go2rtc-restreams niet uit.</em>",
+      "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>",
       "title": "Streams"
     },
     "title": "Camera-instellingen"

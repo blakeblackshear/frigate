@@ -294,5 +294,9 @@
   "white_noise": "Zgomot alb",
   "television": "Televizor",
   "radio": "Radio",
-  "scream": "Tipa"
+  "scream": "Tipa",
+  "chant": "Cântec",
+  "synthetic_singing": "Cântat sintetic",
+  "rapping": "Rap",
+  "shuffle": "Amestecă"
 }

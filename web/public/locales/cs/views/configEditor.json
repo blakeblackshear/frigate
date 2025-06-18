@@ -11,5 +11,6 @@
     "error": {
       "savingError": "Chyba ukládání konfigurace"
     }
-  }
+  },
+  "confirm": "Opustit bez uložení?"
 }

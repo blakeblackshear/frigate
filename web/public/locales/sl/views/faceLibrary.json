@@ -6,7 +6,8 @@
   },
   "details": {
     "person": "Oseba",
-    "unknown": "Nenznano"
+    "unknown": "Nenznano",
+    "timestamp": "Časovni žig"
   },
   "uploadFaceImage": {
     "title": "Naloži nov obraz"

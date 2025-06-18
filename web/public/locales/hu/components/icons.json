@@ -1,1 +1,8 @@
-{}
+{
+  "iconPicker": {
+    "selectIcon": "Válassz ikont",
+    "search": {
+      "placeholder": "Ikon keresése…"
+    }
+  }
+}

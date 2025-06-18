@@ -29,7 +29,7 @@
     "month_one": "{{time}} maand",
     "month_other": "{{time}} maanden",
     "formattedTimestamp2": {
-      "12hour": "dd-MM HH:mm:ss",
+      "12hour": "dd/MM h:mm:ss",
       "24hour": "d MMM HH:mm:ss"
     },
     "s": "{{time}}s",
@@ -174,7 +174,8 @@
       "hi": "हिन्दी (Hindi)",
       "ja": "日本語 (Japans)",
       "yue": "粵語 (Kantonees)",
-      "th": "ไทย (Thais)"
+      "th": "ไทย (Thais)",
+      "ca": "Català (Catalaans)"
     },
     "darkMode": {
       "label": "Donkere modus",

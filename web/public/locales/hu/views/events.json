@@ -1,1 +1,15 @@
-{}
+{
+  "alerts": "Riasztások",
+  "empty": {
+    "detection": "Nincs megnézendő észlelés",
+    "alert": "Nincs megnézendő riasztás",
+    "motion": "Nem található mozgás"
+  },
+  "detections": "Észlelések",
+  "motion": {
+    "label": "Mozgás",
+    "only": "Csak mozgások"
+  },
+  "allCameras": "Összes kamera",
+  "timeline": "Idővonal"
+}

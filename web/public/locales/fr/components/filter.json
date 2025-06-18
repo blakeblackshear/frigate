@@ -39,10 +39,10 @@
     "label": "Tri",
     "dateDesc": "Date (ordre chronologique inverse)",
     "dateAsc": "Date (ordre chronologique)",
-    "scoreDesc": "Score d'objet (Descendant)",
-    "scoreAsc": "Score d'objet (Ascendant)",
-    "speedAsc": "Vitesse estimée (Ascendant)",
-    "speedDesc": "Vitesse estimée (Descendant)",
+    "scoreDesc": "Score d'objet (décroissant)",
+    "scoreAsc": "Score d'objet (croissant)",
+    "speedAsc": "Vitesse estimée (croissant)",
+    "speedDesc": "Vitesse estimée (décroissant)",
     "relevance": "Pertinence"
   },
   "features": {
@@ -52,7 +52,7 @@
     },
     "hasVideoClip": "A un clip vidéo",
     "hasSnapshot": "A un instantané",
-    "label": "Caractéristiques"
+    "label": "Fonctionnalités"
   },
   "explore": {
     "settings": {
@@ -70,15 +70,15 @@
       "searchSource": {
         "label": "Source de recherche",
         "options": {
-          "thumbnailImage": "Image de la vignette",
+          "thumbnailImage": "Image de miniature",
           "description": "Description"
         },
-        "desc": "Choisissez si vous souhaitez rechercher les vignettes ou les descriptions de vos objets suivis."
+        "desc": "Choisissez si vous souhaitez rechercher les miniatures ou les descriptions de vos objets suivis."
       }
     },
     "date": {
       "selectDateBy": {
-        "label": "Sélectionner une date pour filtrer par"
+        "label": "Sélectionner une date pour filtrer"
       }
     }
   },
@@ -89,19 +89,19 @@
     "label": "Filtre des caméras",
     "all": {
       "short": "Caméras",
-      "title": "Toutes les Caméras"
+      "title": "Toutes les caméras"
     }
   },
   "motion": {
     "showMotionOnly": "Afficher uniquement le mouvement"
   },
   "logSettings": {
-    "filterBySeverity": "Filtrer les journaux par sévérité",
+    "filterBySeverity": "Filtrer les journaux par gravité",
     "loading": {
       "title": "Chargement",
-      "desc": "Lorsque le volet des journaux est défilé jusqu'en bas, les nouveaux enregistrements sont automatiquement diffusées au fur et à mesure de leur ajout."
+      "desc": "Lorsque le volet de journalisation est défilé jusqu'en bas, les nouveaux enregistrements s'affichent automatiquement au fur et à mesure qu'ils sont ajoutés."
     },
-    "label": "Niveau de journal du filtre",
+    "label": "Niveau de journalisation du filtre",
     "disableLogStreaming": "Désactiver la diffusion des journaux",
     "allLogs": "Tous les journaux"
   },
@@ -119,7 +119,7 @@
       "success": "Les objets suivis ont été supprimés avec succès.",
       "error": "Échec de la suppression des objets suivis : {{errorMessage}}"
     },
-    "desc": "La suppression de ces objets suivis {{objectLength}} supprime l'instantané, les plongements vectoriels enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
+    "desc": "Supprimer ces objets suivis {{objectLength}} retirera l'instantané, les représentations numériques enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
   },
   "zoneMask": {
     "filterBy": "Filtrer par masque de zone"
