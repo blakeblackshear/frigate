@@ -38,11 +38,11 @@
   "general": {
     "title": "常规",
     "detector": {
-      "title": "探测器",
-      "inferenceSpeed": "探测器推理速度",
-      "cpuUsage": "探测器CPU使用率",
-      "memoryUsage": "探测器内存使用率",
-      "temperature": "探测器温度"
+      "title": "检测器",
+      "inferenceSpeed": "检测器推理速度",
+      "cpuUsage": "检测器CPU使用率",
+      "memoryUsage": "检测器内存使用率",
+      "temperature": "检测器温度"
     },
     "hardwareInfo": {
       "title": "硬件信息",
@@ -127,7 +127,7 @@
     "framesAndDetections": "帧数/检测次数",
     "label": {
       "camera": "摄像头",
-      "detect": "探测",
+      "detect": "检测",
       "skipped": "跳过",
       "ffmpeg": "FFmpeg编码器",
       "capture": "捕获",
@@ -143,17 +143,17 @@
     },
     "toast": {
       "success": {
-        "copyToClipboard": "已复制探测数据到剪贴板。"
+        "copyToClipboard": "已复制检测数据到剪贴板。"
       },
       "error": {
-        "unableToProbeCamera": "无法探测摄像头：{{errorMessage}}"
+        "unableToProbeCamera": "无法检测到摄像头：{{errorMessage}}"
       }
     }
   },
   "lastRefreshed": "最后刷新时间：",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率较高（{{ffmpegAvg}}%）",
-    "detectHighCpuUsage": "{{camera}} 的 探测 CPU 使用率较高（{{detectAvg}}%）",
+    "detectHighCpuUsage": "{{camera}} 的 检测器 CPU 使用率较高（{{detectAvg}}%）",
     "healthy": "系统运行正常",
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
     "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",

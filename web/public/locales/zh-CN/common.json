@@ -180,7 +180,8 @@
       "ru": "俄语 (Русский)",
       "cs": "捷克语 (Čeština)",
       "yue": "粤语 (粵語)",
-      "th": "泰语（ไทย）"
+      "th": "泰语（ไทย）",
+      "ca": "加泰罗尼亚语 (Català )"
     },
     "appearance": "外观",
     "darkMode": {
@@ -216,7 +217,7 @@
       }
     },
     "review": "核查",
-    "explore": "探测",
+    "explore": "浏览",
     "export": "导出",
     "uiPlayground": "UI 演示",
     "faceLibrary": "人脸管理",

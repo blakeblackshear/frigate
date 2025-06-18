@@ -8,7 +8,7 @@
   "allCameras": "所有摄像头",
   "empty": {
     "alert": "还没有“警报”类核查项",
-    "detection": "还没有“探测”类核查项",
+    "detection": "还没有“检测”类核查项",
     "motion": "还没有运动类数据"
   },
   "timeline": "时间线",
