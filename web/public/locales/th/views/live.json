@@ -2,6 +2,14 @@
   "stream": {
     "playInBackground": {
       "label": "เล่นในพื้นหลัง"
+    },
+    "audio": {
+      "tips": {
+        "documentation": "อ่านเอกสาร "
+      }
+    },
+    "twoWayTalk": {
+      "tips.documentation": "อ่านเอกสาร "
     }
   },
   "documentTitle": "สด - Frigate",
@@ -28,5 +36,14 @@
     }
   },
   "documentTitle.withCamera": "{{camera}} - สด - Frigate",
-  "streamingSettings": "การตั้งค่าการสตรีม"
+  "streamingSettings": "การตั้งค่าการสตรีม",
+  "camera": {
+    "disable": "ปิดกล้อง"
+  },
+  "detect": {
+    "disable": "ปิดการตรวจจับ"
+  },
+  "recording": {
+    "disable": "ปิดการบันทึก"
+  }
 }
