@@ -5,6 +5,7 @@
     "ago": "{{timeAgo}} Lalu",
     "justNow": "Sekarang",
     "today": "Hari ini",
-    "yesterday": "Kemarin"
+    "yesterday": "Kemarin",
+    "untilForTime": "Hingga {{time}}"
   }
 }
