@@ -3,8 +3,8 @@
     "title": "Êtes-vous sûr de vouloir redémarrer Frigate ?",
     "restarting": {
       "title": "Frigate redémarre",
-      "content": "Cette page sera rechargée dans {{countdown}} secondes.",
-      "button": "Forcer le rechargement maintenant"
+      "content": "Actualisation de la page dans {{countdown}} secondes.",
+      "button": "Forcer l'actualisation maintenant"
     },
     "button": "Redémarrer"
   },
@@ -12,7 +12,7 @@
     "plus": {
       "submitToPlus": {
         "label": "Soumettre à Frigate+",
-        "desc": "Les objets situés dans des endroits que vous souhaitez éviter ne sont pas des faux positifs. Les soumettre comme faux positifs perturberait le modèle."
+        "desc": "Les objets situés dans des zones à ignorer ne doivent pas être signalés comme de faux positifs, car cela nuirait à la précision du modèle."
       },
       "review": {
         "true": {
@@ -31,15 +31,15 @@
           "submitted": "Soumis"
         },
         "question": {
-          "label": "Confirmez ce libellé pour Frigate Plus",
-          "ask_an": "Est-ce que cet objet est un <code>{{label}}</code> ?",
-          "ask_a": "Est-ce que cet objet est un <code>{{label}}</code> ?",
-          "ask_full": "Est-ce-que cet objet est un(e) <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) ?"
+          "label": "Confirmez ce libellé pour Frigate+",
+          "ask_an": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
+          "ask_a": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
+          "ask_full": "Est-ce-que cet objet est un(e) <code>{{translatedLabel}}</code>  ?"
         }
       }
     },
     "video": {
-      "viewInHistory": "Afficher dans l'historique"
+      "viewInHistory": "Afficher dans la chronologie"
     }
   },
   "export": {
@@ -50,7 +50,7 @@
       "lastHour_many": "{{count}} dernières heures",
       "lastHour_other": "{{count}} dernières heures",
       "end": {
-        "label": "Sélectionner l'heure de fin",
+        "label": "Sélectionner une heure de fin",
         "title": "Heure de fin"
       },
       "start": {
@@ -58,14 +58,14 @@
         "title": "Heure de début"
       }
     },
-    "selectOrExport": "Sélectionner ou Exporter",
+    "selectOrExport": "Sélectionner ou exporter",
     "toast": {
       "error": {
         "failed": "Échec du démarrage de l'export : {{error}}",
-        "endTimeMustAfterStartTime": "L'heure de fin doit être après l'heure de début",
+        "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début",
         "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide"
       },
-      "success": "Exportation démarrée. Consulter le fichier dans le dossier /exports."
+      "success": "Exportation démarrée avec succès. Consultez le fichier dans le dossier /exports."
     },
     "select": "Sélectionner",
     "name": {
@@ -79,7 +79,7 @@
   },
   "search": {
     "saveSearch": {
-      "desc": "Fournissez un nom pour cette recherche enregistrée.",
+      "desc": "Donnez un nom à cette recherche enregistrée.",
       "label": "Enregistrer la recherche",
       "success": "La recherche ({{searchName}}) a été enregistrée.",
       "button": {
@@ -88,32 +88,32 @@
         }
       },
       "overwrite": "{{searchName}} existe déjà. L'enregistrement écrasera la recherche existante.",
-      "placeholder": "Renseignez un nom pour votre recherche"
+      "placeholder": "Saisissez un nom pour votre recherche"
     }
   },
   "streaming": {
     "label": "Flux",
     "restreaming": {
-      "disabled": "Le renvoi du flux n'est pas activé pour cette caméra.",
+      "disabled": "La rediffusion n'est pas activée pour cette caméra.",
       "desc": {
         "readTheDocumentation": "Lire la documentation",
-        "title": "Installer go2rtc pour accéder à des options supplémentaires de visionnage en direct et l'audio pour cette caméra."
+        "title": "Configurez go2rtc pour bénéficier d'options de visualisation en direct supplémentaires et de l'audio pour cette caméra."
       }
     },
     "showStats": {
-      "label": "Afficher les statistiques de flux",
-      "desc": "Activer cette option pour afficher les statistiques des flux en surimpression sur le flux de la caméra."
+      "label": "Afficher les statistiques du flux",
+      "desc": "Activez cette option pour montrer les statistiques de diffusion en incrustation sur le flux vidéo de la caméra."
     },
-    "debugView": "Vue de débogage"
+    "debugView": "Affichage de débogage"
   },
   "recording": {
     "confirmDelete": {
       "desc": {
-        "selected": "Êtes-vous certain de vouloir supprimer toutes les vidéos enregistrées associées à cet élément de revue ? <br /><br />Pressez la touche <em>Maj</em> pour éviter cette boîte de dialogue dans le futur."
+        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cet élément de la revue d'événements ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
       },
       "title": "Confirmer la suppression",
       "toast": {
-        "success": "Les séquences vidéo associées aux éléments de revue sélectionnés ont été supprimées avec succès.",
+        "success": "Les vidéos associées aux éléments de revue d'événements sélectionnés ont été supprimées.",
         "error": "Échec de la suppression : {{error}}"
       }
     },
