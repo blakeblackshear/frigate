@@ -26,11 +26,13 @@ import {
   GiDeer,
   GiFox,
   GiGoat,
+  GiKangaroo,
   GiPolarBear,
   GiPostStamp,
   GiRabbit,
   GiRaccoonHead,
   GiSailboat,
+  GiSquirrel,
 } from "react-icons/gi";
 import { LuBox, LuLassoSelect, LuScanBarcode } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
@@ -72,6 +74,7 @@ export function getIconForLabel(label: string, className?: string) {
     case "boat":
       return <GiSailboat key={label} className={className} />;
     case "bus":
+    case "school_bus":
       return <FaBus key={label} className={className} />;
     case "car":
     case "vehicle":
@@ -90,6 +93,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <GiGoat key={label} className={className} />;
     case "horse":
       return <FaHorse key={label} className={className} />;
+    case "kangaroo":
+      return <GiKangaroo key={label} className={className} />;
     case "license_plate":
       return <LuScanBarcode key={label} className={className} />;
     case "motorcycle":
@@ -108,6 +113,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <FaHockeyPuck key={label} className={className} />;
     case "sports_ball":
       return <FaFootballBall key={label} className={className} />;
+    case "skunk":
+      return <GiSquirrel key={label} className={className} />;
     case "squirrel":
       return <LuIcons.LuSquirrel key={label} className={className} />;
     case "umbrella":
@@ -127,12 +134,14 @@ export function getIconForLabel(label: string, className?: string) {
     case "amazon":
       return <FaAmazon key={label} className={className} />;
     case "an_post":
+    case "canada_post":
     case "dpd":
     case "gls":
     case "nzpost":
     case "postnl":
     case "postnord":
     case "purolator":
+    case "royal_mail":
       return <GiPostStamp key={label} className={className} />;
     case "dhl":
       return <FaDhl key={label} className={className} />;
