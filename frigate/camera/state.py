@@ -350,6 +350,7 @@ class CameraState:
             removed_obj = tracked_objects[id]
             if "end_time" not in removed_obj.obj_data:
                 removed_obj.obj_data["end_time"] = frame_time
+                logger.debug(f"{self.name}: end callback for object {id}")
                 for c in self.callbacks["end"]:
                     c(self.name, removed_obj, frame_name)
 
@@ -441,6 +442,17 @@ class CameraState:
             for t in self.frame_cache.keys()
             if t not in current_thumb_frames and t not in current_best_frames
         ]
+        if len(thumb_frames_to_delete) > 0:
+            logger.debug(f"{self.name}: Current frame cache contents:")
+            for k, v in self.frame_cache.items():
+                logger.debug(f"  frame time: {k}, object id: {v['object_id']}")
+            for obj_id, obj in tracked_objects.items():
+                thumb_time = (
+                    obj.thumbnail_data["frame_time"] if obj.thumbnail_data else None
+                )
+                logger.debug(
+                    f"{self.name}: Tracked object {obj_id} thumbnail frame_time: {thumb_time}"
+                )
         for t in thumb_frames_to_delete:
             object_id = self.frame_cache[t].get("object_id", "unknown")
             logger.debug(f"{self.name}: Deleting {t} from frame cache for {object_id}")
