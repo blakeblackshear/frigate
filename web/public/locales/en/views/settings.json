@@ -339,7 +339,7 @@
       "clickDrawPolygon": "Click to draw a polygon on the image.",
       "objects": {
         "title": "Objects",
-        "desc": "The object type that that applies to this object mask.",
+        "desc": "The object type that applies to this object mask.",
         "allObjectTypes": "All object types"
       },
       "toast": {
