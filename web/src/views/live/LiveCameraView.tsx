@@ -1596,7 +1596,7 @@ function FrigateCameraFeatures({
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 text-xs">
-                    {t("streaming.restreaming.desc", {
+                    {t("streaming.restreaming.desc.title", {
                       ns: "components/dialog",
                     })}
                     <div className="mt-2 flex items-center text-primary">
@@ -1606,7 +1606,7 @@ function FrigateCameraFeatures({
                         rel="noopener noreferrer"
                         className="inline"
                       >
-                        {t("streaming.restreaming.readTheDocumentation", {
+                        {t("streaming.restreaming.desc.readTheDocumentation", {
                           ns: "components/dialog",
                         })}
                         <LuExternalLink className="ml-2 inline-flex size-3" />
