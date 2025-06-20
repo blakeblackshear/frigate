@@ -59,7 +59,6 @@ class OvDetector(DetectionApi):
             )
             self.model_invalid = True
 
-        # Ensure the SSD model has the right input and output shapes
         if self.ov_model_type == ModelTypeEnum.ssd:
             model_inputs = self.interpreter.inputs
             model_outputs = self.interpreter.outputs
@@ -72,12 +71,6 @@ class OvDetector(DetectionApi):
             if len(model_outputs) != 1:
                 logger.error(
                     f"SSD models must only have 1 output. Found {len(model_outputs)}."
-                )
-                self.model_invalid = True
-
-            if model_inputs[0].get_shape() != ov.Shape([1, self.w, self.h, 3]):
-                logger.error(
-                    f"SSD model input doesn't match. Found {model_inputs[0].get_shape()}."
                 )
                 self.model_invalid = True
 
@@ -100,13 +93,6 @@ class OvDetector(DetectionApi):
                     f"YoloNAS models must be exported in flat format and only have 1 output. Found {len(model_outputs)}."
                 )
                 self.model_invalid = True
-
-            if model_inputs[0].get_shape() != ov.Shape([1, 3, self.w, self.h]):
-                logger.error(
-                    f"YoloNAS model input doesn't match. Found {model_inputs[0].get_shape()}, but expected {[1, 3, self.w, self.h]}."
-                )
-                self.model_invalid = True
-
             output_shape = model_outputs[0].partial_shape
             if output_shape[-1] != 7:
                 logger.error(
