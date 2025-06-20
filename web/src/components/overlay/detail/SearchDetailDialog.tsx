@@ -48,7 +48,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import Chip from "@/components/indicators/Chip";
 import { capitalizeAll } from "@/utils/stringUtil";
@@ -1229,11 +1229,14 @@ export function VideoTab({ search }: VideoTabProps) {
   const { data: reviewItem } = useSWR<ReviewSegment>([
     `review/event/${search.id}`,
   ]);
-  const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
-  // subtract 2 seconds from start_time to account for keyframes and any differences in the record/detect streams
-  // to help the start of the event from not being completely cut off
-  const source = `${baseUrl}vod/${search.camera}/start/${search.start_time - 2}/end/${endTime}/index.m3u8`;
+  const clipTimeRange = useMemo(() => {
+    const startTime = search.start_time - REVIEW_PADDING;
+    const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
+    return `start/${startTime}/end/${endTime}`;
+  }, [search]);
+
+  const source = `${baseUrl}vod/${search.camera}/${clipTimeRange}/index.m3u8`;
 
   return (
     <>
@@ -1272,7 +1275,7 @@ export function VideoTab({ search }: VideoTabProps) {
               <TooltipTrigger asChild>
                 <a
                   download
-                  href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4?trim=end`}
+                  href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
                 >
                   <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
                     <FaDownload className="size-4 text-white" />
