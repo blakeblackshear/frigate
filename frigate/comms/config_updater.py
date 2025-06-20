@@ -1,6 +1,7 @@
 """Facilitates communication between processes."""
 
 import multiprocessing as mp
+from _pickle import UnpicklingError
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
@@ -50,7 +51,7 @@ class ConfigSubscriber:
                 return (topic, obj)
             else:
                 return (None, None)
-        except (zmq.ZMQError, UnicodeDecodeError):
+        except (zmq.ZMQError, UnicodeDecodeError, UnpicklingError):
             return (None, None)
 
     def stop(self) -> None:
