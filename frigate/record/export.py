@@ -126,7 +126,7 @@ class RecordingExporter(threading.Thread):
             minutes = int(diff / 60)
             seconds = int(diff % 60)
             ffmpeg_cmd = [
-                "7.0",
+                "/usr/lib/ffmpeg/7.0/bin/ffmpeg",  # hardcode path for exports thumbnail due to missing libwebp support
                 "-hide_banner",
                 "-loglevel",
                 "warning",

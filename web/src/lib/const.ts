@@ -6,6 +6,7 @@ export const supportedLanguageKeys = [
   "de",
   "it",
   "ca",
+  "ro",
   "nl",
   "nb-NO",
   "zh-CN",

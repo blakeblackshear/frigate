@@ -1500,18 +1500,24 @@ class LicensePlateProcessingMixin:
 
         # Determine subLabel based on known plates, use regex matching
         # Default to the detected plate, use label name if there's a match
-        sub_label = next(
-            (
-                label
-                for label, plates in self.lpr_config.known_plates.items()
-                if any(
-                    re.match(f"^{plate}$", top_plate)
-                    or distance(plate, top_plate) <= self.lpr_config.match_distance
-                    for plate in plates
-                )
-            ),
-            None,
-        )
+        try:
+            sub_label = next(
+                (
+                    label
+                    for label, plates in self.lpr_config.known_plates.items()
+                    if any(
+                        re.match(f"^{plate}$", top_plate)
+                        or distance(plate, top_plate) <= self.lpr_config.match_distance
+                        for plate in plates
+                    )
+                ),
+                None,
+            )
+        except re.error:
+            logger.error(
+                f"{camera}: Invalid regex in known plates configuration: {self.lpr_config.known_plates}"
+            )
+            sub_label = None
 
         # If it's a known plate, publish to sub_label
         if sub_label is not None:
