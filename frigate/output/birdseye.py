@@ -319,34 +319,47 @@ class BirdsEyeFrameManager:
         self.frame[:] = self.blank_frame
 
         self.cameras = {}
-        for camera, settings in self.config.cameras.items():
-            # precalculate the coordinates for all the channels
-            y, u1, u2, v1, v2 = get_yuv_crop(
-                settings.frame_shape_yuv,
-                (
-                    0,
-                    0,
-                    settings.frame_shape[1],
-                    settings.frame_shape[0],
-                ),
-            )
-            self.cameras[camera] = {
-                "dimensions": [settings.detect.width, settings.detect.height],
-                "last_active_frame": 0.0,
-                "current_frame": 0.0,
-                "layout_frame": 0.0,
-                "channel_dims": {
-                    "y": y,
-                    "u1": u1,
-                    "u2": u2,
-                    "v1": v1,
-                    "v2": v2,
-                },
-            }
+        for camera in self.config.cameras.keys():
+            self.add_camera(camera)
 
         self.camera_layout = []
         self.active_cameras = set()
         self.last_output_time = 0.0
+
+    def add_camera(self, cam: str):
+        """Add a camera to self.cameras with the correct structure."""
+        settings = self.config.cameras[cam]
+        # precalculate the coordinates for all the channels
+        y, u1, u2, v1, v2 = get_yuv_crop(
+            settings.frame_shape_yuv,
+            (
+                0,
+                0,
+                settings.frame_shape[1],
+                settings.frame_shape[0],
+            ),
+        )
+        self.cameras[cam] = {
+            "dimensions": [
+                settings.detect.width,
+                settings.detect.height,
+            ],
+            "last_active_frame": 0.0,
+            "current_frame": 0.0,
+            "layout_frame": 0.0,
+            "channel_dims": {
+                "y": y,
+                "u1": u1,
+                "u2": u2,
+                "v1": v1,
+                "v2": v2,
+            },
+        }
+
+    def remove_camera(self, cam: str):
+        """Remove a camera from self.cameras."""
+        if cam in self.cameras:
+            del self.cameras[cam]
 
     def clear_frame(self):
         logger.debug("Clearing the birdseye frame")
@@ -774,7 +787,7 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
+        self.birdseye_manager = BirdsEyeFrameManager(self.config, stop_event)
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
@@ -803,6 +816,16 @@ class Birdseye:
     def all_cameras_disabled(self) -> None:
         self.birdseye_manager.clear_frame()
         self.__send_new_frame()
+
+    def add_camera(self, camera: str) -> None:
+        """Add a camera to the birdseye manager."""
+        self.birdseye_manager.add_camera(camera)
+        logger.debug(f"Added camera {camera} to birdseye")
+
+    def remove_camera(self, camera: str) -> None:
+        """Remove a camera from the birdseye manager."""
+        self.birdseye_manager.remove_camera(camera)
+        logger.debug(f"Removed camera {camera} from birdseye")
 
     def write_data(
         self,
