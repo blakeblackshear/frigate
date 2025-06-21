@@ -133,13 +133,19 @@ class OutputProcess(FrigateProcess):
             # check if there is an updated config
             updates = config_subscriber.check_for_updates()
 
-            if "add" in updates:
+            if CameraConfigUpdateEnum.add in updates:
                 for camera in updates["add"]:
                     jsmpeg_cameras[camera] = JsmpegCamera(
                         cam_config, self.stop_event, websocket_server
                     )
                     preview_recorders[camera] = PreviewRecorder(cam_config)
                     preview_write_times[camera] = 0
+
+                    if (
+                        self.config.birdseye.enabled
+                        and self.config.cameras[camera].birdseye.enabled
+                    ):
+                        birdseye.add_camera(camera)
 
             (topic, data) = detection_subscriber.check_for_update(timeout=1)
             now = datetime.datetime.now().timestamp()
