@@ -6,7 +6,7 @@ import os
 import shutil
 import threading
 from multiprocessing import Queue
-from multiprocessing.managers import DictProxy
+from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -35,6 +35,7 @@ class CameraMaintainer(threading.Thread):
         camera_metrics: DictProxy,
         ptz_metrics: dict[str, PTZMetrics],
         stop_event: MpEvent,
+        metrics_manager: SyncManager,
     ):
         super().__init__(name="camera_processor")
         self.config = config
@@ -56,6 +57,7 @@ class CameraMaintainer(threading.Thread):
         self.shm_count = self.__calculate_shm_frame_count()
         self.camera_processes: dict[str, mp.Process] = {}
         self.capture_processes: dict[str, mp.Process] = {}
+        self.metrics_manager = metrics_manager
 
     def __init_historical_regions(self) -> None:
         # delete region grids for removed or renamed cameras
@@ -128,7 +130,7 @@ class CameraMaintainer(threading.Thread):
             return
 
         if runtime:
-            self.camera_metrics[name] = CameraMetrics()
+            self.camera_metrics[name] = CameraMetrics(self.metrics_manager)
             self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
             self.region_grids[name] = get_camera_regions_grid(
                 name,
