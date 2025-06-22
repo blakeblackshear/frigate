@@ -721,7 +721,7 @@ function ObjectDetailsTab({
                 ns: "objects",
               })}
               {search.sub_label && ` (${search.sub_label})`}
-              {isAdmin && (
+              {isAdmin && search.end_time && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
