@@ -1610,9 +1610,9 @@ class CTCDecoder:
         self.characters = []
         if character_dict_path and os.path.exists(character_dict_path):
             with open(character_dict_path, "r", encoding="utf-8") as f:
-                self.characters = ["blank"] + [
-                    line.strip() for line in f if line.strip()
-                ]
+                self.characters = (
+                    ["blank"] + [line.strip() for line in f if line.strip()] + [" "]
+                )
         else:
             self.characters = [
                 "blank",
@@ -1747,7 +1747,7 @@ class CTCDecoder:
                     merged_path.append(char_index)
                     merged_probs.append(seq_log_probs[t, char_index])
 
-            result = "".join(self.char_map[idx] for idx in merged_path)
+            result = "".join(self.char_map.get(idx, "") for idx in merged_path)
             results.append(result)
 
             confidence = np.exp(merged_probs).tolist()
