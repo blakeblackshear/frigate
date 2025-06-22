@@ -11,7 +11,7 @@ from typing import Any
 
 import cv2
 import numpy as np
-from peewee import DoesNotExist
+from peewee import SQL, DoesNotExist
 
 from frigate.camera.state import CameraState
 from frigate.comms.config_updater import ConfigSubscriber
@@ -29,9 +29,13 @@ from frigate.config import (
     RecordConfig,
     SnapshotsConfig,
 )
-from frigate.const import FAST_QUEUE_TIMEOUT, UPDATE_CAMERA_ACTIVITY
+from frigate.const import (
+    FAST_QUEUE_TIMEOUT,
+    UPDATE_CAMERA_ACTIVITY,
+    UPSERT_REVIEW_SEGMENT,
+)
 from frigate.events.types import EventStateEnum, EventTypeEnum
-from frigate.models import Event, Timeline
+from frigate.models import Event, ReviewSegment, Timeline
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager
 
@@ -356,6 +360,71 @@ class TrackedObjectProcessor(threading.Thread):
             Timeline.update(
                 data=Timeline.data.update({"sub_label": (sub_label, score)})
             ).where(Timeline.source_id == event_id).execute()
+
+            # only update ended review segments
+            # manually updating a sub_label from the UI is only possible for ended tracked objects
+            try:
+                review_segment = ReviewSegment.get(
+                    (
+                        SQL(
+                            "json_extract(data, '$.detections') LIKE ?",
+                            [f'%"{event_id}"%'],
+                        )
+                    )
+                    & (ReviewSegment.end_time.is_null(False))
+                )
+
+                segment_data = review_segment.data
+                detection_ids = segment_data.get("detections", [])
+                objects_set = set(segment_data.get("objects", []))
+
+                # if sub_label is None, update objects set to remove -verified
+                if sub_label is None:
+                    try:
+                        target_event = Event.get(Event.id == event_id)
+                        base_label = target_event.label  # eg, "bird"
+                        verified_label = f"{base_label}-verified"  # eg, "bird-verified"
+                        if verified_label in objects_set:
+                            objects_set.remove(verified_label)
+                            objects_set.add(base_label)
+                    except DoesNotExist:
+                        logger.debug(
+                            f"No event found for event ID {event_id} when updating review item objects"
+                        )
+
+                sub_labels = set()
+                for det_id in detection_ids:
+                    try:
+                        det_event = Event.get(Event.id == det_id)
+                        if det_event.sub_label:
+                            sub_labels.add(det_event.sub_label)
+                    except DoesNotExist:
+                        logger.debug(
+                            f"No event found for review segment detection {det_id}"
+                        )
+
+                segment_data["objects"] = list(objects_set)
+                segment_data["sub_labels"] = list(sub_labels)
+
+                updated_data = {
+                    ReviewSegment.id.name: review_segment.id,
+                    ReviewSegment.camera.name: review_segment.camera,
+                    ReviewSegment.start_time.name: review_segment.start_time,
+                    ReviewSegment.end_time.name: review_segment.end_time,
+                    ReviewSegment.severity.name: review_segment.severity,
+                    ReviewSegment.thumb_path.name: review_segment.thumb_path,
+                    ReviewSegment.data.name: segment_data,
+                }
+
+                self.requestor.send_data(UPSERT_REVIEW_SEGMENT, updated_data)
+                logger.debug(
+                    f"Updated sub_label for event {event_id} in review segment {review_segment.id}"
+                )
+
+            except ReviewSegment.DoesNotExist:
+                logger.debug(
+                    f"No review segment found with event ID {event_id} when updating sub_label"
+                )
 
         return True
 
