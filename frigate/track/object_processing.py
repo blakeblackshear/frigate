@@ -376,35 +376,24 @@ class TrackedObjectProcessor(threading.Thread):
 
                 segment_data = review_segment.data
                 detection_ids = segment_data.get("detections", [])
-                objects_set = set(segment_data.get("objects", []))
 
-                # if sub_label is None, update objects set to remove -verified
-                if sub_label is None:
-                    try:
-                        target_event = Event.get(Event.id == event_id)
-                        base_label = target_event.label  # eg, "bird"
-                        verified_label = f"{base_label}-verified"  # eg, "bird-verified"
-                        if verified_label in objects_set:
-                            objects_set.remove(verified_label)
-                            objects_set.add(base_label)
-                    except DoesNotExist:
-                        logger.debug(
-                            f"No event found for event ID {event_id} when updating review item objects"
-                        )
-
+                # Rebuild objects list and sync sub_labels
+                objects_list = []
                 sub_labels = set()
-                for det_id in detection_ids:
-                    try:
-                        det_event = Event.get(Event.id == det_id)
-                        if det_event.sub_label:
-                            sub_labels.add(det_event.sub_label)
-                    except DoesNotExist:
-                        logger.debug(
-                            f"No event found for review segment detection {det_id}"
-                        )
+                events = Event.select(Event.id, Event.label, Event.sub_label).where(
+                    Event.id.in_(detection_ids)
+                )
+                for det_event in events:
+                    if det_event.sub_label:
+                        sub_labels.add(det_event.sub_label)
+                        objects_list.append(
+                            f"{det_event.label}-verified"
+                        )  # eg, "bird-verified"
+                    else:
+                        objects_list.append(det_event.label)  # eg, "bird"
 
-                segment_data["objects"] = list(objects_set)
                 segment_data["sub_labels"] = list(sub_labels)
+                segment_data["objects"] = objects_list
 
                 updated_data = {
                     ReviewSegment.id.name: review_segment.id,
