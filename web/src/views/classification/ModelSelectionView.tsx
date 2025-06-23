@@ -37,27 +37,37 @@ export default function ModelSelectionView({
   return (
     <div className="flex size-full gap-2 p-2">
       {classificationConfigs.map((config) => (
-        <div
-          key={config.name}
-          className={cn(
-            "flex h-52 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
-            "outline-transparent duration-500",
-            isMobile && "w-full",
-          )}
-          onClick={() => onClick(config)}
-          onContextMenu={() => {
-            // e.stopPropagation();
-            // e.preventDefault();
-            // handleClickEvent(true);
-          }}
-        >
-          <div className="size-48"></div>
-          <div className="smart-capitalize">
-            {config.name} ({config.state_config != null ? "State" : "Object"}{" "}
-            Classification)
-          </div>
-        </div>
+        <ModelCard config={config} onClick={() => onClick(config)} />
       ))}
+    </div>
+  );
+}
+
+type ModelCardProps = {
+  config: CustomClassificationModelConfig;
+  onClick: () => void;
+};
+function ModelCard({ config, onClick }: ModelCardProps) {
+  return (
+    <div
+      key={config.name}
+      className={cn(
+        "flex h-52 cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+        "outline-transparent duration-500",
+        isMobile && "w-full",
+      )}
+      onClick={() => onClick()}
+      onContextMenu={() => {
+        // e.stopPropagation();
+        // e.preventDefault();
+        // handleClickEvent(true);
+      }}
+    >
+      <div className="size-48"></div>
+      <div className="smart-capitalize">
+        {config.name} ({config.state_config != null ? "State" : "Object"}{" "}
+        Classification)
+      </div>
     </div>
   );
 }
