@@ -291,11 +291,9 @@ class CameraState:
             new_obj.thumbnail_data = thumbnail_data
             tracked_objects[id].thumbnail_data = thumbnail_data
             object_type = new_obj.obj_data["label"]
-            self.best_objects[object_type] = new_obj
 
             # call event handlers
-            for c in self.callbacks["snapshot"]:
-                c(self.name, self.best_objects[object_type], frame_name)
+            self.send_mqtt_snapshot(new_obj, object_type)
 
             for c in self.callbacks["start"]:
                 c(self.name, new_obj, frame_name)
@@ -417,13 +415,9 @@ class CameraState:
                     or (now - current_best.thumbnail_data["frame_time"])
                     > self.camera_config.best_image_timeout
                 ):
-                    self.best_objects[object_type] = obj
-                    for c in self.callbacks["snapshot"]:
-                        c(self.name, self.best_objects[object_type], frame_name)
+                    self.send_mqtt_snapshot(obj, object_type)
             else:
-                self.best_objects[object_type] = obj
-                for c in self.callbacks["snapshot"]:
-                    c(self.name, self.best_objects[object_type], frame_name)
+                self.send_mqtt_snapshot(obj, object_type)
 
         for c in self.callbacks["camera_activity"]:
             c(self.name, camera_activity)
@@ -471,6 +465,20 @@ class CameraState:
                     self.frame_manager.close(self.previous_frame_id)
 
             self.previous_frame_id = frame_name
+
+    def send_mqtt_snapshot(self, new_obj: TrackedObject, object_type: str) -> None:
+        for c in self.callbacks["snapshot"]:
+            updated = c(self.name, new_obj)
+
+            # if the snapshot was not updated, then this object is not a best object
+            # but all new objects should be considered the next best object
+            # so we remove the label from the best objects
+            if updated:
+                self.best_objects[object_type] = new_obj
+            else:
+                if object_type in self.best_objects:
+                    self.best_objects.pop(object_type)
+                break
 
     def save_manual_event_image(
         self,

@@ -156,7 +156,7 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-        def snapshot(camera, obj: TrackedObject, frame_name: str):
+        def snapshot(camera: str, obj: TrackedObject) -> bool:
             mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_img_bytes(
@@ -188,6 +188,10 @@ class TrackedObjectProcessor(threading.Thread):
                                 jpg_bytes,
                                 retain=True,
                             )
+
+                    return True
+
+            return False
 
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
