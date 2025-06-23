@@ -721,7 +721,7 @@ function ObjectDetailsTab({
                 ns: "objects",
               })}
               {search.sub_label && ` (${search.sub_label})`}
-              {isAdmin && (
+              {isAdmin && search.end_time && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
@@ -1242,13 +1242,13 @@ export function VideoTab({ search }: VideoTabProps) {
     <>
       <span tabIndex={0} className="sr-only" />
       <GenericVideoPlayer source={source}>
-        {reviewItem && (
-          <div
-            className={cn(
-              "absolute top-2 z-10 flex items-center gap-2",
-              isIOS ? "right-8" : "right-2",
-            )}
-          >
+        <div
+          className={cn(
+            "absolute top-2 z-10 flex items-center gap-2",
+            isIOS ? "right-8" : "right-2",
+          )}
+        >
+          {reviewItem && (
             <Tooltip>
               <TooltipTrigger>
                 <Chip
@@ -1271,25 +1271,25 @@ export function VideoTab({ search }: VideoTabProps) {
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a
-                  download
-                  href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
-                >
-                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                    <FaDownload className="size-4 text-white" />
-                  </Chip>
-                </a>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("button.download", { ns: "common" })}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          </div>
-        )}
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                download
+                href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
+              >
+                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                  <FaDownload className="size-4 text-white" />
+                </Chip>
+              </a>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>
+                {t("button.download", { ns: "common" })}
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+        </div>
       </GenericVideoPlayer>
     </>
   );
