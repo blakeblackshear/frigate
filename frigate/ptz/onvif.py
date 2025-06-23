@@ -792,6 +792,10 @@ class OnvifController:
             )
             return
 
+        logger.debug(
+            f"{camera_name}: Pan/tilt status: {pan_tilt_status}, Zoom status: {zoom_status}"
+        )
+
         if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
             self.cams[camera_name]["active"] = False
             if not self.ptz_metrics[camera_name].motor_stopped.is_set():
