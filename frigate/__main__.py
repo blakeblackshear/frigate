@@ -23,6 +23,10 @@ def main() -> None:
     setup_logging(manager)
 
     threading.current_thread().name = "frigate"
+    stop_event = mp.Event()
+
+    # send stop event on SIGINT
+    signal.signal(signal.SIGINT, lambda sig, frame: stop_event.set())
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
@@ -110,7 +114,7 @@ def main() -> None:
         sys.exit(0)
 
     # Run the main application.
-    FrigateApp(config, manager).start()
+    FrigateApp(config, manager, stop_event).start()
 
 
 if __name__ == "__main__":

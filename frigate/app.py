@@ -79,10 +79,12 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config: FrigateConfig, manager: SyncManager) -> None:
+    def __init__(
+        self, config: FrigateConfig, manager: SyncManager, stop_event: MpEvent
+    ) -> None:
         self.metrics_manager = manager
         self.audio_process: Optional[mp.Process] = None
-        self.stop_event: MpEvent = mp.Event()
+        self.stop_event = stop_event
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
