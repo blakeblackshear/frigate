@@ -1255,6 +1255,38 @@ def regenerate_description(
     )
 
 
+@router.post(
+    "/description/generate",
+    response_model=GenericResponse,
+    # dependencies=[Depends(require_role(["admin"]))],
+)
+def generate_description_embedding(
+    request: Request,
+    body: EventsDescriptionBody,
+):
+    new_description = body.description
+
+    # If semantic search is enabled, update the index
+    if request.app.frigate_config.semantic_search.enabled:
+        context: EmbeddingsContext = request.app.embeddings
+        if len(new_description) > 0:
+            result = context.generate_description_embedding(
+                new_description,
+            )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Embedding for description is {result}"
+                if result
+                else "Failed to generate embedding",
+            }
+        ),
+        status_code=200,
+    )
+
+
 def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)

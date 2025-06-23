@@ -56,6 +56,7 @@ from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
+from frigate.data_processing.real_time.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
@@ -187,6 +188,16 @@ class EmbeddingMaintainer(threading.Thread):
                     self.metrics,
                 )
             )
+
+        self.realtime_processors.append(
+            SemanticTriggerProcessor(
+                self.config,
+                self.config.cameras["orlandocam"].semantic_search,
+                self.requestor,
+                metrics,
+                self.embeddings,
+            )
+        )
 
         # post processors
         self.post_processors: list[PostProcessorApi] = []

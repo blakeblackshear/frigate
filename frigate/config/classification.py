@@ -10,6 +10,7 @@ __all__ = [
     "CameraLicensePlateRecognitionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
+    "CameraSemanticSearchConfig",
     "LicensePlateRecognitionConfig",
 ]
 
@@ -111,6 +112,14 @@ class SemanticSearchConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
+
+
+class CameraSemanticSearchConfig(FrigateBaseModel):
+    triggers: Optional[list[str]] = Field(
+        default=None, title="Text phrases to elevate tracked objects to review alerts."
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class FaceRecognitionConfig(FrigateBaseModel):
