@@ -55,7 +55,7 @@ from frigate.util.process import FrigateProcess
 logger = logging.getLogger(__name__)
 
 
-def stop_ffmpeg(ffmpeg_process, logger):
+def stop_ffmpeg(ffmpeg_process: sp.Popen[Any], logger: logging.Logger):
     logger.info("Terminating the existing ffmpeg process...")
     ffmpeg_process.terminate()
     try:
@@ -441,7 +441,7 @@ class CameraCapture(FrigateProcess):
     def __init__(
         self, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
     ) -> None:
-        super().__init__(name=f"camera_capture:{config.name}", daemon=True)
+        super().__init__(name=f"frigate.capture:{config.name}", daemon=True)
         self.config = config
         self.shm_frame_count = shm_frame_count
         self.camera_metrics = camera_metrics
@@ -473,7 +473,7 @@ class CameraTracker(FrigateProcess):
         ptz_metrics: PTZMetrics,
         region_grid: list[list[dict[str, Any]]],
     ) -> None:
-        super().__init__(name=f"camera_processor:{config.name}", daemon=True)
+        super().__init__(name=f"frigate.process:{config.name}", daemon=True)
         self.config = config
         self.model_config = model_config
         self.labelmap = labelmap
