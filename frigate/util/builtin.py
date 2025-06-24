@@ -5,7 +5,7 @@ import copy
 import datetime
 import logging
 import math
-import multiprocessing as mp
+import multiprocessing.queues
 import queue
 import re
 import shlex
@@ -338,16 +338,23 @@ def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
     file.unlink(missing_ok=missing_ok)
 
 
-def empty_and_close_queue(q: mp.Queue):
+def empty_and_close_queue(q):
     while True:
         try:
-            try:
-                q.get(block=True, timeout=0.5)
-            except (queue.Empty, EOFError):
-                q.close()
-                q.join_thread()
-                return
-        except AttributeError:
+            q.get(block=True, timeout=0.5)
+        except (queue.Empty, EOFError):
+            break
+        except Exception as e:
+            logger.debug(f"Error while emptying queue: {e}")
+            break
+
+    # close the queue if it is a multiprocessing queue
+    # manager proxy queues do not have close or join_thread method
+    if isinstance(q, multiprocessing.queues.Queue):
+        try:
+            q.close()
+            q.join_thread()
+        except Exception:
             pass
 
 
