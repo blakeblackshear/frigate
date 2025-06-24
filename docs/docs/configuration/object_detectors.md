@@ -142,8 +142,10 @@ See the [installation docs](../frigate/installation.md#hailo-8l) for information
 ### Configuration
 
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
+When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
 
+#### YOLO
 #### YOLO
 
 Use this configuration for YOLO-based models. When no custom model path or URL is provided, the detector automatically downloads the default model based on the detected hardware:
@@ -255,13 +257,14 @@ degirum_detector:
       - "8778:8778"
 ```
 All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
+
 Once completed, changing the config.yml file is simple.
 ```yaml
 degirum_detector:
     type: degirum
     location: degirum # Set to service name (degirum_detector), container_name (degirum), or a host:port (192.168.29.4:8778)
     zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start. If you aren't pulling a model from the AI Hub, leave this and 'token' blank.
-    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the AI Hub (https://hub.degirum.com). Leave blank if you aren't going to pull a model from the AI Hub.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the [AI Hub](https://hub.degirum.com). Leave blank if you aren't going to pull a model from the AI Hub.
 ```
 Setting up a model in the .yml is similar to setting up an AI server.
 You can set it to:

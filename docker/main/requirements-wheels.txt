@@ -73,4 +73,3 @@ tflite_runtime @ https://github.com/frigate-nvr/TFlite-builds/releases/download/
 tflite_runtime @ https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl; platform_machine == 'aarch64'
 # DeGirum detector
 degirum == 0.16.*
-# degirum_headless == 0.15.*
