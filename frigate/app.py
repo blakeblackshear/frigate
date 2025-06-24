@@ -660,4 +660,3 @@ class FrigateApp:
 
         _stop_logging()
         self.metrics_manager.shutdown()
-        os._exit(os.EX_OK)
