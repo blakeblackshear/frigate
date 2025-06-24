@@ -84,7 +84,13 @@ Only car objects can trigger the `front_yard_street` zone and only person can tr
 
 ### Zone Loitering
 
-Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
+Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time after which the object will be considered in the zone.
+
+:::note
+
+When using loitering zones, a review item will remain active until the object leaves. Loitering zones are only meant to be used in areas where loitering is not expected behavior.
+
+:::
 
 ```yaml
 cameras:
@@ -130,7 +136,7 @@ Your zone must be defined with exactly 4 points and should be aligned to the gro
 
 ![Ground plane 4-point zone](/img/ground-plane.jpg)
 
-Speed estimation requires a minimum number of frames for your object to be tracked before a valid estimate can be calculated, so create your zone away from places where objects enter and exit for the best results. _Your zone should not take up the full frame._ An object's speed is tracked while it is in the zone and then saved to Frigate's database.
+Speed estimation requires a minimum number of frames for your object to be tracked before a valid estimate can be calculated, so create your zone away from places where objects enter and exit for the best results. The object's bounding box must be stable and remain a constant size as it enters and exits the zone. _Your zone should not take up the full frame, and the zone does **not** need to be the same size or larger than the objects passing through it._ An object's speed is tracked while it passes through the zone and then saved to Frigate's database.
 
 Accurate real-world distance measurements are required to estimate speeds. These distances can be specified in your zone config through the `distances` field.
 
@@ -159,8 +165,9 @@ These speed values are output as a number in miles per hour (mph) or kilometers 
 
 #### Best practices and caveats
 
-- Speed estimation works best with a straight road or path when your object travels in a straight line across that path. Avoid creating your zone near intersections or anywhere that objects would make a turn. If the bounding box changes shape (either because the object made a turn or became partially obscured, for example), speed estimation will not be accurate.
-- Create a zone where the bottom center of your object's bounding box travels directly through it and does not become obscured at any time. See the photo example above.
+- Speed estimation works best with a straight road or path when your object travels in a straight line across that path. Avoid creating your zone near intersections or anywhere that objects would make a turn.
+- Create a zone where the bottom center of your object's bounding box travels directly through it and does not become obscured at any time.
+- A large zone can be used (as in the photo example above), but it may cause inaccurate estimation if the object's bounding box changes shape (such as when it turns or becomes partially hidden). Generally it's best to make your zone large enough to capture a few frames, but small enough so that the bounding box doesn't change size as it enters, travels through, and exits the zone.
 - Depending on the size and location of your zone, you may want to decrease the zone's `inertia` value from the default of 3.
 - The more accurate your real-world dimensions can be measured, the more accurate speed estimation will be. However, due to the way Frigate's tracking algorithm works, you may need to tweak the real-world distance values so that estimated speeds better match real-world speeds.
 - Once an object leaves the zone, speed accuracy will likely decrease due to perspective distortion and misalignment with the calibrated area. Therefore, speed values will show as a zero through MQTT and will not be visible on the debug view when an object is outside of a speed tracking zone.

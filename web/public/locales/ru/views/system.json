@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Статистика камер - Frigate",
+    "storage": "Статистика хранилища - Frigate",
+    "general": "Общая статистика - Frigate",
+    "enrichments": "Статистика обогащений - Frigate",
+    "logs": {
+      "frigate": "Логи Frigate - Frigate",
+      "go2rtc": "Логи Go2RTC - Frigate",
+      "nginx": "Логи Nginx - Frigate"
+    }
+  },
+  "title": "Система",
+  "metrics": "Показатели системы",
+  "logs": {
+    "download": {
+      "label": "Загрузить логи"
+    },
+    "copy": {
+      "label": "Копировать в буфер",
+      "success": "Логи скопированы в буфер",
+      "error": "Не удалось скопировать логи в буфер обмена"
+    },
+    "type": {
+      "label": "Тип",
+      "timestamp": "Метка времени",
+      "tag": "Тег",
+      "message": "Сообщение"
+    },
+    "tips": "Логи передаются с сервера в потоковом режиме",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Ошибка получения логов: {{errorMessage}}",
+        "whileStreamingLogs": "Ошибка при потоковой передаче логов: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Общие",
+    "detector": {
+      "title": "Детекторы",
+      "inferenceSpeed": "Скорость вывода детектора",
+      "cpuUsage": "Использование CPU детектором",
+      "memoryUsage": "Использование памяти детектором",
+      "temperature": "Температура детектора"
+    },
+    "hardwareInfo": {
+      "title": "Информация об оборудовании",
+      "gpuUsage": "Использование GPU",
+      "gpuMemory": "Память GPU",
+      "gpuEncoder": "GPU-кодировщик",
+      "gpuDecoder": "GPU-декодер",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Вывод Vainfo",
+          "returnCode": "Код возврата: {{code}}",
+          "processOutput": "Вывод процесса:",
+          "processError": "Ошибка процесса:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Вывод Nvidia SMI",
+          "name": "Название: {{name}}",
+          "driver": "Драйвер: {{driver}}",
+          "cudaComputerCapability": "Вычислительная способность CUDA: {{cuda_compute}}",
+          "vbios": "Информация VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Закрыть информацию GPU"
+        },
+        "copyInfo": {
+          "label": "Скопировать информацию о GPU"
+        },
+        "toast": {
+          "success": "Информация о GPU скопирована в буфер обмена"
+        }
+      },
+      "npuMemory": "Память NPU",
+      "npuUsage": "Использование NPU"
+    },
+    "otherProcesses": {
+      "title": "Другие процессы",
+      "processCpuUsage": "Использование CPU процессом",
+      "processMemoryUsage": "Использование памяти процессом"
+    }
+  },
+  "storage": {
+    "title": "Хранилище",
+    "overview": "Обзор",
+    "recordings": {
+      "title": "Записи",
+      "tips": "Это значение показывает, сколько места в хранилище занимают записи из базы данных Frigate. Frigate не учитывает другие файлы на диске.",
+      "earliestRecording": "Первая запись:"
+    },
+    "cameraStorage": {
+      "title": "Хранилище камеры",
+      "camera": "Камера",
+      "unusedStorageInformation": "Информация о неиспользованном хранилище",
+      "storageUsed": "Хранилище",
+      "percentageOfTotalUsed": "Доля (%)",
+      "bandwidth": "Пропускная способность",
+      "unused": {
+        "title": "Не используется",
+        "tips": "Это значение может неточно отражать свободное место, доступное Frigate, если на вашем диске есть другие файлы помимо записей Frigate. Frigate не отслеживает использование хранилища за пределами своих записей."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Камеры",
+    "overview": "Обзор",
+    "info": {
+      "cameraProbeInfo": "Информация о проверке камеры {{camera}}",
+      "streamDataFromFFPROBE": "Данные о потоке получены от <code>ffprobe</code>.",
+      "fetching": "Получение данных камеры",
+      "stream": "Поток {{idx}}",
+      "video": "Видео:",
+      "codec": "Кодек:",
+      "resolution": "Разрешение:",
+      "fps": "FPS:",
+      "unknown": "Неизвестно",
+      "audio": "Аудио:",
+      "error": "Ошибка: {{error}}",
+      "tips": {
+        "title": "Информация о тестировании камеры"
+      },
+      "aspectRatio": "соотношение сторон"
+    },
+    "framesAndDetections": "Кадры/детекции",
+    "label": {
+      "ffmpeg": "FFmpeg",
+      "camera": "камера",
+      "capture": "захват",
+      "skipped": "пропущено",
+      "detect": "детекция",
+      "cameraDetectionsPerSecond": "{{camName}} обнаружений в секунду",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} пропущенных обнаружений в секунду",
+      "cameraFramesPerSecond": "{{camName}} кадров в секунду",
+      "overallFramesPerSecond": "общее количество кадров в секунду",
+      "overallDetectionsPerSecond": "общее количество обнаружений в секунду",
+      "overallSkippedDetectionsPerSecond": "общее количество пропущенных обнаружений в секунду",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} захват",
+      "cameraDetect": "{{camName}} обнаружения"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Данные тестирования скопированы в буфер обмена."
+      },
+      "error": {
+        "unableToProbeCamera": "Не удалось протестировать камеру: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Обновлено: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "Камера {{camera}} использует слишком много ресурсов CPU для детекции ({{detectAvg}}%)",
+    "healthy": "Система в порядке",
+    "reindexingEmbeddings": "Переиндексация эмбеддингов (выполнено {{processed}} %)",
+    "cameraIsOffline": "{{camera}} отключена",
+    "detectIsVerySlow": "{{detect}} идёт очень медленно ({{speed}} мс)",
+    "detectIsSlow": "{{detect}} идёт медленно ({{speed}} мс)"
+  },
+  "enrichments": {
+    "title": "Обогащение данных",
+    "infPerSecond": "Выводов в секунду",
+    "embeddings": {
+      "image_embedding_speed": "Скорость векторизации изображений",
+      "plate_recognition_speed": "Скорость распознавания номеров",
+      "text_embedding_speed": "Скорость векторизации текста",
+      "face_embedding_speed": "Скорость векторизации лиц",
+      "face_recognition_speed": "Скорость распознавания лиц",
+      "text_embedding": "Векторизация текста",
+      "yolov9_plate_detection_speed": "Скорость обнаружения номеров YOLOv9",
+      "yolov9_plate_detection": "Обнаружение номеров YOLOv9",
+      "face_recognition": "Распознавание лиц",
+      "plate_recognition": "Распознавание номеров",
+      "image_embedding": "Векторизация изображений"
+    }
+  }
+}

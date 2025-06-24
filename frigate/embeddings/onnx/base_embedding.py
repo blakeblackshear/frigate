@@ -5,6 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from enum import Enum
 from io import BytesIO
+from typing import Any
 
 import numpy as np
 import requests
@@ -59,7 +60,7 @@ class BaseEmbedding(ABC):
         pass
 
     @abstractmethod
-    def _preprocess_inputs(self, raw_inputs: any) -> any:
+    def _preprocess_inputs(self, raw_inputs: Any) -> Any:
         pass
 
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
@@ -69,10 +70,12 @@ class BaseEmbedding(ABC):
                 image = Image.open(BytesIO(response.content)).convert(output)
         elif isinstance(image, bytes):
             image = Image.open(BytesIO(image)).convert(output)
+        elif isinstance(image, np.ndarray):
+            image = Image.fromarray(image)
 
         return image
 
-    def _postprocess_outputs(self, outputs: any) -> any:
+    def _postprocess_outputs(self, outputs: Any) -> Any:
         return outputs
 
     def __call__(
@@ -82,7 +85,7 @@ class BaseEmbedding(ABC):
         processed = self._preprocess_inputs(inputs)
         input_names = self.runner.get_input_names()
         onnx_inputs = {name: [] for name in input_names}
-        input: dict[str, any]
+        input: dict[str, Any]
         for input in processed:
             for key, value in input.items():
                 if key in input_names:

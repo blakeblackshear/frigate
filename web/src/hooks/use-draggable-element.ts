@@ -3,6 +3,8 @@ import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useDateLocale } from "./use-date-locale";
+import { useTranslation } from "react-i18next";
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -162,17 +164,28 @@ function useDraggableElement({
     [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
+  const { t } = useTranslation(["common"]);
+  const locale = useDateLocale();
+
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    const formatKey = `time.${
+      segmentDuration < 60 && !dense
+        ? "formattedTimestampHourMinuteSecond"
+        : "formattedTimestampHourMinute"
+    }.${timeFormat}`;
+    return t(formatKey);
+  }, [t, timeFormat, segmentDuration, dense]);
+
   const getFormattedTimestamp = useCallback(
     (segmentStartTime: number) => {
       return formatUnixTimestampToDateTime(segmentStartTime, {
         timezone: config?.ui.timezone,
-        strftime_fmt:
-          config?.ui.time_format == "24hour"
-            ? `%H:%M${segmentDuration < 60 && !dense ? ":%S" : ""}`
-            : `%I:%M${segmentDuration < 60 && !dense ? ":%S" : ""} %p`,
+        date_format: format,
+        locale,
       });
     },
-    [config, dense, segmentDuration],
+    [config?.ui.timezone, format, locale],
   );
 
   const updateDraggableElementPosition = useCallback(

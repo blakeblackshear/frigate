@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Skupine kamer",
+    "add": "Dodaj skupino kamer",
+    "edit": "Uredi skupino kamer",
+    "delete": {
+      "label": "Izbriši skupino kamer",
+      "confirm": {
+        "title": "Potrdite izbris",
+        "desc": "Ali ste prepričani, da želite izbrisati skupino kamer z imenom <em>{{name}}</em>?"
+      }
+    },
+    "camera": {
+      "setting": {
+        "desc": "Spremeni možnosti prenosa v živo za nadzorno ploščo te skupine kamer. <em>Te nastavitve so specifične za napravo/brskalnik.</em>",
+        "streamMethod": {
+          "method": {
+            "smartStreaming": {
+              "desc": "Pametno pretakanje bo posodabljalo sliko vaše kamere enkrat na minuto, kadar ni zaznane nobene aktivnosti, da prihrani pasovno širino in vire. Ko je zaznana aktivnost, se slika brez prekinitve preklopi na prenos v živo.",
+              "label": "Pametno pretakanje (priporočeno)"
+            },
+            "continuousStreaming": {
+              "desc": {
+                "warning": "Neprekinjeno pretakanje lahko povzroči visoko porabo pasovne širine in težave z zmogljivostjo. Uporabljajte previdno.",
+                "title": "Slika kamere bo na nadzorni plošči vedno prenos v živo, tudi če ni zaznane nobene aktivnosti."
+              },
+              "label": "Neprekinjeno pretakanje"
+            },
+            "noStreaming": {
+              "desc": "Slike kamere se bodo posodabljale enkrat na minuto.",
+              "label": "Brez pretakanja"
+            }
+          },
+          "label": "Metoda pretakanja",
+          "placeholder": "Izberiti metodo pretakanja"
+        },
+        "audio": {
+          "tips": {
+            "title": "Izhod za zvok mora biti nastavljen v go2rtc za ta tok.",
+            "document": "Preberite dokumentacijo "
+          }
+        },
+        "label": "Nastavitve pretakanja kamer",
+        "title": "Nastavitve pretakanja kamere {{cameraName}}",
+        "audioIsAvailable": "Zvok za ta tok je na voljo",
+        "audioIsUnavailable": "Zvok za ta tok ni na voljo",
+        "compatibilityMode": {
+          "label": "Način združjivosti",
+          "desc": "To možnost omogočite le, če se v prenosu v živo vaše kamere pojavljajo barvni artefakti in diagonalna črta na desni strani slike."
+        },
+        "placeholder": "Izberite tok",
+        "stream": "Tok"
+      }
+    },
+    "name": {
+      "label": "Ime",
+      "placeholder": "Vpišite ime …",
+      "errorMessage": {
+        "mustLeastCharacters": "Ime skupine kamer mora imeti vsaj 2 znaka.",
+        "exists": "Skupina kamer s tem imenom že obstaja.",
+        "nameMustNotPeriod": "Ime skupine kamer ne sme vsebovati pike.",
+        "invalid": "Neveljavno ime skupine kamer."
+      }
+    },
+    "cameras": {
+      "label": "Kamere",
+      "desc": "Izberite kamere za to skupino."
+    },
+    "icon": "Ikona",
+    "success": "Skupina kamer z imenom ({{name}}) je bila shranjena."
+  },
+  "debug": {
+    "options": {
+      "label": "Nastavitve",
+      "title": "Lastnosti",
+      "showOptions": "Prikaži lastnosti",
+      "hideOptions": "Skrij lastnosti"
+    },
+    "boundingBox": "Omejitve okvirja",
+    "timestamp": "Časovni žig",
+    "zones": "Območja",
+    "mask": "Maska",
+    "motion": "Gibanje",
+    "regions": "Regije"
+  }
+}

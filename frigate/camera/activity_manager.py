@@ -1,18 +1,18 @@
 """Manage camera activity and updating listeners."""
 
 from collections import Counter
-from typing import Callable
+from typing import Any, Callable
 
 from frigate.config.config import FrigateConfig
 
 
 class CameraActivityManager:
     def __init__(
-        self, config: FrigateConfig, publish: Callable[[str, any], None]
+        self, config: FrigateConfig, publish: Callable[[str, Any], None]
     ) -> None:
         self.config = config
         self.publish = publish
-        self.last_camera_activity: dict[str, dict[str, any]] = {}
+        self.last_camera_activity: dict[str, dict[str, Any]] = {}
         self.camera_all_object_counts: dict[str, Counter] = {}
         self.camera_active_object_counts: dict[str, Counter] = {}
         self.zone_all_object_counts: dict[str, Counter] = {}
@@ -39,8 +39,8 @@ class CameraActivityManager:
                     else camera_config.objects.track
                 )
 
-    def update_activity(self, new_activity: dict[str, dict[str, any]]) -> None:
-        all_objects: list[dict[str, any]] = []
+    def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
+        all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
             new_objects = new_activity[camera].get("objects", [])
@@ -93,7 +93,7 @@ class CameraActivityManager:
         self.last_camera_activity = new_activity
 
     def compare_camera_activity(
-        self, camera: str, new_activity: dict[str, any]
+        self, camera: str, new_activity: dict[str, Any]
     ) -> None:
         all_objects = Counter(
             obj["label"].replace("-verified", "") for obj in new_activity

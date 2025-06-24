@@ -1,0 +1,103 @@
+{
+  "description": {
+    "placeholder": "Digite um nome para esta coleção",
+    "addFace": "Veja como adicionar uma nova coleção à biblioteca de rostos.",
+    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens."
+  },
+  "details": {
+    "person": "Pessoa",
+    "face": "Detalhes do rosto",
+    "faceDesc": "Detalhes do objeto encontrado que gerou esta cara",
+    "timestamp": "Carimbo de hora",
+    "confidence": "Confiança",
+    "scoreInfo": "A pontuação da subetiqueta é a pontuação ponderada de todas as confianças de rostos reconhecidos, portanto, ela pode ser diferente da pontuação exibida na captura de imagem.",
+    "subLabelScore": "Pontuação da Subetiqueta",
+    "unknown": "Desconhecido"
+  },
+  "documentTitle": "Biblioteca de rostos - Frigate",
+  "uploadFaceImage": {
+    "title": "Carregar imagem do rosto",
+    "desc": "Carregue uma imagem para procurar rostos e incluir em {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Criar coleção",
+    "desc": "Criar uma nova coleção",
+    "new": "Criar novo rosto",
+    "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treino que capturem rostos em ângulo.</li></ul>"
+  },
+  "train": {
+    "aria": "Selecionar treino",
+    "title": "Treinar",
+    "empty": "Não há tentativas recentes de reconhecimento facial"
+  },
+  "selectItem": "Selecionar {{item}}",
+  "selectFace": "Selecionar rosto",
+  "deleteFaceLibrary": {
+    "title": "Excluir nome",
+    "desc": "Tem certeza de que deseja excluir a coleção {{name}}? Isso excluirá permanentemente todos os rostos associados."
+  },
+  "button": {
+    "addFace": "Adicionar rosto",
+    "uploadImage": "Carregar imagem",
+    "deleteFaceAttempts": "Excluir rostos",
+    "reprocessFace": "Reprocessar Rosto",
+    "renameFace": "Renomear rosto",
+    "deleteFace": "Excluir rosto"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Selecione um arquivo de imagem."
+    },
+    "dropActive": "Solte a imagem aqui…",
+    "maxSize": "Tamanho máximo: {{size}}MB",
+    "dropInstructions": "Arraste e solte uma imagem aqui ou clique para selecionar"
+  },
+  "trainFace": "Treinar rosto",
+  "toast": {
+    "success": {
+      "updatedFaceScore": "Pontuação facial atualizada com sucesso.",
+      "trainedFace": "Rosto treinado com sucesso.",
+      "deletedFace_one": "{{count}} rosto excluído com sucesso.",
+      "deletedFace_many": "{{count}} rostos excluídos com sucesso.",
+      "deletedFace_other": "{{count}} rostos excluídos com sucesso.",
+      "deletedName_one": "{{count}} rosto foi excluído com sucesso.",
+      "deletedName_many": "{{count}} rostos foram excluídos com sucesso.",
+      "deletedName_other": "{{count}} rostos foram excluídos com sucesso.",
+      "uploadedImage": "Imagem carregada com sucesso.",
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à biblioteca de rostos!",
+      "renamedFace": "Rosto renomeado com sucesso para {{name}}"
+    },
+    "error": {
+      "uploadingImageFailed": "Falha ao carregar a imagem: {{errorMessage}}",
+      "deleteFaceFailed": "Falha ao excluir: {{errorMessage}}",
+      "deleteNameFailed": "Falha ao excluir nome: {{errorMessage}}",
+      "addFaceLibraryFailed": "Falhou ao definir nome do rosto: {{errorMessage}}",
+      "trainFailed": "Falhou ao treinar: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falhou ao atualizar pontuação do rosto: {{errorMessage}}",
+      "renameFaceFailed": "Falha ao renomear o rosto: {{errorMessage}}"
+    }
+  },
+  "readTheDocs": "Leia a documentação",
+  "trainFaceAs": "Treinar rosto como:",
+  "steps": {
+    "faceName": "Digite o Nome do Rosto",
+    "uploadFace": "Carregar imagem do rosto",
+    "nextSteps": "Próximos passos",
+    "description": {
+      "uploadFace": "Carregue uma imagem de {{name}} que mostre a cara de frente. A imagem não precisa de ser cortada para mostrar apenas a cara."
+    }
+  },
+  "renameFace": {
+    "desc": "Entre com um novo nome para {{name}}",
+    "title": "Renomear rosto"
+  },
+  "collections": "Coleções",
+  "deleteFaceAttempts": {
+    "title": "Excluir rostos",
+    "desc_one": "Tem a certeza que pretende apagar {{count}} cara? Esta ação não pode ser revertida.",
+    "desc_many": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida.",
+    "desc_other": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida."
+  },
+  "nofaces": "Não tem caras disponíveis",
+  "pixels": "{{area}}px"
+}

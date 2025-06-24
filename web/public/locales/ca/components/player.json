@@ -1,0 +1,51 @@
+{
+  "stats": {
+    "latency": {
+      "short": {
+        "title": "Latència",
+        "value": "{{seconds}} s"
+      },
+      "title": "Latència:",
+      "value": "{{seconds}} segons"
+    },
+    "streamType": {
+      "title": "Tipus de transmissió:",
+      "short": "Tipus"
+    },
+    "bandwidth": {
+      "title": "Ample de banda:",
+      "short": "Ample de banda"
+    },
+    "totalFrames": "Fotogrames totals:",
+    "droppedFrames": {
+      "title": "Fotogrames perduts:",
+      "short": {
+        "title": "Perduts",
+        "value": "{{droppedFrames}} fotogrames"
+      }
+    },
+    "decodedFrames": "Fotogrames decodificats:",
+    "droppedFrameRate": "Taxa de fotogrames perduts:"
+  },
+  "noRecordingsFoundForThisTime": "No s'han trobat enregistraments en aquesta hora",
+  "noPreviewFound": "No s'ha trobat previsualització",
+  "noPreviewFoundFor": "No s'ha trobat cap previsualització per a {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Enviar aquesta imatge a Frigate+?",
+    "submit": "Enviar"
+  },
+  "livePlayerRequiredIOSVersion": "Es requereix iOS 17.1 o superior per a aquest tipus de reproducció en directe.",
+  "streamOffline": {
+    "title": "Transmissió desconnectada",
+    "desc": "No s’han rebut imatges a la transmissió <code>detect</code> de la càmera {{cameraName}}. Comprova els registres d’errors"
+  },
+  "cameraDisabled": "La càmera està desactivada",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Fotograma enviat correctament a Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Error al enviar fotograma a Frigate+"
+    }
+  }
+}

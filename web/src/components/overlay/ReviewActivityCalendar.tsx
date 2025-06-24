@@ -1,12 +1,15 @@
 import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Calendar } from "../ui/calendar";
-import { useMemo } from "react";
+import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
-import { type DayContentProps } from "react-day-picker";
+import { type DayButtonProps, TZDate } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
 import { usePersistence } from "@/hooks/use-persistence";
 import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+import { useTimezone } from "@/hooks/use-date-utils";
 
 type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -22,6 +25,8 @@ export default function ReviewActivityCalendar({
   selectedDay,
   onSelect,
 }: ReviewActivityCalendarProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
   const [weekStartsOn] = usePersistence("weekStartsOn", 0);
 
   const disabledDates = useMemo(() => {
@@ -45,7 +50,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new Date(date);
+        const cal = new TZDate(date, timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
@@ -65,7 +70,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new Date(date);
+        const cal = new TZDate(date, timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
@@ -82,7 +87,7 @@ export default function ReviewActivityCalendar({
     }
 
     return { alerts, detections, recordings };
-  }, [reviewSummary, recordingsSummary]);
+  }, [reviewSummary, recordingsSummary, timezone]);
 
   return (
     <Calendar
@@ -94,51 +99,70 @@ export default function ReviewActivityCalendar({
       onSelect={onSelect}
       modifiers={modifiers}
       components={{
-        DayContent: ReviewActivityDay,
+        DayButton: ReviewActivityDay,
       }}
       defaultMonth={selectedDay ?? new Date()}
       weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
+      timeZone={timezone}
     />
   );
 }
 
-function ReviewActivityDay({ date, activeModifiers }: DayContentProps) {
+function ReviewActivityDay({
+  day,
+  modifiers,
+  ...buttonProps
+}: DayButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
   const dayActivity = useMemo(() => {
-    if (activeModifiers["alerts"]) {
+    if (modifiers["alerts"]) {
       return "alert";
-    } else if (activeModifiers["detections"]) {
+    } else if (modifiers["detections"]) {
       return "detection";
     } else {
       return "none";
     }
-  }, [activeModifiers]);
+  }, [modifiers]);
 
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-0.5")}>
-      <span
-        className={cn(
-          "w-4",
-          activeModifiers["recordings"]
-            ? "border-b border-primary/60 text-primary"
-            : "text-primary/40",
-          activeModifiers.selected && "border-white text-white",
-        )}
-      >
-        {date.getDate()}
-      </span>
-      <div className="mt-0.5 flex h-2 flex-row gap-0.5">
-        {dayActivity != "none" && (
-          <FaCircle
-            size={6}
-            className={cn(
-              dayActivity == "alert"
-                ? "fill-severity_alert"
-                : "fill-severity_detection",
-            )}
-          />
-        )}
+    <button ref={ref} {...buttonProps}>
+      <div className={cn("flex flex-col items-center justify-center gap-0.5")}>
+        <span
+          className={cn(
+            modifiers["recordings"] ? "text-primary" : "text-primary/40",
+          )}
+        >
+          {day.date.getDate()}
+        </span>
+        <div
+          className={cn(
+            "w-4",
+            modifiers["recordings"]
+              ? "border-b border-primary/60 text-primary"
+              : "text-primary/40",
+            modifiers.selected && "border-white text-white",
+          )}
+        />
+
+        <div className="mt-0.5 flex h-2 flex-row gap-0.5">
+          {dayActivity != "none" && (
+            <FaCircle
+              size={6}
+              className={cn(
+                dayActivity == "alert"
+                  ? "fill-severity_alert"
+                  : "fill-severity_detection",
+              )}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </button>
   );
 }
 

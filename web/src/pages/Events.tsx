@@ -23,9 +23,12 @@ import EventView from "@/views/events/EventView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 
 export default function Events() {
+  const { t } = useTranslation(["views/events"]);
+
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -77,11 +80,11 @@ export default function Events() {
 
   useEffect(() => {
     if (recording) {
-      document.title = "Recordings - Frigate";
+      document.title = t("recordings.documentTitle");
     } else {
-      document.title = `Review - Frigate`;
+      document.title = t("documentTitle");
     }
-  }, [recording, severity]);
+  }, [recording, severity, t]);
 
   // review filter
 

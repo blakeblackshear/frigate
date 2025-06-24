@@ -31,6 +31,8 @@ import useSWR from "swr";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
+import { Trans, useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -49,6 +51,9 @@ export function CameraStreamingDialog({
   setIsDialogOpen,
   onSave,
 }: CameraStreamingDialogProps) {
+  const { t } = useTranslation(["components/camera", "components/dialog"]);
+
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -96,16 +101,24 @@ export function CameraStreamingDialog({
     if (!config) {
       return;
     }
+
+    // Get available streams from the config and first stream entry as fallback
+    const availableStreams = config?.cameras[camera]?.live?.streams || {};
+    const firstStreamEntry = Object.entries(availableStreams)[0]?.[1] || "";
+
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
-      setStreamName(cameraSettings.streamName || "");
+      const streamNameFromSettings = cameraSettings.streamName || "";
+
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName(
-        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
-          "",
-      );
+      setStreamName(firstStreamEntry);
       setStreamType("smart");
       setCompatibilityMode(false);
     }
@@ -143,19 +156,28 @@ export function CameraStreamingDialog({
     if (!config) {
       return;
     }
+
+    // Get available streams from the config and first stream entry as fallback
+    const availableStreams = config?.cameras[camera]?.live?.streams || {};
+    const firstStreamEntry = Object.entries(availableStreams)[0]?.[1] || "";
+
     if (groupStreamingSettings && groupStreamingSettings[camera]) {
       const cameraSettings = groupStreamingSettings[camera];
-      setStreamName(cameraSettings.streamName || "");
+      const streamNameFromSettings = cameraSettings.streamName || "";
+
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
-      setStreamName(
-        Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] ||
-          "",
-      );
+      setStreamName(firstStreamEntry);
       setStreamType("smart");
       setCompatibilityMode(false);
     }
+
     setIsDialogOpen(false);
   }, [groupStreamingSettings, camera, config, setIsDialogOpen]);
 
@@ -166,39 +188,49 @@ export function CameraStreamingDialog({
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="mb-4">
-        <DialogTitle className="capitalize">
-          {camera.replaceAll("_", " ")} Streaming Settings
+        <DialogTitle className="smart-capitalize">
+          {t("group.camera.setting.title", {
+            cameraName: camera.replaceAll("_", " "),
+          })}
         </DialogTitle>
         <DialogDescription>
-          Change the live streaming options for this camera group's dashboard.{" "}
-          <em>These settings are device/browser-specific.</em>
+          <Trans ns="components/camera">group.camera.setting.desc</Trans>
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col space-y-8">
         {!isRestreamed && (
           <div className="flex flex-col gap-2">
-            <Label>Stream</Label>
+            <Label></Label>
             <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
               <LuX className="size-4 text-danger" />
-              <div>Restreaming is not enabled for this camera.</div>
+              <div>
+                {t("streaming.restreaming.disabled", {
+                  ns: "components/dialog",
+                })}
+              </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="cursor-pointer p-0">
                     <LuInfo className="size-4" />
-                    <span className="sr-only">Info</span>
+                    <span className="sr-only">
+                      {t("button.info", { ns: "common" })}
+                    </span>
                   </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 text-xs">
-                  Set up go2rtc for additional live view options and audio for
-                  this camera.
+                  {t("streaming.restreaming.desc.title", {
+                    ns: "components/dialog",
+                  })}
                   <div className="mt-2 flex items-center text-primary">
                     <Link
-                      to="https://docs.frigate.video/configuration/live"
+                      to={getLocaleDocUrl("configuration/live")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      Read the documentation{" "}
+                      {t("streaming.restreaming.desc.readTheDocumentation", {
+                        ns: "components/dialog",
+                      })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -211,11 +243,13 @@ export function CameraStreamingDialog({
           Object.entries(config?.cameras[camera].live.streams).length > 0 && (
             <div className="flex flex-col items-start gap-2">
               <Label htmlFor="stream" className="text-right">
-                Stream
+                {t("group.camera.setting.stream")}
               </Label>
               <Select value={streamName} onValueChange={setStreamName}>
                 <SelectTrigger className="">
-                  <SelectValue placeholder="Choose a stream" />
+                  <SelectValue
+                    placeholder={t("group.camera.setting.placeholder")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {camera !== "birdseye" &&
@@ -231,30 +265,31 @@ export function CameraStreamingDialog({
                   {supportsAudioOutput ? (
                     <>
                       <LuCheck className="size-4 text-success" />
-                      <div>Audio is available for this stream</div>
+                      <div>{t("group.camera.setting.audioIsAvailable")}</div>
                     </>
                   ) : (
                     <>
                       <LuX className="size-4 text-danger" />
-                      <div>Audio is unavailable for this stream</div>
+                      <div>{t("group.camera.setting.audioIsUnavailable")}</div>
                       <Popover>
                         <PopoverTrigger asChild>
                           <div className="cursor-pointer p-0">
                             <LuInfo className="size-4" />
-                            <span className="sr-only">Info</span>
+                            <span className="sr-only">
+                              {t("button.info", { ns: "common" })}
+                            </span>
                           </div>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 text-xs">
-                          Audio must be output from your camera and configured
-                          in go2rtc for this stream.
+                          {t("group.camera.setting.audio.tips.title")}
                           <div className="mt-2 flex items-center text-primary">
                             <Link
-                              to="https://docs.frigate.video/configuration/live"
+                              to={getLocaleDocUrl("configuration/live")}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              Read the documentation{" "}
+                              {t("group.camera.setting.audio.tips.document")}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>
@@ -268,48 +303,60 @@ export function CameraStreamingDialog({
           )}
         <div className="flex flex-col items-start gap-2">
           <Label htmlFor="streaming-method" className="text-right">
-            Streaming Method
+            {t("group.camera.setting.streamMethod.label")}
           </Label>
           <Select
             value={streamType}
             onValueChange={(value) => setStreamType(value as StreamType)}
           >
             <SelectTrigger className="">
-              <SelectValue placeholder="Choose a streaming option" />
+              <SelectValue
+                placeholder={t("group.camera.setting.streamMethod.placeholder")}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="no-streaming">No Streaming</SelectItem>
-              <SelectItem value="smart">
-                Smart Streaming (recommended)
+              <SelectItem value="no-streaming">
+                {t(
+                  "group.camera.setting.streamMethod.method.noStreaming.label",
+                )}
               </SelectItem>
-              <SelectItem value="continuous">Continuous Streaming</SelectItem>
+              <SelectItem value="smart">
+                {t(
+                  "group.camera.setting.streamMethod.method.smartStreaming.label",
+                )}
+              </SelectItem>
+              <SelectItem value="continuous">
+                {t(
+                  "group.camera.setting.streamMethod.method.continuousStreaming.label",
+                )}
+              </SelectItem>
             </SelectContent>
           </Select>
           {streamType === "no-streaming" && (
             <p className="text-sm text-muted-foreground">
-              Camera images will only update once per minute and no live
-              streaming will occur.
+              {t("group.camera.setting.streamMethod.method.noStreaming.desc")}
             </p>
           )}
           {streamType === "smart" && (
             <p className="text-sm text-muted-foreground">
-              Smart streaming will update your camera image once per minute when
-              no detectable activity is occurring to conserve bandwidth and
-              resources. When activity is detected, the image seamlessly
-              switches to a live stream.
+              {t(
+                "group.camera.setting.streamMethod.method.smartStreaming.desc",
+              )}
             </p>
           )}
           {streamType === "continuous" && (
             <>
               <p className="text-sm text-muted-foreground">
-                Camera image will always be a live stream when visible on the
-                dashboard, even if no activity is being detected.
+                {t(
+                  "group.camera.setting.streamMethod.method.continuousStreaming.desc.title",
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <IoIosWarning className="mr-2 size-5 text-danger" />
                 <div className="max-w-[85%] text-sm">
-                  Continuous streaming may cause high bandwidth usage and
-                  performance issues. Use with caution.
+                  {t(
+                    "group.camera.setting.streamMethod.method.continuousStreaming.desc.warning",
+                  )}
                 </div>
               </div>
             </>
@@ -327,14 +374,12 @@ export function CameraStreamingDialog({
               htmlFor="compatibility"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Compatibility mode
+              {t("group.camera.setting.compatibilityMode.label")}
             </Label>
           </div>
           <div className="flex flex-col gap-2 leading-none">
             <p className="text-sm text-muted-foreground">
-              Enable this option only if your camera's live stream is displaying
-              color artifacts and has a diagonal line on the right side of the
-              image.
+              {t("group.camera.setting.compatibilityMode.desc")}
             </p>
           </div>
         </div>
@@ -343,14 +388,14 @@ export function CameraStreamingDialog({
         <div className="flex flex-row gap-2 pt-5">
           <Button
             className="flex flex-1"
-            aria-label="Cancel"
+            aria-label={t("button.cancel", { ns: "common" })}
             onClick={handleCancel}
           >
-            Cancel
+            {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             variant="select"
-            aria-label="Save"
+            aria-label={t("button.save", { ns: "common" })}
             disabled={isLoading}
             className="flex flex-1"
             onClick={handleSave}
@@ -358,10 +403,10 @@ export function CameraStreamingDialog({
             {isLoading ? (
               <div className="flex flex-row items-center gap-2">
                 <ActivityIndicator />
-                <span>Saving...</span>
+                <span>{t("button.saving", { ns: "common" })}</span>
               </div>
             ) : (
-              "Save"
+              t("button.save", { ns: "common" })
             )}
           </Button>
         </div>

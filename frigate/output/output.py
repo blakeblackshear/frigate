@@ -99,12 +99,7 @@ def output_frames(
     websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
     detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
-
-    enabled_subscribers = {
-        camera: ConfigSubscriber(f"config/enabled/{camera}", True)
-        for camera in config.cameras.keys()
-        if config.cameras[camera].enabled_in_config
-    }
+    config_enabled_subscriber = ConfigSubscriber("config/enabled/")
 
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Birdseye | None = None
@@ -116,7 +111,7 @@ def output_frames(
     move_preview_frames("cache")
 
     for camera, cam_config in config.cameras.items():
-        if not cam_config.enabled:
+        if not cam_config.enabled_in_config:
             continue
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
@@ -128,16 +123,21 @@ def output_frames(
 
     websocket_thread.start()
 
-    def get_enabled_state(camera: str) -> bool:
-        _, config_data = enabled_subscribers[camera].check_for_update()
-
-        if config_data:
-            config.cameras[camera].enabled = config_data.enabled
-            return config_data.enabled
-
-        return config.cameras[camera].enabled
-
     while not stop_event.is_set():
+        # check if there is an updated config
+        while True:
+            (
+                updated_enabled_topic,
+                updated_enabled_config,
+            ) = config_enabled_subscriber.check_for_update()
+
+            if not updated_enabled_topic:
+                break
+
+            if updated_enabled_config:
+                camera_name = updated_enabled_topic.rpartition("/")[-1]
+                config.cameras[camera_name].enabled = updated_enabled_config.enabled
+
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
         now = datetime.datetime.now().timestamp()
 
@@ -160,7 +160,7 @@ def output_frames(
             _,
         ) = data
 
-        if not get_enabled_state(camera):
+        if not config.cameras[camera].enabled:
             continue
 
         frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
@@ -240,9 +240,7 @@ def output_frames(
     if birdseye is not None:
         birdseye.stop()
 
-    for subscriber in enabled_subscribers.values():
-        subscriber.stop()
-
+    config_enabled_subscriber.stop()
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
     websocket_server.manager.join()

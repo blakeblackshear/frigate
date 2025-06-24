@@ -1,0 +1,275 @@
+{
+  "time": {
+    "untilForRestart": "Jusqu'au redémarrage de Frigate.",
+    "untilRestart": "Jusqu'au redémarrage",
+    "untilForTime": "Jusqu'à {{time}}",
+    "justNow": "À l'instant",
+    "today": "Aujourd'hui",
+    "last7": "7 derniers jours",
+    "last14": "14 derniers jours",
+    "ago": "Il y a {{timeAgo}}",
+    "yesterday": "Hier",
+    "last30": "30 derniers jours",
+    "thisWeek": "Cette semaine",
+    "lastWeek": "La semaine dernière",
+    "thisMonth": "Ce mois-ci",
+    "lastMonth": "Le mois dernier",
+    "10minutes": "10 minutes",
+    "5minutes": "5 minutes",
+    "30minutes": "30 minutes",
+    "12hours": "12 heures",
+    "h": "{{time}} h",
+    "pm": "PM",
+    "am": "AM",
+    "yr": "{{time}} a",
+    "year_one": "{{time}} année",
+    "year_many": "{{time}} années",
+    "year_other": "{{time}} années",
+    "mo": "{{time}} m",
+    "month_one": "{{time}} mois",
+    "month_many": "{{time}} mois",
+    "month_other": "{{time}} mois",
+    "s": "{{time}} s",
+    "second_one": "{{time}} seconde",
+    "second_many": "{{time}} secondes",
+    "second_other": "{{time}} secondes",
+    "m": "{{time}} mn",
+    "hour_one": "{{time}} heure",
+    "hour_many": "{{time}} heures",
+    "hour_other": "{{time}} heures",
+    "24hours": "24 heures",
+    "minute_one": "{{time}} minute",
+    "minute_many": "{{time}} minutes",
+    "minute_other": "{{time}} minutes",
+    "d": "{{time}} j",
+    "day_one": "{{time}} jour",
+    "day_many": "{{time}} jours",
+    "day_other": "{{time}} jours",
+    "1hour": "1 heure",
+    "formattedTimestamp": {
+      "12hour": "d MMM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampWithYear": {
+      "24hour": "%b %-d %Y, %H:%M",
+      "12hour": "%b %-d %Y, %I:%M %p"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM HH:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "HH:mm aaa"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-HH-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, HH:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "HH:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, HH:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM,yyyy"
+    }
+  },
+  "button": {
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "disabled": "Désactivé",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "close": "Fermer",
+    "copy": "Copier",
+    "back": "Retour",
+    "history": "Historique",
+    "pictureInPicture": "Image en incrustation",
+    "twoWayTalk": "Conversation bidirectionnelle",
+    "off": "Inactif",
+    "edit": "Editer",
+    "copyCoordinates": "Copier les coordonnées",
+    "delete": "Supprimer",
+    "yes": "Oui",
+    "no": "Non",
+    "unsuspended": "Reprendre",
+    "play": "Lire",
+    "unselect": "Désélectionner",
+    "suspended": "Suspendu",
+    "enable": "Activer",
+    "enabled": "Activé",
+    "info": "Info",
+    "disable": "Désactiver",
+    "cancel": "Annuler",
+    "fullscreen": "Plein écran",
+    "next": "Suivant",
+    "exitFullscreen": "Sortir du mode plein écran",
+    "cameraAudio": "Son de la caméra",
+    "on": "Actif",
+    "export": "Exporter",
+    "deleteNow": "Supprimer maintenant",
+    "download": "Télécharger",
+    "done": "Terminé"
+  },
+  "menu": {
+    "configuration": "Configuration",
+    "language": {
+      "en": "English (Anglais)",
+      "withSystem": {
+        "label": "Utiliser les paramètres système pour la langue"
+      },
+      "zhCN": "简体中文 (Chinois simplifié)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Français)",
+      "ja": "日本語 (Japonais)",
+      "tr": "Türkçe (Turc)",
+      "it": "Italiano (Italien)",
+      "nl": "Nederlands (Néerlandais)",
+      "sv": "Svenska (Suédois)",
+      "cs": "Čeština (Tchèque)",
+      "nb": "Norsk Bokmål (Bokmål Norvégien)",
+      "ko": "한국어 (Coréen)",
+      "fa": "فارسی (Perse)",
+      "pl": "Polski (Polonais)",
+      "el": "Ελληνικά (Grec)",
+      "ro": "Română (Roumain)",
+      "hu": "Magyar (Hongrois)",
+      "he": "עברית (Hebreu)",
+      "ru": "Русский (Russe)",
+      "de": "Deutsch (Allemand)",
+      "es": "Español (Espagnol)",
+      "ar": "العربية (Arabe)",
+      "da": "Dansk (Danois)",
+      "fi": "Suomi (Finlandais)",
+      "pt": "Português (Portugais)",
+      "sk": "Slovenčina (Slovaque)",
+      "uk": "Українська (Ukrainien)",
+      "vi": "Tiếng Việt (Vietnamien)",
+      "yue": "粵語 (Cantonais)",
+      "th": "ไทย (Thai)",
+      "ca": "Català (Catalan)"
+    },
+    "appearance": "Apparence",
+    "darkMode": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "withSystem": {
+        "label": "Utiliser les paramètres système pour le mode clair ou sombre"
+      },
+      "label": "Mode sombre"
+    },
+    "review": "Revue d'événements",
+    "explore": "Explorer",
+    "export": "Exporter",
+    "user": {
+      "account": "Compte",
+      "logout": "Se déconnecter",
+      "setPassword": "Configurer un mot de passe",
+      "current": "Utilisateur actuel : {{user}}",
+      "title": "Utilisateur",
+      "anonymous": "anonyme"
+    },
+    "systemLogs": "Journaux système",
+    "documentation": {
+      "title": "Documentation",
+      "label": "Documentation de Frigate"
+    },
+    "system": "Système",
+    "help": "Aide",
+    "configurationEditor": "Editeur de configuration",
+    "theme": {
+      "contrast": "Contraste élevé",
+      "blue": "Bleu",
+      "green": "Vert",
+      "nord": "Nord",
+      "red": "Rouge",
+      "default": "Défaut",
+      "label": "Thème",
+      "highcontrast": "Contraste élevé"
+    },
+    "systemMetrics": "Indicateurs systèmes",
+    "settings": "Paramètres",
+    "withSystem": "Système",
+    "restart": "Redémarrer Frigate",
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} caméra",
+        "count_many": "{{count}} caméras",
+        "count_other": "{{count}} caméras",
+        "title": "Caméras"
+      },
+      "allCameras": "Toutes les caméras",
+      "title": "Direct"
+    },
+    "uiPlayground": "Gestion de l'interface",
+    "faceLibrary": "Bibliothèque de visages",
+    "languages": "Langues"
+  },
+  "toast": {
+    "save": {
+      "title": "Enregistrer",
+      "error": {
+        "noMessage": "Echec lors de l'enregistrement des changements de configuration",
+        "title": "Echec lors de l'enregistrement des changements de configuration : {{errorMessage}}"
+      }
+    },
+    "copyUrlToClipboard": "Lien copié dans le presse-papier."
+  },
+  "role": {
+    "title": "Rôle",
+    "viewer": "Observateur",
+    "admin": "Administrateur",
+    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, de la revue d'événements, et à l'historique des enregistrements dans l'interface utilisateur."
+  },
+  "pagination": {
+    "next": {
+      "title": "Suivant",
+      "label": "Aller à la page suivante"
+    },
+    "more": "Plus de pages",
+    "previous": {
+      "label": "Aller à la page précédente",
+      "title": "Précédent"
+    },
+    "label": "pagination"
+  },
+  "notFound": {
+    "title": "404",
+    "documentTitle": "Non trouvé - Frigate",
+    "desc": "Page non trouvée"
+  },
+  "selectItem": "Sélectionner {{item}}",
+  "accessDenied": {
+    "title": "Accès refusé",
+    "documentTitle": "Accès refusé - Frigate",
+    "desc": "Vous n'avez pas l'autorisation de voir cette page."
+  },
+  "label": {
+    "back": "Retour"
+  },
+  "unit": {
+    "speed": {
+      "kph": "km/h",
+      "mph": "mph"
+    },
+    "length": {
+      "feet": "pieds",
+      "meters": "mètres"
+    }
+  }
+}

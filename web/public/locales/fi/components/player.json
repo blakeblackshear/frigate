@@ -1,0 +1,28 @@
+{
+  "noPreviewFound": "Esikatselua ei löytynyt",
+  "noPreviewFoundFor": "Ei esikatselua {{cameraName}}lle",
+  "noRecordingsFoundForThisTime": "Ei tallenteita valitulta ajalta",
+  "submitFrigatePlus": {
+    "title": "Lähetä tämä kuva Frigate+:aan?",
+    "submit": "Lähetä"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 tai uudempi vaaditaan tälle suoratoistotyypille.",
+  "streamOffline": {
+    "title": "Kamera poissa verkosta",
+    "desc": "Kuvaruutuja ei vastaanotettu kameran {{cameraName}} <code>detect</code>-kuvavirrasta, tarkista virhelogit"
+  },
+  "cameraDisabled": "Kamera on poistettu käytöstä",
+  "stats": {
+    "streamType": {
+      "title": "Kuvavirran tyyppi:",
+      "short": "Tyyppi"
+    },
+    "bandwidth": {
+      "title": "Kaistanleveys:",
+      "short": "Kaistanleveys"
+    },
+    "latency": {
+      "title": "Latenssi:"
+    }
+  }
+}

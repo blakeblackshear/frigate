@@ -1,0 +1,126 @@
+{
+  "filter": "Lọc",
+  "labels": {
+    "label": "Nhãn",
+    "all": {
+      "title": "Tất cả các nhãn",
+      "short": "Nhãn"
+    },
+    "count_one": "{{count}} nhãn",
+    "count_other": "{{count}} nhãn"
+  },
+  "features": {
+    "submittedToFrigatePlus": {
+      "tips": "Trước tiên, bạn phải lọc các đối tượng được theo dõi có ảnh chụp nhanh.<br /><br />Không thể gửi các đối tượng được theo dõi không có ảnh chụp nhanh tới Frigate+.",
+      "label": "Đã gửi tới Frigate+"
+    },
+    "label": "Tính năng",
+    "hasSnapshot": "Có ảnh chụp nhanh",
+    "hasVideoClip": "Có video clip"
+  },
+  "sort": {
+    "scoreDesc": "Điểm Đối tượng (Giảm dần)",
+    "speedAsc": "Tốc độ Ước tính (Tăng dần)",
+    "relevance": "Mức độ liên quan",
+    "label": "Sắp xếp",
+    "dateAsc": "Ngày (Tăng dần)",
+    "dateDesc": "Ngày (Giảm dần)",
+    "scoreAsc": "Điểm Đối tượng (Tăng dần)",
+    "speedDesc": "Tốc độ Ước tính (Giảm dần)"
+  },
+  "cameras": {
+    "label": "Bộ lọc Camera",
+    "all": {
+      "title": "Tất cả Camera",
+      "short": "Camera"
+    }
+  },
+  "review": {
+    "showReviewed": "Hiển thị đã xem xét"
+  },
+  "motion": {
+    "showMotionOnly": "Chỉ Hiển thị Chuyển động"
+  },
+  "explore": {
+    "settings": {
+      "title": "Cài đặt",
+      "defaultView": {
+        "title": "Chế độ xem Mặc định",
+        "desc": "Khi không có bộ lọc nào được chọn, hiển thị bản tóm tắt các đối tượng được theo dõi gần đây nhất cho mỗi nhãn, hoặc hiển thị lưới không được lọc.",
+        "summary": "Tóm tắt",
+        "unfilteredGrid": "Lưới không được lọc"
+      },
+      "gridColumns": {
+        "title": "Cột Lưới",
+        "desc": "Chọn số lượng cột trong chế độ xem lưới."
+      },
+      "searchSource": {
+        "label": "Nguồn Tìm kiếm",
+        "desc": "Chọn tìm kiếm hình thu nhỏ hay mô tả của các đối tượng được theo dõi của bạn.",
+        "options": {
+          "thumbnailImage": "Hình thu nhỏ",
+          "description": "Mô tả"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Chọn một ngày để lọc theo"
+      }
+    }
+  },
+  "logSettings": {
+    "allLogs": "Tất cả nhật ký",
+    "label": "Lọc cấp độ nhật ký",
+    "filterBySeverity": "Lọc nhật ký theo mức độ nghiêm trọng",
+    "loading": {
+      "title": "Đang tải",
+      "desc": "Khi bảng nhật ký được cuộn xuống dưới cùng, nhật ký mới sẽ tự động truyền trực tuyến khi chúng được thêm vào."
+    },
+    "disableLogStreaming": "Tắt truyền phát nhật ký"
+  },
+  "trackedObjectDelete": {
+    "title": "Xác nhận Xóa",
+    "toast": {
+      "success": "Đã xóa thành công các đối tượng được theo dõi.",
+      "error": "Không thể xóa các đối tượng được theo dõi: {{errorMessage}}"
+    },
+    "desc": "Việc xóa {{objectLength}} đối tượng được theo dõi này sẽ xóa ảnh chụp nhanh, mọi nội dung nhúng đã lưu và mọi mục nhập vòng đời đối tượng liên quan. Đoạn ghi hình đã ghi của các đối tượng được theo dõi này trong chế độ xem Lịch sử sẽ <em>KHÔNG</em> bị xóa.<br /><br />Bạn có chắc chắn muốn tiếp tục không?<br /><br />Giữ phím <em>Shift</em> để bỏ qua hộp thoại này trong tương lai."
+  },
+  "recognizedLicensePlates": {
+    "selectPlatesFromList": "Chọn một hoặc nhiều biển số từ danh sách.",
+    "title": "Biển số xe được Nhận dạng",
+    "loadFailed": "Không thể tải biển số xe được nhận dạng.",
+    "loading": "Đang tải biển số xe được nhận dạng…",
+    "placeholder": "Nhập để tìm kiếm biển số xe…",
+    "noLicensePlatesFound": "Không tìm thấy biển số xe nào."
+  },
+  "more": "Thêm Bộ lọc",
+  "reset": {
+    "label": "Đặt lại bộ lọc về giá trị mặc định"
+  },
+  "timeRange": "Phạm vi Thời gian",
+  "subLabels": {
+    "label": "Nhãn phụ",
+    "all": "Tất cả Nhãn phụ"
+  },
+  "score": "Điểm",
+  "estimatedSpeed": "Tốc độ Ước tính ({{unit}})",
+  "dates": {
+    "selectPreset": "Chọn thiết lập sẵn…",
+    "all": {
+      "title": "Tất cả Ngày",
+      "short": "Ngày"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Lọc theo mặt nạ khu vực"
+  },
+  "zones": {
+    "label": "Khu vực",
+    "all": {
+      "title": "Tất cả Khu vực",
+      "short": "Khu vực"
+    }
+  }
+}

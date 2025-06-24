@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { LuRefreshCcw } from "react-icons/lu";
 import { MutableRefObject, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type NewReviewDataProps = {
   className: string;
@@ -18,6 +19,7 @@ export default function NewReviewData({
   itemsToReview,
   pullLatestData,
 }: NewReviewDataProps) {
+  const { t } = useTranslation(["views/events"]);
   const hasUpdate = useMemo(() => {
     if (!reviewItems || !itemsToReview) {
       return false;
@@ -36,7 +38,7 @@ export default function NewReviewData({
               : "invisible",
             "mx-auto bg-gray-400 text-center text-white",
           )}
-          aria-label="View new review items"
+          aria-label={t("newReviewItems.label")}
           onClick={() => {
             pullLatestData();
             if (contentRef.current) {
@@ -48,7 +50,7 @@ export default function NewReviewData({
           }}
         >
           <LuRefreshCcw className="mr-2 h-4 w-4" />
-          New Items To Review
+          {t("newReviewItems.button")}
         </Button>
       </div>
     </div>

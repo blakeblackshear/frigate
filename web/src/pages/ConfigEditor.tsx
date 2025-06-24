@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
 
 type SaveOptions = "saveonly" | "restart";
@@ -24,11 +25,12 @@ type ApiErrorResponse = {
 };
 
 function ConfigEditor() {
+  const { t } = useTranslation(["views/configEditor"]);
   const apiHost = useApiHost();
 
   useEffect(() => {
-    document.title = "Config Editor - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   const { data: config } = useSWR<string>("config/raw");
 
@@ -64,7 +66,7 @@ function ConfigEditor() {
           toast.success(response.data.message, { position: "top-center" });
         }
       } catch (error) {
-        toast.error("Error saving config", { position: "top-center" });
+        toast.error(t("toast.error.savingError"), { position: "top-center" });
 
         const axiosError = error as AxiosError<ApiErrorResponse>;
         const errorMessage =
@@ -76,7 +78,7 @@ function ConfigEditor() {
         throw new Error(errorMessage);
       }
     },
-    [editorRef],
+    [editorRef, t],
   );
 
   const handleCopyConfig = useCallback(async () => {
@@ -85,8 +87,10 @@ function ConfigEditor() {
     }
 
     copy(editorRef.current.getValue());
-    toast.success("Config copied to clipboard.", { position: "top-center" });
-  }, [editorRef]);
+    toast.success(t("toast.success.copyToClipboard"), {
+      position: "top-center",
+    });
+  }, [editorRef, t]);
 
   const handleSaveAndRestart = useCallback(async () => {
     try {
@@ -139,6 +143,12 @@ function ConfigEditor() {
         scrollBeyondLastLine: false,
         theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
+      editorRef.current?.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+        () => {
+          onHandleSaveConfig("saveonly");
+        },
+      );
     } else if (editorRef.current) {
       editorRef.current.setModel(modelRef.current);
     }
@@ -154,7 +164,7 @@ function ConfigEditor() {
       }
       schemaConfiguredRef.current = false;
     };
-  }, [config, apiHost, systemTheme, theme]);
+  }, [config, apiHost, systemTheme, theme, onHandleSaveConfig]);
 
   // monitoring state
 
@@ -187,7 +197,7 @@ function ConfigEditor() {
       listener = (e) => {
         e.preventDefault();
         e.returnValue = true;
-        return "Exit without saving?";
+        return t("confirm");
       };
       window.addEventListener("beforeunload", listener);
     }
@@ -197,7 +207,18 @@ function ConfigEditor() {
         window.removeEventListener("beforeunload", listener);
       }
     };
-  }, [hasChanges]);
+  }, [hasChanges, t]);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      // Small delay to ensure DOM has updated
+      const timeoutId = setTimeout(() => {
+        editorRef.current?.layout();
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [error]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -205,52 +226,53 @@ function ConfigEditor() {
 
   return (
     <div className="absolute bottom-2 left-0 right-0 top-2 md:left-2">
-      <div className="relative h-full overflow-hidden">
+      <div className="relative flex h-full flex-col overflow-hidden">
         <div className="mr-1 flex items-center justify-between">
           <Heading as="h2" className="mb-0 ml-1 md:ml-0">
-            Config Editor
+            {t("configEditor")}
           </Heading>
           <div className="flex flex-row gap-1">
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Copy config"
+              aria-label={t("copyConfig")}
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
-              <span className="hidden md:block">Copy Config</span>
+              <span className="hidden md:block">{t("copyConfig")}</span>
             </Button>
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Save and restart"
+              aria-label={t("saveAndRestart")}
               onClick={handleSaveAndRestart}
             >
               <div className="relative size-5">
                 <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
                 <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
               </div>
-              <span className="hidden md:block">Save & Restart</span>
+              <span className="hidden md:block">{t("saveAndRestart")}</span>
             </Button>
             <Button
               size="sm"
               className="flex items-center gap-2"
-              aria-label="Save only without restarting"
+              aria-label={t("saveOnly")}
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block">Save Only</span>
+              <span className="hidden md:block">{t("saveOnly")}</span>
             </Button>
           </div>
         </div>
 
-        {error && (
-          <div className="mt-2 max-h-[30%] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
-            {error}
-          </div>
-        )}
-
-        <div ref={configRef} className="mt-2 h-[calc(100%-2.75rem)]" />
+        <div className="mt-2 flex flex-1 flex-col overflow-hidden">
+          {error && (
+            <div className="mt-2 max-h-[30%] min-h-[2.5rem] overflow-auto whitespace-pre-wrap border-2 border-muted bg-background_alt p-4 text-sm text-danger md:max-h-[40%]">
+              {error}
+            </div>
+          )}
+          <div ref={configRef} className="flex-1 overflow-hidden" />
+        </div>
       </div>
       <Toaster closeButton={true} />
       <RestartDialog

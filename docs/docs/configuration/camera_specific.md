@@ -15,6 +15,17 @@ Many cameras support encoding options which greatly affect the live view experie
 
 :::
 
+## H.265 Cameras via Safari
+
+Some cameras support h265 with different formats, but Safari only supports the annexb format. When using h265 camera streams for recording with devices that use the Safari browser, the `apple_compatibility` option should be used.
+
+```yaml
+cameras:
+  h265_cam: # <------ Doesn't matter what the camera is called
+    ffmpeg:
+      apple_compatibility: true # <- Adds compatibility with MacOS and iPhone
+```
+
 ## MJPEG Cameras
 
 Note that mjpeg cameras require encoding the video into h264 for recording, and restream roles. This will use significantly more CPU than if the cameras supported h264 feeds directly. It is recommended to use the restream role to create an h264 restream and then use that as the source for ffmpeg.

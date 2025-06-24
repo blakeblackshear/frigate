@@ -21,6 +21,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import SearchResultActions from "@/components/menu/SearchResultActions";
 import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useTranslation } from "react-i18next";
 
 type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
@@ -35,11 +36,12 @@ export default function ExploreView({
   setSimilaritySearch,
   onSelectSearch,
 }: ExploreViewProps) {
+  const { t } = useTranslation(["views/explore"]);
   // title
 
   useEffect(() => {
-    document.title = "Explore - Frigate";
-  }, []);
+    document.title = t("documentTitle");
+  }, [t]);
 
   // data
 
@@ -137,6 +139,7 @@ function ThumbnailRow({
   setSimilaritySearch,
   onSelectSearch,
 }: ThumbnailRowType) {
+  const { t } = useTranslation(["views/explore"]);
   const navigate = useNavigate();
 
   const handleSearch = (label: string) => {
@@ -148,16 +151,14 @@ function ThumbnailRow({
 
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
-      <div className="flex flex-row items-center text-lg capitalize">
-        {objectType.replaceAll("_", " ")}
+      <div className="flex flex-row items-center text-lg smart-capitalize">
+        {t(objectType, { ns: "objects" })}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
-            (
-            {
+            {t("trackedObjectsCount", {
               // @ts-expect-error we know this is correct
-              searchResults[0].event_count
-            }{" "}
-            tracked objects){" "}
+              count: searchResults[0].event_count,
+            })}
           </span>
         )}
         {isValidating && <ActivityIndicator className="ml-2 size-4" />}
@@ -189,8 +190,8 @@ function ThumbnailRow({
               />
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent className="capitalize">
-                <ExploreMoreLink objectType={objectType} />
+              <TooltipContent>
+                {t("exploreMore", { label: objectType })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -225,7 +226,7 @@ function ExploreThumbnailImage({
   };
 
   const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, false, "object lifecycle");
+    onSelectSearch(event, false, "object_lifecycle");
   };
 
   const handleShowSnapshot = () => {
@@ -281,13 +282,4 @@ function ExploreThumbnailImage({
       </div>
     </SearchResultActions>
   );
-}
-
-function ExploreMoreLink({ objectType }: { objectType: string }) {
-  const formattedType = objectType.replaceAll("_", " ");
-  const label = formattedType.endsWith("s")
-    ? `${formattedType}es`
-    : `${formattedType}s`;
-
-  return <div>Explore More {label}</div>;
 }

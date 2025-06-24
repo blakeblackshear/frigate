@@ -1,0 +1,268 @@
+{
+  "time": {
+    "lastWeek": "Geçen Hafta",
+    "thisWeek": "Bu Hafta",
+    "lastMonth": "Geçen Ay",
+    "untilForRestart": "Frigate yeniden başlatılana kadar.",
+    "untilRestart": "Yeniden başlatmaya kadar",
+    "ago": "{{timeAgo}} önce",
+    "justNow": "Az önce",
+    "today": "Bugün",
+    "yesterday": "Dün",
+    "last7": "Son 7 gün",
+    "last30": "Son 30 gün",
+    "thisMonth": "Bu Ay",
+    "5minutes": "5 dakika",
+    "10minutes": "10 dakika",
+    "30minutes": "30 dakika",
+    "1hour": "1 saat",
+    "12hours": "12 saat",
+    "last14": "Son 14 gün",
+    "24hours": "24 saat",
+    "formattedTimestamp": {
+      "24hour": "d MMM, HH:mm:ss",
+      "12hour": "d MMM, h:mm:ss aaa"
+    },
+    "formattedTimestamp2": {
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "dd/MM h:mm:ssa"
+    },
+    "second_one": "{{time}} saniye",
+    "second_other": "{{time}} saniye",
+    "year_one": "{{time}} yıl",
+    "year_other": "{{time}} yıl",
+    "hour_one": "{{time}} saat",
+    "hour_other": "{{time}} saat",
+    "h": "{{time}} s",
+    "yr": "{{time}} yıl",
+    "mo": "{{time}} ay",
+    "untilForTime": "{{time}}'a kadar",
+    "pm": "ÖS",
+    "am": "ÖÖ",
+    "d": "{{time}} gün",
+    "day_one": "{{time}} gün",
+    "day_other": "{{time}} gün",
+    "m": "{{time}}d",
+    "minute_one": "{{time}} dakika",
+    "minute_other": "{{time}} dakika",
+    "formattedTimestampWithYear": {
+      "12hour": "%-d %b %Y, %I:%M %p",
+      "24hour": "%-d %b %Y, %H:%M"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%-d %b",
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%-d %b, %I:%M %p",
+      "24hour": "%-d %b, %H:%M"
+    },
+    "s": "{{time}}sn",
+    "month_one": "{{time}} ay",
+    "month_other": "{{time}} ay",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    }
+  },
+  "button": {
+    "off": "KAPALI",
+    "next": "Sonraki",
+    "saving": "Kaydediliyor…",
+    "back": "Geri",
+    "unselect": "Seçimi kaldır",
+    "info": "Bilgi",
+    "enable": "Aç",
+    "disabled": "Kapalı",
+    "disable": "Kapat",
+    "history": "Geçmiş",
+    "cameraAudio": "Kamera Sesi",
+    "on": "AÇIK",
+    "suspended": "Askıya alınmış",
+    "unsuspended": "Askıdan çıkart",
+    "export": "Dışa aktar",
+    "download": "İndir",
+    "edit": "Düzenle",
+    "fullscreen": "Tam ekran",
+    "deleteNow": "Şimdi Sil",
+    "apply": "Uygula",
+    "reset": "Sıfırla",
+    "done": "Bitti",
+    "enabled": "Açık",
+    "save": "Kaydet",
+    "exitFullscreen": "Tam ekrandan çık",
+    "pictureInPicture": "Pencere içinde pencere",
+    "copyCoordinates": "Koordinatları kopyala",
+    "yes": "Evet",
+    "play": "Oynat",
+    "no": "Hayır",
+    "copy": "Kopyala",
+    "cancel": "İptal",
+    "twoWayTalk": "Çift Yönlü Ses",
+    "close": "Kapat",
+    "delete": "Sil"
+  },
+  "menu": {
+    "systemLogs": "Sistem günlükleri",
+    "user": {
+      "anonymous": "anonim",
+      "account": "Hesap",
+      "current": "Mevcut kullanıcı: {{user}}",
+      "setPassword": "Parola Belirle",
+      "logout": "Oturumu Kapat",
+      "title": "Kullanıcı"
+    },
+    "configuration": "Yapılandırma",
+    "languages": "Diller",
+    "language": {
+      "en": "İngilizce",
+      "zhCN": "简体中文 (Basitleştirilmiş Çince)",
+      "withSystem": {
+        "label": "Dil için sistem tercihini kullan"
+      },
+      "hi": "हिन्दी (Hintçe)",
+      "fr": "Français (Fransızca)",
+      "pt": "Português (Portekizce)",
+      "de": "Deutsch (Almanca)",
+      "ja": "日本語 (Japonca)",
+      "tr": "Türkçe (Türkçe)",
+      "it": "Italiano (İtalyanca)",
+      "nl": "Nederlands (Felemenkçe)",
+      "sv": "Svenska (İsveççe)",
+      "cs": "Čeština (Çekçe)",
+      "nb": "Norsk Bokmål (Bokmål Norveç Dili)",
+      "ko": "한국어 (Korece)",
+      "vi": "Tiếng Việt (Vietnamca)",
+      "pl": "Polski (Lehçe)",
+      "uk": "Українська (Ukraynaca)",
+      "he": "עברית (İbranice)",
+      "el": "Ελληνικά (Yunanca)",
+      "ro": "Română (Rumence)",
+      "hu": "Magyar (Macarca)",
+      "fi": "Suomi (Fince)",
+      "da": "Dansk (Danimarka Dili)",
+      "sk": "Slovenčina (Slovakça)",
+      "fa": "فارسی (Farsça)",
+      "es": "Español (İspanyolca)",
+      "ar": "العربية (Arapça)",
+      "ru": "Русский (Rusça)",
+      "yue": "粵語 (Kantonca)",
+      "th": "ไทย (Tayca)",
+      "ca": "Català (Katalanca)"
+    },
+    "withSystem": "Sistem",
+    "theme": {
+      "label": "Tema",
+      "blue": "Mavi",
+      "contrast": "Yüksek Karşıtlık",
+      "green": "Yeşil",
+      "red": "Kırmızı",
+      "default": "Varsayılan",
+      "nord": "Kuzey",
+      "highcontrast": "Yüksek Karşıtlık"
+    },
+    "restart": "Frigate'i yeniden başlat",
+    "live": {
+      "title": "Canlı",
+      "allCameras": "Tüm Kameralar",
+      "cameras": {
+        "title": "Kameralar",
+        "count_one": "{{count}} Kamera",
+        "count_other": "{{count}} Kamera"
+      }
+    },
+    "review": "İncele",
+    "explore": "Keşfet",
+    "system": "Sistem",
+    "documentation": {
+      "title": "Dökümantasyon",
+      "label": "Frigate dökümantasyonu"
+    },
+    "settings": "Ayarlar",
+    "appearance": "Görünüm",
+    "darkMode": {
+      "label": "Karanlık Mod",
+      "withSystem": {
+        "label": "Karanlık tema için sistem tercihini kullan"
+      },
+      "light": "Açık",
+      "dark": "Koyu"
+    },
+    "export": "Dışa Aktar",
+    "configurationEditor": "Yapılandırma düzenleyicisi",
+    "help": "Yardım",
+    "faceLibrary": "Yüz Veritabanı",
+    "systemMetrics": "Sistem metrikleri",
+    "uiPlayground": "UI Deneme Alanı"
+  },
+  "label": {
+    "back": "Geri"
+  },
+  "notFound": {
+    "documentTitle": "Bulunamadı - Frigate",
+    "desc": "Sayfa bulunamadı",
+    "title": "404"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/s"
+    },
+    "length": {
+      "feet": "feet",
+      "meters": "metre"
+    }
+  },
+  "pagination": {
+    "next": {
+      "title": "Sonraki",
+      "label": "Sonraki sayfaya git"
+    },
+    "previous": {
+      "label": "Önceki sayfaya git",
+      "title": "Önceki"
+    },
+    "label": "sayfalandırma",
+    "more": "Daha fazla"
+  },
+  "accessDenied": {
+    "title": "Erişim Reddedildi",
+    "desc": "Bu sayfayı görüntüleme yetkiniz yok.",
+    "documentTitle": "Erişim Reddedildi - Frigate"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL panoya kopyalandı.",
+    "save": {
+      "title": "Kaydet",
+      "error": {
+        "noMessage": "Yapılandırma değişiklikleri kaydedilemedi",
+        "title": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
+      }
+    }
+  },
+  "selectItem": "{{item}} seçin",
+  "role": {
+    "title": "Rol",
+    "viewer": "Görüntüleyici",
+    "admin": "Yönetici",
+    "desc": "Yöneticiler Frigate arayüzündeki bütün özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntülemekle sınırlıdır."
+  }
+}

@@ -31,6 +31,7 @@ from frigate.api.defs.request.events_body import (
     EventsDeleteBody,
     EventsDescriptionBody,
     EventsEndBody,
+    EventsLPRBody,
     EventsSubLabelBody,
     SubmitPlusBody,
 )
@@ -701,6 +702,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             for k, v in event["data"].items()
             if k
             in [
+                "attributes",
                 "type",
                 "score",
                 "top_score",
@@ -723,13 +725,15 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if (sort is None or sort == "relevance") and search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
     elif min_score is not None and max_score is not None and sort == "score_asc":
-        processed_events.sort(key=lambda x: x["score"])
+        processed_events.sort(key=lambda x: x["data"]["score"])
     elif min_score is not None and max_score is not None and sort == "score_desc":
-        processed_events.sort(key=lambda x: x["score"], reverse=True)
+        processed_events.sort(key=lambda x: x["data"]["score"], reverse=True)
     elif min_speed is not None and max_speed is not None and sort == "speed_asc":
-        processed_events.sort(key=lambda x: x["average_estimated_speed"])
+        processed_events.sort(key=lambda x: x["data"]["average_estimated_speed"])
     elif min_speed is not None and max_speed is not None and sort == "speed_desc":
-        processed_events.sort(key=lambda x: x["average_estimated_speed"], reverse=True)
+        processed_events.sort(
+            key=lambda x: x["data"]["average_estimated_speed"], reverse=True
+        )
     elif sort == "date_asc":
         processed_events.sort(key=lambda x: x["start_time"])
     else:
@@ -1093,6 +1097,60 @@ def set_sub_label(
         content={
             "success": True,
             "message": f"Event {event_id} sub label set to {new_sub_label if new_sub_label is not None else 'None'}",
+        },
+        status_code=200,
+    )
+
+
+@router.post(
+    "/events/{event_id}/recognized_license_plate",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def set_plate(
+    request: Request,
+    event_id: str,
+    body: EventsLPRBody,
+):
+    try:
+        event: Event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = None
+
+        for state in request.app.detected_frames_processor.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
+        return JSONResponse(
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
+            status_code=404,
+        )
+
+    new_plate = body.recognizedLicensePlate
+    new_score = body.recognizedLicensePlateScore
+
+    if new_plate == "":
+        new_plate = None
+        new_score = None
+
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.recognized_license_plate, (event_id, new_plate, new_score)
+    )
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Event {event_id} license plate set to {new_plate if new_plate is not None else 'None'}",
         },
         status_code=200,
     )

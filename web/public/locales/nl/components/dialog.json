@@ -1,0 +1,123 @@
+{
+  "restart": {
+    "title": "Weet je zeker dat je Frigate opnieuw wilt opstarten?",
+    "button": "Herstart",
+    "restarting": {
+      "title": "Frigate wordt opnieuw gestart",
+      "button": "Forceer herladen nu",
+      "content": "Deze pagina zal herladen in {{countdown}} seconden."
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Verzenden naar Frigate+",
+        "desc": "Objecten op locaties die je wilt vermijden, zijn geen valspositieven. Als je ze als valspositieven indient, brengt dit het model in verwarring."
+      },
+      "review": {
+        "true": {
+          "true_one": "Dit is een {{label}}",
+          "true_other": "Dit zijn {{label}}",
+          "label": "Bevestig dit label voor Frigate Plus"
+        },
+        "false": {
+          "false_one": "Dit is geen {{label}}",
+          "false_other": "Dit zijn geen {{label}}",
+          "label": "Bevestig dit label niet voor Frigate Plus"
+        },
+        "state": {
+          "submitted": "Ingediend"
+        },
+        "question": {
+          "ask_an": "Is dit object een <code>{{label}}</code>?",
+          "label": "Bevestig dit label voor Frigate Plus",
+          "ask_a": "Is dit object een <code>{{label}}</code>?",
+          "ask_full": "Is dit object een <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Bekijk in Geschiedenis"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Selecteer uit tijdlijn",
+      "end": {
+        "label": "Selecteer eindtijd",
+        "title": "Eindtijd"
+      },
+      "lastHour_one": "Afgelopen uur",
+      "lastHour_other": "Afgelopen {{count}} uren",
+      "custom": "Aangepast",
+      "start": {
+        "title": "Starttijd",
+        "label": "Selecteer starttijd"
+      }
+    },
+    "name": {
+      "placeholder": "Geef de export een naam"
+    },
+    "select": "Selecteer",
+    "toast": {
+      "error": {
+        "failed": "Exporteren is mislukt: {{error}}",
+        "noVaildTimeSelected": "Geen geldig tijdsbereik geselecteerd",
+        "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn"
+      },
+      "success": "Export is succesvol gestart. Bekijk het bestand in de map /exports."
+    },
+    "fromTimeline": {
+      "saveExport": "Export opslaan",
+      "previewExport": "Export vooraf bekijken"
+    },
+    "export": "Exporteren",
+    "selectOrExport": "Selecteren of exporteren"
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "desc": {
+        "title": "Stel go2rtc in voor extra liveweergaveopties en audio voor deze camera.",
+        "readTheDocumentation": "Lees de documentatie"
+      },
+      "disabled": "Herstreamen is niet ingeschakeld voor deze camera."
+    },
+    "showStats": {
+      "label": "Streamstatistieken tonen",
+      "desc": "Schakel deze optie in om streamstatistieken als overlay op de camerafeed weer te geven."
+    },
+    "debugView": "Debugweergave"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Zoekopdracht opslaan",
+      "desc": "Geef een naam op voor deze opgeslagen zoekopdracht.",
+      "success": "Zoekopdracht ({{searchName}}) is opgeslagen.",
+      "button": {
+        "save": {
+          "label": "Bewaar deze zoekopdracht"
+        }
+      },
+      "overwrite": "{{searchName}} bestaat al. Opslaan overschrijft de bestaande waarde.",
+      "placeholder": "Voer een naam in voor uw zoekopdracht"
+    }
+  },
+  "recording": {
+    "button": {
+      "deleteNow": "Nu verwijderen",
+      "export": "Exporteren",
+      "markAsReviewed": "Markeren als beoordeeld"
+    },
+    "confirmDelete": {
+      "desc": {
+        "selected": "Weet u zeker dat u alle opgenomen videobeelden wilt verwijderen die aan dit beoordelingsitem zijn gekoppeld?<br /><br />Houd de <em>Shift</em>-toets ingedrukt om dit dialoogvenster in de toekomst over te slaan."
+      },
+      "title": "Bevestig Verwijderen",
+      "toast": {
+        "error": "Verwijderen mislukt: {{error}}",
+        "success": "De videobeelden die aan de geselecteerde beoordelingsitems zijn gekoppeld, zijn succesvol verwijderd."
+      }
+    }
+  }
+}

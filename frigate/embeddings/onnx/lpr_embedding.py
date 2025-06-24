@@ -31,11 +31,14 @@ class PaddleOCRDetection(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
+        model_file = (
+            "detection-large.onnx" if model_size == "large" else "detection-small.onnx"
+        )
         super().__init__(
             model_name="paddleocr-onnx",
-            model_file="detection.onnx",
+            model_file=model_file,
             download_urls={
-                "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
+                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/{model_file}"
             },
         )
         self.requestor = requestor
@@ -261,8 +264,8 @@ class LicensePlateDetector(BaseEmbedding):
     def _preprocess_inputs(self, raw_inputs):
         if isinstance(raw_inputs, list):
             raise ValueError("License plate embedding does not support batch inputs.")
-        # Get image as numpy array
-        img = self._process_image(raw_inputs)
+
+        img = raw_inputs
         height, width, channels = img.shape
 
         # Resize maintaining aspect ratio

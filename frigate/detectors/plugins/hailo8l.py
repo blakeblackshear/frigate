@@ -1,6 +1,5 @@
 import logging
 import os
-import queue
 import subprocess
 import threading
 import urllib.request
@@ -9,17 +8,6 @@ from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
-
-try:
-    from hailo_platform import (
-        HEF,
-        FormatType,
-        HailoSchedulingAlgorithm,
-        VDevice,
-    )
-except ModuleNotFoundError:
-    pass
-
 from pydantic import Field
 from typing_extensions import Literal
 
@@ -28,35 +16,9 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
 )
+from frigate.object_detection.util import RequestStore, ResponseStore
 
 logger = logging.getLogger(__name__)
-
-
-# ----------------- ResponseStore Class ----------------- #
-class ResponseStore:
-    """
-    A thread-safe hash-based response store that maps request IDs
-    to their results. Threads can wait on the condition variable until
-    their request's result appears.
-    """
-
-    def __init__(self):
-        self.responses = {}  # Maps request_id -> (original_input, infer_results)
-        self.lock = threading.Lock()
-        self.cond = threading.Condition(self.lock)
-
-    def put(self, request_id, response):
-        with self.cond:
-            self.responses[request_id] = response
-            self.cond.notify_all()
-
-    def get(self, request_id, timeout=None):
-        with self.cond:
-            if not self.cond.wait_for(
-                lambda: request_id in self.responses, timeout=timeout
-            ):
-                raise TimeoutError(f"Timeout waiting for response {request_id}")
-            return self.responses.pop(request_id)
 
 
 # ----------------- Utility Functions ----------------- #
@@ -122,14 +84,26 @@ class HailoAsyncInference:
     def __init__(
         self,
         hef_path: str,
-        input_queue: queue.Queue,
+        input_store: RequestStore,
         output_store: ResponseStore,
         batch_size: int = 1,
         input_type: Optional[str] = None,
         output_type: Optional[Dict[str, str]] = None,
         send_original_frame: bool = False,
     ) -> None:
-        self.input_queue = input_queue
+        # when importing hailo it activates the driver
+        # which leaves processes running even though it may not be used.
+        try:
+            from hailo_platform import (
+                HEF,
+                FormatType,
+                HailoSchedulingAlgorithm,
+                VDevice,
+            )
+        except ModuleNotFoundError:
+            pass
+
+        self.input_store = input_store
         self.output_store = output_store
 
         params = VDevice.create_params()
@@ -139,23 +113,18 @@ class HailoAsyncInference:
         self.target = VDevice(params)
         self.infer_model = self.target.create_infer_model(hef_path)
         self.infer_model.set_batch_size(batch_size)
+
         if input_type is not None:
-            self._set_input_type(input_type)
+            self.infer_model.input().set_format_type(getattr(FormatType, input_type))
+
         if output_type is not None:
-            self._set_output_type(output_type)
+            for output_name, output_type in output_type.items():
+                self.infer_model.output(output_name).set_format_type(
+                    getattr(FormatType, output_type)
+                )
+
         self.output_type = output_type
         self.send_original_frame = send_original_frame
-
-    def _set_input_type(self, input_type: Optional[str] = None) -> None:
-        self.infer_model.input().set_format_type(getattr(FormatType, input_type))
-
-    def _set_output_type(
-        self, output_type_dict: Optional[Dict[str, str]] = None
-    ) -> None:
-        for output_name, output_type in output_type_dict.items():
-            self.infer_model.output(output_name).set_format_type(
-                getattr(FormatType, output_type)
-            )
 
     def callback(
         self,
@@ -202,11 +171,14 @@ class HailoAsyncInference:
         return self.hef.get_input_vstream_infos()[0].shape
 
     def run(self) -> None:
+        job = None
         with self.infer_model.configure() as configured_infer_model:
             while True:
-                batch_data = self.input_queue.get()
+                batch_data = self.input_store.get()
+
                 if batch_data is None:
                     break
+
                 request_id, frame_data = batch_data
                 preprocessed_batch = [frame_data]
                 request_ids = [request_id]
@@ -227,7 +199,9 @@ class HailoAsyncInference:
                         bindings_list=bindings_list,
                     ),
                 )
-            job.wait(100)
+
+            if job is not None:
+                job.wait(100)
 
 
 # ----------------- HailoDetector Class ----------------- #
@@ -274,16 +248,14 @@ class HailoDetector(DetectionApi):
         self.working_model_path = self.check_and_prepare()
 
         self.batch_size = 1
-        self.input_queue = queue.Queue()
+        self.input_store = RequestStore()
         self.response_store = ResponseStore()
-        self.request_counter = 0
-        self.request_counter_lock = threading.Lock()
 
         try:
             logger.debug(f"[INIT] Loading HEF model from {self.working_model_path}")
             self.inference_engine = HailoAsyncInference(
                 self.working_model_path,
-                self.input_queue,
+                self.input_store,
                 self.response_store,
                 self.batch_size,
             )
@@ -364,30 +336,26 @@ class HailoDetector(DetectionApi):
                 raise FileNotFoundError(f"Model file not found at: {self.model_path}")
         return cached_model_path
 
-    def _get_request_id(self) -> int:
-        with self.request_counter_lock:
-            request_id = self.request_counter
-            self.request_counter += 1
-            if self.request_counter > 1000000:
-                self.request_counter = 0
-        return request_id
-
     def detect_raw(self, tensor_input):
-        request_id = self._get_request_id()
-
         tensor_input = self.preprocess(tensor_input)
+
         if isinstance(tensor_input, np.ndarray) and len(tensor_input.shape) == 3:
             tensor_input = np.expand_dims(tensor_input, axis=0)
 
-        self.input_queue.put((request_id, tensor_input))
+        request_id = self.input_store.put(tensor_input)
+
         try:
-            original_input, infer_results = self.response_store.get(
-                request_id, timeout=10.0
-            )
+            _, infer_results = self.response_store.get(request_id, timeout=1.0)
         except TimeoutError:
             logger.error(
                 f"Timeout waiting for inference results for request {request_id}"
             )
+
+            if not self.inference_thread.is_alive():
+                raise RuntimeError(
+                    "HailoRT inference thread has stopped, restart required."
+                )
+
             return np.zeros((20, 6), dtype=np.float32)
 
         if isinstance(infer_results, list) and len(infer_results) == 1:

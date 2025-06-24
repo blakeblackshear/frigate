@@ -137,23 +137,23 @@
     --secondary: hsl(0, 0%, 15%);
     --secondary: 0 0% 15%;
 
-    --secondary-foreground: hsl(0, 0%, 32%);
-    --secondary-foreground: 0 0% 32%;
+    --secondary-foreground: hsl(0, 0%, 42%);
+    --secondary-foreground: 0 0% 42%;
 
     --secondary-highlight: hsl(0, 0%, 25%);
     --secondary-highlight: 0 0% 25%;
 
-    --neutral: hsl(0, 0%, 45.1%);
-    --neutral: 0 0% 45.1%;
+    --neutral: hsl(0, 0%, 55.1%);
+    --neutral: 0 0% 55.1%;
 
-    --neutral_variant: hsl(0, 0%, 32.2%);
-    --neutral_variant: 0 0% 32.2%;
+    --neutral_variant: hsl(0, 0%, 42.2%);
+    --neutral_variant: 0 0% 42.2%;
 
     --muted: hsl(0, 0%, 12%);
     --muted: 0 0% 12%;
 
-    --muted-foreground: hsl(0, 0%, 32%);
-    --muted-foreground: 0 0% 32%;
+    --muted-foreground: hsl(0, 0%, 42%);
+    --muted-foreground: 0 0% 42%;
 
     --accent: hsl(0, 0%, 19%);
     --accent: 0 0% 19%;

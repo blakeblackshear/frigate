@@ -6,7 +6,7 @@ import random
 import string
 import threading
 import time
-from typing import Tuple
+from typing import Any, Tuple
 
 import numpy as np
 
@@ -29,7 +29,7 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
-from frigate.object_detection import load_labels
+from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
@@ -126,7 +126,7 @@ class AudioEventMaintainer(threading.Thread):
 
         self.config = camera
         self.camera_metrics = camera_metrics
-        self.detections: dict[dict[str, any]] = {}
+        self.detections: dict[dict[str, Any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)

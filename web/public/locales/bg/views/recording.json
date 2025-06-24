@@ -1,0 +1,12 @@
+{
+  "filter": "Филтър",
+  "export": "Експорт",
+  "calendar": "Календар",
+  "filters": "Филтри",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Не е избран валиден времеви диапазон",
+      "endTimeMustAfterStartTime": "Крайното време трябва да бъде след началеният час"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "documentTitle": "Beoordelen - Frigate",
+  "camera": "Camera",
+  "newReviewItems": {
+    "button": "Nieuwe items om te beoordelen",
+    "label": "Bekijk nieuwe beoordelingsitems"
+  },
+  "timeline.aria": "Selecteer tijdlijn",
+  "recordings": {
+    "documentTitle": "Opnamen - Frigate"
+  },
+  "timeline": "Tijdlijn",
+  "empty": {
+    "alert": "Er zijn geen meldingen om te beoordelen",
+    "detection": "Er zijn geen detecties om te beoordelen",
+    "motion": "Geen bewegingsgegevens gevonden"
+  },
+  "events": {
+    "aria": "Selecteer activiteiten",
+    "noFoundForTimePeriod": "Er zijn geen activiteiten gevonden voor deze periode.",
+    "label": "Activiteiten"
+  },
+  "calendarFilter": {
+    "last24Hours": "Laatste 24 uur"
+  },
+  "alerts": "Meldingen",
+  "motion": {
+    "label": "Bewegingen",
+    "only": "Alleen bewegingen"
+  },
+  "allCameras": "Alle camera's",
+  "markAsReviewed": "Markeren als beoordeeld",
+  "detections": "Detecties",
+  "markTheseItemsAsReviewed": "Markeer deze items als beoordeeld",
+  "selected_other": "{{count}} geselecteerd",
+  "selected_one": "{{count}} geselecteerd",
+  "detected": "gedetecteerd"
+}

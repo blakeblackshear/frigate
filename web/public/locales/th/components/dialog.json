@@ -1,0 +1,105 @@
+{
+  "search": {
+    "saveSearch": {
+      "label": "บันทึกค้นหา",
+      "success": "ค้นหา {{searchName}} ถูกบันทึกเรียบร้อยแล้ว",
+      "desc": "ระบุชื่อสำหรับการค้นหาบันทึกนี้",
+      "button": {
+        "save": {
+          "label": "บันทึกการค้นหานี้"
+        }
+      },
+      "overwrite": "{{searchName}} มีอยู่แล้ว. การบันทึกจะทำการทับของเดิมลงไป.",
+      "placeholder": "ใส่ชื่อสําหรับการค้นหาของคุณ"
+    }
+  },
+  "export": {
+    "fromTimeline": {
+      "saveExport": "บันทึกส่งออก",
+      "previewExport": "ตัวอย่างส่งออก"
+    },
+    "toast": {
+      "error": {
+        "endTimeMustAfterStartTime": "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น",
+        "noVaildTimeSelected": "ไม่ได้เลือกช่วงเวลาที่ถูกต้อง",
+        "failed": "เริ่มต้นการส่งออกผิดพลาด: {{error}}"
+      },
+      "success": "เริ่มต้นการส่งออก ดูไฟล์ในโฟลเดอร์ /exports."
+    },
+    "time": {
+      "fromTimeline": "เลือกจากเวลา",
+      "lastHour_other": "ก่อนหน้านี้ {{count}} ชั่วโมง",
+      "custom": "กําหนดเอง",
+      "start": {
+        "title": "เวลาเริ่มต้น",
+        "label": "เลือกเวลาเริ่มต้น"
+      },
+      "end": {
+        "title": "เวลาสิ้นสุด",
+        "label": "เลือกเวลาสิ้นสุด"
+      }
+    },
+    "name": {
+      "placeholder": "ชื่อส่งออก"
+    },
+    "select": "เลือก",
+    "export": "ส่งออก",
+    "selectOrExport": "เลือกหรือส่งออก"
+  },
+  "restart": {
+    "restarting": {
+      "button": "โหลดหน้าใหม่ตอนนี้",
+      "title": "Frigate กำลังรีสตาร์ท",
+      "content": "หน้านี้จะถูกโหลดในอีก {{countdown}} วินาที."
+    },
+    "title": "คุณแน่ใจหรือว่าต้องการรีสตาร์ท Frigate?",
+    "button": "รีสตาร์ท"
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_full": "วัตถุนี้คือ <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "ยืนยันหมวดหมู่นี้สําหรับ Frigate+",
+          "ask_a": "วัตถุนี้คือ <code>{{label}}</code>?",
+          "ask_an": "วัตถุนี้คือ <code>{{label}}</code>?"
+        },
+        "state": {
+          "submitted": "ส่งเรียบร้อย"
+        }
+      },
+      "submitToPlus": {
+        "label": "ส่งไปยัง Frigate+"
+      }
+    },
+    "video": {
+      "viewInHistory": "ดูประวัติ"
+    }
+  },
+  "recording": {
+    "button": {
+      "deleteNow": "ลบตอนนี้",
+      "export": "ส่งออก",
+      "markAsReviewed": "ทำเครื่องหมายว่ารีวิวแล้ว"
+    },
+    "confirmDelete": {
+      "title": "ยืนยันการลบ",
+      "toast": {
+        "error": "ลบไม่ได้: {{error}}"
+      }
+    }
+  },
+  "streaming": {
+    "label": "สตรีม",
+    "restreaming": {
+      "disabled": "รีสตรีมไม่ได้เปิดใช้งานสําหรับกล้องนี้.",
+      "desc": {
+        "readTheDocumentation": "อ่านเอกสาร"
+      }
+    },
+    "showStats": {
+      "label": "แสดงสถานะสตรีม",
+      "desc": "เปิดใช้งานตัวเลือกนี้เพื่อจะแสดงสถิติในกล้อง."
+    }
+  }
+}

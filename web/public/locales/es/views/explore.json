@@ -1,0 +1,209 @@
+{
+  "generativeAI": "Inteligencia Artificial Generativa",
+  "exploreIsUnavailable": {
+    "title": "Explorar no está disponible",
+    "embeddingsReindexing": {
+      "startingUp": "Iniciando…",
+      "estimatedTime": "Tiempo estimado restante:",
+      "finishingShortly": "Finalizando en breve",
+      "step": {
+        "thumbnailsEmbedded": "Miniaturas incrustadas: ",
+        "descriptionsEmbedded": "Descripciones incrustadas: ",
+        "trackedObjectsProcessed": "Objetos rastreados procesados: "
+      },
+      "context": "Explorar puede usarse después de que las incrustaciones de objetos rastreados hayan terminado de reindexarse."
+    },
+    "downloadingModels": {
+      "context": "Frigate está descargando los modelos de incrustaciones necesarios para soportar la función de Búsqueda Semántica. Esto puede tomar varios minutos dependiendo de la velocidad de tu conexión de red.",
+      "error": "Ha ocurrido un error. Revisa los registros de Frigate.",
+      "setup": {
+        "visionModelFeatureExtractor": "Extractor de características del modelo de visión",
+        "visionModel": "Modelo de visión",
+        "textModel": "Modelo de texto",
+        "textTokenizer": "Tokenizador de texto"
+      },
+      "tips": {
+        "context": "Es posible que desees reindexar las incrustaciones de tus objetos rastreados una vez que se hayan descargado los modelos.",
+        "documentation": "Leer la documentación"
+      }
+    }
+  },
+  "details": {
+    "timestamp": "Marca de tiempo",
+    "item": {
+      "title": "Detalles del elemento de revisión",
+      "desc": "Detalles del elemento de revisión",
+      "button": {
+        "share": "Compartir este elemento de revisión",
+        "viewInExplore": "Ver en Explorar"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "Subetiqueta actualizada con éxito.",
+          "regenerate": "Se ha solicitado una nueva descripción a {{provider}}. Dependiendo de la velocidad de tu proveedor, la nueva descripción puede tardar algún tiempo en regenerarse.",
+          "updatedLPR": "Matrícula actualizada con éxito."
+        },
+        "error": {
+          "regenerate": "No se pudo llamar a {{provider}} para una nueva descripción: {{errorMessage}}",
+          "updatedSublabelFailed": "No se pudo actualizar la subetiqueta: {{errorMessage}}",
+          "updatedLPRFailed": "No se pudo actualizar la matrícula: {{errorMessage}}"
+        }
+      },
+      "tips": {
+        "mismatch_one": "Se detectó y se incluyó en este elemento de revisión un objeto {{count}} no disponible. Esos objetos no calificaron como alerta o detección o ya han sido limpiados/eliminados.",
+        "mismatch_many": "Se detectaron y se incluyeron en este elemento de revisión {{count}} objetos no disponibles. Esos objetos no calificaron como alerta o detección o ya han sido limpiados/eliminados.",
+        "mismatch_other": "Se detectaron y se incluyeron en este elemento de revisión {{count}} objetos no disponibles. Esos objetos no calificaron como alerta o detección o ya han sido limpiados/eliminados.",
+        "hasMissingObjects": "Ajusta tu configuración si quieres que Frigate guarde los objetos rastreados para las siguientes etiquetas: <em>{{objects}}</em>"
+      }
+    },
+    "topScore": {
+      "label": "Puntuación máxima",
+      "info": "La puntuación máxima es la mediana más alta para el objeto rastreado, por lo que puede diferir de la puntuación mostrada en la miniatura del resultado de búsqueda."
+    },
+    "description": {
+      "aiTips": "Frigate no solicitará una descripción a tu proveedor de Inteligencia Artificial Generativa hasta que el ciclo de vida del objeto rastreado haya terminado.",
+      "placeholder": "Descripción del objeto rastreado",
+      "label": "Descripción"
+    },
+    "expandRegenerationMenu": "Expandir menú de regeneración",
+    "regenerateFromSnapshot": "Regenerar desde captura de pantalla",
+    "regenerateFromThumbnails": "Regenerar desde miniaturas",
+    "tips": {
+      "descriptionSaved": "Descripción guardada con éxito",
+      "saveDescriptionFailed": "No se pudo actualizar la descripción: {{errorMessage}}"
+    },
+    "zones": "Zonas",
+    "label": "Etiqueta",
+    "editSubLabel": {
+      "title": "Editar subetiqueta",
+      "descNoLabel": "Introduce una nueva subetiqueta para este objeto rastreado",
+      "desc": "Introduce una nueva subetiqueta para este {{label}}"
+    },
+    "button": {
+      "regenerate": {
+        "label": "Regenerar descripción del objeto rastreado",
+        "title": "Regenerar"
+      },
+      "findSimilar": "Buscar similares"
+    },
+    "objects": "Objetos",
+    "estimatedSpeed": "Velocidad estimada",
+    "camera": "Cámara",
+    "editLPR": {
+      "title": "Editar matrícula",
+      "desc": "Introduce un nuevo valor de matrícula para este {{label}}",
+      "descNoLabel": "Introduce un nuevo valor de matrícula para este objeto rastreado"
+    },
+    "recognizedLicensePlate": "Matrícula Reconocida",
+    "snapshotScore": {
+      "label": "Puntuación de Instantánea"
+    }
+  },
+  "documentTitle": "Explorar - Frigate",
+  "trackedObjectDetails": "Detalles del objeto rastreado",
+  "type": {
+    "snapshot": "captura instantánea",
+    "video": "vídeo",
+    "object_lifecycle": "ciclo de vida del objeto",
+    "details": "detalles"
+  },
+  "objectLifecycle": {
+    "title": "Ciclo de vida del objeto",
+    "noImageFound": "No se encontró ninguna imagen para esta marca de tiempo.",
+    "createObjectMask": "Crear máscara de objeto",
+    "adjustAnnotationSettings": "Ajustar configuración de anotaciones",
+    "scrollViewTips": "Desplázate para ver los momentos significativos del ciclo de vida de este objeto.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectado",
+      "entered_zone": "{{label}} entró en {{zones}}",
+      "attribute": {
+        "other": "{{label}} reconocido como {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} detectado para {{label}}"
+      },
+      "gone": "{{label}} salió",
+      "heard": "{{label}} escuchado",
+      "external": "{{label}} detectado",
+      "active": "{{label}} se activó",
+      "stationary": "{{label}} se volvió estacionario",
+      "header": {
+        "zones": "Zonas",
+        "ratio": "Proporción",
+        "area": "Área"
+      }
+    },
+    "annotationSettings": {
+      "offset": {
+        "label": "Desplazamiento de anotación",
+        "millisecondsToOffset": "Milisegundos para desplazar las anotaciones de detección. <em>Valor por defecto: 0</em>",
+        "desc": "Estos datos provienen de la transmisión de detección de tu cámara, pero se superponen en imágenes de la transmisión de grabación. Es poco probable que ambas transmisiones estén perfectamente sincronizadas. Como resultado, la caja delimitadora y la grabación no estarán perfectamente alineadas. Sin embargo, el campo <code>annotation_offset</code> se puede usar para ajustar esto.",
+        "documentation": "Leer la documentación ",
+        "tips": "CONSEJO: Imagina que hay un clip de evento con una persona caminando de izquierda a derecha. Si la caja delimitadora de la línea de tiempo del evento está constantemente a la izquierda de la persona, entonces se debe disminuir el valor. Del mismo modo, si una persona camina de izquierda a derecha y la caja delimitadora está constantemente por delante de la persona, entonces se debe aumentar el valor.",
+        "toast": {
+          "success": "El desplazamiento de anotación para {{camera}} se ha guardado en el archivo de configuración. Reinicia Frigate para aplicar los cambios."
+        }
+      },
+      "showAllZones": {
+        "title": "Mostrar todas las zonas",
+        "desc": "Mostrar siempre las zonas en los fotogramas donde los objetos hayan entrado en una zona."
+      },
+      "title": "Configuración de anotaciones"
+    },
+    "carousel": {
+      "previous": "Diapositiva anterior",
+      "next": "Siguiente diapositiva"
+    },
+    "autoTrackingTips": "Las posiciones de las cajas delimitadoras serán inexactas para cámaras con seguimiento automático.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punto Rastreado"
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Descargar video",
+      "aria": "Descargar video"
+    },
+    "downloadSnapshot": {
+      "label": "Descargar captura de pantalla",
+      "aria": "Descargar captura de pantalla"
+    },
+    "viewObjectLifecycle": {
+      "label": "Ver ciclo de vida del objeto",
+      "aria": "Mostrar el ciclo de vida del objeto"
+    },
+    "findSimilar": {
+      "label": "Buscar similares",
+      "aria": "Buscar objetos rastreados similares"
+    },
+    "submitToPlus": {
+      "label": "Enviar a Frigate+",
+      "aria": "Enviar a Frigate Plus"
+    },
+    "viewInHistory": {
+      "aria": "Ver en Historial",
+      "label": "Ver en Historial"
+    },
+    "deleteTrackedObject": {
+      "label": "Eliminar este objeto rastreado"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirmar eliminación",
+      "desc": "Eliminar este objeto rastreado elimina la captura de pantalla, cualquier incrustación guardada y cualquier entrada asociada al ciclo de vida del objeto. Las grabaciones de este objeto rastreado en la vista de Historial <em>NO</em> se eliminarán.<br /><br />¿Estás seguro de que quieres proceder?"
+    }
+  },
+  "noTrackedObjects": "No se encontraron objetos rastreados",
+  "fetchingTrackedObjectsFailed": "Error al obtener objetos rastreados: {{errorMessage}}",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Objeto rastreado eliminado con éxito.",
+        "error": "No se pudo eliminar el objeto rastreado: {{errorMessage}}"
+      }
+    },
+    "tooltip": "Coincidencia con {{type}} al {{confidence}}%"
+  },
+  "trackedObjectsCount_one": "{{count}} objeto rastreado ",
+  "trackedObjectsCount_many": "{{count}} objetos rastreados ",
+  "trackedObjectsCount_other": "{{count}} objetos rastreados ",
+  "exploreMore": "Explora más objetos {{label}}"
+}

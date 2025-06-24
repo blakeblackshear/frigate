@@ -33,11 +33,12 @@ const sidebars: SidebarsConfig = {
         "configuration/object_detectors",
         "configuration/audio_detectors",
       ],
-      Classifiers: [
+      Enrichments: [
         "configuration/semantic_search",
         "configuration/genai",
         "configuration/face_recognition",
         "configuration/license_plate_recognition",
+        "configuration/bird_classification",
       ],
       Cameras: [
         "configuration/cameras",
@@ -58,10 +59,13 @@ const sidebars: SidebarsConfig = {
         "configuration/objects",
         "configuration/stationary_objects",
       ],
+      "Hardware Acceleration": [
+        "configuration/hardware_acceleration_video",
+        "configuration/hardware_acceleration_enrichments",
+      ],
       "Extra Configuration": [
         "configuration/authentication",
         "configuration/notifications",
-        "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
         "configuration/pwa",
         "configuration/tls",
@@ -96,6 +100,7 @@ const sidebars: SidebarsConfig = {
     Troubleshooting: [
       "troubleshooting/faqs",
       "troubleshooting/recordings",
+      "troubleshooting/gpu",
       "troubleshooting/edgetpu",
     ],
     Development: [

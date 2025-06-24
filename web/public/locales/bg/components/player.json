@@ -1,0 +1,51 @@
+{
+  "noPreviewFoundFor": "Не е намерен предварителен преглед за {{cameraName}}",
+  "stats": {
+    "latency": {
+      "short": {
+        "value": "{{seconds}} сек",
+        "title": "Закъснение"
+      },
+      "title": "Закъснение:",
+      "value": "{{seconds}} секунди"
+    },
+    "streamType": {
+      "title": "Тип поток:",
+      "short": "Тип"
+    },
+    "bandwidth": {
+      "title": "Трафик:",
+      "short": "Трафик"
+    },
+    "totalFrames": "Общо кадри:",
+    "droppedFrames": {
+      "title": "Пропуснати кадри:",
+      "short": {
+        "title": "Пропуснати",
+        "value": "{{droppedFrames}} кадри"
+      }
+    },
+    "decodedFrames": "Декодирани кадри:",
+    "droppedFrameRate": "Честота на пропуснатати кадри:"
+  },
+  "streamOffline": {
+    "desc": "Не са получени кадри в потока за <code>разпознаване</code> на {{cameraName}}, проверете лог файловете за грешки",
+    "title": "Потокът е офлайн"
+  },
+  "submitFrigatePlus": {
+    "title": "Да се изпрати ли този кадър към Frigate+?",
+    "submit": "Изпрати"
+  },
+  "noPreviewFound": "Не е намерен предварителен преглед",
+  "noRecordingsFoundForThisTime": "За това време не са намерени записи",
+  "livePlayerRequiredIOSVersion": "За този тип поток на живо се изисква iOS 17.1 или по-нова версия.",
+  "cameraDisabled": "Камерата е изключена",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Успешно изпратен кадър към Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Неуспешно изпратен кадър към Frigate+"
+    }
+  }
+}

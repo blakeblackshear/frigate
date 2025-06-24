@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { isIOS, isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
+import { useTranslation } from "react-i18next";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
@@ -43,6 +44,7 @@ type StatusAlertNavProps = {
   className?: string;
 };
 function StatusAlertNav({ className }: StatusAlertNavProps) {
+  const { t } = useTranslation(["views/system"]);
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
   });
@@ -82,14 +84,19 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
         clearMessages("embeddings-reindex");
         addMessage(
           "embeddings-reindex",
-          `Reindexing embeddings (${Math.floor((reindexState.processed_objects / reindexState.total_objects) * 100)}% complete)`,
+          t("stats.reindexingEmbeddings", {
+            processed: Math.floor(
+              (reindexState.processed_objects / reindexState.total_objects) *
+                100,
+            ),
+          }),
         );
       }
       if (reindexState.status === "completed") {
         clearMessages("embeddings-reindex");
       }
     }
-  }, [reindexState, addMessage, clearMessages]);
+  }, [reindexState, addMessage, clearMessages, t]);
 
   if (!messages || Object.keys(messages).length === 0) {
     return;

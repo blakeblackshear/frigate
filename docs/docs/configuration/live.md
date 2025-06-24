@@ -23,7 +23,7 @@ If you are using go2rtc, you should adjust the following settings in your camera
 
 - Video codec: **H.264** - provides the most compatible video codec with all Live view technologies and browsers. Avoid any kind of "smart codec" or "+" codec like _H.264+_ or _H.265+_. as these non-standard codecs remove keyframes (see below).
 - Audio codec: **AAC** - provides the most compatible audio codec with all Live view technologies and browsers that support audio.
-- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
+- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
 
 The default video and audio codec on your camera may not always be compatible with your browser, which is why setting them to H.264 and AAC is recommended. See the [go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness) for codec support information.
 
@@ -40,6 +40,16 @@ go2rtc:
     http_cam: # <- for http streams
       - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio
       - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+```
+
+If your camera does not support AAC audio or are having problems with Live view, try transcoding to AAC audio directly:
+
+```yaml
+go2rtc:
+  streams:
+    rtsp_cam: # <- for RTSP streams
+      - "ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac" # <- copies video stream and transcodes to aac audio
+      - "ffmpeg:rtsp_cam#audio=opus" # <- provides support for WebRTC
 ```
 
 If your camera does not have audio and you are having problems with Live view, you should have go2rtc send video only:
@@ -104,9 +114,9 @@ cameras:
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
-- For internal/local access, unless you are running through the add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
+- For internal/local access, unless you are running through the HA Add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
-  ```yaml title="/config/frigate.yaml"
+  ```yaml title="config.yml"
   go2rtc:
     streams:
       test_cam: ...
@@ -121,9 +131,9 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 
 :::tip
 
-This extra configuration may not be required if Frigate has been installed as a Home Assistant add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
+This extra configuration may not be required if Frigate has been installed as a Home Assistant Add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
 
-However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate add-on fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the add-on logs page during the initialization:
+However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate Add-on fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the Add-on logs page during the initialization:
 
 ```log
 [WARN] Failed to get IP address from supervisor
@@ -179,13 +189,24 @@ Frigate provides a dialog in the Camera Group Edit pane with several options for
 
 :::note
 
-The default dashboard ("All Cameras") will always use Smart Streaming and the first entry set in your `streams` configuration, if defined. Use a camera group if you want to change any of these settings from the defaults.
+The default dashboard ("All Cameras") will always use:
+
+- Smart Streaming, unless you've disabled the global Automatic Live View in Settings.
+- The first entry set in your `streams` configuration, if defined.
+
+Use a camera group if you want to change any of these settings from the defaults.
 
 :::
 
 ### Disabling cameras
 
 Cameras can be temporarily disabled through the Frigate UI and through [MQTT](/integrations/mqtt#frigatecamera_nameenabledset) to conserve system resources. When disabled, Frigate's ffmpeg processes are terminated — recording stops, object detection is paused, and the Live dashboard displays a blank image with a disabled message. Review items, tracked objects, and historical footage for disabled cameras can still be accessed via the UI.
+
+:::note
+
+Disabling a camera via the Frigate UI or MQTT is temporary and does not persist through restarts of Frigate.
+
+:::
 
 For restreamed cameras, go2rtc remains active but does not use system resources for decoding or processing unless there are active external consumers (such as the Advanced Camera Card in Home Assistant using a go2rtc source).
 
@@ -203,9 +224,11 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 
    Frigate intelligently selects the live streaming technology based on a number of factors (user-selected modes like two-way talk, camera settings, browser capabilities, available bandwidth) and prioritizes showing an actual up-to-date live view of your camera's stream as quickly as possible.
 
-   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI labels as "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. You can also try using the _Reset_ button to force a reload of your stream.
+   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI labels as "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. Continuous streaming mode does not have an automatic reset mechanism, but you can use the _Reset_ option to force a reload of your stream.
 
-   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the recommendations above or ensure you have enough bandwidth available.
+   If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
+
+   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the [recommendations above](#camera_settings_recommendations).
 
 3. **It doesn't seem like my cameras are streaming on the Live dashboard. Why?**
 
@@ -220,6 +243,8 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
    Because a static image of a scene looks exactly the same as a live stream with no motion or activity, smart streaming updates your camera images once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any activity (motion or object/audio detection) occurs, cameras seamlessly switch to a live stream.
 
    This static image is pulled from the stream defined in your config with the `detect` role. When activity is detected, images from the `detect` stream immediately begin updating at ~5 frames per second so you can see the activity until the live player is loaded and begins playing. This usually only takes a second or two. If the live player times out, buffers, or has streaming errors, the jsmpeg player is loaded and plays a video-only stream from the `detect` role. When activity ends, the players are destroyed and a static image is displayed until activity is detected again, and the process repeats.
+
+   Smart streaming depends on having your camera's motion `threshold` and `contour_area` config values dialed in. Use the Motion Tuner in Settings in the UI to tune these values in real-time.
 
    This is Frigate's default and recommended setting because it results in a significant bandwidth savings, especially for high resolution cameras.
 

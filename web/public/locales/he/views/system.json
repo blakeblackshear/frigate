@@ -1,0 +1,180 @@
+{
+  "lastRefreshed": "רענון אחרון: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "ל-{{camera}} יש צריכת מעבד גבוהה של FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "ל-{{camera}} יש צריכת CPU גבוהה ({{detectAvg}}%)",
+    "healthy": "המערכת פועלת בצורה תקינה",
+    "reindexingEmbeddings": "אינדקס מחדש של ההטמעות ({{processed}}% הושלם)",
+    "cameraIsOffline": "{{camera}} לא זמינה",
+    "detectIsSlow": "{{detect}} איטי ({{speed}} אלפיות שנייה)",
+    "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)"
+  },
+  "documentTitle": {
+    "cameras": "מצב מצלמות - Frigate",
+    "storage": "מצב אחסון - Frigate",
+    "general": "סטטיסטיקה כללית - Frigate",
+    "enrichments": "סטטיסטיקת העשרה - Frigate",
+    "logs": {
+      "frigate": "לוגים - Frigate",
+      "go2rtc": "לוגים - Go2RTC - Frigate",
+      "nginx": "לוגים - Nginx - Frigate"
+    }
+  },
+  "title": "מערכת",
+  "metrics": "מדדי מערכת",
+  "logs": {
+    "download": {
+      "label": "הורדת לוגים"
+    },
+    "copy": {
+      "label": "העתק ללוח עריכה",
+      "success": "לוגים הועתקו ללוח העריכה",
+      "error": "לא ניתן היה להעתיק לוגים ללוח"
+    },
+    "type": {
+      "label": "סוג",
+      "timestamp": "חותמת זמן",
+      "tag": "תג",
+      "message": "הודעה"
+    },
+    "tips": "יומני רישום מוצגים בזרימה מהשרת",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "שגיאה באחזור לוגים: {{errorMessage}}",
+        "whileStreamingLogs": "שגיאה בעת הזרמת לוגים: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "כללי",
+    "detector": {
+      "title": "גלאים",
+      "inferenceSpeed": "מהירות זיהוי",
+      "temperature": "טמפרטורת הגלאי",
+      "cpuUsage": "ניצול מעבד על ידי הגלאי",
+      "memoryUsage": "שימוש בזיכרון על ידי הגלאי"
+    },
+    "hardwareInfo": {
+      "gpuMemory": "זיכרון GPU",
+      "title": "מידע על החומרה",
+      "gpuUsage": "שימוש GPU",
+      "gpuEncoder": "מקודד GPU",
+      "gpuDecoder": "מפענח GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "פלט Vainfo",
+          "returnCode": "קוד החזרה: {{code}}",
+          "processOutput": "פלט תהליך:",
+          "processError": "שגיאת תהליך:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "פלט SMI של Nvidia",
+          "name": "שם: {{name}}",
+          "driver": "מנהל התקן: {{driver}}",
+          "cudaComputerCapability": "יכולת חישוב CUDA: {{cuda_compute}}",
+          "vbios": "מידע על VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "סגור את המידע על ה-GPU"
+        },
+        "copyInfo": {
+          "label": "העתק מידע על GPU"
+        },
+        "toast": {
+          "success": "מידע על ה-GPU הועתק ללוח"
+        }
+      },
+      "npuUsage": "שימוש ב-NPU",
+      "npuMemory": "NPU זיכרון"
+    },
+    "otherProcesses": {
+      "title": "תהליכים אחרים",
+      "processCpuUsage": "ניצול CPU של התהליך",
+      "processMemoryUsage": "ניצול זיכרון של תהליך"
+    }
+  },
+  "enrichments": {
+    "infPerSecond": "מספר הסקות בשנייה",
+    "title": "העשרה",
+    "embeddings": {
+      "image_embedding": "הטמעת תמונה",
+      "text_embedding": "הטמעת טקסט",
+      "face_recognition": "זיהוי פנים",
+      "plate_recognition": "זיהוי לוחית רישוי",
+      "image_embedding_speed": "מהירות הטמעת תמונה",
+      "face_embedding_speed": "מהירות הטמעת פנים",
+      "face_recognition_speed": "מהירות זיהוי פנים",
+      "plate_recognition_speed": "מהירות זיהוי לוחית",
+      "text_embedding_speed": "מהירות הטמעת טקסט",
+      "yolov9_plate_detection_speed": "מהירות זיהוי לוחיות YOLOv9",
+      "yolov9_plate_detection": "זיהוי לוחיות YOLOv9"
+    }
+  },
+  "storage": {
+    "cameraStorage": {
+      "storageUsed": "אחסון",
+      "percentageOfTotalUsed": "אחוז מהסך הכל",
+      "bandwidth": "רוחב פס",
+      "unused": {
+        "title": "לא בשימוש",
+        "tips": "ייתכן שערך זה לא מייצג במדויק את השטח הפנוי הזמין ל-Frigate אם יש לך קבצים אחרים המאוחסנים בכונן שלך מעבר להקלטות של Frigate. Frigate אינו עוקב אחר ניצול האחסון מלבד להקלטות שלו."
+      },
+      "title": "אחסון מצלמה",
+      "camera": "מצלמה",
+      "unusedStorageInformation": "מידע על אחסון שאינו בשימוש"
+    },
+    "title": "אחסון",
+    "overview": "סקירה כללית",
+    "recordings": {
+      "title": "הקלטות",
+      "earliestRecording": "ההקלטה המוקדמת ביותר הזמינה:",
+      "tips": "ערך זה מייצג את סך האחסון בו משתמשים ההקלטות במסד הנתונים של Frigate. Frigate אינו עוקב אחר ניצול האחסון עבור כל הקבצים בדיסק שלך."
+    }
+  },
+  "cameras": {
+    "title": "מצלמות",
+    "overview": "סקירה כללית",
+    "info": {
+      "aspectRatio": "יחס גובה-רוחב",
+      "cameraProbeInfo": "פרטי בדיקה של מצלמה {{camera}}",
+      "streamDataFromFFPROBE": "נתוני השידור מתקבלים באמצעות <code>ffprobe</code>.",
+      "fetching": "טוען נתוני מצלמה",
+      "stream": "זרם {{idx}}",
+      "video": "וידיאו:",
+      "codec": "מקודד:",
+      "resolution": "רזולוציה:",
+      "fps": "פריימים לשניה:",
+      "audio": "קול:",
+      "error": "שגיאה: {{error}}",
+      "tips": {
+        "title": "טוען נתוני מצלמה"
+      },
+      "unknown": "לא ידוע"
+    },
+    "label": {
+      "detect": "גילוי",
+      "skipped": "דילוג",
+      "ffmpeg": "FFmpeg",
+      "overallDetectionsPerSecond": "סך כל הזיהויים לשנייה",
+      "overallSkippedDetectionsPerSecond": "סה״כ זיהויים שדולגו לשנייה",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} לכידה",
+      "cameraDetect": "זיהוי {{camName}}",
+      "cameraDetectionsPerSecond": "מספר הזיהויים של {{camName}} לשנייה",
+      "cameraSkippedDetectionsPerSecond": "כמות הזיהויים שדולגו בשנייה – {{camName}}",
+      "capture": "לכידה",
+      "cameraFramesPerSecond": "{{camName}} פריימים לשנייה",
+      "camera": "מצלמה",
+      "overallFramesPerSecond": "סך כל הפריימים לשנייה"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "העתקת נתוני הבדיקה בוצעה בהצלחה."
+      },
+      "error": {
+        "unableToProbeCamera": "לא ניתן לבדוק את המצלמה: {{errorMessage}}"
+      }
+    },
+    "framesAndDetections": "פריימים / זיהויים"
+  }
+}

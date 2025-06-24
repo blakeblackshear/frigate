@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Last ned video",
+      "toast": {
+        "success": "Videoen for inspeksjonselementet ditt har startet nedlasting."
+      }
+    }
+  }
+}

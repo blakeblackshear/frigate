@@ -7,6 +7,9 @@ import signal
 import subprocess as sp
 import threading
 import time
+from multiprocessing import Queue, Value
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 import cv2
 from setproctitle import setproctitle
@@ -15,6 +18,7 @@ from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
+from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -23,7 +27,7 @@ from frigate.const import (
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
-from frigate.object_detection import RemoteObjectDetector
+from frigate.object_detection.base import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
@@ -98,10 +102,10 @@ def capture_frames(
     frame_shape: tuple[int, int],
     frame_manager: FrameManager,
     frame_queue,
-    fps: mp.Value,
-    skipped_fps: mp.Value,
-    current_frame: mp.Value,
-    stop_event: mp.Event,
+    fps: Value,
+    skipped_fps: Value,
+    current_frame: Value,
+    stop_event: MpEvent,
 ):
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
@@ -113,8 +117,10 @@ def capture_frames(
     def get_enabled_state():
         """Fetch the latest enabled state from ZMQ."""
         _, config_data = config_subscriber.check_for_update()
+
         if config_data:
-            return config_data.enabled
+            config.enabled = config_data.enabled
+
         return config.enabled
 
     while not stop_event.is_set():
@@ -164,7 +170,7 @@ class CameraWatchdog(threading.Thread):
         camera_name,
         config: CameraConfig,
         shm_frame_count: int,
-        frame_queue: mp.Queue,
+        frame_queue: Queue,
         camera_fps,
         skipped_fps,
         ffmpeg_pid,
@@ -178,7 +184,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
-        self.ffmpeg_other_processes: list[dict[str, any]] = []
+        self.ffmpeg_other_processes: list[dict[str, Any]] = []
         self.camera_fps = camera_fps
         self.skipped_fps = skipped_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -365,7 +371,9 @@ class CameraWatchdog(threading.Thread):
             p["logpipe"].close()
         self.ffmpeg_other_processes.clear()
 
-    def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
+    def get_latest_segment_datetime(
+        self, latest_segment: datetime.datetime
+    ) -> datetime.datetime:
         """Checks if ffmpeg is still writing recording segments to cache."""
         cache_files = sorted(
             [
@@ -399,10 +407,10 @@ class CameraCapture(threading.Thread):
         frame_index: int,
         ffmpeg_process,
         frame_shape: tuple[int, int],
-        frame_queue: mp.Queue,
-        fps,
-        skipped_fps,
-        stop_event,
+        frame_queue: Queue,
+        fps: Value,
+        skipped_fps: Value,
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{config.name}"
@@ -416,7 +424,7 @@ class CameraCapture(threading.Thread):
         self.skipped_fps = skipped_fps
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
-        self.current_frame = mp.Value("d", 0.0)
+        self.current_frame = Value("d", 0.0)
         self.last_frame = 0
 
     def run(self):
@@ -466,14 +474,14 @@ def capture_camera(
 def track_camera(
     name,
     config: CameraConfig,
-    model_config,
-    labelmap,
-    detection_queue,
-    result_connection,
+    model_config: ModelConfig,
+    labelmap: dict[int, str],
+    detection_queue: Queue,
+    result_connection: MpEvent,
     detected_objects_queue,
     camera_metrics: CameraMetrics,
     ptz_metrics: PTZMetrics,
-    region_grid,
+    region_grid: list[list[dict[str, Any]]],
 ):
     stop_event = mp.Event()
 
@@ -517,6 +525,7 @@ def track_camera(
         frame_queue,
         frame_shape,
         model_config,
+        config,
         config.detect,
         frame_manager,
         motion_detector,
@@ -580,21 +589,22 @@ def detect(
 def process_frames(
     camera_name: str,
     requestor: InterProcessRequestor,
-    frame_queue: mp.Queue,
-    frame_shape,
+    frame_queue: Queue,
+    frame_shape: tuple[int, int],
     model_config: ModelConfig,
+    camera_config: CameraConfig,
     detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
-    detected_objects_queue: mp.Queue,
+    detected_objects_queue: Queue,
     camera_metrics: CameraMetrics,
     objects_to_track: list[str],
     object_filters,
-    stop_event,
+    stop_event: MpEvent,
     ptz_metrics: PTZMetrics,
-    region_grid,
+    region_grid: list[list[dict[str, Any]]],
     exit_on_empty: bool = False,
 ):
     next_region_update = get_tomorrow_at_time(2)
@@ -609,6 +619,29 @@ def process_frames(
     camera_enabled = True
 
     region_min_size = get_min_region_size(model_config)
+
+    attributes_map = model_config.attributes_map
+    all_attributes = model_config.all_attributes
+
+    # remove license_plate from attributes if this camera is a dedicated LPR cam
+    if camera_config.type == CameraTypeEnum.lpr:
+        modified_attributes_map = model_config.attributes_map.copy()
+
+        if (
+            "car" in modified_attributes_map
+            and "license_plate" in modified_attributes_map["car"]
+        ):
+            modified_attributes_map["car"] = [
+                attr
+                for attr in modified_attributes_map["car"]
+                if attr != "license_plate"
+            ]
+
+            attributes_map = modified_attributes_map
+
+        all_attributes = [
+            attr for attr in model_config.all_attributes if attr != "license_plate"
+        ]
 
     while not stop_event.is_set():
         _, updated_enabled_config = enabled_config_subscriber.check_for_update()
@@ -803,9 +836,7 @@ def process_frames(
             # if detection was run on this frame, consolidate
             if len(regions) > 0:
                 tracked_detections = [
-                    d
-                    for d in consolidated_detections
-                    if d[0] not in model_config.all_attributes
+                    d for d in consolidated_detections if d[0] not in all_attributes
                 ]
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(
@@ -817,7 +848,7 @@ def process_frames(
 
         # group the attribute detections based on what label they apply to
         attribute_detections: dict[str, list[TrackedObjectAttribute]] = {}
-        for label, attribute_labels in model_config.attributes_map.items():
+        for label, attribute_labels in attributes_map.items():
             attribute_detections[label] = [
                 TrackedObjectAttribute(d)
                 for d in consolidated_detections
@@ -830,12 +861,11 @@ def process_frames(
             detections[obj["id"]] = {**obj, "attributes": []}
 
         # find the best object for each attribute to be assigned to
-        all_objects: list[dict[str, any]] = object_tracker.tracked_objects.values()
+        all_objects: list[dict[str, Any]] = object_tracker.tracked_objects.values()
         for attributes in attribute_detections.values():
             for attribute in attributes:
                 filtered_objects = filter(
-                    lambda o: attribute.label
-                    in model_config.attributes_map.get(o["label"], []),
+                    lambda o: attribute.label in attributes_map.get(o["label"], []),
                     all_objects,
                 )
                 selected_object_id = attribute.find_best_object(filtered_objects)
@@ -883,7 +913,7 @@ def process_frames(
             for obj in object_tracker.tracked_objects.values():
                 if obj["frame_time"] == frame_time:
                     thickness = 2
-                    color = model_config.colormap[obj["label"]]
+                    color = model_config.colormap.get(obj["label"], (255, 255, 255))
                 else:
                     thickness = 1
                     color = (255, 0, 0)

@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Kamerastatistikk - Frigate",
+    "storage": "Lagringsstatistikk - Frigate",
+    "logs": {
+      "frigate": "Frigate-logger - Frigate",
+      "go2rtc": "Go2RTC-logger - Frigate",
+      "nginx": "Nginx-logger - Frigate"
+    },
+    "general": "Generell statistikk - Frigate",
+    "enrichments": "Statistikk for utvidelser - Frigate"
+  },
+  "logs": {
+    "copy": {
+      "success": "Logger kopiert til utklippstavlen",
+      "error": "Kunne ikke kopiere logger til utklippstavlen",
+      "label": "Kopier til utklippstavle"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Tidsstempel",
+      "tag": "Merke",
+      "message": "Melding"
+    },
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Feil ved henting av logger: {{errorMessage}}",
+        "whileStreamingLogs": "Feil under strømming av logger: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Last ned logger"
+    },
+    "tips": "Logger strømmer fra serveren"
+  },
+  "general": {
+    "title": "Generelt",
+    "detector": {
+      "inferenceSpeed": "Detektor inferenshastighet",
+      "title": "Detektorer",
+      "cpuUsage": "Detektor CPU-belastning",
+      "memoryUsage": "Detektor minnebruk",
+      "temperature": "Detektor temperatur"
+    },
+    "hardwareInfo": {
+      "gpuMemory": "GPU-minne",
+      "gpuEncoder": "GPU-enkoder",
+      "gpuDecoder": "GPU-dekoder",
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "CUDA beregningsevne: {{cuda_compute}}",
+          "vbios": "VBios-info: {{vbios}}",
+          "title": "Nvidia SMI-utdata",
+          "name": "Navn: {{name}}"
+        },
+        "copyInfo": {
+          "label": "Kopier GPU-informasjon"
+        },
+        "toast": {
+          "success": "GPU-informasjon kopiert til utklippstavlen"
+        },
+        "vainfoOutput": {
+          "title": "Vainfo-utdata",
+          "returnCode": "Returkode: {{code}}",
+          "processOutput": "Prosessutdata:",
+          "processError": "Prosessfeil:"
+        },
+        "closeInfo": {
+          "label": "Lukk GPU-informasjon"
+        }
+      },
+      "title": "Maskinvareinformasjon",
+      "gpuUsage": "GPU-belastning",
+      "npuMemory": "NPU minne",
+      "npuUsage": "NPU belastning"
+    },
+    "otherProcesses": {
+      "title": "Andre prosesser",
+      "processCpuUsage": "Prosessenes CPU-belastning",
+      "processMemoryUsage": "Prosessenes minnebruk"
+    }
+  },
+  "storage": {
+    "overview": "Oversikt",
+    "recordings": {
+      "earliestRecording": "Tidligste opptak tilgjengelig:",
+      "title": "Opptak",
+      "tips": "Denne verdien representerer total lagringsplass brukt av opptakene i Frigates database. Frigate sporer ikke lagringsbruk for alle filer på disken din."
+    },
+    "cameraStorage": {
+      "storageUsed": "Lagringsbruk",
+      "bandwidth": "Båndbredde",
+      "title": "Kameralagring",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Ubrukt lagringsinformasjon",
+      "percentageOfTotalUsed": "Prosentandel av tilgjengelig",
+      "unused": {
+        "title": "Ubrukt",
+        "tips": "Denne verdien representerer kanskje ikke nøyaktig den ledige plassen Frigate har tilgang til, dersom det finnes andre filer lagret på disken. Frigate sporer kun lagring brukt av egne opptak."
+      }
+    },
+    "title": "Lagring"
+  },
+  "cameras": {
+    "info": {
+      "codec": "Kodek:",
+      "resolution": "Oppløsning:",
+      "audio": "Lyd:",
+      "error": "Feil: {{error}}",
+      "cameraProbeInfo": "{{camera}} - kamerainformasjon",
+      "streamDataFromFFPROBE": "Strømmedata er hentet med <code>ffprobe</code>.",
+      "fetching": "Henter kameradata",
+      "stream": "Strøm {{idx}}",
+      "video": "Video:",
+      "fps": "Bilder per sekund:",
+      "unknown": "Ukjent",
+      "tips": {
+        "title": "Kamerainformasjon"
+      },
+      "aspectRatio": "bildeforhold"
+    },
+    "framesAndDetections": "Bilder / Deteksjoner",
+    "title": "Kameraer",
+    "overview": "Oversikt",
+    "label": {
+      "camera": "kamera",
+      "detect": "detektering",
+      "skipped": "forkastet",
+      "ffmpeg": "FFmpeg",
+      "capture": "opptak",
+      "cameraDetectionsPerSecond": "{{camName}} deteksjoner per sekund",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} forkastede deteksjoner per sekund",
+      "cameraFramesPerSecond": "{{camName}} bilder per sekund",
+      "cameraCapture": "{{camName}} opptak",
+      "cameraDetect": "{{camName}} detekt",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "overallDetectionsPerSecond": "totale deteksjoner per sekund",
+      "overallSkippedDetectionsPerSecond": "totalt forkastede deteksjoner per sekund",
+      "overallFramesPerSecond": "totalt bilder per sekund"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Kameradata kopiert til utklippstavlen."
+      },
+      "error": {
+        "unableToProbeCamera": "Kunne ikke hente informasjon fra kamera: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "plate_recognition_speed": "Hastighet for kjennemerkegjenkjenning",
+      "face_embedding_speed": "Hastighet ansikt-vektorrepresentasjon",
+      "text_embedding_speed": "Hastighet tekst-vektorrepresentasjoner",
+      "image_embedding_speed": "Hastighet bilde-vektorrepresentasjoner",
+      "face_recognition_speed": "Hastighet for ansiktsgjenkjenning",
+      "image_embedding": "Bilde-vektorrepresentasjoner",
+      "face_recognition": "Ansiktsgjenkjenning",
+      "text_embedding": "Tekst-vektorrepresentasjoner",
+      "plate_recognition": "Kjennemerke gjenkjenning",
+      "yolov9_plate_detection_speed": "Hastighet for YOLOv9 kjennemerkedeteksjon",
+      "yolov9_plate_detection": "YOLOv9 kjennemerkedeteksjon"
+    },
+    "title": "Utvidelser",
+    "infPerSecond": "Inferenser per sekund"
+  },
+  "title": "System",
+  "metrics": "Systemmålinger",
+  "lastRefreshed": "Sist oppdatert: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
+    "healthy": "Systemet fungerer som det skal",
+    "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",
+    "cameraIsOffline": "{{camera}} er frakoblet",
+    "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)"
+  }
+}

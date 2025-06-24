@@ -1,0 +1,61 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Oznake",
+    "all": {
+      "title": "Vse oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} oznaka",
+    "count_other": "{{count}} oznak"
+  },
+  "dates": {
+    "selectPreset": "Izberite nastavitev …",
+    "all": {
+      "title": "Vsi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Več filtrov",
+  "explore": {
+    "settings": {
+      "defaultView": {
+        "summary": "Povzetek"
+      }
+    }
+  },
+  "subLabels": {
+    "all": "Vse podoznake",
+    "label": "Podoznake"
+  },
+  "sort": {
+    "relevance": "Ustreznost",
+    "dateAsc": "Datum (naraščajoče)"
+  },
+  "zones": {
+    "label": "Cone",
+    "all": {
+      "title": "Vse cone",
+      "short": "Cone"
+    }
+  },
+  "timeRange": "Časovno obdobje",
+  "reset": {
+    "label": "Ponastavi filtre na privzete vrednosti"
+  },
+  "logSettings": {
+    "disableLogStreaming": "Izklopite zapisovanje dnevnika",
+    "allLogs": "Vsi dnevniki"
+  },
+  "trackedObjectDelete": {
+    "title": "Potrdite brisanje",
+    "desc": "Izbris teh {{objectLength}} sledenih predmetov odstrani pripadajoče slikovne posneteke, shranjene vstavke in povezane vnose življenskega cikla predmetov. Posnetki teh sledenih predmetov v pogledu Zgodovina se <em>NE</em> bodo izbrisali. <br /><br />Ste prepričani, da želite nadaljevati?<br /><br />Pritisnite tipko <em>Shift</em> , da v prihodnje preskočite dialog.",
+    "toast": {
+      "success": "Uspešno izbrisani sledeni predmeti.",
+      "error": "Ni uspelo izbrisati sledenih predmetov: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrirajte po maski območja"
+  }
+}

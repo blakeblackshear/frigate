@@ -1,0 +1,12 @@
+{
+  "filter": "Filtr",
+  "export": "Eksportuj",
+  "calendar": "Kalendarz",
+  "filters": "Filtry",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Nie wybrano poprawnego zakresu czasu",
+      "endTimeMustAfterStartTime": "Czas końca musi być po czasie początku"
+    }
+  }
+}

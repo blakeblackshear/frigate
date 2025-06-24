@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Ingen opptak funnet for dette tidspunktet",
+  "stats": {
+    "streamType": {
+      "short": "Type",
+      "title": "Strømmetype:"
+    },
+    "droppedFrames": {
+      "short": {
+        "title": "Tapt",
+        "value": "{{droppedFrames}} bilder"
+      },
+      "title": "Tapte bilder:"
+    },
+    "bandwidth": {
+      "title": "Båndbredde:",
+      "short": "Båndbredde"
+    },
+    "latency": {
+      "title": "Forsinkelse:",
+      "value": "{{seconds}} sekunder",
+      "short": {
+        "title": "Forsinkelse",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "totalFrames": "Totalt antall bilder:",
+    "decodedFrames": "Dekodede bilder:",
+    "droppedFrameRate": "Tapte bilder per sekund:"
+  },
+  "noPreviewFound": "Ingen forhåndsvisning funnet",
+  "noPreviewFoundFor": "Ingen forhåndsvisning funnet for {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Send dette bildet til Frigate+?",
+    "submit": "Send"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 eller høyere kreves for denne typen direkte-strømming.",
+  "streamOffline": {
+    "title": "Strømmen er frakoblet",
+    "desc": "Ingen bilder er mottatt på {{cameraName}} <code>detekt</code> strømmen, sjekk feilloggene"
+  },
+  "cameraDisabled": "Kameraet er deaktivert",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Bildet ble sendt til Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Kunne ikke sende bildet til Frigate+"
+    }
+  }
+}

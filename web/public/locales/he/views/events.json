@@ -1,0 +1,38 @@
+{
+  "alerts": "התרעות",
+  "detections": "גילויים",
+  "motion": {
+    "label": "תנועה",
+    "only": "תנועה בלבד"
+  },
+  "allCameras": "כל המצלמות",
+  "empty": {
+    "detection": "אין גילויים לבדיקה",
+    "alert": "אין התראות להצגה",
+    "motion": "לא נמצאו נתוני תנועה"
+  },
+  "timeline": "ציר זמן",
+  "timeline.aria": "בחירת ציר זמן",
+  "events": {
+    "label": "אירועים",
+    "aria": "בחירת אירועים",
+    "noFoundForTimePeriod": "לא נמצאו אירועים עבור תקופת זמן זו."
+  },
+  "documentTitle": "סקירה - Frigate",
+  "recordings": {
+    "documentTitle": "הקלטות - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "24 שעות אחרונות"
+  },
+  "markAsReviewed": "סימון כנבדק",
+  "markTheseItemsAsReviewed": "סמן פריטים אלה כנסרקו",
+  "newReviewItems": {
+    "label": "הצג פריטי סקירה חדשים",
+    "button": "פריטים חדשים לסקירה"
+  },
+  "selected_one": "נבחרו {{count}}",
+  "selected_other": "{{count}} נבחרו",
+  "camera": "מצלמה",
+  "detected": "זוהה"
+}

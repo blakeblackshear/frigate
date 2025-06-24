@@ -1,0 +1,10 @@
+{
+  "search": "Cari",
+  "savedSearches": "Simpan Pencarian",
+  "searchFor": "Cari untuk {{inputValue}}",
+  "button": {
+    "clear": "Bersihkan pencarian",
+    "save": "Simpan Pencarian",
+    "delete": "Hapus pencarian yang disimpan"
+  }
+}

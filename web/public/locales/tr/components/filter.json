@@ -1,0 +1,127 @@
+{
+  "labels": {
+    "label": "Etiketler",
+    "all": {
+      "title": "Bütün Etiketler",
+      "short": "Etiketler"
+    },
+    "count": "{{count}} Etiket",
+    "count_one": "{{count}} Etiket",
+    "count_other": "{{count}} Etiket"
+  },
+  "dates": {
+    "all": {
+      "title": "Tüm Tarihler",
+      "short": "Tarihler"
+    },
+    "selectPreset": "Ön ayar seçin…"
+  },
+  "sort": {
+    "label": "Sırala",
+    "dateAsc": "Tarih (Artan)",
+    "dateDesc": "Tarih (Azalan)",
+    "scoreAsc": "Nesne Skoru (Artan)",
+    "scoreDesc": "Nesne Skoru (Azalan)",
+    "speedAsc": "Tahmini Hız (Artan)",
+    "relevance": "Alaka",
+    "speedDesc": "Tahmini Hız (Azalan)"
+  },
+  "filter": "Filtre",
+  "zones": {
+    "all": {
+      "short": "Alanlar",
+      "title": "Bütün Alanlar"
+    },
+    "label": "Alanlar"
+  },
+  "reset": {
+    "label": "Filtreleri varsayılanlara sıfırla"
+  },
+  "features": {
+    "submittedToFrigatePlus": {
+      "tips": "Öncelikle izlenen nesneler içinde fotoğrafı olanlar için filtre uygulamalısınız.<br /><br />Fotoğrafı olmayan nesneler Frigate+’a gönderilemez.",
+      "label": "Frigate+'a Gönderildi"
+    },
+    "hasVideoClip": "Video klibi var",
+    "hasSnapshot": "Fotoğrafı var",
+    "label": "Özellikler"
+  },
+  "score": "Skor",
+  "estimatedSpeed": "Tahmini Hız ({{unit}})",
+  "timeRange": "Zaman Aralığı",
+  "subLabels": {
+    "all": "Tüm Alt Etiketler",
+    "label": "Alt Etiketler"
+  },
+  "more": "Daha Fazla Filtre",
+  "cameras": {
+    "all": {
+      "short": "Kameralar",
+      "title": "Tüm Kameralar"
+    },
+    "label": "Kameraları Filtrele"
+  },
+  "review": {
+    "showReviewed": "İncelenenleri de Göster"
+  },
+  "explore": {
+    "settings": {
+      "defaultView": {
+        "summary": "Özet",
+        "title": "Varsayılan Görünüm",
+        "unfilteredGrid": "Filtresiz Izgara",
+        "desc": "Filtre seçilmediğinde, her etiket için en son izlenen nesnelerin özeti ya da filtresiz ızgara görünümü gösterilir."
+      },
+      "gridColumns": {
+        "title": "Izgara Sütun Sayısı",
+        "desc": "Izgara görünümüde gösterilecek sütun sayısı."
+      },
+      "title": "Ayarlar",
+      "searchSource": {
+        "options": {
+          "thumbnailImage": "Küçük Resim",
+          "description": "Metin Açıklaması"
+        },
+        "label": "Arama kaynağı",
+        "desc": "Aramanızda küçük resimleri mi yoksa açıklamaları mı kullanacağınızı seçin."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Filtrelemek için tarih seçin"
+      }
+    }
+  },
+  "logSettings": {
+    "filterBySeverity": "Önceliğe göre günlükleri filtrele",
+    "disableLogStreaming": "Günlük akışını devre dışı bırak",
+    "allLogs": "Tüm günlükler",
+    "loading": {
+      "title": "Günlük Akışı",
+      "desc": "Günlükler sayfası en aşağıya kaydırıldığında yeni günlük satırları geldikçe aşağıya eklenir."
+    },
+    "label": "Düzeye göre günlükleri filtrele"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "success": "Takip edilen nesneler başarıyla silindi.",
+      "error": "Takip edilen nesneler silinemedi: {{errorMessage}}"
+    },
+    "title": "Silmeyi onayla",
+    "desc": "Bu {{objectLength}} adet izlenen nesneyi sildiğinizde ilgili tüm fotoğraflar, kaydedilmiş tüm gömüler ve ilişkili tüm Nesne Geçmişi kayıtları kaldırılır. Bu izlenen nesnelere ait Geçmiş görünümündeki kayıtlı görüntüler <em>SİLİNMEYECEKTİR.</em><br /><br />Devam etmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
+  },
+  "recognizedLicensePlates": {
+    "selectPlatesFromList": "Listeden bir veya birden fazla plaka seçin.",
+    "placeholder": "Plaka ara…",
+    "loading": "Tanınan plakalar yükleniyor…",
+    "title": "Tanınan Plakalar",
+    "noLicensePlatesFound": "Plaka bulunamadı.",
+    "loadFailed": "Tanınan plakalar yüklenemedi."
+  },
+  "motion": {
+    "showMotionOnly": "Yalnızca Hareket Olanları Göster"
+  },
+  "zoneMask": {
+    "filterBy": "Alana göre filtrele"
+  }
+}

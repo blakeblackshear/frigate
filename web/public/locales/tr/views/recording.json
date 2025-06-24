@@ -1,0 +1,12 @@
+{
+  "filter": "Filtre",
+  "export": "Dışa Aktar",
+  "filters": "Filtreler",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Geçerli bir zaman aralığı seçilmedi",
+      "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanında sonra olmalıdır"
+    }
+  },
+  "calendar": "Takvim"
+}

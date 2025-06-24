@@ -1,0 +1,209 @@
+{
+  "generativeAI": "IA Generativa",
+  "documentTitle": "Esplora - Frigate",
+  "exploreIsUnavailable": {
+    "title": "Esplora non è disponibile",
+    "embeddingsReindexing": {
+      "context": "Potrai usare Esplora dopo che l'incorporamento degli oggetti tracciati avrà terminato la ricostruzione dell'indice.",
+      "step": {
+        "descriptionsEmbedded": "Descrizioni incorporate: ",
+        "thumbnailsEmbedded": "Miniature incorporate: ",
+        "trackedObjectsProcessed": "Oggetti tracciati elaborati: "
+      },
+      "startingUp": "Avvio…",
+      "estimatedTime": "Tempo rimanente stimato:",
+      "finishingShortly": "Completamento a breve"
+    },
+    "downloadingModels": {
+      "setup": {
+        "textModel": "Modello di testo",
+        "visionModel": "Modello di visione",
+        "visionModelFeatureExtractor": "Estrattore di funzionalità del modello di visione",
+        "textTokenizer": "Tokenizzatore di testo"
+      },
+      "tips": {
+        "documentation": "Leggi la documentazione",
+        "context": "Una volta scaricati i modelli, potrebbe essere necessario reindicizzare gli incorporamenti degli oggetti tracciati."
+      },
+      "error": "Si è verificato un errore. Controlla i registri di Frigate.",
+      "context": "Frigate sta scaricando i modelli di incorporamento necessari per supportare la funzione di Ricerca Semantica. L'operazione potrebbe richiedere diversi minuti, a seconda della velocità della connessione di rete."
+    }
+  },
+  "details": {
+    "timestamp": "Orario",
+    "snapshotScore": {
+      "label": "Punteggio istantanea"
+    },
+    "regenerateFromSnapshot": "Rigenera da istantanea",
+    "item": {
+      "tips": {
+        "mismatch_one": "E' stato rilevato {{count}} oggetto non disponibile e incluse in questo elemento visto. Tale oggetto non è stato classificato come avviso o rilevamento oppure è già stato ripulito/eliminato.",
+        "mismatch_many": "Sono stati rilevati {{count}} oggetti non disponibili e inclusi in questo elemento visto. Tali oggetti non sono stati classificati come avvisi o rilevamenti oppure sono già stati ripuliti/eliminati.",
+        "mismatch_other": "Sono stati rilevati {{count}} oggetti non disponibili e inclusi in questo elemento visto. Tali oggetti non sono stati classificati come avvisi o rilevamenti oppure sono già stati ripuliti/eliminati.",
+        "hasMissingObjects": "Modifica la configurazione se vuoi che Frigate salvi gli oggetti tracciati per le seguenti etichette: <em>{{objects}}</em>"
+      },
+      "title": "Dettagli dell'elemento visto",
+      "desc": "Dettagli dell'elemento visto",
+      "button": {
+        "share": "Condividi questo elemento visto",
+        "viewInExplore": "Visualizza in Esplora"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "È stata richiesta una nuova descrizione a {{provider}}. A seconda della velocità del tuo provider, la rigenerazione della nuova descrizione potrebbe richiedere del tempo.",
+          "updatedSublabel": "Sottoetichetta aggiornata correttamente.",
+          "updatedLPR": "Targa aggiornata con successo."
+        },
+        "error": {
+          "regenerate": "Impossibile chiamare {{provider}} per una nuova descrizione: {{errorMessage}}",
+          "updatedSublabelFailed": "Impossibile aggiornare la sottoetichetta: {{errorMessage}}",
+          "updatedLPRFailed": "Impossibile aggiornare la targa: {{errorMessage}}"
+        }
+      }
+    },
+    "zones": "Zone",
+    "description": {
+      "label": "Descrizione",
+      "placeholder": "Descrizione dell'oggetto tracciato",
+      "aiTips": "Frigate non richiederà una descrizione al tuo fornitore di Intelligenza Artificiale Generativa finché non sarà terminato il ciclo di vita dell'oggetto tracciato."
+    },
+    "label": "Etichetta",
+    "editSubLabel": {
+      "title": "Modifica sottoetichetta",
+      "desc": "Inserisci una nuova sottoetichetta per questa {{label}}",
+      "descNoLabel": "Inserisci una nuova sottoetichetta per questo oggetto tracciato"
+    },
+    "editLPR": {
+      "title": "Modifica targa",
+      "desc": "Inserisci un nuovo valore della targa per questa {{label}}",
+      "descNoLabel": "Inserisci un nuovo valore di targa per questo oggetto tracciato"
+    },
+    "topScore": {
+      "label": "Punteggio massimo",
+      "info": "Il punteggio massimo è il punteggio mediano più alto per l'oggetto tracciato, quindi potrebbe differire dal punteggio mostrato nella miniatura del risultato della ricerca."
+    },
+    "recognizedLicensePlate": "Targa riconosciuta",
+    "estimatedSpeed": "Velocità stimata",
+    "objects": "Oggetti",
+    "camera": "Telecamera",
+    "button": {
+      "findSimilar": "Trova simili",
+      "regenerate": {
+        "title": "Rigenera",
+        "label": "Rigenera la descrizione dell'oggetto tracciato"
+      }
+    },
+    "expandRegenerationMenu": "Espandi il menu di rigenerazione",
+    "regenerateFromThumbnails": "Rigenera dalle miniature",
+    "tips": {
+      "descriptionSaved": "Descrizione salvata correttamente",
+      "saveDescriptionFailed": "Impossibile aggiornare la descrizione: {{errorMessage}}"
+    }
+  },
+  "objectLifecycle": {
+    "annotationSettings": {
+      "offset": {
+        "tips": "SUGGERIMENTO: immagina un filmato evento con una persona che cammina da sinistra verso destra. Se il riquadro di delimitazione della cronologia dell'evento si trova costantemente a sinistra della persona, il valore dovrebbe essere diminuito. Analogamente, se una persona cammina da sinistra verso destra e il riquadro di delimitazione si trova costantemente davanti alla persona, il valore dovrebbe essere aumentato.",
+        "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. Tuttavia, è possibile utilizzare il campo <code>annotation_offset</code> per correggere questo problema.",
+        "label": "Compensazione di annotazione",
+        "documentation": "Leggi la documentazione ",
+        "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
+        "toast": {
+          "success": "La compensazione di annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
+        }
+      },
+      "showAllZones": {
+        "title": "Mostra tutte le zone",
+        "desc": "Mostra sempre le zone nei fotogrammi in cui gli oggetti sono entrati in una zona."
+      },
+      "title": "Impostazioni di annotazione"
+    },
+    "lifecycleItemDesc": {
+      "heard": "{{label}} sentito",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} rilevato per {{label}}",
+        "other": "{{label}} riconosciuto come {{attribute}}"
+      },
+      "gone": "{{label}} lasciato",
+      "external": "{{label}} rilevato",
+      "visible": "{{label}} rilevato",
+      "entered_zone": "{{label}} è entrato in {{zones}}",
+      "active": "{{label}} è diventato attivo",
+      "stationary": "{{label}} è diventato stazionario",
+      "header": {
+        "ratio": "Rapporto",
+        "area": "Area",
+        "zones": "Zone"
+      }
+    },
+    "title": "Ciclo di vita dell'oggetto",
+    "createObjectMask": "Crea maschera oggetto",
+    "noImageFound": "Nessuna immagine trovata per questo orario.",
+    "adjustAnnotationSettings": "Regola le impostazioni di annotazione",
+    "scrollViewTips": "Scorri per visualizzare i momenti più significativi del ciclo di vita di questo oggetto.",
+    "autoTrackingTips": "Le posizioni dei riquadri di delimitazione non saranno precise per le telecamere con tracciamento automatico.",
+    "carousel": {
+      "previous": "Diapositiva precedente",
+      "next": "Diapositiva successiva"
+    },
+    "count": "{{first}} di {{second}}",
+    "trackedPoint": "Punto tracciato"
+  },
+  "type": {
+    "snapshot": "istantanea",
+    "object_lifecycle": "ciclo di vita dell'oggetto",
+    "details": "dettagli",
+    "video": "video"
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "label": "Scarica istantanea",
+      "aria": "Scarica istantanea"
+    },
+    "viewInHistory": {
+      "label": "Visualizza in Storico",
+      "aria": "Visualizza in Storico"
+    },
+    "deleteTrackedObject": {
+      "label": "Elimina questo oggetto tracciato"
+    },
+    "downloadVideo": {
+      "label": "Scarica video",
+      "aria": "Scarica video"
+    },
+    "viewObjectLifecycle": {
+      "label": "Visualizza il ciclo di vita dell'oggetto",
+      "aria": "Mostra il ciclo di vita dell'oggetto"
+    },
+    "findSimilar": {
+      "label": "Trova simili",
+      "aria": "Trova oggetti tracciati simili"
+    },
+    "submitToPlus": {
+      "label": "Invia a Frigate+",
+      "aria": "Invia a Frigate Plus"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate al ciclo di vita dell'oggetto. Il filmato registrato di questo oggetto tracciato nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
+      "title": "Conferma eliminazione"
+    }
+  },
+  "trackedObjectDetails": "Dettagli dell'oggetto tracciato",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "error": "Impossibile eliminare l'oggetto tracciato: {{errorMessage}}",
+        "success": "Oggetto tracciato eliminato correttamente."
+      }
+    },
+    "tooltip": "Corrispondenza {{type}} al {{confidence}}%"
+  },
+  "trackedObjectsCount_one": "{{count}} oggetto tracciato ",
+  "trackedObjectsCount_many": "{{count}} oggetti tracciati ",
+  "trackedObjectsCount_other": "{{count}} oggetti tracciati ",
+  "fetchingTrackedObjectsFailed": "Errore durante il recupero degli oggetti tracciati: {{errorMessage}}",
+  "noTrackedObjects": "Nessun oggetto tracciato trovato",
+  "exploreMore": "Esplora altri oggetti {{label}}"
+}

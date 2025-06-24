@@ -1,3 +1,4 @@
+import TextEntry from "@/components/input/TextEntry";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,12 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 
 type TextEntryDialogProps = {
   open: boolean;
@@ -22,6 +20,8 @@ type TextEntryDialogProps = {
   onSave: (text: string) => void;
   defaultValue?: string;
   allowEmpty?: boolean;
+  regexPattern?: RegExp;
+  regexErrorMessage?: string;
 };
 
 export default function TextEntryDialog({
@@ -32,34 +32,10 @@ export default function TextEntryDialog({
   onSave,
   defaultValue = "",
   allowEmpty = false,
+  regexPattern,
+  regexErrorMessage,
 }: TextEntryDialogProps) {
-  const formSchema = z.object({
-    text: z.string(),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { text: defaultValue },
-  });
-  const fileRef = form.register("text");
-
-  // upload handler
-
-  const onSubmit = useCallback(
-    (data: z.infer<typeof formSchema>) => {
-      if (!allowEmpty && !data["text"]) {
-        return;
-      }
-      onSave(data["text"]);
-    },
-    [onSave, allowEmpty],
-  );
-
-  useEffect(() => {
-    if (open) {
-      form.reset({ text: defaultValue });
-    }
-  }, [open, defaultValue, form]);
+  const { t } = useTranslation("common");
 
   return (
     <Dialog open={open} defaultOpen={false} onOpenChange={setOpen}>
@@ -68,33 +44,22 @@ export default function TextEntryDialog({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="text"
-              render={() => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      className="aspect-video h-8 w-full"
-                      type="text"
-                      {...fileRef}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <DialogFooter className="pt-4">
-              <Button type="button" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="select" type="submit">
-                Save
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <TextEntry
+          defaultValue={defaultValue}
+          allowEmpty={allowEmpty}
+          onSave={onSave}
+          regexPattern={regexPattern}
+          regexErrorMessage={regexErrorMessage}
+        >
+          <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
+            <Button type="button" onClick={() => setOpen(false)}>
+              {t("button.cancel")}
+            </Button>
+            <Button variant="select" type="submit">
+              {t("button.save")}
+            </Button>
+          </DialogFooter>
+        </TextEntry>
       </DialogContent>
     </Dialog>
   );

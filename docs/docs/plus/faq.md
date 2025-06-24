@@ -22,3 +22,13 @@ Yes. Models and metadata are stored in the `model_cache` directory within the co
 ### Can I keep using my Frigate+ models even if I do not renew my subscription?
 
 Yes. Subscriptions to Frigate+ provide access to the infrastructure used to train the models. Models trained with your subscription are yours to keep and use forever. However, do note that the terms and conditions prohibit you from sharing, reselling, or creating derivative products from the models.
+
+### Why can't I submit images to Frigate+?
+
+If you've configured your API key and the Frigate+ Settings page in the UI shows that the key is active, you need to ensure that you've enabled both snapshots and `clean_copy` snapshots for the cameras you'd like to submit images for. Note that `clean_copy` is enabled by default when snapshots are enabled.
+
+```yaml
+snapshots:
+  enabled: true
+  clean_copy: true
+```

@@ -1,0 +1,44 @@
+{
+  "documentTitle": {
+    "default": "Beállítások - Frigate",
+    "authentication": "Hitelesítési beállítások - Frigate",
+    "camera": "Kamera beállítások - Frigate",
+    "classification": "Osztályozási beállítások - Frigate",
+    "masksAndZones": "Maszk és zónaszerkesztő - Frigate",
+    "object": "Hibakeresés - Frigate",
+    "general": "Alapbeállítások - Frigate",
+    "frigatePlus": "Frigate+ beállítások - Frigate",
+    "notifications": "Értesítések beállítása - Frigate",
+    "motionTuner": "Mozgás Hangoló - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "classification": "Osztályozás",
+    "cameras": "Kamera beállítások",
+    "masksAndZones": "Maszkok / Zónák",
+    "motionTuner": "Mozgás finomhangolása",
+    "debug": "Hibakeresés",
+    "users": "Felhasználók",
+    "notifications": "Értesítések",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Vannak nem mentett módosítások.",
+      "desc": "Szeretné elmenteni a módosításokat a folytatás előtt?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Nincs kamera"
+  },
+  "general": {
+    "liveDashboard": {
+      "title": "Live irányítópult",
+      "automaticLiveView": {
+        "label": "Automata élőkép"
+      }
+    },
+    "title": "Alapbeállítások"
+  }
+}

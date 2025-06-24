@@ -8,6 +8,7 @@ import subprocess as sp
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np
@@ -255,7 +256,7 @@ class PreviewRecorder:
 
     def should_write_frame(
         self,
-        current_tracked_objects: list[dict[str, any]],
+        current_tracked_objects: list[dict[str, Any]],
         motion_boxes: list[list[int]],
         frame_time: float,
     ) -> bool:
@@ -315,7 +316,7 @@ class PreviewRecorder:
 
     def write_data(
         self,
-        current_tracked_objects: list[dict[str, any]],
+        current_tracked_objects: list[dict[str, Any]],
         motion_boxes: list[list[int]],
         frame_time: float,
         frame: np.ndarray,
@@ -402,6 +403,7 @@ class PreviewRecorder:
             self.reset_frame_cache(frame_time)
 
     def stop(self) -> None:
+        self.config_subscriber.stop()
         self.requestor.stop()
 
 

@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import AnyStr, Optional
+from typing import Any, AnyStr, Optional
 
 import cv2
 import numpy as np
@@ -80,7 +80,7 @@ def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
             return False
 
     # check license_plate on car
-    if label == "car":
+    if label in ["car", "motorcycle"]:
         if has_better_attr(current_thumb, new_obj, "license_plate"):
             return True
         # if the current thumb has a license_plate attr, dont update unless it gets better
@@ -263,6 +263,19 @@ def draw_box_with_label(
         color=(0, 0, 0),
         thickness=2,
     )
+
+
+def grab_cv2_contours(cnts):
+    # if the length the contours tuple returned by cv2.findContours
+    # is '2' then we are using either OpenCV v2.4, v4-beta, or
+    # v4-official
+    if len(cnts) == 2:
+        return cnts[0]
+
+    # if the length of the contours tuple is '3' then we are using
+    # either OpenCV v3, v4-pre, or v4-alpha
+    elif len(cnts) == 3:
+        return cnts[1]
 
 
 def is_label_printable(label) -> bool:
@@ -753,7 +766,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         pass
 
     @abstractmethod
@@ -834,7 +847,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -931,7 +944,7 @@ def get_image_from_recording(
     relative_frame_time: float,
     codec: str,
     height: Optional[int] = None,
-) -> Optional[any]:
+) -> Optional[Any]:
     """retrieve a frame from given time in recording file."""
 
     ffmpeg_cmd = [

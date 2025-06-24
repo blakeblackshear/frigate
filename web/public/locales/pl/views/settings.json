@@ -1,0 +1,687 @@
+{
+  "menu": {
+    "users": "Użytkownicy",
+    "notifications": "Powiadomienia",
+    "ui": "Interfejs Użytkownika",
+    "classification": "Klasyfikacja",
+    "cameras": "Ustawienia Kamery",
+    "frigateplus": "Frigate+",
+    "masksAndZones": "Maski / Strefy",
+    "motionTuner": "Konfigurator Ruchu",
+    "debug": "Debugowanie",
+    "enrichments": "Wzbogacenia"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Masz niezapisane zmiany.",
+      "desc": "Czy chcesz zapisać swoje zmiany przed kontynuowaniem?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Brak Kamery"
+  },
+  "general": {
+    "title": "Ustawienia Ogólne",
+    "storedLayouts": {
+      "title": "Zapisane Układy",
+      "clearAll": "Wyczyść Wszystkie Układy",
+      "desc": "Układ kamer w grupie można przeciągać/zmieniać rozmiar. Pozycje są zapisywane w lokalnej pamięci przeglądarki."
+    },
+    "calendar": {
+      "title": "Kalendarz",
+      "firstWeekday": {
+        "label": "Pierwszy dzień tygodnia",
+        "sunday": "Niedziela",
+        "monday": "Poniedziałek",
+        "desc": "Dzień od którego zaczyna się kalendarz przeglądu."
+      }
+    },
+    "liveDashboard": {
+      "automaticLiveView": {
+        "label": "Automatyczny Podgląd na Żywo",
+        "desc": "Automatycznie przełącz na podgląd na żywo kamery, gdy wykryta zostanie aktywność. Wyłączenie tej opcji spowoduje, że statyczne obrazy kamer na panelu Na Żywo będą aktualizowane tylko raz na minutę."
+      },
+      "title": "Panel Na Żywo",
+      "playAlertVideos": {
+        "label": "Odtwarzaj Filmy Alarmowe",
+        "desc": "Domyślnie, ostatnie alerty na panelu Na Żywo są odtwarzane jako małe zapętlone filmy. Wyłącz tę opcję, aby pokazywać tylko statyczny obraz ostatnich alertów na tym urządzeniu/przeglądarce."
+      }
+    },
+    "cameraGroupStreaming": {
+      "title": "Ustawienia Strumieniowania Grup Kamer",
+      "desc": "Ustawienia strumieniowania dla każdej grupy kamer są przechowywane w lokalnej pamięci przeglądarki.",
+      "clearAll": "Wyczyść Wszystkie Ustawienia Strumieniowania"
+    },
+    "recordingsViewer": {
+      "title": "Przeglądarka Nagrań",
+      "defaultPlaybackRate": {
+        "label": "Domyślna Prędkość Odtwarzania",
+        "desc": "Domyślna prędkość odtwarzania dla odtwarzania nagrań."
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Wyczyszczono zapisany układ dla {{cameraName}}",
+        "clearStreamingSettings": "Wyczyszczono ustawienia strumieniowania dla wszystkich grup kamer."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Nie udało się wyczyścić zapisanego układu: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nie udało się wyczyścić ustawień strumieniowania: {{errorMessage}}"
+      }
+    }
+  },
+  "documentTitle": {
+    "default": "Ustawienia - Frigate",
+    "camera": "Ustawienia Kamery - Frigate",
+    "masksAndZones": "Edytor Masek i Stref - Frigate",
+    "frigatePlus": "Ustawienia Frigate+ - Frigate",
+    "classification": "Ustawienia Klasyfikacji - Frigate",
+    "general": "Ustawienia Ogólne - Frigate",
+    "authentication": "Ustawienia Uwierzytelniania - Frigate",
+    "motionTuner": "Konfigurator Ruchu - Frigate",
+    "object": "Debug - Frigate",
+    "notifications": "Ustawienia powiadomień - Frigate",
+    "enrichments": "Ustawienia wzbogacania - Frigate"
+  },
+  "classification": {
+    "title": "Ustawienia Klasyfikacji",
+    "semanticSearch": {
+      "modelSize": {
+        "small": {
+          "title": "mały",
+          "desc": "Używanie <em>małego</em> modelu wykorzystuje skwantyzowaną wersję, która zużywa mniej pamięci RAM i działa szybciej na procesorze przy bardzo nieznacznej różnicy w jakości osadzeń."
+        },
+        "large": {
+          "title": "duży",
+          "desc": "Używanie <em>dużego</em> modelu wykorzystuje pełny model Jina i automatycznie uruchomi się na GPU, jeśli jest dostępny."
+        },
+        "desc": "Rozmiar modelu używanego do osadzeń wyszukiwania semantycznego.",
+        "label": "Rozmiar Modelu"
+      },
+      "title": "Wyszukiwanie Semantyczne",
+      "desc": "Wyszukiwanie semantyczne w Frigate pozwala znaleźć śledzone obiekty w elementach przeglądu za pomocą samego obrazu, zdefiniowanego przez użytkownika opisu tekstowego lub automatycznie wygenerowanego opisu.",
+      "readTheDocumentation": "Przeczytaj Dokumentację",
+      "reindexNow": {
+        "label": "Przeindeksuj Teraz",
+        "desc": "Przeindeksowanie wygeneruje ponownie osadzenia dla wszystkich śledzonych obiektów. Ten proces działa w tle i może maksymalnie obciążyć procesor oraz zająć sporo czasu w zależności od liczby śledzonych obiektów.",
+        "confirmButton": "Przeindeksuj",
+        "success": "Przeindeksowanie rozpoczęte pomyślnie.",
+        "alreadyInProgress": "Przeindeksowanie jest już w toku.",
+        "error": "Nie udało się rozpocząć przeindeksowania: {{errorMessage}}",
+        "confirmTitle": "Potwierdź Przeindeksowanie",
+        "confirmDesc": "Czy na pewno chcesz przeindeksować osadzenia wszystkich śledzonych obiektów? Ten proces będzie działał w tle, ale może maksymalnie obciążyć procesor i zająć sporo czasu. Możesz śledzić postęp na stronie Eksploruj."
+      }
+    },
+    "faceRecognition": {
+      "title": "Rozpoznawanie Twarzy",
+      "desc": "Rozpoznawanie twarzy pozwala na przypisanie imion do osób przez Frigate jako podrzędna etykieta. Ta informacja jest zawarta w interfejsie użytkownika, filtrach jak i w powiadomieniach.",
+      "modelSize": {
+        "label": "Rozmiar Modelu",
+        "desc": "Rozmiar modelu używanego do rozpoznawania twarzy.",
+        "small": {
+          "title": "mały",
+          "desc": "Używanie <em>małego</em> modelu wykorzystuje model osadzania twarzy FaceNet, który działa efektywnie na większości procesorów."
+        },
+        "large": {
+          "title": "duży",
+          "desc": "Używanie <em>dużego</em> modelu wykorzystuje model osadzania twarzy ArcFace i automatycznie uruchomi się na GPU, jeśli jest dostępny."
+        }
+      },
+      "readTheDocumentation": "Przeczytaj Dokumentację"
+    },
+    "licensePlateRecognition": {
+      "title": "Rozpoznawanie Tablic Rejestracyjnych",
+      "desc": "Frigate może rozpoznawać tablice rejestracyjne pojazdów i automatycznie dodawać wykryte znaki do pola recognized_license_plate albo znaną nazwę jako etykietę podrzędną do obiektów typu samochód. Częstym przypadkiem użycia może być odczytywanie tablic rejestracyjnych samochodów wjeżdżających na podjazd albo przejeżdżających ulicą.",
+      "readTheDocumentation": "Przeczytaj Dokumentację"
+    },
+    "toast": {
+      "error": "Nie udało się zapisać zmian w konfiguracji: {{errorMessage}}",
+      "success": "Ustawienia klasyfikacji zostały zapisane. Uruchom ponownie Frigate aby wprowadzić swoje zmiany."
+    },
+    "birdClassification": {
+      "desc": "Klasyfikacja ptaków identyfikuje znane ptaki przy użyciu skwantyzowanego modelu Tensorflow. Gdy znany ptak zostanie rozpoznany, jego popularna nazwa zostanie dodana jako sub_label. Ta informacja jest uwzględniana w interfejsie użytkownika, filtrach oraz powiadomieniach.",
+      "title": "Klasyfikacja Ptaków"
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (Zmienione ustawienia klasyfikacji)",
+    "unsavedChanges": "Niezapisane zmiany w ustawieniach klasyfikacji"
+  },
+  "camera": {
+    "title": "Ustawienia Kamery",
+    "reviewClassification": {
+      "noDefinedZones": "Brak stref zdefiniowanych dla tej kamery.",
+      "selectAlertsZones": "Wybierz strefy dla Alertów",
+      "title": "Klasyfikacja Przeglądu",
+      "desc": "Frigate kategoryzuje elementy przeglądu jako Alerty i Wykrycia. Domyślnie wszystkie obiekty <em>osoba</em> i <em>samochód</em> są traktowane jako Alerty. Możesz doprecyzować kategoryzację elementów przeglądu, konfigurując dla nich wymagane strefy.",
+      "readTheDocumentation": "Przeczytaj Dokumentację",
+      "objectAlertsTips": "Wszystkie obiekty {{alertsLabels}} na {{cameraName}} będą wyświetlane jako Alerty.",
+      "zoneObjectAlertsTips": "Wszystkie obiekty {{alertsLabels}} wykryte w strefie {{zone}} na {{cameraName}} będą wyświetlane jako Alerty.",
+      "zoneObjectDetectionsTips": {
+        "notSelectDetections": "Wszystkie obiekty {{detectionsLabels}} wykryte w strefie {{zone}} na {{cameraName}}, które nie są skategoryzowane jako Alerty, będą wyświetlane jako Wykrycia niezależnie od strefy, w której się znajdują.",
+        "regardlessOfZoneObjectDetectionsTips": "Wszystkie nieskategoryzowane obiekty {{detectionsLabels}} na {{cameraName}} będą wyświetlane jako Wykrycia niezależnie od strefy, w której się znajdują.",
+        "text": "Wszystkie nieskategoryzowane obiekty {{detectionsLabels}} w strefie {{zone}} na {{cameraName}} będą wyświetlane jako Wykrycia."
+      },
+      "toast": {
+        "success": "Konfiguracja klasyfikacji przeglądu została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+      },
+      "objectDetectionsTips": "Wszystkie nieskategoryzowane obiekty {{detectionsLabels}} na {{cameraName}} będą wyświetlane jako Wykrycia niezależnie od strefy, w której się znajdują.",
+      "limitDetections": "Ogranicz wykrycia do określonych stref",
+      "selectDetectionsZones": "Wybierz strefy dla Wykryć",
+      "unsavedChanges": "Niezapisane ustawienia klasyfikacji przeglądu dla {{camera}}"
+    },
+    "review": {
+      "alerts": "Alerty ",
+      "title": "Przegląd",
+      "detections": "Wykrycia ",
+      "desc": "Włącz/wyłącz alerty i wykrywania dla tej kamery. Po wyłączeniu nie będą generowane nowe elementy do przeglądu."
+    },
+    "streams": {
+      "desc": "Wyłączenie kamery całkowicie zatrzymuje przetwarzanie strumieni tej kamery przez Frigate. Wykrywanie, nagrywanie i debugowanie będą niedostępne.<br /><em>Uwaga: Nie wyłącza to przekazywania strumieni go2rtc.</em>",
+      "title": "Strumienie"
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Wszystkie Maski i Strefy"
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Nazwa strefy musi mieć co najmniej 2 znaki.",
+          "mustNotBeSameWithCamera": "Nazwa strefy nie może być taka sama jak nazwa kamery.",
+          "alreadyExists": "Strefa z tą nazwą już istnieje dla tej kamery.",
+          "hasIllegalCharacter": "Nazwa strefy zawiera niedozwolone znaki.",
+          "mustNotContainPeriod": "Nazwa strefy nie może zawierać kropki."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Odległość musi być większa lub równa 0.1.",
+          "mustBeFilled": "Wszystkie pola odległości muszą być wypełnione, aby używać szacowania prędkości."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Bezwładność musi być większa od 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Czas przebywania musi być większy lub równy 0."
+        }
+      },
+      "polygonDrawing": {
+        "snapPoints": {
+          "false": "Nie przyciągaj punktów",
+          "true": "Przyciągaj punkty"
+        },
+        "removeLastPoint": "Usuń ostatni punkt",
+        "reset": {
+          "label": "Wyczyść wszystkie punkty"
+        },
+        "delete": {
+          "title": "Potwierdź usunięcie",
+          "success": "{{name}} został usunięty.",
+          "desc": "Czy na pewno chcesz usunąć {{type}} <em>{{name}}</em>?"
+        },
+        "error": {
+          "mustBeFinished": "Rysowanie wielokąta musi być zakończone przed zapisaniem."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Próg prędkości musi być większy lub równy 0,1."
+        }
+      }
+    },
+    "zones": {
+      "label": "Strefy",
+      "documentTitle": "Edytuj Strefę - Frigate",
+      "desc": {
+        "title": "Strefy pozwalają na zdefiniowanie konkretnych obszarów kadru, dzięki czemu można sprawdzić, czy obiekt znajduje się w danym obszarze.",
+        "documentation": "Dokumentacja"
+      },
+      "add": "Dodaj Strefę",
+      "clickDrawPolygon": "Kliknij aby narysować wielokąt na obrazie.",
+      "edit": "Edytuj Strefę",
+      "name": {
+        "title": "Nazwa",
+        "inputPlaceHolder": "Wprowadź nazwę…",
+        "tips": "Nazwa musi mieć co najmniej 2 znaki i nie może być taka sama jak nazwa kamery lub innej strefy."
+      },
+      "objects": {
+        "title": "Obiekty",
+        "desc": "Lista obiektów dla tej strefy."
+      },
+      "allObjects": "Wszystkie Obiekty",
+      "point_one": "{{count}} punkt",
+      "point_few": "{{count}} punkty",
+      "point_many": "{{count}} punktów",
+      "inertia": {
+        "title": "Bezwładność",
+        "desc": "Określa, przez ile klatek obiekt musi znajdować się w strefie, zanim zostanie uznany za będący w strefie. <em>Domyślnie: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Czas przebywania",
+        "desc": "Ustala minimalny czas w sekundach, przez który obiekt musi znajdować się w strefie, aby ją aktywować. <em>Domyślnie: 0</em>"
+      },
+      "speedThreshold": {
+        "title": "Próg prędkości ({{unit}})",
+        "desc": "Określa minimalną prędkość, przy której obiekty są uwzględniane w tej strefie.",
+        "toast": {
+          "error": {
+            "loiteringTimeError": "Strefy z czasem przebywania większym niż 0 nie powinny być używane z szacowaniem prędkości.",
+            "pointLengthError": "Szacowanie prędkości zostało wyłączone dla tej strefy. Strefy z szacowaniem prędkości muszą mieć dokładnie 4 punkty."
+          }
+        }
+      },
+      "speedEstimation": {
+        "title": "Szacowanie prędkości",
+        "desc": "Włącz szacowanie prędkości dla obiektów w tej strefie. Strefa musi mieć dokładnie 4 punkty.",
+        "docs": "Przeczytaj dokumentację",
+        "lineADistance": "Odległość linii A ({{unit}})",
+        "lineBDistance": "Odległość linii B ({{unit}})",
+        "lineCDistance": "Odległość linii C ({{unit}})",
+        "lineDDistance": "Odległość linii D ({{unit}})"
+      },
+      "toast": {
+        "success": "Strefa ({{zoneName}}) została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+      }
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Dokumentacja",
+        "title": "Maski ruchu służą do zapobiegania wykrywaniu niepożądanych typów ruchu. Zbyt intensywne maskowanie utrudni śledzenie obiektów."
+      },
+      "point_one": "{{count}} punkt",
+      "point_few": "{{count}} punkty",
+      "point_many": "{{count}} punktów",
+      "clickDrawPolygon": "Kliknij aby narysować wielokąt na obrazie.",
+      "documentTitle": "Edytuj maskę ruchu - Frigate",
+      "add": "Nowa Maska Ruchu",
+      "polygonAreaTooLarge": {
+        "tips": "Maski ruchu nie zapobiegają wykrywaniu obiektów. Powinieneś użyć wymaganej strefy zamiast tego.",
+        "documentation": "Przeczytaj dokumentację",
+        "title": "Maska ruchu pokrywa {{polygonArea}}% ramki kamery. Duże maski ruchu nie są zalecane."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} został zapisany. Uruchom ponownie Frigate, aby zastosować zmiany.",
+          "noName": "Maska Ruchu została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+        }
+      },
+      "label": "Maska ruchu",
+      "edit": "Edytuj Maskę Ruchu",
+      "context": {
+        "documentation": "Przeczytaj dokumentację",
+        "title": "Maski ruchu są używane do zapobiegania niepożądanym typom ruchu przed wyzwalaniem detekcji (przykład: gałęzie drzew, znaczniki czasowe kamery). Maski ruchu powinny być używane <em>bardzo oszczędnie</em>, nadmierne maskowanie utrudni śledzenie obiektów."
+      }
+    },
+    "objectMasks": {
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} został zapisany. Uruchom ponownie Frigate aby wprowadzić zmiany.",
+          "noName": "Maska Obiektu została zapisana. Uruchom ponownie Frigate, aby zastosować zmiany."
+        }
+      },
+      "objects": {
+        "title": "Obiekty",
+        "allObjectTypes": "Wszystkie typy obiektów",
+        "desc": "Typ obiektu, który ma zastosowanie do tej maski obiektu."
+      },
+      "point_one": "{{count}} punkt",
+      "point_few": "{{count}} punkty",
+      "point_many": "{{count}} punktów",
+      "label": "Maski Obiektów",
+      "documentTitle": "Edytuj Maskę Obiektu - Frigate",
+      "desc": {
+        "title": "Maski filtrujące obiekty są używane do filtrowania fałszywych detekcji dla danego typu obiektu na podstawie lokalizacji.",
+        "documentation": "Dokumentacja"
+      },
+      "add": "Dodaj Maskę Obiektu",
+      "edit": "Edytuj Maskę Obiektu",
+      "clickDrawPolygon": "Kliknij, aby narysować wielokąt na obrazie.",
+      "context": "Maski filtrujące obiekty są używane do filtrowania fałszywych detekcji dla danego typu obiektu na podstawie lokalizacji."
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Skopiowano współrzędne dla {{polyName}} do schowka."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nie udało się skopiować współrzędnych do schowka."
+      }
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (maski/strefy zmienione)",
+    "motionMaskLabel": "Maska Ruchu {{number}}",
+    "objectMaskLabel": "Maska Obiektu {{number}} ({{label}})"
+  },
+  "debug": {
+    "objectList": "Lista Obiektów",
+    "debugging": "Debugowanie",
+    "title": "Debugowanie",
+    "detectorDesc": "Frigate używa twoich detektorów ({{detectors}}) do wykrywania obiektów w strumieniu wideo kamery.",
+    "boundingBoxes": {
+      "desc": "Pokaż ramki ograniczające wokół śledzonych obiektów",
+      "colors": {
+        "label": "Kolory Ramek Ograniczających Obiekty",
+        "info": "<li>Przy uruchomieniu, różne kolory zostaną przypisane do każdej etykiety obiektu</li><li>Ciemnoniebieska cienka linia oznacza, że obiekt nie jest wykrywany w tym momencie</li><li>Szara cienka linia oznacza, że obiekt jest wykrywany jako nieruchomy</li><li>Gruba linia oznacza, że obiekt jest przedmiotem automatycznego śledzenia (gdy włączone)</li>"
+      },
+      "title": "Ramki ograniczające"
+    },
+    "zones": {
+      "desc": "Pokaż kontur zdefiniowanych stref",
+      "title": "Strefy"
+    },
+    "desc": "Widok debugowania pokazuje podgląd śledzonych obiektów w czasie rzeczywistym i ich statystyki. Lista obiektów pokazuje opóźnione podsumowanie wykrytych obiektów.",
+    "noObjects": "Brak obiektów",
+    "timestamp": {
+      "title": "Znacznik czasu",
+      "desc": "Nałóż znacznik czasu na obraz"
+    },
+    "mask": {
+      "title": "Maski ruchu",
+      "desc": "Pokaż wielokąty maski ruchu"
+    },
+    "motion": {
+      "title": "Ramki ruchu",
+      "desc": "Pokaż ramki wokół obszarów, gdzie wykryto ruch",
+      "tips": "<p><strong>Ramki Ruchu</strong></p><br><p>Czerwone ramki będą nakładane na obszary kadru, gdzie aktualnie wykrywany jest ruch</p>"
+    },
+    "regions": {
+      "title": "Regiony",
+      "desc": "Pokaż ramkę regionu zainteresowania wysyłanego do detektora obiektów",
+      "tips": "<p><strong>Ramki Regionów</strong></p><br><p>Jasnozielone ramki będą nakładane na obszary zainteresowania w kadrze, które są wysyłane do detektora obiektów.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "document": "Przeczytaj dokumentację ",
+      "title": "Rysowanie Filtra Kształtu Obiektu",
+      "ratio": "Proporcja",
+      "score": "Wynik",
+      "tips": "Włącz tę opcję, aby narysować prostokąt na obrazie kamery w celu pokazania jego obszaru i proporcji. Te wartości mogą być następnie użyte do ustawienia parametrów filtra kształtu obiektu w twojej konfiguracji.",
+      "desc": "Narysuj prostokąt na obrazie, aby zobaczyć szczegóły obszaru i proporcji",
+      "area": "Obszar"
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Tuner Wykrywania Ruchu",
+    "desc": {
+      "title": "Frigate używa wykrywania ruchu jako pierwszej linii sprawdzenia, czy w kadrze dzieje się coś wartego sprawdzenia przez detekcję obiektów.",
+      "documentation": "Przeczytaj Przewodnik Dostrajania Ruchu"
+    },
+    "Threshold": {
+      "desc": "Wartość progowa określa, jak duża zmiana jasności piksela jest wymagana, aby uznać ją za ruch. <em>Domyślnie: 30</em>",
+      "title": "Próg"
+    },
+    "contourArea": {
+      "title": "Obszar Konturu",
+      "desc": "Wartość obszaru konturu służy do określenia, które grupy zmienionych pikseli kwalifikują się jako ruch. <em>Domyślnie: 10</em>"
+    },
+    "improveContrast": {
+      "desc": "Popraw kontrast dla ciemniejszych scen. <em>Domyślnie: WŁĄCZONE</em>",
+      "title": "Popraw Kontrast"
+    },
+    "toast": {
+      "success": "Ustawienia ruchu zostały zapisane."
+    },
+    "unsavedChanges": "Niezapisane zmiany w korektorze ruchu ({{camera}})"
+  },
+  "users": {
+    "addUser": "Dodaj Użytkownika",
+    "updatePassword": "Aktualizuj Hasło",
+    "toast": {
+      "success": {
+        "createUser": "Użytkownik {{user}} został utworzony pomyślnie",
+        "deleteUser": "Użytkownik {{user}} został usunięty pomyślnie",
+        "updatePassword": "Hasło zaktualizowane pomyślnie.",
+        "roleUpdated": "Rola zaktualizowana dla {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Nie udało się zapisać hasła: {{errorMessage}}",
+        "createUserFailed": "Nie udało się utworzyć użytkownika: {{errorMessage}}",
+        "deleteUserFailed": "Nie udało się usunąć użytkownika: {{errorMessage}}",
+        "roleUpdateFailed": "Nie udało się zaktualizować roli: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Nazwa użytkownika",
+      "actions": "Akcje",
+      "role": "Rola",
+      "noUsers": "Nie znaleziono użytkowników.",
+      "changeRole": "Zmień rolę użytkownika",
+      "password": "Hasło",
+      "deleteUser": "Usuń użytkownika"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Nazwa użytkownika",
+          "desc": "Dozwolone są tylko litery, cyfry, kropki i podkreślenia.",
+          "placeholder": "Wprowadź nazwę użytkownika"
+        },
+        "password": {
+          "strength": {
+            "strong": "Silne",
+            "title": "Siła hasła: ",
+            "weak": "Słabe",
+            "medium": "Średnie",
+            "veryStrong": "Bardzo silne"
+          },
+          "match": "Hasła pasują",
+          "confirm": {
+            "placeholder": "Potwierdź hasło",
+            "title": "Potwierdź hasło"
+          },
+          "title": "Hasło",
+          "placeholder": "Wprowadź hasło",
+          "notMatch": "Hasła nie pasują"
+        },
+        "newPassword": {
+          "placeholder": "Wprowadź nowe hasło",
+          "title": "Nowe hasło",
+          "confirm": {
+            "placeholder": "Wprowadź ponownie nowe hasło"
+          }
+        },
+        "usernameIsRequired": "Nazwa użytkownika jest wymagana",
+        "passwordIsRequired": "Hasło jest wymagane"
+      },
+      "changeRole": {
+        "desc": "Aktualizuj uprawnienia dla <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Wybierz właściwą rolę dla tego użytkownika:",
+          "admin": "Admin",
+          "adminDesc": "Pełny dostęp do wszystkich funkcjonalności.",
+          "viewerDesc": "Ograniczony wyłącznie do pulpitów na żywo, przeglądania, eksploracji i eksportu.",
+          "viewer": "Przeglądający"
+        },
+        "title": "Zmień rolę użytkownika",
+        "select": "Wybierz role"
+      },
+      "createUser": {
+        "title": "Utwórz nowego użytkownika",
+        "desc": "Dodaj nowe konto użytkownika i określ rolę dla dostępu do obszarów interfejsu Frigate.",
+        "usernameOnlyInclude": "Nazwa użytkownika może zawierać tylko litery, cyfry lub znak _",
+        "confirmPassword": "Proszę potwierdź swoje hasło"
+      },
+      "deleteUser": {
+        "title": "Usuń użytkownika",
+        "desc": "Tej akcji nie można cofnąć. Spowoduje to trwałe usunięcie konta użytkownika i wszystkich powiązanych danych.",
+        "warn": "Czy na pewno chcesz usunąć <strong>{{username}}</strong>?"
+      },
+      "passwordSetting": {
+        "updatePassword": "Aktualizuj hasło dla {{username}}",
+        "setPassword": "Ustaw hasło",
+        "desc": "Utwórz silne hasło, aby zabezpieczyć to konto.",
+        "cannotBeEmpty": "Hasło nie może być puste",
+        "doNotMatch": "Hasła nie pasują do siebie"
+      }
+    },
+    "management": {
+      "title": "Zarządzanie Użytkownikami",
+      "desc": "Zarządzaj kontami użytkowników tej instancji Frigate."
+    },
+    "title": "Użytkownicy"
+  },
+  "notification": {
+    "title": "Powiadomienia",
+    "notificationSettings": {
+      "title": "Ustawienia powiadomień",
+      "desc": "Frigate może wysyłać natywne powiadomienia push na twoje urządzenie, gdy działa w przeglądarce lub jest zainstalowany jako PWA.",
+      "documentation": "Przeczytaj dokumentację"
+    },
+    "notificationUnavailable": {
+      "title": "Powiadomienia niedostępne",
+      "desc": "Powiadomienia push w przeglądarce wymagają bezpiecznego kontekstu (<code>https://…</code>). To jest ograniczenie przeglądarki. Uzyskaj dostęp do Frigate przez bezpieczne połączenie, aby korzystać z powiadomień.",
+      "documentation": "Przeczytaj dokumentację"
+    },
+    "globalSettings": {
+      "title": "Ustawienia globalne",
+      "desc": "Tymczasowo wstrzymaj powiadomienia dla określonych kamer na wszystkich zarejestrowanych urządzeniach."
+    },
+    "suspendTime": {
+      "12hours": "Zawieś na 12 godzin",
+      "24hours": "Zawieś na 24 godziny",
+      "untilRestart": "Zawieś do restartu",
+      "1hour": "Zawieś na 1 godzinę",
+      "5minutes": "Zawieś na 5 minut",
+      "10minutes": "Zawieś na 10 minut",
+      "30minutes": "Zawieś na 30 minut",
+      "suspend": "Wstrzymaj"
+    },
+    "cancelSuspension": "Anuluj zawieszenie",
+    "toast": {
+      "error": {
+        "registerFailed": "Nie udało się zapisać rejestracji powiadomień."
+      },
+      "success": {
+        "settingSaved": "Ustawienia powiadomień zostały zapisane.",
+        "registered": "Rejestracja powiadomień zakończona powodzeniem. Przed wysłaniem jakichkolwiek powiadomień (włącznie z testowym) wymagane jest ponowne uruchomienie Frigate."
+      }
+    },
+    "email": {
+      "title": "Email",
+      "placeholder": "np. przyklad@email.com",
+      "desc": "Wymagany jest prawidłowy adres email, który będzie używany do powiadamiania Cię w przypadku problemów z usługą push."
+    },
+    "cameras": {
+      "title": "Kamery",
+      "noCameras": "Brak dostępnych kamer",
+      "desc": "Wybierz kamery, dla których chcesz włączyć powiadomienia."
+    },
+    "deviceSpecific": "Ustawienia specyficzne dla urządzenia",
+    "registerDevice": "Zarejestruj to urządzenie",
+    "active": "Powiadomienia aktywne",
+    "suspended": "Powiadomienia zawieszone {{time}}",
+    "unregisterDevice": "Wyrejestruj to urządzenie",
+    "sendTestNotification": "Wyślij testowe powiadomienie",
+    "unsavedRegistrations": "Niezapisane ustawienia rejestracji powiadomień",
+    "unsavedChanges": "Niezapisane zmiany ustawień powiadomień"
+  },
+  "frigatePlus": {
+    "title": "Ustawienia Frigate+",
+    "apiKey": {
+      "title": "Klucz API Frigate+",
+      "validated": "Klucz API Frigate+ został wykryty i zweryfikowany",
+      "plusLink": "Dowiedz się więcej o Frigate+",
+      "notValidated": "Klucz API Frigate+ nie został wykryty lub nie został zweryfikowany",
+      "desc": "Klucz API Frigate+ umożliwia integrację z usługą Frigate+."
+    },
+    "snapshotConfig": {
+      "title": "Konfiguracja zrzutów ekranu",
+      "documentation": "Przeczytaj dokumentację",
+      "desc": "Aby wysyłać dane do Frigate+, w konfiguracji muszą być włączone zarówno zwykłe zrzuty ekranu, jak i zrzuty typu <code>clean_copy</code>.",
+      "table": {
+        "snapshots": "Zrzuty ekranu",
+        "cleanCopySnapshots": "Zrzuty ekranu <code>clean_copy</code>",
+        "camera": "Kamera"
+      },
+      "cleanCopyWarning": "Niektóre kamery mają włączone zrzuty ekranu, ale mają wyłączoną funkcję czystej kopii. Musisz włączyć <code>clean_copy</code> w konfiguracji zrzutów ekranu, aby móc przesyłać obrazy z tych kamer do Frigate+."
+    },
+    "modelInfo": {
+      "title": "Informacje o modelu",
+      "modelType": "Typ modelu",
+      "trainDate": "Data treningu",
+      "supportedDetectors": "Wspierane detektory",
+      "dimensions": "Wymiary",
+      "cameras": "Kamery",
+      "loading": "Ładowanie informacji o modelu…",
+      "error": "Nie udało się załadować informacji o modelu",
+      "availableModels": "Dostępne modele",
+      "loadingAvailableModels": "Ładowanie dostępnych modeli…",
+      "baseModel": "Model bazowy",
+      "modelSelect": "Tutaj możesz wybrać swoje dostępne modele w Frigate+. Pamiętaj, że można wybrać tylko modele kompatybilne z Twoją aktualną konfiguracją detektora.",
+      "plusModelType": {
+        "baseModel": "Model bazowy",
+        "userModel": "Dostrojony"
+      }
+    },
+    "toast": {
+      "success": "Ustawienia Frigate+ zostały zapisane. Uruchom ponownie Frigate, aby zastosować zmiany.",
+      "error": "Nie udało się zapisać zmian konfiguracji: {{errorMessage}}"
+    },
+    "restart_required": "Wymagane ponowne uruchomienie (Zmieniony model Frigate+)",
+    "unsavedChanges": "Niezapisane zmiany ustawień Frigate+"
+  },
+  "enrichments": {
+    "faceRecognition": {
+      "title": "Rozpoznawanie twarzy",
+      "desc": "Rozpoznawanie twarzy pozwala na przypisywanie imion osobom, a gdy ich twarz zostanie rozpoznana, Frigate przypisze imię osoby jako sub label. Ta informacja jest wyświetlana w interfejsie, filtrach oraz powiadomieniach.",
+      "readTheDocumentation": "Przeczytaj Dokumentację",
+      "modelSize": {
+        "label": "Rozmiar modelu",
+        "desc": "Rozmiar modelu używanego do rozpoznawania twarzy.",
+        "small": {
+          "title": "mały",
+          "desc": "Użycie opcji <em>mały</em> wykorzystuje model osadzeń twarzy FaceNet, który działa wydajnie na większości procesorów."
+        },
+        "large": {
+          "title": "duży",
+          "desc": "Użycie opcji <em>duży</em> wykorzystuje model osadzeń twarzy ArcFace i automatycznie uruchomi się na karcie graficznej, jeśli jest dostępna."
+        }
+      }
+    },
+    "title": "Ustawienia wzbogacania",
+    "unsavedChanges": "Niezapisane zmiany ustawień wzbogacania",
+    "birdClassification": {
+      "title": "Klasyfikacja ptaków",
+      "desc": "Klasyfikacja ptaków identyfikuje znane gatunki przy użyciu skwantyzowanego modelu Tensorflow. Gdy rozpoznany zostanie znany ptak, jego zwyczajowa nazwa zostanie dodana jako sub_label. Ta informacja jest wyświetlana w interfejsie, filtrach oraz powiadomieniach."
+    },
+    "semanticSearch": {
+      "title": "Wyszukiwanie semantyczne",
+      "desc": "Wyszukiwanie semantyczne w Frigate pozwala na znajdowanie śledzonych obiektów w elementach przeglądowych za pomocą samego obrazu, opisu tekstowego zdefiniowanego przez użytkownika lub automatycznie wygenerowanego.",
+      "readTheDocumentation": "Przeczytaj Dokumentację",
+      "reindexNow": {
+        "label": "Reindeksuj teraz",
+        "desc": "Reindeksowanie zregeneruje osadzenia dla wszystkich śledzonych obiektów. Ten proces działa w tle i może maksymalnie obciążyć procesor oraz zająć sporo czasu w zależności od liczby śledzonych obiektów.",
+        "confirmTitle": "Potwierdź reindeksowanie",
+        "confirmDesc": "Czy na pewno chcesz reindeksować wszystkie osadzenia śledzonych obiektów? Ten proces będzie działał w tle, ale może maksymalnie obciążyć procesor i zająć sporo czasu. Postęp możesz śledzić na stronie Eksploruj.",
+        "confirmButton": "Reindeksuj",
+        "success": "Reindeksowanie zostało pomyślnie uruchomione.",
+        "alreadyInProgress": "Reindeksowanie już trwa.",
+        "error": "Nie udało się uruchomić reindeksowania: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Rozmiar modelu",
+        "desc": "Rozmiar modelu używanego do osadzeń wyszukiwania semantycznego.",
+        "small": {
+          "title": "mały",
+          "desc": "Użycie opcji <em>mały</em> wykorzystuje skwantyzowaną wersję modelu, która zużywa mniej pamięci RAM i działa szybciej na procesorze przy zaniedbywalnej różnicy w jakości osadzeń."
+        },
+        "large": {
+          "title": "duży",
+          "desc": "Użycie opcji <em>duży</em> wykorzystuje pełny model Jina i automatycznie uruchomi się na karcie graficznej, jeśli jest dostępna."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Rozpoznawanie tablic rejestracyjnych",
+      "desc": "Frigate może rozpoznawać tablice rejestracyjne na pojazdach i automatycznie dodawać wykryte znaki do pola recognized_license_plate lub znaną nazwę jako sub_label do obiektów typu samochód. Typowy przypadek użycia to odczytywanie tablic rejestracyjnych samochodów wjeżdżających na podjazd lub przejeżdżających ulicą.",
+      "readTheDocumentation": "Przeczytaj Dokumentację"
+    },
+    "restart_required": "Wymagany restart (zmieniono ustawienia wzbogacania)",
+    "toast": {
+      "success": "Ustawienia wzbogacania zostały zapisane. Uruchom ponownie Frigate, aby zastosować zmiany.",
+      "error": "Nie udało się zapisać zmian konfiguracji: {{errorMessage}}"
+    }
+  }
+}

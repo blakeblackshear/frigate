@@ -4,7 +4,7 @@ In addition to Frigate's Live camera dashboard, Birdseye allows a portable heads
 
 Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the "+" icon on the Live page, and choose "Birdseye" as one of the cameras.
 
-Birdseye can also be used in HomeAssistant dashboards, cast to media devices, etc.
+Birdseye can also be used in Home Assistant dashboards, cast to media devices, etc.
 
 ## Birdseye Behavior
 

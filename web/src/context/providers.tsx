@@ -5,6 +5,7 @@ import { ApiProvider } from "@/api";
 import { IconContext } from "react-icons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
+import { LanguageProvider } from "./language-provider";
 import { StreamingSettingsProvider } from "./streaming-settings-provider";
 import { AuthProvider } from "./auth-context";
 
@@ -18,15 +19,17 @@ function providers({ children }: TProvidersProps) {
       <AuthProvider>
         <ApiProvider>
           <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
-            <TooltipProvider>
-              <IconContext.Provider value={{ size: "20" }}>
-                <StatusBarMessagesProvider>
-                  <StreamingSettingsProvider>
-                    {children}
-                  </StreamingSettingsProvider>
-                </StatusBarMessagesProvider>
-              </IconContext.Provider>
-            </TooltipProvider>
+            <LanguageProvider>
+              <TooltipProvider>
+                <IconContext.Provider value={{ size: "20" }}>
+                  <StatusBarMessagesProvider>
+                    <StreamingSettingsProvider>
+                      {children}
+                    </StreamingSettingsProvider>
+                  </StatusBarMessagesProvider>
+                </IconContext.Provider>
+              </TooltipProvider>
+            </LanguageProvider>
           </ThemeProvider>
         </ApiProvider>
       </AuthProvider>

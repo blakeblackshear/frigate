@@ -28,7 +28,7 @@ export default function CameraImage({
 
   const { name } = config ? config.cameras[camera] : "";
   const { payload: enabledState } = useEnabledState(camera);
-  const enabled = enabledState === "ON" || enabledState === undefined;
+  const enabled = enabledState ? enabledState === "ON" : true;
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);

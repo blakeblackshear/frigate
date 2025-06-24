@@ -1,7 +1,6 @@
 import logging
 
 import cv2
-import imutils
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
@@ -9,6 +8,7 @@ from frigate.camera import PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
+from frigate.util.image import grab_cv2_contours
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ class ImprovedMotionDetector(MotionDetector):
         contours = cv2.findContours(
             thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        contours = imutils.grab_contours(contours)
+        contours = grab_cv2_contours(contours)
 
         # loop over the contours
         total_contour_area = 0

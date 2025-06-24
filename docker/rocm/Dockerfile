@@ -22,7 +22,7 @@ RUN apt update && \
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
-    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
+    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocsolver*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
     mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
     cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
@@ -39,6 +39,7 @@ WORKDIR /opt/frigate
 COPY --from=rootfs / /
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" --break-system-packages
 RUN python3 -m pip config set global.break-system-packages true
 
@@ -62,6 +63,7 @@ COPY --from=rocm /opt/rocm-dist/ /
 FROM deps-prelim AS rocm-prelim-hsa-override0
 ENV HSA_ENABLE_SDMA=0
 ENV MIGRAPHX_ENABLE_NHWC=1
+ENV TF_ROCM_USE_IMMEDIATE_MODE=1
 
 COPY --from=rocm-dist / /
 

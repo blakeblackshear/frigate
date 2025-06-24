@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+from typing import Any
 
 import cv2
 import numpy as np
@@ -9,6 +10,7 @@ from peewee import DoesNotExist
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.data_processing.common.license_plate.mixin import (
     WRITE_DEBUG_IMAGES,
@@ -31,11 +33,13 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
     def __init__(
         self,
         config: FrigateConfig,
+        requestor: InterProcessRequestor,
         sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         model_runner: LicensePlateModelRunner,
-        detected_license_plates: dict[str, dict[str, any]],
+        detected_license_plates: dict[str, dict[str, Any]],
     ):
+        self.requestor = requestor
         self.detected_license_plates = detected_license_plates
         self.model_runner = model_runner
         self.lpr_config = config.lpr
@@ -44,7 +48,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         super().__init__(config, metrics, model_runner)
 
     def process_data(
-        self, data: dict[str, any], data_type: PostProcessDataEnum
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
         """Look for license plates in recording stream image
         Args:
@@ -54,6 +58,9 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         Returns:
             None.
         """
+        # don't run LPR post processing for now
+        return
+
         event_id = data["event_id"]
         camera_name = data["camera"]
 
@@ -139,7 +146,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         scale_y = image.shape[0] / detect_height
 
         # Determine which box to enlarge based on detection mode
-        if self.requires_license_plate_detection:
+        if "license_plate" not in self.config.cameras[camera_name].objects.track:
             # Scale and enlarge the car box
             box = obj_data.get("box")
             if not box:
@@ -189,7 +196,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         )
 
         keyframe_obj_data = obj_data.copy()
-        if self.requires_license_plate_detection:
+        if "license_plate" not in self.config.cameras[camera_name].objects.track:
             # car box
             keyframe_obj_data["box"] = [new_left, new_top, new_right, new_bottom]
         else:
@@ -208,7 +215,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         logger.debug(f"Post processing plate: {event_id}, {frame_time}")
         self.lpr_process(keyframe_obj_data, frame)
 
-    def handle_request(self, topic, request_data) -> dict[str, any] | None:
+    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.reprocess_plate.value:
             event = request_data["event"]
 

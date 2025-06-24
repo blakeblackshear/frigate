@@ -19,7 +19,7 @@ For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
 ## Configuration
 
-Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Settings page before it can be used. Semantic Search is a global configuration setting.
+Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Enrichments Settings page before it can be used. Semantic Search is a global configuration setting.
 
 ```yaml
 semantic_search:
@@ -29,9 +29,9 @@ semantic_search:
 
 :::tip
 
-The embeddings database can be re-indexed from the existing tracked objects in your database by adding `reindex: True` to your `semantic_search` configuration or by toggling the switch on the Search Settings page in the UI and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing. Make sure to turn the UI's switch off or set the config back to `False` before restarting Frigate again.
+The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Enrichments Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing.
 
-If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to enable the `reindex` feature in order to do that.
+If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to reindex as described above.
 
 :::
 
@@ -72,7 +72,7 @@ For most users, especially native English speakers, the V1 model remains the rec
 
 :::note
 
-Switching between V1 and V2 requires reindexing your embeddings. To do this, set `reindex: True` in your Semantic Search configuration and restart Frigate. The embeddings from V1 and V2 are incompatible, and failing to reindex will result in incorrect search results.
+Switching between V1 and V2 requires reindexing your embeddings. The embeddings from V1 and V2 are incompatible, and failing to reindex will result in incorrect search results.
 
 :::
 
@@ -90,19 +90,7 @@ semantic_search:
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
-
-- **AMD**
-
-  - ROCm will automatically be detected and used for Semantic Search in the `-rocm` Frigate image.
-
-- **Intel**
-
-  - OpenVINO will automatically be detected and used for Semantic Search in the default Frigate image.
-
-- **Nvidia**
-  - Nvidia GPUs will automatically be detected and used for Semantic Search in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used for Semantic Search in the `-tensorrt-jp(4/5)` Frigate image.
+See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 :::
 

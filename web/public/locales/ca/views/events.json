@@ -1,0 +1,38 @@
+{
+  "detected": "detectat",
+  "alerts": "Alertes",
+  "detections": "Deteccions",
+  "motion": {
+    "label": "Moviment",
+    "only": "Només moviment"
+  },
+  "allCameras": "Totes les càmeres",
+  "empty": {
+    "alert": "Hi ha cap alerta per revisar",
+    "detection": "Hi ha cap detecció per revisar",
+    "motion": "No s'haan trobat dades de moviment"
+  },
+  "timeline": "Línia de temps",
+  "timeline.aria": "Seleccionar línia de temps",
+  "events": {
+    "label": "Esdeveniments",
+    "aria": "Seleccionar esdeveniments",
+    "noFoundForTimePeriod": "No s'han trobat esdeveniments per aquest període de temps."
+  },
+  "documentTitle": "Revisió - Frigate",
+  "recordings": {
+    "documentTitle": "Enregistraments - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Últimes 24 hores"
+  },
+  "markAsReviewed": "Marcar com a revisat",
+  "markTheseItemsAsReviewed": "Marca aquests elements com a revisats",
+  "newReviewItems": {
+    "label": "Veure nous elements de revisió",
+    "button": "Nous elements per revisar"
+  },
+  "camera": "Càmera",
+  "selected_one": "{{count}} seleccionats",
+  "selected_other": "{{count}} seleccionats"
+}

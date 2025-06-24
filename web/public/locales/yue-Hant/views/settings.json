@@ -1,0 +1,680 @@
+{
+  "documentTitle": {
+    "default": "設定 - Frigate",
+    "authentication": "認證設定 - Frigate",
+    "camera": "鏡頭設定 - Frigate",
+    "classification": "進階功能設定 - Frigate",
+    "masksAndZones": "遮罩與區域編輯器 - Frigate",
+    "motionTuner": "移動調校器 - Frigate",
+    "object": "除錯 - Frigate",
+    "general": "一般設定 - Frigate",
+    "frigatePlus": "Frigate+ 設定 - Frigate",
+    "notifications": "通知設定 - Frigate",
+    "enrichments": "進階功能設定 - Frigate"
+  },
+  "menu": {
+    "ui": "介面",
+    "classification": "進階功能",
+    "cameras": "鏡頭設定",
+    "masksAndZones": "遮罩／區域",
+    "motionTuner": "移動調校器",
+    "debug": "除錯",
+    "users": "用戶",
+    "notifications": "通知",
+    "frigateplus": "Frigate+",
+    "enrichments": "進階功能"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "你有未儲存的更改。",
+      "desc": "你想在繼續前儲存更改嗎？"
+    }
+  },
+  "cameraSetting": {
+    "camera": "鏡頭",
+    "noCamera": "沒有鏡頭"
+  },
+  "general": {
+    "title": "一般設定",
+    "liveDashboard": {
+      "playAlertVideos": {
+        "label": "播放警報影片",
+        "desc": "預設情況下，即時儀表板上的最近警報會以小型循環影片形式播放。停用此選項後，只會在此裝置／瀏覽器上顯示警報的靜態圖片。"
+      },
+      "automaticLiveView": {
+        "label": "自動即時檢視",
+        "desc": "當偵測到活動時，自動切換到該鏡頭的即時畫面。若停用此選項，即時儀表板上的鏡頭靜態畫面將每分鐘只更新一次。"
+      },
+      "title": "即時儀表板"
+    },
+    "storedLayouts": {
+      "title": "儲存的版面配置",
+      "clearAll": "清除所有版面配置",
+      "desc": "鏡頭群組內的鏡頭佈局可以拖動或調整大小。位置會儲存在你瀏覽器的本機儲存空間內。"
+    },
+    "cameraGroupStreaming": {
+      "title": "鏡頭群組串流設定",
+      "clearAll": "清除所有串流設定",
+      "desc": "每個鏡頭群組的串流設定會儲存在你瀏覽器的本機儲存空間內。"
+    },
+    "recordingsViewer": {
+      "defaultPlaybackRate": {
+        "desc": "錄影播放的預設播放速度。",
+        "label": "預設播放速度"
+      },
+      "title": "錄影瀏覽器"
+    },
+    "calendar": {
+      "title": "日曆",
+      "firstWeekday": {
+        "label": "每星期的第一天",
+        "sunday": "星期日",
+        "monday": "星期一",
+        "desc": "審查日曆中每星期開始的日子。"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "已清除 {{cameraName}} 的儲存版面配置",
+        "clearStreamingSettings": "已清除所有鏡頭群組的串流設定。"
+      },
+      "error": {
+        "clearStoredLayoutFailed": "清除儲存版面配置失敗：{{errorMessage}}",
+        "clearStreamingSettingsFailed": "清除串流設定失敗：{{errorMessage}}"
+      }
+    }
+  },
+  "classification": {
+    "birdClassification": {
+      "desc": "鳥類分類會使用量化 Tensorflow 模型識別已知鳥類。當辨識到已知鳥類時，牠的常見名稱會加到子標籤上。此資訊會顯示在介面、篩選器及通知中。",
+      "title": "鳥類分類"
+    },
+    "semanticSearch": {
+      "title": "語意搜尋",
+      "desc": "Frigate 的語意搜尋功能讓你可以利用影像本身、自訂文字描述，或自動產生的描述，在審查項目中尋找已追蹤的物件。",
+      "readTheDocumentation": "閱讀文件",
+      "reindexNow": {
+        "label": "立即重建索引",
+        "confirmTitle": "確認重建索引",
+        "confirmButton": "重建索引",
+        "success": "重建索引已成功開始。",
+        "alreadyInProgress": "重建索引已在進行中。",
+        "error": "啟動重建索引失敗：{{errorMessage}}",
+        "confirmDesc": "你確定要重建索引所有已追蹤物件的嵌入向量嗎？這個過程會在背景運行，但可能會用盡你的 CPU，而且需要一定時間。你可以在「瀏覽」頁面查看進度。",
+        "desc": "重建索引會為所有已追蹤物件重新生成嵌入向量。這個過程會在背景運行，可能會用盡你的 CPU，所需時間取決於已追蹤物件的數量。"
+      },
+      "modelSize": {
+        "label": "模型大小",
+        "desc": "用於語意搜尋的模型大小。",
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用量化版本，較少佔用 RAM，在 CPU 上運行更快，而嵌入品質的差異非常細微。"
+        },
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用完整的 Jina 模型，並在適用情況下自動於 GPU 上運行。"
+        }
+      }
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用 FaceNet 臉部嵌入模型，在大多數 CPU 上能有效運行。"
+        },
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上運行。"
+        },
+        "label": "模型大小",
+        "desc": "用於人臉識別的模型大小。"
+      },
+      "readTheDocumentation": "閱讀文件",
+      "title": "人臉識別",
+      "desc": "人臉識別功能允許為人物分配名字，當辨識到他們的臉孔時，Frigate 會將名字加到子標籤上。此資訊會顯示於介面、篩選器及通知中。"
+    },
+    "licensePlateRecognition": {
+      "title": "車牌識別",
+      "readTheDocumentation": "閱讀文件",
+      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。"
+    },
+    "restart_required": "需要重新啟動（分類設定已變更）",
+    "toast": {
+      "error": "儲存設定變更失敗：{{errorMessage}}",
+      "success": "分類設定已儲存。請重新啟動 Frigate 以套用你的更改。"
+    },
+    "title": "進階功能設定",
+    "unsavedChanges": "進階功能設定更改尚未儲存"
+  },
+  "camera": {
+    "title": "鏡頭設定",
+    "streams": {
+      "title": "串流",
+      "desc": "暫時停用鏡頭直到Frigate重新啟動。停用鏡頭會完全停止 Frigate 處理此鏡頭的串流。將會無法使用偵測、錄影和除錯功能。<br /><em>注意：這不會停用 go2rtc 的轉播功能。</em>"
+    },
+    "review": {
+      "title": "審查",
+      "desc": "暫時啟用或停用此鏡頭的警報和偵測直到Frigate重新啟動。停用後，將不會產生新的審查項目。 ",
+      "alerts": "警報 ",
+      "detections": "偵測 "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "閱讀文件",
+      "noDefinedZones": "此鏡頭未定義任何區域。",
+      "zoneObjectAlertsTips": "在{{cameraName}}的{{zone}}區域偵測到的所有{{alertsLabels}}物件將會顯示為警報。",
+      "objectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
+      "objectAlertsTips": "在{{cameraName}}上所有{{alertsLabels}}物件將會顯示為警報。",
+      "zoneObjectDetectionsTips": {
+        "text": "在{{cameraName}}的{{zone}}區域內所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
+        "regardlessOfZoneObjectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
+        "notSelectDetections": "無論位於哪個區域，在{{cameraName}}的{{zone}}區域偵測到、但未分類為警報的{{detectionsLabels}}物件將會顯示為偵測結果。"
+      },
+      "selectDetectionsZones": "選擇偵測的區域",
+      "limitDetections": "限制偵測至特定區域",
+      "title": "審查分類",
+      "desc": "Frigate會將審查項目分類為「警報」同「偵測」。預設情況下，所有<em>人</em>同<em>車</em> 的物件都會被視為警報。你可以透過設定所需區域，細分審查項目分類。",
+      "selectAlertsZones": "選擇警報的區域",
+      "toast": {
+        "success": "審查分類設定已儲存。請重新啟動Frigate以套用更改。"
+      },
+      "unsavedChanges": "{{camera}}的審查分類設定尚未儲存"
+    }
+  },
+  "masksAndZones": {
+    "toast": {
+      "error": {
+        "copyCoordinatesFailed": "無法將座標複製到剪貼簿。"
+      },
+      "success": {
+        "copyCoordinates": "已將{{polyName}}的座標複製到剪貼簿。"
+      }
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "區域名稱必須至少有2個字元。",
+          "mustNotBeSameWithCamera": "區域名稱不得與鏡頭名稱相同。",
+          "alreadyExists": "此鏡頭已存在相同名稱的區域。",
+          "mustNotContainPeriod": "區域名稱不可包含句號。",
+          "hasIllegalCharacter": "區域名稱包含非法字元。"
+        }
+      },
+      "distance": {
+        "error": {
+          "mustBeFilled": "必須填寫所有距離欄位，才能使用速度估算功能。",
+          "text": "距離必須大於或等於0.1。"
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "慣性值必須大於0。"
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "逗留時間必須大於或等於0。"
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "移除最後一個點",
+        "delete": {
+          "title": "確認刪除",
+          "desc": "確定要刪除{{type}} <em>{{name}}</em>嗎？",
+          "success": "已刪除{{name}}。"
+        },
+        "error": {
+          "mustBeFinished": "必須完成多邊形繪製後才能儲存。"
+        },
+        "snapPoints": {
+          "false": "不對齊點",
+          "true": "對齊點"
+        },
+        "reset": {
+          "label": "清除所有點"
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "速度閾值必須大於或等於 0.1。"
+        }
+      }
+    },
+    "zones": {
+      "label": "區域",
+      "add": "新增區域",
+      "edit": "編輯區域",
+      "point_other": "{{count}}個點",
+      "clickDrawPolygon": "在圖片上點擊以繪製多邊形。",
+      "name": {
+        "title": "名稱",
+        "inputPlaceHolder": "請輸入名稱…",
+        "tips": "名稱必須至少有2個字元，且不可與鏡頭或其他區域同名。"
+      },
+      "inertia": {
+        "title": "慣性",
+        "desc": "指定物件需在區域內停留多少個畫格，才會被視為進入該區域。<em>預設：3</em>"
+      },
+      "loiteringTime": {
+        "desc": "設定物件必須於區域內停留的最少秒數，以觸發動作。<em>預設：0</em>",
+        "title": "逗留時間"
+      },
+      "objects": {
+        "title": "物件",
+        "desc": "此區域適用的物件列表。"
+      },
+      "allObjects": "所有物件",
+      "speedEstimation": {
+        "title": "速度估算",
+        "desc": "啟用此區域內物件的速度估算。區域必須正好有4個點。",
+        "docs": "閱讀文件",
+        "lineCDistance": "C 線距離 ({{unit}})",
+        "lineBDistance": "B 線距離 ({{unit}})",
+        "lineADistance": "A 線距離 ({{unit}})",
+        "lineDDistance": "D 線距離 ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "速度門檻 ({{unit}})",
+        "desc": "指定物件於此區域被視為有效時所需的最小速度。",
+        "toast": {
+          "error": {
+            "loiteringTimeError": "設有逗留時間大於0的區域，不應同時使用速度估算功能。",
+            "pointLengthError": "此區域已停用速度估算功能。啟用速度估算的區域必須正好有4個點。"
+          }
+        }
+      },
+      "toast": {
+        "success": "區域（{{zoneName}}）已儲存。請重新啟動Frigate以套用更改。"
+      },
+      "desc": {
+        "title": "區域可讓你定義畫面中的特定範圍，以判斷物件是否進入該範圍。",
+        "documentation": "文件"
+      },
+      "documentTitle": "編輯區域 - Frigate"
+    },
+    "motionMasks": {
+      "label": "移動遮罩",
+      "documentTitle": "編輯移動遮罩 - Frigate",
+      "desc": {
+        "title": "移動遮罩可防止不需要的移動觸發偵測。遮罩過多會令物件追蹤變得困難。",
+        "documentation": "文件"
+      },
+      "edit": "編輯移動遮罩",
+      "point_other": "{{count}}個點",
+      "clickDrawPolygon": "在圖片上點擊以繪製多邊形。",
+      "polygonAreaTooLarge": {
+        "title": "移動遮罩覆蓋了鏡頭畫面{{polygonArea}}%。建議不要使用過大的遮罩。",
+        "tips": "移動遮罩無法阻止物件被偵測，應使用必要區域來限制範圍。",
+        "documentation": "閱讀文件"
+      },
+      "context": {
+        "title": "移動遮罩用於防止某些不需要的移動（如樹枝晃動、鏡頭時間戳記）觸發偵測。移動遮罩應該<em>非常謹慎</em>使用，過度遮罩會令物件追蹤更加困難。",
+        "documentation": "閱讀文件"
+      },
+      "add": "新增移動遮罩",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}}已儲存。請重新啟動Frigate以套用更改。",
+          "noName": "移動遮罩已儲存。請重新啟動Frigate以套用更改。"
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "物件遮罩",
+      "desc": {
+        "documentation": "文件",
+        "title": "物件過濾遮罩根據位置，過濾指定物件類型的誤判偵測。"
+      },
+      "add": "新增物件遮罩",
+      "context": "物件過濾遮罩根據位置，過濾指定物件類型的誤判偵測。",
+      "point_other": "{{count}}個點",
+      "clickDrawPolygon": "在圖片上點擊以繪製多邊形。",
+      "objects": {
+        "title": "物件",
+        "desc": "此物件遮罩適用的物件類型。",
+        "allObjectTypes": "所有物件類型"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}}已儲存。請重新啟動Frigate以套用更改。",
+          "noName": "物件遮罩已儲存。請重新啟動Frigate以套用更改。"
+        }
+      },
+      "documentTitle": "編輯物件遮罩 - Frigate",
+      "edit": "編輯物件遮罩"
+    },
+    "filter": {
+      "all": "所有遮罩與區域"
+    },
+    "restart_required": "需要重新啟動（遮罩／區域已變更）",
+    "motionMaskLabel": "移動遮罩 {{number}}",
+    "objectMaskLabel": "物件遮罩 {{number}}（{{label}}"
+  },
+  "motionDetectionTuner": {
+    "title": "移動偵測調校器",
+    "desc": {
+      "title": "Frigate首先利用移動偵測作初步篩選，以判斷畫面中是否出現值得進行物件偵測的情況。",
+      "documentation": "閱讀移動調整指南"
+    },
+    "Threshold": {
+      "title": "門檻",
+      "desc": "門檻值決定像素亮度變化多少才會被視為移動。<em>預設：30</em>"
+    },
+    "contourArea": {
+      "title": "輪廓面積",
+      "desc": "輪廓面積值用來決定哪些變化像素群符合移動標準。<em>預設：10</em>"
+    },
+    "improveContrast": {
+      "title": "改善對比度",
+      "desc": "改善黑暗場景的對比度。<em>預設：開啟</em>"
+    },
+    "toast": {
+      "success": "移動設定已儲存。"
+    },
+    "unsavedChanges": "{{camera}}的移動調校設定尚未儲存"
+  },
+  "debug": {
+    "title": "除錯",
+    "objectList": "物件列表",
+    "noObjects": "沒有物件",
+    "boundingBoxes": {
+      "title": "邊框框線",
+      "colors": {
+        "info": "<li>啟動時，系統會為每個物件標籤指派不同顏色</li><li>深藍色幼線代表目前沒有偵測到該物件</li><li>灰色幼線代表該物件被偵測為靜止狀態</li><li>粗線代表該物件正被自動追蹤（若已啟用）</li>",
+        "label": "物件邊框顏色"
+      },
+      "desc": "顯示追蹤物件周圍的邊框"
+    },
+    "zones": {
+      "title": "區域",
+      "desc": "顯示所有已定義區域的輪廓"
+    },
+    "motion": {
+      "title": "移動方框",
+      "desc": "顯示偵測到移動的區域方框",
+      "tips": "<p><strong>移動方框</strong></p><p>畫面中偵測到移動的地方將會顯示亮紅色方框</p>"
+    },
+    "regions": {
+      "desc": "顯示屬於物件偵測器感興趣範圍的方框",
+      "title": "偵測區",
+      "tips": "<p><strong>偵測區方框</strong></p><p>畫面中屬於物件偵測器感興趣的地方將會顯示亮綠色方框，並且進行分析</p>"
+    },
+    "desc": "除錯畫面會即時顯示追蹤到的物件及統計資料。物件列表則顯示偵測到物件的延遲總結。",
+    "timestamp": {
+      "title": "時間戳記",
+      "desc": "在圖片上疊加時間戳記"
+    },
+    "detectorDesc": "Frigate 使用你的偵測器（{{detectors}}）來偵測鏡頭影片串流中的物件。",
+    "debugging": "除錯中",
+    "mask": {
+      "title": "移動遮罩",
+      "desc": "顯示移動遮罩多邊形"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "物件形狀篩選繪圖",
+      "document": "閱讀文件 ",
+      "score": "分數",
+      "area": "面積",
+      "ratio": "比例",
+      "desc": "在圖片上畫矩形以查看面積與比例詳情",
+      "tips": "啟用此選項後，會於鏡頭畫面上繪製矩形，以顯示其面積及比例。這些數值可用於設定物件形狀過濾參數。"
+    }
+  },
+  "users": {
+    "management": {
+      "desc": "管理此Frigate個體的用戶帳戶。",
+      "title": "用戶管理"
+    },
+    "addUser": "新增用戶",
+    "updatePassword": "更新密碼",
+    "toast": {
+      "success": {
+        "createUser": "成功建立用戶{{user}}",
+        "deleteUser": "成功刪除用戶{{user}}",
+        "roleUpdated": "成功更新{{user}}的角色",
+        "updatePassword": "成功更新密碼。"
+      },
+      "error": {
+        "createUserFailed": "建立用戶失敗：{{errorMessage}}",
+        "roleUpdateFailed": "更新角色失敗：{{errorMessage}}",
+        "setPasswordFailed": "儲存密碼失敗：{{errorMessage}}",
+        "deleteUserFailed": "刪除用戶失敗：{{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "用戶名稱",
+      "role": "角色",
+      "noUsers": "找不到用戶。",
+      "changeRole": "更改用戶角色",
+      "password": "密碼",
+      "deleteUser": "刪除用戶",
+      "actions": "操作"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "用戶名稱",
+          "desc": "只允許使用字母、數字、句號及底線。",
+          "placeholder": "輸入用戶名稱"
+        },
+        "password": {
+          "title": "密碼",
+          "placeholder": "輸入密碼",
+          "confirm": {
+            "placeholder": "確認密碼",
+            "title": "確認密碼"
+          },
+          "strength": {
+            "title": "密碼強度： ",
+            "weak": "弱",
+            "medium": "中等",
+            "strong": "強",
+            "veryStrong": "非常強"
+          },
+          "match": "密碼相符",
+          "notMatch": "密碼不相符"
+        },
+        "newPassword": {
+          "confirm": {
+            "placeholder": "重新輸入新密碼"
+          },
+          "title": "新密碼",
+          "placeholder": "輸入新密碼"
+        },
+        "usernameIsRequired": "必須輸入用戶名稱",
+        "passwordIsRequired": "必須填寫密碼"
+      },
+      "createUser": {
+        "title": "建立新用戶",
+        "desc": "新增用戶帳戶，並指定可存取Frigate介面各區域的角色。",
+        "usernameOnlyInclude": "用戶名稱只可包含字母、數字、句號或底線",
+        "confirmPassword": "請確認你的密碼"
+      },
+      "deleteUser": {
+        "title": "刪除用戶",
+        "desc": "此操作無法還原，將會永久刪除用戶帳戶及所有相關資料。",
+        "warn": "確定要刪除<strong>{{username}}</strong>嗎？"
+      },
+      "changeRole": {
+        "title": "更改用戶角色",
+        "desc": "更新<strong>{{username}}</strong>的權限",
+        "roleInfo": {
+          "intro": "為此用戶選擇合適的角色：",
+          "adminDesc": "可使用所有功能。",
+          "viewer": "觀看者",
+          "viewerDesc": "只限使用即時儀表板、審查、瀏覽及匯出功能。",
+          "admin": "管理員"
+        },
+        "select": "選擇角色"
+      },
+      "passwordSetting": {
+        "setPassword": "設定密碼",
+        "updatePassword": "更新{{username}}的密碼",
+        "desc": "建立強密碼以保障此帳戶安全。",
+        "cannotBeEmpty": "密碼不能留空",
+        "doNotMatch": "密碼不相符"
+      }
+    },
+    "title": "用戶"
+  },
+  "notification": {
+    "title": "通知",
+    "notificationSettings": {
+      "title": "通知設定",
+      "desc": "Frigate可原生向你的裝置推送通知，無論在瀏覽器中運行或安裝為PWA。",
+      "documentation": "閱讀文件"
+    },
+    "notificationUnavailable": {
+      "title": "無法使用通知功能",
+      "desc": "網頁推送通知需在安全環境下運作（<code>https://…</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。",
+      "documentation": "閱讀文件"
+    },
+    "globalSettings": {
+      "title": "全域設定",
+      "desc": "暫停所有已註冊裝置上特定鏡頭的通知。"
+    },
+    "email": {
+      "placeholder": "例如：example@email.com",
+      "desc": "需要提供有效的電郵地址，若推送服務出現問題，將會透過此地址通知你。",
+      "title": "電郵地址"
+    },
+    "cameras": {
+      "title": "鏡頭",
+      "noCameras": "沒有可用鏡頭",
+      "desc": "選擇啟用通知功能的鏡頭。"
+    },
+    "deviceSpecific": "裝置專屬設定",
+    "registerDevice": "登記此裝置",
+    "unregisterDevice": "取消登記此裝置",
+    "sendTestNotification": "發送測試通知",
+    "active": "通知功能已啟用",
+    "suspended": "通知功能已暫停{{time}}",
+    "suspendTime": {
+      "10minutes": "暫停10分鐘",
+      "12hours": "暫停12小時",
+      "30minutes": "暫停30分鐘",
+      "24hours": "暫停24小時",
+      "5minutes": "暫停5分鐘",
+      "1hour": "暫停1小時",
+      "untilRestart": "暫停至重新啟動",
+      "suspend": "暫停"
+    },
+    "toast": {
+      "error": {
+        "registerFailed": "儲存通知登記失敗。"
+      },
+      "success": {
+        "registered": "成功登記通知功能。必須重新啟動Frigate後，才能發送任何通知（包括測試通知）。",
+        "settingSaved": "通知設定已儲存。"
+      }
+    },
+    "cancelSuspension": "取消暫停",
+    "unsavedRegistrations": "通知註冊尚未儲存",
+    "unsavedChanges": "通知設定更改尚未儲存"
+  },
+  "frigatePlus": {
+    "title": "Frigate+設定",
+    "apiKey": {
+      "title": "Frigate+ API金鑰",
+      "validated": "已偵測並驗證Frigate+ API金鑰",
+      "notValidated": "未偵測到Frigate+ API金鑰或驗證失敗",
+      "desc": "Frigate+ API金鑰可啟用與Frigate+服務的整合功能。",
+      "plusLink": "了解更多Frigate+資料"
+    },
+    "snapshotConfig": {
+      "title": "快照設定",
+      "documentation": "閱讀文件",
+      "table": {
+        "camera": "鏡頭",
+        "snapshots": "快照",
+        "cleanCopySnapshots": "<code>clean_copy</code> 快照"
+      },
+      "cleanCopyWarning": "部分鏡頭已啟用快照，但未啟用乾淨副本。你必須於快照設定中啟用<code>clean_copy</code>，才能從這些鏡頭提交影像至Frigate+。",
+      "desc": "提交至Frigate+需要在設定中同時啟用快照及<code>clean_copy</code>快照功能。"
+    },
+    "modelInfo": {
+      "title": "模型資料",
+      "modelType": "模型類型",
+      "trainDate": "訓練日期",
+      "baseModel": "基礎模型",
+      "plusModelType": {
+        "baseModel": "基礎模型",
+        "userModel": "微調"
+      },
+      "supportedDetectors": "支援的偵測器",
+      "cameras": "鏡頭",
+      "availableModels": "可用模型",
+      "loadingAvailableModels": "正在載入可用模型…",
+      "modelSelect": "可於此選擇你在Frigate+上的可用模型。請注意，只能選擇與當前偵測器設定相容的模型。",
+      "loading": "正在載入模型資料…",
+      "error": "載入模型資料失敗"
+    },
+    "toast": {
+      "error": "儲存設定變更失敗：{{errorMessage}}",
+      "success": "Frigate+設定已儲存。請重新啟動Frigate以套用更改。"
+    },
+    "restart_required": "需要重新啟動（已更改Frigate+模型）",
+    "unsavedChanges": "Frigate+ 設定更改尚未儲存"
+  },
+  "enrichments": {
+    "faceRecognition": {
+      "modelSize": {
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上運行。"
+        },
+        "desc": "用於人臉識別的模型大小。",
+        "label": "模型大小",
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用 FaceNet 臉部嵌入模型，在大多數 CPU 上能有效運行。"
+        }
+      },
+      "desc": "人臉識別功能允許為人物分配名字，當辨識到他們的臉孔時，Frigate 會將名字加到子標籤上。此資訊會顯示於介面、篩選器及通知中。",
+      "title": "人臉識別",
+      "readTheDocumentation": "閱讀文件"
+    },
+    "birdClassification": {
+      "title": "鳥類分類",
+      "desc": "鳥類分類會使用量化 Tensorflow 模型識別已知鳥類。當辨識到已知鳥類時，牠的常見名稱會加到子標籤上。此資訊會顯示在介面、篩選器及通知中。"
+    },
+    "semanticSearch": {
+      "desc": "Frigate 的語意搜尋功能讓你可以利用影像本身、自訂文字描述，或自動產生的描述，在審查項目中尋找已追蹤的物件。",
+      "reindexNow": {
+        "confirmDesc": "你確定要重建索引所有已追蹤物件的嵌入向量嗎？這個過程會在背景運行，但可能會用盡你的 CPU，而且需要一定時間。你可以在「瀏覽」頁面查看進度。",
+        "label": "立即重建索引",
+        "desc": "重建索引會為所有已追蹤物件重新生成嵌入向量。這個過程會在背景運行，可能會用盡你的 CPU，所需時間取決於已追蹤物件的數量。",
+        "confirmTitle": "確認重建索引",
+        "confirmButton": "重建索引",
+        "success": "重建索引已成功開始。",
+        "alreadyInProgress": "重建索引已在進行中。",
+        "error": "啟動重建索引失敗：{{errorMessage}}"
+      },
+      "title": "語意搜尋",
+      "readTheDocumentation": "閱讀文件",
+      "modelSize": {
+        "label": "模型大小",
+        "desc": "用於語意搜尋的模型大小。",
+        "small": {
+          "title": "小型",
+          "desc": "使用<em>小型</em>模型會採用量化版本，較少佔用 RAM，在 CPU 上運行更快，而嵌入品質的差異非常細微。"
+        },
+        "large": {
+          "title": "大型",
+          "desc": "使用<em>大型</em>模型會採用完整的 Jina 模型，並在適用情況下自動於 GPU 上運行。"
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "車牌識別",
+      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。",
+      "readTheDocumentation": "閱讀文件"
+    },
+    "title": "進階功能設定",
+    "unsavedChanges": "未儲存進階功能設定變更",
+    "restart_required": "需要重新啟動（進階功能設定已變更）",
+    "toast": {
+      "success": "進階功能設定已儲存。請重新啟動 Frigate 以套用你的更改。",
+      "error": "儲存設定變更失敗：{{errorMessage}}"
+    }
+  }
+}

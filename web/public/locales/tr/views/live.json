@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Canlı - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Canlı - Frigate",
+  "muteCameras": {
+    "disable": "Tüm Kameraların Sesini Aç",
+    "enable": "Tüm Kameraları Sustur"
+  },
+  "autotracking": {
+    "disable": "Otomatik Takibi Kapat",
+    "enable": "Otomatik Takibi Aç"
+  },
+  "manualRecording": {
+    "start": "Talep üzerine kaydı başlat",
+    "failedToEnd": "Manuel talep üzerine kayıt bitirilemedi.",
+    "recordDisabledTips": "Kamera konfigürasyonunda kayıtlar devre dışı bırakıldığı veya kısıtlandığı için yalnızca bir fotoğraf kaydedilcektir.",
+    "showStats": {
+      "desc": "Yayın istatistiklerini göstermek için bu seçeneği açın.",
+      "label": "İstatistikleri Göster"
+    },
+    "started": "Manuel talep üzerine kayıt başlatıldı.",
+    "failedToStart": "Manuel talep üzerine kayıt başlatılamadı.",
+    "title": "İsteğe Bağlı Kayıt",
+    "end": "Talep üzerine kaydı bitir",
+    "debugView": "Hata Ayıklama Görünümü",
+    "ended": "Manuel talep üzerine kayıt bitirildi.",
+    "tips": "Bu kameranın kayıt tutma ayarları kapsamında manuel olarak bir olay başlatın.",
+    "playInBackground": {
+      "label": "Arka planda oynat",
+      "desc": "Yayını oynatıcı arkadayken de devam ettirmek için bu seçeneği açın."
+    }
+  },
+  "stream": {
+    "audio": {
+      "tips": {
+        "documentation": "Dökümantasyonu oku ",
+        "title": "Bu yayın için kameranızın yayın çıkışında ses olması ve go2rtc'de ayarlanmış olması gerekmektedir."
+      },
+      "unavailable": "Bu yayında ses yok",
+      "available": "Bu yayında ses var"
+    },
+    "twoWayTalk": {
+      "tips": "Çift yönlü ses için cihazınızın ve kameranızın bu özelliği desteklemesi ve WebRTC'nin ayarlanmış olması gereklidir.",
+      "tips.documentation": "Dökümantasyonu oku ",
+      "available": "Bu yayında çift yönlü ses var",
+      "unavailable": "Bu yayında çift yönlü ses yok"
+    },
+    "lowBandwidth": {
+      "tips": "Canlı görünüm, yayında donmalar veya yayın hataları sebebiyle düşük bant genişliği moduna geçti.",
+      "resetStream": "Yayını sıfırla"
+    },
+    "playInBackground": {
+      "label": "Arka planda oynat",
+      "tips": "Yayını oynatıcı arkadayken de devam ettirmek için bu seçeneği açın."
+    },
+    "title": "Yayın"
+  },
+  "cameraSettings": {
+    "recording": "Kayıt",
+    "snapshots": "Fotoğraflar",
+    "title": "{{camera}} Ayarları",
+    "autotracking": "Otomatik Takip",
+    "cameraEnabled": "Kamera Açık",
+    "objectDetection": "Nesne Algılama",
+    "audioDetection": "Ses Algılama"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "active_objects": "Aktif nesneler",
+      "all": "Tümü",
+      "motion": "Hareket"
+    },
+    "notAllTips": "İlgili {{source}} kaynağındaki kayıt saklama politikanız <code> şu moda ayarlı: {{effectiveRetainMode}}</code>. Dolayısıyla şu anda gerçekleştirdiğiniz manuel talep üzerine kayıtta yalnızca {{effectiveRetainModeName}} içeren bölümler yer alacaktır."
+  },
+  "editLayout": {
+    "label": "Düzeni düzenle",
+    "group": {
+      "label": "Kamera Grubunu Düzenle"
+    },
+    "exitEdit": "Düzenlemeden Çık"
+  },
+  "cameraAudio": {
+    "enable": "Kamera sesini aç",
+    "disable": "Kamera sesini kapat"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "enable": "Tıklamayla gezintiyi aç",
+        "disable": "Tıklamayla gezintiyi kapat",
+        "label": "Kamerayı ortalamak için görüntüye tıklatın"
+      },
+      "down": {
+        "label": "PTZ kamerayı aşağı çevir"
+      },
+      "right": {
+        "label": "PTZ kamerayı sağa çevir"
+      },
+      "left": {
+        "label": "PTZ kameryı sağa çevir"
+      },
+      "up": {
+        "label": "PTZ kamerayı yukarı çevir"
+      }
+    },
+    "zoom": {
+      "out": {
+        "label": "PTZ kamerayı uzaklaştır"
+      },
+      "in": {
+        "label": "PTZ kamerayı yakınlaştır"
+      }
+    },
+    "presets": "PTZ kamera ön ayarları",
+    "frame": {
+      "center": {
+        "label": "PTZ kamerayı ortalamak için görüntüye tıklatın"
+      }
+    }
+  },
+  "history": {
+    "label": "Geçmiş görüntüleri göster"
+  },
+  "camera": {
+    "enable": "Kamerayı aç",
+    "disable": "Kamerayı kapat"
+  },
+  "suspend": {
+    "forTime": "Askıya alınma süresi: "
+  },
+  "twoWayTalk": {
+    "disable": "Çift yönli sesi kapat",
+    "enable": "Çift yönli sesi aç"
+  },
+  "snapshots": {
+    "enable": "Resimleri Aç",
+    "disable": "Resimleri Kapat"
+  },
+  "audioDetect": {
+    "enable": "Ses Tespitini Aç",
+    "disable": "Ses Tespitini Kapat"
+  },
+  "streamStats": {
+    "disable": "Yayın İstatistiklerini Gizel",
+    "enable": "Yayın İstatistiklerini Göster"
+  },
+  "lowBandwidthMode": "Düşük bant genişliği modu",
+  "streamingSettings": "Yayın ayarları",
+  "audio": "Ses",
+  "recording": {
+    "enable": "Kaydı Aç",
+    "disable": "Kaydı Kapat"
+  },
+  "notifications": "Bildirimler",
+  "detect": {
+    "disable": "Tespiti Kapat",
+    "enable": "Tespiti Aç"
+  }
+}

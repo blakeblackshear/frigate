@@ -1,0 +1,97 @@
+{
+  "description": {
+    "addFace": "我们将引导你如何向人脸库中添加新的特征库。",
+    "placeholder": "请输入此特征库的名称",
+    "invalidName": "名称无效。名称只能包含字母、数字、空格、撇号、下划线和连字符。"
+  },
+  "details": {
+    "person": "人",
+    "confidence": "置信度",
+    "face": "人脸详情",
+    "faceDesc": "生成此人脸特征的跟踪对象详细信息",
+    "timestamp": "时间戳",
+    "subLabelScore": "子标签得分",
+    "scoreInfo": "子标签分数是基于所有识别到的人脸置信度的加权评分，因此可能与快照中显示的分数有所不同。",
+    "unknown": "未知"
+  },
+  "documentTitle": "人脸库 - Frigate",
+  "uploadFaceImage": {
+    "title": "上传人脸图片",
+    "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"
+  },
+  "createFaceLibrary": {
+    "title": "创建特征库",
+    "desc": "创建一个新的特征库",
+    "new": "新建人脸",
+    "nextSteps": "建议按以下步骤建立可靠的特征库：<li>使用<em>训练</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
+  },
+  "train": {
+    "title": "训练",
+    "aria": "选择训练",
+    "empty": "近期未检测到人脸识别操作"
+  },
+  "selectItem": "选择 {{item}}",
+  "selectFace": "选择人脸",
+  "deleteFaceLibrary": {
+    "title": "删除名称",
+    "desc": "确定要删除特征库 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
+  },
+  "button": {
+    "deleteFaceAttempts": "删除人脸",
+    "addFace": "添加人脸",
+    "uploadImage": "上传图片",
+    "reprocessFace": "重新处理人脸",
+    "renameFace": "重命名人脸",
+    "deleteFace": "删除人脸"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "请选择图片文件。"
+    },
+    "dropActive": "拖动图片文件到这里…",
+    "dropInstructions": "拖动图片文件到此处或点击选择",
+    "maxSize": "最大文件大小：{{size}}MB"
+  },
+  "readTheDocs": "阅读文档",
+  "trainFaceAs": "将人脸特征训练为：",
+  "trainFace": "训练人脸特征",
+  "toast": {
+    "success": {
+      "uploadedImage": "图片上传成功。",
+      "addFaceLibrary": "{{name}} 已成功添加至人脸库！",
+      "deletedFace_other": "成功删除 {{count}} 个 人脸特征。",
+      "deletedName_other": "成功删除 {{count}} 个 人脸特征。",
+      "trainedFace": "人脸特征训练成功。",
+      "updatedFaceScore": "更新人脸特征评分成功。",
+      "renamedFace": "成功重命名人脸为{{name}}"
+    },
+    "error": {
+      "uploadingImageFailed": "图片上传失败：{{errorMessage}}",
+      "addFaceLibraryFailed": "人脸命名失败：{{errorMessage}}",
+      "deleteFaceFailed": "删除失败：{{errorMessage}}",
+      "deleteNameFailed": "特征集删除失败：{{errorMessage}}",
+      "trainFailed": "训练失败：{{errorMessage}}",
+      "updateFaceScoreFailed": "更新人脸评分失败：{{errorMessage}}",
+      "renameFaceFailed": "重命名人脸失败：{{errorMessage}}"
+    }
+  },
+  "steps": {
+    "faceName": "输入人脸姓名",
+    "uploadFace": "上传人脸照片",
+    "nextSteps": "下一步",
+    "description": {
+      "uploadFace": "上传一张{{name}}的正面人脸照片。图片无需裁剪为仅显示面部。"
+    }
+  },
+  "renameFace": {
+    "desc": "为 {{name}} 输入新的名称",
+    "title": "重命名人脸"
+  },
+  "collections": "特征库",
+  "deleteFaceAttempts": {
+    "desc_other": "你确定要删除 {{count}} 张人脸数据吗？此操作不可撤销。",
+    "title": "删除人脸"
+  },
+  "pixels": "{{area}} 像素",
+  "nofaces": "没有可用的人脸"
+}

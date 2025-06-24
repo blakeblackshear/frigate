@@ -1,0 +1,126 @@
+{
+  "filter": "Filtro",
+  "labels": {
+    "label": "Etichette",
+    "all": {
+      "title": "Tutte le etichette",
+      "short": "Etichette"
+    },
+    "count_one": "{{count}} Etichetta",
+    "count_other": "{{count}} Etichette"
+  },
+  "more": "Altri filtri",
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Tutte le zone",
+      "short": "Zone"
+    }
+  },
+  "dates": {
+    "all": {
+      "title": "Tutte le date",
+      "short": "Date"
+    },
+    "selectPreset": "Seleziona una preimpostazione…"
+  },
+  "reset": {
+    "label": "Ripristina i filtri ai valori predefiniti"
+  },
+  "features": {
+    "submittedToFrigatePlus": {
+      "label": "Inviato a Frigate+",
+      "tips": "Devi prima filtrare gli oggetti tracciati che hanno un'istantanea.<br /><br />Gli oggetti tracciati senza istantanee non possono essere inviati a Frigate+."
+    },
+    "hasSnapshot": "Contiene una istantanea",
+    "hasVideoClip": "Contiene un filmato video",
+    "label": "Caratteristiche"
+  },
+  "sort": {
+    "dateAsc": "Data (crescente)",
+    "scoreAsc": "Punteggio dell'oggetto (crescente)",
+    "dateDesc": "Data (discendente)",
+    "speedAsc": "Velocità stimata (crescente)",
+    "speedDesc": "Velocità stimata (discendente)",
+    "relevance": "Rilevanza",
+    "label": "Ordina",
+    "scoreDesc": "Punteggio dell'oggetto (discrescente)"
+  },
+  "explore": {
+    "settings": {
+      "title": "Impostazioni",
+      "gridColumns": {
+        "desc": "Seleziona il numero di colonne nella vista griglia.",
+        "title": "Colonne della griglia"
+      },
+      "defaultView": {
+        "title": "Vista predefinita",
+        "desc": "Se non è selezionato alcun filtro, visualizza un riepilogo degli oggetti tracciati più di recente per etichetta oppure visualizza una griglia non filtrata.",
+        "summary": "Riepilogo",
+        "unfilteredGrid": "Griglia non filtrata"
+      },
+      "searchSource": {
+        "label": "Cerca la fonte",
+        "desc": "Scegli se cercare nelle miniature o nelle descrizioni degli oggetti tracciati.",
+        "options": {
+          "thumbnailImage": "Immagine anteprima",
+          "description": "Descrizione"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Seleziona una data da filtrare"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtra livello di registro",
+    "loading": {
+      "title": "Caricamento",
+      "desc": "Scorrendo il riquadro dei registri fino in fondo, i nuovi registri vengono automaticamente visualizzati non appena vengono aggiunti."
+    },
+    "filterBySeverity": "Filtra i registri per gravità",
+    "disableLogStreaming": "Disabilita la trasmissione del registro",
+    "allLogs": "Tutti i registri"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "success": "Oggetti tracciati eliminati correttamente.",
+      "error": "Impossibile eliminare gli oggetti tracciati: {{errorMessage}}"
+    },
+    "desc": "L'eliminazione di questi {{objectLength}} oggetti tracciati rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate al ciclo di vita dell'oggetto. Il filmato registrato di questi oggetti tracciati nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi procedere?<br /><br />Tieni premuto il tasto <em>Maiusc</em> per ignorare questa finestra di dialogo in futuro.",
+    "title": "Conferma eliminazione"
+  },
+  "recognizedLicensePlates": {
+    "title": "Targhe riconosciute",
+    "selectPlatesFromList": "Seleziona una o più targhe dall'elenco.",
+    "loadFailed": "Impossibile caricare le targhe riconosciute.",
+    "loading": "Caricamento targhe riconosciute…",
+    "placeholder": "Digita per cercare le targhe…",
+    "noLicensePlatesFound": "Nessuna targa trovata."
+  },
+  "timeRange": "Intervallo di tempo",
+  "subLabels": {
+    "label": "Sottoetichette",
+    "all": "Tutte le sottoetichette"
+  },
+  "score": "Punteggio",
+  "estimatedSpeed": "Velocità stimata ({{unit}})",
+  "cameras": {
+    "label": "Filtro telecamere",
+    "all": {
+      "title": "Tutte le telecamere",
+      "short": "Telecamere"
+    }
+  },
+  "review": {
+    "showReviewed": "Mostra visti"
+  },
+  "motion": {
+    "showMotionOnly": "Mostra solo movimento"
+  },
+  "zoneMask": {
+    "filterBy": "Filtra per maschera di zona"
+  }
+}

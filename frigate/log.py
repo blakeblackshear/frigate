@@ -1,3 +1,4 @@
+# In log.py
 import atexit
 import logging
 import multiprocessing as mp
@@ -6,6 +7,7 @@ import sys
 import threading
 from collections import deque
 from logging.handlers import QueueHandler, QueueListener
+from queue import Queue
 from typing import Deque, Optional
 
 from frigate.util.builtin import clean_camera_user_pass
@@ -32,12 +34,14 @@ LOG_HANDLER.addFilter(
 )
 
 log_listener: Optional[QueueListener] = None
+log_queue: Optional[Queue] = None
+manager = None
 
 
 def setup_logging() -> None:
-    global log_listener
-
-    log_queue: mp.Queue = mp.Queue()
+    global log_listener, log_queue, manager
+    manager = mp.Manager()
+    log_queue = manager.Queue()
     log_listener = QueueListener(log_queue, LOG_HANDLER, respect_handler_level=True)
 
     atexit.register(_stop_logging)
@@ -53,11 +57,13 @@ def setup_logging() -> None:
 
 
 def _stop_logging() -> None:
-    global log_listener
-
+    global log_listener, manager
     if log_listener is not None:
         log_listener.stop()
         log_listener = None
+    if manager is not None:
+        manager.shutdown()
+        manager = None
 
 
 # When a multiprocessing.Process exits, python tries to flush stdout and stderr. However, if the

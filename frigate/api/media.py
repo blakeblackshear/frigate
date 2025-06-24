@@ -1,12 +1,15 @@
 """Image and video apis."""
 
+import asyncio
 import glob
 import logging
+import math
 import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path as FilePath
+from typing import Any
 from urllib.parse import unquote
 
 import cv2
@@ -87,7 +90,7 @@ def imagestream(
     camera_name: str,
     fps: int,
     height: int,
-    draw_options: dict[str, any],
+    draw_options: dict[str, Any],
 ):
     while True:
         # max out at specified FPS
@@ -109,9 +112,12 @@ def imagestream(
 @router.get("/{camera_name}/ptz/info")
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
-        return JSONResponse(
-            content=await request.app.onvif.get_camera_info(camera_name),
+        # Schedule get_camera_info in the OnvifController's event loop
+        future = asyncio.run_coroutine_threadsafe(
+            request.app.onvif.get_camera_info(camera_name), request.app.onvif.loop
         )
+        result = future.result()
+        return JSONResponse(content=result)
     else:
         return JSONResponse(
             content={"success": False, "message": "Camera not found"},
@@ -240,25 +246,50 @@ def get_snapshot_from_recording(
             content={"success": False, "message": "Camera not found"},
             status_code=404,
         )
-
-    recording_query = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-        )
-        .where(
-            (
-                (frame_time >= Recordings.start_time)
-                & (frame_time <= Recordings.end_time)
-            )
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.desc())
-        .limit(1)
-    )
+    recording: Recordings | None = None
 
     try:
-        recording: Recordings = recording_query.get()
+        recording = (
+            Recordings.select(
+                Recordings.path,
+                Recordings.start_time,
+            )
+            .where(
+                (
+                    (frame_time >= Recordings.start_time)
+                    & (frame_time <= Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .order_by(Recordings.start_time.desc())
+            .limit(1)
+            .get()
+        )
+    except DoesNotExist:
+        # try again with a rounded frame time as it may be between
+        # the rounded segment start time
+        frame_time = math.ceil(frame_time)
+        try:
+            recording = (
+                Recordings.select(
+                    Recordings.path,
+                    Recordings.start_time,
+                )
+                .where(
+                    (
+                        (frame_time >= Recordings.start_time)
+                        & (frame_time <= Recordings.end_time)
+                    )
+                )
+                .where(Recordings.camera == camera_name)
+                .order_by(Recordings.start_time.desc())
+                .limit(1)
+                .get()
+            )
+        except DoesNotExist:
+            pass
+
+    if recording is not None:
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
         mime_type = "png" if format == "png" else "jpeg"
@@ -279,7 +310,7 @@ def get_snapshot_from_recording(
                 status_code=404,
             )
         return Response(image_data, headers={"Content-Type": f"image/{mime_type}"})
-    except DoesNotExist:
+    else:
         return JSONResponse(
             content={
                 "success": False,
@@ -511,7 +542,10 @@ def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
+    description="For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.",
+)
 def recording_clip(
     request: Request,
     camera_name: str,
@@ -559,9 +593,11 @@ def recording_clip(
         clip: Recordings
         for clip in recordings:
             file.write(f"file '{clip.path}'\n")
+
             # if this is the starting clip, add an inpoint
             if clip.start_time < start_ts:
                 file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
+
             # if this is the ending clip, add an outpoint
             if clip.end_time > end_ts:
                 file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
@@ -604,10 +640,18 @@ def recording_clip(
     )
 
 
-@router.get("/vod/{camera_name}/start/{start_ts}/end/{end_ts}")
+@router.get(
+    "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
+    description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     recordings = (
-        Recordings.select(Recordings.path, Recordings.duration, Recordings.end_time)
+        Recordings.select(
+            Recordings.path,
+            Recordings.duration,
+            Recordings.end_time,
+            Recordings.start_time,
+        )
         .where(
             Recordings.start_time.between(start_ts, end_ts)
             | Recordings.end_time.between(start_ts, end_ts)
@@ -627,14 +671,19 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
-        # Determine if we need to end the last clip early
+        # adjust start offset if start_ts is after recording.start_time
+        if start_ts > recording.start_time:
+            inpoint = int((start_ts - recording.start_time) * 1000)
+            clip["clipFrom"] = inpoint
+            duration -= inpoint
+
+        # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-            if duration == 0:
-                # this means the segment starts right at the end of the requested time range
-                # and it does not need to be included
-                continue
+        if duration <= 0:
+            # skip if the clip has no valid duration
+            continue
 
         if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
@@ -668,7 +717,10 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     )
 
 
-@router.get("/vod/{year_month}/{day}/{hour}/{camera_name}")
+@router.get(
+    "/vod/{year_month}/{day}/{hour}/{camera_name}",
+    description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
     """VOD for specific hour. Uses the default timezone (UTC)."""
     return vod_hour(
@@ -676,7 +728,10 @@ def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str)
     )
 
 
-@router.get("/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}")
+@router.get(
+    "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
+    description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
     parts = year_month.split("-")
     start_date = (
@@ -690,7 +745,10 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     return vod_ts(camera_name, start_ts, end_ts)
 
 
-@router.get("/vod/event/{event_id}")
+@router.get(
+    "/vod/event/{event_id}",
+    description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 def vod_event(event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -876,7 +934,7 @@ def event_thumbnail(
         elif extension == "webp":
             quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{img}", thumbnail, quality_params)
+        _, img = cv2.imencode(f".{extension}", thumbnail, quality_params)
         thumbnail_bytes = img.tobytes()
 
     return Response(

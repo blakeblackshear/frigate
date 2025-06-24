@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "storage": "Statistiques de stockage - Frigate",
+    "cameras": "Statistiques des caméras - Frigate",
+    "general": "Statistiques générales - Frigate",
+    "enrichments": "Statistiques de données augmentées - Frigate",
+    "logs": {
+      "frigate": "Journaux de Frigate - Frigate",
+      "nginx": "Journaux Nginx - Frigate",
+      "go2rtc": "Journaux Go2RTC - Frigate"
+    }
+  },
+  "title": "Système",
+  "metrics": "Métriques du système",
+  "logs": {
+    "download": {
+      "label": "Télécharger les journaux"
+    },
+    "copy": {
+      "label": "Copier dans le presse-papiers",
+      "success": "Journaux copiés vers le presse-papiers",
+      "error": "Échec du copiage des journaux dans le presse-papiers"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Horodatage",
+      "tag": "Balise",
+      "message": "Message"
+    },
+    "tips": "Les logs sont diffusés en continu depuis le serveur",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Erreur lors de la récupération des logs : {{errorMessage}}",
+        "whileStreamingLogs": "Erreur lors de la diffusion des logs : {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Général",
+    "detector": {
+      "title": "Détecteurs",
+      "inferenceSpeed": "Vitesse d'inférence du détecteur",
+      "cpuUsage": "Utilisation processeur du détecteur",
+      "memoryUsage": "Utilisation mémoire du détecteur",
+      "temperature": "Température du détecteur"
+    },
+    "hardwareInfo": {
+      "title": "Info matériel",
+      "gpuUsage": "Utilisation carte graphique",
+      "gpuMemory": "Mémoire carte graphique",
+      "gpuEncoder": "Encodeur carte graphique",
+      "gpuDecoder": "Décodeur carte graphique",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Sortie Vainfo",
+          "returnCode": "Code de retour : {{code}}",
+          "processOutput": "Tâche de sortie :",
+          "processError": "Erreur de tâche :"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Sortie Nvidia SMI",
+          "name": "Nom : {{name}}",
+          "cudaComputerCapability": "Capacité de calcul CUDA : {{cuda_compute}}",
+          "vbios": "Informations VBios : {{vbios}}",
+          "driver": "Pilote : {{driver}}"
+        },
+        "copyInfo": {
+          "label": "Information de copie du GPU"
+        },
+        "toast": {
+          "success": "Informations GPU copiées dans le presse-papier"
+        },
+        "closeInfo": {
+          "label": "Information de fermeture du GPU"
+        }
+      },
+      "npuUsage": "Utilisation NPU",
+      "npuMemory": "Mémoire NPU"
+    },
+    "otherProcesses": {
+      "title": "Autres tâches",
+      "processCpuUsage": "Utilisation processeur des tâches",
+      "processMemoryUsage": "Utilisation mémoire des tâches"
+    }
+  },
+  "storage": {
+    "title": "Stockage",
+    "recordings": {
+      "title": "Enregistrements",
+      "earliestRecording": "Enregistrement le plus ancien :",
+      "tips": "Cette valeur correspond au stockage total utilisé par les enregistrements dans la base de données Frigate. Frigate ne suit pas l'utilisation du stockage pour tous les fichiers sur votre disque."
+    },
+    "cameraStorage": {
+      "title": "Stockage de la caméra",
+      "bandwidth": "Bande passante",
+      "unused": {
+        "title": "Inutilisé",
+        "tips": "Cette valeur ne représente peut-être pas précisément l'espace libre et utilisable par Frigate si vous avez d'autres fichiers stockés sur ce disque en plus des enregistrements Frigate. Frigate ne suit pas l'utilisation du stockage en dehors de ses propres enregistrements."
+      },
+      "percentageOfTotalUsed": "Pourcentage du total",
+      "storageUsed": "Stockage",
+      "camera": "Caméra",
+      "unusedStorageInformation": "Information sur le stockage non utilisé"
+    },
+    "overview": "Vue d'ensemble"
+  },
+  "cameras": {
+    "title": "Caméras",
+    "info": {
+      "cameraProbeInfo": "{{camera}} Information récupérée depuis la caméra",
+      "fetching": "En cours de récupération des données de la caméra",
+      "stream": "Flux {{idx}}",
+      "fps": "Images par seconde :",
+      "unknown": "Inconnu",
+      "audio": "Audio :",
+      "tips": {
+        "title": "Information récupérée depuis la caméra"
+      },
+      "streamDataFromFFPROBE": "Le flux de données est obtenu par <code>ffprobe</code>.",
+      "resolution": "Résolution :",
+      "error": "Erreur : {{error}}",
+      "codec": "Codec :",
+      "video": "Vidéo :",
+      "aspectRatio": "ratio d'aspect"
+    },
+    "framesAndDetections": "Images / Détections",
+    "label": {
+      "camera": "caméra",
+      "detect": "Détecter",
+      "skipped": "ignoré",
+      "ffmpeg": "FFmpeg",
+      "capture": "capture",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} détections manquées par seconde",
+      "overallDetectionsPerSecond": "Moyenne de détections par seconde",
+      "overallFramesPerSecond": "Moyenne d'images par seconde",
+      "overallSkippedDetectionsPerSecond": "Moyenne de détections manquées par seconde",
+      "cameraCapture": "{{camName}} capture",
+      "cameraDetect": "{{camName}} détection",
+      "cameraFramesPerSecond": "{{camName}} images par seconde",
+      "cameraDetectionsPerSecond": "{{camName}} détections par seconde"
+    },
+    "overview": "Vue d'ensemble",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Données récupérées copiées dans le presse-papier."
+      },
+      "error": {
+        "unableToProbeCamera": "Impossible de récupérer des infos depuis la caméra : {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Dernier rafraichissement : ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur par FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} a un taux élevé d'utilisation processeur ({{detectAvg}}%)",
+    "healthy": "Le système est sain",
+    "reindexingEmbeddings": "Réindexation des représentations numériques ({{processed}}% complété)",
+    "cameraIsOffline": "{{camera}} est hors ligne",
+    "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)"
+  },
+  "enrichments": {
+    "title": "Données augmentées",
+    "infPerSecond": "Inférences par seconde",
+    "embeddings": {
+      "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
+      "text_embedding_speed": "Vitesse de capture des données complémentaire de texte",
+      "image_embedding_speed": "Vitesse de capture des données complémentaires à l'image",
+      "plate_recognition_speed": "Vitesse de reconnaissance des plaques d'immatriculation",
+      "face_recognition_speed": "Vitesse de reconnaissance faciale",
+      "plate_recognition": "Reconnaissance de plaques d'immatriculation",
+      "image_embedding": "Représentations numériques d'image",
+      "yolov9_plate_detection": "Détection de plaques d'immatriculation YOLOv9",
+      "face_recognition": "Reconnaissance faciale",
+      "text_embedding": "Représentation numérique de texte",
+      "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9"
+    }
+  }
+}

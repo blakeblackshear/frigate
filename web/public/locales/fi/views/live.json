@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Suora - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Suora - Frigate",
+  "lowBandwidthMode": "Pienen kaistanleveyden tila",
+  "twoWayTalk": {
+    "enable": "Ota käyttöön kaksisuuntainen puhe",
+    "disable": "Poista kaksisuuntainen puhe käytöstä"
+  },
+  "cameraAudio": {
+    "enable": "Ota kameran ääni käyttöön",
+    "disable": "Poista kameran ääni käytöstä"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Napsauta ruutua keskittääksesi kameran",
+        "enable": "Ota käyttöön napsauttamalla siirtäminen",
+        "disable": "Poista napsauttamalla siirtäminen"
+      },
+      "left": {
+        "label": "Siirrä PTZ-kameraa vasemmalle"
+      },
+      "up": {
+        "label": "Siirrä PTZ-kameraa ylös"
+      },
+      "down": {
+        "label": "Siirrä PTZ-kameraa alas"
+      },
+      "right": {
+        "label": "Siirrä PTZ-kameraa oikealle"
+      }
+    },
+    "zoom": {
+      "out": {
+        "label": "Zoomaa PTZ-kamera ulos"
+      },
+      "in": {
+        "label": "Zoomaa PTZ-kamera sisään"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Napsauta kehystä keskittääksesi PTZ-kamera"
+      }
+    },
+    "presets": "PTZ-kameroiden esiasetukset"
+  },
+  "camera": {
+    "enable": "Ota kamera käyttöön",
+    "disable": "Poista kamera käytöstä"
+  },
+  "muteCameras": {
+    "enable": "Mykistä kaikki kamerat",
+    "disable": "Poista kaikkien kameroiden mykistys"
+  },
+  "detect": {
+    "enable": "Ota tunnistus käyttöön",
+    "disable": "Poista tunnistus käytöstä"
+  },
+  "recording": {
+    "enable": "Ota tallennus käyttöön",
+    "disable": "Poista tallennus käytöstä"
+  },
+  "snapshots": {
+    "enable": "Ota tilannekuva käyttöön",
+    "disable": "Poista tilannekuva käytöstä"
+  },
+  "audioDetect": {
+    "enable": "Ota käyttöön äänen tunnistus",
+    "disable": "Poista äänen tunnistus käytöstä"
+  },
+  "autotracking": {
+    "enable": "Ota automaattinen seuranta käyttöön",
+    "disable": "Poista automaattinen seuranta käytöstä"
+  },
+  "streamStats": {
+    "enable": "Näytä suoratoiston tilastot",
+    "disable": "Piilota suoratoiston tilastot"
+  },
+  "manualRecording": {
+    "title": "Tallennus pyynnöstä",
+    "tips": "Aloita manuaalinen tapahtuma tämän kameran tallenteen tallennusasetusten perusteella.",
+    "playInBackground": {
+      "label": "Toista taustalla",
+      "desc": "Ota tämä asetus käyttöön, jos haluat jatkaa suoratoistoa kun soitin on piilotettu."
+    },
+    "showStats": {
+      "label": "Näytä tilastot",
+      "desc": "Ota tämä asetus käyttöön, jos haluat näyttää suoratoistotilastot kamerasyötteen päällä."
+    },
+    "debugView": "Virheenkorjausnäkymä",
+    "start": "Aloita tallennus pyynnöstä",
+    "started": "Manuaalinen pyynnöstätallennus aloitettu.",
+    "failedToStart": "Manuaalisen pyynnöstätallennuksen aloittaminen epäonnistui.",
+    "recordDisabledTips": "Koska tallennus on poistettu käytöstä tai rajoitettu tämän kameran asetuksissa, vain tilannekuva tallennetaan.",
+    "end": "Lopeta pyynnöstätallennus",
+    "ended": "Manuaalinen on-demand-tallennus lopetettu.",
+    "failedToEnd": "Manuaalisen pyynnöstätallennuksen lopettaminen epäonnistui."
+  },
+  "streamingSettings": "Suoratoistoasetukset",
+  "notifications": "Ilmoitukset",
+  "audio": "Ääni",
+  "suspend": {
+    "forTime": "Keskeytys: "
+  },
+  "stream": {
+    "title": "Suoratoisto",
+    "audio": {
+      "tips": {
+        "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten.",
+        "documentation": "Lue dokumentaatio "
+      },
+      "available": "Ääni on saatavilla tälle suoratoistolle",
+      "unavailable": "Ääni ei ole saatavilla tälle suoratoistolle"
+    },
+    "twoWayTalk": {
+      "tips": "Laitteesi on tuettava ominaisuutta ja WebRTC:n on oltava määritetty kaksisuuntaista ääntä varten.",
+      "tips.documentation": "Lue dokumentaatio ",
+      "available": "Kaksisuuntainen ääni on saatavilla tässä suoratoistossa",
+      "unavailable": "Kaksisuuntainen ääni ei ole käytettävissä tässä suoratoistossa"
+    },
+    "lowBandwidth": {
+      "tips": "Live-näkymä on matalan kaistanleveyden tilassa puskuroinnin tai suoratoistovirheiden vuoksi.",
+      "resetStream": "Nollaa suoratoisto"
+    },
+    "playInBackground": {
+      "label": "Toista taustalla",
+      "tips": "Ota tämä asetus käyttöön, jos haluat jatkaa suoratoistoa, kun soitin on piilotettu."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Asetukset",
+    "cameraEnabled": "Kamera käytössä",
+    "objectDetection": "Kohteen tunnistus",
+    "recording": "Nauhoitus",
+    "snapshots": "Tilannekuvat",
+    "audioDetection": "Äänen tunnistus",
+    "autotracking": "Automaattinen seuranta"
+  },
+  "history": {
+    "label": "Näytä historiallista materiaalia"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Kaikki",
+      "motion": "Liike",
+      "active_objects": "Aktiiviset kohteet"
+    },
+    "notAllTips": "{{source}}-tallenteiden säilytysmäärityksesi on asetettu <code>tila: {{effectiveRetainMode}}</code>, joten tämä tilattu tallenne säilyttää vain ne osat joiden tyyppi on {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Muokkaa asettelua",
+    "group": {
+      "label": "Muokkaa kameraryhmää"
+    },
+    "exitEdit": "Poistu muokkauksesta"
+  }
+}

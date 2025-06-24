@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "No recordings found for this time",
+  "noPreviewFound": "No Preview Found",
+  "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Submit this frame to Frigate+?",
+    "submit": "Submit"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
+  "streamOffline": {
+    "title": "Stream Offline",
+    "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
+  },
+  "cameraDisabled": "Camera is disabled",
+  "stats": {
+    "streamType": {
+      "title": "Stream Type:",
+      "short": "Type"
+    },
+    "bandwidth": {
+      "title": "Bandwidth:",
+      "short": "Bandwidth"
+    },
+    "latency": {
+      "title": "Latency:",
+      "value": "{{seconds}} seconds",
+      "short": {
+        "title": "Latency",
+        "value": "{{seconds}} sec"
+      }
+    },
+    "totalFrames": "Total Frames:",
+    "droppedFrames": {
+      "title": "Dropped Frames:",
+      "short": {
+        "title": "Dropped",
+        "value": "{{droppedFrames}} frames"
+      }
+    },
+    "decodedFrames": "Decoded Frames:",
+    "droppedFrameRate": "Dropped Frame Rate:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Successfully submitted frame to Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Failed to submit frame to Frigate+"
+    }
+  }
+}

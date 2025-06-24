@@ -4,7 +4,7 @@ import threading
 import time
 from multiprocessing.synchronize import Event as MpEvent
 
-from frigate.object_detection import ObjectDetectProcess
+from frigate.object_detection.base import ObjectDetectProcess
 from frigate.util.services import restart_frigate
 
 logger = logging.getLogger(__name__)

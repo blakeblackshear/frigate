@@ -1,0 +1,17 @@
+{
+  "search": "Tìm kiếm",
+  "documentTitle": "Xuất tệp - Frigate",
+  "noExports": "Không tìm thấy tệp xuất nào",
+  "deleteExport": "Xóa tệp xuất",
+  "deleteExport.desc": "Bạn có chắc chắn muốn xóa {{exportName}} không?",
+  "editExport": {
+    "title": "Đổi tên tệp xuất",
+    "desc": "Nhập tên mới cho tệp xuất này.",
+    "saveExport": "Lưu tệp xuất"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Đổi tên tệp xuất thất bại: {{errorMessage}}"
+    }
+  }
+}

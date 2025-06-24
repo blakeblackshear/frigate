@@ -12,6 +12,7 @@ from typing import Any, Callable
 
 from py_vapid import Vapid01
 from pywebpush import WebPusher
+from titlecase import titlecase
 
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
@@ -173,7 +174,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 return
             self.send_alert(decoded)
         elif topic == "notification_test":
-            if not self.config.notifications.enabled:
+            if not self.config.notifications.enabled and not any(
+                cam.notifications.enabled for cam in self.config.cameras.values()
+            ):
+                logger.debug(
+                    "No cameras have notifications enabled, test notification not sent"
+                )
                 return
             self.send_notification_test()
 
@@ -303,6 +309,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             and len(payload["before"]["data"]["zones"])
             == len(payload["after"]["data"]["zones"])
         ):
+            logger.debug(
+                f"Skipping notification for {camera} - message is an update and important fields don't have an update"
+            )
             return
 
         self.last_camera_notification_time[camera] = current_time
@@ -317,13 +326,15 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
-        message = f"Detected on {camera.replace('_', ' ').title()}"
+        title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
+        message = f"Detected on {titlecase(camera.replace('_', ' '))}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
         ttl = 3600 if state == "end" else 0
+
+        logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
         for user in self.web_pushers:
             self.send_push_notification(

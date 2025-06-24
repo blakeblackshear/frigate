@@ -109,6 +109,7 @@ export function useSearchEffect(
   key: string,
   callback: (value: string) => boolean,
 ) {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const param = useMemo(() => {
@@ -129,7 +130,7 @@ export function useSearchEffect(
     const remove = callback(param[1]);
 
     if (remove) {
-      setSearchParams(undefined, { replace: true });
+      setSearchParams(undefined, { state: location.state, replace: true });
     }
-  }, [param, callback, setSearchParams]);
+  }, [param, location.state, callback, setSearchParams]);
 }

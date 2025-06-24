@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Direkte - Frigate",
+  "lowBandwidthMode": "Lav båndbreddemodus",
+  "documentTitle.withCamera": "{{camera}} - Direkte - Frigate",
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klikk i rammen for å sentrere kameraet",
+        "enable": "Aktiver klikk for å flytte",
+        "disable": "Deaktiver klikk for å flytte"
+      },
+      "left": {
+        "label": "Flytt PTZ-kameraet til venstre"
+      },
+      "up": {
+        "label": "Flytt PTZ-kameraet opp"
+      },
+      "down": {
+        "label": "Flytt PTZ-kameraet ned"
+      },
+      "right": {
+        "label": "Flytt PTZ-kameraet til høyre"
+      }
+    },
+    "presets": "PTZ-kamera forhåndsinnstillinger",
+    "zoom": {
+      "in": {
+        "label": "Zoom inn på PTZ-kameraet"
+      },
+      "out": {
+        "label": "Zoom ut på PTZ-kameraet"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klikk i rammen for å sentrere PTZ-kameraet"
+      }
+    }
+  },
+  "camera": {
+    "enable": "Aktiver kamera",
+    "disable": "Deaktiver kamera"
+  },
+  "snapshots": {
+    "enable": "Aktiver øyeblikksbilder",
+    "disable": "Deaktiver øyeblikksbilder"
+  },
+  "audioDetect": {
+    "enable": "Aktiver lydregistrering",
+    "disable": "Deaktiver lydregistrering"
+  },
+  "autotracking": {
+    "enable": "Aktiver automatisk sporing",
+    "disable": "Deaktiver automatisk sporing"
+  },
+  "manualRecording": {
+    "tips": "Start en manuell hendelse basert på kameraets innstillinger for opptaksbevaring.",
+    "playInBackground": {
+      "label": "Spill av i bakgrunnen",
+      "desc": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
+    },
+    "showStats": {
+      "label": "Vis statistikk",
+      "desc": "Aktiver dette alternativet for å vise strømmestatistikk som et overlegg på kamerastrømmen."
+    },
+    "started": "Startet manuelt opptak på forespørsel.",
+    "end": "Avslutt opptak på forespørsel",
+    "title": "Opptak på forespørsel",
+    "debugView": "Feilsøkingsvisning",
+    "start": "Start opptak på forespørsel",
+    "failedToStart": "Kunne ikke starte manuelt opptak på forespørsel.",
+    "recordDisabledTips": "Siden opptak er deaktivert eller begrenset i konfigurasjonen for dette kameraet, vil kun et øyeblikksbilde bli lagret.",
+    "ended": "Avsluttet manuelt opptak på forespørsel.",
+    "failedToEnd": "Kunne ikke avslutte manuelt opptak på forespørsel."
+  },
+  "audio": "Lyd",
+  "suspend": {
+    "forTime": "Pause i: "
+  },
+  "stream": {
+    "audio": {
+      "tips": {
+        "title": "Lyd må være aktivert på kameraet ditt og konfigurert i go2rtc for denne strømmen.",
+        "documentation": "Se dokumentasjonen "
+      },
+      "available": "Lyd er tilgjengelig for denne strømmen",
+      "unavailable": "Lyd er ikke tilgjengelig for denne strømmen"
+    },
+    "twoWayTalk": {
+      "tips": "Enheten din må støtte funksjonen og WebRTC må være konfigurert for toveis tale.",
+      "tips.documentation": "Se dokumentasjonen ",
+      "available": "Toveis tale er tilgjengelig for denne strømmen",
+      "unavailable": "Toveis tale er ikke tilgjengelig for denne strømmen"
+    },
+    "lowBandwidth": {
+      "tips": "Direktevisning er i lav båndbreddemodus på grunn av buffering eller strømmefeil.",
+      "resetStream": "Tilbakestill strøm"
+    },
+    "title": "Strøm",
+    "playInBackground": {
+      "label": "Spill av i bakgrunnen",
+      "tips": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
+    }
+  },
+  "history": {
+    "label": "Vis historiske opptak"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Alle",
+      "motion": "Bevegelse",
+      "active_objects": "Aktive objekter"
+    },
+    "notAllTips": "Konfigurasjonen for opptaksbevaring for {{source}} er satt til <code>mode: {{effectiveRetainMode}}</code>, så dette manuelle opptaket vil kun beholde segmenter med {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Rediger oppsett",
+    "group": {
+      "label": "Rediger kameragruppe"
+    },
+    "exitEdit": "Avslutt redigering"
+  },
+  "twoWayTalk": {
+    "enable": "Aktiver toveis tale",
+    "disable": "Deaktiver toveis tale"
+  },
+  "cameraAudio": {
+    "enable": "Aktiver kameralyd",
+    "disable": "Deaktiver kameralyd"
+  },
+  "muteCameras": {
+    "enable": "Demp alle kameraer",
+    "disable": "Slå på lyd på alle kameraer"
+  },
+  "detect": {
+    "enable": "Aktiver deteksjon",
+    "disable": "Deaktiver deteksjon"
+  },
+  "recording": {
+    "enable": "Aktiver opptak",
+    "disable": "Deaktiver opptak"
+  },
+  "streamStats": {
+    "enable": "Vis Strømmestatistikk",
+    "disable": "Skjul strømmestatistikk"
+  },
+  "streamingSettings": "Strømmingsinnstillinger",
+  "notifications": "Meldingsvarsler",
+  "cameraSettings": {
+    "title": "{{camera}}-innstillinger",
+    "cameraEnabled": "Kamera aktivert",
+    "objectDetection": "Objektdeteksjon",
+    "recording": "Opptak",
+    "snapshots": "Øyeblikksbilder",
+    "audioDetection": "Lydregistrering",
+    "autotracking": "Automatisk sporing"
+  }
+}

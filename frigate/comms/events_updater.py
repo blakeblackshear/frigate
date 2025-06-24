@@ -1,5 +1,7 @@
 """Facilitates communication between processes."""
 
+from typing import Any
+
 from frigate.events.types import EventStateEnum, EventTypeEnum
 
 from .zmq_proxy import Publisher, Subscriber
@@ -14,7 +16,7 @@ class EventUpdatePublisher(Publisher):
         super().__init__("update")
 
     def publish(
-        self, payload: tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, any]]
+        self, payload: tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, Any]]
     ) -> None:
         super().publish(payload)
 
@@ -37,7 +39,7 @@ class EventEndPublisher(Publisher):
         super().__init__("finalized")
 
     def publish(
-        self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, any]]
+        self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, Any]]
     ) -> None:
         super().publish(payload)
 

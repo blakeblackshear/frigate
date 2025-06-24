@@ -146,7 +146,7 @@ The above configuration example can be added globally or on a per camera basis.
 
 ## Can I have "continuous" recordings, but only at certain times?
 
-Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
+Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
 ## How do I export recordings?
 
@@ -173,6 +173,10 @@ When using `hwaccel_args` globally hardware encoding is used for time lapse gene
 To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
 
 :::
+
+## Apple Compatibility with H.265 Streams
+
+Apple devices running the Safari browser may fail to playback h.265 recordings. The [apple compatibility option](../configuration/camera_specific.md#h265-cameras-via-safari) should be used to ensure seamless playback on Apple devices.
 
 ## Syncing Recordings With Disk
 

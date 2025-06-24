@@ -7,7 +7,6 @@ starlette-context == 0.3.6
 fastapi == 0.115.*
 uvicorn == 0.30.*
 slowapi == 0.1.*
-imutils == 0.5.*
 joserfc == 1.0.*
 pathvalidate == 3.2.*
 markupsafe == 3.0.*
@@ -32,6 +31,7 @@ norfair == 2.2.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
+titlecase == 2.4.*
 # Image Manipulation
 numpy == 1.26.*
 opencv-python-headless == 4.11.0.*

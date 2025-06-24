@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
+from pathlib import Path as FilePath
 from typing import Any, Optional
 
 import aiofiles
@@ -73,18 +74,22 @@ def go2rtc_streams():
         )
     stream_data = r.json()
     for data in stream_data.values():
-        for producer in data.get("producers", []):
+        for producer in data.get("producers") or []:
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
     return JSONResponse(content=stream_data)
 
 
 @router.get("/go2rtc/streams/{camera_name}")
-def go2rtc_camera_stream(camera_name: str):
+def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
     )
     if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
+        camera_config = request.app.frigate_config.cameras.get(camera_name)
+
+        if camera_config and camera_config.enabled:
+            logger.error("Failed to fetch streams from go2rtc")
+
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
@@ -126,7 +131,7 @@ def metrics(request: Request):
 @router.get("/config")
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
-    config: dict[str, dict[str, any]] = config_obj.model_dump(
+    config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
 
@@ -153,7 +158,7 @@ def config(request: Request):
             camera_dict["zones"][zone_name]["color"] = zone.color
 
     # remove go2rtc stream passwords
-    go2rtc: dict[str, any] = config_obj.go2rtc.model_dump(
+    go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
     for stream_name, stream in go2rtc.get("streams", {}).items():
@@ -173,6 +178,22 @@ def config(request: Request):
     config["model"]["colormap"] = config_obj.model.colormap
     config["model"]["all_attributes"] = config_obj.model.all_attributes
     config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
+
+    # Add model plus data if plus is enabled
+    if config["plus"]["enabled"]:
+        model_path = config.get("model", {}).get("path")
+        if model_path:
+            model_json_path = FilePath(model_path).with_suffix(".json")
+            try:
+                with open(model_json_path, "r") as f:
+                    model_plus_data = json.load(f)
+                config["model"]["plus"] = model_plus_data
+            except FileNotFoundError:
+                config["model"]["plus"] = None
+            except json.JSONDecodeError:
+                config["model"]["plus"] = None
+        else:
+            config["model"]["plus"] = None
 
     # use merged labelamp
     for detector_config in config["detectors"].values():
@@ -619,6 +640,48 @@ def get_sub_labels(split_joined: Optional[int] = None):
     return JSONResponse(content=sub_labels)
 
 
+@router.get("/plus/models")
+def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
+    if not request.app.frigate_config.plus_api.is_active():
+        return JSONResponse(
+            content=({"success": False, "message": "Frigate+ is not enabled"}),
+            status_code=400,
+        )
+
+    models: dict[Any, Any] = request.app.frigate_config.plus_api.get_models()
+
+    if not models["list"]:
+        return JSONResponse(
+            content=({"success": False, "message": "No models found"}),
+            status_code=400,
+        )
+
+    modelList = models["list"]
+
+    # current model type
+    modelType = request.app.frigate_config.model.model_type
+
+    # current detectorType for comparing to supportedDetectors
+    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+
+    validModels = []
+
+    for model in sorted(
+        filter(
+            lambda m: (
+                not filterByCurrentModelDetector
+                or (detectorType in m["supportedDetectors"] and modelType in m["type"])
+            ),
+            modelList,
+        ),
+        key=(lambda m: m["trainDate"]),
+        reverse=True,
+    ):
+        validModels.append(model)
+
+    return JSONResponse(content=validModels)
+
+
 @router.get("/recognized_license_plates")
 def get_recognized_license_plates(split_joined: Optional[int] = None):
     try:
@@ -738,7 +801,7 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     count = 0
     start = 0
     end = 0
-    hours: dict[str, list[dict[str, any]]] = {}
+    hours: dict[str, list[dict[str, Any]]] = {}
 
     for t in timeline:
         if count == 0:

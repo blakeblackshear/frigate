@@ -1,0 +1,39 @@
+{
+  "alerts": "Тревоги",
+  "detections": "Обнаружения",
+  "motion": {
+    "label": "Движение",
+    "only": "Только движение"
+  },
+  "allCameras": "Все камеры",
+  "camera": "Камера",
+  "empty": {
+    "alert": "Отсутствуют тревоги для просмотра",
+    "detection": "Отсутствуют обнаружения для просмотра",
+    "motion": "Не найдено данных о движении"
+  },
+  "timeline": "Таймлайн",
+  "timeline.aria": "Выбор таймлайна",
+  "events": {
+    "label": "События",
+    "aria": "Выбор событий",
+    "noFoundForTimePeriod": "Для этого периода времени не найдено ни одного события."
+  },
+  "documentTitle": "Обзор событий - Frigate",
+  "recordings": {
+    "documentTitle": "Записи - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Последние 24 часа"
+  },
+  "markAsReviewed": "Пометить как просмотренное",
+  "newReviewItems": {
+    "label": "Посмотреть новые элементы для просмотра",
+    "button": "Новые элементы для просмотра"
+  },
+  "markTheseItemsAsReviewed": "Пометить эти элементы как просмотренные",
+  "selected": "{{count}} выбрано",
+  "selected_one": "{{count}} выбрано",
+  "selected_other": "{{count}} выбрано",
+  "detected": "обнаружен"
+}

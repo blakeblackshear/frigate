@@ -62,11 +62,13 @@ def migrate(migrator, database, fake=False, **kwargs):
             'SELECT "id" FROM "reviewsegment" WHERE "has_been_reviewed" = 1'
         )
         reviewed_segment_ids = [row[0] for row in cursor.fetchall()]
+        # also migrate for anonymous (unauthenticated users)
+        usernames = [user.username for user in all_users] + ["anonymous"]
 
         for segment_id in reviewed_segment_ids:
-            for user in all_users:
+            for username in usernames:
                 UserReviewStatus.create(
-                    user_id=user.username,
+                    user_id=username,
                     review_segment=segment_id,
                     has_been_reviewed=True,
                 )

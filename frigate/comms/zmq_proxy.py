@@ -2,9 +2,11 @@
 
 import json
 import threading
-from typing import Optional
+from typing import Any, Optional
 
 import zmq
+
+from frigate.const import FAST_QUEUE_TIMEOUT
 
 SOCKET_PUB = "ipc:///tmp/cache/proxy_pub"
 SOCKET_SUB = "ipc:///tmp/cache/proxy_sub"
@@ -56,7 +58,7 @@ class Publisher:
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect(SOCKET_PUB)
 
-    def publish(self, payload: any, sub_topic: str = "") -> None:
+    def publish(self, payload: Any, sub_topic: str = "") -> None:
         """Publish message."""
         self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
@@ -77,7 +79,9 @@ class Subscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, self.topic)
         self.socket.connect(SOCKET_SUB)
 
-    def check_for_update(self, timeout: float = 1) -> Optional[tuple[str, any]]:
+    def check_for_update(
+        self, timeout: float = FAST_QUEUE_TIMEOUT
+    ) -> Optional[tuple[str, Any]]:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
@@ -94,5 +98,5 @@ class Subscriber:
         self.socket.close()
         self.context.destroy()
 
-    def _return_object(self, topic: str, payload: any) -> any:
+    def _return_object(self, topic: str, payload: Any) -> Any:
         return payload

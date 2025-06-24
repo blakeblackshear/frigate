@@ -159,16 +159,30 @@ export function useTimelineZoom({
   );
 
   useEffect(() => {
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: false });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    const timelineElement = timelineRef.current;
+
+    if (timelineElement) {
+      timelineElement.addEventListener("wheel", handleWheel, {
+        passive: false,
+      });
+      timelineElement.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+      });
+      timelineElement.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
 
     return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
+      if (timelineElement) {
+        timelineElement.removeEventListener("wheel", handleWheel);
+        timelineElement.removeEventListener("touchstart", handleTouchStart);
+        timelineElement.removeEventListener("touchmove", handleTouchMove);
+      }
     };
-  }, [handleWheel, handleTouchStart, handleTouchMove]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleWheel, handleTouchStart, handleTouchMove, timelineRef.current]);
 
   return { zoomLevel, handleZoom, isZooming, zoomDirection };
 }

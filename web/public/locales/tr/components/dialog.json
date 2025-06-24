@@ -1,0 +1,123 @@
+{
+  "restart": {
+    "title": "Frigate'i yeniden başlatmak istediğinize emin misiniz?",
+    "button": "Yeniden Başlat",
+    "restarting": {
+      "content": "Bu sayfa {{countdown}} saniye sonra yeniden yüklenecektir.",
+      "title": "Frigate Yeniden Başlatılıyor",
+      "button": "Şimdi Yeniden Yükle"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "state": {
+          "submitted": "Gönderildi"
+        },
+        "true": {
+          "true_one": "Bu bir {{label}}",
+          "true_other": "Bu bir {{label}}",
+          "label": "Frigate+ için bu etiketi onaylayın"
+        },
+        "false": {
+          "label": "Bu etiketi Frigate+ için onaylamaktan vazgeç",
+          "false_one": "Bu bir {{label}} değil",
+          "false_other": "Bu bir {{label}} değil"
+        },
+        "question": {
+          "ask_an": "Bu nesne bir <code>{{label}}</code> nesnesi mi?",
+          "label": "Bu etiketi Frigate+ için onaylayın",
+          "ask_a": "Bu nesne bir <code>{{label}}</code> mi?",
+          "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) nesnesi mi?"
+        }
+      },
+      "submitToPlus": {
+        "label": "Frigate+'ya Gönder",
+        "desc": "Görülmesini istemediğiniz yerlerdeki nesneler yanlış pozitif değildir. Bunları yanlış pozitif olarak göndermek modeli yanıltacaktır."
+      }
+    },
+    "video": {
+      "viewInHistory": "Geçmiş Görünümünde Görüntüle"
+    }
+  },
+  "export": {
+    "time": {
+      "end": {
+        "label": "Bitiş Zamanını Seç",
+        "title": "Bitiş Zamanı"
+      },
+      "lastHour_one": "Son 1 Saat",
+      "lastHour_other": "Son {{count}} Saat",
+      "start": {
+        "title": "Başlangıç Zamanı",
+        "label": "Başlangıç Zamanını Seç"
+      },
+      "fromTimeline": "Zaman Şeridinde Seç",
+      "custom": "Özel"
+    },
+    "select": "Seç",
+    "export": "Dışa Aktar",
+    "selectOrExport": "Seç veya Dışa Aktar",
+    "toast": {
+      "success": "Dışa aktarım başladı. Dosyaya /exports klasöründe veya Dışa Aktar sekmesinden ulaşabilirsiniz.",
+      "error": {
+        "failed": "Dışa aktarım başlatılamadı: {{error}}",
+        "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
+        "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Dışa Aktarımı Kaydet",
+      "previewExport": "Dışa Aktarımı Önizle"
+    },
+    "name": {
+      "placeholder": "Dışa Aktarımı Adlandırın"
+    }
+  },
+  "streaming": {
+    "label": "Akış",
+    "restreaming": {
+      "disabled": "Bu kamera için Yeniden Akış devre dışı.",
+      "desc": {
+        "readTheDocumentation": "Dökümantasyonu oku",
+        "title": "Bu kameradan ek canlı gösterim seçenekleri ve sesli yayın almak için go2rtc'yi yapılandırın."
+      }
+    },
+    "showStats": {
+      "label": "Akış istatistiklerini göster",
+      "desc": "Kamera akışının üzerinde akış istastistiklerini görmek için bu seçeneği aktifleştirin."
+    },
+    "debugView": "Hata Ayıklama Görünümü"
+  },
+  "search": {
+    "saveSearch": {
+      "desc": "Kayıtlı aramaya bir isim verin.",
+      "placeholder": "Aramanız için bir isim girin",
+      "overwrite": "{{searchName}} zaten var. Bu isimle kaydetmek mevcut olanın üzerine yazacaktır.",
+      "label": "Aramayı Kaydet",
+      "button": {
+        "save": {
+          "label": "Bu aramayı kaydet"
+        }
+      },
+      "success": "Arama ({{searchName}}) kaydedildi."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Silmeyi Onayla",
+      "desc": {
+        "selected": "Bu inceleme öğesiyle ilişkili tüm kaydedilmiş videoları silmek istediğinizden emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklatın."
+      },
+      "toast": {
+        "success": "Seçili incele öğelerinin ilişkili olduğu video kayıtları başarıyla silinmiştir.",
+        "error": "Siliemedi: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Dışa Aktar",
+      "markAsReviewed": "İncelendi olarak işaretle",
+      "deleteNow": "Şimdi Sil"
+    }
+  }
+}

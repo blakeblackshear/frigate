@@ -27,6 +27,7 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
+    FAST_QUEUE_TIMEOUT,
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
     MAX_SEGMENTS_IN_CACHE,
@@ -37,8 +38,6 @@ from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
-
-QUEUE_READ_TIMEOUT = 0.00001  # seconds
 
 
 class SegmentInfo:
@@ -243,7 +242,7 @@ class RecordingMaintainer(threading.Thread):
         self.end_time_cache.pop(cache_path, None)
 
     async def validate_and_move_segment(
-        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, any]
+        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, Any]
     ) -> None:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
@@ -536,7 +535,7 @@ class RecordingMaintainer(threading.Thread):
             # empty the object recordings info queue
             while True:
                 (topic, data) = self.detection_subscriber.check_for_update(
-                    timeout=QUEUE_READ_TIMEOUT
+                    timeout=FAST_QUEUE_TIMEOUT
                 )
 
                 if not topic:
@@ -577,7 +576,7 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
-                elif topic == DetectionTypeEnum.api:
+                elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
                     continue
 
                 if frame_time < run_start - stale_frame_count_threshold:

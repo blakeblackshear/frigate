@@ -4,6 +4,9 @@ import base64
 import os
 from pathlib import Path
 
+import cv2
+from numpy import ndarray
+
 from frigate.const import CLIPS_DIR, THUMB_DIR
 from frigate.models import Event
 
@@ -19,6 +22,11 @@ def get_event_thumbnail_bytes(event: Event) -> bytes | None:
                 return f.read()
         except Exception:
             return None
+
+
+def get_event_snapshot(event: Event) -> ndarray:
+    media_name = f"{event.camera}-{event.id}"
+    return cv2.imread(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
 
 
 ### Deletion

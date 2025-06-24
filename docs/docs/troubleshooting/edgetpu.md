@@ -32,7 +32,7 @@ The USB coral can draw up to 900mA and this can be too much for some on-device U
 The USB coral has different IDs when it is uninitialized and initialized.
 
 - When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped.
-- When running HA OS you may need to run the Full Access version of the Frigate addon with the `Protected Mode` switch disabled so that the coral can be accessed.
+- When running through the Home Assistant OS you may need to run the Full Access variant of the Frigate Add-on with the _Protection mode_ switch disabled so that the coral can be accessed.
 
 ### Synology 716+II running DSM 7.2.1-69057 Update 5
 
@@ -55,10 +55,10 @@ The USB Coral can become stuck and need to be restarted, this can happen for a n
 
 ## PCIe Coral Not Detected
 
-The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run. 
+The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run.
 
 - In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
-- For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
+- For some newer Linux distros (for example, Ubuntu 22.04+), https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
 
 ## Attempting to load TPU as pci & Fatal Python error: Illegal instruction
 

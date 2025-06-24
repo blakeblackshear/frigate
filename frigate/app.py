@@ -6,6 +6,7 @@ import secrets
 import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
+from pathlib import Path
 from typing import Optional
 
 import psutil
@@ -44,6 +45,7 @@ from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
+from frigate.log import _stop_logging
 from frigate.models import (
     Event,
     Export,
@@ -55,7 +57,7 @@ from frigate.models import (
     Timeline,
     User,
 )
-from frigate.object_detection import ObjectDetectProcess
+from frigate.object_detection.base import ObjectDetectProcess
 from frigate.output.output import output_frames
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
@@ -438,7 +440,7 @@ class FrigateApp:
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
+            if not self.config.cameras[name].enabled_in_config:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
@@ -467,7 +469,7 @@ class FrigateApp:
         shm_frame_count = self.shm_frame_count()
 
         for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
+            if not self.config.cameras[name].enabled_in_config:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
@@ -684,6 +686,9 @@ class FrigateApp:
     def stop(self) -> None:
         logger.info("Stopping...")
 
+        # used by the docker healthcheck
+        Path("/dev/shm/.frigate-is-stopping").touch()
+
         self.stop_event.set()
 
         # set an end_time on entries without an end_time before exiting
@@ -698,6 +703,10 @@ class FrigateApp:
         if self.audio_process:
             self.audio_process.terminate()
             self.audio_process.join()
+
+        # stop the onvif controller
+        if self.onvif_controller:
+            self.onvif_controller.close()
 
         # ensure the capture processes are done
         for camera, metrics in self.camera_metrics.items():
@@ -766,5 +775,8 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
+
+        # exit the mp Manager process
+        _stop_logging()
 
         os._exit(os.EX_OK)

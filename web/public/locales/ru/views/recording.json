@@ -1,0 +1,12 @@
+{
+  "filter": "Фильтр",
+  "export": "Экспорт",
+  "calendar": "Календарь",
+  "filters": "Фильтры",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "Конечное время должно быть позже начального",
+      "noValidTimeSelected": "Выбран недопустимый временной диапазон"
+    }
+  }
+}

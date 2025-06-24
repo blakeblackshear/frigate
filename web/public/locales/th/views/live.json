@@ -1,0 +1,49 @@
+{
+  "stream": {
+    "playInBackground": {
+      "label": "เล่นในพื้นหลัง"
+    },
+    "audio": {
+      "tips": {
+        "documentation": "อ่านเอกสาร "
+      }
+    },
+    "twoWayTalk": {
+      "tips.documentation": "อ่านเอกสาร "
+    }
+  },
+  "documentTitle": "สด - Frigate",
+  "lowBandwidthMode": "โหมดแบนด์วิดท์ต่ำ",
+  "twoWayTalk": {
+    "enable": "เปิดใช้งานการสนทนาสองทาง",
+    "disable": "ปิดใช้งานการสนทนาสองทาง"
+  },
+  "cameraAudio": {
+    "enable": "เปิดเสียงกล้อง",
+    "disable": "ปิดเสียงกล้อง"
+  },
+  "manualRecording": {
+    "playInBackground": {
+      "label": "เล่นในพื้นหลัง"
+    }
+  },
+  "editLayout": {
+    "exitEdit": "ออกจากการแก้ไข"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "ทั้งหมด"
+    }
+  },
+  "documentTitle.withCamera": "{{camera}} - สด - Frigate",
+  "streamingSettings": "การตั้งค่าการสตรีม",
+  "camera": {
+    "disable": "ปิดกล้อง"
+  },
+  "detect": {
+    "disable": "ปิดการตรวจจับ"
+  },
+  "recording": {
+    "disable": "ปิดการบันทึก"
+  }
+}

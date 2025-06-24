@@ -8,8 +8,10 @@ import os
 import signal
 import threading
 from types import FrameType
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
+import regex
+from pathvalidate import ValidationError, sanitize_filename
 from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
@@ -188,11 +190,19 @@ class EmbeddingsContext:
 
         return results
 
-    def register_face(self, face_name: str, image_data: bytes) -> dict[str, any]:
+    def register_face(self, face_name: str, image_data: bytes) -> dict[str, Any]:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.register_face.value,
             {
                 "face_name": face_name,
+                "image": base64.b64encode(image_data).decode("ASCII"),
+            },
+        )
+
+    def recognize_face(self, image_data: bytes) -> dict[str, Any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.recognize_face.value,
+            {
                 "image": base64.b64encode(image_data).decode("ASCII"),
             },
         )
@@ -207,7 +217,7 @@ class EmbeddingsContext:
 
         return self.db.execute_sql(sql_query).fetchall()
 
-    def reprocess_face(self, face_file: str) -> dict[str, any]:
+    def reprocess_face(self, face_file: str) -> dict[str, Any]:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.reprocess_face.value, {"image_file": face_file}
         )
@@ -225,13 +235,59 @@ class EmbeddingsContext:
             if os.path.isfile(file_path):
                 os.unlink(file_path)
 
+        if face != "train" and len(os.listdir(folder)) == 0:
+            os.rmdir(folder)
+
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
+    def rename_face(self, old_name: str, new_name: str) -> None:
+        valid_name_pattern = r"^[\p{L}\p{N}\s'_-]{1,50}$"
+
+        try:
+            sanitized_old_name = sanitize_filename(old_name, replacement_text="_")
+            sanitized_new_name = sanitize_filename(new_name, replacement_text="_")
+        except ValidationError as e:
+            raise ValueError(f"Invalid face name: {str(e)}")
+
+        if not regex.match(valid_name_pattern, old_name):
+            raise ValueError(f"Invalid old face name: {old_name}")
+        if not regex.match(valid_name_pattern, new_name):
+            raise ValueError(f"Invalid new face name: {new_name}")
+        if sanitized_old_name != old_name:
+            raise ValueError(f"Old face name contains invalid characters: {old_name}")
+        if sanitized_new_name != new_name:
+            raise ValueError(f"New face name contains invalid characters: {new_name}")
+
+        old_path = os.path.normpath(os.path.join(FACE_DIR, old_name))
+        new_path = os.path.normpath(os.path.join(FACE_DIR, new_name))
+
+        # Prevent path traversal
+        if not old_path.startswith(
+            os.path.normpath(FACE_DIR)
+        ) or not new_path.startswith(os.path.normpath(FACE_DIR)):
+            raise ValueError("Invalid path detected")
+
+        if not os.path.exists(old_path):
+            raise ValueError(f"Face {old_name} not found.")
+
+        os.rename(old_path, new_path)
+
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.clear_face_classifier.value, None
+        )
+
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
             EmbeddingsRequestEnum.embed_description.value,
             {"id": event_id, "description": description},
         )
 
-    def reprocess_plate(self, event: dict[str, any]) -> dict[str, any]:
+    def reprocess_plate(self, event: dict[str, Any]) -> dict[str, Any]:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.reprocess_plate.value, {"event": event}
         )
+
+    def reindex_embeddings(self) -> dict[str, Any]:
+        return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})

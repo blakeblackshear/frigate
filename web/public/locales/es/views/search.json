@@ -1,0 +1,74 @@
+{
+  "search": "Búsqueda",
+  "savedSearches": "Búsquedas Guardadas",
+  "searchFor": "Búsqueda de {{inputValue}}",
+  "button": {
+    "save": "Guardar búsqueda",
+    "delete": "Eliminar búsqueda guardada",
+    "clear": "Borrar búsqueda",
+    "filterInformation": "Información de filtro",
+    "filterActive": "Filtros activos"
+  },
+  "trackedObjectId": "ID de Objeto Rastreado",
+  "filter": {
+    "label": {
+      "cameras": "Cámaras",
+      "labels": "Etiquetas",
+      "zones": "Zonas",
+      "sub_labels": "Subetiquetas",
+      "search_type": "Tipo de Búsqueda",
+      "time_range": "Rango de Tiempo",
+      "before": "Antes",
+      "after": "Después",
+      "min_score": "Puntuación Mínima",
+      "max_score": "Puntuación Máxima",
+      "min_speed": "Velocidad Mínima",
+      "max_speed": "Velocidad Máxima",
+      "recognized_license_plate": "Matrícula Reconocida",
+      "has_clip": "Tiene Clip",
+      "has_snapshot": "Tiene Instantánea"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descripción"
+    },
+    "toast": {
+      "error": {
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "La 'velocidad máxima' debe ser mayor o igual que la 'velocidad mínima'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "La 'puntuación máxima' debe ser mayor o igual que la 'puntuación mínima'.",
+        "beforeDateBeLaterAfter": "La fecha 'antes' debe ser posterior a la fecha 'después'.",
+        "minScoreMustBeLessOrEqualMaxScore": "La 'puntuación mínima' debe ser menor o igual que la 'puntuación máxima'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "La 'velocidad mínima' debe ser menor o igual que la 'velocidad máxima'.",
+        "afterDatebeEarlierBefore": "La fecha 'después' debe ser anterior a la fecha 'antes'."
+      }
+    },
+    "tips": {
+      "title": "Cómo usar filtros de texto",
+      "desc": {
+        "text": "Los filtros te ayudan a reducir los resultados de tu búsqueda. Aquí te explicamos cómo usarlos en el campo de entrada:",
+        "example": "Ejemplo: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Escribe un nombre de filtro seguido de dos puntos (por ejemplo, \"cameras:\").</li><li>Selecciona un valor de las sugerencias o escribe el tuyo propio.</li><li>Usa múltiples filtros añadiéndolos uno tras otro con un espacio entre ellos.</li><li>Los filtros de fecha (before: y after:) usan el formato <em>{{DateFormat}}</em>.</li><li>El filtro de rango de tiempo usa el formato <em>{{exampleTime}}</em>.</li><li>Elimina filtros haciendo clic en la 'x' junto a ellos.</li></ul>",
+        "step4": "Los filtros de fecha (antes: y después:) usan el formato {{DateFormat}}.",
+        "step6": "Elimina filtros haciendo clic en la 'x' junto a ellos.",
+        "exampleLabel": "Ejemplo:",
+        "step1": "Escribe un nombre de clave de filtro seguido de dos puntos (por ejemplo, \"cámaras:\").",
+        "step2": "Selecciona un valor de las sugerencias o escribe el tuyo propio.",
+        "step3": "Usa múltiples filtros añadiéndolos uno tras otro con un espacio entre ellos.",
+        "step5": "El filtro de rango de tiempo usa el formato {{exampleTime}}."
+      }
+    },
+    "header": {
+      "currentFilterType": "Valores de Filtro",
+      "noFilters": "Filtros",
+      "activeFilters": "Filtros Activos"
+    }
+  },
+  "similaritySearch": {
+    "title": "Búsqueda por Similitud",
+    "active": "Búsqueda por similitud activa",
+    "clear": "Borrar búsqueda por similitud"
+  },
+  "placeholder": {
+    "search": "Buscar…"
+  }
+}

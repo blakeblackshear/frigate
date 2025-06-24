@@ -1,0 +1,12 @@
+{
+  "filter": "فلٹر",
+  "export": "برآمد",
+  "calendar": "کیلنڈر",
+  "filters": "فلٹرز",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "درست وقت کی حد منتخب نہیں کی گئی",
+      "endTimeMustAfterStartTime": "اختتامی وقت آغاز کے وقت کے بعد ہونا چاہیے"
+    }
+  }
+}

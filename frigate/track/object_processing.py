@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 import logging
@@ -6,9 +7,11 @@ import threading
 from collections import defaultdict
 from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
+import cv2
 import numpy as np
-from peewee import DoesNotExist
+from peewee import SQL, DoesNotExist
 
 from frigate.camera.state import CameraState
 from frigate.comms.config_updater import ConfigSubscriber
@@ -26,9 +29,13 @@ from frigate.config import (
     RecordConfig,
     SnapshotsConfig,
 )
-from frigate.const import UPDATE_CAMERA_ACTIVITY
+from frigate.const import (
+    FAST_QUEUE_TIMEOUT,
+    UPDATE_CAMERA_ACTIVITY,
+    UPSERT_REVIEW_SEGMENT,
+)
 from frigate.events.types import EventStateEnum, EventTypeEnum
-from frigate.models import Event, Timeline
+from frigate.models import Event, ReviewSegment, Timeline
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager
 
@@ -68,7 +75,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_end_subscriber = EventEndSubscriber()
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)
 
-        self.camera_activity: dict[str, dict[str, any]] = {}
+        self.camera_activity: dict[str, dict[str, Any]] = {}
         self.ongoing_manual_events: dict[str, str] = {}
 
         # {
@@ -149,7 +156,7 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-        def snapshot(camera, obj: TrackedObject, frame_name: str):
+        def snapshot(camera: str, obj: TrackedObject) -> bool:
             mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_img_bytes(
@@ -171,6 +178,20 @@ class TrackedObjectProcessor(threading.Thread):
                         jpg_bytes,
                         retain=True,
                     )
+
+                    if obj.obj_data.get("sub_label"):
+                        sub_label = obj.obj_data["sub_label"][0]
+
+                        if sub_label in self.config.model.all_attribute_logos:
+                            self.dispatcher.publish(
+                                f"{camera}/{sub_label}/snapshot",
+                                jpg_bytes,
+                                retain=True,
+                            )
+
+                    return True
+
+            return False
 
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
@@ -236,7 +257,7 @@ class TrackedObjectProcessor(threading.Thread):
 
     def should_mqtt_snapshot(self, camera, obj: TrackedObject):
         # object never changed position
-        if obj.obj_data["position_changes"] == 0:
+        if obj.is_stationary():
             return False
 
         # if there are required zones and there is no overlap
@@ -289,7 +310,7 @@ class TrackedObjectProcessor(threading.Thread):
             return {}
 
     def get_current_frame(
-        self, camera: str, draw_options: dict[str, any] = {}
+        self, camera: str, draw_options: dict[str, Any] = {}
     ) -> np.ndarray | None:
         if camera == "birdseye":
             return self.frame_manager.get(
@@ -344,6 +365,60 @@ class TrackedObjectProcessor(threading.Thread):
                 data=Timeline.data.update({"sub_label": (sub_label, score)})
             ).where(Timeline.source_id == event_id).execute()
 
+            # only update ended review segments
+            # manually updating a sub_label from the UI is only possible for ended tracked objects
+            try:
+                review_segment = ReviewSegment.get(
+                    (
+                        SQL(
+                            "json_extract(data, '$.detections') LIKE ?",
+                            [f'%"{event_id}"%'],
+                        )
+                    )
+                    & (ReviewSegment.end_time.is_null(False))
+                )
+
+                segment_data = review_segment.data
+                detection_ids = segment_data.get("detections", [])
+
+                # Rebuild objects list and sync sub_labels
+                objects_list = []
+                sub_labels = set()
+                events = Event.select(Event.id, Event.label, Event.sub_label).where(
+                    Event.id.in_(detection_ids)
+                )
+                for det_event in events:
+                    if det_event.sub_label:
+                        sub_labels.add(det_event.sub_label)
+                        objects_list.append(
+                            f"{det_event.label}-verified"
+                        )  # eg, "bird-verified"
+                    else:
+                        objects_list.append(det_event.label)  # eg, "bird"
+
+                segment_data["sub_labels"] = list(sub_labels)
+                segment_data["objects"] = objects_list
+
+                updated_data = {
+                    ReviewSegment.id.name: review_segment.id,
+                    ReviewSegment.camera.name: review_segment.camera,
+                    ReviewSegment.start_time.name: review_segment.start_time,
+                    ReviewSegment.end_time.name: review_segment.end_time,
+                    ReviewSegment.severity.name: review_segment.severity,
+                    ReviewSegment.thumb_path.name: review_segment.thumb_path,
+                    ReviewSegment.data.name: segment_data,
+                }
+
+                self.requestor.send_data(UPSERT_REVIEW_SEGMENT, updated_data)
+                logger.debug(
+                    f"Updated sub_label for event {event_id} in review segment {review_segment.id}"
+                )
+
+            except ReviewSegment.DoesNotExist:
+                logger.debug(
+                    f"No review segment found with event ID {event_id} when updating sub_label"
+                )
+
         return True
 
     def set_recognized_license_plate(
@@ -384,6 +459,19 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def save_lpr_snapshot(self, payload: tuple) -> None:
+        # save the snapshot image
+        (frame, event_id, camera) = payload
+
+        img = cv2.imdecode(
+            np.frombuffer(base64.b64decode(frame), dtype=np.uint8),
+            cv2.IMREAD_COLOR,
+        )
+
+        self.camera_states[camera].save_manual_event_image(
+            img, event_id, "license_plate", {}
+        )
+
     def create_manual_event(self, payload: tuple) -> None:
         (
             frame_time,
@@ -399,7 +487,9 @@ class TrackedObjectProcessor(threading.Thread):
         ) = payload
 
         # save the snapshot image
-        self.camera_states[camera_name].save_manual_event_image(event_id, label, draw)
+        self.camera_states[camera_name].save_manual_event_image(
+            None, event_id, label, draw
+        )
         end_time = frame_time + duration if duration is not None else None
 
         # send event to event maintainer
@@ -445,6 +535,59 @@ class TrackedObjectProcessor(threading.Thread):
                 ),
                 DetectionTypeEnum.api.value,
             )
+
+    def create_lpr_event(self, payload: tuple) -> None:
+        (
+            frame_time,
+            camera_name,
+            label,
+            event_id,
+            include_recording,
+            score,
+            sub_label,
+            plate,
+        ) = payload
+
+        # send event to event maintainer
+        self.event_sender.publish(
+            (
+                EventTypeEnum.api,
+                EventStateEnum.start,
+                camera_name,
+                "",
+                {
+                    "id": event_id,
+                    "label": label,
+                    "sub_label": sub_label,
+                    "score": score,
+                    "camera": camera_name,
+                    "start_time": frame_time
+                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    "end_time": None,
+                    "has_clip": self.config.cameras[camera_name].record.enabled
+                    and include_recording,
+                    "has_snapshot": True,
+                    "type": "api",
+                    "recognized_license_plate": plate,
+                    "recognized_license_plate_score": score,
+                },
+            )
+        )
+
+        self.ongoing_manual_events[event_id] = camera_name
+        self.detection_publisher.publish(
+            (
+                camera_name,
+                frame_time,
+                {
+                    "state": ManualEventState.start,
+                    "label": f"{label}: {sub_label}" if sub_label else label,
+                    "event_id": event_id,
+                    "end_time": None,
+                },
+            ),
+            DetectionTypeEnum.lpr.value,
+        )
 
     def end_manual_event(self, payload: tuple) -> None:
         (event_id, end_time) = payload
@@ -550,6 +693,10 @@ class TrackedObjectProcessor(threading.Thread):
                     self.set_recognized_license_plate(
                         event_id, recognized_license_plate, score
                     )
+                elif topic.endswith(EventMetadataTypeEnum.lpr_event_create.value):
+                    self.create_lpr_event(payload)
+                elif topic.endswith(EventMetadataTypeEnum.save_lpr_snapshot.value):
+                    self.save_lpr_snapshot(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_create.value):
                     self.create_manual_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.manual_event_end.value):
@@ -598,7 +745,9 @@ class TrackedObjectProcessor(threading.Thread):
 
             # cleanup event finished queue
             while not self.stop_event.is_set():
-                update = self.event_end_subscriber.check_for_update(timeout=0.01)
+                update = self.event_end_subscriber.check_for_update(
+                    timeout=FAST_QUEUE_TIMEOUT
+                )
 
                 if not update:
                     break

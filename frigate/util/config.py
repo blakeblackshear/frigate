@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 import shutil
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -37,7 +37,7 @@ def migrate_frigate_config(config_file: str):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
     with open(config_file, "r") as f:
-        config: dict[str, dict[str, any]] = yaml.load(f)
+        config: dict[str, dict[str, Any]] = yaml.load(f)
 
     if config is None:
         logger.error(f"Failed to load config at {config_file}")
@@ -94,7 +94,7 @@ def migrate_frigate_config(config_file: str):
     logger.info("Finished frigate config migration...")
 
 
-def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_014(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.14"""
     # migrate record.events.required_zones to review.alerts.required_zones
     new_config = config.copy()
@@ -142,7 +142,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         del new_config["rtmp"]
 
     for name, camera in config.get("cameras", {}).items():
-        camera_config: dict[str, dict[str, any]] = camera.copy()
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
         required_zones = (
             camera_config.get("record", {}).get("events", {}).get("required_zones", [])
         )
@@ -181,7 +181,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     return new_config
 
 
-def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_015_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.15-0"""
     new_config = config.copy()
 
@@ -232,9 +232,9 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         del new_config["record"]["events"]
 
     for name, camera in config.get("cameras", {}).items():
-        camera_config: dict[str, dict[str, any]] = camera.copy()
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
 
-        record_events: dict[str, any] = camera_config.get("record", {}).get("events")
+        record_events: dict[str, Any] = camera_config.get("record", {}).get("events")
 
         if record_events:
             alerts_retention = {"retain": {}}
@@ -281,7 +281,7 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     return new_config
 
 
-def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_015_1(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.15-1"""
     new_config = config.copy()
 
@@ -296,7 +296,7 @@ def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     return new_config
 
 
-def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_016_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.16-0"""
     new_config = config.copy()
 
@@ -307,7 +307,7 @@ def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         new_config["detect"] = detect_config
 
     for name, camera in config.get("cameras", {}).items():
-        camera_config: dict[str, dict[str, any]] = camera.copy()
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
 
         live_config = camera_config.get("live", {})
         if "stream_name" in live_config:
@@ -318,6 +318,21 @@ def migrate_016_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
             del live_config["stream_name"]
 
             camera_config["live"] = live_config
+
+        # add another value to movement_weights for autotracking cams
+        onvif_config = camera_config.get("onvif", {})
+        if "autotracking" in onvif_config:
+            movement_weights = (
+                camera_config.get("onvif", {})
+                .get("autotracking")
+                .get("movement_weights", {})
+            )
+
+            if movement_weights and len(movement_weights.split(",")) == 5:
+                onvif_config["autotracking"]["movement_weights"] = (
+                    movement_weights + ", 0"
+                )
+            camera_config["onvif"] = onvif_config
 
         new_config["cameras"][name] = camera_config
 

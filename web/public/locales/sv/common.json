@@ -1,0 +1,257 @@
+{
+  "time": {
+    "untilForTime": "Till {{time}}",
+    "untilForRestart": "Tills Frigate startar om.",
+    "untilRestart": "Tills omstart",
+    "ago": "{{timeAgo}} sedan",
+    "justNow": "Just nu",
+    "today": "Idag",
+    "yesterday": "Igår",
+    "last14": "Senaste 14 dagarna",
+    "thisMonth": "Denna månad",
+    "lastMonth": "Förra månaden",
+    "30minutes": "30 minuter",
+    "1hour": "1 timma",
+    "12hours": "12 timmar",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}år",
+    "mo": "{{time}} mån",
+    "month_one": "{{time}} månad",
+    "month_other": "{{time}} månader",
+    "d": "{{time}}dag",
+    "last7": "Senaste 7 dagarna",
+    "5minutes": "5 minuter",
+    "last30": "Senaste 30 dagarna",
+    "thisWeek": "Denna vecka",
+    "lastWeek": "Förra veckan",
+    "10minutes": "10 minuter",
+    "24hours": "24 timmar",
+    "year_one": "{{time}} år",
+    "year_other": "{{time}} år",
+    "second_one": "{{time}} sekund",
+    "second_other": "{{time}} sekunder",
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyy"
+    },
+    "h": "{{time}} h",
+    "hour_one": "{{time}} timme",
+    "hour_other": "{{time}} timmar",
+    "m": "{{time}} m",
+    "minute_one": "{{time}} minut",
+    "minute_other": "{{time}} minuter",
+    "s": "{{time}} s",
+    "formattedTimestamp": {
+      "12hour": "d MMM, kl. h:mm:ss a",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "kl. h:mm a",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "day_one": "{{time}} dag",
+    "day_other": "{{time}} dagar"
+  },
+  "button": {
+    "save": "Spara",
+    "enabled": "Aktiverad",
+    "enable": "Aktivera",
+    "disabled": "Inaktiverad",
+    "pictureInPicture": "Bild-i-Bild",
+    "twoWayTalk": "Tvåvägskommunikation",
+    "edit": "Redigera",
+    "copyCoordinates": "Kopiera koordinater",
+    "suspended": "Pausad",
+    "play": "Spela",
+    "unselect": "Avmarkera",
+    "unsuspended": "Återuppta",
+    "deleteNow": "Radera nu",
+    "next": "Nästa",
+    "apply": "Verkställ",
+    "reset": "Återställ",
+    "done": "Klar",
+    "disable": "Inaktivera",
+    "saving": "Sparar…",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "copy": "Kopiera",
+    "back": "Tillbaka",
+    "history": "Historia",
+    "fullscreen": "Fullskärm",
+    "exitFullscreen": "Lämna Fullskärm",
+    "cameraAudio": "Kameraljud",
+    "on": "PÅ",
+    "off": "AV",
+    "delete": "Släng",
+    "yes": "Ja",
+    "no": "Nej",
+    "download": "Ladda ner",
+    "info": "Info",
+    "export": "Exportera"
+  },
+  "menu": {
+    "language": {
+      "yue": "Kantonesiska",
+      "it": "Italienska",
+      "fr": "Franska",
+      "nl": "Nederländska (Dutch)",
+      "hi": "Hindi",
+      "pt": "Portugisiska",
+      "ru": "Ryska",
+      "pl": "Polska",
+      "el": "Grekiska",
+      "sk": "Slovenska",
+      "tr": "Turkiska",
+      "uk": "Ukrainska",
+      "he": "Hebreiska",
+      "ro": "Romänska",
+      "hu": "Ungerska",
+      "fi": "Finska",
+      "da": "Danska",
+      "ar": "Arabiska",
+      "es": "Spanska",
+      "zhCN": "Kinesiska",
+      "de": "Tyska",
+      "ja": "Japanska",
+      "sv": "Svenska (Swedish)",
+      "cs": "Tjeckiska (Czech)",
+      "nb": "Norsk Bokmål (Norsk Bokmål)",
+      "ko": "Koreanska",
+      "vi": "Vietnamesiska",
+      "fa": "Persiska",
+      "th": "Thailändska",
+      "withSystem": {
+        "label": "Använd systeminställningarna för språk"
+      },
+      "en": "Engelska"
+    },
+    "darkMode": {
+      "withSystem": {
+        "label": "Använd systeminställningarna för ljust eller mörkt läge"
+      },
+      "label": "Mörk Läge",
+      "light": "Ljus",
+      "dark": "Mörk"
+    },
+    "theme": {
+      "label": "Tema",
+      "blue": "Blå",
+      "green": "Grön",
+      "nord": "North",
+      "default": "Standard",
+      "highcontrast": "Hög Kontrast",
+      "red": "Röd"
+    },
+    "export": "Exportera",
+    "faceLibrary": "Ansiktsbibliotek",
+    "user": {
+      "title": "Användare",
+      "account": "Konto",
+      "current": "Nuvarande Användare: {{user}}",
+      "anonymous": "anonym",
+      "logout": "Logga ut",
+      "setPassword": "Sätt Lösenord"
+    },
+    "systemMetrics": "Systemstatus",
+    "configuration": "Konfiguration",
+    "explore": "Utforska",
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} Kamera",
+        "count_other": "{{count}} Kameror",
+        "title": "Kameror"
+      },
+      "allCameras": "Alla kameror",
+      "title": "Live"
+    },
+    "system": "System",
+    "systemLogs": "Systemlogg",
+    "settings": "Inställningar",
+    "help": "Hjälp",
+    "documentation": {
+      "title": "Dokumentation",
+      "label": "Frigate dokumentation"
+    },
+    "uiPlayground": "UI Testmiljö",
+    "restart": "Starta om Frigate",
+    "review": "Granska",
+    "languages": "Språk",
+    "configurationEditor": "Konfigurationsredigerare",
+    "withSystem": "System",
+    "appearance": "Utseende"
+  },
+  "pagination": {
+    "next": {
+      "title": "Nästa",
+      "label": "Gå till nästa sida"
+    },
+    "previous": {
+      "title": "Föregående",
+      "label": "Gå till föregående sida"
+    },
+    "more": "Flera sidor",
+    "label": "paginering"
+  },
+  "accessDenied": {
+    "title": "Åtkomst Förbjuden",
+    "desc": "Du har inte rättigheter att visa den här sidan.",
+    "documentTitle": "Åtkomst Förbjuden - Frigate"
+  },
+  "role": {
+    "admin": "Admin",
+    "viewer": "Tittare",
+    "desc": "Administratörer har fullständig åtkomst till alla funktioner i Frigates gränssnitt. Tittare kan endast visa kameror, granska objekt och se historiskt videomaterial.",
+    "title": "Roll"
+  },
+  "notFound": {
+    "documentTitle": "Hittades Inte - Frigate",
+    "desc": "Sidan hittades inte",
+    "title": "404"
+  },
+  "toast": {
+    "save": {
+      "title": "Spara",
+      "error": {
+        "title": "Misslyckades med att spara konfigurationsändringar: {{errorMessage}}",
+        "noMessage": "Misslyckades med att spara konfigurationsändringar"
+      }
+    },
+    "copyUrlToClipboard": "Webbadressen har kopierats till urklipp."
+  },
+  "label": {
+    "back": "Gå tillbaka"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "fot",
+      "meters": "meter"
+    }
+  },
+  "selectItem": "Välj {{item}}"
+}

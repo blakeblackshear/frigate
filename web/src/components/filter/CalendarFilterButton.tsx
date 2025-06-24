@@ -1,6 +1,7 @@
 import {
   useFormattedRange,
   useFormattedTimestamp,
+  useTimezone,
 } from "@/hooks/use-date-utils";
 import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Button } from "../ui/button";
@@ -14,6 +15,9 @@ import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
+import { useTranslation } from "react-i18next";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -27,16 +31,19 @@ export default function CalendarFilterButton({
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
+  const { t } = useTranslation(["components/filter", "views/events"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
   const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
-    "%b %-d",
+    t("time.formattedTimestampMonthDay", { ns: "common" }),
+    config?.ui.timezone,
   );
 
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="Select a date to filter by"
+      aria-label={t("explore.date.selectDateBy.label")}
       variant={day == undefined ? "default" : "select"}
       size="sm"
     >
@@ -46,7 +53,9 @@ export default function CalendarFilterButton({
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
-        {day == undefined ? "Last 24 Hours" : selectedDate}
+        {day == undefined
+          ? t("calendarFilter.last24Hours", { ns: "views/events" })
+          : selectedDate}
       </div>
     </Button>
   );
@@ -61,12 +70,12 @@ export default function CalendarFilterButton({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-center p-2">
         <Button
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
             updateSelectedDay(undefined);
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </>
@@ -93,18 +102,22 @@ export function CalendarRangeFilterButton({
   defaultText,
   updateSelectedRange,
 }: CalendarRangeFilterButtonProps) {
+  const { t } = useTranslation(["components/filter"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
   const [open, setOpen] = useState(false);
 
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
-    "%b %-d",
+    t("time.formattedTimestampMonthDay", { ns: "common" }),
+    config?.ui.timezone,
   );
 
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="Select a date to filter by"
+      aria-label={t("explore.date.selectDateBy.label")}
       variant={range == undefined ? "default" : "select"}
       size="sm"
     >
@@ -123,6 +136,7 @@ export function CalendarRangeFilterButton({
       <DateRangePicker
         initialDateFrom={range?.from}
         initialDateTo={range?.to}
+        timezone={timezone}
         showCompare={false}
         onUpdate={(range) => {
           updateSelectedRange(range.range);

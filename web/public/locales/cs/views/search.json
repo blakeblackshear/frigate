@@ -1,0 +1,72 @@
+{
+  "search": "Hledat",
+  "savedSearches": "Uložená vyhledávání",
+  "searchFor": "Hledat {{inputValue}}",
+  "button": {
+    "clear": "Vymazat vyhledávaní",
+    "save": "Uložit vyhledávání",
+    "delete": "Vymazat uložená vyhledávání",
+    "filterInformation": "Filtrovat informace",
+    "filterActive": "Aktivní filtry"
+  },
+  "trackedObjectId": "ID sledovaného objektu",
+  "filter": {
+    "label": {
+      "cameras": "Kamery",
+      "labels": "Štítky",
+      "zones": "Zóny",
+      "sub_labels": "Podružné Štítky",
+      "max_speed": "Max rychlost",
+      "min_speed": "Min rychlost",
+      "search_type": "Typ Hledání",
+      "time_range": "Časový Rozsah",
+      "before": "Před",
+      "after": "Po",
+      "max_score": "Maximální Skóre",
+      "min_score": "Minimální Skóre",
+      "recognized_license_plate": "Rozpoznaná SPZ",
+      "has_clip": "Má Klip",
+      "has_snapshot": "Má Snímek"
+    },
+    "tips": {
+      "desc": {
+        "step1": "Zadejte název filtru následovaný dvojtečkou (např. „kamery:“).",
+        "step2": "Vyberte hodnotu z nabízených možností nebo zadejte vlastní.",
+        "step3": "Použijte více filtrů tak, že je přidáte jeden po druhém s mezerou mezi nimi.",
+        "step4": "Datumové filtry (before: a after:) používají formát {{DateFormat}}.",
+        "step6": "Odstraňte filtr kliknutím na 'x' vedle něj.",
+        "exampleLabel": "Příklad:",
+        "text": "Filtry vám pomohou zúžit výsledky hledání. Zde je návod, jak je používat ve vstupním poli:",
+        "step5": "Pro časový rozsah použijte formát {{exampleTime}}."
+      },
+      "title": "Jak používat textové filtry"
+    },
+    "searchType": {
+      "thumbnail": "Náhled",
+      "description": "Popis"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Datum 'před' musí být pozdější než datum 'po'.",
+        "afterDatebeEarlierBefore": "Datum 'po' musí být dřívější než datum 'před'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'min_score' musí být menší nebo rovno 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'max_score' musí být větší nebo rovno 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'min_speed' musí být menší nebo rovno 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'max_speed' musí být větší nebo rovno 'min_speed'."
+      }
+    },
+    "header": {
+      "currentFilterType": "Hodnoty Filtru",
+      "noFilters": "Filtry",
+      "activeFilters": "Aktivní Filtry"
+    }
+  },
+  "similaritySearch": {
+    "title": "Hledání Podle Podobnosti",
+    "active": "Hledání podobností aktivní",
+    "clear": "Vymazat hledání podobností"
+  },
+  "placeholder": {
+    "search": "Hledat…"
+  }
+}

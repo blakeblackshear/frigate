@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Any
 
 from cryptography.hazmat.primitives import serialization
 from fastapi import APIRouter, Request
@@ -41,7 +42,7 @@ def register_notifications(request: Request, body: dict = None):
     else:
         username = "admin"
 
-    json: dict[str, any] = body or {}
+    json: dict[str, Any] = body or {}
     sub = json.get("sub")
 
     if not sub:

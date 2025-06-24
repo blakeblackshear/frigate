@@ -1,0 +1,21 @@
+{
+  "search": "Etsi",
+  "savedSearches": "Tallennetut haut",
+  "searchFor": "Etsi {{inputValue}}",
+  "button": {
+    "clear": "Tyhjennä haku",
+    "save": "Tallenna haku",
+    "delete": "Poista tallennettu haku",
+    "filterInformation": "Suodattimen tiedot",
+    "filterActive": "Suodattimia valittuina"
+  },
+  "trackedObjectId": "Seuratun kohteen ID",
+  "filter": {
+    "label": {
+      "cameras": "Kamerat",
+      "labels": "Nimikkeet",
+      "zones": "Alueet",
+      "sub_labels": "Alinimikkeet"
+    }
+  }
+}

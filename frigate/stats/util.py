@@ -15,7 +15,7 @@ from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
-from frigate.object_detection import ObjectDetectProcess
+from frigate.object_detection.base import ObjectDetectProcess
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     get_amd_gpu_stats,
@@ -24,6 +24,8 @@ from frigate.util.services import (
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
+    get_rockchip_gpu_stats,
+    get_rockchip_npu_stats,
     is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
@@ -109,6 +111,7 @@ def get_processing_stats(
         stats_tasks = [
             asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
             asyncio.create_task(set_cpu_stats(stats)),
+            asyncio.create_task(set_npu_usages(config, stats)),
         ]
 
         if config.telemetry.stats.network_bandwidth:
@@ -230,12 +233,30 @@ async def set_gpu_stats(
                 else:
                     stats["intel-vaapi"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
+        elif "preset-rk" in args:
+            rga_usage = get_rockchip_gpu_stats()
+
+            if rga_usage:
+                stats["rockchip"] = rga_usage
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
             stats["rpi-v4l2m2m"] = {"gpu": "", "mem": ""}
 
     if stats:
         all_stats["gpu_usages"] = stats
+
+
+async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
+    stats: dict[str, dict] = {}
+
+    for detector in config.detectors.values():
+        if detector.type == "rknn":
+            # Rockchip NPU usage
+            rk_usage = get_rockchip_npu_stats()
+            stats["rockchip"] = rk_usage
+
+    if stats:
+        all_stats["npu_usages"] = stats
 
 
 def stats_snapshot(
@@ -293,27 +314,42 @@ def stats_snapshot(
             stats["embeddings"].update(
                 {
                     "image_embedding_speed": round(
-                        embeddings_metrics.image_embeddings_fps.value * 1000, 2
+                        embeddings_metrics.image_embeddings_speed.value * 1000, 2
+                    ),
+                    "image_embedding": round(
+                        embeddings_metrics.image_embeddings_eps.value, 2
                     ),
                     "text_embedding_speed": round(
-                        embeddings_metrics.text_embeddings_sps.value * 1000, 2
+                        embeddings_metrics.text_embeddings_speed.value * 1000, 2
+                    ),
+                    "text_embedding": round(
+                        embeddings_metrics.text_embeddings_eps.value, 2
                     ),
                 }
             )
 
         if config.face_recognition.enabled:
             stats["embeddings"]["face_recognition_speed"] = round(
-                embeddings_metrics.face_rec_fps.value * 1000, 2
+                embeddings_metrics.face_rec_speed.value * 1000, 2
+            )
+            stats["embeddings"]["face_recognition"] = round(
+                embeddings_metrics.face_rec_fps.value, 2
             )
 
         if config.lpr.enabled:
             stats["embeddings"]["plate_recognition_speed"] = round(
-                embeddings_metrics.alpr_pps.value * 1000, 2
+                embeddings_metrics.alpr_speed.value * 1000, 2
+            )
+            stats["embeddings"]["plate_recognition"] = round(
+                embeddings_metrics.alpr_pps.value, 2
             )
 
-            if "license_plate" not in config.objects.all_objects:
+            if embeddings_metrics.yolov9_lpr_pps.value > 0.0:
                 stats["embeddings"]["yolov9_plate_detection_speed"] = round(
-                    embeddings_metrics.yolov9_lpr_fps.value * 1000, 2
+                    embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
+                )
+                stats["embeddings"]["yolov9_plate_detection"] = round(
+                    embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
     get_processing_stats(config, stats, hwaccel_errors)

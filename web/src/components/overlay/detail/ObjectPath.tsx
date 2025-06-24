@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
+import { useTranslation } from "react-i18next";
 
 type ObjectPathProps = {
   positions?: Position[];
@@ -40,6 +41,7 @@ export function ObjectPath({
   onPointClick,
   visible = true,
 }: ObjectPathProps) {
+  const { t } = useTranslation(["views/explore"]);
   const getAbsolutePositions = useCallback(() => {
     if (!imgRef.current || !positions) return [];
     const imgRect = imgRef.current.getBoundingClientRect();
@@ -95,17 +97,15 @@ export function ObjectPath({
               fill={getPointColor(color, pos.lifecycle_item?.class_type)}
               stroke="white"
               strokeWidth={width / 2}
-              onClick={() =>
-                pos.lifecycle_item && onPointClick && onPointClick(index)
-              }
-              style={{ cursor: pos.lifecycle_item ? "pointer" : "default" }}
+              onClick={() => onPointClick && onPointClick(index)}
+              style={{ cursor: "pointer" }}
             />
           </TooltipTrigger>
           <TooltipPortal>
-            <TooltipContent side="top" className="capitalize">
+            <TooltipContent side="top" className="smart-capitalize">
               {pos.lifecycle_item
                 ? getLifecycleItemDescription(pos.lifecycle_item)
-                : "Tracked point"}
+                : t("objectLifecycle.trackedPoint")}
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>

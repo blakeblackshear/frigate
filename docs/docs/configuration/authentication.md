@@ -43,13 +43,28 @@ Restarting Frigate will reset the rate limits.
 
 If you are running Frigate behind a proxy, you will want to set `trusted_proxies` or these rate limits will apply to the upstream proxy IP address. This means that a brute force attack will rate limit login attempts from other devices and could temporarily lock you out of your instance. In order to ensure rate limits only apply to the actual IP address where the requests are coming from, you will need to list the upstream networks that you want to trust. These trusted proxies are checked against the `X-Forwarded-For` header when looking for the IP address where the request originated.
 
-If you are running a reverse proxy in the same docker compose file as Frigate, here is an example of how your auth config might look:
+If you are running a reverse proxy in the same Docker Compose file as Frigate, here is an example of how your auth config might look:
 
 ```yaml
 auth:
   failed_login_rate_limit: "1/second;5/minute;20/hour"
   trusted_proxies:
-    - 172.18.0.0/16 # <---- this is the subnet for the internal docker compose network
+    - 172.18.0.0/16 # <---- this is the subnet for the internal Docker Compose network
+```
+
+## Session Length
+
+The default session length for user authentication in Frigate is 24 hours. This setting determines how long a user's authenticated session remains active before a token refresh is required — otherwise, the user will need to log in again.
+
+While the default provides a balance of security and convenience, you can customize this duration to suit your specific security requirements and user experience preferences. The session length is configured in seconds.
+
+The default value of `86400` will expire the authentication session after 24 hours. Some other examples:
+- `0`: Setting the session length to 0 will require a user to log in every time they access the application or after a very short, immediate timeout.
+- `604800`: Setting the session length to 604800 will require a user to log in if the token is not refreshed for 7 days.
+
+```yaml
+auth:
+  session_length: 86400
 ```
 
 ## JWT Token Secret
@@ -66,7 +81,7 @@ Frigate looks for a JWT token secret in the following order:
 
 1. An environment variable named `FRIGATE_JWT_SECRET`
 2. A docker secret named `FRIGATE_JWT_SECRET` in `/run/secrets/`
-3. A `jwt_secret` option from the Home Assistant Addon options
+3. A `jwt_secret` option from the Home Assistant Add-on options
 4. A `.jwt_secret` file in the config directory
 
 If no secret is found on startup, Frigate generates one and stores it in a `.jwt_secret` file in the config directory.
@@ -77,7 +92,7 @@ Changing the secret will invalidate current tokens.
 
 Frigate can be configured to leverage features of common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.
 
-If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
+If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication as there is no correspondence between users in Frigate's database and users authenticated via the proxy. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
 
 Here is an example of how to disable Frigate's authentication and also ensure the requests come only from your known proxy.
 
@@ -97,17 +112,26 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 ### Header mapping
 
-If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive.
+If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive. Multiple values can be included in the role header. Frigate expects that the character separating the roles is a comma, but this can be specified using the `separator` config entry.
 
 ```yaml
 proxy:
   ...
+  separator: "|" # This value defaults to a comma, but Authentik uses a pipe, for example.
   header_map:
     user: x-forwarded-user
     role: x-forwarded-role
 ```
 
 Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
+
+A default role can be provided. Any value in the mapped `role` header will override the default.
+
+```yaml
+proxy:
+  ...
+  default_role: viewer
+```
 
 #### Port Considerations
 

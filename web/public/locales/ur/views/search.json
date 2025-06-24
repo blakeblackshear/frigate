@@ -1,0 +1,11 @@
+{
+  "search": "تلاش",
+  "savedSearches": "محفوظ شدہ تلاشیں",
+  "searchFor": "{{inputValue}} تلاش کریں",
+  "button": {
+    "clear": "تلاش صاف کریں",
+    "save": "تلاش کو محفوظ کریں",
+    "delete": "محفوظ کردہ تلاش کو حذف کریں",
+    "filterInformation": "معلومات کو فلٹر کریں"
+  }
+}

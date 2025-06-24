@@ -1,0 +1,158 @@
+{
+  "documentTitle": "即時畫面 - Frigate",
+  "cameraAudio": {
+    "disable": "停用鏡頭音訊",
+    "enable": "啟用鏡頭音訊"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "點擊畫面以置中鏡頭",
+        "enable": "啟用點擊移動",
+        "disable": "停用點擊移動"
+      },
+      "up": {
+        "label": "移動 PTZ 鏡頭向上"
+      },
+      "right": {
+        "label": "移動 PTZ 鏡頭向右"
+      },
+      "left": {
+        "label": "移動 PTZ 鏡頭向左"
+      },
+      "down": {
+        "label": "移動 PTZ 鏡頭向下"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "點擊畫面以置中 PTZ 鏡頭"
+      }
+    },
+    "presets": "PTZ 鏡頭預設位置",
+    "zoom": {
+      "in": {
+        "label": "放大 PTZ 鏡頭"
+      },
+      "out": {
+        "label": "縮小 PTZ 鏡頭"
+      }
+    }
+  },
+  "twoWayTalk": {
+    "enable": "啟用雙向通話",
+    "disable": "停用雙向通話"
+  },
+  "lowBandwidthMode": "低頻寬模式",
+  "documentTitle.withCamera": "{{camera}} - 即時畫面 - Frigate",
+  "recording": {
+    "disable": "停用錄影",
+    "enable": "啟用錄影"
+  },
+  "snapshots": {
+    "enable": "啟用快照",
+    "disable": "停用快照"
+  },
+  "audioDetect": {
+    "enable": "啟用音訊偵測",
+    "disable": "停用音訊偵測"
+  },
+  "autotracking": {
+    "enable": "啟用自動追蹤",
+    "disable": "停用自動追蹤"
+  },
+  "streamStats": {
+    "enable": "顯示串流統計資料",
+    "disable": "隱藏串流統計資料"
+  },
+  "manualRecording": {
+    "title": "按需錄影",
+    "tips": "根據此鏡頭的錄影保留設定手動啟動事件。",
+    "debugView": "除錯視圖",
+    "start": "開始按需錄影",
+    "showStats": {
+      "label": "顯示統計資料",
+      "desc": "啟用此選項可在鏡頭畫面上疊加串流統計資料。"
+    },
+    "playInBackground": {
+      "desc": "啟用此選項可在播放器隱藏時繼續串流播放。",
+      "label": "背景播放"
+    },
+    "started": "已開始手動按需錄影。",
+    "end": "結束按需錄影",
+    "ended": "已結束手動按需錄影。",
+    "failedToEnd": "無法結束手動按需錄影。",
+    "failedToStart": "無法開始手動按需錄影。",
+    "recordDisabledTips": "由於此鏡頭的設定已停用或限制錄影，因此只會儲存快照。"
+  },
+  "camera": {
+    "enable": "啟用鏡頭",
+    "disable": "停用鏡頭"
+  },
+  "muteCameras": {
+    "enable": "所有鏡頭靜音",
+    "disable": "所有鏡頭取消靜音"
+  },
+  "detect": {
+    "disable": "停用偵測",
+    "enable": "啟用偵測"
+  },
+  "streamingSettings": "串流設定",
+  "notifications": "通知",
+  "audio": "音訊",
+  "suspend": {
+    "forTime": "暫停時間： "
+  },
+  "stream": {
+    "title": "串流",
+    "audio": {
+      "tips": {
+        "documentation": "閱讀文件 ",
+        "title": "音訊必須從你的鏡頭輸出，並在 go2rtc 中正確設定此串流。"
+      },
+      "available": "此串流支援音訊",
+      "unavailable": "此串流不支援音訊"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "閱讀文件 ",
+      "available": "此串流支援雙向通話",
+      "unavailable": "此串流不支援雙向通話",
+      "tips": "你的裝置必須支援此功能，且需設定 WebRTC 才能使用雙向通話。"
+    },
+    "lowBandwidth": {
+      "tips": "因緩衝或串流錯誤，即時畫面已切換至低頻寬模式。",
+      "resetStream": "重置串流"
+    },
+    "playInBackground": {
+      "tips": "啟用此選項可在播放器隱藏時繼續串流播放。",
+      "label": "背景播放"
+    }
+  },
+  "cameraSettings": {
+    "cameraEnabled": "鏡頭已啟用",
+    "objectDetection": "物件偵測",
+    "recording": "錄影",
+    "snapshots": "快照",
+    "autotracking": "自動追蹤",
+    "audioDetection": "音訊偵測",
+    "title": "{{camera}} 設定"
+  },
+  "history": {
+    "label": "顯示歷史影像"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "全部",
+      "motion": "移動",
+      "active_objects": "活躍物件"
+    },
+    "notAllTips": "你的 {{source}} 錄影保留設定為 <code>mode: {{effectiveRetainMode}}</code>，因此此按需錄影只會保留{{effectiveRetainModeName}}的片段。"
+  },
+  "editLayout": {
+    "label": "編輯版面配置",
+    "group": {
+      "label": "編輯鏡頭群組"
+    },
+    "exitEdit": "結束編輯"
+  }
+}
