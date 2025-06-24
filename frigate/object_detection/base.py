@@ -95,8 +95,9 @@ class DetectorRunner(FrigateProcess):
         start_time: Value,
         config: FrigateConfig,
         detector_config: BaseDetectorConfig,
+        stop_event: MpEvent,
     ) -> None:
-        super().__init__(name=name, daemon=True)
+        super().__init__(stop_event, name=name, daemon=True)
         self.detection_queue = detection_queue
         self.cameras = cameras
         self.avg_speed = avg_speed
@@ -166,6 +167,7 @@ class ObjectDetectProcess:
         cameras: list[str],
         config: FrigateConfig,
         detector_config: BaseDetectorConfig,
+        stop_event: MpEvent,
     ):
         self.name = name
         self.cameras = cameras
@@ -175,6 +177,7 @@ class ObjectDetectProcess:
         self.detect_process: FrigateProcess | None = None
         self.config = config
         self.detector_config = detector_config
+        self.stop_event = stop_event
         self.start_or_restart()
 
     def stop(self):
@@ -202,6 +205,7 @@ class ObjectDetectProcess:
             self.detection_start,
             self.config,
             self.detector_config,
+            self.stop_event,
         )
         self.detect_process.start()
 

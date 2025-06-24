@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 from json.decoder import JSONDecodeError
+from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Union
 
 import regex
@@ -29,9 +30,12 @@ logger = logging.getLogger(__name__)
 
 class EmbeddingProcess(FrigateProcess):
     def __init__(
-        self, config: FrigateConfig, metrics: DataProcessorMetrics | None
+        self,
+        config: FrigateConfig,
+        metrics: DataProcessorMetrics | None,
+        stop_event: MpEvent,
     ) -> None:
-        super().__init__(name="frigate.embeddings_manager", daemon=True)
+        super().__init__(stop_event, name="frigate.embeddings_manager", daemon=True)
         self.config = config
         self.metrics = metrics
 
