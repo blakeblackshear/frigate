@@ -142,7 +142,7 @@ def redirect_stdout_to_logpipe(log_name: str, level: int):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            current_log_pipe = LogPipe()
+            current_log_pipe = LogPipe(log_name, level)
 
             old_stdout = sys.stdout
             old_stderr = sys.stderr
