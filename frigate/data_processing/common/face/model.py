@@ -11,6 +11,7 @@ from scipy import stats
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
+from frigate.log import redirect_stdout_to_logpipe
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
+    @redirect_stdout_to_logpipe(__name__, logging.DEBUG)
     def init_landmark_detector(self) -> None:
         landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
 

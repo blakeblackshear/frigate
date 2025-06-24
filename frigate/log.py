@@ -6,6 +6,7 @@ import sys
 import threading
 from collections import deque
 from enum import Enum
+from functools import wraps
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing.managers import SyncManager
 from queue import Queue
@@ -102,11 +103,11 @@ os.register_at_fork(after_in_child=reopen_std_streams)
 
 # based on https://codereview.stackexchange.com/a/17959
 class LogPipe(threading.Thread):
-    def __init__(self, log_name: str):
+    def __init__(self, log_name: str, level: int = logging.ERROR):
         """Setup the object with a logger and start the thread"""
         super().__init__(daemon=False)
         self.logger = logging.getLogger(log_name)
-        self.level = logging.ERROR
+        self.level = level
         self.deque: Deque[str] = deque(maxlen=100)
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
@@ -135,3 +136,25 @@ class LogPipe(threading.Thread):
     def close(self) -> None:
         """Close the write end of the pipe."""
         os.close(self.fdWrite)
+
+
+def redirect_stdout_to_logpipe(log_name: str, level: int):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            current_log_pipe = LogPipe()
+
+            old_stdout = sys.stdout
+            sys.stdout = current_log_pipe
+
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                sys.stdout = old_stdout
+                current_log_pipe.dump()
+
+            return result
+
+        return wrapper
+
+    return decorator
