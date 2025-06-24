@@ -145,12 +145,15 @@ def redirect_stdout_to_logpipe(log_name: str, level: int):
             current_log_pipe = LogPipe()
 
             old_stdout = sys.stdout
+            old_stderr = sys.stderr
             sys.stdout = current_log_pipe
+            sys.stderr = current_log_pipe
 
             try:
                 result = func(*args, **kwargs)
             finally:
                 sys.stdout = old_stdout
+                sys.stderr = old_stderr
                 current_log_pipe.dump()
 
             return result
