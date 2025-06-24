@@ -1,7 +1,7 @@
 """Util for classification models."""
 
+import logging
 import os
-import sys
 
 import cv2
 import numpy as np
@@ -9,6 +9,7 @@ import numpy as np
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.log import redirect_stdout_to_logger
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.process import FrigateProcess
 
@@ -36,6 +37,7 @@ def __generate_representative_dataset_factory(dataset_dir: str):
     return generate_representative_dataset
 
 
+@redirect_stdout_to_logger(__name__, logging.DEBUG)
 def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
 
@@ -54,14 +56,6 @@ def __train_classification_model(model_name: str) -> bool:
             if os.path.isdir(os.path.join(dataset_dir, d))
         ]
     )
-
-    # TF and Keras are very loud with logging
-    # we want to avoid these logs so we
-    # temporarily redirect stdout / stderr
-    original_stdout = sys.stdout
-    original_stderr = sys.stderr
-    sys.stdout = open(os.devnull, "w")
-    sys.stderr = open(os.devnull, "w")
 
     # Start with imagenet base model with 35% of channels in each layer
     base_model = MobileNetV2(
@@ -123,10 +117,6 @@ def __train_classification_model(model_name: str) -> bool:
     # write model
     with open(os.path.join(model_dir, "model.tflite"), "wb") as f:
         f.write(tflite_model)
-
-    # restore original stdout / stderr
-    sys.stdout = original_stdout
-    sys.stderr = original_stderr
 
 
 @staticmethod

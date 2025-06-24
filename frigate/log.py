@@ -1,5 +1,6 @@
 # In log.py
 import atexit
+import io
 import logging
 import os
 import sys
@@ -10,7 +11,7 @@ from functools import wraps
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing.managers import SyncManager
 from queue import Queue
-from typing import Deque, Optional
+from typing import Any, Callable, Deque, Optional
 
 from frigate.util.builtin import clean_camera_user_pass
 
@@ -138,12 +139,61 @@ class LogPipe(threading.Thread):
         os.close(self.fdWrite)
 
 
-def redirect_stdout_to_logpipe(log_name: str, level: int):
-    def decorator(func):
+class LogRedirect(io.StringIO):
+    """
+    A custom file-like object to capture stdout and process it.
+    It extends io.StringIO to capture output and then processes it
+    line by line.
+    """
+
+    def __init__(self, logger_instance: logging.Logger, level: int):
+        super().__init__()
+        self.logger = logger_instance
+        self.log_level = level
+        self.buffer = []
+
+    def write(self, s):
+        if not isinstance(s, str):
+            s = str(s)
+
+        self.buffer.append(s)
+
+        # Process output line by line if a newline is present
+        if "\n" in s:
+            full_output = "".join(self.buffer)
+            lines = full_output.splitlines(keepends=True)
+            self.buffer = []
+
+            for line in lines:
+                if line.endswith("\n"):
+                    self._process_line(line.rstrip("\n"))
+                else:
+                    self.buffer.append(line)
+
+    def _process_line(self, line):
+        self.logger.log(self.log_level, line)
+
+    def flush(self):
+        if self.buffer:
+            full_output = "".join(self.buffer)
+            self.buffer = []
+            if full_output:  # Only process if there's content
+                self._process_line(full_output)
+
+    def __enter__(self):
+        """Context manager entry point."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit point. Ensures buffered content is flushed."""
+        self.flush()
+
+
+def redirect_stdout_to_logger(log_name: str, level: int) -> Any:
+    def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            current_log_pipe = LogPipe(log_name, logging.ERROR)
-            current_log_pipe.run()
+            current_log_pipe = LogRedirect(log_name, logging.ERROR)
 
             old_stdout = sys.stdout
             old_stderr = sys.stderr
@@ -151,13 +201,11 @@ def redirect_stdout_to_logpipe(log_name: str, level: int):
             sys.stderr = current_log_pipe
 
             try:
-                print()
                 result = func(*args, **kwargs)
             finally:
                 sys.stdout = old_stdout
                 sys.stderr = old_stderr
-                current_log_pipe.dump()
-                current_log_pipe.close()
+                current_log_pipe.flush()
 
             return result
 

@@ -37,7 +37,7 @@ from frigate.data_processing.real_time.audio_transcription import (
     AudioTranscriptionRealTimeProcessor,
 )
 from frigate.ffmpeg_presets import parse_preset_input
-from frigate.log import LogPipe, redirect_stdout_to_logpipe
+from frigate.log import LogPipe, redirect_stdout_to_logger
 from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.process import FrigateProcess
@@ -423,7 +423,7 @@ class AudioEventMaintainer(threading.Thread):
 
 
 class AudioTfl:
-    @redirect_stdout_to_logpipe(__name__, logging.DEBUG)
+    @redirect_stdout_to_logger(__name__, logging.DEBUG)
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads
