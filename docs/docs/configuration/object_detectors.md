@@ -237,30 +237,9 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 
 ## DeGirum
-DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). You can connect directly to DeGirum's cloud platform to run inference with just an internet connection after signing up, or use DeGirum with local hardware through a [AI server](#ai-server). You can view their official docs site page for their cloud platform [here](https://docs.degirum.com/ai-hub/quickstart).
+DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through an [AI server](#ai-server), or through the use of @local. You can also connect directly to DeGirum's cloud platform to run inferences.
 
 ### Configuration
-#### AI Hub Cloud Inference
-DeGirum is designed to support very easy cloud inference. To set it up, you need to:
-1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
-2. Get an access token.
-3. Create a DeGirum detector in your config.yml file.
-```yaml
-degirum_detector:
-    type: degirum
-    location: "@cloud" # For accessing AI Hub devices and models
-    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start.
-    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
-
-```
-Once `degirum_detector` is setup, you can choose a model through 'model' section in the config.yml file.
-```yaml
-model:
-    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-```
-
 #### AI Server Inference
 Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your docker-compose.yml to get started:
 ```yaml
@@ -272,7 +251,7 @@ degirum_detector:
       - "8778:8778"
 ```
 All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
-Once completed, changing the config.yml file is much the same as the process for cloud.
+Once completed, changing the config.yml file is simple.
 ```yaml
 degirum_detector:
     type: degirum
@@ -291,8 +270,54 @@ model:
     path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
     width: 300 # width is in the model name as the first number in the "int"x"int" section
     height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
 ```
 
+
+#### Local Inference
+It is also possible to eliminate the need for an AI server and run the hardware directly. The benefit of this approach is that you eliminate any bottlenecks that occur when transferring prediction results from the AI server docker container to the frigate one. However, the method of implementing local inference is different for every device and hardware combination, so it's usually more trouble than it's worth. A general guideline to achieve this would be:
+1. Ensuring that the frigate docker container has the runtime you want to use. So for instance, running @local for hailo means making sure the container you're using has the hailo runtime installed.
+2. To double check the runtime is detected by degirum, make sure the `degirum sys-info` command properly shows whatever runtimes you mean to install
+3. Create a DeGirum detector in your config.yml file.
+```yaml
+degirum_detector:
+    type: degirum
+    location: "@local" # For accessing AI Hub devices and models
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
+
+```
+Once `degirum_detector` is setup, you can choose a model through 'model' section in the config.yml file.
+```yaml
+model:
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+
+#### AI Hub Cloud Inference
+If you do not possess whatever hardware you want to run, there's also the option to run cloud inferences. Do note that your detection fps might need to be lowered as network latency does significantly slow down this method of detection. For use with Frigate, we highly recommend using a local AI server as described above. To set up cloud inferences,
+1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
+2. Get an access token.
+3. Create a DeGirum detector in your config.yml file.
+```yaml
+degirum_detector:
+    type: degirum
+    location: "@cloud" # For accessing AI Hub devices and models
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "team_name/zoo_name". DeGirum/public is available to everyone, so feel free to use it if you don't know where to start.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
+
+```
+Once `degirum_detector` is setup, you can choose a model through 'model' section in the config.yml file.
+```yaml
+model:
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
 
 
 ## OpenVINO Detector
