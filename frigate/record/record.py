@@ -1,6 +1,7 @@
 """Run recording maintainer and cleanup."""
 
 import logging
+from multiprocessing.synchronize import Event as MpEvent
 
 from playhouse.sqliteq import SqliteQueueDatabase
 
@@ -13,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class RecordProcess(FrigateProcess):
-    def __init__(self, config: FrigateConfig) -> None:
-        super().__init__(name="frigate.recording_manager", daemon=True)
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
+        super().__init__(stop_event, name="frigate.recording_manager", daemon=True)
         self.config = config
 
     def run(self) -> None:

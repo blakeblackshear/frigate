@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 import threading
+from multiprocessing.synchronize import Event as MpEvent
 from wsgiref.simple_server import make_server
 
 from ws4py.server.wsgirefserver import (
@@ -72,8 +73,8 @@ def check_disabled_camera_update(
 
 
 class OutputProcess(FrigateProcess):
-    def __init__(self, config: FrigateConfig) -> None:
-        super().__init__(name="frigate.output", daemon=True)
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
+        super().__init__(stop_event, name="frigate.output", daemon=True)
         self.config = config
 
     def run(self) -> None:

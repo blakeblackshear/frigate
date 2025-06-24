@@ -449,9 +449,13 @@ class CameraCaptureRunner(threading.Thread):
 
 class CameraCapture(FrigateProcess):
     def __init__(
-        self, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
+        self,
+        config: CameraConfig,
+        shm_frame_count: int,
+        camera_metrics: CameraMetrics,
+        stop_event: MpEvent,
     ) -> None:
-        super().__init__(name=f"frigate.capture:{config.name}", daemon=True)
+        super().__init__(stop_event, name=f"frigate.capture:{config.name}", daemon=True)
         self.config = config
         self.shm_frame_count = shm_frame_count
         self.camera_metrics = camera_metrics
@@ -482,8 +486,9 @@ class CameraTracker(FrigateProcess):
         camera_metrics: CameraMetrics,
         ptz_metrics: PTZMetrics,
         region_grid: list[list[dict[str, Any]]],
+        stop_event: MpEvent,
     ) -> None:
-        super().__init__(name=f"frigate.process:{config.name}", daemon=True)
+        super().__init__(stop_event, name=f"frigate.process:{config.name}", daemon=True)
         self.config = config
         self.model_config = model_config
         self.labelmap = labelmap
