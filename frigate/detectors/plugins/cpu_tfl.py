@@ -28,7 +28,7 @@ class CpuDetectorConfig(BaseDetectorConfig):
 class CpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
-    @redirect_stdout_to_logger(__name__, logging.DEBUG)
+    @redirect_stdout_to_logger(logger, logging.DEBUG)
     def __init__(self, detector_config: CpuDetectorConfig):
         interpreter = Interpreter(
             model_path=detector_config.model.path,

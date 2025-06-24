@@ -38,7 +38,7 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
-    @redirect_stdout_to_logger(__name__, logging.DEBUG)
+    @redirect_stdout_to_logger(logger, logging.DEBUG)
     def init_landmark_detector(self) -> None:
         landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
 

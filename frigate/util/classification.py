@@ -17,6 +17,8 @@ BATCH_SIZE = 16
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
+logger = logging.getLogger(__name__)
+
 
 def __generate_representative_dataset_factory(dataset_dir: str):
     def generate_representative_dataset():
@@ -37,7 +39,7 @@ def __generate_representative_dataset_factory(dataset_dir: str):
     return generate_representative_dataset
 
 
-@redirect_stdout_to_logger(__name__, logging.DEBUG)
+@redirect_stdout_to_logger(logger, logging.DEBUG)
 def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
 

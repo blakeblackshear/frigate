@@ -49,6 +49,9 @@ except ModuleNotFoundError:
     from tensorflow.lite.python.interpreter import Interpreter
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     ffmpeg_input: CameraInput = [i for i in ffmpeg.inputs if "audio" in i.roles][0]
     input_args = get_ffmpeg_arg_list(ffmpeg.global_args) + (
@@ -423,7 +426,7 @@ class AudioEventMaintainer(threading.Thread):
 
 
 class AudioTfl:
-    @redirect_stdout_to_logger(__name__, logging.DEBUG)
+    @redirect_stdout_to_logger(logger, logging.DEBUG)
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads

@@ -189,11 +189,11 @@ class LogRedirect(io.StringIO):
         self.flush()
 
 
-def redirect_stdout_to_logger(log_name: str, level: int) -> Any:
+def redirect_stdout_to_logger(logger: logging.Logger, level: int) -> Any:
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            current_log_pipe = LogRedirect(log_name, logging.ERROR)
+            current_log_pipe = LogRedirect(logger, logging.ERROR)
 
             old_stdout = sys.stdout
             old_stderr = sys.stderr
