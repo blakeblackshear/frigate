@@ -225,14 +225,14 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = RecordProcess(self.config)
+        recording_process = RecordProcess(self.config, self.stop_event)
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = ReviewProcess(self.config)
+        review_segment_process = ReviewProcess(self.config, self.stop_event)
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
@@ -252,8 +252,7 @@ class FrigateApp:
             return
 
         embedding_process = EmbeddingProcess(
-            self.config,
-            self.embeddings_metrics,
+            self.config, self.embeddings_metrics, self.stop_event
         )
         self.embedding_process = embedding_process
         embedding_process.start()
@@ -389,6 +388,7 @@ class FrigateApp:
                 list(self.config.cameras.keys()),
                 self.config,
                 detector_config,
+                self.stop_event,
             )
 
     def start_ptz_autotracker(self) -> None:
@@ -412,7 +412,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = OutputProcess(self.config)
+        output_processor = OutputProcess(self.config, self.stop_event)
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
@@ -438,7 +438,7 @@ class FrigateApp:
 
         if audio_cameras:
             self.audio_process = AudioProcessor(
-                self.config, audio_cameras, self.camera_metrics
+                self.config, audio_cameras, self.camera_metrics, self.stop_event
             )
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
