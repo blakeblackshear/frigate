@@ -118,5 +118,19 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    mp.set_forkserver_preload(
+        [
+            # Standard library and core dependencies
+            "sqlite3",
+            # Third-party libraries commonly used in Frigate
+            "numpy",
+            "cv2",
+            "peewee",
+            "zmq",
+            "ruamel.yaml",
+            # Frigate core modules
+            "frigate.camera.maintainer",
+        ]
+    )
     mp.set_start_method("forkserver", force=True)
     main()
