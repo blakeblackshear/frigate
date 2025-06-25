@@ -13,7 +13,7 @@ WiFi cameras are not recommended as [their streams are less reliable and cause c
 
 Many users have reported various issues with 4K-plus Reolink cameras, it is best to stick with 5MP and lower for Reolink cameras. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-cameras).
 
-Here are some of the camera's I recommend:
+Here are some of the cameras I recommend:
 
 - <a href="https://amzn.to/4fwoNWA" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T549M-ALED-S3</a> (affiliate link)
 - <a href="https://amzn.to/3YXpcMw" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T54IR-AS</a> (affiliate link)
