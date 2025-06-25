@@ -19,4 +19,5 @@ export const supportedLanguageKeys = [
   "pl",
   "uk",
   "cs",
+  "hu",
 ];
