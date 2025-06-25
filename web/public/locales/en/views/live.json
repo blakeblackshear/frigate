@@ -38,6 +38,14 @@
         "label": "Zoom PTZ camera out"
       }
     },
+    "focus": {
+      "in": {
+        "label": "Focus PTZ camera in"
+      },
+      "out": {
+        "label": "Focus PTZ camera out"
+      }
+    },
     "frame": {
       "center": {
         "label": "Click in the frame to center the PTZ camera"
