@@ -37,7 +37,7 @@ from frigate.data_processing.real_time.audio_transcription import (
     AudioTranscriptionRealTimeProcessor,
 )
 from frigate.ffmpeg_presets import parse_preset_input
-from frigate.log import LogPipe
+from frigate.log import LogPipe, redirect_output_to_logger
 from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.process import FrigateProcess
@@ -47,6 +47,9 @@ try:
     from tflite_runtime.interpreter import Interpreter
 except ModuleNotFoundError:
     from tensorflow.lite.python.interpreter import Interpreter
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
@@ -423,6 +426,7 @@ class AudioEventMaintainer(threading.Thread):
 
 
 class AudioTfl:
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, stop_event: threading.Event, num_threads=2):
         self.stop_event = stop_event
         self.num_threads = num_threads

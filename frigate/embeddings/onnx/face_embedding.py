@@ -6,6 +6,7 @@ import os
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 
 from .base_embedding import BaseEmbedding
@@ -53,6 +54,7 @@ class FaceNetEmbedding(BaseEmbedding):
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
