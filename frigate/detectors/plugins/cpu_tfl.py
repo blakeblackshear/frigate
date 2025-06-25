@@ -5,7 +5,7 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.log import redirect_stdout_to_logger
+from frigate.log import redirect_output_to_logger
 
 from ..detector_utils import tflite_detect_raw, tflite_init
 
@@ -28,7 +28,7 @@ class CpuDetectorConfig(BaseDetectorConfig):
 class CpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
-    @redirect_stdout_to_logger(logger, logging.DEBUG)
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, detector_config: CpuDetectorConfig):
         interpreter = Interpreter(
             model_path=detector_config.model.path,

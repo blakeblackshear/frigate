@@ -9,7 +9,7 @@ import numpy as np
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
-from frigate.log import redirect_stdout_to_logger
+from frigate.log import redirect_output_to_logger
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.process import FrigateProcess
 
@@ -39,7 +39,7 @@ def __generate_representative_dataset_factory(dataset_dir: str):
     return generate_representative_dataset
 
 
-@redirect_stdout_to_logger(logger, logging.DEBUG)
+@redirect_output_to_logger(logger, logging.DEBUG)
 def __train_classification_model(model_name: str) -> bool:
     """Train a classification model."""
 
@@ -138,6 +138,7 @@ def kickoff_model_training(
     # tensorflow will free CPU / GPU memory
     # upon training completion
     training_process = FrigateProcess(
+        None,
         target=__train_classification_model,
         name=f"model_training:{model_name}",
         args=(model_name,),
