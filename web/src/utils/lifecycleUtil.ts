@@ -1,20 +1,15 @@
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { t } from "i18next";
+import { getTranslatedLabel } from "./i18n";
 
 export function getLifecycleItemDescription(
   lifecycleItem: ObjectLifecycleSequence,
 ) {
-  // can't use useTranslation here
-  const label = t(
-    (
-      (Array.isArray(lifecycleItem.data.sub_label)
-        ? lifecycleItem.data.sub_label[0]
-        : lifecycleItem.data.sub_label) || lifecycleItem.data.label
-    )
-      .replace(" ", "_")
-      .toLowerCase(),
-    { ns: "objects" },
-  );
+  const rawLabel = Array.isArray(lifecycleItem.data.sub_label)
+    ? lifecycleItem.data.sub_label[0]
+    : lifecycleItem.data.sub_label || lifecycleItem.data.label;
+
+  const label = getTranslatedLabel(rawLabel);
 
   switch (lifecycleItem.class_type) {
     case "visible":

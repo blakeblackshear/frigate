@@ -32,6 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -81,18 +82,18 @@ export default function CameraSettingsView({
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
       ? cameraConfig.review.alerts.labels
-          .map((label) => t(label, { ns: "objects" }))
+          .map((label) => getTranslatedLabel(label))
           .join(", ")
       : "";
-  }, [cameraConfig, t]);
+  }, [cameraConfig]);
 
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
       ? cameraConfig.review.detections.labels
-          .map((label) => t(label, { ns: "objects" }))
+          .map((label) => getTranslatedLabel(label))
           .join(", ")
       : "";
-  }, [cameraConfig, t]);
+  }, [cameraConfig]);
 
   // form
 

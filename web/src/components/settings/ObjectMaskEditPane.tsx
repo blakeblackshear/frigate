@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -101,7 +102,7 @@ export default function ObjectMaskEditPane({
 
     return t("masksAndZones.objectMaskLabel", {
       number: count + 1,
-      label: t(objectType, { ns: "objects" }),
+      label: getTranslatedLabel(objectType),
     });
   }, [polygons, polygon, t]);
 
@@ -438,7 +439,7 @@ export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
         <SelectSeparator className="bg-secondary" />
         {allLabels.map((item) => (
           <SelectItem key={item} value={item}>
-            {t(item, { ns: "objects" })}
+            {getTranslatedLabel(item)}
           </SelectItem>
         ))}
       </SelectGroup>

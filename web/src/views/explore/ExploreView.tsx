@@ -22,6 +22,7 @@ import SearchResultActions from "@/components/menu/SearchResultActions";
 import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
@@ -152,7 +153,7 @@ function ThumbnailRow({
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="flex flex-row items-center text-lg smart-capitalize">
-        {t(objectType, { ns: "objects" })}
+        {getTranslatedLabel(objectType)}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
             {t("trackedObjectsCount", {
