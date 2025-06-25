@@ -445,7 +445,7 @@ class CameraState:
                     obj.thumbnail_data["frame_time"] if obj.thumbnail_data else None
                 )
                 logger.debug(
-                    f"{self.name}: Tracked object {obj_id} thumbnail frame_time: {thumb_time}"
+                    f"{self.name}: Tracked object {obj_id} thumbnail frame_time: {thumb_time}, false positive: {obj.false_positive}"
                 )
         for t in thumb_frames_to_delete:
             object_id = self.frame_cache[t].get("object_id", "unknown")

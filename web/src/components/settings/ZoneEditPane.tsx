@@ -33,6 +33,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -969,7 +970,7 @@ export function ZoneObjectSelector({
                 className="w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
-                {t(item, { ns: "objects" })}
+                {getTranslatedLabel(item)}
               </Label>
               <Switch
                 key={item}

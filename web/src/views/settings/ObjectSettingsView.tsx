@@ -29,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -371,7 +372,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                     {getIconForLabel(obj.label, "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
-                    {t(obj.label, { ns: "objects" })}
+                    {getTranslatedLabel(obj.label)}
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-center justify-end">

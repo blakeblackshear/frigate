@@ -1,6 +1,12 @@
-import i18n from "i18next";
+import i18n, { t } from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
+
+export const getTranslatedLabel = (label: string) => {
+  if (!label) return "";
+
+  return t(`${label.replace(/\s+/g, "_").toLowerCase()}`, { ns: "objects" });
+};
 
 i18n
   .use(initReactI18next)

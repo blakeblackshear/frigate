@@ -12,7 +12,7 @@ import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
-import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -23,7 +23,6 @@ export default function SearchThumbnail({
   searchResult,
   onClick,
 }: SearchThumbnailProps) {
-  const { t } = useTranslation(["views/search"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -151,7 +150,7 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => t(text, { ns: "objects" }))
+                  .map((text) => getTranslatedLabel(text))
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}
