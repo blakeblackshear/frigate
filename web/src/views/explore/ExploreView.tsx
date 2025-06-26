@@ -192,7 +192,7 @@ function ThumbnailRow({
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent>
-                {t("exploreMore", { label: objectType })}
+                {t("exploreMore", { label: getTranslatedLabel(objectType) })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
