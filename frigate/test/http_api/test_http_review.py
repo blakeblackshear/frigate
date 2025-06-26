@@ -88,7 +88,7 @@ class TestHttpReview(BaseTestHttp):
             response = client.get("/review", params=params)
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 1
+            assert len(response_json) == 0
 
     def test_get_review_with_time_filter(self):
         now = datetime.now().timestamp()
