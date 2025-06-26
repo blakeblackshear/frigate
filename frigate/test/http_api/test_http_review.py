@@ -48,8 +48,9 @@ class TestHttpReview(BaseTestHttp):
     ###################################  GET /review Endpoint   ########################################################
     ####################################################################################################################
 
-    # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 2 seconds from now
-    def test_get_review_no_filters_no_matches(self):
+    def test_get_review_that_overlaps_default_period(self):
+        """Test that a review item that starts during the default period
+        but ends after is included in the results."""
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
@@ -57,7 +58,7 @@ class TestHttpReview(BaseTestHttp):
             response = client.get("/review")
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 0
+            assert len(response_json) == 1
 
     def test_get_review_no_filters(self):
         now = datetime.now().timestamp()
@@ -73,11 +74,13 @@ class TestHttpReview(BaseTestHttp):
             assert response_json[0]["has_been_reviewed"] == False
 
     def test_get_review_with_time_filter_no_matches(self):
+        """Test that review items outside the range are not returned."""
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
             id = "123456.random"
-            super().insert_mock_review_segment(id, now, now + 2)
+            super().insert_mock_review_segment(id, now - 2, now - 1)
+            super().insert_mock_review_segment(f"{id}2", now + 4, now + 5)
             params = {
                 "after": now,
                 "before": now + 3,
@@ -85,7 +88,7 @@ class TestHttpReview(BaseTestHttp):
             response = client.get("/review", params=params)
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 0
+            assert len(response_json) == 1
 
     def test_get_review_with_time_filter(self):
         now = datetime.now().timestamp()
