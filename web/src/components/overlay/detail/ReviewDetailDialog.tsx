@@ -42,6 +42,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { LuSearch } from "react-icons/lu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -328,11 +329,7 @@ export default function ReviewDetailDialog({
                         ns="views/explore"
                         values={{
                           objects: missingObjects
-                            .map((x) =>
-                              t(x, {
-                                ns: "objects",
-                              }),
-                            )
+                            .map((x) => getTranslatedLabel(x))
                             .join(", "),
                         }}
                       >

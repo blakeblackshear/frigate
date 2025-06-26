@@ -264,9 +264,7 @@ function GeneralFilterButton({
     }
 
     if (selectedLabels.length == 1) {
-      return t(selectedLabels[0], {
-        ns: "objects",
-      });
+      return getTranslatedLabel(selectedLabels[0]);
     }
 
     return t("labels.count", {
