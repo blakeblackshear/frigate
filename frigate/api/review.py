@@ -58,9 +58,14 @@ async def review(
     )
 
     clauses = [
-        (ReviewSegment.start_time > after)
-        & (ReviewSegment.start_time < before)
-        & ((ReviewSegment.end_time.is_null(True)) | (ReviewSegment.end_time < before))
+        ((ReviewSegment.start_time > after) & (ReviewSegment.start_time < before))
+        | (
+            (
+                (ReviewSegment.start_time > after)
+                & (ReviewSegment.end_time.is_null(True))
+            )
+            | ((ReviewSegment.end_time > after) & (ReviewSegment.end_time < before))
+        )
     ]
 
     if cameras != "all":
