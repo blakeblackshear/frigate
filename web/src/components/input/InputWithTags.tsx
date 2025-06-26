@@ -52,6 +52,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
 import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -419,9 +420,7 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return t(filterValues as string, {
-        ns: "objects",
-      });
+      return getTranslatedLabel(filterValues as string);
     } else if (filterType === "search_type") {
       return t("filter.searchType." + (filterValues as string));
     } else {
@@ -828,9 +827,7 @@ export default function InputWithTags({
                           >
                             {t("filter.label." + filterType)}:{" "}
                             {filterType === "labels"
-                              ? t(value, {
-                                  ns: "objects",
-                                })
+                              ? getTranslatedLabel(value)
                               : value.replaceAll("_", " ")}
                             <button
                               onClick={() =>

@@ -77,6 +77,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 const SEARCH_TABS = [
   "details",
@@ -717,9 +718,7 @@ function ObjectDetailsTab({
             <div className="text-sm text-primary/40">{t("details.label")}</div>
             <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
               {getIconForLabel(search.label, "size-4 text-primary")}
-              {t(search.label, {
-                ns: "objects",
-              })}
+              {getTranslatedLabel(search.label)}
               {search.sub_label && ` (${search.sub_label})`}
               {isAdmin && search.end_time && (
                 <Tooltip>
@@ -1167,9 +1166,9 @@ export function ObjectSnapshotTab({
                                 ns="components/dialog"
                                 values={{
                                   untranslatedLabel: search?.label,
-                                  translatedLabel: t(search?.label, {
-                                    ns: "objects",
-                                  }),
+                                  translatedLabel: getTranslatedLabel(
+                                    search?.label,
+                                  ),
                                 }}
                               >
                                 explore.plus.review.question.ask_full
