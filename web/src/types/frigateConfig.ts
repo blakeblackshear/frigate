@@ -282,6 +282,7 @@ export type CameraStreamingSettings = {
 export type CustomClassificationModelConfig = {
   enabled: boolean;
   name: string;
+  threshold: number;
   object_config: null | {
     objects: string[];
   };
@@ -289,7 +290,6 @@ export type CustomClassificationModelConfig = {
     cameras: {
       [cameraName: string]: {
         crop: [number, number, number, number];
-        threshold: number;
       };
     };
     motion: boolean;
