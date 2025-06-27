@@ -5,6 +5,8 @@
   "button": {
     "clear": "Bersihkan pencarian",
     "save": "Simpan Pencarian",
-    "delete": "Hapus pencarian yang disimpan"
+    "delete": "Hapus pencarian yang disimpan",
+    "filterInformation": "Saring Informasi",
+    "filterActive": "Filter aktif"
   }
 }
