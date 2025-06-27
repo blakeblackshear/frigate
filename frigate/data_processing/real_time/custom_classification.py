@@ -150,14 +150,11 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             score,
         )
 
-        if score >= camera_config.threshold :
-            sub_label = self.labelmap[best_id]
-
-            if sub_label.lower() != "none":
-                self.requestor.send_data(
-                    f"{camera}/classification/{self.model_config.name}",
-                    self.labelmap[best_id],
-                )
+        if score >= camera_config.threshold:
+            self.requestor.send_data(
+                f"{camera}/classification/{self.model_config.name}",
+                self.labelmap[best_id],
+            )
 
     def handle_request(self, topic, request_data):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
@@ -275,11 +272,14 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             logger.debug(f"Score {score} is worse than previous score {previous_score}")
             return
 
-        self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label,
-            (obj_data["id"], self.labelmap[best_id], score),
-        )
+        sub_label = self.labelmap[best_id]
         self.detected_objects[obj_data["id"]] = score
+
+        if sub_label != "none":
+            self.sub_label_publisher.publish(
+                EventMetadataTypeEnum.sub_label,
+                (obj_data["id"], sub_label, score),
+            )
 
     def handle_request(self, topic, request_data):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
