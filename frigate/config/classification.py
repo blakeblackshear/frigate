@@ -59,9 +59,6 @@ class CustomClassificationStateCameraConfig(FrigateBaseModel):
     crop: list[int, int, int, int] = Field(
         title="Crop of image frame on this camera to run classification on."
     )
-    threshold: float = Field(
-        default=0.8, title="Classification score threshold to change the state."
-    )
 
 
 class CustomClassificationStateConfig(FrigateBaseModel):
@@ -86,6 +83,9 @@ class CustomClassificationObjectConfig(FrigateBaseModel):
 class CustomClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable running the model.")
     name: str | None = Field(default=None, title="Name of classification model.")
+    threshold: float = Field(
+        default=0.8, title="Classification score threshold to change the state."
+    )
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 
