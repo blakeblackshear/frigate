@@ -681,7 +681,9 @@ function TrainGrid({
           <div className="rounded-b-lg bg-card p-3">
             <div className="flex w-full flex-row items-center justify-between gap-2">
               <div className="flex flex-col items-start text-xs text-primary-variant">
-                <div className="smart-capitalize">{data.label}</div>
+                <div className="smart-capitalize">
+                  {data.label.replaceAll("_", " ")}
+                </div>
                 <div>{data.score}%</div>
               </div>
               <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
