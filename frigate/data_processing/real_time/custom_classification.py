@@ -152,7 +152,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             score,
         )
 
-        if score >= camera_config.threshold:
+        if score >= self.model_config.threshold:
             self.requestor.send_data(
                 f"{camera}/classification/{self.model_config.name}",
                 self.labelmap[best_id],
@@ -270,6 +270,10 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             self.labelmap[best_id],
             score,
         )
+
+        if score < self.model_config.threshold:
+            logger.debug(f"Score {score} is less than threshold.")
+            return
 
         if score <= previous_score:
             logger.debug(f"Score {score} is worse than previous score {previous_score}")

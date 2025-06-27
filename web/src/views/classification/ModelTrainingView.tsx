@@ -48,12 +48,15 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { useModelState } from "@/api/ws";
 import { ModelState } from "@/types/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { useNavigate } from "react-router-dom";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
 };
 export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { t } = useTranslation(["views/classificationModel"]);
+  const navigate = useNavigate();
   const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
@@ -294,14 +297,28 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       </AlertDialog>
 
       <div className="flex flex-row justify-between gap-2 p-2 align-middle">
-        <LibrarySelector
-          pageToggle={pageToggle}
-          dataset={dataset || {}}
-          trainImages={trainImages || []}
-          setPageToggle={setPageToggle}
-          onDelete={onDelete}
-          onRename={() => {}}
-        />
+        <div className="flex flex-row items-center justify-center gap-2">
+          <Button
+            className="flex items-center gap-2.5 rounded-lg"
+            aria-label={t("label.back", { ns: "common" })}
+            onClick={() => navigate(-1)}
+          >
+            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+            {isDesktop && (
+              <div className="text-primary">
+                {t("button.back", { ns: "common" })}
+              </div>
+            )}
+          </Button>
+          <LibrarySelector
+            pageToggle={pageToggle}
+            dataset={dataset || {}}
+            trainImages={trainImages || []}
+            setPageToggle={setPageToggle}
+            onDelete={onDelete}
+            onRename={() => {}}
+          />
+        </div>
         {selectedImages?.length > 0 ? (
           <div className="flex items-center justify-center gap-2">
             <div className="mx-1 flex w-48 items-center justify-center text-sm text-muted-foreground">
@@ -640,15 +657,17 @@ function TrainGrid({
       trainImages
         .map((raw) => {
           const parts = raw.replaceAll(".webp", "").split("-");
+          const rawScore = Number.parseFloat(parts[2]);
           return {
             raw,
             timestamp: parts[0],
             label: parts[1],
-            score: Number.parseFloat(parts[2]) * 100,
+            score: rawScore * 100,
+            truePositive: rawScore >= model.threshold,
           };
         })
         .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
-    [trainImages],
+    [model, trainImages],
   );
 
   return (
@@ -684,7 +703,14 @@ function TrainGrid({
                 <div className="smart-capitalize">
                   {data.label.replaceAll("_", " ")}
                 </div>
-                <div>{data.score}%</div>
+                <div
+                  className={cn(
+                    "",
+                    data.truePositive ? "text-success" : "text-danger",
+                  )}
+                >
+                  {data.score}%
+                </div>
               </div>
               <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
                 <ClassificationSelectionDialog
