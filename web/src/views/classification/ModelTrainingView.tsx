@@ -640,15 +640,17 @@ function TrainGrid({
       trainImages
         .map((raw) => {
           const parts = raw.replaceAll(".webp", "").split("-");
+          const rawScore = Number.parseFloat(parts[2]);
           return {
             raw,
             timestamp: parts[0],
             label: parts[1],
-            score: Number.parseFloat(parts[2]) * 100,
+            score: rawScore * 100,
+            truePositive: rawScore >= model.threshold,
           };
         })
         .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
-    [trainImages],
+    [model, trainImages],
   );
 
   return (
@@ -684,7 +686,14 @@ function TrainGrid({
                 <div className="smart-capitalize">
                   {data.label.replaceAll("_", " ")}
                 </div>
-                <div>{data.score}%</div>
+                <div
+                  className={cn(
+                    "",
+                    data.truePositive ? "text-success" : "text-danger",
+                  )}
+                >
+                  {data.score}%
+                </div>
               </div>
               <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
                 <ClassificationSelectionDialog
