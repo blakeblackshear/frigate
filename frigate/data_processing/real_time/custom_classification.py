@@ -17,6 +17,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
+from frigate.log import redirect_output_to_logger
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
 
@@ -55,6 +56,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.last_run = datetime.datetime.now().timestamp()
         self.__build_detector()
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
         self.interpreter = Interpreter(
             model_path=os.path.join(self.model_dir, "model.tflite"),
@@ -200,6 +202,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
         self.__build_detector()
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
         self.interpreter = Interpreter(
             model_path=os.path.join(self.model_dir, "model.tflite"),
