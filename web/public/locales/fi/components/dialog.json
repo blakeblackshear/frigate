@@ -34,7 +34,37 @@
     "time": {
       "fromTimeline": "Valitse aikajanalta",
       "lastHour_one": "Viimeinen tunti",
-      "lastHour_other": "Viimeiset {{count}} tuntia"
+      "lastHour_other": "Viimeiset {{count}} tuntia",
+      "start": {
+        "title": "Aloitusaika",
+        "label": "Valitse aloitusaika"
+      },
+      "end": {
+        "title": "Lopetusaika",
+        "label": "Valitse lopetusaika"
+      },
+      "custom": "Mukautettu"
+    },
+    "name": {
+      "placeholder": "Nimeä vienti"
+    },
+    "select": "Valitse",
+    "export": "Vie",
+    "selectOrExport": "Valitse tai Vie",
+    "toast": {
+      "error": {
+        "failed": "Viennin aloitus epäonnistui: {{error}}",
+        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen",
+        "noVaildTimeSelected": "Sopivaa aikaikkunaa ei valittuna"
+      },
+      "success": "Vienti käynnistettiin onnistuneesti. Katso tiedosto /export kansiossa."
+    },
+    "fromTimeline": {
+      "saveExport": "Tallenna vienti",
+      "previewExport": "Esikatsele vientiä"
     }
+  },
+  "streaming": {
+    "label": "Kuvavirta"
   }
 }

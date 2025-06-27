@@ -37,5 +37,22 @@
   "hair_dryer": "Hiustenkuivaaja",
   "toothbrush": "Hammasharja",
   "clock": "Kello",
-  "bark": "Haukku"
+  "bark": "Haukku",
+  "chant": "Laulaa",
+  "mantra": "Mantra",
+  "child_singing": "Lapsi laulaa",
+  "synthetic_singing": "Synteettinen laulu",
+  "rapping": "Räppi",
+  "humming": "Humina",
+  "groan": "Notkua",
+  "grunt": "Murahtaa",
+  "whistling": "Vihellys",
+  "breathing": "Hengitys",
+  "wheeze": "Vinkua",
+  "snoring": "Kuorsaus",
+  "gasp": "Haukkua",
+  "pant": "Huohottaa",
+  "snort": "Haukkua",
+  "cough": "Yskä",
+  "sneeze": "Niistää"
 }
