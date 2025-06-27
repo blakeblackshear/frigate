@@ -375,7 +375,7 @@ function LibrarySelector({
 }: LibrarySelectorProps) {
   const { t } = useTranslation(["views/classificationModel"]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [renameFace, setRenameFace] = useState<string | null>(null);
+  const [renameClass, setRenameFace] = useState<string | null>(null);
 
   const handleDeleteFace = useCallback(
     (name: string) => {
@@ -390,9 +390,9 @@ function LibrarySelector({
 
   const handleSetOpen = useCallback(
     (open: boolean) => {
-      setRenameFace(open ? renameFace : null);
+      setRenameFace(open ? renameClass : null);
     },
-    [renameFace],
+    [renameClass],
   );
 
   return (
@@ -428,15 +428,15 @@ function LibrarySelector({
       </Dialog>
 
       <TextEntryDialog
-        open={!!renameFace}
+        open={!!renameClass}
         setOpen={handleSetOpen}
         title={t("renameCategory.title")}
-        description={t("renameCategory.desc", { name: renameFace })}
+        description={t("renameCategory.desc", { name: renameClass })}
         onSave={(newName) => {
-          onRename(renameFace!, newName);
+          onRename(renameClass!, newName);
           setRenameFace(null);
         }}
-        defaultValue={renameFace || ""}
+        defaultValue={renameClass || ""}
         regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
         regexErrorMessage={t("description.invalidName")}
       />
@@ -484,10 +484,10 @@ function LibrarySelector({
               className="group flex items-center justify-between"
             >
               <div
-                className="flex-grow cursor-pointer"
+                className="flex-grow cursor-pointer capitalize"
                 onClick={() => setPageToggle(id)}
               >
-                {id}
+                {id.replaceAll("_", " ")}
                 <span className="ml-2 text-muted-foreground">
                   ({dataset?.[id].length})
                 </span>
