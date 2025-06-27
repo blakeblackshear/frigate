@@ -15,5 +15,105 @@
       "title": "Minden zóna",
       "short": "Zónák"
     }
+  },
+  "more": "Több Szűrő",
+  "timeRange": "Idő intervallum",
+  "reset": {
+    "label": "Szűrők visszaállítása alapállapotba"
+  },
+  "subLabels": {
+    "label": "Alcimkék",
+    "all": "Minden Alcimke"
+  },
+  "logSettings": {
+    "label": "Szűrő napló szint",
+    "loading": {
+      "title": "Töltés"
+    },
+    "allLogs": "Minden napló",
+    "filterBySeverity": "Naplók szűrési fontosság alapján",
+    "disableLogStreaming": "Napló adásának kikapcsolása"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "error": "Követett tárgyak törlése sikertelen: {{errorMessage}}",
+      "success": "Követett tárgyak törlése sikeres."
+    },
+    "title": "Törlés Megerősítése"
+  },
+  "dates": {
+    "all": {
+      "title": "Minden Dátum",
+      "short": "Dátumok"
+    }
+  },
+  "score": "Pont",
+  "estimatedSpeed": "Becsült Sebesség {{unit}}",
+  "features": {
+    "hasSnapshot": "Van pillanatképe",
+    "submittedToFrigatePlus": {
+      "label": "Elküldve a Frigate+-hoz"
+    },
+    "label": "Funkciók",
+    "hasVideoClip": "Van videója"
+  },
+  "sort": {
+    "label": "Rendezés",
+    "dateAsc": "Dátum szerint (Növekvő)",
+    "scoreDesc": "Tárgy Pontszám (Csökkenő)",
+    "scoreAsc": "Tárgy Pontszám (Növekvő)",
+    "speedAsc": "Becsült Sebesség (Növekvő)",
+    "dateDesc": "Dátum szerint (Csökkenő)",
+    "speedDesc": "Becsült Sebesség (Csökkenő)",
+    "relevance": "Relevancia"
+  },
+  "cameras": {
+    "all": {
+      "title": "Minden Kamera",
+      "short": "Kamerák"
+    },
+    "label": "Kamera szűrő"
+  },
+  "review": {
+    "showReviewed": "Mutasd az Áttekintetteket"
+  },
+  "motion": {
+    "showMotionOnly": "Mutasd Csak a Mozgást"
+  },
+  "explore": {
+    "settings": {
+      "title": "Beállítások",
+      "defaultView": {
+        "title": "Alap Nézet",
+        "summary": "Összegzés",
+        "unfilteredGrid": "Szűrőmentes Rács"
+      },
+      "searchSource": {
+        "label": "Keresés Forrás",
+        "options": {
+          "description": "Leírás"
+        }
+      },
+      "gridColumns": {
+        "title": "Rács Oszlopok",
+        "desc": "Válassza ki az oszlopok számáta rács nézetben."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Válassza ki a dátumot a szűréshez"
+      }
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Szűrés zóna maszk alapján"
+  },
+  "recognizedLicensePlates": {
+    "title": "Felismert Rendszámtáblák",
+    "loadFailed": "Felismert rendszámtáblák betöltése sikertelen.",
+    "noLicensePlatesFound": "Rendszámtábla nem található.",
+    "selectPlatesFromList": "Válasszon ki egy vagy több rendszámtáblát a listából.",
+    "loading": "Felismert rendszámtáblák betöltése…",
+    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…"
   }
 }

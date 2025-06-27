@@ -9,7 +9,8 @@
     "general": "Alapbeállítások - Frigate",
     "frigatePlus": "Frigate+ beállítások - Frigate",
     "notifications": "Értesítések beállítása - Frigate",
-    "motionTuner": "Mozgás Hangoló - Frigate"
+    "motionTuner": "Mozgás Hangoló - Frigate",
+    "enrichments": "Gazdagítási Beállítások - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -20,7 +21,8 @@
     "debug": "Hibakeresés",
     "users": "Felhasználók",
     "notifications": "Értesítések",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "enrichments": "Gazdagítások"
   },
   "dialog": {
     "unsavedChanges": {
@@ -37,8 +39,417 @@
       "title": "Live irányítópult",
       "automaticLiveView": {
         "label": "Automata élőkép"
+      },
+      "playAlertVideos": {
+        "label": "Riadó Videók Lejátszása"
       }
     },
-    "title": "Alapbeállítások"
+    "title": "Alapbeállítások",
+    "cameraGroupStreaming": {
+      "title": "Kamera Csoport Adás Beállítások",
+      "clearAll": "Minden Adás Beállítás Törlése"
+    },
+    "recordingsViewer": {
+      "title": "Felvétel Néző",
+      "defaultPlaybackRate": {
+        "label": "Alap Lejátszási Sebesség"
+      }
+    },
+    "calendar": {
+      "title": "Naptár",
+      "firstWeekday": {
+        "label": "Első Hétköznap",
+        "sunday": "Vasárnap",
+        "monday": "Hétfő",
+        "desc": "A nap, amivel az áttekintési naptár hete kezdődik."
+      }
+    },
+    "toast": {
+      "error": {
+        "clearStreamingSettingsFailed": "Adásbeállítások törlése sikertelen: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "reindexNow": {
+        "error": "Újraindexálás megkezdése sikertelen: {{errorMessage}}",
+        "label": "Újraindexálás Most",
+        "confirmTitle": "Újraindexálás Megerősítése",
+        "confirmButton": "Újraindexálás",
+        "success": "Újraindexálás sikeresen megkezdődött.",
+        "alreadyInProgress": "Újraindexálás már folyamatban."
+      },
+      "modelSize": {
+        "label": "Modell méret",
+        "small": {
+          "title": "kicsi"
+        },
+        "large": {
+          "title": "nagy"
+        }
+      },
+      "title": "Szemantikus keresés"
+    },
+    "birdClassification": {
+      "title": "Madár Osztályozás"
+    },
+    "faceRecognition": {
+      "title": "Arcfelismerés",
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "modelSize": {
+        "label": "Modell Mérete",
+        "desc": "Az arcfelismeréshez használt modell mérete.",
+        "small": {
+          "title": "kis"
+        },
+        "large": {
+          "title": "nagy"
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Rendszámtábla Felismerés",
+      "readTheDocumentation": "Olvassa el a Dokumentációt"
+    },
+    "toast": {
+      "error": "Konfigurációs változtatások mentése sikertelen: {{errorMessage}}"
+    },
+    "unsavedChanges": "Mentetlen gazdagítási beállítás változtatások",
+    "title": "Gazdagítási Beállítások"
+  },
+  "notification": {
+    "title": "Értesítések",
+    "notificationSettings": {
+      "documentation": "Olvassa el a Dokumentációt",
+      "title": "Értesítési Beállítások"
+    },
+    "globalSettings": {
+      "title": "Globális Beállítások"
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "Példa example@email.com"
+    },
+    "suspended": "Értesítések felfüggesztve {{time}}",
+    "active": "Értesítések Bekapcsolva",
+    "suspendTime": {
+      "5minutes": "Felfüggesztés 5 percre",
+      "24hours": "Felfüggesztés 24 órára",
+      "suspend": "Felfüggeszt",
+      "12hours": "Felfüggesztés 12 órára",
+      "10minutes": "Felfüggesztés 10 percre",
+      "1hour": "Felfüggesztés 1 órára",
+      "30minutes": "Felfüggesztés 30 percre",
+      "untilRestart": "Felfüggesztés újraindításig"
+    },
+    "toast": {
+      "success": {
+        "settingSaved": "Értesítési beállítások elmentve."
+      }
+    },
+    "notificationUnavailable": {
+      "title": "Értesítés elérhetetlen",
+      "documentation": "Olvassa el a Dokumentációt"
+    },
+    "sendTestNotification": "Teszt értesítés küldése",
+    "deviceSpecific": "Eszköz Specifikus Beállítások",
+    "cameras": {
+      "desc": "Válassza ki mely kamerákhoz engedélyezi az értesítéseket.",
+      "noCameras": "Nincs elérhető kamera",
+      "title": "Kamerák"
+    },
+    "unsavedChanges": "Mentetlen Értesítés változtatások",
+    "cancelSuspension": "Felfüggesztés megszüntetése"
+  },
+  "frigatePlus": {
+    "modelInfo": {
+      "error": "Modell információ betöltése sikertelen",
+      "plusModelType": {
+        "baseModel": "Alap modell"
+      },
+      "supportedDetectors": "Támogatott Érzékelők",
+      "baseModel": "Alap modell",
+      "loadingAvailableModels": "Elérhető modellek betöltése…",
+      "loading": "Modell információ betöltése…",
+      "availableModels": "Elérhető modellek",
+      "modelType": "Modell típus",
+      "title": "Modell Információ",
+      "cameras": "Kamerák"
+    },
+    "apiKey": {
+      "plusLink": "Tudjon meg többet a Frigate+-ról",
+      "title": "Frigate+ API kulcs",
+      "validated": "Frigate+ API kulcs észlelve és ellenőrizve",
+      "notValidated": "Frigate+ API kulcs nem található vagy nem ellenőrzött"
+    },
+    "snapshotConfig": {
+      "title": "Pillanatkép Konfiguráció",
+      "table": {
+        "snapshots": "Pillanatképek",
+        "camera": "Kamera"
+      },
+      "documentation": "Olvassa el a dokumentációt"
+    },
+    "restart_required": "Újraindítás szükséges ( Frigate+ modell megváltozott)",
+    "toast": {
+      "success": "Frigate+ beállítások elmentve. Indítsa újra a Frigate-et a változtatások érvényrejutásához.",
+      "error": "Konfigurációs módosítások mentése sikertelen: {{errorMessage}}"
+    },
+    "title": "Frigate+ Beállítások",
+    "unsavedChanges": "Mentetlen Frigate+ beállítás változtatások"
+  },
+  "users": {
+    "dialog": {
+      "changeRole": {
+        "roleInfo": {
+          "viewer": "Néző",
+          "admin": "Adminisztrátor"
+        }
+      },
+      "form": {
+        "user": {
+          "desc": "Csak betűk, számok, pontok és alulhúzások engedélyezettek.",
+          "title": "Felhasználói név",
+          "placeholder": "Adja meg a felhasználói nevet"
+        },
+        "password": {
+          "match": "A jelszavak egyeznek",
+          "strength": {
+            "weak": "Gyenge",
+            "veryStrong": "Nagyon Erős",
+            "strong": "Erős",
+            "medium": "Közepes",
+            "title": "Jelszó erőssége: "
+          },
+          "placeholder": "Adja meg a jelszót",
+          "title": "Jelszó",
+          "confirm": {
+            "placeholder": "Erősítse meg Jelszavát",
+            "title": "Erősítse meg Jelszavát"
+          },
+          "notMatch": "A jelszavak nem egyeznek"
+        },
+        "newPassword": {
+          "title": "Új Jelszó",
+          "placeholder": "Adjon meg egy új jelszót",
+          "confirm": {
+            "placeholder": "Adja meg ismét az új jelszót"
+          }
+        },
+        "usernameIsRequired": "Felhasználói név szükséges",
+        "passwordIsRequired": "Jelszó szükséges"
+      },
+      "createUser": {
+        "usernameOnlyInclude": "A felhasználói név csak betűket, számokat, .-t vagy _-t tartalmazhat",
+        "title": "Új Felhasználó Létrehozása",
+        "confirmPassword": "Erősítse meg a jelszavát"
+      },
+      "deleteUser": {
+        "title": "Felhasználó Törlése",
+        "warn": "Biztosan törölni akarja <strong>{{username}}</strong>-t?"
+      },
+      "passwordSetting": {
+        "setPassword": "Jelszó Megadása",
+        "doNotMatch": "Jelszavak nem egyeznek",
+        "cannotBeEmpty": "A jelszó nem lehet üres",
+        "updatePassword": "{{username}} Jelszavának Módosítása"
+      }
+    },
+    "table": {
+      "noUsers": "Felhasználók nem találhatóak.",
+      "username": "Felhasználói név",
+      "password": "Jelszó",
+      "deleteUser": "Felhasználó törlése"
+    },
+    "toast": {
+      "error": {
+        "setPasswordFailed": "Jelszó mentése sikertelen: {{errorMessage}}",
+        "deleteUserFailed": "Felhasználó törlése sikertelen: {{errorMessage}}",
+        "createUserFailed": "Felhasználó létrehozása sikertelen: {{errorMessage}}"
+      },
+      "success": {
+        "updatePassword": "Jelszó sikeresen módosítva.",
+        "deleteUser": "{{user}} felhasználó sikeresen törölve",
+        "createUser": "{{user}} felhasználó sikeresen létrehozva"
+      }
+    },
+    "addUser": "Felhasználó hozzáadása",
+    "updatePassword": "Jelszó Módosítása",
+    "management": {
+      "desc": "Ezen Frigate példány felhasználóinak kezelése.",
+      "title": "Felhasználó kezelés"
+    },
+    "title": "Felhasználók"
+  },
+  "masksAndZones": {
+    "zones": {
+      "desc": {
+        "documentation": "Dokumentáció"
+      },
+      "edit": "Zóne Módosítása",
+      "label": "Zónák",
+      "documentTitle": "Zóna Módosítása - Frigate",
+      "name": {
+        "title": "Név",
+        "tips": "A névnek legalább 2 karakterből kell állnia és nem a kamera neve vagy egy másik zónáé.",
+        "inputPlaceHolder": "Adjon meg egy nevet…"
+      },
+      "objects": {
+        "title": "Tárgyak",
+        "desc": "Adott zónára vonatkozó tárgyak listája."
+      },
+      "add": "Zóna Hozzáadása",
+      "allObjects": "Minden Tárgy",
+      "speedEstimation": {
+        "title": "Sebesség Becslés",
+        "docs": "Olvassa el a dokumentációt",
+        "lineADistance": "A vonal távsolság {{unit}}",
+        "lineBDistance": "B vonal távolsága {{unit}}",
+        "lineCDistance": "C vonal távolsága {{unit}}",
+        "lineDDistance": "D vonal távolsága {{unit}}"
+      },
+      "speedThreshold": {
+        "title": "Sebesség Határérték {{unit}}"
+      },
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "clickDrawPolygon": "Kattintson a sokszög rajzoláshoz a képen.",
+      "inertia": {
+        "title": "Inercia"
+      },
+      "loiteringTime": {
+        "title": "Lebzselési idő"
+      }
+    },
+    "objectMasks": {
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "label": "Tárgymaszkok",
+      "desc": {
+        "documentation": "Dokumentáció"
+      },
+      "documentTitle": "Tárgymaszk módosítása - Frigate",
+      "objects": {
+        "title": "Tárgyak",
+        "allObjectTypes": "Minden tárgytípus"
+      },
+      "edit": "Tárgymaszk módosítása",
+      "add": "Tárgymaszk hozzáadása"
+    },
+    "form": {
+      "polygonDrawing": {
+        "delete": {
+          "title": "Törlés Megerősítése",
+          "desc": "Biztosan törölni akarja {{type}}<em>{{name}}</em>-t?",
+          "success": "{{name}} törölve."
+        },
+        "error": {
+          "mustBeFinished": "A sokszög rajzolásnak be kell fejeződnie mentés előtt."
+        },
+        "removeLastPoint": "Utolsó pont törlése",
+        "reset": {
+          "label": "Minden pont törlése"
+        }
+      },
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "A zóna neve olyan karaktert tartalmaz, ami nem megengedett.",
+          "mustBeAtLeastTwoCharacters": "A zóna neve legalább 2 karakterből kell, hogy álljon.",
+          "mustNotBeSameWithCamera": "A zóna neve nem egyezhet meg a kamera nevével.",
+          "alreadyExists": "Egy zóna ezen a néven már létezik ennél a kameránál.",
+          "mustNotContainPeriod": "A zóna neve nem tartalmazhat pontot."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "A távolságnak nagyobb vagy egyenlőnek kell lennie, mint 0.1."
+        }
+      }
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Dokumentáció"
+      },
+      "context": {
+        "documentation": "Olvassa el a dokumentációt"
+      },
+      "edit": "Mozgási Maszk Módosítása",
+      "polygonAreaTooLarge": {
+        "documentation": "Olvassa el a dokumentációt"
+      },
+      "documentTitle": "Mozgási Maszk Módosítása - Frigate",
+      "add": "Új Mozgási Maszk",
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "label": "Mozgási maszk",
+      "clickDrawPolygon": "Kattintson a sokszög rajzoláshoz a képre.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} neve mentve. Indítsa újra a Frigate-et a módosítások érvényesítéséhez."
+        }
+      }
+    },
+    "restart_required": "Újraindítás szükséges (maszkok/zónák módosultak)",
+    "filter": {
+      "all": "Mindem Maszk és Zóna"
+    },
+    "motionMaskLabel": "Mozgási Maszk {{number}}",
+    "objectMaskLabel": "Tárgy Maszk {{number}} {{label}}"
+  },
+  "debug": {
+    "objectList": "Tárgy lista",
+    "debugging": "Hibakeresés",
+    "motion": {
+      "desc": "Mutasd a dobozokat azon területek körül, ahol mozgás észlelés történt"
+    },
+    "zones": {
+      "title": "Zónák"
+    },
+    "objectShapeFilterDrawing": {
+      "score": "Pontszám",
+      "document": "Olvassa el a dokumentációt ",
+      "area": "Terület"
+    },
+    "timestamp": {
+      "title": "Időbélyeg"
+    },
+    "title": "Hibakeresés",
+    "noObjects": "Nincs tárgy"
+  },
+  "motionDetectionTuner": {
+    "toast": {
+      "success": "Mozgási beállítások mentve."
+    },
+    "improveContrast": {
+      "desc": "Növelje a kontrasztot a sötétebb jeleneteknél. <em>Alapbeállítás: BE</em>",
+      "title": "Kontraszt Növelése"
+    },
+    "Threshold": {
+      "title": "Határérték"
+    }
+  },
+  "camera": {
+    "streams": {
+      "title": "Adások"
+    },
+    "review": {
+      "title": "Áttekintés",
+      "alerts": "Riasztások ",
+      "detections": "Érzékelések "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "title": "Attekintés Osztályozás",
+      "noDefinedZones": "Nincs zóna meghatározva ehhez a kamerához.",
+      "objectAlertsTips": "Minden {{alertsLabels}} tárgy a {{cameraName}} -n Riasztásként fog megjelenni.",
+      "selectDetectionsZones": "Válassza ki a zónákat az Észleléshez",
+      "limitDetections": "Korlátozza az észleléseket adott zónákra",
+      "selectAlertsZones": "Válassza ki a zónákat a Riasztásokhoz",
+      "zoneObjectAlertsTips": "Minden {{alertsLabels}}tárgy észlelés {{zone}}-ban/-ben a {{cameraName}}-n Riasztásként lesz megjelenítve.",
+      "objectDetectionsTips": "Minden {{detectionsLabels}} tárgy, ami nincs bekategorizálva a {{cameraName}}-n Észleléskén lesz megjelenítve függetlenül attól, hogy melyik zónában vannak."
+    },
+    "title": "Kamera Beállítások"
   }
 }
