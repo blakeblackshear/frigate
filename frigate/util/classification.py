@@ -49,6 +49,7 @@ def __train_classification_model(model_name: str) -> bool:
     from tensorflow.keras.applications import MobileNetV2
     from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+    logger.info(f"Kicking off classification training for {model_name}.")
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     model_dir = os.path.join(MODEL_CACHE_DIR, model_name)
     num_classes = len(
