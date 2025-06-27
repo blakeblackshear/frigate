@@ -71,8 +71,11 @@
         }
       },
       "button": {
-        "viewInExplore": "Mutasd a Felfedezésben"
-      }
+        "viewInExplore": "Mutasd a Felfedezésben",
+        "share": "Áttekintési elem megosztása"
+      },
+      "desc": "Áttekintendő elem részletei",
+      "title": "Áttekintendő Elem Részletei"
     },
     "snapshotScore": {
       "label": "Pillanatfelvétel Pontszáma"
@@ -107,7 +110,8 @@
         "thumbnailsEmbedded": "Beágyazott ikonok: ",
         "descriptionsEmbedded": "Beágyazott leírások: ",
         "trackedObjectsProcessed": "Feldolgozott követett tárgyak: "
-      }
+      },
+      "context": "A felfedezés azután használható, hogy a követett tárgy beágyazások újraindexálása befejeződött."
     },
     "downloadingModels": {
       "tips": {
@@ -115,7 +119,9 @@
       },
       "setup": {
         "textModel": "Szöveg modell",
-        "textTokenizer": "Szöveg tokenizáló"
+        "textTokenizer": "Szöveg tokenizáló",
+        "visionModel": "Látvány modell",
+        "visionModelFeatureExtractor": "Látvány modell képesség kinyerő"
       },
       "error": "Hiba történt. Ellenőrizze a Frigate naplókat."
     }
@@ -148,7 +154,9 @@
         "faceOrLicense_plate": "{{attribute}} észlelve {{label}}-hoz/-hez/-höz"
       },
       "entered_zone": "{{label}} belépett {{zones}}-ba/-be",
-      "visible": "{{label}} észlelve"
+      "visible": "{{label}} észlelve",
+      "gone": "{{label}} elment",
+      "stationary": "{{label}} mozdulatlanná vált"
     },
     "annotationSettings": {
       "offset": {
@@ -163,7 +171,9 @@
       "next": "Következő dia",
       "previous": "Előző dia"
     },
-    "trackedPoint": "Követett Pont"
+    "trackedPoint": "Követett Pont",
+    "count": "{{first}}-nek a {{second}}",
+    "autoTrackingTips": "A doboz helyzete pontatlan lesz az automatikusan követő kamerákhoz."
   },
   "type": {
     "video": "videó",

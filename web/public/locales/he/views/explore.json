@@ -62,7 +62,7 @@
   "trackedObjectDetails": "פרטי אובייקט במעקב",
   "type": {
     "details": "פרטים",
-    "snapshot": "לכידת תמונה.",
+    "snapshot": "לכידת תמונה",
     "video": "וידיאו",
     "object_lifecycle": "שלבי זיהוי של האובייקט"
   },

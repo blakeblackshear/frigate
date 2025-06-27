@@ -11,5 +11,28 @@
     "only": "Csak mozgások"
   },
   "allCameras": "Összes kamera",
-  "timeline": "Idővonal"
+  "timeline": "Idővonal",
+  "detected": "észlelve",
+  "events": {
+    "label": "Események",
+    "aria": "Válassza ki az eseményeket",
+    "noFoundForTimePeriod": "Nem található esemény ebben az idő intervallumban."
+  },
+  "calendarFilter": {
+    "last24Hours": "Elmúlt 24 Óra"
+  },
+  "newReviewItems": {
+    "label": "Új áttekintendő elemek megnézése",
+    "button": "Áttekintendő Új Elemek"
+  },
+  "camera": "Kamera",
+  "timeline.aria": "Válassza ki az idővonalat",
+  "documentTitle": "Áttekintés - Frigate",
+  "recordings": {
+    "documentTitle": "Felvételek - Frigate"
+  },
+  "markTheseItemsAsReviewed": "Ezen elwmek megjelölése áttekintettként",
+  "markAsReviewed": "Megjelölés Áttekintettként",
+  "selected_one": "{{count}} kiválasztva",
+  "selected_other": "{{count}} kiválasztva"
 }
