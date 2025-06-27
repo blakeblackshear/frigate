@@ -150,11 +150,14 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             score,
         )
 
-        if score >= camera_config.threshold:
-            self.requestor.send_data(
-                f"{camera}/classification/{self.model_config.name}",
-                self.labelmap[best_id],
-            )
+        if score >= camera_config.threshold :
+            sub_label = self.labelmap[best_id]
+
+            if sub_label.lower() != "none":
+                self.requestor.send_data(
+                    f"{camera}/classification/{self.model_config.name}",
+                    self.labelmap[best_id],
+                )
 
     def handle_request(self, topic, request_data):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
