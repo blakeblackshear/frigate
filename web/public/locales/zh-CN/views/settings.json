@@ -160,7 +160,7 @@
     },
     "reviewClassification": {
       "title": "核查分级",
-      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的 <b>人</b>、<b>汽车</b> 对象都将视为警报。你可以通过修改配置文件配置区域来细分。",
+      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的 <strong>人</strong>、<strong>汽车</strong> 对象都将视为警报。你可以通过修改配置文件配置区域来细分。",
       "readTheDocumentation": "阅读文档",
       "noDefinedZones": "该摄像头没有设置区域。",
       "objectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下都将显示为警报。",
@@ -335,7 +335,7 @@
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "objects": {
         "title": "对象",
-        "desc": "将应用于此对象遮罩的对象列表。",
+        "desc": "将应用于此对象遮罩的对象类型。",
         "allObjectTypes": "所有对象类型"
       },
       "toast": {
