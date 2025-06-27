@@ -141,29 +141,16 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-<<<<<<< HEAD
-| Name | YOLOv7 Inference Time | YOLO-NAS Inference Time | RF-DETR Inference Time |
+| Name            | YOLOv7 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
 | --------------- | --------------------- | ------------------------- | ------------------------- |
-| GTX 1060 6GB | ~ 7 ms | | |
-| GTX 1070 | ~ 6 ms | | |
-| GTX 1660 SUPER | ~ 4 ms | | |
-| RTX 3050 | 5 - 7 ms | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
-| RTX 3070 Mobile | ~ 5 ms | | |
-| RTX 3070 | 4 - 6 ms | 320: ~ 6 ms 640: ~ 12 ms | 336: ~ 14 ms 560: ~ 36 ms |
-| Quadro P400 2GB | 20 - 25 ms | | |
-| Quadro P2000 | ~ 12 ms | | |
-=======
-| Name | YoloV7 Inference Time | YOLO-NAS Inference Time |
-| --------------- | ---------------------- | --------------------------- |
-| Quadro P2000    | ~ 12 ms                |                             |
-| Quadro P400 2GB | 20 - 25 ms            |                             |
-| RTX 3070 Mobile | ~ 5 ms                |                             |
-| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
-| GTX 1660 SUPER  | ~ 4 ms                |                             |
-| GTX 1070        | ~ 6 ms                |                             |
-| GTX 1060 6GB    | ~ 7 ms                |                             |
-
-> > > > > > > origin/master
+| GTX 1060 6GB    | ~ 7 ms                |                           |                           |
+| GTX 1070        | ~ 6 ms                |                           |                           |
+| GTX 1660 SUPER  | ~ 4 ms                |                           |                           |
+| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
+| RTX 3070 Mobile | ~ 5 ms                |                           |                           |
+| RTX 3070        | 4 - 6 ms              | 320: ~ 6 ms 640: ~ 12 ms  | 336: ~ 14 ms 560: ~ 36 ms |
+| Quadro P400 2GB | 20 - 25 ms            |                           |                           |
+| Quadro P2000    | ~ 12 ms               |                           |                           |
 
 ### AMD GPUs
 
