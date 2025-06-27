@@ -82,7 +82,7 @@ export default function ClassificationSelectionDialog({
   );
 
   // control
-  const [newFace, setNewFace] = useState(false);
+  const [newClass, setNewClass] = useState(false);
 
   // components
   const Selector = isDesktop ? DropdownMenu : Drawer;
@@ -98,10 +98,10 @@ export default function ClassificationSelectionDialog({
 
   return (
     <div className={className ?? ""}>
-      {newFace && (
+      {newClass && (
         <TextEntryDialog
           open={true}
-          setOpen={setNewFace}
+          setOpen={setNewClass}
           title={t("createCategory.new")}
           onSave={(newCat) => onCategorizeImage(newCat)}
         />
@@ -130,7 +130,7 @@ export default function ClassificationSelectionDialog({
             >
               <SelectorItem
                 className="flex cursor-pointer gap-2 smart-capitalize"
-                onClick={() => setNewFace(true)}
+                onClick={() => setNewClass(true)}
               >
                 <LuPlus />
                 {t("createCategory.new")}
@@ -142,7 +142,7 @@ export default function ClassificationSelectionDialog({
                   onClick={() => onCategorizeImage(category)}
                 >
                   <MdCategory />
-                  {category}
+                  {category.replaceAll("_", " ")}
                 </SelectorItem>
               ))}
             </div>
