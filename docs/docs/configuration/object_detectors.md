@@ -498,6 +498,7 @@ detectors:
 
 model:
   path: /config/model_cache/tensorrt/yolov7-320.trt
+  labelmap_path: /labelmap/coco-80.txt
   input_tensor: nchw
   input_pixel_format: rgb
   width: 320

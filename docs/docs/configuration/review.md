@@ -21,6 +21,21 @@ In 0.14 and later, all of that is bundled into a single review item which starts
 
 Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate 0.14 categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.
 
+:::note
+
+Alerts and detections categorize the tracked objects in review items, but Frigate must first detect those objects with your configured object detector (Coral, OpenVINO, etc). By default, the object tracker only detects `person`. Setting `labels` for `alerts` and `detections` does not automatically enable detection of new objects. To detect more than `person`, you should add the following to your config:
+
+```yaml
+objects:
+  track:
+    - person
+    - car
+    - ...
+```
+
+See the [objects documentation](objects.md) for the list of objects that Frigate's default model tracks.
+:::
+
 ## Restricting alerts to specific labels
 
 By default a review item will only be marked as an alert if a person or car is detected. This can be configured to include any object or audio label using the following config:

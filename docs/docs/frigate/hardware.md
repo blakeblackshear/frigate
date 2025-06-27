@@ -9,23 +9,36 @@ Cameras that output H.264 video and AAC audio will offer the most compatibility 
 
 I recommend Dahua, Hikvision, and Amcrest in that order. Dahua edges out Hikvision because they are easier to find and order, not because they are better cameras. I personally use Dahua cameras because they are easier to purchase directly. In my experience Dahua and Hikvision both have multiple streams with configurable resolutions and frame rates and rock solid streams. They also both have models with large sensors well known for excellent image quality at night. Not all the models are equal. Larger sensors are better than higher resolutions; especially at night. Amcrest is the fallback recommendation because they are rebranded Dahuas. They are rebranding the lower end models with smaller sensors or less configuration options.
 
-Many users have reported various issues with Reolink cameras, so I do not recommend them. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-cameras). Wifi cameras are also not recommended. Their streams are less reliable and cause connection loss and/or lost video data.
+WiFi cameras are not recommended as [their streams are less reliable and cause connection loss and/or lost video data](https://ipcamtalk.com/threads/camera-conflicts.68142/#post-738821), especially when more than a few WiFi cameras will be used at the same time.
 
-Here are some of the camera's I recommend:
+Many users have reported various issues with 4K-plus Reolink cameras, it is best to stick with 5MP and lower for Reolink cameras. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-cameras).
+
+Here are some of the cameras I recommend:
 
 - <a href="https://amzn.to/4fwoNWA" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T549M-ALED-S3</a> (affiliate link)
 - <a href="https://amzn.to/3YXpcMw" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T54IR-AS</a> (affiliate link)
 - <a href="https://amzn.to/3AvBHoY" target="_blank" rel="nofollow noopener sponsored">Amcrest IP5M-T1179EW-AI-V3</a> (affiliate link)
+- <a href="https://amzn.to/4ltOpaC" target="_blank" rel="nofollow noopener sponsored">HIKVISION DS-2CD2387G2P-LSU/SL ColorVu 8MP Panoramic Turret IP Camera</a> (affiliate link)
 
 I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
 ## Server
 
-My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Hailo8 or Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+My current favorite is the Beelink EQ13 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral, Hailo, or other AI accelerators.
 
-| Name                                                                                                          | Notes                                                                                     |
-| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Beelink EQ13 (<a href="https://amzn.to/4iQaBKu" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
+Note that many of these mini PCs come with Windows pre-installed, and you will need to install Linux according to the [getting started guide](../guides/getting_started.md).
+
+I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+
+:::warning
+
+If the EQ13 is out of stock, the link below may take you to a suggested alternative on Amazon. The Beelink EQ14 has some known compatibility issues, so you should avoid that model for now.
+
+:::
+
+| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
+| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| Beelink EQ13 (<a href="https://amzn.to/4jn2qVr" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
 
 ## Detectors
 
@@ -128,16 +141,29 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YOLOv7 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
+<<<<<<< HEAD
+| Name | YOLOv7 Inference Time | YOLO-NAS Inference Time | RF-DETR Inference Time |
 | --------------- | --------------------- | ------------------------- | ------------------------- |
-| GTX 1060 6GB    | ~ 7 ms                |                           |                           |
-| GTX 1070        | ~ 6 ms                |                           |                           |
-| GTX 1660 SUPER  | ~ 4 ms                |                           |                           |
-| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
-| RTX 3070 Mobile | ~ 5 ms                |                           |                           |
-| RTX 3070        | 4 - 6 ms              | 320: ~ 6 ms 640: ~ 12 ms  | 336: ~ 14 ms 560: ~ 36 ms |
-| Quadro P400 2GB | 20 - 25 ms            |                           |                           |
-| Quadro P2000    | ~ 12 ms               |                           |                           |
+| GTX 1060 6GB | ~ 7 ms | | |
+| GTX 1070 | ~ 6 ms | | |
+| GTX 1660 SUPER | ~ 4 ms | | |
+| RTX 3050 | 5 - 7 ms | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
+| RTX 3070 Mobile | ~ 5 ms | | |
+| RTX 3070 | 4 - 6 ms | 320: ~ 6 ms 640: ~ 12 ms | 336: ~ 14 ms 560: ~ 36 ms |
+| Quadro P400 2GB | 20 - 25 ms | | |
+| Quadro P2000 | ~ 12 ms | | |
+=======
+| Name | YoloV7 Inference Time | YOLO-NAS Inference Time |
+| --------------- | ---------------------- | --------------------------- |
+| Quadro P2000    | ~ 12 ms                |                             |
+| Quadro P400 2GB | 20 - 25 ms            |                             |
+| RTX 3070 Mobile | ~ 5 ms                |                             |
+| RTX 3050        | 5 - 7 ms              | 320: ~ 10 ms 640: ~ 16 ms |
+| GTX 1660 SUPER  | ~ 4 ms                |                             |
+| GTX 1070        | ~ 6 ms                |                             |
+| GTX 1060 6GB    | ~ 7 ms                |                             |
+
+> > > > > > > origin/master
 
 ### AMD GPUs
 
@@ -193,4 +219,4 @@ Basically - When you increase the resolution and/or the frame rate of the stream
 
 YES! The Coral does not help with decoding video streams.
 
-Decompressing video streams takes a significant amount of CPU power. Video compression uses key frames (also known as I-frames) to send a full frame in the video stream. The following frames only include the difference from the key frame, and the CPU has to compile each frame by merging the differences with the key frame. [More detailed explanation](https://blog.video.ibm.com/streaming-video-tips/keyframes-interframe-video-compression/). Higher resolutions and frame rates mean more processing power is needed to decode the video stream, so try and set them on the camera to avoid unnecessary decoding work.
+Decompressing video streams takes a significant amount of CPU power. Video compression uses key frames (also known as I-frames) to send a full frame in the video stream. The following frames only include the difference from the key frame, and the CPU has to compile each frame by merging the differences with the key frame. [More detailed explanation](https://support.video.ibm.com/hc/en-us/articles/18106203580316-Keyframes-InterFrame-Video-Compression). Higher resolutions and frame rates mean more processing power is needed to decode the video stream, so try and set them on the camera to avoid unnecessary decoding work.

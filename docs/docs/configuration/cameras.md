@@ -101,6 +101,8 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Ctronics PTZ                 |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                        |      ✅      |      ✅      | Some low-end Dahuas (lite series, among others) have been reported to not support autotracking                                                  |
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
+| Dahua DH-SD49825GB-HNR       |      ✅      |      ✅      |                                                                                                                                                 |
+| Dahua DH-P5AE-PV             |      ❌      |      ❌      |                                                                                                                                                 |
 | Foscam R5                    |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
 | Hikvision                    |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |

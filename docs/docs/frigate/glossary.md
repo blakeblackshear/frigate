@@ -66,4 +66,4 @@ The time period starting when a tracked object entered the frame and ending when
 
 ## Zone
 
-Zones are areas of interest, zones can be used for notifications and for limiting the areas where Frigate will create an [event](#event). [See the zone docs for more info](/configuration/zones)
+Zones are areas of interest, zones can be used for notifications and for limiting the areas where Frigate will create a [review item](#review-item). [See the zone docs for more info](/configuration/zones)

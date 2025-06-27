@@ -110,6 +110,14 @@ If you run Frigate on a separate device within your local network, Home Assistan
 
 Use `http://<frigate_device_ip>:8971` as the URL for the integration so that authentication is required.
 
+:::tip
+
+The above URL assumes you have [disabled TLS](../configuration/tls).
+By default, TLS is enabled and Frigate will be using a self-signed certificate. HomeAssistant will fail to connect HTTPS to port 8971 since it fails to verify the self-signed certificate.
+Either disable TLS and use HTTP from HomeAssistant, or configure Frigate to be acessible with a valid certificate.
+
+:::
+
 ```yaml
 services:
   frigate:

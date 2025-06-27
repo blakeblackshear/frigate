@@ -3,15 +3,9 @@ id: index
 title: Models
 ---
 
-<a href="https://frigate.video/plus" target="_blank" rel="nofollow">Frigate+</a> offers models trained on images submitted by Frigate+ users from their security cameras and is specifically designed for the way Frigate analyzes video footage. These models offer higher accuracy with less resources. The images you upload are used to fine tune a baseline model trained from images uploaded by all Frigate+ users. This fine tuning process results in a model that is optimized for accuracy in your specific conditions.
+<a href="https://frigate.video/plus" target="_blank" rel="nofollow">Frigate+</a> offers models trained on images submitted by Frigate+ users from their security cameras and is specifically designed for the way Frigate NVR analyzes video footage. These models offer higher accuracy with less resources. The images you upload are used to fine tune a base model trained from images uploaded by all Frigate+ users. This fine tuning process results in a model that is optimized for accuracy in your specific conditions.
 
-:::info
-
-The baseline model isn't directly available after subscribing. This may change in the future, but for now you will need to submit a model request with the minimum number of images.
-
-:::
-
-With a subscription, 12 model trainings per year are included. If you cancel your subscription, you will retain access to any trained models. An active subscription is required to submit model requests or purchase additional trainings.
+With a subscription, 12 model trainings to fine tune your model per year are included. In addition, you will have access to any base models published while your subscription is active. If you cancel your subscription, you will retain access to any trained and base models in your account. An active subscription is required to submit model requests or purchase additional trainings. New base models are published quarterly with target dates of January 15th, April 15th, July 15th, and October 15th.
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
@@ -19,7 +13,7 @@ Information on how to integrate Frigate+ with Frigate can be found in the [integ
 
 There are two model types offered in Frigate+, `mobiledet` and `yolonas`. Both of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
 
-Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types).
+Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
 
 | Model Type  | Description                                                                                                                                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -36,19 +30,27 @@ Using Frigate+ models with `onnx` is only available with Frigate 0.15 and later.
 
 :::
 
-| Hardware                                                                                                                     | Recommended Detector Type | Recommended Model Type |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
-| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)                                                       | `cpu`                     | `mobiledet`            |
-| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector)                                             | `edgetpu`                 | `mobiledet`            |
-| [Intel](/configuration/object_detectors.md#openvino-detector)                                                                | `openvino`                | `yolonas`              |
-| [NVidia GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#onnx)\*                   | `onnx`                    | `yolonas`              |
-| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `onnx`                    | `yolonas`              |
+| Hardware                                                                         | Recommended Detector Type | Recommended Model Type |
+| -------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)           | `cpu`                     | `mobiledet`            |
+| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector) | `edgetpu`                 | `mobiledet`            |
+| [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                | `yolonas`              |
+| [NVidia GPU](/configuration/object_detectors#onnx)\*                             | `onnx`                    | `yolonas`              |
+| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)\*           | `rocm`                    | `yolonas`              |
 
 _\* Requires Frigate 0.15_
 
+## Improving your model
+
+Some users may find that Frigate+ models result in more false positives initially, but by submitting true and false positives, the model will improve. With all the new images now being submitted by subscribers, future base models will improve as more and more examples are incorporated. Note that only images with at least one verified label will be used when training your model. Submitting an image from Frigate as a true or false positive will not verify the image. You still must verify the image in Frigate+ in order for it to be used in training.
+
+- **Submit both true positives and false positives**. This will help the model differentiate between what is and isn't correct. You should aim for a target of 80% true positive submissions and 20% false positives across all of your images. If you are experiencing false positives in a specific area, submitting true positives for any object type near that area in similar lighting conditions will help teach the model what that area looks like when no objects are present.
+- **Lower your thresholds a little in order to generate more false/true positives near the threshold value**. For example, if you have some false positives that are scoring at 68% and some true positives scoring at 72%, you can try lowering your threshold to 65% and submitting both true and false positives within that range. This will help the model learn and widen the gap between true and false positive scores.
+- **Submit diverse images**. For the best results, you should provide at least 100 verified images per camera. Keep in mind that varying conditions should be included. You will want images from cloudy days, sunny days, dawn, dusk, and night. As circumstances change, you may need to submit new examples to address new types of false positives. For example, the change from summer days to snowy winter days or other changes such as a new grill or patio furniture may require additional examples and training.
+
 ## Available label types
 
-Frigate+ models support a more relevant set of objects for security cameras. Currently, the following objects are supported:
+Frigate+ models support a more relevant set of objects for security cameras. The labels for annotation in Frigate+ are configurable by editing the camera in the Cameras section of Frigate+. Currently, the following objects are supported:
 
 - **People**: `person`, `face`
 - **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `license_plate`
@@ -57,6 +59,16 @@ Frigate+ models support a more relevant set of objects for security cameras. Cur
 - **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`
 
 Other object types available in the default Frigate model are not available. Additional object types will be added in future releases.
+
+### Candidate labels
+
+Candidate labels are also available for annotation. These labels don't have enough data to be included in the model yet, but using them will help add support sooner. You can enable these labels by editing the camera settings.
+
+Where possible, these labels are mapped to existing labels during training. For example, any `baby` labels are mapped to `person` until support for new labels is added.
+
+The candidate labels are: `baby`, `royal mail`, `canada post`, `bpost`, `skunk`, `badger`, `possum`, `rodent`, `kangaroo`, `chicken`, `groundhog`, `boar`, `hedgehog`, `school bus`, `tractor`, `golf cart`, `garbage truck`, `bus`, `sports ball`
+
+Candidate labels are not available for automatic suggestions.
 
 ### Label attributes
 

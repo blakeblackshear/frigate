@@ -5,12 +5,13 @@ import frigateHttpApiSidebar from "./docs/integrations/api/sidebar";
 const sidebars: SidebarsConfig = {
   docs: {
     Frigate: [
-      "frigate/index",
-      "frigate/hardware",
-      "frigate/installation",
-      "frigate/camera_setup",
-      "frigate/video_pipeline",
-      "frigate/glossary",
+      'frigate/index',
+      'frigate/hardware',
+      'frigate/installation',
+      'frigate/updating',
+      'frigate/camera_setup',
+      'frigate/video_pipeline',
+      'frigate/glossary',
     ],
     Guides: [
       "guides/getting_started",
@@ -91,11 +92,11 @@ const sidebars: SidebarsConfig = {
       "configuration/metrics",
       "integrations/third_party_extensions",
     ],
-    "Frigate+": [
-      "plus/index",
-      "plus/first_model",
-      "plus/improving_model",
-      "plus/faq",
+    'Frigate+': [
+      'plus/index',
+      'plus/annotating',
+      'plus/first_model',
+      'plus/faq',
     ],
     Troubleshooting: [
       "troubleshooting/faqs",

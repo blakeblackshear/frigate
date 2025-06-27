@@ -35,6 +35,7 @@ There are many solutions available to implement reverse proxies and the communit
 * [Apache2](#apache2-reverse-proxy)
 * [Nginx](#nginx-reverse-proxy)
 * [Traefik](#traefik-reverse-proxy)
+* [Caddy](#caddy-reverse-proxy)
 
 ## Apache2 Reverse Proxy
 
@@ -117,7 +118,8 @@ server {
   set $port           8971;
 
   listen 80;
-  listen 443 ssl http2;
+  listen 443 ssl;
+  http2 on;
 
   server_name frigate.domain.com;
 }
@@ -177,3 +179,33 @@ The above configuration will create a "service" in Traefik, automatically adding
 It will also add a router, routing requests to "traefik.example.com" to your local container.
 
 Note that with this approach, you don't need to expose any ports for the Frigate instance since all traffic will be routed over the internal Docker network.
+
+## Caddy Reverse Proxy
+
+This example shows Frigate running under a subdomain with logging and a tls cert (in this case a wildcard domain cert obtained independently of caddy) handled via imports
+
+```caddy
+(logging) {
+        log {
+                output file /var/log/caddy/{args[0]}.log {
+                        roll_size 10MiB
+                        roll_keep 5
+                        roll_keep_for 10d
+                }
+                format json
+                level INFO
+        }
+}
+
+
+(tls) {
+        tls /var/lib/caddy/wildcard.YOUR_DOMAIN.TLD.fullchain.pem /var/lib/caddy/wildcard.YOUR_DOMAIN.TLD.privkey.pem
+}
+
+frigate.YOUR_DOMAIN.TLD {
+        reverse_proxy http://localhost:8971 
+        import tls
+        import logging frigate.YOUR_DOMAIN.TLD
+}
+
+```
