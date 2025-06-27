@@ -1,0 +1,86 @@
+{
+  "group": {
+    "add": "Afegir grup de càmeres",
+    "edit": "Editar grup de càmeres",
+    "delete": {
+      "label": "Eliminar grup de càmeres",
+      "confirm": {
+        "title": "Confirmar eliminació",
+        "desc": "Estàs segur que vols eliminar el grup de càmeres <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "placeholder": "Introduïu un nom…",
+      "errorMessage": {
+        "mustLeastCharacters": "El nom del grup de càmeres ha de ser de com a mínim 2 caràcters.",
+        "exists": "El nom del grup de càmeres ja existeix.",
+        "nameMustNotPeriod": "El nom del grup de càmeres no pot contenir un punt.",
+        "invalid": "Nom del grup de càmeres no vàlid."
+      },
+      "label": "Nom"
+    },
+    "cameras": {
+      "label": "Càmeres",
+      "desc": "Seleccioneu càmeres per a aquest grup."
+    },
+    "camera": {
+      "setting": {
+        "label": "Paràmetres de transmissió de la càmera",
+        "title": "Paràmetres de transmissió de {{cameraName}}",
+        "audioIsAvailable": "L'àudio està disponible per a aquesta transmissió",
+        "audioIsUnavailable": "L'audio no està disponible per a aquesta transmissió",
+        "audio": {
+          "tips": {
+            "document": "Llegir la documentació · ",
+            "title": "L'audio ha de venir de la càmera i estar configurat a go2rtc per a aquesta transmissió."
+          }
+        },
+        "streamMethod": {
+          "label": "Mètode de transmissió",
+          "method": {
+            "noStreaming": {
+              "label": "Sense transmissió",
+              "desc": "Les imatges de la càmera només s'actualitzaran una vegada per minut i no hi haurà transmissió en viu."
+            },
+            "smartStreaming": {
+              "label": "Transmissió intel·ligent (recomanat)",
+              "desc": "La transmissió intel·ligent actualitzarà la imatge de la teva càmera una vegada per minut quan no es detecti activitat per a conservar amplada de banda i recursos. Quan es detecti activitat, la imatge canviarà automàticament a una transmissió en directe."
+            },
+            "continuousStreaming": {
+              "label": "Transmissió contínua",
+              "desc": {
+                "title": "La imatge de la càmera sempre serà una transmissió en directe quan estigui visible al panell de control, tot i que no hi hagi cap activitat detectada.",
+                "warning": "La transmissió contínua pot provocar problemes d'ús elevat d'amplada de banda i rendiment. Feu servir amb precaució."
+              }
+            }
+          },
+          "placeholder": "Tria un mètode de transmissió"
+        },
+        "compatibilityMode": {
+          "label": "Mode de compatibilitat",
+          "desc": "Activeu aquesta opció només si la transmissió en directe de la càmera mostra artefactes de color i té una línia diagonal a la part dreta de la imatge."
+        },
+        "desc": "Cambia les opcions de transmissió en viu del panell de control d'aquest grup de càmeres. <em>Aquest paràmetres son específics del dispositiu/navegador.</em>",
+        "stream": "Transmissió",
+        "placeholder": "Seleccionar una transmissió"
+      }
+    },
+    "success": "El grup de càmeres ({{name}}) ha estat guardat.",
+    "icon": "Icona",
+    "label": "Grups de càmeres"
+  },
+  "debug": {
+    "options": {
+      "title": "Opcions",
+      "showOptions": "Mostra opcions",
+      "hideOptions": "Amaga opcions",
+      "label": "Paràmetres"
+    },
+    "boundingBox": "Caixa delimitadora",
+    "timestamp": "Marca temporal",
+    "zones": "Zones",
+    "mask": "Màscara",
+    "motion": "Moviment",
+    "regions": "Regions"
+  }
+}

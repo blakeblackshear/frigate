@@ -1,0 +1,11 @@
+{
+  "time": {
+    "untilForRestart": "Hingga Frigate memulai ulang.",
+    "untilRestart": "Sampai memulai ulang",
+    "ago": "{{timeAgo}} Lalu",
+    "justNow": "Sekarang",
+    "today": "Hari ini",
+    "yesterday": "Kemarin",
+    "untilForTime": "Hingga {{time}}"
+  }
+}

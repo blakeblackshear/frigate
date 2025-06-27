@@ -7,7 +7,7 @@ title: Camera Configuration
 
 Several inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
 
-A camera is enabled by default but can be temporarily disabled by using `enabled: False`. Existing tracked objects and recordings can still be accessed. Live streams, recording and detecting are not working. Camera specific configurations will be used.
+A camera is enabled by default but can be disabled by using `enabled: False`. Cameras that are disabled through the configuration file will not appear in the Frigate UI and will not consume system resources.
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
@@ -97,8 +97,9 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest ASH21                |      ✅      |      ❌      | ONVIF service port: 80                                                                                                                          |
 | Amcrest IP4M-S2112EW-AI      |      ✅      |      ❌      | FOV relative movement not supported.                                                                                                            |
 | Amcrest IP5M-1190EW          |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                            |
+| Annke CZ504                  |      ✅      |      ✅      | Annke support provide specific firmware ([V5.7.1 build 250227](https://github.com/pierrepinon/annke_cz504/raw/refs/heads/main/digicap_V5-7-1_build_250227.dav)) to fix issue with ONVIF "TranslationSpaceFov" |
 | Ctronics PTZ                 |      ✅      |      ❌      |                                                                                                                                                 |
-| Dahua                        |      ✅      |      ✅      |                                                                                                                                                 |
+| Dahua                        |      ✅      |      ✅      | Some low-end Dahuas (lite series, among others) have been reported to not support autotracking                                                  |
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua DH-SD49825GB-HNR       |      ✅      |      ✅      |                                                                                                                                                 |
 | Dahua DH-P5AE-PV             |      ❌      |      ❌      |                                                                                                                                                 |

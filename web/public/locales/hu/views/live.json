@@ -1,0 +1,114 @@
+{
+  "twoWayTalk": {
+    "enable": "Kétirányú kommunikáció engedélyezése",
+    "disable": "Kétirányú kommunikáció tiltása"
+  },
+  "documentTitle": "Élő - Frigate",
+  "lowBandwidthMode": "Alacsony felbontású mód",
+  "documentTitle.withCamera": "{{camera}} - Élő - Frigate",
+  "cameraAudio": {
+    "disable": "Kamera hangjának kikapcsolása",
+    "enable": "Kamera hangjának bekapcsolása"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kattintson a képre a kamera középre igazításához"
+      },
+      "left": {
+        "label": "PTZ kamera balra mozgatása"
+      },
+      "up": {
+        "label": "PTZ kamera felfele mozgatása"
+      },
+      "down": {
+        "label": "PTZ kamera lefele mozgatása"
+      },
+      "right": {
+        "label": "PTZ kamera jobbra mozgatása"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ kamera közelítés"
+      },
+      "out": {
+        "label": "PTZ kamera távolodás"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kattinston a képre a PTZ kamera középre igazításához"
+      }
+    }
+  },
+  "camera": {
+    "enable": "Kamera Engedélyezése",
+    "disable": "Kamera Kikapcsolása"
+  },
+  "muteCameras": {
+    "enable": "Minden Kamera Némítása",
+    "disable": "Minden Kamera Felhangosítása"
+  },
+  "detect": {
+    "enable": "Észlelés Engedélyezése",
+    "disable": "Észlelés Kikapcsolása"
+  },
+  "recording": {
+    "enable": "Felvétel Készítés Engedélyezése",
+    "disable": "Felvétel Készítés Kikapcsolása"
+  },
+  "snapshots": {
+    "enable": "Pillanatfelvétel Engedélyezése",
+    "disable": "Pillanatfelvétel Kikapcsolása"
+  },
+  "audioDetect": {
+    "enable": "Hang Észlelés Engedélyezése",
+    "disable": "Hang Észlelés Kikapcsolása"
+  },
+  "autotracking": {
+    "enable": "Automatikus Követés Engedélyezése",
+    "disable": "Automatikus Követés Kikapcsolása"
+  },
+  "streamStats": {
+    "enable": "Adás Statisztika Mutatása",
+    "disable": "Adás Statisztika Elrejtése"
+  },
+  "manualRecording": {
+    "playInBackground": {
+      "label": "Lejátszás a háttérben",
+      "desc": "Engedélyezze ezt a lehetőséget, hogy az adás tovább folyjon amikor a lejátszó rejtve van."
+    },
+    "showStats": {
+      "label": "Statisztika Mutatása"
+    },
+    "debugView": "Hibakeresési Nézet"
+  },
+  "streamingSettings": "Adás Beállítások",
+  "notifications": "Értesítések",
+  "audio": "Hang",
+  "suspend": {
+    "forTime": "Felfüggesztés: "
+  },
+  "stream": {
+    "title": "Adás",
+    "audio": {
+      "tips": {
+        "documentation": "Olvassa el a leírást "
+      },
+      "available": "Ehhez az adáshoz hang elérhető",
+      "unavailable": "Nem elérhető hang ehhez az adáshoz"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Olvassa el a leírást ",
+      "available": "Kétirányú kommunikáció elérhető ehhez az adáshoz",
+      "unavailable": "Nem elérhető a kétirányú kommunikáció ehhez az adáshoz"
+    },
+    "lowBandwidth": {
+      "resetStream": "Adás visszaállítása"
+    },
+    "playInBackground": {
+      "label": "Lejátszás a háttérben"
+    }
+  }
+}

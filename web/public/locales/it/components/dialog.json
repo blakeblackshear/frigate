@@ -1,0 +1,126 @@
+{
+  "restart": {
+    "title": "Sei sicuro di voler riavviare Frigate?",
+    "button": "Riavvia",
+    "restarting": {
+      "title": "Frigate si sta riavviando",
+      "content": "Questa pagina si ricaricherà in {{countdown}} secondi.",
+      "button": "Forza ricarica ora"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Invia a Frigate+",
+        "desc": "Gli oggetti in posizioni che si desidera evitare non sono falsi positivi. Inviarli come falsi positivi confonderà il modello."
+      },
+      "review": {
+        "false": {
+          "label": "Non confermare questa etichetta per Frigate Plus",
+          "false_one": "Questo non è un {{label}}",
+          "false_many": "Questi non sono un {{label}}",
+          "false_other": "Questi non sono un {{label}}"
+        },
+        "true": {
+          "label": "Conferma questa etichetta per Frigate Plus",
+          "true_one": "Questo è un {{label}}",
+          "true_many": "Questi sono {{label}}",
+          "true_other": "Questi sono {{label}}"
+        },
+        "state": {
+          "submitted": "Inviato"
+        },
+        "question": {
+          "label": "Conferma questa etichetta per Frigate Plus",
+          "ask_a": "Questo oggetto è un <code>{{label}}</code>?",
+          "ask_an": "Questo oggetto è un <code>{{label}}</code>?",
+          "ask_full": "Questo oggetto è un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Visualizza in Storico"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Seleziona dalla cronologia",
+      "custom": "Personalizzato",
+      "start": {
+        "title": "Ora di inizio",
+        "label": "Seleziona l'ora di inizio"
+      },
+      "end": {
+        "title": "Ora di fine",
+        "label": "Seleziona l'ora di fine"
+      },
+      "lastHour_one": "Ultima ora",
+      "lastHour_many": "Ultime {{count}} ore",
+      "lastHour_other": "Ultime {{count}} ore"
+    },
+    "export": "Esporta",
+    "selectOrExport": "Seleziona o esporta",
+    "toast": {
+      "success": "Esportazione avviata correttamente. Visualizza il file nella cartella /exports.",
+      "error": {
+        "failed": "Impossibile avviare l'esportazione: {{error}}",
+        "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
+        "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Salva esportazione",
+      "previewExport": "Anteprima esportazione"
+    },
+    "select": "Seleziona",
+    "name": {
+      "placeholder": "Assegna un nome all'esportazione"
+    }
+  },
+  "streaming": {
+    "label": "Trasmissione",
+    "showStats": {
+      "label": "Mostra statistiche di trasmissione",
+      "desc": "Abilita questa opzione per visualizzare le statistiche della trasmissione come sovrapposizione sul flusso della telecamera."
+    },
+    "debugView": "Vista correzioni",
+    "restreaming": {
+      "disabled": "La ritrasmissione non è abilitata per questa telecamera.",
+      "desc": {
+        "title": "Imposta go2rtc per opzioni aggiuntive di visualizzazione dal vivo e audio per questa telecamera.",
+        "readTheDocumentation": "Leggi la documentazione"
+      }
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salva ricerca",
+      "overwrite": "{{searchName}} esiste già. Il salvataggio sovrascriverà il valore esistente.",
+      "desc": "Specifica un nome per questa ricerca salvata.",
+      "button": {
+        "save": {
+          "label": "Salva questa ricerca"
+        }
+      },
+      "placeholder": "Inserisci un nome per la tua ricerca",
+      "success": "La ricerca ({{searchName}}) è stata salvata."
+    }
+  },
+  "recording": {
+    "button": {
+      "export": "Esporta",
+      "markAsReviewed": "Segna come visto",
+      "deleteNow": "Elimina ora"
+    },
+    "confirmDelete": {
+      "desc": {
+        "selected": "Vuoi davvero eliminare tutti i video registrati associati a questo elemento di visto?<br /><br />Tieni premuto il tasto <em>Maiusc</em> per ignorare questa finestra di dialogo in futuro."
+      },
+      "title": "Conferma eliminazione",
+      "toast": {
+        "success": "Il filmato associato agli elementi di recensione selezionati è stato eliminato correttamente.",
+        "error": "Impossibile eliminare: {{error}}"
+      }
+    }
+  }
+}

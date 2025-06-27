@@ -1,0 +1,15 @@
+{
+  "documentTitle": {
+    "storage": "Lagringsstatistik - Frigate",
+    "general": "Allmän statistik - Frigate",
+    "cameras": "Kamerastatistik - Frigate",
+    "logs": {
+      "frigate": "Frigate loggar - Frigate"
+    }
+  },
+  "logs": {
+    "copy": {
+      "label": "Kopiera till urklipp"
+    }
+  }
+}

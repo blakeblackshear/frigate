@@ -22,6 +22,15 @@ const config: Config = {
   markdown: {
     mermaid: true,
   },
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+      }
+    },
+  },
   themeConfig: {
     announcementBar: {
       id: 'frigate_plus',
@@ -128,9 +137,19 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://github.com/blakeblackshear/frigate",
-          label: "GitHub",
-          position: "right",
+          type: 'localeDropdown',
+          position: 'right',
+          dropdownItemsAfter: [
+            {
+              label: '简体中文（社区翻译）',
+              href: 'https://docs.frigate-cn.video',
+            }
+          ]
+        },
+        {
+          href: 'https://github.com/blakeblackshear/frigate',
+          label: 'GitHub',
+          position: 'right',
         },
       ],
     },

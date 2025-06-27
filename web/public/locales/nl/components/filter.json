@@ -1,0 +1,127 @@
+{
+  "labels": {
+    "count": "{{count}} Labels",
+    "all": {
+      "short": "Labels",
+      "title": "Alle labels"
+    },
+    "label": "Labels",
+    "count_one": "{{count}} Label",
+    "count_other": "{{count}} Labels"
+  },
+  "zones": {
+    "label": "Zones",
+    "all": {
+      "title": "Alle zones",
+      "short": "Zones"
+    }
+  },
+  "dates": {
+    "all": {
+      "title": "Alle datums",
+      "short": "Datums"
+    },
+    "selectPreset": "Selecteer een voorinstelling…"
+  },
+  "features": {
+    "hasVideoClip": "Heeft een videoclip",
+    "label": "Functies",
+    "hasSnapshot": "Heeft een snapshot",
+    "submittedToFrigatePlus": {
+      "label": "Ingediend bij Frigate+",
+      "tips": "Je moet eerst filteren op gevolgde objecten met een snapshot.<br /><br />Gevolgde objecten zonder snapshot kunnen niet worden verzonden naar Frigate+."
+    }
+  },
+  "review": {
+    "showReviewed": "Toon beoordeelde items"
+  },
+  "motion": {
+    "showMotionOnly": "Alleen bewegingen weergeven"
+  },
+  "explore": {
+    "settings": {
+      "title": "Instellingen",
+      "defaultView": {
+        "title": "Standaardweergave",
+        "unfilteredGrid": "Ongefilterd overzicht",
+        "summary": "Samenvatting",
+        "desc": "Wanneer er geen filters zijn geselecteerd, wordt er een samenvatting van de meest recent gevolgde objecten per label weergegeven, of wordt er een ongefilterd overzicht weergegeven."
+      },
+      "gridColumns": {
+        "title": "Overzichtskolommen",
+        "desc": "Selecteer het aantal kolommen in het overzicht."
+      },
+      "searchSource": {
+        "options": {
+          "description": "Beschrijving",
+          "thumbnailImage": "Thumbnail afbeelding"
+        },
+        "desc": "Kies of u wilt zoeken in de thumbnails of beschrijvingen van de objecten die u volgt.",
+        "label": "Zoekbron"
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selecteer een datum om op te filteren"
+      }
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filteren op zonemasker"
+  },
+  "recognizedLicensePlates": {
+    "loadFailed": "Het laden van herkende kentekenplaten is mislukt.",
+    "placeholder": "Type om kentekens te zoeken…",
+    "title": "Herkende kentekenplaten",
+    "noLicensePlatesFound": "Geen kentekenplaten gevonden.",
+    "selectPlatesFromList": "Selecteer een of meer kentekens uit de lijst.",
+    "loading": "Herkende kentekenplaten laden…"
+  },
+  "score": "Score",
+  "sort": {
+    "scoreAsc": "Objectscore (oplopend)",
+    "dateAsc": "Datum (oplopend)",
+    "speedAsc": "Geschatte snelheid (oplopend)",
+    "label": "Sorteer",
+    "relevance": "Relevantie",
+    "dateDesc": "Datum (aflopend)",
+    "scoreDesc": "Objectscore (aflopend)",
+    "speedDesc": "Geschatte snelheid (aflopend)"
+  },
+  "cameras": {
+    "all": {
+      "title": "Alle camera's",
+      "short": "Camera's"
+    },
+    "label": "Camerafilter"
+  },
+  "subLabels": {
+    "label": "Sublabels",
+    "all": "Alle sublabels"
+  },
+  "logSettings": {
+    "loading": {
+      "title": "Bezig met laden",
+      "desc": "Wanneer u het logvenster naar beneden scrolt, worden nieuwe logs automatisch weergegeven terwijl ze worden toegevoegd."
+    },
+    "disableLogStreaming": "Logstreaming uitschakelen",
+    "allLogs": "Alle logs",
+    "label": "Filterlogniveau",
+    "filterBySeverity": "Filter logs op ernst"
+  },
+  "filter": "Filter",
+  "timeRange": "Tijdsbereik",
+  "trackedObjectDelete": {
+    "toast": {
+      "success": "Gevolgde objecten succesvol verwijderd.",
+      "error": "Het verwijderen van gevolgde objecten is mislukt: {{errorMessage}}"
+    },
+    "title": "Bevestig Verwijderen",
+    "desc": "Het verwijderen van deze {{objectLength}} gevolgde objecten verwijdert de snapshot, eventuele opgeslagen embeddings en bijbehorende levenscyclusgegevens van het object. Opgenomen videobeelden van deze objecten in de geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?<br /><br />Houd de <em>Shift</em>-toets ingedrukt om deze melding in de toekomst over te slaan."
+  },
+  "reset": {
+    "label": "Filters resetten naar standaardwaarden"
+  },
+  "more": "Meer filters",
+  "estimatedSpeed": "Geschatte snelheid ({{unit}})"
+}

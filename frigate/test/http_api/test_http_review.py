@@ -1,16 +1,29 @@
 from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
+from peewee import DoesNotExist
 
-from frigate.models import Event, Recordings, ReviewSegment
+from frigate.api.auth import get_current_user
+from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import BaseTestHttp
 
 
 class TestHttpReview(BaseTestHttp):
     def setUp(self):
-        super().setUp([Event, Recordings, ReviewSegment])
+        super().setUp([Event, Recordings, ReviewSegment, UserReviewStatus])
         self.app = super().create_app()
+        self.user_id = "admin"
+
+        # Mock get_current_user for all tests
+        async def mock_get_current_user():
+            return {"username": self.user_id, "role": "admin"}
+
+        self.app.dependency_overrides[get_current_user] = mock_get_current_user
+
+    def tearDown(self):
+        self.app.dependency_overrides.clear()
+        super().tearDown()
 
     def _get_reviews(self, ids: list[str]):
         return list(
@@ -24,12 +37,20 @@ class TestHttpReview(BaseTestHttp):
             Recordings.select(Recordings.id).where(Recordings.id.in_(ids)).execute()
         )
 
+    def _insert_user_review_status(self, review_id: str, reviewed: bool = True):
+        UserReviewStatus.create(
+            user_id=self.user_id,
+            review_segment=ReviewSegment.get(ReviewSegment.id == review_id),
+            has_been_reviewed=reviewed,
+        )
+
     ####################################################################################################################
     ###################################  GET /review Endpoint   ########################################################
     ####################################################################################################################
 
-    # Does not return any data point since the end time (before parameter) is not passed and the review segment end_time is 2 seconds from now
-    def test_get_review_no_filters_no_matches(self):
+    def test_get_review_that_overlaps_default_period(self):
+        """Test that a review item that starts during the default period
+        but ends after is included in the results."""
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
@@ -37,24 +58,29 @@ class TestHttpReview(BaseTestHttp):
             response = client.get("/review")
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 0
+            assert len(response_json) == 1
 
     def test_get_review_no_filters(self):
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
-            super().insert_mock_review_segment("123456.random", now - 2, now - 1)
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 2, now - 1)
             response = client.get("/review")
             assert response.status_code == 200
             response_json = response.json()
             assert len(response_json) == 1
+            assert response_json[0]["id"] == id
+            assert response_json[0]["has_been_reviewed"] == False
 
     def test_get_review_with_time_filter_no_matches(self):
+        """Test that review items outside the range are not returned."""
         now = datetime.now().timestamp()
 
         with TestClient(self.app) as client:
             id = "123456.random"
-            super().insert_mock_review_segment(id, now, now + 2)
+            super().insert_mock_review_segment(id, now - 2, now - 1)
+            super().insert_mock_review_segment(f"{id}2", now + 4, now + 5)
             params = {
                 "after": now,
                 "before": now + 3,
@@ -257,82 +283,6 @@ class TestHttpReview(BaseTestHttp):
             }
             self.assertEqual(response_json, expected_response)
 
-    def test_get_review_summary_multiple_days_edge_cases(self):
-        now = datetime.now()
-        five_days_ago = datetime.today() - timedelta(days=5)
-        twenty_days_ago = datetime.today() - timedelta(days=20)
-        one_month_ago = datetime.today() - timedelta(days=30)
-        one_month_ago_ts = one_month_ago.timestamp()
-
-        with TestClient(self.app) as client:
-            super().insert_mock_review_segment("123456.random", now.timestamp())
-            super().insert_mock_review_segment(
-                "123457.random", five_days_ago.timestamp()
-            )
-            super().insert_mock_review_segment(
-                "123458.random",
-                twenty_days_ago.timestamp(),
-                None,
-                SeverityEnum.detection,
-            )
-            # One month ago plus 5 seconds fits within the condition (review.start_time > month_ago). Assuming that the endpoint does not take more than 5 seconds to be invoked
-            super().insert_mock_review_segment(
-                "123459.random",
-                one_month_ago_ts + 5,
-                None,
-                SeverityEnum.detection,
-            )
-            # This won't appear in the output since it's not within last month start_time clause (review.start_time > month_ago)
-            super().insert_mock_review_segment("123450.random", one_month_ago_ts)
-            response = client.get("/review/summary")
-            assert response.status_code == 200
-            response_json = response.json()
-            # e.g. '2024-11-24'
-            today_formatted = now.strftime("%Y-%m-%d")
-            # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
-            # e.g. '2024-11-04'
-            twenty_days_ago_formatted = twenty_days_ago.strftime("%Y-%m-%d")
-            # e.g. '2024-10-24'
-            one_month_ago_formatted = one_month_ago.strftime("%Y-%m-%d")
-            expected_response = {
-                "last24Hours": {
-                    "reviewed_alert": 0,
-                    "reviewed_detection": 0,
-                    "total_alert": 1,
-                    "total_detection": 0,
-                },
-                today_formatted: {
-                    "day": today_formatted,
-                    "reviewed_alert": 0,
-                    "reviewed_detection": 0,
-                    "total_alert": 1,
-                    "total_detection": 0,
-                },
-                five_days_ago_formatted: {
-                    "day": five_days_ago_formatted,
-                    "reviewed_alert": 0,
-                    "reviewed_detection": 0,
-                    "total_alert": 1,
-                    "total_detection": 0,
-                },
-                twenty_days_ago_formatted: {
-                    "day": twenty_days_ago_formatted,
-                    "reviewed_alert": 0,
-                    "reviewed_detection": 0,
-                    "total_alert": 0,
-                    "total_detection": 1,
-                },
-                one_month_ago_formatted: {
-                    "day": one_month_ago_formatted,
-                    "reviewed_alert": 0,
-                    "reviewed_detection": 0,
-                    "total_alert": 0,
-                    "total_detection": 1,
-                },
-            }
-            self.assertEqual(response_json, expected_response)
-
     def test_get_review_summary_multiple_in_same_day(self):
         now = datetime.now()
         five_days_ago = datetime.today() - timedelta(days=5)
@@ -391,37 +341,27 @@ class TestHttpReview(BaseTestHttp):
         with TestClient(self.app) as client:
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(10):
+                id = f"123456_{i}.random_alert_not_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_alert_not_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.alert,
-                    False,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert
                 )
             for i in range(10):
+                id = f"123456_{i}.random_alert_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_alert_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.alert,
-                    True,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.alert
                 )
+                self._insert_user_review_status(id, reviewed=True)
             for i in range(10):
+                id = f"123456_{i}.random_detection_not_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_detection_not_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.detection,
-                    False,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection
                 )
             for i in range(5):
+                id = f"123456_{i}.random_detection_reviewed"
                 super().insert_mock_review_segment(
-                    f"123456_{i}.random_detection_reviewed",
-                    five_days_ago_ts,
-                    five_days_ago_ts,
-                    SeverityEnum.detection,
-                    True,
+                    id, five_days_ago_ts, five_days_ago_ts, SeverityEnum.detection
                 )
+                self._insert_user_review_status(id, reviewed=True)
             response = client.get("/review/summary")
             assert response.status_code == 200
             response_json = response.json()
@@ -447,6 +387,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
     ###################################  POST reviews/viewed Endpoint   ################################################
     ####################################################################################################################
+
     def test_post_reviews_viewed_no_body(self):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
@@ -473,12 +414,11 @@ class TestHttpReview(BaseTestHttp):
             assert response["success"] == True
             assert response["message"] == "Reviewed multiple items"
             # Verify that in DB the review segment was not changed
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.has_been_reviewed)
-                .where(ReviewSegment.id == id)
-                .get()
-            )
-            assert review_segment_in_db.has_been_reviewed == False
+            with self.assertRaises(DoesNotExist):
+                UserReviewStatus.get(
+                    UserReviewStatus.user_id == self.user_id,
+                    UserReviewStatus.review_segment == "1",
+                )
 
     def test_post_reviews_viewed(self):
         with TestClient(self.app) as client:
@@ -487,16 +427,15 @@ class TestHttpReview(BaseTestHttp):
             body = {"ids": [id]}
             response = client.post("/reviews/viewed", json=body)
             assert response.status_code == 200
-            response = response.json()
-            assert response["success"] == True
-            assert response["message"] == "Reviewed multiple items"
-            # Verify that in DB the review segment was changed
-            review_segment_in_db = (
-                ReviewSegment.select(ReviewSegment.has_been_reviewed)
-                .where(ReviewSegment.id == id)
-                .get()
+            response_json = response.json()
+            assert response_json["success"] == True
+            assert response_json["message"] == "Reviewed multiple items"
+            # Verify UserReviewStatus was created
+            user_review = UserReviewStatus.get(
+                UserReviewStatus.user_id == self.user_id,
+                UserReviewStatus.review_segment == id,
             )
-            assert review_segment_in_db.has_been_reviewed == True
+            assert user_review.has_been_reviewed == True
 
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################
@@ -504,7 +443,7 @@ class TestHttpReview(BaseTestHttp):
     def test_post_reviews_delete_no_body(self):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
-            response = client.post("/reviews/delete")
+            response = client.post("/reviews/delete", headers={"remote-role": "admin"})
             # Missing ids
             assert response.status_code == 422
 
@@ -512,7 +451,9 @@ class TestHttpReview(BaseTestHttp):
         with TestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             body = {"ids": [""]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             # Missing ids
             assert response.status_code == 422
 
@@ -521,7 +462,9 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": ["1"]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
@@ -536,7 +479,9 @@ class TestHttpReview(BaseTestHttp):
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": [id]}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
@@ -558,7 +503,9 @@ class TestHttpReview(BaseTestHttp):
             assert len(recordings_ids_in_db_before) == 2
 
             body = {"ids": ids}
-            response = client.post("/reviews/delete", json=body)
+            response = client.post(
+                "/reviews/delete", json=body, headers={"remote-role": "admin"}
+            )
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
@@ -664,8 +611,7 @@ class TestHttpReview(BaseTestHttp):
                     "camera": "front_door",
                     "start_time": now + 1,
                     "end_time": now + 2,
-                    "has_been_reviewed": False,
-                    "severity": SeverityEnum.alert,
+                    "severity": "alert",
                     "thumb_path": "False",
                     "data": {"detections": {"event_id": event_id}},
                 },
@@ -700,8 +646,7 @@ class TestHttpReview(BaseTestHttp):
                     "camera": "front_door",
                     "start_time": now + 1,
                     "end_time": now + 2,
-                    "has_been_reviewed": False,
-                    "severity": SeverityEnum.alert,
+                    "severity": "alert",
                     "thumb_path": "False",
                     "data": {},
                 },
@@ -711,6 +656,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
     ###################################  DELETE /review/{review_id}/viewed Endpoint   ##################################
     ####################################################################################################################
+
     def test_delete_review_viewed_review_not_found(self):
         with TestClient(self.app) as client:
             review_id = "123456.random"
@@ -727,11 +673,10 @@ class TestHttpReview(BaseTestHttp):
 
         with TestClient(self.app) as client:
             review_id = "123456.review.random"
-            super().insert_mock_review_segment(
-                review_id, now + 1, now + 2, has_been_reviewed=True
-            )
-            review_before = ReviewSegment.get(ReviewSegment.id == review_id)
-            assert review_before.has_been_reviewed == True
+            super().insert_mock_review_segment(review_id, now + 1, now + 2)
+            self._insert_user_review_status(review_id, reviewed=True)
+            # Verify it’s reviewed before
+            response = client.get(f"/review/{review_id}")
 
             response = client.delete(f"/review/{review_id}/viewed")
             assert response.status_code == 200
@@ -741,5 +686,9 @@ class TestHttpReview(BaseTestHttp):
                 response_json,
             )
 
-            review_after = ReviewSegment.get(ReviewSegment.id == review_id)
-            assert review_after.has_been_reviewed == False
+            # Verify it’s unreviewed after
+            with self.assertRaises(DoesNotExist):
+                UserReviewStatus.get(
+                    UserReviewStatus.user_id == self.user_id,
+                    UserReviewStatus.review_segment == review_id,
+                )

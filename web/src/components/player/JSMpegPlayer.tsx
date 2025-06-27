@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
+import { PlayerStatsType } from "@/types/live";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +13,8 @@ type JSMpegPlayerProps = {
   height: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   playbackEnabled: boolean;
+  useWebGL: boolean;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
 };
 
@@ -22,6 +25,8 @@ export default function JSMpegPlayer({
   className,
   containerRef,
   playbackEnabled,
+  useWebGL = false,
+  setStats,
   onPlaying,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
@@ -33,6 +38,9 @@ export default function JSMpegPlayer({
   const [hasData, setHasData] = useState(false);
   const hasDataRef = useRef(hasData);
   const [dimensionsReady, setDimensionsReady] = useState(false);
+  const bytesReceivedRef = useRef(0);
+  const lastTimestampRef = useRef(Date.now());
+  const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const selectedContainerRef = useMemo(
     () => (containerRef.current ? containerRef : internalContainerRef),
@@ -111,6 +119,8 @@ export default function JSMpegPlayer({
     const canvas = canvasRef.current;
     let videoElement: JSMpeg.VideoElement | null = null;
 
+    let frameCount = 0;
+
     setHasData(false);
 
     if (videoWrapper && playbackEnabled) {
@@ -123,21 +133,68 @@ export default function JSMpegPlayer({
           {
             protocols: [],
             audio: false,
-            disableGl: camera != "birdseye",
-            disableWebAssembly: camera != "birdseye",
+            disableGl: !useWebGL,
+            disableWebAssembly: !useWebGL,
             videoBufferSize: 1024 * 1024 * 4,
             onVideoDecode: () => {
               if (!hasDataRef.current) {
                 setHasData(true);
                 onPlayingRef.current?.();
               }
+              frameCount++;
             },
           },
         );
+
+        // Set up WebSocket message handler
+        if (
+          videoElement.player &&
+          videoElement.player.source &&
+          videoElement.player.source.socket
+        ) {
+          const socket = videoElement.player.source.socket;
+          socket.addEventListener("message", (event: MessageEvent) => {
+            if (event.data instanceof ArrayBuffer) {
+              bytesReceivedRef.current += event.data.byteLength;
+            }
+          });
+        }
+
+        // Update stats every second
+        statsIntervalRef.current = setInterval(() => {
+          const currentTimestamp = Date.now();
+          const timeDiff = (currentTimestamp - lastTimestampRef.current) / 1000; // in seconds
+          const bitrate = (bytesReceivedRef.current * 8) / timeDiff / 1000; // in kbps
+
+          setStats?.({
+            streamType: "jsmpeg",
+            bandwidth: Math.round(bitrate),
+            totalFrames: frameCount,
+            latency: undefined,
+            droppedFrames: undefined,
+            decodedFrames: undefined,
+            droppedFrameRate: undefined,
+          });
+
+          bytesReceivedRef.current = 0;
+          lastTimestampRef.current = currentTimestamp;
+        }, 1000);
+
+        return () => {
+          if (statsIntervalRef.current) {
+            clearInterval(statsIntervalRef.current);
+            frameCount = 0;
+            statsIntervalRef.current = null;
+          }
+        };
       }, 0);
 
       return () => {
         clearTimeout(initPlayer);
+        if (statsIntervalRef.current) {
+          clearInterval(statsIntervalRef.current);
+          statsIntervalRef.current = null;
+        }
         if (videoElement) {
           try {
             // this causes issues in react strict mode

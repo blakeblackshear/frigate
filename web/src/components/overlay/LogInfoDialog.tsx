@@ -17,6 +17,8 @@ import {
 import { LogChip } from "../indicators/Chip";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type LogInfoDialogProps = {
   logLine?: LogLine;
@@ -26,6 +28,7 @@ export default function LogInfoDialog({
   logLine,
   setLogLine,
 }: LogInfoDialogProps) {
+  const { t } = useTranslation(["views/system"]);
   const Overlay = isDesktop ? Sheet : Drawer;
   const Content = isDesktop ? SheetContent : DrawerContent;
   const Header = isDesktop ? SheetHeader : DrawerHeader;
@@ -53,20 +56,35 @@ export default function LogInfoDialog({
         {logLine && (
           <div className="flex size-full flex-col gap-5">
             <div className="flex w-min flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Type</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.label")}
+              </div>
               <LogChip severity={logLine.severity} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Timestamp</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.timestamp")}
+              </div>
               <div className="text-sm">{logLine.dateStamp}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Tag</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.tag")}
+              </div>
               <div className="text-sm">{logLine.section}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">Message</div>
-              <div className="text-sm">{logLine.content}</div>
+              <div className="text-sm text-primary/40">
+                {t("logs.type.message")}
+              </div>
+              <div className="text-sm">
+                {logLine.content.split("\n").map((line) => (
+                  <>
+                    {line}
+                    <br />
+                  </>
+                ))}
+              </div>
             </div>
             {helpfulLinks.length > 0 && (
               <div className="flex flex-col gap-1.5">
@@ -88,23 +106,25 @@ export default function LogInfoDialog({
 }
 
 function useHelpfulLinks(content: string | undefined) {
+  const { getLocaleDocUrl } = useDocDomain();
   return useMemo(() => {
     if (!content) {
       return [];
     }
 
     const links = [];
-
     if (/Could not clear [\d.]* currently [\d.]*/.exec(content)) {
       links.push({
-        link: "https://docs.frigate.video/configuration/record#will-frigate-delete-old-recordings-if-my-storage-runs-out",
+        link: getLocaleDocUrl(
+          "configuration/record#will-frigate-delete-old-recordings-if-my-storage-runs-out",
+        ),
         text: "Frigate Automatic Storage Cleanup",
       });
     }
 
     if (/Did not detect hwaccel/.exec(content)) {
       links.push({
-        link: "https://docs.frigate.video/configuration/hardware_acceleration",
+        link: getLocaleDocUrl("configuration/hardware_acceleration"),
         text: "Setup Hardware Acceleration",
       });
     }
@@ -122,25 +142,27 @@ function useHelpfulLinks(content: string | undefined) {
       content.includes("No VA display found for device /dev/dri/renderD128")
     ) {
       links.push({
-        link: "https://docs.frigate.video/configuration/hardware_acceleration",
+        link: getLocaleDocUrl("configuration/hardware_acceleration"),
         text: "Verify Hardware Acceleration Setup",
       });
     }
 
     if (content.includes("No EdgeTPU was detected")) {
       links.push({
-        link: "https://docs.frigate.video/troubleshooting/edgetpu",
+        link: getLocaleDocUrl("troubleshooting/edgetpu"),
         text: "Troubleshoot Coral",
       });
     }
 
     if (content.includes("The current SHM size of")) {
       links.push({
-        link: "https://docs.frigate.video/frigate/installation/#calculating-required-shm-size",
+        link: getLocaleDocUrl(
+          "frigate/installation/#calculating-required-shm-size",
+        ),
         text: "Calculate Correct SHM Size",
       });
     }
 
     return links;
-  }, [content]);
+  }, [content, getLocaleDocUrl]);
 }

@@ -1,0 +1,74 @@
+{
+  "savedSearches": "Gespeicherte Suchen",
+  "searchFor": "Suche nach {{inputValue}}",
+  "button": {
+    "save": "Suche speichern",
+    "filterActive": "Filter aktiv",
+    "delete": "Gespeicherte Suche löschen",
+    "filterInformation": "Information filtern",
+    "clear": "Suche löschen"
+  },
+  "trackedObjectId": "ID verfolgtes Objekt",
+  "filter": {
+    "label": {
+      "cameras": "Kameras",
+      "zones": "Zonen",
+      "search_type": "Suchtyp",
+      "before": "Vor",
+      "after": "Nach",
+      "min_score": "Minimalwert",
+      "max_score": "Maximalwert",
+      "recognized_license_plate": "Erkanntes Autokennzeichen",
+      "has_clip": "Clip vorhanden",
+      "has_snapshot": "Schnappschuss vorhanden",
+      "min_speed": "Minimalgeschwindigkeit",
+      "max_speed": "Maximalgeschwindigkeit",
+      "time_range": "Zeitraum",
+      "labels": "Labels",
+      "sub_labels": "Unterlabels"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Das \"Vor\" Datum muss später als das \"Nach\" Datum sein.",
+        "minScoreMustBeLessOrEqualMaxScore": "Der \"Minimalwert\" muss kleiner oder gleich dem \"Maximalwert\" sein.",
+        "afterDatebeEarlierBefore": "Das \"Nach\" Datum muss früher als das \"Vor\" Datum sein.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Der \"Maximalwert\" muss größer oder gleich dem \"Minimalwert\" sein.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Der \"Minimalgeschwindigkeit\" muss kleiner oder gleich der \"Maximalgeschwindigkeit\" sein.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Der \"Maximalgeschwindigkeit\" muss größer oder gleich der \"Maximalgeschwindigkeit\" sein."
+      }
+    },
+    "header": {
+      "currentFilterType": "Filterwerte",
+      "noFilters": "Filter",
+      "activeFilters": "Aktive Filter"
+    },
+    "tips": {
+      "desc": {
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Gib einen Filternamen gefolgt von einem Doppelpunkt ein (z.B. \"Kameras:\").</li><li>Wähle einen Wert aus den Vorschlägen aus oder tippe einen individuellen ein.</li><li> Verwende mehrere Filter, indem Du sie nacheinander mit Leerzeichen getrennt eingibst.</li><li>Datumfilter (Vor: und Nach:) im Format <em>{{DateFormat}}</em>.</li><li>Zeitraumfilter im Format <em>{{exampleTime}}</em>.</li><li>Lösche Filter durch Drücken des \"x\" daneben.</li></ul>",
+        "text": "Mit Filtern kannst Du Suchergebnisse eingrenzen. Hier erfährst Du, wie diese im Eingabefeld verwendet werden können:",
+        "example": "Beispiel: <code className=\"text-primary\">Kameras:Tor Label:Person Vor:01012024 Zeitraum:15:00-16:00</code>",
+        "step3": "Verwende mehrere Filter, indem du sie nacheinander mit einem Leerzeichen dazwischen hinzufügst.",
+        "step2": "Wähle einen Wert aus den Vorschlägen aus oder gib einen eigenen ein.",
+        "step1": "Gib einen Filter-Schlüssel ein, gefolgt von einem Doppelpunkt (z.B. „kameras:“).",
+        "exampleLabel": "Beispiel:",
+        "step6": "Entferne Filter, indem du auf das „x“ daneben klickst.",
+        "step4": "Datumsfilter (bevor: und nach:) verwenden das Format {{DateFormat}}.",
+        "step5": "Der Zeitbereichsfilter verwendet das Format {{exampleTime}}."
+      },
+      "title": "Wie man Textfilter verwendet"
+    },
+    "searchType": {
+      "thumbnail": "Miniaturansicht",
+      "description": "Beschreibung"
+    }
+  },
+  "similaritySearch": {
+    "title": "Ähnlichkeitssuche",
+    "clear": "Ähnlichkeitssuche löschen",
+    "active": "Aktive Ähnlichkeitssuche"
+  },
+  "search": "Suche",
+  "placeholder": {
+    "search": "Suchen…"
+  }
+}

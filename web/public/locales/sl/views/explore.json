@@ -1,0 +1,73 @@
+{
+  "exploreIsUnavailable": {
+    "title": "Funkcija razišči ni na voljo",
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "Model vida"
+      },
+      "context": "Frigate prenaša potrebne modele vdelave za podporo funkcije semantičnega iskanja. To lahko traja nekaj minut, odvisno od hitrosti vaše omrežne povezave."
+    },
+    "embeddingsReindexing": {
+      "step": {
+        "descriptionsEmbedded": "Vdelani opisi: ",
+        "trackedObjectsProcessed": "Obdelani sledeni predmeti: "
+      }
+    }
+  },
+  "documentTitle": "Razišči - Frigate",
+  "generativeAI": "Generativna UI",
+  "exploreMore": "Razišči več {{label}} objektov",
+  "details": {
+    "button": {
+      "regenerate": {
+        "label": "Regeneriraj opise sledenih predmetov",
+        "title": "Regeneriraj"
+      },
+      "findSimilar": "Najdi podobno"
+    },
+    "camera": "Kamera",
+    "estimatedSpeed": "Ocenjena hitrost",
+    "description": {
+      "placeholder": "Opis sledenega predmeta",
+      "label": "Opis"
+    },
+    "recognizedLicensePlate": "Prepoznana registrska tablica",
+    "objects": "Predmeti",
+    "zones": "Območja",
+    "timestamp": "Časovni žig"
+  },
+  "itemMenu": {
+    "findSimilar": {
+      "aria": "Najdi podobne sledene predmete",
+      "label": "Najdi podobno"
+    },
+    "submitToPlus": {
+      "label": "Predloži v Frigate+",
+      "aria": "Predloži v Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Poglej v zgodovini",
+      "aria": "Poglej v zgodovini"
+    },
+    "deleteTrackedObject": {
+      "label": "Izbriši ta sledeni predmet"
+    },
+    "viewObjectLifecycle": {
+      "aria": "Pokaži življenjski cikel predmeta",
+      "label": "Poglej življenjski cikel predmeta"
+    },
+    "downloadVideo": {
+      "label": "Prenesi video",
+      "aria": "Prenesi video"
+    },
+    "downloadSnapshot": {
+      "label": "Prenesi posnetek",
+      "aria": "Prenesi posnetek"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Potrdi brisanje"
+    }
+  }
+}

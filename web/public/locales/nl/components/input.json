@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Video downloaden",
+      "toast": {
+        "success": "Het downloaden van uw beoordelingsvideo is gestart."
+      }
+    }
+  }
+}

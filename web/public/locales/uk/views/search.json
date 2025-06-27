@@ -1,0 +1,72 @@
+{
+  "search": "Пошук",
+  "filter": {
+    "tips": {
+      "desc": {
+        "step1": "Введіть назву ключа фільтра, а потім двокрапку (наприклад, «камери:»).",
+        "step2": "Виберіть значення з пропозицій або введіть своє.",
+        "step3": "Використовуйте кілька фільтрів, додаючи їх один за одним з проміжком між ними.",
+        "step5": "Фільтр діапазону часу використовує формат {{exampleTime}}.",
+        "step6": "Видалити фільтри, натиснувши 'x' поруч з ними.",
+        "exampleLabel": "Наприклад:",
+        "step4": "Фільтри дат (до: і після:) використовують формат {{DateFormat}}.",
+        "text": "Фільтри допомагають звузити результати пошуку. Ось як використовувати їх у полі вводу:"
+      },
+      "title": "Як використовувати текстові фільтри"
+    },
+    "header": {
+      "currentFilterType": "Фільтрувати значення",
+      "activeFilters": "Активнi фiльтри",
+      "noFilters": "Фiлтри"
+    },
+    "label": {
+      "zones": "Зони",
+      "sub_labels": "Суб-меткi",
+      "search_type": "Тип пошуку",
+      "cameras": "Камери",
+      "labels": "Етикеткi",
+      "time_range": "Часовий діапазон",
+      "before": "Перед",
+      "after": "Пiсля",
+      "min_score": "Мінімальний бал",
+      "max_score": "Найвищий бал",
+      "min_speed": "Мінімальна швидкість",
+      "max_speed": "Максимальна швидкість",
+      "recognized_license_plate": "Розпізнаний номерний знак",
+      "has_clip": "Має клiп",
+      "has_snapshot": "Має знiмок"
+    },
+    "searchType": {
+      "thumbnail": "Мініатюра",
+      "description": "Опис"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Дата 'до' повинна бути пізнішою, ніж дата 'після'.",
+        "afterDatebeEarlierBefore": "Дата 'після' повинна бути раніше, ніж дата 'до'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Значення 'min_score' має бути меншим або дорівнювати 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Значення 'max_score' має бути більшим або дорівнювати 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Значення 'min_speed' має бути меншим або дорівнювати 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Значення 'max_speed' має бути більшим або дорівнювати 'min_speed'."
+      }
+    }
+  },
+  "similaritySearch": {
+    "title": "Пошук подібності",
+    "active": "Активнi пошук подібності",
+    "clear": "Очистити пошук подібності"
+  },
+  "placeholder": {
+    "search": "Пошук…"
+  },
+  "button": {
+    "save": "Зберігати пошук",
+    "delete": "Видалити збережений пошук",
+    "filterInformation": "Фільтрувати інформацію",
+    "clear": "Очистити пошук",
+    "filterActive": "Активни фільтри"
+  },
+  "savedSearches": "Збережені пошуки",
+  "searchFor": "Пошук да {{inputValue}}",
+  "trackedObjectId": "Iдентифікатори об'єктів"
+}

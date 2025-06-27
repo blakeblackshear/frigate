@@ -1,0 +1,38 @@
+{
+  "detections": "Detektioner",
+  "alerts": "Varningar",
+  "motion": {
+    "label": "Rörelse",
+    "only": "Endast rörelse"
+  },
+  "allCameras": "Alla kameror",
+  "empty": {
+    "alert": "Det finns inga varningar att granska",
+    "detection": "Det finns inga detekteringar att granska",
+    "motion": "Ingen rörelsedata hittad"
+  },
+  "documentTitle": "Granska - Frigate",
+  "timeline": "Tidslinje",
+  "events": {
+    "noFoundForTimePeriod": "Inga hädelser hittade för denna tidsperiod.",
+    "aria": "Välj händelse",
+    "label": "Händelse"
+  },
+  "recordings": {
+    "documentTitle": "Inspelningar - Frigate"
+  },
+  "newReviewItems": {
+    "label": "Visa nya objekt att granska",
+    "button": "Nya objekt att granska"
+  },
+  "markAsReviewed": "Markera som granskad",
+  "calendarFilter": {
+    "last24Hours": "Senaste 24 timmarna"
+  },
+  "timeline.aria": "Välj tidslinje",
+  "camera": "Kamera",
+  "markTheseItemsAsReviewed": "Markera dessa objekt som granskade",
+  "detected": "upptäckt",
+  "selected_one": "{{count}} valda",
+  "selected_other": "{{count}} valda"
+}

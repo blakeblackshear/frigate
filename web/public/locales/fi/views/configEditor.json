@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Frigaten konfiguraatioeditori",
+  "confirm": "Poistu tallentamatta?",
+  "saveOnly": "Vain tallennus",
+  "toast": {
+    "error": {
+      "savingError": "Virhe tallennettaessa konfiguraatiota"
+    },
+    "success": {
+      "copyToClipboard": "Konfiguraatio kopioitu leikepöydälle."
+    }
+  },
+  "configEditor": "Konfiguraatioeditori",
+  "copyConfig": "Kopioi konfiguraatio",
+  "saveAndRestart": "Tallenna & uudelleenkäynnistä"
+}

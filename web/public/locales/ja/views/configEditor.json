@@ -1,0 +1,7 @@
+{
+  "copyConfig": "設定をコピー",
+  "configEditor": "Configエディタ",
+  "saveAndRestart": "保存後再起動",
+  "saveOnly": "保存",
+  "confirm": "保存せずに終了しますか？"
+}

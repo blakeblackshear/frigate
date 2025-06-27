@@ -10,6 +10,7 @@ from pydantic import Json
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
+from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -73,19 +74,19 @@ class BaseTestHttp(unittest.TestCase):
                         "total": 67.1,
                         "used": 16.6,
                     },
-                    "/media/frigate/clips": {
+                    os.path.join(BASE_DIR, "clips"): {
                         "free": 42429.9,
                         "mount_type": "ext4",
                         "total": 244529.7,
                         "used": 189607.0,
                     },
-                    "/media/frigate/recordings": {
+                    os.path.join(BASE_DIR, "recordings"): {
                         "free": 0.2,
                         "mount_type": "ext4",
                         "total": 8.0,
                         "used": 7.8,
                     },
-                    "/tmp/cache": {
+                    CACHE_DIR: {
                         "free": 976.8,
                         "mount_type": "tmpfs",
                         "total": 1000.0,
@@ -112,7 +113,6 @@ class BaseTestHttp(unittest.TestCase):
         return create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
-            None,
             None,
             None,
             None,
@@ -157,16 +157,14 @@ class BaseTestHttp(unittest.TestCase):
         start_time: float = datetime.datetime.now().timestamp(),
         end_time: float = datetime.datetime.now().timestamp() + 20,
         severity: SeverityEnum = SeverityEnum.alert,
-        has_been_reviewed: bool = False,
         data: Json = {},
-    ) -> Event:
+    ) -> ReviewSegment:
         """Inserts a review segment model with a given id."""
         return ReviewSegment.insert(
             id=id,
             camera="front_door",
             start_time=start_time,
             end_time=end_time,
-            has_been_reviewed=has_been_reviewed,
             severity=severity,
             thumb_path=False,
             data=data,

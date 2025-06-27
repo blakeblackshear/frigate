@@ -1,0 +1,17 @@
+{
+  "search": "Szukaj",
+  "documentTitle": "Eksportuj - Frigate",
+  "noExports": "Nie znaleziono eksportów",
+  "deleteExport": "Usuń eksport",
+  "deleteExport.desc": "Czy na pewno chcesz usunąć {{exportName}}?",
+  "editExport": {
+    "title": "Zmień nazwę eksportu",
+    "desc": "Wprowadź nową nazwę dla tego eksportu.",
+    "saveExport": "Zapisz eksport"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Nie udało się zmienić nazwy eksportu: {{errorMessage}}"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "noRecordingsFoundForThisTime": "Ebben az időpontban nem található felvétel",
+  "noPreviewFound": "Nincs elérhető előkép",
+  "submitFrigatePlus": {
+    "title": "Elküldi ezt a képet a Frigate+-nak?",
+    "submit": "Küldés"
+  },
+  "noPreviewFoundFor": "Nem található előnézet {{cameraName}}-hoz/-hez/-höz",
+  "livePlayerRequiredIOSVersion": "iOS 17.1 vagy újabb szükséges ehhez az élő adás típushoz.",
+  "streamOffline": {
+    "title": "Adás Nem Elérhető"
+  },
+  "cameraDisabled": "Kamera kikapcsolva"
+}

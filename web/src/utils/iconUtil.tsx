@@ -26,13 +26,15 @@ import {
   GiDeer,
   GiFox,
   GiGoat,
+  GiKangaroo,
   GiPolarBear,
   GiPostStamp,
   GiRabbit,
   GiRaccoonHead,
   GiSailboat,
+  GiSquirrel,
 } from "react-icons/gi";
-import { LuBox, LuLassoSelect } from "react-icons/lu";
+import { LuBox, LuLassoSelect, LuScanBarcode } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
 import { PiBirdFill } from "react-icons/pi";
@@ -57,6 +59,8 @@ export function isValidIconName(value: string): value is IconName {
 export function getIconForLabel(label: string, className?: string) {
   if (label.endsWith("-verified")) {
     return getVerifiedIcon(label, className);
+  } else if (label.endsWith("-plate")) {
+    return getRecognizedPlateIcon(label, className);
   }
 
   switch (label) {
@@ -70,6 +74,7 @@ export function getIconForLabel(label: string, className?: string) {
     case "boat":
       return <GiSailboat key={label} className={className} />;
     case "bus":
+    case "school_bus":
       return <FaBus key={label} className={className} />;
     case "car":
     case "vehicle":
@@ -88,6 +93,10 @@ export function getIconForLabel(label: string, className?: string) {
       return <GiGoat key={label} className={className} />;
     case "horse":
       return <FaHorse key={label} className={className} />;
+    case "kangaroo":
+      return <GiKangaroo key={label} className={className} />;
+    case "license_plate":
+      return <LuScanBarcode key={label} className={className} />;
     case "motorcycle":
       return <FaMotorcycle key={label} className={className} />;
     case "mouse":
@@ -104,6 +113,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <FaHockeyPuck key={label} className={className} />;
     case "sports_ball":
       return <FaFootballBall key={label} className={className} />;
+    case "skunk":
+      return <GiSquirrel key={label} className={className} />;
     case "squirrel":
       return <LuIcons.LuSquirrel key={label} className={className} />;
     case "umbrella":
@@ -123,12 +134,14 @@ export function getIconForLabel(label: string, className?: string) {
     case "amazon":
       return <FaAmazon key={label} className={className} />;
     case "an_post":
+    case "canada_post":
     case "dpd":
     case "gls":
     case "nzpost":
     case "postnl":
     case "postnord":
     case "purolator":
+    case "royal_mail":
       return <GiPostStamp key={label} className={className} />;
     case "dhl":
       return <FaDhl key={label} className={className} />;
@@ -150,6 +163,17 @@ function getVerifiedIcon(label: string, className?: string) {
     <div key={label} className="flex items-center">
       {getIconForLabel(simpleLabel, className)}
       <FaCheckCircle className="absolute size-2 translate-x-[80%] translate-y-3/4" />
+    </div>
+  );
+}
+
+function getRecognizedPlateIcon(label: string, className?: string) {
+  const simpleLabel = label.substring(0, label.lastIndexOf("-"));
+
+  return (
+    <div key={label} className="flex items-center">
+      {getIconForLabel(simpleLabel, className)}
+      <LuScanBarcode className="absolute size-2.5 translate-x-[50%] translate-y-3/4" />
     </div>
   );
 }

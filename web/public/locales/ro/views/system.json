@@ -1,0 +1,73 @@
+{
+  "documentTitle": {
+    "storage": "Statistici Stocare - Frigate",
+    "cameras": "Statistici Camere - Frigate",
+    "general": "Statistici Generale - Frigate",
+    "logs": {
+      "go2rtc": "Jurnal Go2RTC - Frigate",
+      "nginx": "Jurnal Nginx - Frigate",
+      "frigate": "Jurnal Frigate - Frigate"
+    },
+    "enrichments": "Statistici îmbogățire - Frigate"
+  },
+  "general": {
+    "hardwareInfo": {
+      "npuUsage": "Utilizare NPU",
+      "npuMemory": "Memorie NPU",
+      "gpuUsage": "Utilizare GPU",
+      "gpuMemory": "Utilizare Memorie",
+      "title": "Informații hardware",
+      "gpuEncoder": "Codificator GPU",
+      "gpuDecoder": "Decodificator GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "returnCode": "Cod de retur: {{code}}",
+          "processOutput": "Rezultatul procesului:",
+          "title": "Rezultat vainfo"
+        }
+      }
+    },
+    "detector": {
+      "temperature": "Temperatura Detectorului",
+      "title": "Detectori",
+      "cpuUsage": "Utilizarea procesorului detectorului",
+      "inferenceSpeed": "Viteza inferenței detectorului",
+      "memoryUsage": "Utilizare memorie detector"
+    },
+    "otherProcesses": {
+      "title": "Alte Procese"
+    },
+    "title": "General"
+  },
+  "storage": {
+    "recordings": {
+      "title": "Înregistrări"
+    },
+    "title": "Stocare"
+  },
+  "title": "Sistem",
+  "logs": {
+    "download": {
+      "label": "Jurnal Descărcări"
+    },
+    "copy": {
+      "label": "Copiați în Clipboard",
+      "success": "Copiați jurnal în Clipboard",
+      "error": "Nu se poate copia jurnalul în Clipboard"
+    },
+    "type": {
+      "label": "Tip",
+      "timestamp": "Marca temporală",
+      "tag": "Etichetă",
+      "message": "Mesaj"
+    },
+    "tips": "Jurnalele se transmit de pe server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Eroare la preluarea jurnalelor: {{errorMessage}}",
+        "whileStreamingLogs": "Eroare la transmiterea jurnalelor: {{errorMessage}}"
+      }
+    }
+  },
+  "metrics": "Date Sistem"
+}

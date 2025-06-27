@@ -1,0 +1,111 @@
+{
+  "time": {
+    "untilForTime": "Do {{time}}",
+    "untilRestart": "Do ponovnega zagona",
+    "ago": "{{timeAgo}} nazaj",
+    "justNow": "Zdaj",
+    "untilForRestart": "Dokler se Frigate ne zažene ponovno.",
+    "thisWeek": "Ta teden",
+    "lastWeek": "Prejšnji teden",
+    "thisMonth": "Ta mesec",
+    "year_one": "{{time}} leto",
+    "year_two": "{{time}} leti",
+    "year_few": "{{time}} leta",
+    "year_other": "{{time}} let",
+    "second_one": "{{time}} sekunda",
+    "second_two": "{{time}} sekundi",
+    "second_few": "{{time}} sekunde",
+    "second_other": "{{time}} sekund",
+    "month_one": "{{time}} mesec",
+    "month_two": "{{time}} meseca",
+    "month_few": "{{time}} meseci",
+    "month_other": "{{time}} mesecev",
+    "day_one": "{{time}} dan",
+    "day_two": "{{time}} dneva",
+    "day_few": "{{time}} dnevi",
+    "day_other": "{{time}} dni",
+    "hour_one": "{{time}} ura",
+    "hour_two": "{{time}} uri",
+    "hour_few": "{{time}} ure",
+    "hour_other": "{{time}} ur",
+    "minute_one": "{{time}} minuta",
+    "minute_two": "{{time}} minuti",
+    "minute_few": "{{time}} minute",
+    "minute_other": "{{time}} minut",
+    "10minutes": "10 minut",
+    "lastMonth": "Prejšnji mesec",
+    "5minutes": "5 minut",
+    "today": "Danes",
+    "yesterday": "Včeraj",
+    "last7": "Zadnjih 7 dni",
+    "last14": "Zadnjih 14 dni",
+    "last30": "Zadnjih 30 dni",
+    "1hour": "1 ura",
+    "12hours": "12 ur",
+    "24hours": "24 ur",
+    "30minutes": "30 minut",
+    "am": "am",
+    "pm": "pm",
+    "mo": "{{time}}mes",
+    "d": "{{time}}d",
+    "h": "{{time}}h",
+    "m": "{{time}}m",
+    "s": "{{time}}s",
+    "yr": "le"
+  },
+  "menu": {
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} kamera",
+        "count_two": "{{count}} kameri",
+        "count_few": "{{count}} kamere",
+        "count_other": "{{count}} kamer",
+        "title": "Kamere"
+      },
+      "allCameras": "Vse Kamere",
+      "title": "V Živo"
+    },
+    "explore": "Brskanje",
+    "theme": {
+      "nord": "Nord"
+    },
+    "review": "Pregled"
+  },
+  "button": {
+    "apply": "Uporabi",
+    "reset": "Ponastavi",
+    "done": "Končano",
+    "disable": "Izklopi",
+    "close": "Zapri",
+    "back": "Nazaj",
+    "pictureInPicture": "Slika v Sliki",
+    "history": "Zgodovina",
+    "disabled": "Izklopljeno",
+    "copy": "Kopiraj",
+    "exitFullscreen": "Izhod iz Celozaslonskega načina",
+    "enabled": "Omogočen",
+    "enable": "Vklopi",
+    "save": "Shrani",
+    "saving": "Shranjevanje …",
+    "cancel": "Prekliči",
+    "fullscreen": "Celozaslonski način"
+  },
+  "unit": {
+    "speed": {
+      "kph": "km/h",
+      "mph": "mi/h"
+    },
+    "length": {
+      "feet": "čevelj",
+      "meters": "metri"
+    }
+  },
+  "label": {
+    "back": "Pojdi nazaj"
+  },
+  "pagination": {
+    "next": {
+      "label": "Pojdi na naslednjo stran"
+    }
+  }
+}

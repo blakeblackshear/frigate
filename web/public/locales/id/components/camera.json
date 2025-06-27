@@ -1,0 +1,17 @@
+{
+  "group": {
+    "label": "Grup Kamera",
+    "add": "Tambah Grup Kamera",
+    "edit": "Edit Grup kamera",
+    "delete": {
+      "label": "Hapus Grup Kamera",
+      "confirm": {
+        "title": "Yakin Hapus",
+        "desc": "Apakah Anda yakin ingin menghapus grup kamera <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nama"
+    }
+  }
+}

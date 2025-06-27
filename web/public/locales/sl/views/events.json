@@ -1,0 +1,38 @@
+{
+  "detected": "zaznanih",
+  "events": {
+    "noFoundForTimePeriod": "Za to časovno obdobje ni bilo najdenih dogodkov.",
+    "label": "Dogodki",
+    "aria": "Izberi dogodke"
+  },
+  "allCameras": "Vse kamere",
+  "empty": {
+    "motion": "Ni najdenih podatkov o gibanju",
+    "alert": "Ni opozoril za pregled",
+    "detection": "Ni zaznanih elementov za pregled"
+  },
+  "recordings": {
+    "documentTitle": "Posnetki - Frigate"
+  },
+  "camera": "Kamera",
+  "documentTitle": "Pregled - Frigate",
+  "alerts": "Opozorila",
+  "detections": "Zaznavanja",
+  "motion": {
+    "label": "Premik",
+    "only": "Samo premik"
+  },
+  "timeline": "Časovnica",
+  "timeline.aria": "Izberi časovnico",
+  "calendarFilter": {
+    "last24Hours": "Zadnjih 24 ur"
+  },
+  "markAsReviewed": "Označi kot Pregledano",
+  "markTheseItemsAsReviewed": "Označi te elemente kot pregledane",
+  "newReviewItems": {
+    "label": "Ogled novih elementov za pregled",
+    "button": "Novi elementi za pregled"
+  },
+  "selected_one": "{{count}} izbranih",
+  "selected_other": "{{count}} izbranih"
+}

@@ -59,7 +59,11 @@ Message published for each changed tracked object. The first message is publishe
     "attributes": {
       "face": 0.64
     }, // attributes with top score that have been identified on the object at any point
-    "current_attributes": [] // detailed data about the current attributes in this frame
+    "current_attributes": [], // detailed data about the current attributes in this frame
+    "current_estimated_speed": 0.71, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "recognized_license_plate": "ABC12345", // a recognized license plate for car objects
+    "recognized_license_plate_score": 0.933451
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -103,20 +107,53 @@ Message published for each changed tracked object. The first message is publishe
         "box": [442, 506, 534, 524],
         "score": 0.86
       }
-    ]
+    ],
+    "current_estimated_speed": 0.77, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
+    "recognized_license_plate": "ABC12345", // a recognized license plate for car objects
+    "recognized_license_plate_score": 0.933451
   }
 }
 ```
 
 ### `frigate/tracked_object_update`
 
-Message published for updates to tracked object metadata, for example when GenAI runs and returns a tracked object description.
+Message published for updates to tracked object metadata, for example:
+
+#### Generative AI Description Update
 
 ```json
 {
   "type": "description",
   "id": "1607123955.475377-mxklsc",
   "description": "The car is a red sedan moving away from the camera."
+}
+```
+
+#### Face Recognition Update
+
+```json
+{
+  "type": "face",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John",
+  "score": 0.95,
+  "camera": "front_door_cam",
+  "timestamp": 1607123958.748393,
+}
+```
+
+#### License Plate Recognition Update
+
+```json
+{
+  "type": "lpr",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John's Car",
+  "plate": "123ABC",
+  "score": 0.95,
+  "camera": "driveway_cam",
+  "timestamp": 1607123958.748393,
 }
 ```
 
@@ -232,6 +269,14 @@ Publishes the rms value for audio detected on this camera.
 
 **NOTE:** Requires audio detection to be enabled
 
+### `frigate/<camera_name>/enabled/set`
+
+Topic to turn Frigate's processing of a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/enabled/state`
+
+Topic with current state of processing for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/detect/set`
 
 Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`.
@@ -303,6 +348,10 @@ Topic to adjust motion contour area for a camera. Expected value is an integer.
 
 Topic with current motion contour area for a camera. Published value is an integer.
 
+### `frigate/<camera_name>/review_status`
+
+Topic with current activity status of the camera. Possible values are `NONE`, `DETECTION`, or `ALERT`.
+
 ### `frigate/<camera_name>/ptz`
 
 Topic to send PTZ commands to camera.
@@ -325,6 +374,22 @@ Topic with current state of the PTZ autotracker for a camera. Published values a
 ### `frigate/<camera_name>/ptz_autotracker/active`
 
 Topic to determine if PTZ autotracker is actively tracking an object. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_alerts/set`
+
+Topic to turn review alerts for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_alerts/state`
+
+Topic with current state of review alerts for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_detections/set`
+
+Topic to turn review detections for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_detections/state`
+
+Topic with current state of review detections for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/birdseye/set`
 
@@ -351,3 +416,19 @@ the camera to be removed from the view._
 ### `frigate/<camera_name>/birdseye_mode/state`
 
 Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+
+### `frigate/<camera_name>/notifications/set`
+
+Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/state`
+
+Topic with current state of notifications. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/notifications/suspend`
+
+Topic to suspend notifications for a certain number of minutes. Expected value is an integer.
+
+### `frigate/<camera_name>/notifications/suspended`
+
+Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if notifications are not suspended.

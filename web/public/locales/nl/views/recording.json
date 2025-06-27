@@ -1,0 +1,12 @@
+{
+  "export": "Exporteren",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "De eindtijd moet na de starttijd zijn",
+      "noValidTimeSelected": "Er is geen geldig tijdsbereik geselecteerd"
+    }
+  },
+  "filter": "Filter",
+  "calendar": "Kalender",
+  "filters": "Filters"
+}

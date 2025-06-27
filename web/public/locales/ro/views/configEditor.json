@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor Setari - Frigate",
+  "configEditor": "Editor Setari",
+  "copyConfig": "Copiaza Setarile",
+  "saveAndRestart": "Salveaza & Reporneste",
+  "saveOnly": "Doar Salveaza",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Setari copiate in clipboard."
+    },
+    "error": {
+      "savingError": "Eroare la salvarea setarilor"
+    }
+  },
+  "confirm": "Ieși fără să salvezi?"
+}

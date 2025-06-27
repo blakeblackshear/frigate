@@ -1,0 +1,103 @@
+{
+  "description": {
+    "addFace": "Guide pour ajouter une nouvelle collection à la bibliothèque de visages",
+    "placeholder": "Saisissez un nom pour cette collection",
+    "invalidName": "Nom invalide. Les noms ne peuvent contenir que des lettres, des chiffres, des espaces, des apostrophes, des traits de soulignement et des tirets."
+  },
+  "details": {
+    "person": "Personne",
+    "confidence": "Confiance",
+    "face": "Détails du visage",
+    "timestamp": "Horodatage",
+    "faceDesc": "Détails de l'objet suivi qui a généré ce visage",
+    "subLabelScore": "Score de sous-libellé",
+    "scoreInfo": "Le score du sous-libellé correspond au score pondéré de tous les scores de confiance des visages reconnus. Il est donc possible qu'il ne corresponde pas au score affiché sur l'instantané.",
+    "unknown": "Inconnu"
+  },
+  "documentTitle": "Bibliothèque de visages - Frigate",
+  "uploadFaceImage": {
+    "title": "Téléverser l'image du visage",
+    "desc": "Téléversez une image pour rechercher des visages et l'inclure dans {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Créer une collection",
+    "desc": "Créer une nouvelle collection",
+    "new": "Créer un nouveau visage",
+    "nextSteps": "Pour construire une base solide :<li>Utilisez l'onglet Entraîner pour sélectionner et entraîner des images pour chaque personne détectée.</li><li>Privilégiez les images de face pour de meilleurs résultats ; évitez d'utiliser des images d'entraînement où les visages sont capturés de biais.</li></ul>"
+  },
+  "train": {
+    "title": "Entraîner",
+    "aria": "Sélectionner entraîner",
+    "empty": "Il n'y a pas de tentatives récentes de reconnaissance faciale"
+  },
+  "selectFace": "Sélectionner un visage",
+  "button": {
+    "addFace": "Ajouter un visage",
+    "uploadImage": "Téléverser une image",
+    "deleteFaceAttempts": "Supprimer les visages",
+    "reprocessFace": "Retraiter le visage",
+    "renameFace": "Renommer le visage",
+    "deleteFace": "Supprimer le visage"
+  },
+  "selectItem": "Sélectionner {{item}}",
+  "deleteFaceLibrary": {
+    "title": "Supprimer un nom",
+    "desc": "Etes-vous certain de vouloir supprimer la collection {{name}} ? Cette action supprimera définitivement tous les visages associés."
+  },
+  "imageEntry": {
+    "dropActive": "Déposez l'image ici…",
+    "dropInstructions": "Glissez et déposez une image ici, ou cliquez pour sélectionner",
+    "maxSize": "Taille max : {{size}}MB",
+    "validation": {
+      "selectImage": "Veuillez sélectionner un fichier image."
+    }
+  },
+  "readTheDocs": "Lire la documentation",
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} visage a été supprimé avec succès.",
+      "deletedName_many": "{{count}} visages ont été supprimés avec succès.",
+      "deletedName_other": "{{count}} visages ont été supprimés avec succès.",
+      "uploadedImage": "Image téléversée avec succès.",
+      "addFaceLibrary": "{{name}} a été ajouté avec succès à la bibliothèque de visages !",
+      "updatedFaceScore": "Score du visage mis à jour avec succès.",
+      "deletedFace_one": "{{count}} visage a été supprimé avec succès.",
+      "deletedFace_many": "{{count}} visages ont été supprimés avec succès.",
+      "deletedFace_other": "{{count}} visages ont été supprimés avec succès.",
+      "trainedFace": "Visage entraîné avec succès.",
+      "renamedFace": "Visage renommé avec succés en {{name}}"
+    },
+    "error": {
+      "uploadingImageFailed": "Échec du téléversement de l'image : {{errorMessage}}",
+      "deleteFaceFailed": "Échec de la suppression : {{errorMessage}}",
+      "trainFailed": "Échec de l'entrainement : {{errorMessage}}",
+      "updateFaceScoreFailed": "Échec de la mise à jour du score du visage : {{errorMessage}}",
+      "addFaceLibraryFailed": "Échec du nommage du visage : {{errorMessage}}",
+      "deleteNameFailed": "Échec de la suppression du nom : {{errorMessage}}",
+      "renameFaceFailed": "Échec du renommage du visage : {{errorMessage}}"
+    }
+  },
+  "trainFaceAs": "Entraîner le visage comme :",
+  "trainFace": "Entraîner un visage",
+  "steps": {
+    "uploadFace": "Téléverser une image de visage",
+    "faceName": "Entrer un nom pour le visage",
+    "nextSteps": "Prochaines étapes",
+    "description": {
+      "uploadFace": "Téléversez une image de {{name}} qui montre son visage de face. L'image n'a pas besoin d'être recadrée pour ne montrer que son visage."
+    }
+  },
+  "renameFace": {
+    "title": "Renommer le visage",
+    "desc": "Saisissez un nouveau nom pour {{name}}"
+  },
+  "collections": "Collections",
+  "deleteFaceAttempts": {
+    "title": "Supprimer les visages",
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} visage ? Cette action est irréversible.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
+  },
+  "nofaces": "Pas de visage disponible",
+  "pixels": "{{area}} pixels"
+}

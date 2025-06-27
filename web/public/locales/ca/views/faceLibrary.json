@@ -1,0 +1,102 @@
+{
+  "selectItem": "Selecciona {{item}}",
+  "details": {
+    "subLabelScore": "Puntuació de la subetiqueta",
+    "scoreInfo": "La puntuació de la subetiqueta és la puntuació ponderada de totes la confidència dels rostres reconeguts, de manera que pot ser diferent de la puntuació que es mostra a la instantània.",
+    "unknown": "Desconegut",
+    "person": "Persona",
+    "faceDesc": "Detalls de l'objecte que ha generat aquest rostre",
+    "timestamp": "Marca temporal",
+    "face": "Detalls del rostre"
+  },
+  "collections": "Col·leccions",
+  "train": {
+    "empty": "No hi ha intents recents de reconeixement de rostres",
+    "title": "Entrenar",
+    "aria": "Seleccionar entrenament"
+  },
+  "description": {
+    "addFace": "Guia per a agregar una nova colecció a la biblioteca de rostres.",
+    "placeholder": "Introduïu un nom per a aquesta col·lecció",
+    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guionets."
+  },
+  "documentTitle": "Biblioteca de rostres - Frigate",
+  "uploadFaceImage": {
+    "title": "Puja una imatge del rostre",
+    "desc": "Carregar una imatge per escanejar els rostres i incloure per a {{pageToggle}}"
+  },
+  "createFaceLibrary": {
+    "title": "Crear Col·lecció",
+    "desc": "Crear una nova col·lecció",
+    "new": "Crear un nou rostre",
+    "nextSteps": "Per establir una base sòlida:<li>Utilitza la pestanya Entrenament per seleccionar i entrenar imatges de cada persona detectada.</li><li>Centra’t en imatges frontals per obtenir millors resultats; evita imatges d’entrenament amb rostres en angle.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Introduir el nom del rostre",
+    "uploadFace": "Puja una imatge del rostre",
+    "nextSteps": "Següents passos",
+    "description": {
+      "uploadFace": "Puja una imatge de {{name}} que mostri el seu rostre de cares. No cal que la imatge estigui retallada només al rostre."
+    }
+  },
+  "selectFace": "Seleccionar rostre",
+  "deleteFaceLibrary": {
+    "desc": "Estàs segur que vols eliminar la col·lecció {{name}}? Això eliminarà permanentment tots els rostres associats.",
+    "title": "Suprimir nom"
+  },
+  "renameFace": {
+    "desc": "Introduïu un nou nom per a {{name}}",
+    "title": "Canviar nom del rostre"
+  },
+  "imageEntry": {
+    "dropActive": "Arrossegueu la imatge aquí…",
+    "validation": {
+      "selectImage": "Siusplau, selecciona un fixer d'imatge."
+    },
+    "maxSize": "Mida màxima: {{size}}MB",
+    "dropInstructions": "Arrastra una imatge aquí, o fes clic per a selccionar-ne una"
+  },
+  "button": {
+    "uploadImage": "Pujar imatge",
+    "addFace": "Afegir rostre",
+    "deleteFaceAttempts": "Suprimir rostres",
+    "renameFace": "Renombrar rostre",
+    "deleteFace": "Suprimeix rostre",
+    "reprocessFace": "Reprocessar rostre"
+  },
+  "toast": {
+    "success": {
+      "trainedFace": "Rostre entrenat amb èxit.",
+      "updatedFaceScore": "Puntació de rostre actualitzada amb èxit.",
+      "uploadedImage": "Imatge pujada amb èxit.",
+      "addFaceLibrary": "{{name}} s'ha afegit amb èxit a la biblioteca de rostres!",
+      "deletedName_one": "{{count}} rostre s'ha suprimit amb èxit.",
+      "deletedName_many": "{{count}} rostres s'han suprimit amb èxit.",
+      "deletedName_other": "{{count}} rostres s'han suprimit amb èxit.",
+      "deletedFace_one": "{{count}} rostre suprimit amb èxit.",
+      "deletedFace_many": "{{count}} rostres suprimits amb èxit.",
+      "deletedFace_other": "{{count}} rostres suprimits amb èxit.",
+      "renamedFace": "Rostre renombrat amb èxit a {{name}}"
+    },
+    "error": {
+      "uploadingImageFailed": "No s'ha pogut penjar la imatge: {{errorMessage}}",
+      "trainFailed": "No s'ha pogut entrenar: {{errorMessage}}",
+      "deleteFaceFailed": "No s'ha pogut suprimir: {{errorMessage}}",
+      "deleteNameFailed": "No s'ha pogut suprimir el nom: {{errorMessage}}",
+      "updateFaceScoreFailed": "No s'ha pogut actualitzar la puntuació de rostre: {{errorMessage}}",
+      "addFaceLibraryFailed": "No s'ha pogut establir el nom del rostre: {{errorMessage}}",
+      "renameFaceFailed": "No s'ha pogut renombrar el rostre: {{errorMessage}}"
+    }
+  },
+  "nofaces": "No hi han rostres disponibles",
+  "deleteFaceAttempts": {
+    "title": "Suprimir rostres",
+    "desc_one": "Estàs segur que vols suprimir {{count}} rostre? Aquesta acció no es pot desfer.",
+    "desc_many": "Estàs segur que vols suprimir {{count}} rostres? Aquesta acció no es pot desfer.",
+    "desc_other": "Estàs segur que vols suprimir {{count}} rostres? Aquesta acció no es pot desfer."
+  },
+  "pixels": "{{area}}px",
+  "trainFace": "Entrenar rostre",
+  "readTheDocs": "Llegir la documentació",
+  "trainFaceAs": "Entrenar rostre com a:"
+}

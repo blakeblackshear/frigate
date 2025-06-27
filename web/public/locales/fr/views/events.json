@@ -1,0 +1,39 @@
+{
+  "detections": "Détections",
+  "motion": {
+    "label": "Mouvement",
+    "only": "Mouvement seulement"
+  },
+  "alerts": "Alertes",
+  "allCameras": "Toutes les caméras",
+  "empty": {
+    "alert": "Il n'y a aucune alerte à passer en revue",
+    "detection": "Il n'y a aucune détection à passer en revue",
+    "motion": "Aucune donnée de mouvement trouvée"
+  },
+  "timeline": "Chronologie",
+  "events": {
+    "label": "Événements",
+    "aria": "Sélectionner les événements",
+    "noFoundForTimePeriod": "Aucun événement trouvé pour cette plage de temps."
+  },
+  "documentTitle": "Revue d'événements -Frigate",
+  "recordings": {
+    "documentTitle": "Enregistrements - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Dernières 24 heures"
+  },
+  "timeline.aria": "Sélectionner une chronologie",
+  "markAsReviewed": "Marqué comme passé en revue",
+  "newReviewItems": {
+    "button": "Nouveaux éléments à passer en revue",
+    "label": "Afficher les nouveaux éléments de la revue d'événements"
+  },
+  "camera": "Caméra",
+  "markTheseItemsAsReviewed": "Marquer ces éléments comme passés en revue",
+  "selected": "{{count}} sélectionné(s)",
+  "selected_other": "{{count}} sélectionné(s)",
+  "selected_one": "{{count}} sélectionné(s)",
+  "detected": "détecté"
+}
