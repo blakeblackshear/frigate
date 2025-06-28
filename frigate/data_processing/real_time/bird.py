@@ -147,8 +147,8 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             return
 
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label,
             (obj_data["id"], self.labelmap[best_id], score),
+            EventMetadataTypeEnum.sub_label.value,
         )
         self.detected_birds[obj_data["id"]] = score
 
