@@ -172,12 +172,12 @@ class Dispatcher:
                 json.dumps(self.embeddings_reindex.copy()),
             )
 
-        def handle_update_birdseye_layout():
+        def handle_update_birdseye_layout() -> None:
             if payload:
                 self.birdseye_layout = payload
                 self.publish("birdseye_layout", json.dumps(self.birdseye_layout))
 
-        def handle_birdseye_layout():
+        def handle_birdseye_layout() -> None:
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
 
         def handle_on_connect() -> None:
