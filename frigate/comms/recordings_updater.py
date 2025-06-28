@@ -2,7 +2,6 @@
 
 import logging
 from enum import Enum
-from typing import Any
 
 from .zmq_proxy import Publisher, Subscriber
 
