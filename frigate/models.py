@@ -1,6 +1,8 @@
 from peewee import (
+    BlobField,
     BooleanField,
     CharField,
+    CompositeKey,
     DateTimeField,
     FloatField,
     ForeignKeyField,
@@ -132,3 +134,18 @@ class User(Model):  # type: ignore[misc]
     )
     password_hash = CharField(null=False, max_length=120)
     notification_tokens = JSONField()
+
+
+class Trigger(Model):
+    camera = CharField(max_length=20)
+    name = CharField()
+    type = CharField(max_length=10)
+    data = TextField()
+    threshold = FloatField()
+    model = CharField(max_length=30)
+    embedding = BlobField()
+    triggering_event_id = CharField(max_length=30)
+    last_triggered = DateTimeField()
+
+    class Meta:
+        primary_key = CompositeKey("camera", "name")

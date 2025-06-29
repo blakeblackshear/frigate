@@ -55,6 +55,7 @@ from frigate.models import (
     Regions,
     ReviewSegment,
     Timeline,
+    Trigger,
     User,
 )
 from frigate.object_detection.base import ObjectDetectProcess
@@ -286,6 +287,7 @@ class FrigateApp:
             ReviewSegment,
             Timeline,
             User,
+            Trigger,
         ]
         self.db.bind(models)
 
