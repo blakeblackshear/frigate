@@ -109,5 +109,12 @@
       "markAsReviewed": "Mark as reviewed",
       "deleteNow": "Delete Now"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Select a tracked object's thumbnail or snapshot",
+    "search": {
+      "placeholder": "Search by label..."
+    },
+    "noImages": "No thumbnails found for this camera"
   }
 }

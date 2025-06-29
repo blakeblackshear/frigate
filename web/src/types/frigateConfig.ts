@@ -1,4 +1,5 @@
 import { IconName } from "@/components/icons/IconPicker";
+import { TriggerAction, TriggerType } from "./trigger";
 
 export interface UiConfig {
   timezone?: string;
@@ -219,6 +220,16 @@ export interface CameraConfig {
   };
   rtmp: {
     enabled: boolean;
+  };
+  semantic_search: {
+    triggers: {
+      [triggerName: string]: {
+        type: TriggerType;
+        data: string;
+        threshold: number;
+        actions: TriggerAction[];
+      };
+    };
   };
   snapshots: {
     bounding_box: boolean;
