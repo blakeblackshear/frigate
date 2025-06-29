@@ -25,6 +25,17 @@ class EnrichmentsDeviceEnum(str, Enum):
     CPU = "CPU"
 
 
+class TriggerType(str, Enum):
+    TEXT = "text"
+    IMAGE = "image"
+    BOTH = "both"
+
+
+class TriggerAction(str, Enum):
+    ALERT = "alert"
+    NOTIFICATION = "notification"
+
+
 class AudioTranscriptionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable audio transcription.")
     language: str = Field(
@@ -114,9 +125,26 @@ class SemanticSearchConfig(FrigateBaseModel):
     )
 
 
+class TriggerConfig(FrigateBaseModel):
+    type: TriggerType = Field(default=TriggerType.TEXT, title="Type of trigger")
+    data: str = Field(title="Trigger content (text phrase or image ID)")
+    threshold: float = Field(
+        title="Confidence score required to run the trigger.",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
+    actions: Optional[List[TriggerAction]] = Field(
+        default=[], title="Actions to perform when trigger is matched"
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
 class CameraSemanticSearchConfig(FrigateBaseModel):
-    triggers: Optional[list[str]] = Field(
-        default=None, title="Text phrases to elevate tracked objects to review alerts."
+    triggers: Optional[Dict[str, TriggerConfig]] = Field(
+        default=None,
+        title="Text or image triggers to elevate tracked objects to review alerts",
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
