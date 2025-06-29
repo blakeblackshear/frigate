@@ -14,7 +14,10 @@ import numpy as np
 from peewee import DoesNotExist
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
-from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
+from frigate.comms.embeddings_updater import (
+    EmbeddingsRequestEnum,
+    EmbeddingsResponder,
+)
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataSubscriber,
@@ -46,6 +49,7 @@ from frigate.data_processing.post.audio_transcription import (
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,
 )
+from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
 from frigate.data_processing.real_time.custom_classification import (
@@ -56,12 +60,11 @@ from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
-from frigate.data_processing.real_time.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Trigger
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import (
@@ -110,7 +113,7 @@ class EmbeddingMaintainer(threading.Thread):
             ),
             load_vec_extension=True,
         )
-        models = [Event, Recordings]
+        models = [Event, Recordings, Trigger]
         db.bind(models)
 
         if config.semantic_search.enabled:
@@ -119,6 +122,8 @@ class EmbeddingMaintainer(threading.Thread):
             # Check if we need to re-index events
             if config.semantic_search.reindex:
                 self.embeddings.reindex()
+
+            # TODO: sync triggers
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -189,16 +194,6 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        self.realtime_processors.append(
-            SemanticTriggerProcessor(
-                self.config,
-                self.config.cameras["orlandocam"].semantic_search,
-                self.requestor,
-                metrics,
-                self.embeddings,
-            )
-        )
-
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
@@ -220,6 +215,17 @@ class EmbeddingMaintainer(threading.Thread):
         ):
             self.post_processors.append(
                 AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
+            )
+
+        if self.config.semantic_search.enabled:
+            self.post_processors.append(
+                SemanticTriggerProcessor(
+                    db,
+                    self.config,
+                    self.requestor,
+                    metrics,
+                    self.embeddings,
+                )
             )
 
         self.stop_event = stop_event
@@ -398,33 +404,6 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            # call any defined post processors
-            for processor in self.post_processors:
-                if isinstance(processor, LicensePlatePostProcessor):
-                    recordings_available = self.recordings_available_through.get(camera)
-                    if (
-                        recordings_available is not None
-                        and event_id in self.detected_license_plates
-                        and self.config.cameras[camera].type != "lpr"
-                    ):
-                        processor.process_data(
-                            {
-                                "event_id": event_id,
-                                "camera": camera,
-                                "recordings_available": self.recordings_available_through[
-                                    camera
-                                ],
-                                "obj_data": self.detected_license_plates[event_id][
-                                    "obj_data"
-                                ],
-                            },
-                            PostProcessDataEnum.recording,
-                        )
-                elif isinstance(processor, AudioTranscriptionPostProcessor):
-                    continue
-                else:
-                    processor.process_data(event_id, PostProcessDataEnum.event_id)
-
             # expire in realtime processors
             for processor in self.realtime_processors:
                 processor.expire_object(event_id, camera)
@@ -460,6 +439,41 @@ class EmbeddingMaintainer(threading.Thread):
                     )
                 ):
                     self._process_genai_description(event, camera_config, thumbnail)
+
+            # call any defined post processors
+            for processor in self.post_processors:
+                if isinstance(processor, LicensePlatePostProcessor):
+                    recordings_available = self.recordings_available_through.get(camera)
+                    if (
+                        recordings_available is not None
+                        and event_id in self.detected_license_plates
+                        and self.config.cameras[camera].type != "lpr"
+                    ):
+                        processor.process_data(
+                            {
+                                "event_id": event_id,
+                                "camera": camera,
+                                "recordings_available": self.recordings_available_through[
+                                    camera
+                                ],
+                                "obj_data": self.detected_license_plates[event_id][
+                                    "obj_data"
+                                ],
+                            },
+                            PostProcessDataEnum.recording,
+                        )
+                elif isinstance(processor, AudioTranscriptionPostProcessor):
+                    continue
+                elif isinstance(processor, SemanticTriggerProcessor):
+                    processor.process_data(
+                        {"event_id": event_id, "camera": camera, "type": "image"},
+                        PostProcessDataEnum.tracked_object,
+                    )
+                else:
+                    processor.process_data(
+                        {"event_id": event_id, "camera": camera},
+                        PostProcessDataEnum.tracked_object,
+                    )
 
             # Delete tracked events based on the event_id
             if event_id in self.tracked_events:
@@ -668,6 +682,16 @@ class EmbeddingMaintainer(threading.Thread):
         # Embed the description
         if self.config.semantic_search.enabled:
             self.embeddings.embed_description(event.id, description)
+
+        # Check semantic trigger for this description
+        for processor in self.post_processors:
+            if isinstance(processor, SemanticTriggerProcessor):
+                processor.process_data(
+                    {"event_id": event.id, "camera": event.camera, "type": "text"},
+                    PostProcessDataEnum.tracked_object,
+                )
+            else:
+                continue
 
         logger.debug(
             "Generated description for %s (%d images): %s",
