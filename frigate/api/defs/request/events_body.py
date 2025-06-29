@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -45,3 +45,9 @@ class EventsDeleteBody(BaseModel):
 
 class SubmitPlusBody(BaseModel):
     include_annotation: int = Field(default=1)
+
+
+class TriggerEmbeddingBody(BaseModel):
+    type: Literal["text", "image", "both"]
+    data: str
+    threshold: float = Field(default=0.5, ge=0.0, le=1.0)

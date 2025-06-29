@@ -23,6 +23,7 @@ class CameraConfigUpdateEnum(str, Enum):
     record = "record"
     remove = "remove"  # for removing a camera
     review = "review"
+    semantic_search = "semantic_search"  # for semantic search triggers
     snapshots = "snapshots"
     zones = "zones"
 
