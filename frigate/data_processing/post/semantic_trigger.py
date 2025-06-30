@@ -1,7 +1,9 @@
 """Real time processor to trigger alerts by matching embeddings."""
 
 import datetime
+import json
 import logging
+import os
 from typing import Any
 
 import cv2
@@ -10,6 +12,7 @@ from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.const import CONFIG_DIR
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings.util import ZScoreNormalization
@@ -41,6 +44,16 @@ class SemanticTriggerProcessor(PostProcessorApi):
         self.trigger_embeddings: list[np.ndarray] = []
 
         self.thumb_stats = ZScoreNormalization()
+        self.desc_stats = ZScoreNormalization()
+
+        # load stats from disk
+        try:
+            with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "r") as f:
+                data = json.loads(f.read())
+                self.thumb_stats.from_dict(data["thumb_stats"])
+                self.desc_stats.from_dict(data["desc_stats"])
+        except FileNotFoundError:
+            pass
 
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum
@@ -105,60 +118,22 @@ class SemanticTriggerProcessor(PostProcessorApi):
             trigger_embedding = np.frombuffer(trigger["embedding"], dtype=np.float32)
 
             # Determine which embedding to compare based on trigger type
-            if trigger["type"] == "image" and thumbnail_embedding is not None:
+            if trigger["type"] == "text" and thumbnail_embedding is not None:
                 data_embedding = thumbnail_embedding
                 normalized_distance = self.thumb_stats.normalize(
                     [cosine_distance(data_embedding, trigger_embedding)],
                     save_stats=False,
                 )[0]
-            elif trigger["type"] == "text" and description_embedding is not None:
-                data_embedding = description_embedding
+            elif trigger["type"] == "thumbnail" and thumbnail_embedding is not None:
+                data_embedding = thumbnail_embedding
                 normalized_distance = cosine_distance(data_embedding, trigger_embedding)
-            elif trigger["type"] == "both":
-                # For "both" type triggers, check both embeddings and use the best match
-                similarities = []
-                similarity_sources = []  # Track which embedding produced each similarity
+            elif trigger["type"] == "description" and description_embedding is not None:
+                data_embedding = description_embedding
+                normalized_distance = self.desc_stats.normalize(
+                    [cosine_distance(data_embedding, trigger_embedding)],
+                    save_stats=False,
+                )[0]
 
-                if thumbnail_embedding is not None:
-                    thumb_distance = cosine_distance(
-                        thumbnail_embedding, trigger_embedding
-                    )
-                    thumb_normalized = self.thumb_stats.normalize(
-                        [thumb_distance], save_stats=False
-                    )[0]
-                    thumb_similarity = 1 - thumb_normalized
-                    similarities.append(thumb_similarity)
-                    similarity_sources.append("thumbnail")
-
-                if description_embedding is not None:
-                    desc_distance = cosine_distance(
-                        description_embedding, trigger_embedding
-                    )
-                    desc_similarity = 1 - desc_distance
-                    similarities.append(desc_similarity)
-                    similarity_sources.append("description")
-
-                if not similarities:
-                    continue  # Skip if no valid embeddings
-
-                # Find the best similarity and its source
-                max_similarity_idx = similarities.index(max(similarities))
-                similarity = similarities[max_similarity_idx]
-                selected_source = similarity_sources[max_similarity_idx]
-                normalized_distance = 1 - similarity
-
-                # Debug log showing all similarities and which was selected
-                if len(similarities) > 1:
-                    logger.debug(
-                        f"Both embeddings available for trigger '{trigger['name']}': "
-                        f"thumbnail={similarities[0]:.4f}, description={similarities[1]:.4f}, "
-                        f"selected={selected_source} with similarity={similarity:.4f}"
-                    )
-                else:
-                    logger.debug(
-                        f"Single embedding available for trigger '{trigger['name']}': "
-                        f"{selected_source}={similarity:.4f}"
-                    )
             else:
                 # Skip trigger if embedding type doesn't match available data
                 continue
@@ -166,7 +141,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
             similarity = 1 - normalized_distance
 
             logger.debug(
-                f"Trigger for {trigger['data'] if trigger['type'] == 'text' else 'image/both'} "
+                f"Trigger for {trigger['data'] if trigger['type'] == 'text' or trigger['type'] == 'description' else 'image'} "
                 f"(camera: {trigger['camera']}): normalized: {normalized_distance:.4f}, "
                 f"similarity: {similarity:.4f}, threshold: {trigger['threshold']}"
             )

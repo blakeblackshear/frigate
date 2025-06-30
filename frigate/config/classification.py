@@ -26,9 +26,8 @@ class EnrichmentsDeviceEnum(str, Enum):
 
 
 class TriggerType(str, Enum):
-    TEXT = "text"
-    IMAGE = "image"
-    BOTH = "both"
+    THUMBNAIL = "thumbnail"
+    DESCRIPTION = "description"
 
 
 class TriggerAction(str, Enum):
@@ -126,7 +125,7 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 
 class TriggerConfig(FrigateBaseModel):
-    type: TriggerType = Field(default=TriggerType.TEXT, title="Type of trigger")
+    type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
     data: str = Field(title="Trigger content (text phrase or image ID)")
     threshold: float = Field(
         title="Confidence score required to run the trigger.",

@@ -663,9 +663,8 @@
       "deleteTrigger": "Delete Trigger"
     },
     "type": {
-      "image": "Image",
-      "text": "Text",
-      "both": "Both"
+      "thumbnail": "Thumbnail",
+      "description": "Description"
     },
     "actions": {
       "alert": "Mark as Alert",

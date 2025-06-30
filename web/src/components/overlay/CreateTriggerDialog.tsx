@@ -86,7 +86,7 @@ export default function CreateTriggerDialog({
           !existingTriggerNames.includes(value) || value === trigger?.name,
         t("triggers.dialog.form.name.error.alreadyExists"),
       ),
-    type: z.enum(["image", "text", "both"]),
+    type: z.enum(["thumbnail", "description"]),
     data: z.string().min(1, t("triggers.dialog.form.content.error.required")),
     threshold: z
       .number()
@@ -102,7 +102,7 @@ export default function CreateTriggerDialog({
     mode: "onChange",
     defaultValues: {
       name: trigger?.name ?? "",
-      type: trigger?.type ?? "text",
+      type: trigger?.type ?? "description",
       data: trigger?.data ?? "",
       threshold: trigger?.threshold ?? 0.5,
       actions: trigger?.actions ?? ["alert"],
@@ -129,7 +129,7 @@ export default function CreateTriggerDialog({
     if (!show) {
       form.reset({
         name: "",
-        type: "text",
+        type: "description",
         data: "",
         threshold: 0.5,
         actions: ["alert"],
@@ -214,14 +214,11 @@ export default function CreateTriggerDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="image">
-                        {t("triggers.type.image")}
+                      <SelectItem value="thumbnail">
+                        {t("triggers.type.thumbnail")}
                       </SelectItem>
-                      <SelectItem value="text">
-                        {t("triggers.type.text")}
-                      </SelectItem>
-                      <SelectItem value="both">
-                        {t("triggers.type.both")}
+                      <SelectItem value="description">
+                        {t("triggers.type.description")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -238,7 +235,7 @@ export default function CreateTriggerDialog({
                   <FormLabel>
                     {t("triggers.dialog.form.content.title")}
                   </FormLabel>
-                  {form.watch("type") === "image" ? (
+                  {form.watch("type") === "thumbnail" ? (
                     <FormControl>
                       <ImagePicker
                         selectedImageId={field.value}

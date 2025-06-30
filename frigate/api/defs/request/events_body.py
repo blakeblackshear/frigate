@@ -48,6 +48,6 @@ class SubmitPlusBody(BaseModel):
 
 
 class TriggerEmbeddingBody(BaseModel):
-    type: Literal["text", "image", "both"]
+    type: Literal["thumbnail", "description"]
     data: str
     threshold: float = Field(default=0.5, ge=0.0, le=1.0)

@@ -1,4 +1,4 @@
-export type TriggerType = "image" | "text" | "both";
+export type TriggerType = "thumbnail" | "description";
 export type TriggerAction = "alert" | "notification";
 
 export type Trigger = {

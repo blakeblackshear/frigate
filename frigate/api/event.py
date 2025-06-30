@@ -1479,9 +1479,9 @@ def create_trigger_embedding(
         context: EmbeddingsContext = request.app.embeddings
         # Generate embedding based on type
         embedding = None
-        if body.type == "text" or body.type == "both":
+        if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
-        elif body.type == "image":
+        elif body.type == "thumbnail":
             try:
                 event: Event = Event.get(Event.id == body.data)
             except DoesNotExist:
@@ -1584,9 +1584,9 @@ def update_trigger_embedding(
         context: EmbeddingsContext = request.app.embeddings
         # Generate embedding based on type
         embedding = None
-        if body.type == "text" or body.type == "both":
+        if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
-        elif body.type == "image":
+        elif body.type == "thumbnail":
             try:
                 event: Event = Event.get(Event.id == body.data)
             except DoesNotExist:
