@@ -150,6 +150,10 @@
       "title": "Streams",
       "desc": "Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
     },
+    "genai": {
+      "title": "Generative AI",
+      "desc": "Temporarily enable/disable Generative AI for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
+    },
     "review": {
       "title": "Review",
       "desc": "Enable/disable alerts and detections for this camera. When disabled, no new review items will be generated.",
