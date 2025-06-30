@@ -111,9 +111,9 @@
     }
   },
   "imagePicker": {
-    "selectImage": "Select a tracked object's thumbnail or snapshot",
+    "selectImage": "Select a tracked object's thumbnail",
     "search": {
-      "placeholder": "Search by label..."
+      "placeholder": "Search by label or sub label..."
     },
     "noImages": "No thumbnails found for this camera"
   }

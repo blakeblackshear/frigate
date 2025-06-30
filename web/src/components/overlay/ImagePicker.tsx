@@ -1,11 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { IoClose } from "react-icons/io5";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +9,7 @@ import Heading from "@/components/ui/heading";
 import { cn } from "@/lib/utils";
 import { Event } from "@/types/event";
 import { useApiHost } from "@/api";
+import { isDesktop, isMobile } from "react-device-detect";
 
 type ImagePickerProps = {
   selectedImageId?: string;
@@ -65,13 +62,13 @@ export default function ImagePicker({
 
   return (
     <div ref={containerRef}>
-      <Popover
+      <Dialog
         open={open}
         onOpenChange={(open) => {
           setOpen(open);
         }}
       >
-        <PopoverTrigger asChild>
+        <DialogTrigger asChild>
           {!selectedImageId || !selectedImage ? (
             <Button
               className="mt-2 w-full text-muted-foreground"
@@ -84,11 +81,7 @@ export default function ImagePicker({
               <div className="my-3 flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center gap-2">
                   <img
-                    src={
-                      selectedImage.has_snapshot
-                        ? `${apiHost}api/events/${selectedImage.id}/snapshot.jpg`
-                        : `${apiHost}api/events/${selectedImage.id}/thumbnail.webp`
-                    }
+                    src={`${apiHost}api/events/${selectedImage.id}/thumbnail.webp`}
                     alt={selectedImage.label}
                     className="h-8 w-8 rounded object-cover"
                   />
@@ -110,23 +103,17 @@ export default function ImagePicker({
               </div>
             </div>
           )}
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          side="top"
-          container={containerRef.current}
-          className="flex max-h-[50dvh] w-full flex-col overflow-y-hidden md:max-h-[30dvh]"
+        </DialogTrigger>
+        <DialogContent
+          className={cn(
+            "scrollbar-container overflow-y-auto",
+            isDesktop && "max-h-[75dvh] sm:max-w-xl md:max-w-3xl",
+            isMobile && "px-4",
+          )}
         >
           <div className="mb-3 flex flex-row items-center justify-between">
             <Heading as="h4">{t("imagePicker.selectImage")}</Heading>
             <span tabIndex={0} className="sr-only" />
-            <IoClose
-              size={15}
-              className="hover:cursor-pointer"
-              onClick={() => {
-                setOpen(false);
-              }}
-            />
           </div>
           <Input
             type="text"
@@ -153,14 +140,9 @@ export default function ImagePicker({
                     )}
                   >
                     <img
-                      src={
-                        // image.has_snapshot
-                        //   ? `${apiHost}api/events/${image.id}/snapshot.jpg`
-                        //   :
-                        `${apiHost}api/events/${image.id}/thumbnail.webp`
-                      }
+                      src={`${apiHost}api/events/${image.id}/thumbnail.webp`}
                       alt={image.label}
-                      className="h-32 w-32 rounded object-cover"
+                      className="rounded object-cover"
                       onClick={() => handleImageSelect(image.id)}
                     />
                   </div>
@@ -168,8 +150,8 @@ export default function ImagePicker({
               )}
             </div>
           </div>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
