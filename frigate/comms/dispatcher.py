@@ -208,6 +208,7 @@ class Dispatcher:
                     ].onvif.autotracking.enabled,
                     "alerts": self.config.cameras[camera].review.alerts.enabled,
                     "detections": self.config.cameras[camera].review.detections.enabled,
+                    "genai": self.config.cameras[camera].genai.enabled,
                 }
 
             self.publish("camera_activity", json.dumps(camera_status))
