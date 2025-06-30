@@ -17,6 +17,7 @@ class CameraConfigUpdateEnum(str, Enum):
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
+    genai = "genai"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
     objects = "objects"
