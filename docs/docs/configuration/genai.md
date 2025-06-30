@@ -27,6 +27,8 @@ cameras:
       enabled: False
 ```
 
+Generative AI can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/genai/set`. See the [MQTT documentation](/integrations/mqtt/#frigatecamera_namegenaiset).
+
 ## Ollama
 
 :::warning
