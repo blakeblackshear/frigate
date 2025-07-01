@@ -25,7 +25,7 @@ from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
-WRITE_DEBUG_IMAGES = True
+WRITE_DEBUG_IMAGES = False
 
 
 class SemanticTriggerProcessor(PostProcessorApi):
@@ -61,11 +61,12 @@ class SemanticTriggerProcessor(PostProcessorApi):
         event_id = data["event_id"]
         camera = data["camera"]
         process_type = data["type"]
-        logger.info(
-            f"semantic trigger event_id: {event_id}, type: {process_type}, camera: {camera}"
-        )
 
-        # TODO: check if triggers exist for this camera, bail if none
+        if self.config.cameras[camera].semantic_search.triggers is None:
+            logger.debug(
+                f"No semantic triggers configured for camera: {camera}, skipping processing."
+            )
+            return
 
         # Get embeddings based on type
         thumbnail_embedding = None
@@ -95,7 +96,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
         # Skip processing if we don't have any embeddings
         if thumbnail_embedding is None and description_embedding is None:
-            logger.warning(f"No embeddings found for event_id: {event_id}")
+            logger.debug(f"No embeddings found for event id: {event_id}")
             return
 
         triggers = (
@@ -113,7 +114,9 @@ class SemanticTriggerProcessor(PostProcessorApi):
         )
 
         for trigger in triggers:
-            logger.debug(f"Processing trigger: {trigger['camera']}_{trigger['name']}")
+            logger.debug(
+                f"Processing trigger for {trigger['camera']}: {trigger['name']}"
+            )
 
             trigger_embedding = np.frombuffer(trigger["embedding"], dtype=np.float32)
 
@@ -141,8 +144,8 @@ class SemanticTriggerProcessor(PostProcessorApi):
             similarity = 1 - normalized_distance
 
             logger.debug(
-                f"Trigger for {trigger['data'] if trigger['type'] == 'text' or trigger['type'] == 'description' else 'image'} "
-                f"(camera: {trigger['camera']}): normalized: {normalized_distance:.4f}, "
+                f"Trigger: {trigger['data'] if trigger['type'] == 'text' or trigger['type'] == 'description' else 'image'} "
+                f"(camera: {trigger['camera']}): normalized distance: {normalized_distance:.4f}, "
                 f"similarity: {similarity:.4f}, threshold: {trigger['threshold']}"
             )
 
@@ -151,6 +154,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
                 logger.info(
                     f"Trigger '{trigger['name']}' activated with similarity {similarity:.4f}"
                 )
+                # TODO: handle actions for the trigger
 
             if WRITE_DEBUG_IMAGES:
                 try:
@@ -184,64 +188,6 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     f"debug/frames/trigger-{event_id}_{current_time}.jpg",
                     thumbnail,
                 )
-
-                if False:
-                    if type == "image":
-                        sql_query = """
-                            SELECT
-                                id,
-                                distance
-                            FROM vec_thumbnails
-                            WHERE thumbnail_embedding MATCH ?
-                                AND k = 100
-                        """
-                    elif type == "text":
-                        sql_query = """
-                            SELECT
-                                id,
-                                distance
-                            FROM vec_descriptions
-                            WHERE description_embedding MATCH ?
-                                AND k = 100
-                        """
-
-                    # Add the IN clause if event_ids is provided and not empty
-                    # this is the only filter supported by sqlite-vec as of 0.1.3
-                    # but it seems to be broken in this version
-                    # if event_id:
-                    #     sql_query += " AND id IN ({})".format(",".join("?" * len(event_id)))
-
-                    # order by distance DESC is not implemented in this version of sqlite-vec
-                    # when it's implemented, we can use cosine similarity
-                    sql_query += " ORDER BY distance"
-
-                    parameters = [
-                        trigger_embedding
-                    ]  # + event_ids if event_ids else [query_embedding]
-
-                    results = self.db.execute_sql(sql_query, parameters).fetchall()
-                    # Extract raw distances
-                    raw_distances = [r[1] for r in results]
-
-                    # Normalize
-                    normalized_distances = self.thumb_stats.normalize(
-                        raw_distances, save_stats=False
-                    )
-
-                    # Pair with IDs
-                    normalized_results = list(
-                        zip([r[0] for r in results], normalized_distances)
-                    )
-
-                    logger.info(
-                        f"Semantic trigger results for event_id {event_id}: {len(normalized_results)} matches found."
-                    )
-
-                    # Optional: Log top few for inspection
-                    for thumb_id, norm_score in normalized_results[:5]:
-                        logger.debug(
-                            f"Normalized match: {thumb_id} → z-score: {1 - norm_score:.4f}"
-                        )
 
     def handle_request(self, topic, request_data):
         return None

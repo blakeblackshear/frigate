@@ -358,14 +358,21 @@ export default function TriggerView({
                         <TableCell>
                           <Badge
                             variant={
-                              trigger.type === "image" ? "default" : "outline"
+                              trigger.type === "thumbnail"
+                                ? "default"
+                                : "outline"
+                            }
+                            className={
+                              trigger.type === "thumbnail"
+                                ? "bg-primary/20 text-primary hover:bg-primary/30"
+                                : ""
                             }
                           >
                             {t(`triggers.type.${trigger.type}`)}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {trigger.type === "image"
+                          {trigger.type === "thumbnail"
                             ? trigger.data
                             : trigger.data.length > 30
                               ? `${trigger.data.substring(0, 30)}...`

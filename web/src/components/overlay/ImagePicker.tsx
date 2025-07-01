@@ -1,7 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { IoClose } from "react-icons/io5";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,9 +32,12 @@ export default function ImagePicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: events } = useSWR<Event[]>(`events?camera=${camera}&limit=50`, {
-    revalidateOnFocus: false,
-  });
+  const { data: events } = useSWR<Event[]>(
+    `events?camera=${camera}&limit=100`,
+    {
+      revalidateOnFocus: false,
+    },
+  );
   const apiHost = useApiHost();
 
   const images = useMemo(() => {
@@ -69,7 +77,7 @@ export default function ImagePicker({
         }}
       >
         <DialogTrigger asChild>
-          {!selectedImageId || !selectedImage ? (
+          {!selectedImageId ? (
             <Button
               className="mt-2 w-full text-muted-foreground"
               aria-label={t("imagePicker.selectImage")}
@@ -81,13 +89,17 @@ export default function ImagePicker({
               <div className="my-3 flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center gap-2">
                   <img
-                    src={`${apiHost}api/events/${selectedImage.id}/thumbnail.webp`}
-                    alt={selectedImage.label}
+                    src={
+                      selectedImage
+                        ? `${apiHost}api/events/${selectedImage.id}/thumbnail.webp`
+                        : `${apiHost}clips/triggers/${camera}/${selectedImageId}.webp`
+                    }
+                    alt={selectedImage?.label || "Selected image"}
                     className="h-8 w-8 rounded object-cover"
                   />
-                  <div className="text-sm">
-                    {selectedImage.label}
-                    {selectedImage.sub_label
+                  <div className="text-sm smart-capitalize">
+                    {selectedImage?.label || selectedImageId}
+                    {selectedImage?.sub_label
                       ? ` (${selectedImage.sub_label})`
                       : ""}
                   </div>
@@ -104,6 +116,9 @@ export default function ImagePicker({
             </div>
           )}
         </DialogTrigger>
+        <DialogTitle className="sr-only">
+          {t("imagePicker.selectImage")}
+        </DialogTitle>
         <DialogContent
           className={cn(
             "scrollbar-container overflow-y-auto",
