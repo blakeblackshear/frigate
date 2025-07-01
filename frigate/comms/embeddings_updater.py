@@ -23,6 +23,8 @@ class EmbeddingsRequestEnum(Enum):
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
     reindex = "reindex"
+    write_trigger_thumbnail = "write_trigger_thumbnail"
+    remove_trigger_thumbnail = "remove_trigger_thumbnail"
     # LPR
     reprocess_plate = "reprocess_plate"
 

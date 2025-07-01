@@ -288,6 +288,17 @@ class EmbeddingMaintainer(threading.Thread):
                     elif topic == EmbeddingsRequestEnum.reindex.value:
                         response = self.embeddings.start_reindex()
                         return "started" if response else "in_progress"
+                    elif topic == EmbeddingsRequestEnum.write_trigger_thumbnail.value:
+                        thumbnail = base64.b64decode(data["thumbnail"])
+                        self.embeddings.write_trigger_thumbnail(
+                            data["camera"], data["event_id"], thumbnail
+                        )
+                        return
+                    elif topic == EmbeddingsRequestEnum.remove_trigger_thumbnail.value:
+                        self.embeddings.remove_trigger_thumbnail(
+                            data["camera"], data["event_id"]
+                        )
+                        return
 
                 processors = [self.realtime_processors, self.post_processors]
                 for processor_list in processors:

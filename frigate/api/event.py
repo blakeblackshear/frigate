@@ -47,7 +47,7 @@ from frigate.api.defs.response.event_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
@@ -1512,11 +1512,18 @@ def create_trigger_embedding(
                     query_embedding = row[0]
                     embedding = np.frombuffer(query_embedding, dtype=np.float32)
             else:
-                # TODO: fixme
                 # Extract valid thumbnail
                 thumbnail = get_event_thumbnail_bytes(event)
 
-                # TODO: save image to the triggers directory
+                if thumbnail is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to get thumbnail for {body.data} for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+
                 embedding = context.generate_image_embedding(
                     body.data, (base64.b64encode(thumbnail).decode("ASCII"))
                 )
@@ -1528,6 +1535,12 @@ def create_trigger_embedding(
                     "message": f"Failed to generate embedding for {body.type} trigger",
                 },
                 status_code=400,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            context.save_trigger_thumbnail(
+                camera, body.data, (base64.b64encode(thumbnail).decode("ASCII"))
             )
 
         Trigger.create(
@@ -1587,26 +1600,40 @@ def update_trigger_embedding(
         if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
         elif body.type == "thumbnail":
+            webp_file = body.data + ".webp"
+            webp_path = os.path.join(TRIGGER_DIR, camera, webp_file)
+
             try:
                 event: Event = Event.get(Event.id == body.data)
+                # Skip the event if not an object
+                if event.data.get("type") != "object":
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Event {body.data} is not a tracked object for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                # Extract valid thumbnail
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                with open(webp_path, "wb") as f:
+                    f.write(thumbnail)
             except DoesNotExist:
-                # TODO: check triggers directory for image
-                return JSONResponse(
-                    content={
-                        "success": False,
-                        "message": f"Failed to fetch event for {body.type} trigger",
-                    },
-                    status_code=400,
-                )
+                # check triggers directory for image
+                if not os.path.exists(webp_path):
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to fetch event for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                else:
+                    # Load the image from the triggers directory
+                    with open(webp_path, "rb") as f:
+                        thumbnail = f.read()
 
-            # Skip the event if not an object
-            if event.data.get("type") != "object":
-                return
-
-            # Extract valid thumbnail
-            thumbnail = get_event_thumbnail_bytes(event)
-
-            # TODO: save image to the triggers directory
             embedding = context.generate_image_embedding(
                 body.data, (base64.b64encode(thumbnail).decode("ASCII"))
             )
@@ -1619,6 +1646,23 @@ def update_trigger_embedding(
                 },
                 status_code=400,
             )
+
+        old = list(
+            Trigger.select(Trigger.camera, Trigger.name, Trigger.data)
+            .where(Trigger.camera == camera, Trigger.name == name)
+            .dicts()
+            .iterator()
+        )
+        if not old:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera}:{name} not found",
+                },
+                status_code=404,
+            )
+
+        context.delete_trigger_thumbnail(camera, old[0]["data"])
 
         updated = (
             Trigger.update(
@@ -1640,6 +1684,12 @@ def update_trigger_embedding(
                     "message": f"Trigger {camera}:{name} not found",
                 },
                 status_code=404,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            context.save_trigger_thumbnail(
+                camera, body.data, (base64.b64encode(thumbnail).decode("ASCII"))
             )
 
         return JSONResponse(
@@ -1666,10 +1716,21 @@ def update_trigger_embedding(
     dependencies=[Depends(require_role(["admin"]))],
 )
 def delete_trigger_embedding(
+    request: Request,
     camera: str,
     name: str,
 ):
     try:
+        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
+        if trigger is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera}:{name} not found",
+                },
+                status_code=500,
+            )
+
         deleted = (
             Trigger.delete()
             .where(Trigger.camera == camera, Trigger.name == name)
@@ -1679,10 +1740,13 @@ def delete_trigger_embedding(
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": f"Trigger {camera}:{name} not found",
+                    "message": f"Error deleting trigger {camera}:{name}",
                 },
-                status_code=404,
+                status_code=401,
             )
+
+        context: EmbeddingsContext = request.app.embeddings
+        context.delete_trigger_thumbnail(camera, trigger.data)
 
         return JSONResponse(
             content={

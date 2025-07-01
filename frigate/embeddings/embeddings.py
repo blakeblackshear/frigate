@@ -7,7 +7,7 @@ import threading
 import time
 
 import numpy as np
-from peewee import IntegrityError
+from peewee import DoesNotExist, IntegrityError
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.embeddings_updater import (
@@ -18,6 +18,7 @@ from frigate.config import FrigateConfig
 from frigate.config.classification import SemanticSearchModelEnum
 from frigate.const import (
     CONFIG_DIR,
+    TRIGGER_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -407,8 +408,6 @@ class Embeddings:
                 self.reindex_thread = None
 
     def sync_triggers(self) -> None:
-        # TODO: fixme
-        return
         for camera in self.config.cameras.values():
             # Get all existing triggers for this camera
             existing_triggers = {
@@ -417,18 +416,52 @@ class Embeddings:
             }
 
             # Get all configured trigger names
-            configured_trigger_names = {
-                trigger.name for trigger in camera.semantic_search.triggers
-            }
+            configured_trigger_names = set(camera.semantic_search.triggers or {})
 
             # Create or update triggers from config
-            # TODO: copy event thumbnail to triggers image directory
-            for trigger in camera.semantic_search.triggers:
-                if trigger.name in existing_triggers:
-                    # Update existing trigger if data has changed
-                    existing_trigger = existing_triggers[trigger.name]
+            for trigger_name, trigger in (
+                camera.semantic_search.triggers or {}
+            ).items():
+                if trigger_name in existing_triggers:
+                    existing_trigger = existing_triggers[trigger_name]
                     needs_embedding_update = False
+                    thumbnail_missing = False
 
+                    # Check if data has changed or thumbnail is missing for thumbnail type
+                    if trigger.type == "thumbnail":
+                        thumbnail_path = os.path.join(
+                            TRIGGER_DIR, camera.name, f"{trigger.data}.webp"
+                        )
+                        try:
+                            event = Event.get(Event.id == trigger.data)
+                            if event.data.get("type") != "object":
+                                logger.warning(
+                                    f"Event {trigger.data} is not a tracked object for {trigger.type} trigger"
+                                )
+                                continue  # Skip if not an object
+
+                            # Check if thumbnail needs to be updated (data changed or missing)
+                            if (
+                                existing_trigger.data != trigger.data
+                                or not os.path.exists(thumbnail_path)
+                            ):
+                                thumbnail = get_event_thumbnail_bytes(event)
+                                if not thumbnail:
+                                    logger.warning(
+                                        f"Unable to retrieve thumbnail for event ID {trigger.data} for {trigger_name}."
+                                    )
+                                    continue
+                                self.write_trigger_thumbnail(
+                                    camera.name, trigger.data, thumbnail
+                                )
+                                thumbnail_missing = True
+                        except DoesNotExist:
+                            logger.warning(
+                                f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
+                            )
+                            continue
+
+                    # Update existing trigger if data has changed
                     if (
                         existing_trigger.type != trigger.type
                         or existing_trigger.data != trigger.data
@@ -440,7 +473,11 @@ class Embeddings:
                         needs_embedding_update = True
 
                     # Check if embedding is missing or needs update
-                    if not existing_trigger.embedding or needs_embedding_update:
+                    if (
+                        not existing_trigger.embedding
+                        or needs_embedding_update
+                        or thumbnail_missing
+                    ):
                         existing_trigger.embedding = self._calculate_trigger_embedding(
                             trigger
                         )
@@ -451,12 +488,39 @@ class Embeddings:
                 else:
                     # Create new trigger
                     try:
+                        try:
+                            event: Event = Event.get(Event.id == trigger.data)
+                        except DoesNotExist:
+                            logger.warning(
+                                f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
+                            )
+                            continue
+
+                        # Skip the event if not an object
+                        if event.data.get("type") != "object":
+                            logger.warning(
+                                f"Event ID {trigger.data} for trigger {trigger_name} is not a tracked object."
+                            )
+                            continue
+
+                        thumbnail = get_event_thumbnail_bytes(event)
+
+                        if not thumbnail:
+                            logger.warning(
+                                f"Unable to retrieve thumbnail for event ID {trigger.data} for {trigger_name}."
+                            )
+                            continue
+
+                        self.write_trigger_thumbnail(
+                            camera.name, trigger.data, thumbnail
+                        )
+
                         # Calculate embedding for new trigger
                         embedding = self._calculate_trigger_embedding(trigger)
 
                         Trigger.create(
                             camera=camera.name,
-                            name=trigger.name,
+                            name=trigger_name,
                             type=trigger.type,
                             data=trigger.data,
                             threshold=trigger.threshold,
@@ -465,6 +529,7 @@ class Embeddings:
                             triggering_event_id="",
                             last_triggered=None,
                         )
+
                     except IntegrityError:
                         pass  # Handle duplicate creation attempts
 
@@ -476,22 +541,50 @@ class Embeddings:
                 Trigger.delete().where(
                     Trigger.camera == camera.name, Trigger.name.in_(triggers_to_remove)
                 ).execute()
+                for trigger_name in triggers_to_remove:
+                    self.remove_trigger_thumbnail(camera.name, trigger_name)
+
+    def write_trigger_thumbnail(
+        self, camera: str, event_id: str, thumbnail: bytes
+    ) -> None:
+        """Write the thumbnail to the trigger directory."""
+        try:
+            os.makedirs(os.path.join(TRIGGER_DIR, camera), exist_ok=True)
+            with open(os.path.join(TRIGGER_DIR, camera, f"{event_id}.webp"), "wb") as f:
+                f.write(thumbnail)
+            logger.debug(
+                f"Writing thumbnail for trigger with data {event_id} in {camera}."
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to write thumbnail for trigger with data {event_id} in {camera}: {e}"
+            )
+
+    def remove_trigger_thumbnail(self, camera: str, event_id: str) -> None:
+        """Write the thumbnail to the trigger directory."""
+        try:
+            os.remove(os.path.join(TRIGGER_DIR, camera, f"{event_id}.webp"))
+            logger.debug(
+                f"Deleted thumbnail for trigger with data {event_id} in {camera}."
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to delete thumbnail for trigger with data {event_id} in {camera}: {e}"
+            )
 
     def _calculate_trigger_embedding(self, trigger) -> bytes:
         """Calculate embedding for a trigger based on its type and data."""
         if trigger.type == "description":
+            logger.debug(f"Generating embedding for trigger description {trigger.name}")
             embedding = self.requestor.send_data(
                 EmbeddingsRequestEnum.embed_description.value,
                 {"id": None, "description": trigger.data, "upsert": False},
             )
             return embedding.astype(np.float32).tobytes()
+
         elif trigger.type == "thumbnail":
-            # return self.requestor.send_data(
-            #     EmbeddingsRequestEnum.embed_thumbnail.value,
-            #     {"id": str(event_id), "thumbnail": str(thumbnail), "upsert": False},
-            # )
             # For image triggers, trigger.data should be an image ID
-            # Get embedding from vec_thumbnails table
+            # Try to get embedding from vec_thumbnails table first
             cursor = self.db.execute_sql(
                 "SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?",
                 [trigger.data],
@@ -500,10 +593,37 @@ class Embeddings:
             if row:
                 return row[0]  # Already in bytes format
             else:
-                logger.warning(
-                    f"No thumbnail embedding found for image ID: {trigger.data}"
+                logger.debug(
+                    f"No thumbnail embedding found for image ID: {trigger.data}, generating from saved trigger thumbnail"
                 )
-                return b""
+
+                try:
+                    with open(
+                        os.path.join(
+                            TRIGGER_DIR, trigger.camera, f"{trigger.data}.webp"
+                        ),
+                        "rb",
+                    ) as f:
+                        thumbnail = f.read()
+                except Exception as e:
+                    logger.error(
+                        f"Failed to read thumbnail for trigger {trigger.name} with ID {trigger.data}: {e}"
+                    )
+                    return b""
+
+                logger.debug(
+                    f"Generating embedding for trigger thumbnail {trigger.name} with ID {trigger.data}"
+                )
+                embedding = self.requestor.send_data(
+                    EmbeddingsRequestEnum.embed_thumbnail.value,
+                    {
+                        "id": str(trigger.data),
+                        "thumbnail": str(thumbnail),
+                        "upsert": False,
+                    },
+                )
+                return embedding.astype(np.float32).tobytes()
+
         else:
             logger.warning(f"Unknown trigger type: {trigger.type}")
             return b""

@@ -299,3 +299,24 @@ class EmbeddingsContext:
             EmbeddingsRequestEnum.embed_thumbnail.value,
             {"id": str(event_id), "thumbnail": str(thumbnail), "upsert": False},
         )
+
+    def save_trigger_thumbnail(
+        self, camera: str, event_id: str, thumbnail: bytes
+    ) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.write_trigger_thumbnail.value,
+            {
+                "camera": str(camera),
+                "event_id": str(event_id),
+                "thumbnail": str(thumbnail),
+            },
+        )
+
+    def delete_trigger_thumbnail(self, camera: str, event_id: str) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.remove_trigger_thumbnail.value,
+            {
+                "camera": str(camera),
+                "event_id": str(event_id),
+            },
+        )
