@@ -123,7 +123,8 @@ class EmbeddingMaintainer(threading.Thread):
             if config.semantic_search.reindex:
                 self.embeddings.reindex()
 
-            # TODO: sync triggers
+            # Sync semantic search triggers in db with config
+            self.embeddings.sync_triggers()
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
