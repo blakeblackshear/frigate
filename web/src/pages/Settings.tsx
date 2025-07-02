@@ -173,7 +173,7 @@ export default function Settings() {
       }
     }
     // don't clear url params if we're creating a new object mask
-    return !searchParams.has("object_mask");
+    return !(searchParams.has("object_mask") || searchParams.has("event_id"));
   });
 
   useSearchEffect("camera", (camera: string) => {
@@ -181,8 +181,8 @@ export default function Settings() {
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
     }
-    // don't clear url params if we're creating a new object mask
-    return !searchParams.has("object_mask");
+    // don't clear url params if we're creating a new object mask or trigger
+    return !(searchParams.has("object_mask") || searchParams.has("event_id"));
   });
 
   useEffect(() => {

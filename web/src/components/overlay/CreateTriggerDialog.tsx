@@ -95,9 +95,7 @@ export default function CreateTriggerDialog({
       .number()
       .min(0, t("triggers.dialog.form.threshold.error.min"))
       .max(1, t("triggers.dialog.form.threshold.error.max")),
-    actions: z
-      .array(z.enum(["alert", "notification"]))
-      .min(1, t("triggers.dialog.form.actions.error.min")),
+    actions: z.array(z.enum(["alert", "notification"])),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -109,7 +107,7 @@ export default function CreateTriggerDialog({
       type: trigger?.type ?? "description",
       data: trigger?.data ?? "",
       threshold: trigger?.threshold ?? 0.5,
-      actions: trigger?.actions ?? ["alert"],
+      actions: trigger?.actions ?? [],
     },
   });
 
@@ -138,17 +136,22 @@ export default function CreateTriggerDialog({
         type: "description",
         data: "",
         threshold: 0.5,
-        actions: ["alert"],
+        actions: [],
       });
     } else if (trigger) {
-      form.reset({
-        enabled: trigger.enabled,
-        name: trigger.name,
-        type: trigger.type,
-        data: trigger.data,
-        threshold: trigger.threshold,
-        actions: trigger.actions,
-      });
+      form.reset(
+        {
+          enabled: trigger.enabled,
+          name: trigger.name,
+          type: trigger.type,
+          data: trigger.data,
+          threshold: trigger.threshold,
+          actions: trigger.actions,
+        },
+        { keepDirty: false, keepTouched: false }, // Reset validation state
+      );
+      // Trigger validation to ensure isValid updates
+      // form.trigger();
     }
   }, [show, trigger, form]);
 

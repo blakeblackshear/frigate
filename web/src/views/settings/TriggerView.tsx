@@ -26,6 +26,7 @@ import CreateTriggerDialog from "@/components/overlay/CreateTriggerDialog";
 import DeleteTriggerDialog from "@/components/overlay/DeleteTriggerDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -295,6 +296,24 @@ export default function TriggerView({
       setUnsavedChanges(false);
     }
   }, [selectedCamera, setUnsavedChanges]);
+
+  // for adding a trigger with event id via explore context menu
+
+  useSearchEffect("event_id", (eventId: string) => {
+    if (!config || isLoading) {
+      return false;
+    }
+    setShowCreate(true);
+    setSelectedTrigger({
+      enabled: true,
+      name: "",
+      type: "thumbnail",
+      data: eventId,
+      threshold: 0.5,
+      actions: [],
+    });
+    return true;
+  });
 
   if (!config || !selectedCamera) {
     return (

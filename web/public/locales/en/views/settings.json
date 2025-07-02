@@ -673,15 +673,15 @@
     "dialog": {
       "createTrigger": {
         "title": "Create Trigger",
-        "desc": "Create a new trigger for camera '{{camera}}'."
+        "desc": "Create a trigger for camera {{camera}}"
       },
       "editTrigger": {
         "title": "Edit Trigger",
-        "desc": "Edit the settings for an existing trigger on camera '{{camera}}'."
+        "desc": "Edit the settings for trigger on camera {{camera}}"
       },
       "deleteTrigger": {
         "title": "Delete Trigger",
-        "desc": "Are you sure you want to delete the trigger <strong>{{triggerName}}</strong> from camera '{{camera}}'? This action cannot be undone."
+        "desc": "Are you sure you want to delete the trigger <strong>{{triggerName}}</strong> from camera {{camera}}? This action cannot be undone."
       },
       "form": {
         "name": {
@@ -725,9 +725,9 @@
     },
     "toast": {
       "success": {
-        "createTrigger": "Trigger '{{name}}' created successfully.",
-        "updateTrigger": "Trigger '{{name}}' updated successfully.",
-        "deleteTrigger": "Trigger '{{name}}' deleted successfully."
+        "createTrigger": "Trigger {{name}} created successfully.",
+        "updateTrigger": "Trigger {{name}} updated successfully.",
+        "deleteTrigger": "Trigger {{name}} deleted successfully."
       },
       "error": {
         "createTriggerFailed": "Failed to create trigger: {{errorMessage}}",
