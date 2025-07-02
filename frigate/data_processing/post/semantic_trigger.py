@@ -63,40 +63,6 @@ class SemanticTriggerProcessor(PostProcessorApi):
         process_type = data["type"]
 
         if self.config.cameras[camera].semantic_search.triggers is None:
-            logger.debug(
-                f"No semantic triggers configured for camera: {camera}, skipping processing."
-            )
-            return
-
-        # Get embeddings based on type
-        thumbnail_embedding = None
-        description_embedding = None
-
-        if process_type == "image":
-            cursor = self.db.execute_sql(
-                """
-                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
-                """,
-                [event_id],
-            )
-            row = cursor.fetchone() if cursor else None
-            if row:
-                thumbnail_embedding = np.frombuffer(row[0], dtype=np.float32)
-
-        if process_type == "text":
-            cursor = self.db.execute_sql(
-                """
-                SELECT description_embedding FROM vec_descriptions WHERE id = ?
-                """,
-                [event_id],
-            )
-            row = cursor.fetchone() if cursor else None
-            if row:
-                description_embedding = np.frombuffer(row[0], dtype=np.float32)
-
-        # Skip processing if we don't have any embeddings
-        if thumbnail_embedding is None and description_embedding is None:
-            logger.debug(f"No embeddings found for event id: {event_id}")
             return
 
         triggers = (
@@ -115,21 +81,52 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
         for trigger in triggers:
             logger.debug(
-                f"Processing trigger for {trigger['camera']}: {trigger['name']}"
+                f"Processing {trigger['type']} trigger for {event_id} on {trigger['camera']}: {trigger['name']}"
             )
 
             trigger_embedding = np.frombuffer(trigger["embedding"], dtype=np.float32)
 
+            # Get embeddings based on type
+            thumbnail_embedding = None
+            description_embedding = None
+
+            if process_type == "image":
+                cursor = self.db.execute_sql(
+                    """
+                    SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                    """,
+                    [event_id],
+                )
+                row = cursor.fetchone() if cursor else None
+                if row:
+                    thumbnail_embedding = np.frombuffer(row[0], dtype=np.float32)
+
+            if process_type == "text":
+                cursor = self.db.execute_sql(
+                    """
+                    SELECT description_embedding FROM vec_descriptions WHERE id = ?
+                    """,
+                    [event_id],
+                )
+                row = cursor.fetchone() if cursor else None
+                if row:
+                    description_embedding = np.frombuffer(row[0], dtype=np.float32)
+
+            # Skip processing if we don't have any embeddings
+            if thumbnail_embedding is None and description_embedding is None:
+                logger.debug(f"No embeddings found for {event_id}")
+                return
+
             # Determine which embedding to compare based on trigger type
-            if trigger["type"] == "text" and thumbnail_embedding is not None:
+            if (
+                trigger["type"] in ["text", "thumbnail"]
+                and thumbnail_embedding is not None
+            ):
                 data_embedding = thumbnail_embedding
                 normalized_distance = self.thumb_stats.normalize(
                     [cosine_distance(data_embedding, trigger_embedding)],
                     save_stats=False,
                 )[0]
-            elif trigger["type"] == "thumbnail" and thumbnail_embedding is not None:
-                data_embedding = thumbnail_embedding
-                normalized_distance = cosine_distance(data_embedding, trigger_embedding)
             elif trigger["type"] == "description" and description_embedding is not None:
                 data_embedding = description_embedding
                 normalized_distance = self.desc_stats.normalize(
@@ -138,23 +135,43 @@ class SemanticTriggerProcessor(PostProcessorApi):
                 )[0]
 
             else:
-                # Skip trigger if embedding type doesn't match available data
                 continue
 
             similarity = 1 - normalized_distance
 
             logger.debug(
-                f"Trigger: {trigger['data'] if trigger['type'] == 'text' or trigger['type'] == 'description' else 'image'} "
-                f"(camera: {trigger['camera']}): normalized distance: {normalized_distance:.4f}, "
+                f"Trigger {trigger['name']} ({trigger['data'] if trigger['type'] == 'text' or trigger['type'] == 'description' else 'image'}): "
+                f"normalized distance: {normalized_distance:.4f}, "
                 f"similarity: {similarity:.4f}, threshold: {trigger['threshold']}"
             )
 
             # Check if similarity meets threshold
             if similarity >= trigger["threshold"]:
                 logger.info(
-                    f"Trigger '{trigger['name']}' activated with similarity {similarity:.4f}"
+                    f"Trigger {trigger['name']} activated with similarity {similarity:.4f}"
                 )
-                # TODO: handle actions for the trigger
+
+                # Always publish MQTT message
+                self.requestor.send_data(
+                    "triggers",
+                    json.dumps(
+                        {
+                            "name": trigger["name"],
+                            "camera": camera,
+                            "event_id": event_id,
+                            "type": trigger["type"],
+                            "score": similarity,
+                        }
+                    ),
+                )
+
+                if (
+                    self.config.cameras[camera]
+                    .semantic_search.triggers[trigger["name"]]
+                    .actions
+                ):
+                    # TODO: handle actions for the trigger
+                    pass
 
             if WRITE_DEBUG_IMAGES:
                 try:
