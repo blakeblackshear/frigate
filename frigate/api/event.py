@@ -1647,24 +1647,14 @@ def update_trigger_embedding(
                 status_code=400,
             )
 
-        old = list(
-            Trigger.select(Trigger.camera, Trigger.name, Trigger.data)
-            .where(Trigger.camera == camera, Trigger.name == name)
-            .dicts()
-            .iterator()
-        )
-        if not old:
-            return JSONResponse(
-                content={
-                    "success": False,
-                    "message": f"Trigger {camera}:{name} not found",
-                },
-                status_code=404,
-            )
+        # Check if trigger exists for upsert
+        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
 
-        context.delete_trigger_thumbnail(camera, old[0]["data"])
+        if trigger:
+            # Update existing trigger
+            if trigger.data != body.data:  # Delete old thumbnail only if data changes
+                context.delete_trigger_thumbnail(camera, trigger.data)
 
-        updated = (
             Trigger.update(
                 data=body.data,
                 model=request.app.frigate_config.semantic_search.model,
@@ -1672,18 +1662,19 @@ def update_trigger_embedding(
                 threshold=body.threshold,
                 triggering_event_id="",
                 last_triggered=None,
-            )
-            .where(Trigger.camera == camera, Trigger.name == name)
-            .execute()
-        )
-
-        if updated == 0:
-            return JSONResponse(
-                content={
-                    "success": False,
-                    "message": f"Trigger {camera}:{name} not found",
-                },
-                status_code=404,
+            ).where(Trigger.camera == camera, Trigger.name == name).execute()
+        else:
+            # Create new trigger (for rename case)
+            Trigger.create(
+                camera=camera,
+                name=name,
+                type=body.type,
+                data=body.data,
+                threshold=body.threshold,
+                model=request.app.frigate_config.semantic_search.model,
+                embedding=np.array(embedding, dtype=np.float32).tobytes(),
+                triggering_event_id="",
+                last_triggered=None,
             )
 
         if body.type == "thumbnail":

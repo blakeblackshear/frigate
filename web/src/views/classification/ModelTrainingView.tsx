@@ -431,6 +431,7 @@ function LibrarySelector({
             </Button>
             <Button
               variant="destructive"
+              className="text-white"
               onClick={() => {
                 if (confirmDelete) {
                   handleDeleteFace(confirmDelete);

@@ -196,6 +196,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             # notification action enabled
             if (
                 not self.config.cameras[camera].notifications.enabled
+                or name not in self.config.cameras[camera].semantic_search.triggers
                 or "notification"
                 not in self.config.cameras[camera]
                 .semantic_search.triggers[name]

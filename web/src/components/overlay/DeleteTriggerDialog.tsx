@@ -9,10 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trans } from "react-i18next";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type DeleteTriggerDialogProps = {
   show: boolean;
   triggerName: string;
+  isLoading: boolean;
   onCancel: () => void;
   onDelete: () => void;
 };
@@ -20,6 +22,7 @@ type DeleteTriggerDialogProps = {
 export default function DeleteTriggerDialog({
   show,
   triggerName,
+  isLoading,
   onCancel,
   onDelete,
 }: DeleteTriggerDialogProps) {
@@ -48,16 +51,25 @@ export default function DeleteTriggerDialog({
                 aria-label={t("button.cancel", { ns: "common" })}
                 onClick={onCancel}
                 type="button"
+                disabled={isLoading}
               >
                 {t("button.cancel", { ns: "common" })}
               </Button>
               <Button
                 variant="destructive"
                 aria-label={t("button.delete", { ns: "common" })}
-                className="flex flex-1"
+                className="flex flex-1 text-white"
                 onClick={onDelete}
+                disabled={isLoading}
               >
-                {t("button.delete", { ns: "common" })}
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator />
+                    <span>{t("button.delete", { ns: "common" })}</span>
+                  </div>
+                ) : (
+                  t("button.delete", { ns: "common" })
+                )}
               </Button>
             </div>
           </div>

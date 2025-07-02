@@ -169,6 +169,7 @@ export default function TriggerView({
         })
         .finally(() => {
           setIsLoading(false);
+          setShowCreate(false);
         });
     },
     [t, updateConfig, selectedCamera, setUnsavedChanges],
@@ -185,7 +186,6 @@ export default function TriggerView({
     ) => {
       setUnsavedChanges(true);
       saveToConfig({ enabled, name, type, data, threshold, actions }, false);
-      setShowCreate(false);
     },
     [saveToConfig, setUnsavedChanges],
   );
@@ -193,18 +193,40 @@ export default function TriggerView({
   const onEdit = useCallback(
     (trigger: Trigger) => {
       setUnsavedChanges(true);
+      setIsLoading(true);
       if (selectedTrigger?.name && selectedTrigger.name !== trigger.name) {
-        // Handle rename by deleting old trigger
+        // Handle rename: delete old trigger, update config, then save new trigger
         axios
           .delete(
             `/trigger/embedding/${selectedCamera}/${selectedTrigger.name}`,
           )
           .then((embeddingResponse) => {
-            if (embeddingResponse.data.success) {
-              return saveToConfig(trigger, true);
-            } else {
+            if (!embeddingResponse.data.success) {
               throw new Error(embeddingResponse.data.message);
             }
+            const deleteConfigBody: ConfigSetBody = {
+              requires_restart: 0,
+              config_data: {
+                cameras: {
+                  [selectedCamera]: {
+                    semantic_search: {
+                      triggers: {
+                        [selectedTrigger.name]: "",
+                      },
+                    },
+                  },
+                },
+              },
+              update_topic: `config/cameras/${selectedCamera}/semantic_search`,
+            };
+            return axios.put("config/set", deleteConfigBody);
+          })
+          .then((configResponse) => {
+            if (configResponse.status !== 200) {
+              throw new Error(configResponse.statusText);
+            }
+            // Save new trigger
+            saveToConfig(trigger, false);
           })
           .catch((error) => {
             const errorMessage =
@@ -218,9 +240,9 @@ export default function TriggerView({
             setIsLoading(false);
           });
       } else {
+        // Regular update without rename
         saveToConfig(trigger, true);
       }
-      setShowCreate(false);
       setSelectedTrigger(null);
     },
     [t, saveToConfig, selectedCamera, selectedTrigger, setUnsavedChanges],
@@ -254,7 +276,6 @@ export default function TriggerView({
               .put("config/set", configBody)
               .then((configResponse) => {
                 if (configResponse.status === 200) {
-                  setShowDelete(false);
                   updateConfig();
                   toast.success(
                     t("triggers.toast.success.deleteTrigger", { name }),
@@ -282,6 +303,7 @@ export default function TriggerView({
           );
         })
         .finally(() => {
+          setShowDelete(false);
           setIsLoading(false);
         });
     },
@@ -439,7 +461,7 @@ export default function TriggerView({
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    className="h-8 px-2"
+                                    className="h-8 px-2 text-white"
                                     onClick={() => {
                                       setSelectedTrigger(trigger);
                                       setShowDelete(true);
@@ -472,6 +494,7 @@ export default function TriggerView({
         show={showCreate}
         trigger={selectedTrigger}
         selectedCamera={selectedCamera}
+        isLoading={isLoading}
         onCreate={onCreate}
         onEdit={onEdit}
         onCancel={() => {
@@ -483,6 +506,7 @@ export default function TriggerView({
       <DeleteTriggerDialog
         show={showDelete}
         triggerName={selectedTrigger?.name ?? ""}
+        isLoading={isLoading}
         onCancel={() => {
           setShowDelete(false);
           setSelectedTrigger(null);

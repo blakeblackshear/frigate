@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,7 @@ type CreateTriggerDialogProps = {
   show: boolean;
   trigger: Trigger | null;
   selectedCamera: string;
+  isLoading: boolean;
   onCreate: (
     enabled: boolean,
     name: string,
@@ -56,12 +57,12 @@ export default function CreateTriggerDialog({
   show,
   trigger,
   selectedCamera,
+  isLoading,
   onCreate,
   onEdit,
   onCancel,
 }: CreateTriggerDialogProps) {
   const { t } = useTranslation("views/settings");
-  const [isLoading, setIsLoading] = useState(false);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const existingTriggerNames = useMemo(() => {
@@ -112,7 +113,6 @@ export default function CreateTriggerDialog({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
     if (trigger) {
       onEdit({ ...values });
     } else {
@@ -125,7 +125,6 @@ export default function CreateTriggerDialog({
         values.actions,
       );
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {

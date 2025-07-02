@@ -681,7 +681,7 @@
       },
       "deleteTrigger": {
         "title": "Delete Trigger",
-        "desc": "Are you sure you want to delete the trigger <strong>{{triggerName}}</strong> from camera {{camera}}? This action cannot be undone."
+        "desc": "Are you sure you want to delete the trigger <strong>{{triggerName}}</strong>? This action cannot be undone."
       },
       "form": {
         "name": {

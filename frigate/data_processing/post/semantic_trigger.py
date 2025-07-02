@@ -81,7 +81,9 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
         for trigger in triggers:
             if (
-                not self.config.cameras[camera]
+                trigger["name"]
+                not in self.config.cameras[camera].semantic_search.triggers
+                or not self.config.cameras[camera]
                 .semantic_search.triggers[trigger["name"]]
                 .enabled
             ):
